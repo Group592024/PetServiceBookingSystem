@@ -112,6 +112,7 @@ namespace PetApi.Presentation.Controllers
 
             // Chuyển đổi và cập nhật
             var updatedEntity = PetTypeConversion.ToEntity(pet, imagePath);
+            updatedEntity.PetType_ID = id;
             var response = await petInterface.UpdateAsync(updatedEntity);
 
             Console.WriteLine("response ddaay: " + response);
