@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\PSPS.Domain",
+    "\\PSPS.Domain\\Entities",
+    "\\PSPS.Infrastructure",
+    "\\PSPS.Presentation",
+    "\\PSPS.Presentation\\Controllers"
+  ],
+  "SelectedNode": "\\PSBS.AccountServiceApiSolution.sln",
+  "PreviewInSolutionExplorer": false
+}

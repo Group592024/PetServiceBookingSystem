@@ -1,0 +1,258 @@
+[
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "GetAccount",
+    "RelativePath": "api/Account",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "GuId",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "PSPS.Application.DTOs.GetAccountDTO",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "UpdateAccount",
+    "RelativePath": "api/Account",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UploadModel.ImageFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountGuId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountEmail",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountPhoneNumber",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountGender",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountDob",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountAddress",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.AccountImage",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "AccountTempDTO.isPickImage",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "PSPS.Application.DTOs.AddAccount",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "GetAllAccount",
+    "RelativePath": "api/Account/all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.List\u00601[[PSPS.Application.DTOs.GetAccountDTO, PSPS.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "ChangePassword",
+    "RelativePath": "api/Account/ChangePassword{accountGuId}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "accountGuId",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "changePasswordDTO",
+        "Type": "PSPS.Application.DTOs.ChangePasswordDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "PSPS.SharedLibrary.Responses.Response",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "ForgotPassword",
+    "RelativePath": "api/Account/ForgotPassword",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "Login",
+    "RelativePath": "api/Account/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "loginDTO",
+        "Type": "PSPS.Application.DTOs.LoginDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "PSPS.SharedLibrary.Responses.Response",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "PSPS.Presentation.Controllers.AccountController",
+    "Method": "Register",
+    "RelativePath": "api/Account/register",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "UploadModel.ImageFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountName",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountEmail",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountPhoneNumber",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountPassword",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountGender",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountDob",
+        "Type": "System.DateTime",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountAddress",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "RegisterTempDTO.AccountImage",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "PSPS.SharedLibrary.Responses.Response",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
