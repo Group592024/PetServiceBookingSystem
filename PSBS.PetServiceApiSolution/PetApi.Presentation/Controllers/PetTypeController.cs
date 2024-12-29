@@ -66,38 +66,35 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreatePet([FromForm] PetTypeDTO pet, IFormFile imageFile)
+        public async Task<ActionResult<Response>> CreatePet([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var existingPet = await petInterface.GetByIdAsync(pet.PetType_ID);
-            if (existingPet != null)
-            {
-                return Conflict(new { message = "A pet with this ID already exists." });
-            }
-
             string imagePath = await HandleImageUpload(imageFile) ?? "default_image.jpg";
 
-            var getEntity = PetTypeConversion.ToEntity(pet with { PetType_Image = imagePath });
+
+
+            var getEntity = PetTypeConversion.ToEntity(pet, imagePath);
 
             var response = await petInterface.CreateAsync(getEntity);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<Response>> UpdatePetType([FromForm] PetTypeDTO pet, IFormFile? imageFile = null)
+        [HttpPut("{id:Guid}")]
+        public async Task<ActionResult<Response>> UpdatePetType([FromRoute] Guid id, [FromForm] CreatePetTypeDTO pet, IFormFile? imageFile = null)
         {
+            Console.WriteLine("id " + id);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var existingPet = await petInterface.GetByIdAsync(pet.PetType_ID);
+            var existingPet = await petInterface.GetByIdAsync(id);
             if (existingPet == null)
-                return NotFound($"Pet with ID {pet.PetType_ID} not found");
+                return NotFound($"Pet with ID {id} not found");
 
             bool hasChanges =
                 existingPet.PetType_Name != pet.PetType_Name ||
-                existingPet.PetType_Image != pet.PetType_Image ||
+
                 existingPet.PetType_Description != pet.PetType_Description ||
                 imageFile != null;
 
@@ -114,12 +111,15 @@ namespace PetApi.Presentation.Controllers
             }
 
             // Chuyển đổi và cập nhật
-            var updatedEntity = PetTypeConversion.ToEntity(pet with { PetType_Image = imagePath });
+            var updatedEntity = PetTypeConversion.ToEntity(pet, imagePath);
             var response = await petInterface.UpdateAsync(updatedEntity);
+
+            Console.WriteLine("response ddaay: " + response);
             if (!response.Flag)
             {
                 return BadRequest(new { message = "Failed to update pet." });
             }
+
 
             return Ok(response);
         }
@@ -128,19 +128,28 @@ namespace PetApi.Presentation.Controllers
         {
             if (imageFile != null && imageFile.Length > 0)
             {
+                // Đường dẫn thư mục lưu ảnh
                 var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "images");
                 if (!Directory.Exists(imagesDirectory))
                 {
                     Directory.CreateDirectory(imagesDirectory);
                 }
 
-                var imagePath = Path.Combine(imagesDirectory, Path.GetFileName(imageFile.FileName));
+                // Tạo tên file duy nhất bằng cách kết hợp DateTime với Guid và đuôi file gốc
+                var uniqueFileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
+                var imagePath = Path.Combine(imagesDirectory, uniqueFileName);
+
+                // Ghi file
                 using (var stream = new FileStream(imagePath, FileMode.Create))
                 {
                     await imageFile.CopyToAsync(stream);
                 }
-                return $"/images/{Path.GetFileName(imageFile.FileName)}";
+
+                // Trả về đường dẫn để lưu trong database (đường dẫn tương đối)
+                return $"/images/{uniqueFileName}";
             }
+
+            // Nếu không upload file mới, trả về đường dẫn ảnh hiện tại (nếu có)
             return existingImagePath;
         }
 

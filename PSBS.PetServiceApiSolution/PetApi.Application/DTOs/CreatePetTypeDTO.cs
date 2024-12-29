@@ -2,10 +2,9 @@
 
 namespace PetApi.Application.DTOs
 {
-    public record PetTypeDTO(
-        Guid PetType_ID,
+    public record CreatePetTypeDTO
+    (
          [Required] string PetType_Name,
-         string? PetType_Image,
          string? PetType_Description
          );
 

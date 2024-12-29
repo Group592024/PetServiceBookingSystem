@@ -40,7 +40,7 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var pet = await GetByIdAsync(entity.PetType_ID);
-                if (pet is null)
+                if (pet is null || pet.IsDelete)
                     return new Response(false, $"{entity.PetType_Name} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 pet.IsDelete = true;
@@ -64,7 +64,7 @@ namespace PetApi.Infrastructure.Repositories
         {
             try
             {
-                var pets = await context.PetTypes.AsNoTracking().ToListAsync();
+                var pets = await context.PetTypes.AsNoTracking().Where(p => p.IsDelete == false).ToListAsync();
                 return pets is not null ? pets : null;
             }
             catch (Exception ex)
@@ -95,6 +95,7 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var pet = await context.PetTypes.FindAsync(id);
+                if (pet.IsDelete) return null;
                 return pet is not null ? pet : null;
             }
             catch (Exception ex)
@@ -111,7 +112,8 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var pet = await GetByIdAsync(entity.PetType_ID);
-                if (pet is null)
+
+                if (pet is null || pet.IsDelete)
                     return new Response(false, $"{entity.PetType_Name} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 pet.PetType_Name = entity.PetType_Name;

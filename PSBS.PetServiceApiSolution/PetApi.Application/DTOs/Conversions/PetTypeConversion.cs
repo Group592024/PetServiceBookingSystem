@@ -8,8 +8,17 @@ namespace PetApi.Application.DTOs.Conversions
         {
             PetType_ID = pet.PetType_ID,
             PetType_Name = pet.PetType_Name,
-            PetType_Image = pet.PetType_Image,
             PetType_Description = pet.PetType_Description,
+            PetType_Image = pet.PetType_Image,
+            IsDelete = false
+        };
+
+        public static PetType ToEntity(CreatePetTypeDTO pet, string imagePath) => new PetType()
+        {
+            PetType_ID = Guid.NewGuid(),
+            PetType_Name = pet.PetType_Name,
+            PetType_Description = pet.PetType_Description,
+            PetType_Image = imagePath,
             IsDelete = false
         };
 
@@ -31,7 +40,7 @@ namespace PetApi.Application.DTOs.Conversions
             {
                 var _pets = pets!.Select(p =>
                 new PetTypeDTO(
-                p.PetType_ID,
+                    p.PetType_ID,
                 p.PetType_Name,
                 p.PetType_Image,
                 p.PetType_Description)).ToList();
