@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20241228135213_migration1")]
-    partial class migration1
+    [Migration("20241229133157_migration001")]
+    partial class migration001
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,22 +29,27 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("cameraId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("camera_id");
 
                     b.Property<string>("cameraCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("camera_code");
 
                     b.Property<string>("cameraStatus")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("camera_status");
 
                     b.Property<string>("cameraType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("camera_type");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.HasKey("cameraId");
 
@@ -55,27 +60,34 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("roomId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("room_id");
 
                     b.Property<string>("description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("hasCamera")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("has_camera");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.Property<string>("roomImage")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("room_image");
 
                     b.Property<Guid>("roomTypeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("roomType_id");
 
                     b.Property<bool>("status")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("status");
 
                     b.HasKey("roomId");
 
@@ -88,24 +100,30 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("roomTypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("roomType_id");
 
                     b.Property<string>("description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.Property<string>("name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("name");
 
                     b.Property<decimal>("pricePerDay")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("pricePerDay");
 
                     b.Property<decimal>("pricePerHour")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("pricePerHour");
 
                     b.HasKey("roomTypeId");
 
@@ -145,31 +163,39 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("serviceId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("service_id");
 
                     b.Property<DateTime>("createAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("createAt");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.Property<string>("serviceDescription")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("service_description");
 
                     b.Property<string>("serviceImage")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("service_Image");
 
                     b.Property<string>("serviceName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("service_name");
 
                     b.Property<Guid>("serviceTypeId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("serviceType_id");
 
                     b.Property<DateTime>("updateAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updateAt");
 
                     b.HasKey("serviceId");
 
@@ -182,24 +208,30 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("serviceTypeId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("serviceType_id");
 
                     b.Property<DateTime>("createAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("createAt");
 
                     b.Property<string>("description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.Property<string>("typeName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("type_name");
 
                     b.Property<DateTime>("updateAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updateAt");
 
                     b.HasKey("serviceTypeId");
 
@@ -210,26 +242,33 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.Property<Guid>("serviceVariantId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("serviceVariant_id");
 
                     b.Property<DateTime>("createAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("createAt");
 
                     b.Property<bool>("isDeleted")
-                        .HasColumnType("bit");
+                        .HasColumnType("bit")
+                        .HasColumnName("isDeleted");
 
                     b.Property<string>("serviceContent")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("service_content");
 
                     b.Property<Guid>("serviceId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("service_id");
 
                     b.Property<decimal>("servicePrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("service_price");
 
                     b.Property<DateTime>("updateAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updateAt");
 
                     b.HasKey("serviceVariantId");
 

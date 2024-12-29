@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<FacilityServiceDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DB")));
 
 builder.Services.AddScoped<IRoomType, RoomTypeRepository>();
 

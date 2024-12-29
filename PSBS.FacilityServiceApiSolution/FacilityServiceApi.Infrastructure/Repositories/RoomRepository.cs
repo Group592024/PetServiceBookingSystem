@@ -14,6 +14,12 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                var existingRoom = await context.Room.FirstOrDefaultAsync(r => r.roomId == entity.roomId);
+                if (existingRoom != null)
+                {
+                    return new Response(false, $"Room with ID {entity.roomId} already exists!");
+                }
+                entity.isDeleted = false;
                 var currentEntity = context.Room.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
@@ -54,7 +60,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var rooms = await context.Room
                                           .Where(r => r.isDeleted == false)
-                                          .AsNoTracking()
                                           .ToListAsync();
                 return rooms ?? new List<Room>();
             }
@@ -102,7 +107,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 var room = await GetByIdAsync(entity.roomId);
                 if (room == null)
                     return new Response(false, $"{entity.roomId} not found");
-
+                room.isDeleted = false;
                 room.roomTypeId = entity.roomTypeId;
                 room.description = entity.description;
                 room.status = entity.status;

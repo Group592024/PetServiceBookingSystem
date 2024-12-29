@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class migration1 : Migration
+    public partial class migration001 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,22 +17,22 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 name: "Camera",
                 columns: table => new
                 {
-                    cameraId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    cameraType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    cameraCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    cameraStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    camera_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    camera_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    camera_code = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    camera_status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Camera", x => x.cameraId);
+                    table.PrimaryKey("PK_Camera", x => x.camera_id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "RoomType",
                 columns: table => new
                 {
-                    roomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    roomType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     pricePerHour = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     pricePerDay = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -41,15 +41,15 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoomType", x => x.roomTypeId);
+                    table.PrimaryKey("PK_RoomType", x => x.roomType_id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "ServiceType",
                 columns: table => new
                 {
-                    serviceTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    typeName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    serviceType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    type_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     createAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     updateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -57,29 +57,29 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceType", x => x.serviceTypeId);
+                    table.PrimaryKey("PK_ServiceType", x => x.serviceType_id);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Room",
                 columns: table => new
                 {
-                    roomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    roomTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    room_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    roomType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     status = table.Column<bool>(type: "bit", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    roomImage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    hasCamera = table.Column<bool>(type: "bit", nullable: false)
+                    room_image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    has_camera = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Room", x => x.roomId);
+                    table.PrimaryKey("PK_Room", x => x.room_id);
                     table.ForeignKey(
-                        name: "FK_Room_RoomType_roomTypeId",
-                        column: x => x.roomTypeId,
+                        name: "FK_Room_RoomType_roomType_id",
+                        column: x => x.roomType_id,
                         principalTable: "RoomType",
-                        principalColumn: "roomTypeId",
+                        principalColumn: "roomType_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -87,23 +87,23 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 name: "Service",
                 columns: table => new
                 {
-                    serviceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    serviceTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    serviceName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    serviceImage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    serviceDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    service_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    serviceType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    service_name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    service_Image = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    service_description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     createAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     updateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Service", x => x.serviceId);
+                    table.PrimaryKey("PK_Service", x => x.service_id);
                     table.ForeignKey(
-                        name: "FK_Service_ServiceType_serviceTypeId",
-                        column: x => x.serviceTypeId,
+                        name: "FK_Service_ServiceType_serviceType_id",
+                        column: x => x.serviceType_id,
                         principalTable: "ServiceType",
-                        principalColumn: "serviceTypeId",
+                        principalColumn: "serviceType_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -111,28 +111,28 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 name: "ServiceVariant",
                 columns: table => new
                 {
-                    serviceVariantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    serviceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    servicePrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    serviceContent = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    serviceVariant_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    service_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    service_price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    service_content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     createAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     updateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ServiceVariant", x => x.serviceVariantId);
+                    table.PrimaryKey("PK_ServiceVariant", x => x.serviceVariant_id);
                     table.ForeignKey(
-                        name: "FK_ServiceVariant_Service_serviceId",
-                        column: x => x.serviceId,
+                        name: "FK_ServiceVariant_Service_service_id",
+                        column: x => x.service_id,
                         principalTable: "Service",
-                        principalColumn: "serviceId",
+                        principalColumn: "service_id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
                 table: "RoomType",
-                columns: new[] { "roomTypeId", "description", "isDeleted", "name", "pricePerDay", "pricePerHour" },
+                columns: new[] { "roomType_id", "description", "isDeleted", "name", "pricePerDay", "pricePerHour" },
                 values: new object[,]
                 {
                     { new Guid("58d5fd73-6017-4b8d-b52a-053b49d8c1be"), "Large room for large pets", false, "Large Room", 1000.00m, 120.00m },
@@ -141,19 +141,19 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Room_roomTypeId",
+                name: "IX_Room_roomType_id",
                 table: "Room",
-                column: "roomTypeId");
+                column: "roomType_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Service_serviceTypeId",
+                name: "IX_Service_serviceType_id",
                 table: "Service",
-                column: "serviceTypeId");
+                column: "serviceType_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ServiceVariant_serviceId",
+                name: "IX_ServiceVariant_service_id",
                 table: "ServiceVariant",
-                column: "serviceId");
+                column: "service_id");
         }
 
         /// <inheritdoc />

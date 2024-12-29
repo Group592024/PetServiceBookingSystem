@@ -9,18 +9,13 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
     {
         public static Room ToEntity(RoomDTO room)
         {
-            if (room.roomId == null || room.roomId == Guid.Empty)
-            {
-                throw new ArgumentException("Invalid roomId in RoomDTO.");
-            }
-
             return new Room()
             {
-                roomId = room.roomId.Value,
+                roomId = room.roomId,
                 roomTypeId = room.roomTypeId,
                 description = room.description,
                 status = room.status,
-                isDeleted = room.isDeleted.Value,
+                isDeleted = false,
                 roomImage = room.roomImage,
                 hasCamera = room.hasCamera
             };
@@ -37,7 +32,6 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     roomTypeId = room.roomTypeId,
                     description = room.description,
                     status = room.status,
-                    isDeleted = room.isDeleted,
                     roomImage = room.roomImage,
                     hasCamera = room.hasCamera
                 };
@@ -53,9 +47,8 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     roomTypeId = p.roomTypeId,
                     description = p.description,
                     status = p.status,
-                    isDeleted = p.isDeleted,
                     roomImage = p.roomImage,
-                    hasCamera = p.hasCamera
+                    hasCamera = p.hasCamera,
                 }).ToList();
 
                 return (null, _rooms);

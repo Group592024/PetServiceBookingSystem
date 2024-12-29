@@ -1,9 +1,13 @@
 ﻿using FacilityServiceApi.Application.DTO;
+using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -19,10 +23,11 @@ namespace FacilityServiceApi.Presentation.Controllers
             _room = roomService;
             _roomType = roomTypeService;
         }
+
         [HttpGet("roomtypes")]
         public async Task<ActionResult<IEnumerable<RoomTypeDTO>>> GetRoomTypes()
         {
-            var roomTypes = await _roomType.GetAllAsync(); 
+            var roomTypes = await _roomType.GetAllAsync();
             if (!roomTypes.Any())
                 return NotFound("No room types found in the database");
 
@@ -39,181 +44,130 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRooms()
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsList()
         {
-            var rooms = await _room.GetAllAsync();
+            var rooms = (await _room.GetAllAsync())
+                        .Where(r => !r.isDeleted) 
+                        .ToList();
             if (!rooms.Any())
-                return NotFound("No rooms found in the database");
-
-            var roomDtos = rooms.Select(room => new RoomDTO
             {
-                roomId = room.roomId,
-                roomTypeId = room.roomTypeId,
-                description = room.description,
-                status = room.status,
-                isDeleted = room.isDeleted,
-                roomImage = room.roomImage,
-                hasCamera = room.hasCamera
-            });
+                return NotFound(new Response(false, "No rooms found in the database"));
+            }
 
-            return Ok(roomDtos);
+            var (_, roomDtos) = RoomConversion.FromEntity(null!, rooms);
+            return Ok(new Response(true, "Rooms retrieved successfully")
+            {
+                Data = roomDtos
+            });
         }
 
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<RoomDTO>> GetRoom(Guid id)
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RoomDTO>> GetRoomById(Guid id)
         {
             var room = await _room.GetByIdAsync(id);
-            if (room == null)
-                return NotFound($"Room with GUID {id} not found");
-
-            return Ok(new RoomDTO
+            if (room == null || room.isDeleted)
             {
-                roomId = room.roomId,
-                roomTypeId = room.roomTypeId,
-                description = room.description,
-                status = room.status,
-                isDeleted = room.isDeleted,
-                roomImage = room.roomImage,
-                hasCamera = room.hasCamera
+                return NotFound(new Response(false, $"Room with GUID {id} not found or is deleted"));
+            }
+
+            var (roomDto, _) = RoomConversion.FromEntity(room, null!);
+            return Ok(new Response(true, "Room retrieved successfully")
+            {
+                Data = roomDto
             });
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreateRoom([FromForm] RoomDTO roomDto, IFormFile? imageFile)
+        public async Task<ActionResult<Response>> CreateRoom([FromForm] RoomDTO creatingRoom, IFormFile? imageFile)
         {
+            ModelState.Remove(nameof(RoomDTO.roomId));
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            {
+                return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
+            }
 
-            var roomType = await _roomType.GetByIdAsync(roomDto.roomTypeId);
+            var roomType = await _roomType.GetByIdAsync(creatingRoom.roomTypeId);
             if (roomType == null)
-                return NotFound($"RoomType with ID {roomDto.roomTypeId} not found");
-
-            var roomId = roomDto.roomId ?? Guid.NewGuid();
-
-            var imagePath = await HandleImageUpload(imageFile) ?? "default_image.jpg";
-            bool isDeleted = roomDto.isDeleted ?? false;
-
-            var room = new Room
             {
-                roomId = roomId,
-                roomTypeId = roomDto.roomTypeId,
-                description = roomDto.description,
-                status = roomDto.status,
-                isDeleted = isDeleted,
-                roomImage = imagePath,
-                hasCamera = roomDto.hasCamera
-            };
-
-            var response = await _room.CreateAsync(room);
-
-            if (response.Flag)
-            {
-                return Ok(response); 
+                return NotFound(new Response(false, $"RoomType with ID {creatingRoom.roomTypeId} not found"));
             }
+            string imagePath = await HandleImageUpload(imageFile) ?? "default_image.jpg";
+            var newRoomEntity = RoomConversion.ToEntity(creatingRoom with { roomImage = imagePath });
+            var response = await _room.CreateAsync(newRoomEntity);
 
-            return BadRequest(response); 
-        }
-
-        [HttpPut]
-        public async Task<ActionResult<Response>> UpdateRoom([FromForm] RoomDTO roomDto, IFormFile? imageFile = null)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            if (roomDto.roomId == null || roomDto.roomId == Guid.Empty)
-            {
-                return BadRequest("Invalid or missing roomId.");
-            }
-
-            var existingRoom = await _room.GetByIdAsync(roomDto.roomId.Value);
-            if (existingRoom == null)
-                return NotFound($"Room with ID {roomDto.roomId} not found");
-
-            var roomType = await _roomType.GetByIdAsync(roomDto.roomTypeId);
-            if (roomType == null)
-                return NotFound($"RoomType with ID {roomDto.roomTypeId} not found");
-
-            string? imagePath = existingRoom.roomImage;
-            if (imageFile != null)
-            {
-                imagePath = await HandleImageUpload(imageFile, existingRoom.roomImage);
-            }
-
-            existingRoom.roomTypeId = roomDto.roomTypeId;
-            existingRoom.description = roomDto.description;
-            existingRoom.status = roomDto.status;
-            existingRoom.roomImage = imagePath;
-            existingRoom.hasCamera = roomDto.hasCamera;
-
-            var response = await _room.UpdateAsync(existingRoom);
-
-            if (response.Flag)
-            {
-                var updatedRoomDto = new RoomDTO
-                {
-                    roomId = existingRoom.roomId,
-                    roomTypeId = existingRoom.roomTypeId,
-                    description = existingRoom.description,
-                    status = existingRoom.status,
-                    isDeleted = existingRoom.isDeleted,
-                    roomImage = existingRoom.roomImage,
-                    hasCamera = existingRoom.hasCamera
-                };
-
-                return Ok(updatedRoomDto);
-            }
-
-            return BadRequest(response);
-        }
-
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult<Response>> DeleteRoom(Guid id)
-        {
-            var existingRoom = await _room.GetByIdAsync(id);
-            if (existingRoom == null)
-                return NotFound($"Room with GUID {id} not found");
-
-            var response = await _room.DeleteAsync(existingRoom);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        private async Task<string?> HandleImageUpload(IFormFile imageFile, string? existingImagePath = null)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateRoom([FromForm] RoomDTO updatingRoom, IFormFile? imageFile = null)
         {
-            try
+            ModelState.Remove(nameof(RoomDTO.roomId));
+            if (!ModelState.IsValid)
             {
-                if (imageFile != null && imageFile.Length > 0)
-                {
-                    var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
-                    if (!Directory.Exists(imagesDirectory))
-                        Directory.CreateDirectory(imagesDirectory);
-
-                    var uniqueFileName = $"{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
-                    var imagePath = Path.Combine(imagesDirectory, uniqueFileName);
-
-                    // Delete Old Image
-                    if (!string.IsNullOrEmpty(existingImagePath))
-                    {
-                        var oldImagePath = Path.Combine(Directory.GetCurrentDirectory(), existingImagePath.TrimStart('/'));
-                        if (System.IO.File.Exists(oldImagePath))
-                            System.IO.File.Delete(oldImagePath);
-                    }
-
-                    using (var stream = new FileStream(imagePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-
-                    return $"/Images/{uniqueFileName}";
-                }
-                return existingImagePath;
+                return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
             }
-            catch (Exception ex)
+
+            var existingRoom = await _room.GetByIdAsync(updatingRoom.roomId);
+            if (existingRoom == null || existingRoom.isDeleted)
             {
-                Console.WriteLine($"Error while uploading file: {ex.Message}");
-                return null;
+                return NotFound(new Response(false, $"Room with ID {updatingRoom.roomId} not found or is deleted"));
             }
+            string? imagePath = imageFile != null
+                ? await HandleImageUpload(imageFile, existingRoom.roomImage)
+                : existingRoom.roomImage;
+
+            var updatedRoom = RoomConversion.ToEntity(updatingRoom with { roomImage = imagePath });
+            var response = await _room.UpdateAsync(updatedRoom);
+
+            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the room"));
         }
 
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Response>> DeleteRoom(Guid id)
+        {
+            var existingRoom = await _room.GetByIdAsync(id);
+            if (existingRoom == null || existingRoom.isDeleted)
+            {
+                return NotFound(new Response(false, $"Room with GUID {id} not found or already deleted"));
+            }
+
+            // Mark the room as deleted (soft delete)
+            var response = await _room.DeleteAsync(existingRoom);
+
+            return response.Flag
+                ? Ok(new Response(true, "Room deleted successfully"))
+                : BadRequest(new Response(false, "Failed to delete the room"));
+        }
+
+        private async Task<string?> HandleImageUpload(IFormFile? imageFile, string? oldImagePath = null)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            if (!string.IsNullOrEmpty(oldImagePath))
+            {
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), oldImagePath.TrimStart('/'));
+                if (System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(imageFile.FileName);
+            var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Images");
+            var fullPath = Path.Combine(folderPath, fileName);
+
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return $"/Images/{fileName}";
+        }
     }
 }
-

@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("FacilityServiceApi.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f736b6488d33a867c1deec8f6f4aa907296d18b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ca57b5a4af8ec40ebf2c2202857d38660b259370")]
 [assembly: System.Reflection.AssemblyProductAttribute("FacilityServiceApi.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("FacilityServiceApi.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

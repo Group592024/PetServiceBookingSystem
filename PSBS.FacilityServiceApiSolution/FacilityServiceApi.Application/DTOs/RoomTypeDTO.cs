@@ -16,6 +16,5 @@ namespace FacilityServiceApi.Application.DTO
         [Range(0.01, double.MaxValue, ErrorMessage = "Price per day must be greater than 0.")]
         public decimal pricePerDay { get; set; }
         public string description { get; set; }
-        public bool isDeleted { get; set; }
     }
 }
