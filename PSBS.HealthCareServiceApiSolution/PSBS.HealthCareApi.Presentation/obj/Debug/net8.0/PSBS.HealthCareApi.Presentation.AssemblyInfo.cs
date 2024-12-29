@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PSBS.HealthCareApi.Presentation")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f736b6488d33a867c1deec8f6f4aa907296d18b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cafb96b874ca996749d11944c22ca40d8db1c847")]
 [assembly: System.Reflection.AssemblyProductAttribute("PSBS.HealthCareApi.Presentation")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PSBS.HealthCareApi.Presentation")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
