@@ -1,0 +1,16 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\PSBS.AccountServiceApiSolution",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\Interfaces",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure",
+    "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data"
+  ],
+  "SelectedNode": "\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution.sln",
+  "PreviewInSolutionExplorer": false
+}

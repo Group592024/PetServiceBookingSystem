@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PSPS.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2cb5ade53c5a5c3a39715f55bf20a0c3779ff6cb")]
 [assembly: System.Reflection.AssemblyProductAttribute("PSPS.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PSPS.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

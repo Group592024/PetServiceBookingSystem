@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj" />
+    <ProjectReference Include="..\..\..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj" />
     <ProjectReference Include="..\PSPS.Domain\PSPS.Domain.csproj" />
   </ItemGroup>
 

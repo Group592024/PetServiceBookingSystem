@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = PSPS.Application
-build_property.ProjectDir = C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\
+build_property.ProjectDir = C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 

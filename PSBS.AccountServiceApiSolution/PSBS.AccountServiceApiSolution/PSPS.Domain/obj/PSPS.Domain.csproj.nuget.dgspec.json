@@ -1,20 +1,24 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj": {}
+    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj": {
+    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj",
         "projectName": "PSPS.Domain",
-        "projectPath": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj",
-        "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\obj\\",
+        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\PSPS.Domain.csproj",
+        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "C:\\Users\\Acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -61,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

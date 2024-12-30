@@ -20,4 +20,8 @@
     <ProjectReference Include="..\PSPS.Infrastructure\PSPS.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="mailssave\" />
+  </ItemGroup>
+
 </Project>

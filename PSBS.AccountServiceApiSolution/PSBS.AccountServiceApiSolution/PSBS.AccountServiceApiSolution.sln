@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{DB248E8D-4F8C-44BC-AA66-B68C50320669}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.Application", "AuthenticationAPI.Application\PSPS.Application.csproj", "{1377C935-6CCA-47C2-A483-AD473971B6B7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.Domain", "PSPS.Domain\PSPS.Domain.csproj", "{D7913628-A861-426B-AAE2-8B97F846C063}"
@@ -13,16 +11,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.Infrastructure", "PSPS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.Presentation", "PSPS.Presentation\PSPS.Presentation.csproj", "{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{C1FC3018-ADE3-492D-A9F4-ECB5B6DB85DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Debug|Any CPU.Build.0 = Release|Any CPU
-		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1377C935-6CCA-47C2-A483-AD473971B6B7}.Debug|Any CPU.ActiveCfg = Release|Any CPU
 		{1377C935-6CCA-47C2-A483-AD473971B6B7}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{1377C935-6CCA-47C2-A483-AD473971B6B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +35,10 @@ Global
 		{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}.Debug|Any CPU.Build.0 = Release|Any CPU
 		{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C1FC3018-ADE3-492D-A9F4-ECB5B6DB85DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1FC3018-ADE3-492D-A9F4-ECB5B6DB85DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1FC3018-ADE3-492D-A9F4-ECB5B6DB85DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1FC3018-ADE3-492D-A9F4-ECB5B6DB85DA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -616,6 +616,12 @@
       "System.Text.Json/8.0.4": {
         "dependencies": {
           "System.Text.Encodings.Web": "8.0.0"
+        },
+        "runtime": {
+          "lib/net8.0/System.Text.Json.dll": {
+            "assemblyVersion": "8.0.0.0",
+            "fileVersion": "8.0.724.31311"
+          }
         }
       },
       "System.Threading.Tasks.Extensions/4.5.4": {},
@@ -640,10 +646,7 @@
       },
       "PSPS.Domain/1.0.0": {
         "runtime": {
-          "PSPS.Domain.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "PSPS.Domain.dll": {}
         }
       },
       "PSPS.SharedLibrary/1.0.0": {
@@ -654,10 +657,7 @@
           "Serilog.AspNetCore": "8.0.2"
         },
         "runtime": {
-          "PSPS.SharedLibrary.dll": {
-            "assemblyVersion": "1.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "PSPS.SharedLibrary.dll": {}
         }
       }
     }
