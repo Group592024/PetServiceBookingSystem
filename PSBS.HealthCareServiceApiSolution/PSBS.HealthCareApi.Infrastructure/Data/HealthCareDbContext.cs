@@ -11,7 +11,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Data
     public class HealthCareDbContext : DbContext
     {
         public HealthCareDbContext(DbContextOptions<HealthCareDbContext> options) : base(options) { }
-        public DbSet<Medicine> PetHealthBooks { get; set; }
+        public DbSet<PetHealthBook> PetHealthBooks { get; set; }
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Treatment> Treatments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)

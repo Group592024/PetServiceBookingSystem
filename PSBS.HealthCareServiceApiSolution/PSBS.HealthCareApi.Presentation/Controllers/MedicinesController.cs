@@ -52,8 +52,15 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         [HttpPost]
         public async Task<ActionResult<Response>> CreateMedicine([FromForm] MedicineDTO creattingMedicine)
         {
-            ModelState.Remove(nameof(MedicineDTO.isDeleted));
             ModelState.Remove(nameof(MedicineDTO.medicineId));
+            if (creattingMedicine.imageFile == null)
+            {
+                ModelState.AddModelError("imageFile", "Please upload a image for medicine");
+            }
+            if (creattingMedicine.treatmentId == null)
+            {
+                ModelState.AddModelError("treatmentId", "Please enter a treatment for medicine");
+            }
             if (!ModelState.IsValid)
             {
                 return BadRequest(new Response(false, "Fail input") { Data = ModelState });
@@ -98,7 +105,6 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                 return NotFound(new Response(false, "The medicine is not found!"));
             }
 
-            var updatedMedicine = updateMedicine with { isDeleted = false };
 
             var getEntity = MedicineConversion.ToEntity(updateMedicine);
             if (updateMedicine.imageFile != null && updateMedicine.imageFile.Length > 0)
@@ -137,6 +143,10 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeleteMedicine(Guid id)
         {
             var existingMedicine = await medicineInterface.GetByIdAsync(id);
+            if(existingMedicine == null)
+            {
+                return NotFound(new Response(false, "The medicine is not found!"));
+            }
             var response = await medicineInterface.DeleteAsync(existingMedicine);
             if (response.Flag)
             {

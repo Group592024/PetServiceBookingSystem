@@ -14,8 +14,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             medicineId = medicineDTO.medicineId,
             treatmentId = medicineDTO.treatmentId,
             medicineName = medicineDTO.medicineName,
-            medicineImage = imagePath ?? medicineDTO.medicineImage,
-            isDeleted = medicineDTO.isDeleted
+            medicineImage = imagePath ?? medicineDTO.medicineImage
         };
 
         public static (MedicineDTO?, IEnumerable<MedicineDTO>?) FromEntity(Medicine medicine, IEnumerable<Medicine>? medicines)
@@ -29,8 +28,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
                         medicine.treatmentId,
                         medicine.medicineName,
                         medicine.medicineImage,
-                        null,
-                        medicine.isDeleted
+                        null
                     );
                 return (singleMedicine, null);
             }
@@ -39,7 +37,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             if (medicines != null || medicine == null)
             {
                 var listMedicines = medicines!.Select(m =>
-                    new MedicineDTO(m.medicineId, m.treatmentId, m.medicineName, m.medicineImage, null, m.isDeleted)).ToList();
+                    new MedicineDTO(m.medicineId, m.treatmentId, m.medicineName, m.medicineImage, null)).ToList();
                 return (null, listMedicines);
             }
 

@@ -3,12 +3,12 @@
   "WorkspaceRootPath": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{93845A9B-5F54-4B9E-A981-EB3856B0F97C}|PSBS.HealthCareApi.Infrastructure\\PSBS.HealthCareApi.Infrastructure.csproj|W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\psbs.healthcareapi.infrastructure\\repositories\\medicinerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{93845A9B-5F54-4B9E-A981-EB3856B0F97C}|PSBS.HealthCareApi.Infrastructure\\PSBS.HealthCareApi.Infrastructure.csproj|solutionrelative:psbs.healthcareapi.infrastructure\\repositories\\medicinerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\psbs.healthcareapi.presentation\\controllers\\medicinescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|solutionrelative:psbs.healthcareapi.presentation\\controllers\\medicinescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|w:\\sp25\\sep490\\task1\\version1\\petservicebookingsystem\\psbs.healthcareserviceapisolution\\psbs.healthcareapi.presentation\\controllers\\medicinescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|solutionrelative:psbs.healthcareapi.presentation\\controllers\\medicinescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|w:\\sp25\\sep490\\task1\\version1\\petservicebookingsystem\\psbs.healthcareserviceapisolution\\psbs.healthcareapi.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}|PSBS.HealthCareApi.Presentation\\PSBS.HealthCareApi.Presentation.csproj|solutionrelative:psbs.healthcareapi.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,27 +43,27 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "MedicinesController.cs",
-              "DocumentMoniker": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
-              "RelativeDocumentMoniker": "PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
-              "ToolTip": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
-              "RelativeToolTip": "PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
-              "ViewState": "AQIAAAoAAAAAAAAAAAB0PRUAAAA+AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-28T11:02:26.893Z",
+              "Title": "appsettings.json",
+              "DocumentMoniker": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\appsettings.json",
+              "RelativeDocumentMoniker": "PSBS.HealthCareApi.Presentation\\appsettings.json",
+              "ToolTip": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\appsettings.json",
+              "RelativeToolTip": "PSBS.HealthCareApi.Presentation\\appsettings.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABUAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-12-29T13:57:03.468Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MedicineRepository.cs",
-              "DocumentMoniker": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Infrastructure\\Repositories\\MedicineRepository.cs",
-              "RelativeDocumentMoniker": "PSBS.HealthCareApi.Infrastructure\\Repositories\\MedicineRepository.cs",
-              "ToolTip": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Infrastructure\\Repositories\\MedicineRepository.cs",
-              "RelativeToolTip": "PSBS.HealthCareApi.Infrastructure\\Repositories\\MedicineRepository.cs",
-              "ViewState": "AQIAABwAAAAAAAAAAAAQwD0AAAANAAAA",
+              "Title": "MedicinesController.cs",
+              "DocumentMoniker": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
+              "RelativeDocumentMoniker": "PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
+              "ToolTip": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
+              "RelativeToolTip": "PSBS.HealthCareApi.Presentation\\Controllers\\MedicinesController.cs",
+              "ViewState": "AQIAAEYAAAAAAAAAAAAAwFQAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-28T09:48:27.453Z",
+              "WhenOpened": "2024-12-28T11:02:26.893Z",
               "EditorCaption": ""
             }
           ]
