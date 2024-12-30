@@ -95,8 +95,13 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var pet = await context.PetTypes.FindAsync(id);
-                if (pet.IsDelete) return null;
-                return pet is not null ? pet : null;
+                if (pet is not null)
+                {
+                    if (pet.IsDelete) return null;
+                    return pet;
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
