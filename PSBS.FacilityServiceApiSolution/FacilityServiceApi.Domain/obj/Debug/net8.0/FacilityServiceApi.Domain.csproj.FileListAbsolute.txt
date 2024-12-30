@@ -1,0 +1,12 @@
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\bin\Debug\net8.0\FacilityServiceApi.Domain.deps.json
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\bin\Debug\net8.0\FacilityServiceApi.Domain.dll
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\bin\Debug\net8.0\FacilityServiceApi.Domain.pdb
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.AssemblyInfoInputs.cache
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.AssemblyInfo.cs
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.csproj.CoreCompileInputs.cache
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.sourcelink.json
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.dll
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\refint\FacilityServiceApi.Domain.dll
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\FacilityServiceApi.Domain.pdb
+E:\STUDIES\Ki9\DoAn\CodeDoAn\PetServiceBookingSystem\PSBS.FacilityServiceApiSolution\FacilityServiceApi.Domain\obj\Debug\net8.0\ref\FacilityServiceApi.Domain.dll
