@@ -5,6 +5,14 @@ VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{4B8A7A2B-0EFF-49EB-BD13-3E0C7D08F701}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSBS.HealthCareApi.Application", "PSBS.HealthCareApi.Application\PSBS.HealthCareApi.Application.csproj", "{5DD5C17E-A595-4DC5-8859-EFA0C78F46AE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSBS.HealthCareApi.Domain", "PSBS.HealthCareApi.Domain\PSBS.HealthCareApi.Domain.csproj", "{60182096-375E-407A-A62A-86CA27E6C845}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSBS.HealthCareApi.Infrastructure", "PSBS.HealthCareApi.Infrastructure\PSBS.HealthCareApi.Infrastructure.csproj", "{93845A9B-5F54-4B9E-A981-EB3856B0F97C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PSBS.HealthCareApi.Presentation", "PSBS.HealthCareApi.Presentation\PSBS.HealthCareApi.Presentation.csproj", "{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{4B8A7A2B-0EFF-49EB-BD13-3E0C7D08F701}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4B8A7A2B-0EFF-49EB-BD13-3E0C7D08F701}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4B8A7A2B-0EFF-49EB-BD13-3E0C7D08F701}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DD5C17E-A595-4DC5-8859-EFA0C78F46AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DD5C17E-A595-4DC5-8859-EFA0C78F46AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DD5C17E-A595-4DC5-8859-EFA0C78F46AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DD5C17E-A595-4DC5-8859-EFA0C78F46AE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60182096-375E-407A-A62A-86CA27E6C845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60182096-375E-407A-A62A-86CA27E6C845}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60182096-375E-407A-A62A-86CA27E6C845}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60182096-375E-407A-A62A-86CA27E6C845}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93845A9B-5F54-4B9E-A981-EB3856B0F97C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93845A9B-5F54-4B9E-A981-EB3856B0F97C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93845A9B-5F54-4B9E-A981-EB3856B0F97C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93845A9B-5F54-4B9E-A981-EB3856B0F97C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6B327B3-5DBE-4D65-AFA8-2E205F96F2AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
