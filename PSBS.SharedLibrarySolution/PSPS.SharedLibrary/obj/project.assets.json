@@ -3180,11 +3180,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\SP25\\InitCode\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+      "projectUniqueName": "D:\\SP25\\hien_VoucherBE\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
       "projectName": "PSPS.SharedLibrary",
-      "projectPath": "D:\\SP25\\InitCode\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+      "projectPath": "D:\\SP25\\hien_VoucherBE\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
       "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-      "outputPath": "D:\\SP25\\InitCode\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\obj\\",
+      "outputPath": "D:\\SP25\\hien_VoucherBE\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",

@@ -1,7 +1,20 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\SP25\\InitCode\\PSBS.RewardServiceApiSolution\\",
-  "Documents": [],
+  "WorkspaceRootPath": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{94A4C8E6-2041-4C63-AB69-718053BE41F8}|VoucherApi.Presentation\\VoucherApi.Presentation.csproj|d:\\sp25\\hien_voucherbe\\psbs.rewardserviceapisolution\\voucherapi.presentation\\controllers\\vouchercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{94A4C8E6-2041-4C63-AB69-718053BE41F8}|VoucherApi.Presentation\\VoucherApi.Presentation.csproj|solutionrelative:voucherapi.presentation\\controllers\\vouchercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|d:\\sp25\\hien_voucherbe\\psbs.rewardserviceapisolution\\voucherapi.infrastructure\\repositories\\voucherrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|solutionrelative:voucherapi.infrastructure\\repositories\\voucherrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|d:\\sp25\\hien_voucherbe\\psbs.rewardserviceapisolution\\voucherapi.infrastructure\\data\\migarations\\20241228105427_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|solutionrelative:voucherapi.infrastructure\\data\\migarations\\20241228105427_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,16 +22,8 @@
       "DocumentGroups": [
         {
           "DockedWidth": 187,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
@@ -30,6 +35,51 @@
             {
               "$type": "Bookmark",
               "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VoucherController.cs",
+              "DocumentMoniker": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Presentation\\Controllers\\VoucherController.cs",
+              "RelativeDocumentMoniker": "VoucherApi.Presentation\\Controllers\\VoucherController.cs",
+              "ToolTip": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Presentation\\Controllers\\VoucherController.cs",
+              "RelativeToolTip": "VoucherApi.Presentation\\Controllers\\VoucherController.cs",
+              "ViewState": "AgIAAC0AAAAAAAAAAAA1wEkAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-28T11:05:08.339Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "VoucherRepository.cs",
+              "DocumentMoniker": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Repositories\\VoucherRepository.cs",
+              "RelativeDocumentMoniker": "VoucherApi.Infrastructure\\Repositories\\VoucherRepository.cs",
+              "ToolTip": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Repositories\\VoucherRepository.cs",
+              "RelativeToolTip": "VoucherApi.Infrastructure\\Repositories\\VoucherRepository.cs",
+              "ViewState": "AgIAAHMAAAAAAAAAAAD4v2sAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-28T10:56:17.693Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "20241228105427_Init.cs",
+              "DocumentMoniker": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Data\\Migarations\\20241228105427_Init.cs",
+              "RelativeDocumentMoniker": "VoucherApi.Infrastructure\\Data\\Migarations\\20241228105427_Init.cs",
+              "ToolTip": "D:\\SP25\\hien_VoucherBE\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Data\\Migarations\\20241228105427_Init.cs",
+              "RelativeToolTip": "VoucherApi.Infrastructure\\Data\\Migarations\\20241228105427_Init.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-28T10:54:28.124Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
             }
           ]
         },
