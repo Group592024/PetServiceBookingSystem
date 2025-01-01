@@ -1,0 +1,17 @@
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.Application.deps.json
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.Application.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.Application.pdb
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.AssemblyInfoInputs.cache
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.AssemblyInfo.cs
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.csproj.CoreCompileInputs.cache
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\refint\PSPS.Application.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.pdb
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\ref\PSPS.Application.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.SharedLibrary.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.SharedLibrary.pdb
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.Application.csproj.AssemblyReference.cache
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\obj\Debug\net8.0\PSPS.App.C0C71F24.Up2Date
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.Domain.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\AuthenticationAPI.Application\bin\Debug\net8.0\PSPS.Domain.pdb

@@ -1,7 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\SP25\\InitCode\\PSBS.AccountServiceApiSolution\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\ASUS\\Desktop\\Working\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}|PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\asus\\desktop\\working\\petservicebookingsystem\\psbs.accountserviceapisolution\\psps.authenticationapi.presentation\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}|PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.authenticationapi.presentation\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +14,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 187,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,6 +35,19 @@
             {
               "$type": "Bookmark",
               "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\Working\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\ASUS\\Desktop\\Working\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",
+              "ViewState": "AQIAADkAAAAAAAAAAAAowAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-01T06:17:37.851Z",
+              "EditorCaption": ""
             }
           ]
         },

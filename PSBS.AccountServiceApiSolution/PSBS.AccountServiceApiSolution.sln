@@ -5,6 +5,14 @@ VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{DB248E8D-4F8C-44BC-AA66-B68C50320669}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.AccountAPI.Application", "PSPS.AuthenticationAPI.Application\PSPS.AccountAPI.Application.csproj", "{CA141AC1-E08E-41D3-8509-60CC825C49BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.AccountAPI.Domain", "PSPS.AuthenticationAPI.Domain\PSPS.AccountAPI.Domain.csproj", "{1F955AA7-D047-4CF6-9A72-2A750C58E5D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.AccountAPI.Infrastructure", "PSPS.AuthenticationAPI.Infrastructure\PSPS.AccountAPI.Infrastructure.csproj", "{64943565-3F19-4BD9-A861-79D8B79AE941}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.AccountAPI.Presentation", "PSPS.AuthenticationAPI.Presentation\PSPS.AccountAPI.Presentation.csproj", "{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB248E8D-4F8C-44BC-AA66-B68C50320669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CA141AC1-E08E-41D3-8509-60CC825C49BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CA141AC1-E08E-41D3-8509-60CC825C49BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CA141AC1-E08E-41D3-8509-60CC825C49BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CA141AC1-E08E-41D3-8509-60CC825C49BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F955AA7-D047-4CF6-9A72-2A750C58E5D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F955AA7-D047-4CF6-9A72-2A750C58E5D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F955AA7-D047-4CF6-9A72-2A750C58E5D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F955AA7-D047-4CF6-9A72-2A750C58E5D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64943565-3F19-4BD9-A861-79D8B79AE941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64943565-3F19-4BD9-A861-79D8B79AE941}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64943565-3F19-4BD9-A861-79D8B79AE941}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64943565-3F19-4BD9-A861-79D8B79AE941}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCFCC64C-08E9-433D-A809-A24A2A8A1D5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
