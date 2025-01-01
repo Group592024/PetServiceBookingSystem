@@ -1,15 +1,181 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\Nodejs\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\",
-  "Documents": [],
+  "WorkspaceRootPath": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.infrastructure\\data\\pspsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.infrastructure\\data\\pspsdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.domain\\entities\\account.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|solutionrelative:psps.domain\\entities\\account.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.domain\\entities\\emailsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|solutionrelative:psps.domain\\entities\\emailsetting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.infrastructure\\repositories\\emailrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.infrastructure\\repositories\\emailrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.infrastructure\\repositories\\accountrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.infrastructure\\repositories\\accountrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\updateaccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\updateaccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\registerdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\registeraccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\registeraccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\logoutdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\logoutdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\imageuploadmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\imageuploadmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\getaccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\getaccountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\changepassworddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\changepassworddto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\addaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\addaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\accountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\accountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\dtos\\conversions\\accountconversions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\dtos\\conversions\\accountconversions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\interfaces\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\interfaces\\iaccount.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.infrastructure\\dependencyinjection\\servicecontainer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.infrastructure\\dependencyinjection\\servicecontainer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\psps.accountapi.presentation.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\psps.accountapi.presentation.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\psps-20241229.text||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\psps-20241229.text||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DB248E8D-4F8C-44BC-AA66-B68C50320669}|..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.sharedlibrarysolution\\psps.sharedlibrary\\psps.sharedlibrary.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\psps.accountapi.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\psps.accountapi.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Acer\\AppData\\Local\\Temp\\.vsdbgsrc\\b38c7bbc046e461a8a58c7e0eb00bea4828feec3606c51aaae6062bc28a1448e\\FileConfigurationProvider.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.infrastructure\\psps.accountapi.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{8F5D96E7-2CF2-4F56-B4E1-D3A6BA2DB50E}|PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.infrastructure\\psps.accountapi.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.domain\\entities\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|solutionrelative:psps.domain\\entities\\role.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\authenticationapi.application\\interfaces\\iemail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1377C935-6CCA-47C2-A483-AD473971B6B7}|AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:authenticationapi.application\\interfaces\\iemail.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.domain\\entities\\mailcontent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{D7913628-A861-426B-AAE2-8B97F846C063}|PSPS.Domain\\PSPS.AccountAPI.Domain.csproj|solutionrelative:psps.domain\\entities\\mailcontent.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|c:\\users\\acer\\downloads\\petservicebookingsystem-main\\petservicebookingsystem-main\\psbs.accountserviceapisolution\\psps.presentation\\psps-20241228.text||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{BA41C987-A260-4AAD-9FC5-E5192AB18FDD}|PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj|solutionrelative:psps.presentation\\psps-20241228.text||{8B382828-6202-11D1-8870-0000F87579D2}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
-      "VerticalTabListWidth": 256,
+      "VerticalTabListWidth": 100,
       "DocumentGroups": [
         {
-          "DockedWidth": 187,
-          "SelectedChildIndex": -1,
+          "DockedWidth": 385,
+          "SelectedChildIndex": 39,
           "Children": [
             {
               "$type": "Bookmark",
@@ -34,12 +200,519 @@
             {
               "$type": "Bookmark",
               "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "PSPS.AccountAPI.Presentation",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+              "RelativeToolTip": "PSPS.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-01-01T04:52:56.796Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Microsoft.Common.CurrentVersion.targets",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "ViewState": "AgIAAGoIAAAAAAAAAAAIwH8IAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
+              "WhenOpened": "2025-01-01T04:44:47.484Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "AccountConversions.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-01T02:12:44.63Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "PSPS.SharedLibrary.csproj",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "RelativeDocumentMoniker": "..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "RelativeToolTip": "..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-01-01T01:47:19.706Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "f35cef5f-31ea-409c-b9f8-31061204cfc1.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\f35cef5f-31ea-409c-b9f8-31061204cfc1.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:59.403Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "df4835d8-69e0-407f-809f-7154dc8065de.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\df4835d8-69e0-407f-809f-7154dc8065de.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:58.508Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "b046ab93-4003-462d-9b91-dae2a970d5ca.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\b046ab93-4003-462d-9b91-dae2a970d5ca.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:54.423Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "a564229a-977e-4bdc-9473-4491f6d4d784.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\a564229a-977e-4bdc-9473-4491f6d4d784.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:53.469Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\a3faca89-1d56-48d4-ad29-e9bfa87e931e.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:52.94Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "6889b7c1-6bf4-40be-9367-32a333454f98.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\6889b7c1-6bf4-40be-9367-32a333454f98.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:52.39Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "397b0444-bc5f-48e4-b37a-8892294746b5.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\397b0444-bc5f-48e4-b37a-8892294746b5.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:51.596Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml",
+              "RelativeToolTip": "PSPS.Presentation\\mailssave\\25eed8cc-0ba0-4f9e-919c-5c5f35f958ea.eml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001861|",
+              "WhenOpened": "2024-12-31T08:29:45.088Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PSPSDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data\\PSPSDbContext.cs",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\Data\\PSPSDbContext.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data\\PSPSDbContext.cs",
+              "RelativeToolTip": "PSPS.Infrastructure\\Data\\PSPSDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:18:33.687Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "Role.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\Role.cs",
+              "RelativeDocumentMoniker": "PSPS.Domain\\Entities\\Role.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\Role.cs",
+              "RelativeToolTip": "PSPS.Domain\\Entities\\Role.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:54.625Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "PSPS.AccountAPI.Application.csproj",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+              "RelativeToolTip": "AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-12-31T08:00:47.409Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UpdateAccountDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\UpdateAccountDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\UpdateAccountDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\UpdateAccountDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\UpdateAccountDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:27.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RegisterDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\RegisterDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\RegisterDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\RegisterDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\RegisterDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:25.577Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RegisterAccountDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\RegisterAccountDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\RegisterAccountDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\RegisterAccountDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\RegisterAccountDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:24.176Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "LogoutDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\LogoutDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\LogoutDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\LogoutDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\LogoutDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:22.499Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "LoginDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\LoginDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\LoginDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\LoginDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\LoginDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:21.643Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "ImageUploadModel.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\ImageUploadModel.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\ImageUploadModel.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\ImageUploadModel.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\ImageUploadModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:00:20.603Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "GetAccountDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\GetAccountDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\GetAccountDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\GetAccountDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\GetAccountDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T11:17:24.743Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "AddAccount.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\AddAccount.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\AddAccount.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\AddAccount.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\AddAccount.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T11:17:23.194Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AccountDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAcAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T11:17:22.018Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "EmailRepository.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Repositories\\EmailRepository.cs",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\Repositories\\EmailRepository.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Repositories\\EmailRepository.cs",
+              "RelativeToolTip": "PSPS.Infrastructure\\Repositories\\EmailRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwBEAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:44:09.852Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "IEmail.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\Interfaces\\IEmail.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\Interfaces\\IEmail.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\Interfaces\\IEmail.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\Interfaces\\IEmail.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:43:58.883Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "IAccount.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\Interfaces\\IAccount.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\Interfaces\\IAccount.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\Interfaces\\IAccount.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\Interfaces\\IAccount.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAsAAAA1AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:43:57.958Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Account.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\Account.cs",
+              "RelativeDocumentMoniker": "PSPS.Domain\\Entities\\Account.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\Account.cs",
+              "RelativeToolTip": "PSPS.Domain\\Entities\\Account.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAcAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:43:56.12Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "FileConfigurationProvider.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\AppData\\Local\\Temp\\.vsdbgsrc\\b38c7bbc046e461a8a58c7e0eb00bea4828feec3606c51aaae6062bc28a1448e\\FileConfigurationProvider.cs",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\b38c7bbc046e461a8a58c7e0eb00bea4828feec3606c51aaae6062bc28a1448e\\FileConfigurationProvider.cs",
+              "ToolTip": "C:\\Users\\Acer\\AppData\\Local\\Temp\\.vsdbgsrc\\b38c7bbc046e461a8a58c7e0eb00bea4828feec3606c51aaae6062bc28a1448e\\FileConfigurationProvider.cs",
+              "RelativeToolTip": "..\\..\\..\\..\\AppData\\Local\\Temp\\.vsdbgsrc\\b38c7bbc046e461a8a58c7e0eb00bea4828feec3606c51aaae6062bc28a1448e\\FileConfigurationProvider.cs",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAawEUAAAAEAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:41:45.989Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 38,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "PSPS.Presentation\\Controllers\\AccountController.cs",
+              "ViewState": "AgIAAD4AAAAAAAAAAAAIwFQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:41:23.146Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 39,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Properties\\launchSettings.json",
+              "RelativeToolTip": "PSPS.Presentation\\Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-12-29T08:41:17.594Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AccountRepository.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Repositories\\AccountRepository.cs",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\Repositories\\AccountRepository.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Repositories\\AccountRepository.cs",
+              "RelativeToolTip": "PSPS.Infrastructure\\Repositories\\AccountRepository.cs",
+              "ViewState": "AgIAANcAAAAAAAAAAAAuwOwAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:40:57.208Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Program.cs",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\Program.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\Program.cs",
+              "RelativeToolTip": "PSPS.Presentation\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:40:19.526Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\appsettings.json",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\appsettings.json",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\appsettings.json",
+              "RelativeToolTip": "PSPS.Presentation\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-12-29T08:40:01.734Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "ServiceContainer.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "RelativeToolTip": "PSPS.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:39:38.854Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "PSPS.AccountAPI.Infrastructure.csproj",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+              "RelativeToolTip": "PSPS.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-12-29T08:39:36.496Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "EmailSetting.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\EmailSetting.cs",
+              "RelativeDocumentMoniker": "PSPS.Domain\\Entities\\EmailSetting.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\EmailSetting.cs",
+              "RelativeToolTip": "PSPS.Domain\\Entities\\EmailSetting.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAqwAkAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:39:34.287Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 40,
+              "Title": "MailContent.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\MailContent.cs",
+              "RelativeDocumentMoniker": "PSPS.Domain\\Entities\\MailContent.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Domain\\Entities\\MailContent.cs",
+              "RelativeToolTip": "PSPS.Domain\\Entities\\MailContent.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:39:33.137Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "ChangePasswordDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\ChangePasswordDTO.cs",
+              "RelativeDocumentMoniker": "AuthenticationAPI.Application\\DTOs\\ChangePasswordDTO.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\AuthenticationAPI.Application\\DTOs\\ChangePasswordDTO.cs",
+              "RelativeToolTip": "AuthenticationAPI.Application\\DTOs\\ChangePasswordDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T08:39:30.913Z",
+              "EditorCaption": ""
             }
           ]
         },
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "DockedWidth": 16,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -56,6 +729,43 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "PSPS-20241229.text",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS-20241229.text",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\PSPS-20241229.text",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS-20241229.text",
+              "RelativeToolTip": "PSPS.Presentation\\PSPS-20241229.text",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAAC8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-12-31T08:47:47.862Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 41,
+              "Title": "PSPS-20241228.text",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS-20241228.text",
+              "RelativeDocumentMoniker": "PSPS.Presentation\\PSPS-20241228.text",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Presentation\\PSPS-20241228.text",
+              "RelativeToolTip": "PSPS.Presentation\\PSPS-20241228.text",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2024-12-31T08:47:44.52Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "20241231083203_First.cs",
+              "DocumentMoniker": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs",
+              "RelativeDocumentMoniker": "PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs",
+              "ToolTip": "C:\\Users\\Acer\\Downloads\\PetServiceBookingSystem-main\\PetServiceBookingSystem-main\\PSBS.AccountServiceApiSolution\\PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs",
+              "RelativeToolTip": "PSPS.Infrastructure\\Data\\Migrations\\20241231083203_First.cs",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-31T08:32:03.656Z"
             }
           ]
         },
@@ -70,7 +780,7 @@
           ]
         },
         {
-          "DockedWidth": 200,
+          "DockedWidth": 228,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -80,6 +790,10 @@
             {
               "$type": "Bookmark",
               "Name": "ST:34:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
             }
           ]
         }

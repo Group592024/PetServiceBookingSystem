@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PSPS.SharedLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2cb5ade53c5a5c3a39715f55bf20a0c3779ff6cb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f1d3d2a27ae7df1a914b0727df6c06ab646006c4")]
 [assembly: System.Reflection.AssemblyProductAttribute("PSPS.SharedLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PSPS.SharedLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

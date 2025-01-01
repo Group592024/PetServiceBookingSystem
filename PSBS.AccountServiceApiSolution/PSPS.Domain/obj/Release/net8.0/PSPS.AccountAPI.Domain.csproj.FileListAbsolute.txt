@@ -1,0 +1,11 @@
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.deps.json
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.pdb
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.AssemblyInfoInputs.cache
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.AssemblyInfo.cs
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.csproj.CoreCompileInputs.cache
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\refint\PSPS.AccountAPI.Domain.dll
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.pdb
+C:\Users\Acer\Downloads\PetServiceBookingSystem-main\PetServiceBookingSystem-main\PSBS.AccountServiceApiSolution\PSPS.Domain\obj\Release\net8.0\ref\PSPS.AccountAPI.Domain.dll

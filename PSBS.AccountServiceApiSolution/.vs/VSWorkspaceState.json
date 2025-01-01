@@ -1,6 +1,15 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\AuthenticationAPI.Application\\DTOs",
+    "\\AuthenticationAPI.Application\\Interfaces",
+    "\\PSPS.Domain",
+    "\\PSPS.Domain\\Entities",
+    "\\PSPS.Infrastructure\\bin",
+    "\\PSPS.Infrastructure\\DependencyInjection",
+    "\\PSPS.Infrastructure\\Repositories",
+    "\\PSPS.Presentation",
+    "\\PSPS.Presentation\\Controllers"
   ],
   "SelectedNode": "\\PSBS.AccountServiceApiSolution.sln",
   "PreviewInSolutionExplorer": false
