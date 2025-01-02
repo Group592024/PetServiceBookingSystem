@@ -1,0 +1,6 @@
+@FacilityServiceApi.Presentation_HostAddress = http://localhost:5023
+
+GET {{FacilityServiceApi.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

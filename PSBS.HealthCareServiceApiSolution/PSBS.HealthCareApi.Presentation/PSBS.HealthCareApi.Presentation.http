@@ -1,0 +1,6 @@
+@PSBS.HealthCareApi.Presentation_HostAddress = http://localhost:5143
+
+GET {{PSBS.HealthCareApi.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

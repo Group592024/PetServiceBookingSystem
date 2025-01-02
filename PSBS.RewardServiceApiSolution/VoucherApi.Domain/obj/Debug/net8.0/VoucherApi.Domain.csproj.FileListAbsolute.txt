@@ -1,0 +1,12 @@
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\bin\Debug\net8.0\VoucherApi.Domain.deps.json
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\bin\Debug\net8.0\VoucherApi.Domain.dll
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\bin\Debug\net8.0\VoucherApi.Domain.pdb
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.AssemblyInfoInputs.cache
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.AssemblyInfo.cs
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.csproj.CoreCompileInputs.cache
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.sourcelink.json
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.dll
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\refint\VoucherApi.Domain.dll
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\VoucherApi.Domain.pdb
+D:\SP25\hien_VoucherBE\PSBS.RewardServiceApiSolution\VoucherApi.Domain\obj\Debug\net8.0\ref\VoucherApi.Domain.dll

@@ -1,23 +1,111 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\SP25\\InitCode\\PSBS.PetServiceApiSolution\\",
-  "Documents": [],
+  "WorkspaceRootPath": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.presentation\\controllers\\pettypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|solutionrelative:petapi.presentation\\controllers\\pettypecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.infrastructure\\repositories\\pettyperepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|solutionrelative:petapi.infrastructure\\repositories\\pettyperepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.application\\dtos\\pettypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|solutionrelative:petapi.application\\dtos\\pettypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.application\\dtos\\conversions\\pettypeconversion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|solutionrelative:petapi.application\\dtos\\conversions\\pettypeconversion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.application\\dtos\\createpettypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BF952D87-9E08-46F1-995F-8F87E19D9A83}|PetApi.Application\\PetApi.Application.csproj|solutionrelative:petapi.application\\dtos\\createpettypedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.infrastructure\\dependencyinjection\\servicecontainer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|solutionrelative:petapi.infrastructure\\dependencyinjection\\servicecontainer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.infrastructure\\data\\petdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|solutionrelative:petapi.infrastructure\\data\\petdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.domain\\entities\\pet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|solutionrelative:petapi.domain\\entities\\pet.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.domain\\entities\\petbreed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|solutionrelative:petapi.domain\\entities\\petbreed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.domain\\entities\\pettype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|solutionrelative:petapi.domain\\entities\\pettype.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.domain\\entities\\petdiary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{66DD4CB4-479C-49F7-9D53-C22D0E7CD741}|PetApi.Domain\\PetApi.Domain.csproj|solutionrelative:petapi.domain\\entities\\petdiary.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.presentation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|solutionrelative:petapi.presentation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|solutionrelative:petapi.presentation\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.presentation\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{3B05EDA3-7C21-49DF-B915-158818EF0BB8}|PetApi.Presentation\\PetApi.Presentation.csproj|solutionrelative:petapi.presentation\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229131324_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PetApi.Infrastructure\\Migrations\\20241229131324_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229130059_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:PetApi.Infrastructure\\Migrations\\20241229130059_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{28AF60B5-683E-4639-969E-41225960544E}|..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.sharedlibrarysolution\\psps.sharedlibrary\\psps.sharedlibrary.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.infrastructure\\petapi.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|solutionrelative:petapi.infrastructure\\petapi.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|d:\\2025\\projects\\petservicebookingsystem\\psbs.petserviceapisolution\\petapi.infrastructure\\data\\migrations\\20241229150740_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{DBFDF474-3573-462F-8881-A57AEF1AFFF4}|PetApi.Infrastructure\\PetApi.Infrastructure.csproj|solutionrelative:petapi.infrastructure\\data\\migrations\\20241229150740_init.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
-      "Orientation": 0,
+      "Orientation": 1,
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 187,
-          "SelectedChildIndex": -1,
+          "DockedHeight": 283,
+          "SelectedChildIndex": 12,
           "Children": [
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+              "Name": "ST:128:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+              "Name": "ST:129:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
               "$type": "Bookmark",
@@ -25,48 +113,275 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:62:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CreatePetTypeDTO.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\CreatePetTypeDTO.cs",
+              "RelativeDocumentMoniker": "PetApi.Application\\DTOs\\CreatePetTypeDTO.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\CreatePetTypeDTO.cs",
+              "RelativeToolTip": "PetApi.Application\\DTOs\\CreatePetTypeDTO.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAYAAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T16:00:13.354Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "PetTypeDTO.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\PetTypeDTO.cs",
+              "RelativeDocumentMoniker": "PetApi.Application\\DTOs\\PetTypeDTO.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\PetTypeDTO.cs",
+              "RelativeToolTip": "PetApi.Application\\DTOs\\PetTypeDTO.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAkAAAALAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:09:59.156Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "PetTypeController.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Controllers\\PetTypeController.cs",
+              "RelativeDocumentMoniker": "PetApi.Presentation\\Controllers\\PetTypeController.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Controllers\\PetTypeController.cs",
+              "RelativeToolTip": "PetApi.Presentation\\Controllers\\PetTypeController.cs",
+              "ViewState": "AQIAAB8AAAAAAAAAAAAcwBkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:15:05.483Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "PetTypeConversion.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\Conversions\\PetTypeConversion.cs",
+              "RelativeDocumentMoniker": "PetApi.Application\\DTOs\\Conversions\\PetTypeConversion.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Application\\DTOs\\Conversions\\PetTypeConversion.cs",
+              "RelativeToolTip": "PetApi.Application\\DTOs\\Conversions\\PetTypeConversion.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAgwAYAAAA6AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:11:30.672Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "PetTypeRepository.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Repositories\\PetTypeRepository.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Repositories\\PetTypeRepository.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Repositories\\PetTypeRepository.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Repositories\\PetTypeRepository.cs",
+              "ViewState": "AQIAAAQAAAAAAAAAAAAvwAoAAABDAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:12:54.619Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Pet.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\Pet.cs",
+              "RelativeDocumentMoniker": "PetApi.Domain\\Entities\\Pet.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\Pet.cs",
+              "RelativeToolTip": "PetApi.Domain\\Entities\\Pet.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAABaAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:48:49.023Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "PetType.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetType.cs",
+              "RelativeDocumentMoniker": "PetApi.Domain\\Entities\\PetType.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetType.cs",
+              "RelativeToolTip": "PetApi.Domain\\Entities\\PetType.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA8AAAABAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T14:59:59.498Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "PetDiary.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetDiary.cs",
+              "RelativeDocumentMoniker": "PetApi.Domain\\Entities\\PetDiary.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetDiary.cs",
+              "RelativeToolTip": "PetApi.Domain\\Entities\\PetDiary.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAFAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:00:16.05Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "20241229150740_init.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\Migrations\\20241229150740_init.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Data\\Migrations\\20241229150740_init.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\Migrations\\20241229150740_init.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Data\\Migrations\\20241229150740_init.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:07:40.445Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "PetBreed.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetBreed.cs",
+              "RelativeDocumentMoniker": "PetApi.Domain\\Entities\\PetBreed.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Domain\\Entities\\PetBreed.cs",
+              "RelativeToolTip": "PetApi.Domain\\Entities\\PetBreed.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T15:00:35.989Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ServiceContainer.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
+              "ViewState": "AQIAAAMAAAAAAAAAAAAAAA8AAAAnAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:05:32.636Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\appsettings.json",
+              "RelativeDocumentMoniker": "PetApi.Presentation\\appsettings.json",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\appsettings.json",
+              "RelativeToolTip": "PetApi.Presentation\\appsettings.json",
+              "ViewState": "AQIAAAEAAAAAAAAAAAAmwBAAAAAmAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-12-29T13:01:56.314Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "PetDbContext.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\PetDbContext.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Data\\PetDbContext.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\PetDbContext.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Data\\PetDbContext.cs",
+              "ViewState": "AQIAABUAAAAAAAAAAAAUwB4AAAAmAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:08:20.041Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Program.cs",
+              "RelativeDocumentMoniker": "PetApi.Presentation\\Program.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Program.cs",
+              "RelativeToolTip": "PetApi.Presentation\\Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:02:13.567Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "20241229131711_init.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Data\\Migration\\20241229131711_init.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:17:11.922Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "PetApi.Presentation\\Properties\\launchSettings.json",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Presentation\\Properties\\launchSettings.json",
+              "RelativeToolTip": "PetApi.Presentation\\Properties\\launchSettings.json",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2024-12-29T13:15:01.045Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "20241229131324_init.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229131324_init.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Migrations\\20241229131324_init.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229131324_init.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Migrations\\20241229131324_init.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:13:24.978Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "20241229130059_init.cs",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229130059_init.cs",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\Migrations\\20241229130059_init.cs",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\Migrations\\20241229130059_init.cs",
+              "RelativeToolTip": "PetApi.Infrastructure\\Migrations\\20241229130059_init.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-12-29T13:00:59.328Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "PSPS.SharedLibrary.csproj",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "RelativeDocumentMoniker": "..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "RelativeToolTip": "..\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAABWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-12-29T12:53:52.955Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "PetApi.Infrastructure.csproj",
+              "DocumentMoniker": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\PetApi.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "PetApi.Infrastructure\\PetApi.Infrastructure.csproj",
+              "ToolTip": "D:\\2025\\projects\\PetServiceBookingSystem\\PSBS.PetServiceApiSolution\\PetApi.Infrastructure\\PetApi.Infrastructure.csproj",
+              "RelativeToolTip": "PetApi.Infrastructure\\PetApi.Infrastructure.csproj",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAgAAABRAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-12-29T12:53:38.553Z"
             }
           ]
         },
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": -1,
-          "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:64:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:63:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:65:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
-            }
-          ]
-        },
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": -1,
-          "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:64:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
-            }
-          ]
-        },
-        {
-          "DockedWidth": 200,
+          "DockedHeight": 117,
           "SelectedChildIndex": -1,
           "Children": [
             {
@@ -76,9 +391,37 @@
           ]
         },
         {
-          "DockedWidth": 200,
+          "DockedHeight": 200,
           "SelectedChildIndex": -1,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:5:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:6:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:131:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:7:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
             {
               "$type": "Bookmark",
               "Name": "ST:16:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
@@ -86,6 +429,24 @@
             {
               "$type": "Bookmark",
               "Name": "ST:34:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            }
+          ]
+        },
+        {
+          "DockedHeight": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{004be353-6879-467c-9d1e-9ac23cdf6d49}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
             }
           ]
         }
