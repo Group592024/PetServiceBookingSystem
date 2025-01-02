@@ -894,14 +894,7 @@
           }
         }
       },
-      "System.Formats.Asn1/8.0.1": {
-        "runtime": {
-          "lib/net8.0/System.Formats.Asn1.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.724.31311"
-          }
-        }
-      },
+      "System.Formats.Asn1/8.0.1": {},
       "System.IdentityModel.Tokens.Jwt/7.1.2": {
         "dependencies": {
           "Microsoft.IdentityModel.JsonWebTokens": "7.1.2",
@@ -1020,12 +1013,6 @@
       "System.Text.Json/8.0.4": {
         "dependencies": {
           "System.Text.Encodings.Web": "8.0.0"
-        },
-        "runtime": {
-          "lib/net8.0/System.Text.Json.dll": {
-            "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.0.724.31311"
-          }
         }
       },
       "System.Threading.Channels/6.0.0": {},
@@ -1055,12 +1042,18 @@
           "PSPS.SharedLibrary": "1.0.0"
         },
         "runtime": {
-          "PSPS.AccountAPI.Application.dll": {}
+          "PSPS.AccountAPI.Application.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "PSPS.AccountAPI.Domain/1.0.0": {
         "runtime": {
-          "PSPS.AccountAPI.Domain.dll": {}
+          "PSPS.AccountAPI.Domain.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "PSPS.SharedLibrary/1.0.0": {
@@ -1071,7 +1064,10 @@
           "Serilog.AspNetCore": "8.0.2"
         },
         "runtime": {
-          "PSPS.SharedLibrary.dll": {}
+          "PSPS.SharedLibrary.dll": {
+            "assemblyVersion": "1.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       }
     }

@@ -1,43 +1,37 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj": {}
+    "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj": {}
   },
   "projects": {
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj": {
+    "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+        "projectUniqueName": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
         "projectName": "PSPS.AccountAPI.Application",
-        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
-        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\obj\\",
+        "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
               },
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
               }
             }
           }
@@ -72,33 +66,27 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
+    "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj",
+        "projectUniqueName": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj",
         "projectName": "PSPS.AccountAPI.Domain",
-        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj",
-        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\obj\\",
+        "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -137,47 +125,41 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj": {
+    "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+        "projectUniqueName": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
         "projectName": "PSPS.AccountAPI.Infrastructure",
-        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\obj\\",
+        "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj"
               },
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
               },
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
               }
             }
           }
@@ -236,47 +218,41 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj": {
+    "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+        "projectUniqueName": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj",
         "projectName": "PSPS.AccountAPI.Presentation",
-        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj",
-        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\obj\\",
+        "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\PSPS.AccountAPI.Presentation.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\PSPS.AccountAPI.Domain.csproj"
               },
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj"
               },
-              "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
-                "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
+              "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+                "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
               }
             }
           }
@@ -330,33 +306,27 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+    "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+        "projectUniqueName": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
         "projectName": "PSPS.SharedLibrary",
-        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
-        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\obj\\",
+        "projectPath": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+        "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
+        "outputPath": "D:\\SP25\\Fix_2_1\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Users\\PC\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -413,7 +383,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

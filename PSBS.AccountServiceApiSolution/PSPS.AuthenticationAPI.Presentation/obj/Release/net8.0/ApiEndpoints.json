@@ -8,14 +8,14 @@
     "Order": 0,
     "Parameters": [
       {
-        "Name": "GuId",
+        "Name": "AccountId",
         "Type": "System.Guid",
         "IsRequired": false
       }
     ],
     "ReturnTypes": [
       {
-        "Type": "PSPS.Application.DTOs.GetAccountDTO",
+        "Type": "PSPS.AccountAPI.Application.DTOs.GetAccountDTO",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -39,7 +39,7 @@
         "IsRequired": false
       },
       {
-        "Name": "AccountTempDTO.AccountGuId",
+        "Name": "AccountTempDTO.AccountId",
         "Type": "System.Guid",
         "IsRequired": false
       },
@@ -86,7 +86,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "PSPS.Application.DTOs.AddAccount",
+        "Type": "PSPS.AccountAPI.Application.DTOs.AddAccount",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -106,7 +106,7 @@
     "Parameters": [],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.List\u00601[[PSPS.Application.DTOs.GetAccountDTO, PSPS.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.List\u00601[[PSPS.AccountAPI.Application.DTOs.GetAccountDTO, PSPS.AccountAPI.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "text/plain",
           "application/json",
@@ -119,19 +119,19 @@
   {
     "ContainingType": "PSPS.Presentation.Controllers.AccountController",
     "Method": "ChangePassword",
-    "RelativePath": "api/Account/ChangePassword{accountGuId}",
+    "RelativePath": "api/Account/ChangePassword{accountId}",
     "HttpMethod": "PUT",
     "IsController": true,
     "Order": 0,
     "Parameters": [
       {
-        "Name": "accountGuId",
+        "Name": "accountId",
         "Type": "System.Guid",
         "IsRequired": true
       },
       {
         "Name": "changePasswordDTO",
-        "Type": "PSPS.Application.DTOs.ChangePasswordDTO",
+        "Type": "PSPS.AccountAPI.Application.DTOs.ChangePasswordDTO",
         "IsRequired": true
       }
     ],
@@ -158,7 +158,7 @@
       {
         "Name": "email",
         "Type": "System.String",
-        "IsRequired": true
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -173,7 +173,7 @@
     "Parameters": [
       {
         "Name": "loginDTO",
-        "Type": "PSPS.Application.DTOs.LoginDTO",
+        "Type": "PSPS.AccountAPI.Application.DTOs.LoginDTO",
         "IsRequired": true
       }
     ],

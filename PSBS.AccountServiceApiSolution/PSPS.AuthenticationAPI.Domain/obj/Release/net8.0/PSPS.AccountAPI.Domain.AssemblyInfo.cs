@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PSPS.AccountAPI.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3339ed82f2aeb6fa76d8c5fe79a7749fb948d1f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+60445a96d40e16dfc3e1620bf6f2ac77927aae47")]
 [assembly: System.Reflection.AssemblyProductAttribute("PSPS.AccountAPI.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PSPS.AccountAPI.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

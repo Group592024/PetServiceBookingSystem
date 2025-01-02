@@ -412,5 +412,10 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public Task<Account> GetByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
