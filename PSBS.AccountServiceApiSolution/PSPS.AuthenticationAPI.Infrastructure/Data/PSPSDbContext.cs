@@ -15,7 +15,7 @@ namespace PSPS.AccountAPI.Infrastructure.Data
             modelBuilder.Entity<Role>().HasData(
                 new Role { RoleId = "admin", RoleName = "Admin" },
                 new Role { RoleId = "user", RoleName = "User" },
-                new Role { RoleId = "manager", RoleName = "Manager" }
+                new Role { RoleId = "staff", RoleName = "Staff" }
             );
         }
     }
