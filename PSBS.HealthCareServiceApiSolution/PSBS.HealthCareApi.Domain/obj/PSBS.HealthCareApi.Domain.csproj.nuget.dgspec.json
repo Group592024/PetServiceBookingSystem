@@ -1,6 +1,19 @@
 {
   "format": 1,
   "restore": {
+<<<<<<< HEAD:PSBS.SharedLibrarySolution/PSPS.SharedLibrary/obj/PSPS.SharedLibrary.csproj.nuget.dgspec.json
+    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+        "projectName": "PSPS.SharedLibrary",
+        "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj",
+        "packagesPath": "C:\\Users\\ASUS\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\obj\\",
+=======
     "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Domain\\PSBS.HealthCareApi.Domain.csproj": {}
   },
   "projects": {
@@ -12,9 +25,18 @@
         "projectPath": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Domain\\PSBS.HealthCareApi.Domain.csproj",
         "packagesPath": "C:\\Users\\mummykiara\\.nuget\\packages\\",
         "outputPath": "W:\\SP25\\SEP490\\Task1\\Version1\\PetServiceBookingSystem\\PSBS.HealthCareServiceApiSolution\\PSBS.HealthCareApi.Domain\\obj\\",
+>>>>>>> main:PSBS.HealthCareServiceApiSolution/PSBS.HealthCareApi.Domain/obj/PSBS.HealthCareApi.Domain.csproj.nuget.dgspec.json
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
+<<<<<<< HEAD:PSBS.SharedLibrarySolution/PSPS.SharedLibrary/obj/PSPS.SharedLibrary.csproj.nuget.dgspec.json
+          "C:\\Users\\ASUS\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+=======
           "C:\\Users\\mummykiara\\AppData\\Roaming\\NuGet\\NuGet.Config",
+>>>>>>> main:PSBS.HealthCareServiceApiSolution/PSBS.HealthCareApi.Domain/obj/PSBS.HealthCareApi.Domain.csproj.nuget.dgspec.json
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +44,10 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+<<<<<<< HEAD:PSBS.SharedLibrarySolution/PSPS.SharedLibrary/obj/PSPS.SharedLibrary.csproj.nuget.dgspec.json
+          "C:\\Program Files\\dotnet\\library-packs": {},
+=======
+>>>>>>> main:PSBS.HealthCareServiceApiSolution/PSBS.HealthCareApi.Domain/obj/PSBS.HealthCareApi.Domain.csproj.nuget.dgspec.json
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -60,7 +86,11 @@
               "privateAssets": "all"
             }
           },
+<<<<<<< HEAD:PSBS.SharedLibrarySolution/PSPS.SharedLibrary/obj/PSPS.SharedLibrary.csproj.nuget.dgspec.json
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200/PortableRuntimeIdentifierGraph.json"
+=======
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204/PortableRuntimeIdentifierGraph.json"
+>>>>>>> main:PSBS.HealthCareServiceApiSolution/PSBS.HealthCareApi.Domain/obj/PSBS.HealthCareApi.Domain.csproj.nuget.dgspec.json
         }
       }
     }
