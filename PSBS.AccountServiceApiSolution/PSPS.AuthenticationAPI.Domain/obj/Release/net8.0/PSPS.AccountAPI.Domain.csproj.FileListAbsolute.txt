@@ -33,3 +33,15 @@ C:\Users\ASUS\Desktop\Working\PetServiceBookingSystem\PSBS.AccountServiceApiSolu
 C:\Users\ASUS\Desktop\Working\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\refint\PSPS.AccountAPI.Domain.dll
 C:\Users\ASUS\Desktop\Working\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.pdb
 C:\Users\ASUS\Desktop\Working\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\ref\PSPS.AccountAPI.Domain.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.deps.json
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\bin\Release\net8.0\PSPS.AccountAPI.Domain.pdb
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.AssemblyInfoInputs.cache
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.AssemblyInfo.cs
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.sourcelink.json
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\refint\PSPS.AccountAPI.Domain.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\PSPS.AccountAPI.Domain.pdb
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.AccountServiceApiSolution\PSPS.AuthenticationAPI.Domain\obj\Release\net8.0\ref\PSPS.AccountAPI.Domain.dll

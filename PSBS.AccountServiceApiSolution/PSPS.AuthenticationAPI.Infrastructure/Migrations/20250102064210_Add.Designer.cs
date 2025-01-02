@@ -12,8 +12,8 @@ using PSPS.AccountAPI.Infrastructure.Data;
 namespace PSPS.AccountAPI.Infrastructure.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
-    [Migration("20250101060209_InitialDB")]
-    partial class InitialDB
+    [Migration("20250102064210_Add")]
+    partial class Add
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -98,8 +98,8 @@ namespace PSPS.AccountAPI.Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = "manager",
-                            RoleName = "Manager"
+                            RoleId = "staff",
+                            RoleName = "Staff"
                         });
                 });
 

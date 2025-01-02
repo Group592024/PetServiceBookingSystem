@@ -5247,6 +5247,7 @@
       "Microsoft.EntityFrameworkCore.Tools >= 8.0.7",
       "PSPS.AccountAPI.Domain >= 1.0.0",
       "PSPS.AccountAPI.Infrastructure >= 1.0.0",
+      "PSPS.SharedLibrary >= 1.0.0",
       "StackExchange.Redis >= 2.8.24",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
@@ -5289,6 +5290,9 @@
             },
             "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj": {
               "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj"
+            },
+            "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj": {
+              "projectPath": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSPS.SharedLibrary.csproj"
             }
           }
         }

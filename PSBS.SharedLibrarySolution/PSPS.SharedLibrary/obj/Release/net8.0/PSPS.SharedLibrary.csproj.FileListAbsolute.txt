@@ -1,0 +1,13 @@
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\bin\Release\net8.0\PSPS.SharedLibrary.deps.json
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\bin\Release\net8.0\PSPS.SharedLibrary.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\bin\Release\net8.0\PSPS.SharedLibrary.pdb
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.csproj.AssemblyReference.cache
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.AssemblyInfoInputs.cache
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.AssemblyInfo.cs
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.csproj.CoreCompileInputs.cache
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.sourcelink.json
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\refint\PSPS.SharedLibrary.dll
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\PSPS.SharedLibrary.pdb
+C:\Users\ASUS\Desktop\HK9\SEP490\PetServiceBookingSystem\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\obj\Release\net8.0\ref\PSPS.SharedLibrary.dll

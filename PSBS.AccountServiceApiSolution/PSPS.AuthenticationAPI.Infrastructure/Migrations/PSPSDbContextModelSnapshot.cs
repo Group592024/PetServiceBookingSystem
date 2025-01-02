@@ -95,8 +95,8 @@ namespace PSPS.AccountAPI.Infrastructure.Migrations
                         },
                         new
                         {
-                            RoleId = "manager",
-                            RoleName = "Manager"
+                            RoleId = "staff",
+                            RoleName = "Staff"
                         });
                 });
 

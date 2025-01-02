@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PSPS.AccountAPI.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialDB : Migration
+    public partial class Add : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -59,7 +59,7 @@ namespace PSPS.AccountAPI.Infrastructure.Migrations
                 values: new object[,]
                 {
                     { "admin", "Admin" },
-                    { "manager", "Manager" },
+                    { "staff", "Staff" },
                     { "user", "User" }
                 });
 

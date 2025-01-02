@@ -25,7 +25,7 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
         // Convert Entity to AccountDTO or List<AccountDTO>
         public static (AccountDTO?, IEnumerable<AccountDTO>?) FromEntity(Account account, IEnumerable<Account>? accounts)
         {
-            if (account is not null && accounts is null)
+            if (account is not null || accounts is null)
             {
                 var singleAccount = new AccountDTO(
                     account.AccountId!.Value,
@@ -44,7 +44,7 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
                 return (singleAccount, null);
             }
 
-            if (accounts is not null && account is null)
+            if (accounts is not null || account is null)
             {
                 var _accounts = accounts.Select(a => new AccountDTO(
                     a.AccountId!.Value,

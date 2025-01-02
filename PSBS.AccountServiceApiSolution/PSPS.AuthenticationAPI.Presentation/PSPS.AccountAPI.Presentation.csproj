@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj" />
     <ProjectReference Include="..\PSPS.AuthenticationAPI.Domain\PSPS.AccountAPI.Domain.csproj" />
     <ProjectReference Include="..\PSPS.AuthenticationAPI.Infrastructure\PSPS.AccountAPI.Infrastructure.csproj" />
   </ItemGroup>
