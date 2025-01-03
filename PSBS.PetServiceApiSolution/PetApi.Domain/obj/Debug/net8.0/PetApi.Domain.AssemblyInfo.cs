@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PetApi.Domain")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f736b6488d33a867c1deec8f6f4aa907296d18b9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+60445a96d40e16dfc3e1620bf6f2ac77927aae47")]
 [assembly: System.Reflection.AssemblyProductAttribute("PetApi.Domain")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PetApi.Domain")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
