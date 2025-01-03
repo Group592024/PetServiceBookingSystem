@@ -86,18 +86,27 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
 
 
-        public async Task<Response> Login(LoginDTO loginDTO)// Hàm đăng nhập, kiểm tra email và mật khẩu
+        public async Task<Response> Login(LoginDTO loginDTO)
         {
-          var getAccount = await GetAccountByAccountEmail(loginDTO.AccountEmail);// Lấy tài khoản qua email
-        if (getAccount is null)
-                return new Response(false, "Account not found!"); // Nếu không tìm thấy tài khoản, trả về lỗi
-        bool verifyPassword = BCrypt.Net.BCrypt.Verify(loginDTO.AccountPassword, getAccount.AccountPassword);// Kiểm tra mật khẩu có đúng không
-        if (!verifyPassword)
-                return new Response(false, "Wrong password!");// Nếu mật khẩu sai, trả về lỗi
+            try
+            {
+                var getAccount = await GetAccountByAccountEmail(loginDTO.AccountEmail);
+                if (getAccount is null)
+                    return new Response(false, "Account not found!");
 
-        string token = GenerateToken(getAccount);// Sinh mã thông báo JWT
-        return new Response(true, "Login successfully!") { Data = token };// Trả về token khi đăng nhập thành công
-    }
+                bool verifyPassword = BCrypt.Net.BCrypt.Verify(loginDTO.AccountPassword, getAccount.AccountPassword);
+                if (!verifyPassword)
+                    return new Response(false, "Wrong password!");
+
+                string token = GenerateToken(getAccount);
+                return new Response(true, "Login successfully!") { Data = token };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+        }
+
         private string GenerateToken(Account account)       // Hàm tạo mã thông báo JWT cho tài khoản
     {
             var key = Encoding.UTF8.GetBytes(config.GetSection("Authentication:Key").Value!);// Lấy khóa bí mật từ cấu hình
