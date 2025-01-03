@@ -3,6 +3,10 @@
   "WorkspaceRootPath": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{CA141AC1-E08E-41D3-8509-60CC825C49BE}|PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|d:\\sp25\\fix_2_1\\psbs.accountserviceapisolution\\psps.authenticationapi.application\\dtos\\accountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CA141AC1-E08E-41D3-8509-60CC825C49BE}|PSPS.AuthenticationAPI.Application\\PSPS.AccountAPI.Application.csproj|solutionrelative:psps.authenticationapi.application\\dtos\\accountdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{64943565-3F19-4BD9-A861-79D8B79AE941}|PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|d:\\sp25\\fix_2_1\\psbs.accountserviceapisolution\\psps.authenticationapi.infrastructure\\repositories\\accountrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{64943565-3F19-4BD9-A861-79D8B79AE941}|PSPS.AuthenticationAPI.Infrastructure\\PSPS.AccountAPI.Infrastructure.csproj|solutionrelative:psps.authenticationapi.infrastructure\\repositories\\accountrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -58,7 +62,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 187,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -73,6 +77,19 @@
               "Name": "ST:62:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
             },
             {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AccountDTO.cs",
+              "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "ToolTip": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "RelativeToolTip": "PSPS.AuthenticationAPI.Application\\DTOs\\AccountDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-01-02T15:32:05.081Z",
+              "EditorCaption": ""
+            },
+            {
               "$type": "Bookmark",
               "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             },
@@ -82,20 +99,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "AccountRepository.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\Repositories\\AccountRepository.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Infrastructure\\Repositories\\AccountRepository.cs",
               "ToolTip": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\Repositories\\AccountRepository.cs",
               "RelativeToolTip": "PSPS.AuthenticationAPI.Infrastructure\\Repositories\\AccountRepository.cs",
-              "ViewState": "AgIAAIEBAAAAAAAAAAAcwI0BAAAwAAAAAAAAAA==",
+              "ViewState": "AgIAAIEBAAAAAAAAAAA2wI0BAAAwAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-01-02T14:44:11.02Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "20250102064210_Add.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\Migrations\\20250102064210_Add.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Infrastructure\\Migrations\\20250102064210_Add.cs",
@@ -103,12 +120,11 @@
               "RelativeToolTip": "PSPS.AuthenticationAPI.Infrastructure\\Migrations\\20250102064210_Add.cs",
               "ViewState": "AgIAAAsAAAAAAAAAAAAAwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-02T06:42:10.926Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-02T06:42:10.926Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 10,
               "Title": "SharedServiceContainer.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\DependencyInjection\\SharedServiceContainer.cs",
               "ToolTip": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\DependencyInjection\\SharedServiceContainer.cs",
@@ -118,7 +134,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "ServiceContainer.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Infrastructure\\DependencyInjection\\ServiceContainer.cs",
@@ -130,7 +146,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "PSPSDbContext.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Infrastructure\\Data\\PSPSDbContext.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Infrastructure\\Data\\PSPSDbContext.cs",
@@ -142,7 +158,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\appsettings.json",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Presentation\\appsettings.json",
@@ -154,7 +170,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "Program.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\Program.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Presentation\\Program.cs",
@@ -166,7 +182,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "AccountConversions.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Application\\DTOs\\Conversions\\AccountConversions.cs",
@@ -178,7 +194,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 8,
               "Title": "Account.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Domain\\Entities\\Account.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Domain\\Entities\\Account.cs",
@@ -190,7 +206,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 11,
               "Title": "IGenericInterface.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\Interface\\IGenericInterface.cs",
               "ToolTip": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\Interface\\IGenericInterface.cs",
@@ -200,7 +216,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 12,
               "Title": "GlobalException.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\MiddleWares\\GlobalException.cs",
               "ToolTip": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\MiddleWares\\GlobalException.cs",
@@ -210,7 +226,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 13,
               "Title": "LogExceptions.cs",
               "DocumentMoniker": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSBSLogs\\LogExceptions.cs",
               "ToolTip": "C:\\Users\\ASUS\\Desktop\\HK9\\SEP490\\PetServiceBookingSystem\\PSBS.SharedLibrarySolution\\PSPS.SharedLibrary\\PSBSLogs\\LogExceptions.cs",
@@ -220,7 +236,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 9,
               "Title": "AccountController.cs",
               "DocumentMoniker": "D:\\SP25\\Fix_2_1\\PSBS.AccountServiceApiSolution\\PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",
               "RelativeDocumentMoniker": "PSPS.AuthenticationAPI.Presentation\\Controllers\\AccountController.cs",

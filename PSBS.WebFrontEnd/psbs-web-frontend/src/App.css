@@ -1,0 +1,98 @@
+
+ *{
+  font-family: 'Nunito', sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --light: #f6f6f9;
+  --primary: #1976D2;
+  --light-primary: #CFE8FF;
+  --grey: #eee;
+  --dark-grey: #AAAAAA;
+  --dark: #363949;
+  --danger: #D32F2F;
+  --light-danger: #FECDD3;
+  --warning: #FBC02D;
+  --light-warning: #FFF2C6;
+  --success: #388E3C;
+  --light-success: #BBF7D0;
+
+   /* ======= Transition ======== */
+   --tran-02: all 0.2s ease;
+   --tran-03: all 0.3 ease;
+   --tran-04: all 0.4 ease;
+   --tran-05: all 0.5 ease;
+  }
+.bx{
+  font-size: 1.7rem;
+}
+
+a{
+  text-decoration: none;
+}
+
+li{
+  list-style: none;
+
+}
+html{
+  overflow-x:hidden;
+}
+body.dark{
+  --light: #181A1E;
+  --grey: #25252C;
+  --dark: #FBFBFB;
+}
+body{
+  background: var(--grey);
+  overflow-x: hidden;
+}
+.sidebar{
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--light);
+  width: 230px;
+  height:100%;
+  z-index:2000;
+  overflow-x: hidden ;
+  scrollbar-width: none ;
+  transition: var(--tran-03) ;
+}
+.sidebar::-webkit-scrollbar{
+  display: none;
+}
+
+.sidebar.close{
+  width: 60px;
+}
+
+.sidebar .logo{
+  font-size: 24px;
+  font-weight: 700;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  z-index: 500;
+  padding-bottom: 20px;
+  box-sizing: content-box;
+}
+
+.sidebar .logo .logo-name span{
+  color: var(--dark);
+}
+.sidebar .logo .bx{
+  min-width: 60px;
+  display: flex;
+  justify-content: center;
+  font-size: 2.2rem;
+
+}
+.sidebar .side-menu{
+  width: 100%;
+  margin-top: 48px;
+}
