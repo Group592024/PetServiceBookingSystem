@@ -18,6 +18,7 @@ namespace VoucherApi.Infrastructure.DependencyInjection
             SharedServiceContainer.AddSharedServices<RewardServiceDBContext>(services, config, config["MySerilog:FineName"]!);
             // create DI
             services.AddScoped<IVoucher, VoucherRepository>();
+            services.AddScoped<IGift, GiftRepository>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)
