@@ -26,7 +26,7 @@ namespace PSPS.Presentation.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);// Kiểm tra tính hợp lệ của model
             var result = await account.Login(loginDTO);// Gọi phương thức Login từ repository
-            return result.Flag ? Ok(result) : BadRequest(Request);// Trả về kết quả thành công hoặc lỗi
+            return result.Flag ? Ok(result) : BadRequest(result);// Trả về kết quả thành công hoặc lỗi
         }
         [HttpGet]
         public async Task<ActionResult<GetAccountDTO>> GetAccount(Guid AccountId)// Lấy thông tin tài khoản bằng GUID

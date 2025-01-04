@@ -18,4 +18,8 @@
     <ProjectReference Include="..\VoucherApi.Infrastructure\VoucherApi.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ImageGifts\" />
+  </ItemGroup>
+
 </Project>
