@@ -1,20 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{94A4C8E6-2041-4C63-AB69-718053BE41F8}|VoucherApi.Presentation\\VoucherApi.Presentation.csproj|w:\\sp25\\sep490\\task2\\version1\\petservicebookingsystem\\psbs.rewardserviceapisolution\\voucherapi.presentation\\controllers\\giftscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{94A4C8E6-2041-4C63-AB69-718053BE41F8}|VoucherApi.Presentation\\VoucherApi.Presentation.csproj|solutionrelative:voucherapi.presentation\\controllers\\giftscontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{30EE6D50-2A3A-47ED-9C3D-F9590DC4AEB3}|VoucherApi.Application\\VoucherApi.Application.csproj|w:\\sp25\\sep490\\task2\\version1\\petservicebookingsystem\\psbs.rewardserviceapisolution\\voucherapi.application\\dtos\\giftdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{30EE6D50-2A3A-47ED-9C3D-F9590DC4AEB3}|VoucherApi.Application\\VoucherApi.Application.csproj|solutionrelative:voucherapi.application\\dtos\\giftdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|w:\\sp25\\sep490\\task2\\version1\\petservicebookingsystem\\psbs.rewardserviceapisolution\\voucherapi.infrastructure\\repositories\\giftrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{F1600523-A227-4F5B-B5E3-C4F43FE3838C}|VoucherApi.Infrastructure\\VoucherApi.Infrastructure.csproj|solutionrelative:voucherapi.infrastructure\\repositories\\giftrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -22,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 187,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -43,45 +30,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:1:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "GiftRepository.cs",
-              "DocumentMoniker": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Repositories\\GiftRepository.cs",
-              "RelativeDocumentMoniker": "VoucherApi.Infrastructure\\Repositories\\GiftRepository.cs",
-              "ToolTip": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Infrastructure\\Repositories\\GiftRepository.cs",
-              "RelativeToolTip": "VoucherApi.Infrastructure\\Repositories\\GiftRepository.cs",
-              "ViewState": "AQIAAAoAAAAAAAAAAAAtwBwAAAAxAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-04T04:24:36.103Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "GiftDTO.cs",
-              "DocumentMoniker": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Application\\DTOs\\GiftDTO.cs",
-              "RelativeDocumentMoniker": "VoucherApi.Application\\DTOs\\GiftDTO.cs",
-              "ToolTip": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Application\\DTOs\\GiftDTO.cs",
-              "RelativeToolTip": "VoucherApi.Application\\DTOs\\GiftDTO.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAABAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-04T04:07:20.965Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "GiftsController.cs",
-              "DocumentMoniker": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Presentation\\Controllers\\GiftsController.cs",
-              "RelativeDocumentMoniker": "VoucherApi.Presentation\\Controllers\\GiftsController.cs",
-              "ToolTip": "W:\\SP25\\SEP490\\Task2\\Version1\\PetServiceBookingSystem\\PSBS.RewardServiceApiSolution\\VoucherApi.Presentation\\Controllers\\GiftsController.cs",
-              "RelativeToolTip": "VoucherApi.Presentation\\Controllers\\GiftsController.cs",
-              "ViewState": "AQIAAHAAAAAAAAAAAAAQwIUAAABDAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-01-04T03:56:32.566Z",
-              "EditorCaption": ""
             }
           ]
         },
