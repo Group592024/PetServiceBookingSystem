@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\PSPS.AccountAPI.Presentation.props" />
-</Project>
