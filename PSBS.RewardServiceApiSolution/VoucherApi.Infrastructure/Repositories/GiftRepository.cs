@@ -18,13 +18,21 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var existingMedicine = await GetByIdAsync(entity.GiftId);
-                if (existingMedicine != null)
+                var existingGift = await GetByIdAsync(entity.GiftId);
+                if (existingGift != null)
                 {
                     return new Response(false, $"{entity.GiftName} already exist! ");
                 }
+                if(entity.GiftCode != null)
+                {
+                    var existingGiftCode = await context.Gifts.Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus).FirstOrDefaultAsync();
+                    if (existingGiftCode != null)
+                    {
+                        return new Response(false, $"{entity.GiftCode} already exist! ");
+                    }
+                }
                 entity.GiftStatus = false;
-                var currentMedicine = context.Gifts.Add(entity).Entity;
+                var currentGift = context.Gifts.Add(entity).Entity;
                 await context.SaveChangesAsync();
                 return new Response(true, $"{entity.GiftName} is created successfully");
             }
@@ -38,15 +46,10 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var gift = await GetByIdAsync(entity.GiftId);
-                if (gift == null)
-                {
-                    return new Response(false, "Gift can't not found");
-                }
-                gift.GiftStatus = true;
-                context.Gifts.Update(gift);
+                entity.GiftStatus = true;
+                context.Gifts.Update(entity);
                 context.SaveChanges();
-                return new Response(true, "Gift is deleted successfully");
+                return new Response { Flag = true, Message = "The gift is deleted successfully" };
             }
             catch (Exception ex)
             {
@@ -89,7 +92,7 @@ namespace VoucherApi.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                throw new Exception("Error occurred retrieving medication");
+                throw new Exception("Error occurred retrieving gift");
             }
         }
 
@@ -101,6 +104,14 @@ namespace VoucherApi.Infrastructure.Repositories
                 if (existingGift == null)
                 {
                     return new Response(false, "The gift can't not found");
+                }
+                if (entity.GiftCode != null)
+                {
+                    var existingGiftCode = await context.Gifts.Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus && g.GiftId != entity.GiftId).FirstOrDefaultAsync();
+                    if (existingGiftCode != null)
+                    {
+                        return new Response(false, $"{entity.GiftCode} already exist! ");
+                    }
                 }
                 existingGift.GiftName = entity.GiftName;
                 existingGift.GiftDescription = entity.GiftDescription;

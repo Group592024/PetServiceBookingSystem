@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,11 +11,11 @@ namespace VoucherApi.Application.DTOs
     public record GiftDTO
     (
     Guid giftId,
-    string giftName,
+    [Required]string giftName,
     string? giftDescription,
     string? giftImage,
     IFormFile? imageFile,
-    int giftPoint,
+    [Required] int giftPoint,
     string? giftCode
     );
 }
