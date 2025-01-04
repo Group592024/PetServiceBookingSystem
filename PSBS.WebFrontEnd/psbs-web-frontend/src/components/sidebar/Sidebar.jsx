@@ -1,30 +1,91 @@
-import React from "react";
-import 'boxicons'
-import PetsIcon from '@mui/icons-material/Pets';
-const Sidebar = () => {
-  return <div className="sidebar ">
-    <a href="#" className="logo">
-    <box-icon type='solid' name='cat'></box-icon>
-    <div className="logo-name"><span>Pet</span>Ease</div>
-    </a>
-    <ul className="side">
-        <li><a href="#"><box-icon type='solid' name='dashboard'></box-icon></a>Dashboard</li>
-        <li><a href="#"><box-icon name='store'></box-icon></a>Service</li>
-        <li><a href="#"><box-icon name='home-heart'></box-icon></a>Room</li>
-        <li><a href="#"><box-icon name='webcam' type='solid' ></box-icon></a>Camera</li>
-        <li><a href="#"></a> <PetsIcon />Pet</li>
-        <li><a href="#"><box-icon name='gift' ></box-icon></a>Gift</li>
-        <li><a href="#"><box-icon name='money'></box-icon></a>Voucher</li>
-    </ul>
-    <ul className="side-menu">
-        <li>
-            <a href="#" class="logout">
-            <box-icon name='log-out-circle' ></box-icon>
-            </a>
-        </li>
-    </ul>
+import React, { useEffect, forwardRef } from "react";
+import './index.js';
+const Sidebar = forwardRef((_, ref) => {
+    useEffect(() => {
+        const sideLinks = document.querySelectorAll(
+          ".sidebar .side-menu li a:not(.logout)"
+        );
     
-  </div>;
-};
+        sideLinks.forEach((item) => {
+          const li = item.parentElement;
+          item.addEventListener("click", () => {
+            sideLinks.forEach((i) => {
+              i.parentElement.classList.remove("active");
+            });
+            li.classList.add("active");
+          });
+        });
+    
+        return () => {
+          // Clean up event listeners
+          sideLinks.forEach((item) => {
+            item.removeEventListener("click", () => {});
+          });
+        };
+      }, []);
+  return (
+    <div className="sidebar" ref={ref}>
+      <a href="#" className="logo">
+      <i className='bx bxs-cat'></i>
+        <div className="logo-name">
+          <span>Pet</span>Ease
+        </div>
+      </a>
+
+      <ul className="side-menu">
+        <li className="active">
+          <a href="#">
+          <i className='bx bxs-dashboard' ></i>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bx-store-alt' ></i>
+            Service
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bx-home-heart' ></i>
+            Room
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bxs-webcam' ></i>
+            Camera
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bxs-dog' ></i>
+            Pet
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bx-gift' ></i>
+            Gift
+          </a>
+        </li>
+        <li>
+          <a href="#">
+          <i className='bx bx-wallet' ></i>
+            Voucher
+          </a>
+        </li>
+      </ul>
+      <ul className="side-menu">
+        <li>
+          <a href="#" className="logout">
+          <i className='bx bx-log-out-circle' ></i>
+            Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  );
+});
 
 export default Sidebar;
