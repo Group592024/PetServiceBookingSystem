@@ -19,6 +19,8 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
 
             //Create Dependency Injection
             services.AddScoped<IRoom, RoomRepository>();
+            services.AddScoped<IService, ServiceRepository>();
+            services.AddScoped<IServiceType, ServiceTypeRepository>();
             return services;
         }
 

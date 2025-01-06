@@ -1,13 +1,8 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -47,7 +42,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsList()
         {
             var rooms = (await _room.GetAllAsync())
-                        .Where(r => !r.isDeleted) 
+                        .Where(r => !r.isDeleted)
                         .ToList();
             if (!rooms.Any())
             {

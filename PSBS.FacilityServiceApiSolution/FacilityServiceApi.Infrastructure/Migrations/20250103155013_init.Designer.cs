@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Data.Migrations
+namespace FacilityServiceApi.Infrastructure.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20241229133157_migration001")]
-    partial class migration001
+    [Migration("20250103155013_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -236,6 +236,26 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                     b.HasKey("serviceTypeId");
 
                     b.ToTable("ServiceType");
+
+                    b.HasData(
+                        new
+                        {
+                            serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
+                            createAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2854),
+                            description = "Medical services like vaccinations,...",
+                            isDeleted = false,
+                            typeName = "Medical",
+                            updateAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2867)
+                        },
+                        new
+                        {
+                            serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
+                            createAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2871),
+                            description = "Spa services like grooming,...",
+                            isDeleted = false,
+                            typeName = "Spa",
+                            updateAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2872)
+                        });
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceVariant", b =>
