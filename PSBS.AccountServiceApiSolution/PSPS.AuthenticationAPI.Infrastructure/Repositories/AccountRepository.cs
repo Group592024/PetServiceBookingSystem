@@ -13,6 +13,7 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 
 namespace PSPS.AccountAPI.Infrastructure.Repositories
@@ -85,18 +86,27 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
 
 
-        public async Task<Response> Login(LoginDTO loginDTO)// Hàm đăng nhập, kiểm tra email và mật khẩu
+        public async Task<Response> Login(LoginDTO loginDTO)
         {
-          var getAccount = await GetAccountByAccountEmail(loginDTO.AccountEmail);// Lấy tài khoản qua email
-        if (getAccount is null)
-                return new Response(false, "Invalid credentials"); // Nếu không tìm thấy tài khoản, trả về lỗi
-        bool verifyPassword = BCrypt.Net.BCrypt.Verify(loginDTO.AccountPassword, getAccount.AccountPassword);// Kiểm tra mật khẩu có đúng không
-        if (!verifyPassword)
-                return new Response(false, "Invalid credentials");// Nếu mật khẩu sai, trả về lỗi
+            try
+            {
+                var getAccount = await GetAccountByAccountEmail(loginDTO.AccountEmail);
+                if (getAccount is null)
+                    return new Response(false, "Account not found!");
 
-        string token = GenerateToken(getAccount);// Sinh mã thông báo JWT
-        return new Response(true, token);// Trả về token khi đăng nhập thành công
-    }
+                bool verifyPassword = BCrypt.Net.BCrypt.Verify(loginDTO.AccountPassword, getAccount.AccountPassword);
+                if (!verifyPassword)
+                    return new Response(false, "Wrong password!");
+
+                string token = GenerateToken(getAccount);
+                return new Response(true, "Login successfully!") { Data = token };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+        }
+
         private string GenerateToken(Account account)       // Hàm tạo mã thông báo JWT cho tài khoản
     {
             var key = Encoding.UTF8.GetBytes(config.GetSection("Authentication:Key").Value!);// Lấy khóa bí mật từ cấu hình
@@ -137,7 +147,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
                     if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                     {
-                        throw new Exception("Định dạng file không được hỗ trợ.");// Kiểm tra định dạng file
+                        throw new Exception("File format not supported.");// Kiểm tra định dạng file
                 }
 
                     string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);// Đường dẫn lưu ảnh
@@ -191,9 +201,38 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
     {
             try
             {
-                
-                // Lấy thông tin tài khoản hiện có
+                // Validate dữ liệu đầu vào
+                if (model == null || model.AccountTempDTO == null)
+                {
+                    return new Response(false, "Invalid model!");
+                }
+
+                // Kiểm tra Account tồn tại
                 var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountId == model.AccountTempDTO.AccountId);
+                if (account == null)
+                {
+                    return new Response(false, "Account does not exist!");
+                }
+
+                // Kiểm tra các trường bắt buộc
+                if (string.IsNullOrEmpty(model.AccountTempDTO.AccountName) ||
+                    string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
+                {
+                    return new Response(false, "Name and Email cannot be empty!");
+                }
+
+                // Validate Email
+                if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                {
+                    return new Response(false, "Invalid email!");
+                }
+
+                // Validate số điện thoại
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber) &&
+                    !Regex.IsMatch(model.AccountTempDTO.AccountPhoneNumber, @"^\d{10,15}$"))
+                {
+                    return new Response(false, "Invalid phone number!");
+                }
                 if (model.AccountTempDTO.isPickImage == true)// Kiểm tra xem người dùng có chọn thay đổi ảnh đại diện không
             {
                     if (model.UploadModel.ImageFile != null)
@@ -202,7 +241,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                         string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
                         if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                         {
-                            throw new Exception("Định dạng file không được hỗ trợ.");
+                            throw new Exception("File format not supported.");
                         }
 
                         string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
