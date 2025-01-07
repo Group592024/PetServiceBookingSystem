@@ -210,7 +210,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
 
         [HttpDelete("{id:Guid}")]
-        public async Task<ActionResult<Response>> DeletePet(Guid id)
+        public async Task<ActionResult<Response>> DeleteService(Guid id)
         {
             var existingService = await _service.GetByIdAsync(id);
             if (existingService == null || existingService.isDeleted)

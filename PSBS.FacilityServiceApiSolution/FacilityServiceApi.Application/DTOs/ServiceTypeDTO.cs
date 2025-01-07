@@ -2,7 +2,7 @@
 
 namespace FacilityServiceApi.Application.DTOs
 {
-    public class ServiceTypeDTO
+    public record ServiceTypeDTO
     {
         public Guid serviceTypeId { get; set; }
         [Required]

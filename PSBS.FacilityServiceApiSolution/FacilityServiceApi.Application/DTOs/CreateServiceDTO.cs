@@ -1,6 +1,6 @@
 ﻿namespace FacilityServiceApi.Application.DTOs
 {
-    public class CreateServiceDTO
+    public record CreateServiceDTO
     {
 
         public Guid serviceTypeId { get; set; }
