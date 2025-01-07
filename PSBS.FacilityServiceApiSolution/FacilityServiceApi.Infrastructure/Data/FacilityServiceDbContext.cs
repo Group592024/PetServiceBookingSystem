@@ -52,6 +52,27 @@ namespace FacilityServiceApi.Infrastructure.Data
                     isDeleted = false
                 }
             );
+
+            modelBuilder.Entity<ServiceType>().HasData(
+                new ServiceType()
+                {
+                    serviceTypeId = Guid.Parse("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
+                    typeName = "Medical",
+                    description = "Medical services like vaccinations,...",
+                    createAt = DateTime.Now,
+                    updateAt = DateTime.Now,
+                    isDeleted = false
+                },
+                new ServiceType()
+                {
+                    serviceTypeId = Guid.Parse("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
+                    typeName = "Spa",
+                    description = "Spa services like grooming,...",
+                    createAt = DateTime.Now,
+                    updateAt = DateTime.Now,
+                    isDeleted = false
+                }
+                );
         }
     }
 }

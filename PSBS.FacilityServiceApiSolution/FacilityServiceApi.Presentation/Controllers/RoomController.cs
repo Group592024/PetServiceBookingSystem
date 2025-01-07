@@ -167,7 +167,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
             return $"/Images/{fileName}";
         }
-        
+
         [HttpGet("available")]
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms()
         {

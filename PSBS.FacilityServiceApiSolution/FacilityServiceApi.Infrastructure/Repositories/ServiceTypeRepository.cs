@@ -21,7 +21,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 }
                 entity.isDeleted = false;
                 entity.createAt = DateTime.UtcNow;
-                entity.updateAt = DateTime.MinValue; 
+                entity.updateAt = DateTime.MinValue;
                 var currentEntity = context.ServiceType.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
@@ -135,7 +135,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 existingServiceType.typeName = entity.typeName;
                 existingServiceType.description = entity.description;
-                existingServiceType.updateAt =  DateTime.UtcNow;
+                existingServiceType.updateAt = DateTime.UtcNow;
                 existingServiceType.isDeleted = entity.isDeleted;
 
                 context.ServiceType.Update(existingServiceType);

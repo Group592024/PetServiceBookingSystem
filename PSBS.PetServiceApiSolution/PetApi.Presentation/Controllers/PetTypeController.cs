@@ -18,7 +18,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPets()
+        public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPetTypes()
         {
             var pets = await petInterface.GetAllAsync();
             if (!pets.Any())
@@ -66,7 +66,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreatePet([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
+        public async Task<ActionResult<Response>> CreatePetType([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -156,7 +156,7 @@ namespace PetApi.Presentation.Controllers
 
 
         [HttpDelete("{id:Guid}")]
-        public async Task<ActionResult<Response>> DeletePet(Guid id)
+        public async Task<ActionResult<Response>> DeletePetType(Guid id)
         {
             var existingPet = await petInterface.GetByIdAsync(id);
             if (existingPet == null)

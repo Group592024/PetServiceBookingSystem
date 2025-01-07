@@ -1,8 +1,7 @@
 using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Infrastructure.Data;
-using FacilityServiceApi.Infrastructure.Repositories;
 using FacilityServiceApi.Infrastructure.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
+using FacilityServiceApi.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +23,11 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddInfrastructureService(builder.Configuration);
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true; // T?t t? ??ng x? lý l?i 400
+});
+
 
 var app = builder.Build();
 
