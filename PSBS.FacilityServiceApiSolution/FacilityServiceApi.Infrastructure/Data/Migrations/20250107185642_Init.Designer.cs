@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Migrations
+namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20250103155013_init")]
-    partial class init
+    [Migration("20250107185642_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,44 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.BookingServiceItem", b =>
+                {
+                    b.Property<Guid>("BookingServiceItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("bookingServiceItem_id");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("booking_Id");
+
+                    b.Property<DateTime>("CreateAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("createAt");
+
+                    b.Property<Guid>("PetId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("pet_id");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("price");
+
+                    b.Property<Guid>("ServiceId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("service_id");
+
+                    b.Property<DateTime>("UpdateAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updateAt");
+
+                    b.HasKey("BookingServiceItemId");
+
+                    b.HasIndex("ServiceId");
+
+                    b.ToTable("bookingServiceItems");
+                });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Camera", b =>
                 {
@@ -94,6 +132,51 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                     b.HasIndex("roomTypeId");
 
                     b.ToTable("Room");
+                });
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomHistory", b =>
+                {
+                    b.Property<Guid>("RoomHistoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("roomHistory_id");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("booking_Id");
+
+                    b.Property<Guid>("CameraId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("camera_id");
+
+                    b.Property<DateTime>("CheckInDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("checkin_date");
+
+                    b.Property<DateTime>("CheckOutDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("checkout_date");
+
+                    b.Property<Guid>("PetId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("pet_id");
+
+                    b.Property<Guid>("RoomId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("room_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("status");
+
+                    b.HasKey("RoomHistoryId");
+
+                    b.HasIndex("CameraId");
+
+                    b.HasIndex("RoomId");
+
+                    b.ToTable("RoomHistories");
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomType", b =>
@@ -241,20 +324,20 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2854),
+                            createAt = new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5024),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2867)
+                            updateAt = new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5040)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2871),
+                            createAt = new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2872)
+                            updateAt = new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043)
                         });
                 });
 
@@ -297,6 +380,17 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                     b.ToTable("ServiceVariant");
                 });
 
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.BookingServiceItem", b =>
+                {
+                    b.HasOne("FacilityServiceApi.Domain.Entities.Service", "Service")
+                        .WithMany("BookingServiceItems")
+                        .HasForeignKey("ServiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Service");
+                });
+
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Room", b =>
                 {
                     b.HasOne("FacilityServiceApi.Domain.Entities.RoomType", "RoomType")
@@ -306,6 +400,25 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("RoomType");
+                });
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomHistory", b =>
+                {
+                    b.HasOne("FacilityServiceApi.Domain.Entities.Camera", "Camera")
+                        .WithMany("RoomHistories")
+                        .HasForeignKey("CameraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FacilityServiceApi.Domain.Entities.Room", "Room")
+                        .WithMany("RoomHistories")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Camera");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Service", b =>
@@ -330,9 +443,24 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                     b.Navigation("Service");
                 });
 
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Camera", b =>
+                {
+                    b.Navigation("RoomHistories");
+                });
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Room", b =>
+                {
+                    b.Navigation("RoomHistories");
+                });
+
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomType", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Service", b =>
+                {
+                    b.Navigation("BookingServiceItems");
                 });
 #pragma warning restore 612, 618
         }

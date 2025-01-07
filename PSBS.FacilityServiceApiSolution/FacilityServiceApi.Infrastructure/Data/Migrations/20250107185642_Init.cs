@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace FacilityServiceApi.Infrastructure.Migrations
+namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -108,6 +108,59 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RoomHistories",
+                columns: table => new
+                {
+                    roomHistory_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    pet_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    room_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    booking_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    camera_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    checkin_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    checkout_date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoomHistories", x => x.roomHistory_id);
+                    table.ForeignKey(
+                        name: "FK_RoomHistories_Camera_camera_id",
+                        column: x => x.camera_id,
+                        principalTable: "Camera",
+                        principalColumn: "camera_id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_RoomHistories_Room_room_id",
+                        column: x => x.room_id,
+                        principalTable: "Room",
+                        principalColumn: "room_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "bookingServiceItems",
+                columns: table => new
+                {
+                    bookingServiceItem_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    booking_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    service_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    pet_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    createAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    updateAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_bookingServiceItems", x => x.bookingServiceItem_id);
+                    table.ForeignKey(
+                        name: "FK_bookingServiceItems_Service_service_id",
+                        column: x => x.service_id,
+                        principalTable: "Service",
+                        principalColumn: "service_id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ServiceVariant",
                 columns: table => new
                 {
@@ -145,14 +198,29 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2854), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2867) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2871), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 3, 22, 50, 12, 79, DateTimeKind.Local).AddTicks(2872) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5024), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5040) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043) }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_bookingServiceItems_service_id",
+                table: "bookingServiceItems",
+                column: "service_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Room_roomType_id",
                 table: "Room",
                 column: "roomType_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomHistories_camera_id",
+                table: "RoomHistories",
+                column: "camera_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RoomHistories_room_id",
+                table: "RoomHistories",
+                column: "room_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Service_serviceType_id",
@@ -169,19 +237,25 @@ namespace FacilityServiceApi.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "bookingServiceItems");
+
+            migrationBuilder.DropTable(
+                name: "RoomHistories");
+
+            migrationBuilder.DropTable(
+                name: "ServiceVariant");
+
+            migrationBuilder.DropTable(
                 name: "Camera");
 
             migrationBuilder.DropTable(
                 name: "Room");
 
             migrationBuilder.DropTable(
-                name: "ServiceVariant");
+                name: "Service");
 
             migrationBuilder.DropTable(
                 name: "RoomType");
-
-            migrationBuilder.DropTable(
-                name: "Service");
 
             migrationBuilder.DropTable(
                 name: "ServiceType");
