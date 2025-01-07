@@ -14,6 +14,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                var roomTypeExists = await context.RoomType.AnyAsync(rt => rt.roomTypeId == entity.roomTypeId && !rt.isDeleted);
+                if (!roomTypeExists)
+                {
+                    return new Response(false, $"RoomType with ID {entity.roomTypeId} is not active or does not exist!");
+                }
                 var existingRoom = await context.Room.FirstOrDefaultAsync(r => r.roomId == entity.roomId);
                 if (existingRoom != null)
                 {
@@ -42,24 +47,34 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 var room = await GetByIdAsync(entity.roomId);
                 if (room == null)
                     return new Response(false, $"{entity.roomId} not found");
-                room.isDeleted = true;
-                context.Room.Update(room);
-                await context.SaveChangesAsync();
-                return new Response(true, $"{entity.roomId} is marked as deleted successfully");
+
+                if (room.isDeleted)
+                {
+                    context.Room.Remove(room);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"{entity.roomId} has been permanently deleted");
+                }
+                else
+                {
+                    room.isDeleted = true;
+                    context.Room.Update(room);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"{entity.roomId} is marked as deleted successfully");
+                }
             }
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-                return new Response(false, "Error occurred performing soft delete on room");
+                return new Response(false, "Error occurred performing delete operation on room");
             }
         }
+
 
         public async Task<IEnumerable<Room>> GetAllAsync()
         {
             try
             {
                 var rooms = await context.Room
-                                          .Where(r => r.isDeleted == false)
                                           .ToListAsync();
                 return rooms ?? new List<Room>();
             }
@@ -90,8 +105,13 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var room = await context.Room.FindAsync(id); 
-                return room != null ? room : null;
+                var room = await context.Room.FindAsync(id);
+                if (room == null)
+                {
+                    LogExceptions.LogException(new Exception($"Room with ID {id} not found"));
+                    return null;
+                }
+                return room;
             }
             catch (Exception ex)
             {
@@ -106,8 +126,10 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var room = await GetByIdAsync(entity.roomId);
                 if (room == null)
-                    return new Response(false, $"{entity.roomId} not found");
-                room.isDeleted = false;
+                {
+                    return new Response(false, $"Room with ID {entity.roomId} not found");
+                }
+                room.isDeleted = entity.isDeleted;
                 room.roomTypeId = entity.roomTypeId;
                 room.description = entity.description;
                 room.status = entity.status;
@@ -125,5 +147,41 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Room>> ListAvailableRoomsAsync()
+        {
+            try
+            {
+                var rooms = await context.Room
+                                         .Where(r => !r.isDeleted)
+                                         .ToListAsync();
+                return rooms ?? new List<Room>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving non-deleted rooms");
+            }
+        }
+
+        public async Task<Room> GetRoomDetailsAsync(Guid roomId)
+        {
+            try
+            {
+                var room = await context.Room
+                                        .Where(r => r.roomId == roomId && !r.isDeleted)
+                                        .FirstOrDefaultAsync();
+
+                if (room == null)
+                {
+                    throw new InvalidOperationException($"Room with ID {roomId} not found or has been deleted");
+                }
+                return room;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving room details", ex);
+            }
+        }
     }
 }
