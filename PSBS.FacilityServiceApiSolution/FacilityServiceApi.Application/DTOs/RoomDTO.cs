@@ -12,5 +12,6 @@ namespace FacilityServiceApi.Application.DTO
         public bool status { get; set; }
         public string? roomImage { get; set; }
         public bool hasCamera { get; set; }
+        public bool? isDeleted { get; set; }
     }
 }
