@@ -47,7 +47,6 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsList()
         {
             var rooms = (await _room.GetAllAsync())
-                        .Where(r => !r.isDeleted) 
                         .ToList();
             if (!rooms.Any())
             {
@@ -65,9 +64,9 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<RoomDTO>> GetRoomById(Guid id)
         {
             var room = await _room.GetByIdAsync(id);
-            if (room == null || room.isDeleted)
+            if (room == null)
             {
-                return NotFound(new Response(false, $"Room with GUID {id} not found or is deleted"));
+                return NotFound(new Response(false, $"Room with GUID {id} not found"));
             }
 
             var (roomDto, _) = RoomConversion.FromEntity(room, null!);
@@ -108,9 +107,9 @@ namespace FacilityServiceApi.Presentation.Controllers
             }
 
             var existingRoom = await _room.GetByIdAsync(updatingRoom.roomId);
-            if (existingRoom == null || existingRoom.isDeleted)
+            if (existingRoom == null)
             {
-                return NotFound(new Response(false, $"Room with ID {updatingRoom.roomId} not found or is deleted"));
+                return NotFound(new Response(false, $"Room with ID {updatingRoom.roomId} not found "));
             }
             string? imagePath = imageFile != null
                 ? await HandleImageUpload(imageFile, existingRoom.roomImage)
@@ -126,17 +125,16 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeleteRoom(Guid id)
         {
             var existingRoom = await _room.GetByIdAsync(id);
-            if (existingRoom == null || existingRoom.isDeleted)
+            if (existingRoom == null)
             {
                 return NotFound(new Response(false, $"Room with GUID {id} not found or already deleted"));
             }
 
-            // Mark the room as deleted (soft delete)
             var response = await _room.DeleteAsync(existingRoom);
 
             return response.Flag
-                ? Ok(new Response(true, "Room deleted successfully"))
-                : BadRequest(new Response(false, "Failed to delete the room"));
+                ? Ok(response)
+                : BadRequest(response);
         }
 
         private async Task<string?> HandleImageUpload(IFormFile? imageFile, string? oldImagePath = null)
@@ -169,5 +167,45 @@ namespace FacilityServiceApi.Presentation.Controllers
 
             return $"/Images/{fileName}";
         }
+        
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms()
+        {
+            var rooms = await _room.ListAvailableRoomsAsync();
+            if (!rooms.Any())
+            {
+                return NotFound(new Response(false, "No available rooms found"));
+            }
+
+            var (_, roomDtos) = RoomConversion.FromEntity(null!, rooms);
+            return Ok(new Response(true, "Available rooms retrieved successfully")
+            {
+                Data = roomDtos
+            });
+        }
+
+        [HttpGet("details/{id}")]
+        public async Task<ActionResult<RoomDTO>> GetRoomDetailsById(Guid id)
+        {
+            try
+            {
+                var room = await _room.GetRoomDetailsAsync(id);
+                if (room == null)
+                {
+                    return NotFound(new Response(false, $"Room with GUID {id} not found or has been deleted"));
+                }
+
+                var (roomDto, _) = RoomConversion.FromEntity(room, null!);
+                return Ok(new Response(true, "Room details retrieved successfully")
+                {
+                    Data = roomDto
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new Response(false, "An error occurred while retrieving room details"));
+            }
+        }
+
     }
 }

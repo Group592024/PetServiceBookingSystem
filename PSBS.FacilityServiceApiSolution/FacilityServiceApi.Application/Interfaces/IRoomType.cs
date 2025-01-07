@@ -6,5 +6,6 @@ namespace FacilityServiceApi.Application.Interfaces
 {
     public interface IRoomType : IGenericInterface<RoomType>
     {
+        Task<IEnumerable<RoomType>> ListAvailableRoomTypeAsync();
     }
 }

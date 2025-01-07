@@ -16,7 +16,8 @@ namespace PetApi.Application.DTOs.Conversions
                 PetBreed_Name = petBreedDTO.petBreedName,
                 PetBreed_Description = petBreedDTO.petBreedDescription,
                 PetBreed_Image = petBreedDTO.petBreedImage,
-                IsDelete = false
+                //IsDelete = false
+                IsDelete = petBreedDTO.isDelete ?? false
             };
         }
 
@@ -33,7 +34,8 @@ namespace PetApi.Application.DTOs.Conversions
                     petTypeId = petBreed.PetType_ID,
                     petBreedName = petBreed.PetBreed_Name,
                     petBreedDescription = petBreed.PetBreed_Description,
-                    petBreedImage = petBreed.PetBreed_Image
+                    petBreedImage = petBreed.PetBreed_Image,
+                    isDelete = petBreed.IsDelete
                 };
                 return (singlePetBreedDTO, null);
             }
@@ -47,7 +49,8 @@ namespace PetApi.Application.DTOs.Conversions
                     petTypeId = p.PetType_ID,
                     petBreedName = p.PetBreed_Name,
                     petBreedDescription = p.PetBreed_Description,
-                    petBreedImage = p.PetBreed_Image
+                    petBreedImage = p.PetBreed_Image,
+                    isDelete = p.IsDelete
                 }).ToList();
 
                 return (null, petBreedDTOs);
