@@ -21,5 +21,6 @@ namespace FacilityServiceApi.Domain.Entities
         [Column("has_camera")]
         public bool hasCamera { get; set; }
         public virtual RoomType? RoomType { get; set; }
+        public virtual ICollection<RoomHistory>? RoomHistories { get; set; }
     }
 }
