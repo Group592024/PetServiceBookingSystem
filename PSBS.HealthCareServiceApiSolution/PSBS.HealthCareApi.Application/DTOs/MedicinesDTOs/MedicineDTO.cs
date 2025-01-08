@@ -6,13 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PSBS.HealthCareApi.Application.DTOs
+namespace PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs
 {
     public record MedicineDTO
-    ( Guid medicineId, 
+    (Guid medicineId,
       [Required] Guid treatmentId,
-      [Required] string medicineName, 
-      string? medicineImage, 
+      [Required] string medicineName,
+      string? medicineImage,
       IFormFile? imageFile
     );
 }

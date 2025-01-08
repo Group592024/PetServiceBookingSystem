@@ -2,10 +2,16 @@ import React, { useRef } from "react";
 import Navbar from "../../../../components/navbar/Navbar";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Datatable from "../../../../components/Medicines/datatable/Datatable";
+import { useNavigate } from "react-router-dom";
 import "./list.css";
 
 const List = () => {
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
+
+  const handleNewButtonClick = () => {
+    navigate("/medicines/new"); 
+  };
 
   return (
     <div className="list">
@@ -47,6 +53,7 @@ const List = () => {
             </form>
             <button
               type="button"
+              onClick={handleNewButtonClick}
               className="flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
             >
               <svg

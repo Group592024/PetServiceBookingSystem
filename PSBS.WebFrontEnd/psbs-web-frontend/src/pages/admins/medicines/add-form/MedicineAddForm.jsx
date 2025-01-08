@@ -1,35 +1,86 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TextField, Autocomplete, Button } from "@mui/material";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
+import { ToastContainer, toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 function MedicineAddForm() {
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
   const [medicineName, setMedicineName] = useState("");
   const [treatmentFor, setTreatmentFor] = useState(null);
   const [image, setImage] = useState(null);
+  const [treatmentOptions, setTreatmentOptions] = useState([]); // Added state for treatmentOptions
 
-  // Temporary data for the Autocomplete options
-  const treatmentOptions = [
-    { label: "Vaccine" },
-    { label: "Deworming" },
-    { label: "Pain Relief" },
-    { label: "Antibiotic" },
-    { label: "Cold Relief" },
-  ];
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      try {
+        const response = await fetch("http://localhost:5003/api/Treatment/available");
+        const result = await response.json();
+        console.log(result);
 
-  const handleSubmit = (event) => {
+        if (response.ok && result.flag) {
+          // Prepend the "None" option
+          setTreatmentFor({ id: null, label: "None" });
+          setTreatmentOptions([
+            { id: null, label: "None" },
+            ...result.data.map((t) => ({
+              id: t.treatmentId,
+              label: t.treatmentName,
+            })),
+          ]);
+        } else {
+          console.error("Failed to adding treatments:", result.message || "Unknown error");
+        }
+      } catch (error) {
+        console.error("Error adding treatments:", error);
+      }
+    };
+
+    fetchTreatments();
+  }, []);
+  
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log("Medicine Name:", medicineName);
-    console.log("Treatment For:", treatmentFor);
-    console.log("Image File:", image);
+
+    if (!medicineName || !treatmentFor || treatmentFor.id === null || !image) {
+      toast.warning("Please fill all required fields.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("medicineName", medicineName);
+    formData.append("treatmentId", treatmentFor.id);
+    formData.append("imageFile", document.getElementById("fileInput").files[0]);
+
+    try {
+      const response = await fetch("http://localhost:5003/Medicines", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Medicine added successfully!");
+        handleCancel();
+        navigate("/medicines"); 
+      } else {
+        toast.error("Error: " + data.message);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast.error("An error occurred while adding the medicine.");
+    }
   };
 
   const handleCancel = () => {
     setMedicineName("");
-    setTreatmentFor(null);
+    setTreatmentFor({ id: null, label: "None" }); 
     setImage(null); // Reset image preview
     document.getElementById("fileInput").value = ""; // Reset file input value
+    toast.warning("Reset the form.");
   };
 
   // Handle image file change
@@ -41,7 +92,6 @@ function MedicineAddForm() {
       alert("Please select a valid image file");
     }
   };
-
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -128,7 +178,10 @@ function MedicineAddForm() {
 
           {/* Conditionally Display Image Preview */}
           {image && (
-            <div className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between" style={{ height: '396px' }}>
+            <div
+              className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between"
+              style={{ height: "396px" }}
+            >
               <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
                 Image Preview
               </h3>
@@ -141,6 +194,7 @@ function MedicineAddForm() {
           )}
         </div>
       </div>
+      <ToastContainer/>
     </div>
   );
 }

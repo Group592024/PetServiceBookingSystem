@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
+using PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs;
 using PSBS.HealthCareApi.Application.Interfaces;
 using PSBS.HealthCareApi.Domain;
 using PSBS.HealthCareApi.Infrastructure.Data;
@@ -61,6 +62,19 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
             try
             {
                 var listMedicines = await context.Medicines.Where(m => !m.isDeleted).ToListAsync();
+                return listMedicines != null ? listMedicines : null!;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error occurred retrieving medication");
+            }
+        }
+
+        public async Task<IEnumerable<Medicine>> GetAllAttributeAsync()
+        {
+            try
+            {
+                var listMedicines = await context.Medicines.ToListAsync();
                 return listMedicines != null ? listMedicines : null!;
             }
             catch (Exception ex)

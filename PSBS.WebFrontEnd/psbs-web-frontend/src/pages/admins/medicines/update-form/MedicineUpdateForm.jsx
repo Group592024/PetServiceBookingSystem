@@ -1,9 +1,9 @@
 import React, { useState, useRef } from "react";
 import { TextField, Autocomplete, Button } from "@mui/material";
-import Navbar from "../../components/navbar/Navbar";
-import Sidebar from "../../components/sidebar/Sidebar";
+import Sidebar from "../../../../components/sidebar/Sidebar";
+import Navbar from "../../../../components/navbar/Navbar";
 
-function MedicineAddForm() {
+function MedicineUpdateForm() {
   const sidebarRef = useRef(null);
   const [medicineName, setMedicineName] = useState("");
   const [treatmentFor, setTreatmentFor] = useState(null);
@@ -28,7 +28,8 @@ function MedicineAddForm() {
   const handleCancel = () => {
     setMedicineName("");
     setTreatmentFor(null);
-    setImage(null);
+    setImage(null); // Reset image preview
+    document.getElementById("fileInput").value = ""; // Reset file input value
   };
 
   // Handle image file change
@@ -51,7 +52,7 @@ function MedicineAddForm() {
             {/* Form Card */}
             <div className="w-full flex flex-col justify-between">
               <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-                Add Medicine
+                Update Medicine
               </h2>
               <form onSubmit={handleSubmit}>
                 {/* Medicine Name TextField */}
@@ -88,6 +89,7 @@ function MedicineAddForm() {
                 {/* Image File Upload */}
                 <div className="mb-6">
                   <input
+                    id="fileInput"
                     type="file"
                     accept="image/*"
                     onChange={handleFileChange}
@@ -124,27 +126,23 @@ function MedicineAddForm() {
             </div>
           </div>
 
-          {/* Always Display Image Preview */}
-          <div className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between" style={{ height: '396px' }}>
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-              Image Preview
-            </h3>
-            {image ? (
+          {/* Conditionally Display Image Preview */}
+          {image && (
+            <div className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between" style={{ height: '396px' }}>
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+                Medicine Image 
+              </h3>
               <img
                 src={image}
                 alt="Preview"
                 className="w-full h-64 object-contain rounded-lg shadow-lg"
               />
-            ) : (
-              <div className="w-full h-64 bg-gray-200 rounded-lg flex items-center justify-center text-gray-400">
-                No Image Selected
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-export default MedicineAddForm;
+export default MedicineUpdateForm;
