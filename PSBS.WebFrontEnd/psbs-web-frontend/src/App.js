@@ -2,6 +2,8 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router";
 import Dashboard from "./pages/admins/dashboard-Admin/Dashboard";
 import Homepage from "./pages/customers/homepage-Customer/Homepage";
+import List from "./pages/admins/medicines/list-pages/List";
+import MedicineAddForm from "./pages/admins/medicines/add-form/MedicineAddForm";
 
 function App() {
   return (
@@ -11,6 +13,10 @@ function App() {
         <Route path="/customer" element={<Homepage />} />
           <Route path="/">
             <Route index element={<Dashboard />} />
+          </Route>
+          <Route path="/medicines">
+          <Route index element={<List />} />
+          <Route path="new" element={<MedicineAddForm />} />
           </Route>
         </Routes>
       </BrowserRouter>
