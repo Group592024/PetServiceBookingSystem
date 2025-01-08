@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import Link và useNavigate
 import axios from "axios";
+import Swal from "sweetalert2"; // Import SweetAlert2
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState([]); // Danh sách tài khoản
   const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
   const itemsPerPage = 10; // Số mục mỗi trang
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Modal xác nhận xóa
-  const [selectedAccount, setSelectedAccount] = useState(null); // Tài khoản được chọn để xóa
   const navigate = useNavigate(); // Hook điều hướng
+  const [accountName, setAccountName] = useState(null); // Tạo state để lưu tên tài khoản
+
+  // Lấy thông tin accountName từ localStorage
+  useEffect(() => {
+    const account = localStorage.getItem('accountName'); // Lấy accountName từ localStorage
+    console.log("Account Name from localStorage: ", account); // Kiểm tra giá trị trong localStorage
+    if (account) {
+      setAccountName(account); // Nếu có accountName trong localStorage, lưu vào state
+    } else {
+      setAccountName('Admin'); // Nếu không có, gán mặc định là Admin
+    }
+  }, []);
 
   // Lấy dữ liệu tài khoản từ API
   useEffect(() => {
@@ -39,17 +50,56 @@ const AccountList = () => {
 
   // Các hàm xử lý
   const handleDelete = (account) => {
-    setSelectedAccount(account);
-    setIsDeleteModalOpen(true);
+    Swal.fire({
+      title: 'Are you sure? You want to delete this account!',
+      text: ` Account Name: ${account.accountName}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        confirmDelete(account);
+      }
+    });
   };
 
-  const confirmDelete = () => {
-    alert(`Account with ID: ${selectedAccount.accountId} deleted.`);
-    setIsDeleteModalOpen(false);
-    setAccounts((prev) => prev.filter((acc) => acc.accountId !== selectedAccount.accountId));
+  const confirmDelete = (account) => {
+    Swal.fire({
+      icon: 'success',
+      title: 'Deleted!',
+      text: `Account Name: ${account.accountName} has been deleted.`,
+      showConfirmButton: false,
+      timer: 1500,
+    });
+    setAccounts((prev) => prev.filter((acc) => acc.accountId !== account.accountId));
   };
 
-  const cancelDelete = () => setIsDeleteModalOpen(false);
+  // Xử lý đăng xuất với SweetAlert2
+  const handleLogout = () => {
+    Swal.fire({
+      title: 'Are you sure you want to logout?',
+      text: 'You are about to logout from your account. Make sure you have saved your progress',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Xóa JWT từ localStorage hoặc sessionStorage
+        localStorage.removeItem('authToken'); // Xóa token từ localStorage
+        sessionStorage.removeItem('authToken'); // Nếu token lưu trong sessionStorage
+
+        // Xóa thông tin accountName
+        localStorage.removeItem('accountName');
+
+        // Chuyển hướng về trang đăng nhập
+        navigate('/login');
+      }
+    });
+  };
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -68,14 +118,14 @@ const AccountList = () => {
         ].map((item, index) => (
           <button
             key={index}
-            className={`w-full py-2 mb-2 rounded ${
-              item === "Account Management" ? "bg-black text-white" : "bg-gray-400"
-            }`}
+            className={`w-full py-2 mb-2 rounded ${item === "Account Management" ? "bg-black text-white" : "bg-gray-400"}`}
           >
             {item}
           </button>
         ))}
-        <button className="w-full py-2 bg-gray-500 rounded">Logout</button>
+        <button className="w-full py-2 bg-gray-500 rounded" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
 
       {/* Main Content */}
@@ -83,11 +133,18 @@ const AccountList = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-4">
-            <span>Admin</span>
+          </div>
+          <div className="flex items-center space-x-4 w-1/2 justify-end">
+            <button className="px-4 py-2 bg-gray-300 rounded">Chat</button>
+            <span>{accountName}</span> {/* Hiển thị accountName nếu có */}
             <div className="w-8 h-8 rounded-full bg-gray-400"></div>
           </div>
-          <div className="flex items-center space-x-4 ml-auto">
-            <button className="px-4 py-2 bg-gray-300 rounded">Chat</button>
+        </div>
+
+        {/* Table Section */}
+        <div className="bg-white shadow-md rounded-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <button className="px-4 py-2 bg-gray-300 rounded">New</button>
             <div className="relative w-1/3">
               <input
                 type="text"
@@ -97,13 +154,7 @@ const AccountList = () => {
               <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</button>
             </div>
           </div>
-        </div>
 
-        {/* Table Section */}
-        <div className="bg-white shadow-md rounded-md p-6">
-          <div className="flex justify-between items-center mb-4">
-            <button className="px-4 py-2 bg-gray-300 rounded">New</button>
-          </div>
           <table className="table-auto w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-200">
@@ -162,23 +213,6 @@ const AccountList = () => {
           </div>
         </div>
       </div>
-
-      {/* Modal Xác nhận xóa */}
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-md shadow-lg">
-            <h3 className="text-lg">Are you sure you want to delete this account?</h3>
-            <div className="flex space-x-4 mt-4">
-              <button className="px-4 py-2 bg-red-500 text-white rounded" onClick={confirmDelete}>
-                Yes
-              </button>
-              <button className="px-4 py-2 bg-gray-300 rounded" onClick={cancelDelete}>
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

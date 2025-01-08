@@ -8,6 +8,7 @@ import ForgotPassword from "./pages/forgotpassword/dashboard-Admin/ForgotPasswor
 import Profile from "./pages/profile/dashboard-Admin/Profile";
 import EditProfile from "./pages/profile/dashboard-Admin/EditProfile";
 import AccountList from "./pages/account/dashboard-Admin/AccountList";
+import Register from "./pages/register/dashboard-Admin/Register";
 
 
 
@@ -20,6 +21,9 @@ function App() {
         <Route path="/customer" element={<Homepage />} />
           <Route path="/">
             <Route index element={<Dashboard />} />
+          </Route>
+          <Route path="/register">
+            <Route index element={<Register />} />
           </Route>
           <Route path="/login">
             <Route index element={<Login />} />

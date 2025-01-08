@@ -83,7 +83,7 @@ const Login = () => {
             )}
             {/* Forgot Password */}
             <div className="text-right mb-4">
-              <a href="#" className="text-cyan-500 hover:underline text-sm">Forgot Password?</a>
+              <a href="/forgotpassword" className="text-cyan-500 hover:underline text-sm">Forgot Password?</a>
             </div>
             {/* Login Button */}
             <button
@@ -97,9 +97,10 @@ const Login = () => {
           <div className="text-center mt-4 text-sm">
             <p>
               You don’t have an account?{' '}
-              <a href="#" className="text-cyan-500 hover:underline">Register Now !!</a>
+              <a href="/register" className="text-cyan-500 hover:underline">Register Now !!</a>
             </p>
           </div>
+          
         </div>
       </div>
     </div>
