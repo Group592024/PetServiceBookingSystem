@@ -4,6 +4,7 @@ import Dashboard from "./pages/admins/dashboard-Admin/Dashboard";
 import Homepage from "./pages/customers/homepage-Customer/Homepage";
 import List from "./pages/admins/medicines/list-pages/List";
 import MedicineAddForm from "./pages/admins/medicines/add-form/MedicineAddForm";
+import PointRuleList from "./pages/admins/pointRule/pointRuleList/PointRuleList";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
       <BrowserRouter>
         <Routes>
         <Route path="/customer" element={<Homepage />} />
+        <Route path="/pointrule" element={<PointRuleList />} />
           <Route path="/">
             <Route index element={<Dashboard />} />
           </Route>

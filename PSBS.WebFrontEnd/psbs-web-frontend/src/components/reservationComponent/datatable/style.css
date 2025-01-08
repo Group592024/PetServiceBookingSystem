@@ -1,0 +1,68 @@
+.datatable {
+    padding: 20px;
+    height: 600px;
+  }
+  
+  .datatable .datatableTitle {
+    width: 100%;
+    font-size: 24px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    color: gray;
+    justify-content: space-between;
+  }
+  
+  .datatable .datatableTitle .link {
+    text-decoration: none;
+    color: green;
+    font-size: 16px;
+    font-weight: 400;
+    border: 1px solid green;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .datatable .cellWithImg {
+    display: flex;
+    align-items: center;
+  }
+  
+  .datatable .cellWithImg .cellImg {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+  }
+  
+  .datatable .cellWithStatus {
+    padding: 5px;
+    border-radius: 5px;
+  }
+  
+  .datatable .cellWithStatus.active {
+    color: green;
+    background-color: rgba(0, 128, 0, 0.151);
+  }
+  
+  .datatable .cellWithStatus.pending {
+    color: goldenrod;
+    background-color: rgba(189, 189, 3, 0.103);
+  }
+  
+  .datatable .MuiDataGrid-columnHeaders {
+    background: linear-gradient(90deg, #00bcf2, #00b294);
+    color: white;
+    font-weight: bold;
+  }
+  
+  .datatable .MuiDataGrid-columnHeaderTitle {
+    font-size: 16px;
+  }
+  
+  .datatable .MuiDataGrid-columnHeader:hover {
+    background: linear-gradient(90deg, #04668d, #00bcf2);
+  }
+  
