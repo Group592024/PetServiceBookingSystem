@@ -1,0 +1,176 @@
+:root {
+    --light: #f6f6f9;
+    --primary: #1976D2;
+    --light-primary: #CFE8FF;
+    --grey: #eee;
+    --dark-grey: #AAAAAA;
+    --dark: #363949;
+    --danger: #D32F2F;
+  --light-danger: #FECDD3;
+    --warning: #FBC02D;
+    --light-warning: #FFF2C6;
+    --success: #388E3C;
+    --light-success: #BBF7D0;
+  }
+  
+  .navbarCustomer {
+    height: 56px;
+    background: var(--light);
+    padding: 0 24px 0 0;
+    display: flex;
+    align-items: center;
+    grid-gap: 24px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
+  
+  .navbarCustomer .logo {
+    font-size: 24px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    color: var(--primary);
+  }
+  
+  .navbarCustomer .logo .logo-name span {
+    color: var(--dark);
+  }
+  
+  .navbarCustomer .logo .bx {
+    font-size: 2.2rem;
+    margin-right: 5px;
+  }
+  
+  .navbarCustomer form {
+    width: 100%;
+    margin-right: 30px; /* Adds space between the search bar and profile avatar */
+  }
+  
+  .navbarCustomer form .form-input {
+    display: flex;
+    align-items: center;
+    height: 36px;
+  }
+  
+  .navbarCustomer form .form-input input {
+    flex-grow: 1;
+    padding: 0 16px;
+    height: 100%;
+    border: none;
+    background: var(--grey);
+    border-radius: 36px 0 0 36px;
+    outline: none;
+    color: var(--dark);
+    max-width: 250px; /* Reduces the width of the search bar */
+  }
+  
+  .navbarCustomer form .form-input button {
+    width: 80px;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--primary);
+    color: var(--light);
+    font-size: 18px;
+    border: none;
+    outline: none;
+    border-radius: 0 36px 36px 0;
+    cursor: pointer;
+  }
+  
+  .navbar-central {
+    display: flex;
+    gap: 20px; /* Adds space between search bar and links */
+    align-items: center;
+    justify-content: center; /* This will center the search bar and links together */
+    flex-grow: 1;
+    margin-left: 20px;
+    margin-right: 20px;
+    /* Adds space between the logo and search bar */
+  }
+  
+  .navbar-links {
+    display: flex;
+    list-style: none;
+    gap: 20px;
+  }
+  
+  .navbar-links li a {
+    text-decoration: none;
+    color: #333;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .navbar-links li a i {
+    margin-right: 5px;
+  }
+  
+  .navbar-links li.active a {
+    color: var(--primary);
+    font-weight: bold;
+  }
+  
+  .navbar-links li.active a:after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: var(--primary);
+    bottom: -5px;
+    left: 0;
+  }
+  
+  .navbar-profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .profile-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 50px; /* Adjust based on avatar size and padding */
+    right: 0;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 150px;
+    z-index: 1000;
+  }
+  
+  .dropdown-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .dropdown-menu ul li {
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .dropdown-menu ul li:hover {
+    background-color: var(--light-primary);
+  }
+  
+  .dropdown-menu ul li:active {
+    background-color: var(--primary);
+    color: #fff;
+  }
