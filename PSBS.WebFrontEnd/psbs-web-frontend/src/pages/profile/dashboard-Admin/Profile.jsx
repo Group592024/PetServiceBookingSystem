@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom'; // Thêm useParams để lấy accountId từ URL
+import { Link, useParams } from 'react-router-dom'; // add useParams to get accountId
 
 const Profile = () => {
   const [account, setAccount] = useState(null);
-  const { accountId } = useParams(); // Lấy accountId từ URL
+  const { accountId } = useParams(); // get accountId from URL
 
-  // Hàm gọi API để lấy thông tin tài khoản
+  
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
@@ -13,7 +13,7 @@ const Profile = () => {
         .then(data => setAccount(data))
         .catch(error => console.error('Error fetching account data:', error));
     }
-  }, [accountId]); // Sử dụng accountId trong dependency array
+  }, [accountId]); // use accountId in dependency array
 
   if (!account) {
     return <div>Loading...</div>;
@@ -65,7 +65,7 @@ const Profile = () => {
         {/* Left Section (Profile Image) */}
         <div className="w-1/4 h-1/4 bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
           <div className="w-40 h-40 rounded-full bg-blue-200 flex items-center justify-center text-4xl">
-            {/* Hiển thị hình ảnh nếu có */}
+            {/* show image */}
             <img
               src={`http://localhost:5000/uploads/${account.accountImage}`}
               alt="Profile"
@@ -99,7 +99,7 @@ const Profile = () => {
                 type="date"
                 id="birthday"
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountDob.split('T')[0]} // Lấy ngày từ định dạng ISO
+                value={account.accountDob.split('T')[0]} // get date ISO
               />
             </div>
 

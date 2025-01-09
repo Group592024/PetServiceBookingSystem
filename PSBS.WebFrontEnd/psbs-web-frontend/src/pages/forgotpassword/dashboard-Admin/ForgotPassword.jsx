@@ -1,25 +1,34 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
+/**
+ * save value email
+ * 
+ */
 const ForgotPassword = () => {
-  const [email, setEmail] = useState(''); // Lưu giá trị email
-  const [loading, setLoading] = useState(false); // Trạng thái loading
-  const [error, setError] = useState(''); // Trạng thái lỗi
-  const [successMessage, setSuccessMessage] = useState(''); // Trạng thái thành công
+  const [email, setEmail] = useState(''); 
+  const [loading, setLoading] = useState(false); 
+  const [error, setError] = useState(''); 
+  const [successMessage, setSuccessMessage] = useState('');
 
-  // Xử lý thay đổi email
+  /**
+   * 
+   * save email change
+   */
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
 
-  // Xử lý submit form
+  /**
+   * submit form
+   */
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngừng hành động mặc định của form
-    setLoading(true); // Bắt đầu loading
-    setError(''); // Xóa lỗi cũ
-    setSuccessMessage(''); // Xóa thông báo thành công
+    e.preventDefault(); 
+    setLoading(true); 
+    setError(''); 
+    setSuccessMessage(''); 
 
-    // Kiểm tra email đã nhập
+    
     if (!email) {
       setError('Please enter a valid email.');
       setLoading(false);
@@ -27,19 +36,19 @@ const ForgotPassword = () => {
     }
 
     try {
-      // Gửi email trong yêu cầu GET
+      // send email request
       const response = await axios.post(
         `http://localhost:5000/api/Account/ForgotPassword?email=${encodeURIComponent(email)}`
       );
 
-      // Kiểm tra phản hồi từ server
+      // check respone email
       if (response.data && response.data.flag) {
-        setSuccessMessage(response.data.message); // Hiển thị thông báo thành công
+        setSuccessMessage(response.data.message); 
       } else {
         setError('Something went wrong, please try again.');
       }
     } catch (error) {
-      // Xử lý lỗi từ API
+      // check error
       if (error.response) {
         console.error('API Error:', error.response.data);
         setError(error.response.data.message || 'An error occurred. Please try again.');
@@ -47,7 +56,7 @@ const ForgotPassword = () => {
         setError('An error occurred. Please try again later.');
       }
     } finally {
-      setLoading(false); // Kết thúc loading
+      setLoading(false); 
     }
   };
 
@@ -77,7 +86,7 @@ const ForgotPassword = () => {
                 type="email"
                 id="email"
                 value={email}
-                onChange={handleEmailChange} // Cập nhật giá trị email khi người dùng nhập
+                onChange={handleEmailChange} // update value email
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="Enter your email"
                 required
@@ -87,14 +96,14 @@ const ForgotPassword = () => {
             {/* Lỗi */}
             {error && <div className="text-red-500 text-sm">{error}</div>}
 
-            {/* Thông báo thành công */}
+            {/* success notication */}
             {successMessage && <div className="text-green-500 text-sm">{successMessage}</div>}
 
             {/* Reset Password Button */}
             <button
               type="submit"
               className={`w-full bg-cyan-500 text-white py-2 rounded-lg hover:bg-blue-600 transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={loading} // Vô hiệu hóa nút khi đang loading
+              disabled={loading} 
             >
               {loading ? 'Sending...' : 'Reset Password'}
             </button>

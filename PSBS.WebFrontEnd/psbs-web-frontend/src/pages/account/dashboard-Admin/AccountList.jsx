@@ -1,36 +1,36 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // Import Link và useNavigate
+import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate
 import axios from "axios";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2"; 
 
 const AccountList = () => {
-  const [accounts, setAccounts] = useState([]); // Danh sách tài khoản
-  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
-  const itemsPerPage = 10; // Số mục mỗi trang
-  const navigate = useNavigate(); // Hook điều hướng
-  const [accountName, setAccountName] = useState(null); // Tạo state để lưu tên tài khoản
+  const [accounts, setAccounts] = useState([]); 
+  const [currentPage, setCurrentPage] = useState(1); 
+  const itemsPerPage = 10; 
+  const navigate = useNavigate(); 
+  const [accountName, setAccountName] = useState(null); 
 
-  // Lấy thông tin accountName từ localStorage
+
   useEffect(() => {
-    const account = localStorage.getItem('accountName'); // Lấy accountName từ localStorage
-    console.log("Account Name from localStorage: ", account); // Kiểm tra giá trị trong localStorage
+    const account = localStorage.getItem('accountName'); // get accountName from localStorage
+    console.log("Account Name from localStorage: ", account); //check value in localStorage
     if (account) {
-      setAccountName(account); // Nếu có accountName trong localStorage, lưu vào state
+      setAccountName(account); 
     } else {
-      setAccountName('Admin'); // Nếu không có, gán mặc định là Admin
+      setAccountName('Admin'); 
     }
   }, []);
 
-  // Lấy dữ liệu tài khoản từ API
+
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/Account/all"); // Thay đổi URL API
+        const response = await axios.get("http://localhost:5000/api/Account/all"); 
         if (response.data && response.data.data && Array.isArray(response.data.data)) {
-          setAccounts(response.data.data); // Lấy danh sách tài khoản từ trường 'data' trong response
+          setAccounts(response.data.data); // get account from 'data' in response
         } else {
           console.error("Data is not an array:", response.data);
-          setAccounts([]); // Nếu không phải mảng, gán mảng rỗng
+          setAccounts([]); 
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -76,7 +76,7 @@ const AccountList = () => {
     setAccounts((prev) => prev.filter((acc) => acc.accountId !== account.accountId));
   };
 
-  // Xử lý đăng xuất với SweetAlert2
+  // logout SweetAlert2
   const handleLogout = () => {
     Swal.fire({
       title: 'Are you sure you want to logout?',
@@ -88,14 +88,14 @@ const AccountList = () => {
       confirmButtonText: 'Yes',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Xóa JWT từ localStorage hoặc sessionStorage
-        localStorage.removeItem('authToken'); // Xóa token từ localStorage
-        sessionStorage.removeItem('authToken'); // Nếu token lưu trong sessionStorage
+        // delete JWT from localStorage or sessionStorage
+        localStorage.removeItem('authToken'); 
+        sessionStorage.removeItem('authToken'); 
 
-        // Xóa thông tin accountName
+        
         localStorage.removeItem('accountName');
 
-        // Chuyển hướng về trang đăng nhập
+        
         navigate('/login');
       }
     });
@@ -136,7 +136,7 @@ const AccountList = () => {
           </div>
           <div className="flex items-center space-x-4 w-1/2 justify-end">
             <button className="px-4 py-2 bg-gray-300 rounded">Chat</button>
-            <span>{accountName}</span> {/* Hiển thị accountName nếu có */}
+            <span>{accountName}</span> {/* show accountName */}
             <div className="w-8 h-8 rounded-full bg-gray-400"></div>
           </div>
         </div>
