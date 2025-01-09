@@ -12,15 +12,15 @@ using PetApi.Infrastructure.Data;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PetDbContext))]
-    [Migration("20250102143642_migration01")]
-    partial class migration01
+    [Migration("20250109033151_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
