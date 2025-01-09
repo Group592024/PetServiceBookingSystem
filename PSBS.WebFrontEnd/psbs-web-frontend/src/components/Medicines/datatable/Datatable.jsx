@@ -10,35 +10,48 @@ import Swal from "sweetalert2";
 
 const Datatable = () => {
   const [medicines, setMedicines] = useState([]);
+  const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchMedicines = async () => {
+    const fetchMedicinesAndTreatments = async () => {
       try {
-        const response = await axios.get("http://localhost:5003/Medicines/all"); // Your API URL
-        if (response.data.flag) {
+        const medicinesResponse = await axios.get("http://localhost:5003/Medicines/all");
+        const treatmentsResponse = await axios.get("http://localhost:5003/api/Treatment/available"); 
+        
+        if (medicinesResponse.data.flag) {
           toast.success(
-            response.data.message || "Medicines data fetched successfully!"
+            medicinesResponse.data.message || "Medicines data fetched successfully!"
           );
-          setMedicines(response.data.data); // Store medicines data
+          setMedicines(medicinesResponse.data.data); 
         } else {
-          setError(response.data.message || "No medicines found");
-          toast.error(response.data.message || "No medicines found");
+          setError(medicinesResponse.data.message || "No medicines found");
+          toast.error(medicinesResponse.data.message || "No medicines found");
+        }
+
+        if (treatmentsResponse.data.flag) {
+          setTreatments(treatmentsResponse.data.data);
+        } else {
+          setError(treatmentsResponse.data.message || "No treatments found");
+          toast.error(treatmentsResponse.data.message || "No treatments found");
         }
       } catch (err) {
-        setError("Error fetching medicines: " + err.message);
-        toast.error("Error fetching medicines: " + err.message);
+        setError("Error fetching data: " + err.message);
+        toast.error("Error fetching data: " + err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMedicines();
+    fetchMedicinesAndTreatments();
   }, []);
 
+   const getTreatmentName = (medicineTreatmentId) => {
+    const treatment = treatments.find(t => t.treatmentId === medicineTreatmentId);
+    return treatment ? treatment.treatmentName : "Unknown";
+  };
 
-  // Define columns for the DataGrid
   const columns = [
     {
       field: "id",
@@ -73,7 +86,7 @@ const Datatable = () => {
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <div className="cellWithTable">{params.value}</div>
+        <div className="cellWithTable">{getTreatmentName(params.value)}</div>
       ),
     },
     {
@@ -92,7 +105,7 @@ const Datatable = () => {
               textAlign: "center",
             }}
           >
-            {isDeleted ? "Stopping" : "Active"}
+            {isDeleted ? "Inactive" : "Active"}
           </div>
         );
       },
@@ -134,7 +147,7 @@ const actionColumn = [
               />
             </svg>
           </Link>
-          <Link to={`#`} className="editBtn" style={{ textDecoration: "none" }}>
+          <Link to={`/medicines/update/${medicineId}`} className="editBtn" style={{ textDecoration: "none" }}>
             <svg
               className="w-6 h-6 text-gray-800 dark:text-white"
               xmlns="http://www.w3.org/2000/svg"
@@ -182,18 +195,17 @@ const handleDelete = (medicineId) => {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        // Call the API to delete the medicine
         const response = await axios.delete(`http://localhost:5003/Medicines/${medicineId}`);
-        if (response.data.success) {
+        if (response.data.flag) {
           toast.success(response.data.message || "Medicine deleted successfully!");
           setMedicines(medicines.filter((medicine) => medicine.medicineId !== medicineId)); 
+          window.location.reload();
         } else {
-          toast.error(response.data.message || "Error deleting medicine");
+          toast.error(response.data.message || "Fail to delete medicine");
         }
       } catch (error) {
         toast.error("Error deleting medicine: " + error.message);
       }
-      window.location.reload();
     }
   });
 };

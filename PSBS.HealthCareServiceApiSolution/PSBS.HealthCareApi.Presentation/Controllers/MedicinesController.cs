@@ -175,11 +175,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                 return NotFound(new Response(false, "The medicine is not found!"));
             }
             var response = await _medicineInterface.DeleteAsync(existingMedicine);
-            if (response.Flag)
-            {
-                return Ok(new Response() { Flag = true, Message = "The medicine is deleted successfully" });
-            }
-            return BadRequest(new Response() { Flag = false, Message = "Failed to delete the medicine" });
+            return response.Flag ? response : response;
         }
     }
 }

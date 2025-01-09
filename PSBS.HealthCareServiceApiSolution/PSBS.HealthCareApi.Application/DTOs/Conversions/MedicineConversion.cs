@@ -61,7 +61,8 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
                 return (singleMedicine, null);
             }
 
-            //return list
+            //return listy
+
             if (medicines != null || medicine == null)
             {
                 var listMedicines = medicines!.Select(m =>

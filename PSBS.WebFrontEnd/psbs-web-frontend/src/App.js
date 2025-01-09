@@ -21,7 +21,7 @@ function App() {
           <Route path="/medicines">
           <Route index element={<List />} />
           <Route path="new" element={<MedicineAddForm />} />
-          <Route path="update" element={<MedicineUpdateForm />} />
+          <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
           <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
           </Route>
         </Routes>
