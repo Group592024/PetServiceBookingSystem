@@ -42,7 +42,7 @@ const Sidebar = forwardRef((_, ref) => {
         <li>
           <a href="#">
           <i className='bx bx-store-alt' ></i>
-            Service
+            XXXXXXXXX
           </a>
         </li>
         <li>

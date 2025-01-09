@@ -19,7 +19,7 @@ const Register = () => {
     setError('');
     setSuccess('');
   
-    // Kiểm tra các trường dữ liệu trước khi gửi
+    // check
     if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
       setError('Please fill in all required fields.');
       return;
@@ -34,31 +34,31 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
   
-    // Tạo tên ngẫu nhiên cho hình ảnh nếu có
+    // random name image
     const generateRandomName = () => {
       return `image_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.png`;
     };
   
-    // Kiểm tra nếu có hình ảnh thì thêm vào FormData, nếu không có thì gửi giá trị trống cho AccountImage
+    
     if (AccountImage) {
-      const randomImageName = generateRandomName(); // Tạo tên ngẫu nhiên cho hình ảnh
+      const randomImageName = generateRandomName(); 
       formData.append('UploadModel.ImageFile', AccountImage);
-      formData.append('RegisterTempDTO.AccountImage', randomImageName); // Gửi tên ngẫu nhiên cho AccountImage
+      formData.append('RegisterTempDTO.AccountImage', randomImageName); 
     } else {
-      formData.append('RegisterTempDTO.AccountImage', ''); // Nếu không có hình ảnh, gửi giá trị trống
+      formData.append('RegisterTempDTO.AccountImage', '');
     }
   
     try {
       const response = await fetch('http://localhost:5000/api/Account/register', {
         method: 'POST',
         headers: {
-          'accept': 'text/plain', // Chấp nhận phản hồi dạng text
+          'accept': 'text/plain',
         },
         body: formData,
       });
   
       const result = await response.json();
-      console.log('API Response:', result); // Log phản hồi API
+      console.log('API Response:', result); 
   
       if (response.ok && result.flag) {
         setSuccess('Registration successful! Please log in.');

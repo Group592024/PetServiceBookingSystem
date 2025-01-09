@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom"; // Import Link and useNavigate
 import axios from "axios";
 import Swal from "sweetalert2"; 
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState([]); 
@@ -9,7 +11,7 @@ const AccountList = () => {
   const itemsPerPage = 10; 
   const navigate = useNavigate(); 
   const [accountName, setAccountName] = useState(null); 
-
+  const sidebarRef = useRef(null);
 
   useEffect(() => {
     const account = localStorage.getItem('accountName'); // get accountName from localStorage
@@ -39,16 +41,16 @@ const AccountList = () => {
     fetchAccounts();
   }, []);
 
-  // Tính toán danh sách hiện tại
+
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentItems = Array.isArray(accounts) ? accounts.slice(startIndex, startIndex + itemsPerPage) : [];
   const totalPages = Array.isArray(accounts) ? Math.ceil(accounts.length / itemsPerPage) : 0;
 
-  // Chuyển trang
+
   const goToNextPage = () => currentPage < totalPages && setCurrentPage(currentPage + 1);
   const goToPreviousPage = () => currentPage > 1 && setCurrentPage(currentPage - 1);
 
-  // Các hàm xử lý
+
   const handleDelete = (account) => {
     Swal.fire({
       title: 'Are you sure? You want to delete this account!',
@@ -102,45 +104,12 @@ const AccountList = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className="w-1/5 bg-gray-300 p-4 h-full">
-        <div className="mb-6 text-center font-bold text-lg bg-gray-400 py-2 rounded">Logo</div>
-        {[
-          "Report",
-          "Account Management",
-          "Service Management",
-          "Room Management",
-          "Camera Management",
-          "Pet Management",
-          "Medicine Management",
-          "Voucher Management",
-        ].map((item, index) => (
-          <button
-            key={index}
-            className={`w-full py-2 mb-2 rounded ${item === "Account Management" ? "bg-black text-white" : "bg-gray-400"}`}
-          >
-            {item}
-          </button>
-        ))}
-        <button className="w-full py-2 bg-gray-500 rounded" onClick={handleLogout}>
-          Logout
-        </button>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col p-6 h-full overflow-y-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center space-x-4">
-          </div>
-          <div className="flex items-center space-x-4 w-1/2 justify-end">
-            <button className="px-4 py-2 bg-gray-300 rounded">Chat</button>
-            <span>{accountName}</span> {/* show accountName */}
-            <div className="w-8 h-8 rounded-full bg-gray-400"></div>
-          </div>
-        </div>
-
+    <div className="flex h-screen bg-dark-grey-100">
+          <Sidebar ref={sidebarRef} />
+      <div className="content">
+        <Navbar sidebarRef={sidebarRef} />
+        <main>
+        
         {/* Table Section */}
         <div className="bg-white shadow-md rounded-md p-6">
           <div className="flex justify-between items-center mb-4">
@@ -212,6 +181,7 @@ const AccountList = () => {
             </button>
           </div>
         </div>
+        </main>
       </div>
     </div>
   );
