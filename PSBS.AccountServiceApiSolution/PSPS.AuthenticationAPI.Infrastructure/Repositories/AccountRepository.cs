@@ -188,6 +188,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 new(ClaimTypes.Name, account.AccountName!),
                 new(ClaimTypes.Email, account.AccountEmail!),
                 new(ClaimTypes.Role, account.RoleId!),
+
+
             };
             if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
                 claims.Add(new(ClaimTypes.Role, account.RoleId!)); // Thêm claim role nếu có

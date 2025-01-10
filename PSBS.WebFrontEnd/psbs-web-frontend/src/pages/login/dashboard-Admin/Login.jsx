@@ -40,27 +40,25 @@ const Login = () => {
       if (response.ok && result.flag) {
         // Save token to session storage
         sessionStorage.setItem('token', result.data);
-
+      
         // Giải mã token để kiểm tra roleId
         const decodedToken = parseJwt(result.data);
         console.log('Decoded Token:', decodedToken); // In token đã giải mã
-
+      
         // Lấy giá trị role từ claim
         const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-
-        if (role === 'admin') {
-          // Redirect to dashboard for admin
-          navigate('/account');
-        } else if (role === 'user') {
+      
+        if (role === 'user') {
           // Redirect to customer page for user
           navigate('/customer');
         } else {
-          // Handle other roles or invalid role
-          setError('Invalid role');
+          // Redirect to dashboard for other roles
+          navigate('/account');
         }
       } else {
         setError(result.message || 'Login failed. Please try again.');
       }
+      
     } catch (err) {
       console.error('Error occurred during login:', err);
       setError('An error occurred. Please try again.');
