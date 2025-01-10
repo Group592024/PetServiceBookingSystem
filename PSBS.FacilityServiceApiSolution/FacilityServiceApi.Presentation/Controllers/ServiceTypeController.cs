@@ -79,7 +79,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<ActionResult<Response>> UpdateServiceType([FromForm] ServiceTypeDTO updatingServiceType)
         {
             if (!ModelState.IsValid)

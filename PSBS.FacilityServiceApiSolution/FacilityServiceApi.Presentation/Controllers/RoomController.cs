@@ -1,13 +1,9 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -22,25 +18,6 @@ namespace FacilityServiceApi.Presentation.Controllers
         {
             _room = roomService;
             _roomType = roomTypeService;
-        }
-
-        [HttpGet("roomtypes")]
-        public async Task<ActionResult<IEnumerable<RoomTypeDTO>>> GetRoomTypes()
-        {
-            var roomTypes = await _roomType.GetAllAsync();
-            if (!roomTypes.Any())
-                return NotFound("No room types found in the database");
-
-            var roomTypeDtos = roomTypes.Select(roomType => new RoomTypeDTO
-            {
-                roomTypeId = roomType.roomTypeId,
-                name = roomType.name,
-                pricePerHour = roomType.pricePerHour,
-                pricePerDay = roomType.pricePerDay,
-                description = roomType.description
-            });
-
-            return Ok(roomTypeDtos);
         }
 
         [HttpGet]
