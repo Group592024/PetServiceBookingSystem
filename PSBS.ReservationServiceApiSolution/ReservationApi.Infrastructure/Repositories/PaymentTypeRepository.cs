@@ -23,7 +23,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 await context.SaveChangesAsync();
                 if (currentEntity is not null && currentEntity.PaymentTypeId.ToString().Length > 0)
                 {
-                    return new Response(true, $"{entity.PaymentTypeName} added to database successfully");
+                    return new Response(true, $"{entity.PaymentTypeName} added to database successfully") { Data = currentEntity };
                 }
                 else
                 {
@@ -55,7 +55,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     paymentType.isDeleted = true;
                     context.PaymentTypes.Update(paymentType);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.PaymentTypeName} marked as deleted.");
+                    return new Response(true, $"{entity.PaymentTypeName} marked as deleted.") { Data = paymentType };
                 }
                 else
                 {
@@ -142,13 +142,17 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"{entity.PaymentTypeName} not found");
                 }
-                var getPaymentType = await GetByAsync(p => p.PaymentTypeName!.Equals(entity.PaymentTypeName));
-                if (getPaymentType is not null && !string.IsNullOrEmpty(getPaymentType.PaymentTypeName))
-                    return new Response(false, $"{entity.PaymentTypeName} already added");
+                if (paymentType.PaymentTypeName != entity.PaymentTypeName)
+                {
+                    var getPaymentType = await GetByAsync(p => p.PaymentTypeName!.Equals(entity.PaymentTypeName));
+                    if (getPaymentType is not null && !string.IsNullOrEmpty(getPaymentType.PaymentTypeName))
+                        return new Response(false, $"{entity.PaymentTypeName} already added");
+                }
+                
                 context.Entry(paymentType).State = EntityState.Detached;
                 context.PaymentTypes.Update(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.PaymentTypeName} successfully updated");
+                return new Response(true, $"{entity.PaymentTypeName} successfully updated") { Data = entity };
             }
             catch (Exception ex)
             {

@@ -17,11 +17,20 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
+                // Check if there's an active PointRule (isDeleted is false)
+                var activePointRule = await context.PointRules.AnyAsync(pr => !pr.isDeleted);
+                if (activePointRule)
+                {
+                    return new Response(false, "Please inactivate the current Point Rule Ratio before adding a new one.");
+                }
+
+                // Add the new PointRule entity
                 var currentEntity = context.PointRules.Add(entity).Entity;
                 await context.SaveChangesAsync();
+
                 if (currentEntity is not null && currentEntity.PointRuleId.ToString().Length > 0)
                 {
-                    return new Response(true, $"{entity.PointRuleRatio} added to database successfully");
+                    return new Response(true, $"{entity.PointRuleRatio} added to database successfully") { Data = currentEntity };
                 }
                 else
                 {
@@ -30,12 +39,13 @@ namespace ReservationApi.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // log the orginal exception
+                // Log the original exception
                 LogExceptions.LogException(ex);
-                // display scary-free message to the client
-                return new Response(false, "Error occured adding new voucher");
+                // Display a user-friendly message to the client
+                return new Response(false, "Error occurred while adding a new Point Rule.");
             }
         }
+
 
         public async Task<Response> DeleteAsync(PointRule entity)
         {
@@ -53,7 +63,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     pointRule.isDeleted = true;
                     context.PointRules.Update(pointRule);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.PointRuleRatio} marked as deleted.");
+                    return new Response(true, $"{entity.PointRuleRatio} marked as deleted.") { Data = pointRule };
                 }
                 else
                 {
@@ -140,18 +150,33 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"{entity.PointRuleRatio} not found");
                 }
+
+                // Check if isDeleted is being changed from true to false
+                if (!entity.isDeleted && pointRule.isDeleted)
+                {
+                    // Check if there's any other active PointRule (isDeleted == false)
+                    var activePointRuleExists = await context.PointRules
+                        .AnyAsync(pr => !pr.isDeleted && pr.PointRuleId != entity.PointRuleId);
+
+                    if (activePointRuleExists)
+                    {
+                        return new Response(false, "Please inactivate the current Point Rule Ratio before making another active.");
+                    }
+                }
+
                 context.Entry(pointRule).State = EntityState.Detached;
                 context.PointRules.Update(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.PointRuleRatio} successfully updated");
+                return new Response(true, $"{entity.PointRuleRatio} successfully updated") { Data = entity };
             }
             catch (Exception ex)
             {
-                // log the orginal exception
+                // Log the original exception
                 LogExceptions.LogException(ex);
-                // display scary-free message to the client
-                return new Response(false, "Error occurred updating the existing booking status");
+                // Display a user-friendly message to the client
+                return new Response(false, "Error occurred while updating the existing Point Rule.");
             }
         }
+
     }
 }

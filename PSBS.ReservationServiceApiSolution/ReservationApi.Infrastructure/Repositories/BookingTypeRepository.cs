@@ -23,7 +23,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 await context.SaveChangesAsync();
                 if (currentEntity is not null && currentEntity.BookingTypeId.ToString().Length > 0)
                 {
-                    return new Response(true, $"{entity.BookingTypeName} added to database successfully");
+                    return new Response(true, $"{entity.BookingTypeName} added to database successfully") { Data = currentEntity };
                 }
                 else
                 {
@@ -55,7 +55,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     bookingType.isDeleted = true;
                     context.BookingTypes.Update(bookingType);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingTypeName} marked as deleted.");
+                    return new Response(true, $"{entity.BookingTypeName} marked as deleted.") { Data = bookingType };
                 }
                 else
                 {
@@ -142,14 +142,17 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"{entity.BookingTypeName} not found");
                 }
-                var getBookingType = await GetByAsync(p => p.BookingTypeName!.Equals(entity.BookingTypeName));
-                if (getBookingType is not null && !string.IsNullOrEmpty(getBookingType.BookingTypeName))
-                    return new Response(false, $"{entity.BookingTypeName} already added");
+                if (bookingType.BookingTypeName != entity.BookingTypeName)
+                {
+                    var getBookingType = await GetByAsync(p => p.BookingTypeName!.Equals(entity.BookingTypeName));
+                    if (getBookingType is not null && !string.IsNullOrEmpty(getBookingType.BookingTypeName))
+                        return new Response(false, $"{entity.BookingTypeName} already added");
+                }            
 
                 context.Entry(bookingType).State = EntityState.Detached;
                     context.BookingTypes.Update(entity);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingTypeName} successfully updated");
+                    return new Response(true, $"{entity.BookingTypeName} successfully updated") { Data = entity };
                 }
                 catch (Exception ex)
                 {

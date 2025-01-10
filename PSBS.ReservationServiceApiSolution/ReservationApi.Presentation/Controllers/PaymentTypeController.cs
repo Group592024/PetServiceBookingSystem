@@ -58,13 +58,9 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         // PUT api/<paymentTypeController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdatepaymentType(Guid id, [FromBody] PaymentTypeDTO paymentType)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdatepaymentType( [FromBody] PaymentTypeDTO paymentType)
         {
-            if (!id.Equals(paymentType.PaymentTypeId))
-            {
-                return BadRequest(new Response(false, "The id is not match"));
-            }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

@@ -4,6 +4,7 @@ using ReservationApi.Application.DTOs.Conversions;
 using ReservationApi.Application.DTOs;
 using ReservationApi.Application.Intefaces;
 using PSPS.SharedLibrary.Responses;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ReservationApi.Presentation.Controllers
 {
@@ -54,17 +55,13 @@ namespace ReservationApi.Presentation.Controllers
             // convert to entity to DT
             var getEntity = PointRuleConversion.ToEntity(pointRule);
             var response = await pointRuleInterface.CreateAsync(getEntity);
-            return response.Flag is true ? Ok(response) : BadRequest(response);
+            return response.Flag is true ? Ok(response) : Ok(response);
         }
 
         // PUT api/<PointRuleController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdatePointRule(Guid id, [FromBody] PointRuleDTO pointRule)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdatePointRule( [FromBody] PointRuleDTO pointRule)
         {
-            if (!id.Equals(pointRule.PointRuleId))
-            {
-                return BadRequest(new Response(false, "The id is not match"));
-            }
             ModelState.Remove("pointRulestartDate");
             // CHECK model state is all data annotations are passed
             if (!ModelState.IsValid)
@@ -72,7 +69,7 @@ namespace ReservationApi.Presentation.Controllers
             // convert to entity to DT         
             var getEntity = PointRuleConversion.ToEntity(pointRule);
             var response = await pointRuleInterface.UpdateAsync(getEntity);
-            return response.Flag is true ? Ok(response) : BadRequest(response);
+            return response.Flag is true ? Ok(response) : Ok(response);
         }
         // DELETE api/<PointRuleController>/5
         [HttpDelete("{id}")]

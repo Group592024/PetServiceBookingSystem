@@ -59,13 +59,10 @@ namespace ReservationApi.Presentation.Controllers
     }
 
     // PUT api/<BookingStatusController>/5
-    [HttpPut("{id}")]
-    public async Task<ActionResult<Response>> UpdateBookingStatus(Guid id, [FromBody] BookingStatusDTO bookingStatus)
+    [HttpPut]
+    public async Task<ActionResult<Response>> UpdateBookingStatus( [FromBody] BookingStatusDTO bookingStatus)
     {
-        if (!id.Equals(bookingStatus.BookingStatusId))
-        {
-            return BadRequest(new Response(false, "The id is not match"));
-        }
+   
       
         if (!ModelState.IsValid)
             return BadRequest(ModelState);

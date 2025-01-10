@@ -10,7 +10,7 @@ namespace ReservationApi.Application.DTOs.Conversions
         {
             PaymentTypeId = PaymentTypeDTO.PaymentTypeId,
             PaymentTypeName = PaymentTypeDTO.PaymentTypeName,
-            isDeleted = false
+            isDeleted = PaymentTypeDTO.isDeleted,
 
         };
 

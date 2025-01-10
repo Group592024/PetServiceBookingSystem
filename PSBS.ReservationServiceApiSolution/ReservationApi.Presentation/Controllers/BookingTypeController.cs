@@ -58,14 +58,9 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         // PUT api/<bookingTypeController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdatebookingType(Guid id, [FromBody] BookingTypeDTO bookingType)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdatebookingType( [FromBody] BookingTypeDTO bookingType)
         {
-            if (!id.Equals(bookingType.BookingTypeId))
-            {
-                return BadRequest(new Response(false, "The id is not match"));
-            }
-
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             // convert to entity to DT         
