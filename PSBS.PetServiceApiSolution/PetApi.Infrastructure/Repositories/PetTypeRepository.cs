@@ -39,15 +39,15 @@ namespace PetApi.Infrastructure.Repositories
         {
             try
             {
-                var pet = await GetByIdAsync(entity.PetType_ID);
-                if (pet is null || pet.IsDelete)
+                var petType = await GetByIdAsync(entity.PetType_ID);
+                if (petType is null || petType.IsDelete)
                     return new Response(false, $"{entity.PetType_Name} not found");
                 //context.Entry(pet).State = EntityState.Detached;
-                pet.IsDelete = true;
+                petType.IsDelete = true;
 
-                context.PetTypes.Update(pet);
+                context.PetTypes.Update(petType);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.PetType_Name} is deleted successfully");
+                return new Response(true, $"{entity.PetType_Name} is marked as soft deleted  successfully");
             }
 
             catch (Exception ex)
@@ -55,16 +55,34 @@ namespace PetApi.Infrastructure.Repositories
                 //Log the orginal exception
                 LogExceptions.LogException(ex);
 
-                return new Response(false, "Error occurred deleting pet type");
+                return new Response(false, "Error occurred soft deleting pet type");
             }
 
         }
+
+        public async Task<Response> DeleteSecondAsync(PetType entity)
+        {
+            try
+            {
+                var petType = await GetByIdAsync(entity.PetType_ID);
+
+                context.PetTypes.Remove(petType);
+                await context.SaveChangesAsync();
+                return new Response(true, $"{entity.PetType_ID} is deleted permanently successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred performing delete permanently on pet type");
+            }
+        }
+
 
         public async Task<IEnumerable<PetType>> GetAllAsync()
         {
             try
             {
-                var pets = await context.PetTypes.AsNoTracking().Where(p => p.IsDelete == false).ToListAsync();
+                var pets = await context.PetTypes.AsNoTracking().ToListAsync();
                 return pets is not null ? pets : null;
             }
             catch (Exception ex)
@@ -95,13 +113,8 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var pet = await context.PetTypes.FindAsync(id);
-                if (pet is not null)
-                {
-                    if (pet.IsDelete) return null;
-                    return pet;
-                }
+                return pet is not null ? pet : null;
 
-                return null;
             }
             catch (Exception ex)
             {

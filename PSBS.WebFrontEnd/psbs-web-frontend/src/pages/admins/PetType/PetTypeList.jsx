@@ -47,22 +47,47 @@ const PetTypeList = () => {
       cancelButtonColor: '#3085d6',
     }).then((result) => {
       if (result.isConfirmed) {
-        // Implement API call to delete item
-        // const response= await fetch(`http://localhost/5010/api/PetType/${id}`)
+        const fetchDelete = async () => {
+          try {
+            const deleteResponse = await fetch(
+              `http://localhost:5010/api/PetType/${id}`,
+              {
+                method: 'DELETE',
+              }
+            );
 
-        // Call API and remove the deleted item from the state
-        setData((prevData) => prevData.filter((item) => item.id !== id));
-        Swal.fire('Deleted!', 'The item has been deleted.', 'success');
+            if (deleteResponse.ok) {
+              Swal.fire(
+                'Deleted!',
+                'The pet type has been deleted.',
+                'success'
+              );
+              window.location.reload();
+            } else {
+              Swal.fire('Deleted!', 'Failed to delete the pet type', 'error');
+            }
+          } catch (error) {
+            Swal.fire('Deleted!', 'Failed to delete the pet type', 'error');
+          }
+        };
+
+        fetchDelete();
       }
     });
   };
 
- 
-
   const columns = [
-    { field: 'petType_ID', headerName: 'ID', flex: 1 },
+    { field: 'petType_ID', headerName: 'ID', flex: 1.5 },
     { field: 'petType_Name', headerName: 'Pet Type Name', flex: 1 },
-    { field: 'petType_Description', headerName: 'Description', flex: 1 },
+    { field: 'petType_Description', headerName: 'Description', flex: 2 },
+    {
+      field: 'isDelete',
+      headerName: 'Status',
+      flex: 1,
+      renderCell: (params) => (
+        <span>{params.row.isDelete ? 'Inactive' : 'Active'}</span>
+      ),
+    },
     {
       field: 'actions',
       headerName: 'Actions',

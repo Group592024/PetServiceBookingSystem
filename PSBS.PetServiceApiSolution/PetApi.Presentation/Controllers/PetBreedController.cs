@@ -1,8 +1,8 @@
-﻿using PetApi.Application.DTOs.Conversions;
-using PetApi.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
-using PSPS.SharedLibrary.Responses;
+﻿using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
+using PetApi.Application.DTOs.Conversions;
+using PetApi.Application.Interfaces;
+using PSPS.SharedLibrary.Responses;
 
 namespace PetApi.Presentation.Controllers
 {
@@ -30,7 +30,8 @@ namespace PetApi.Presentation.Controllers
                 petType.PetType_ID,
                 petType.PetType_Name,
                 petType.PetType_Image,
-                petType.PetType_Description
+                petType.PetType_Description,
+                petType.IsDelete
             ));
 
             return Ok(petTypeDtos);
