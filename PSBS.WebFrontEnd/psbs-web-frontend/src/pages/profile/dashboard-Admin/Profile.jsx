@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom'; // add useParams to get accountId
+import { Link, useParams } from 'react-router-dom';
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
 
 const Profile = () => {
   const [account, setAccount] = useState(null);
-  const { accountId } = useParams(); // get accountId from URL
+  const { accountId } = useParams();
 
-  
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
@@ -13,161 +14,135 @@ const Profile = () => {
         .then(data => setAccount(data))
         .catch(error => console.error('Error fetching account data:', error));
     }
-  }, [accountId]); // use accountId in dependency array
+  }, [accountId]);
 
   if (!account) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="bg-gray-100">
-      {/* Navigation Bar */}
-      <nav className="bg-gray-300 text-white px-10 py-4">
-        <div className="flex justify-between items-center">
-          {/* Left Section */}
-          <div className="flex items-center space-x-10">
-            <div className="bg-gray-600 text-white text-lg font-bold px-5 py-3 rounded-md">LOGO</div>
-            <a href="#" className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold">Home</a>
-            <a href="#" className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold">Services</a>
-            <a href="#" className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold">Rooms</a>
-            {/* Search */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className="rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
-              />
-              <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400">🔍</button>
-            </div>
-          </div>
+    <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
+      <Sidebar /> {/* Sidebar */}
 
-          {/* Right Section */}
-          <div className="flex items-center space-x-4">
-            <button className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold">
-              Booking Now
-            </button>
-            <button className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-semibold">
-              Chat
-            </button>
-            {/* User Info */}
-            <div className="flex items-center space-x-2">
-              <span className="text-black">{account.accountName}</span>
-              <div className="bg-gray-400 w-8 h-8 rounded-full flex items-center justify-center text-white">
-                👤
+      <div className="content flex-1 overflow-y-auto">
+        <Navbar /> {/* Navbar */}
+
+        <div className="p-6 bg-white shadow-md rounded-md max-w-full">
+          <h2 className="mb-4 text-xl font-bold text-left">Profile</h2>
+
+          <div className="flex flex-wrap gap-8">
+            {/* Profile Image Section */}
+            <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+                <img
+                  src={`http://localhost:5000/uploads/${account.accountImage}`}
+                  alt="Profile"
+                  className="rounded-full w-full h-full object-cover"
+                />
               </div>
+              <button className="mt-4 bg-teal-600 text-white text-sm font-bold px-5 py-3 rounded-md hover:bg-blue-700">
+                Change Image
+              </button>
+            </div>
+
+            {/* Profile Details Section */}
+            <div className="w-full sm:w-2/3 md:w-2/4 bg-white shadow-md rounded-md p-6">
+              <form>
+                {/* Name */}
+                <div className="mb-3">
+                  <label htmlFor="name" className="block text-sm font-medium mb-1 font-bold">Name</label>
+                  <input
+                    type="text"
+                    id="name"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountName}
+                    disabled
+                  />
+                </div>
+
+                {/* Birthday */}
+                <div className="mb-3">
+                  <label htmlFor="birthday" className="block text-sm font-medium mb-1 font-bold">Birthday</label>
+                  <input
+                    type="date"
+                    id="birthday"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountDob.split('T')[0]} // get date ISO
+                    disabled
+                  />
+                </div>
+
+                {/* Gender */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium mb-1 font-bold">Gender</label>
+                  <div className="flex gap-4">
+                    <label>
+                      <input type="radio" name="gender" value="male" defaultChecked={account.accountGender === 'male'} disabled /> Male
+                    </label>
+                    <label>
+                      <input type="radio" name="gender" value="female" defaultChecked={account.accountGender === 'female'} disabled /> Female
+                    </label>
+                  </div>
+                </div>
+
+                {/* Phone Number */}
+                <div className="mb-3">
+                  <label htmlFor="phone" className="block text-sm font-medium mb-1 font-bold">Phone Number</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountPhoneNumber}
+                    disabled
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="mb-3">
+                  <label htmlFor="address" className="block text-sm font-medium mb-1 font-bold">Address</label>
+                  <input
+                    type="text"
+                    id="address"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountAddress}
+                    disabled
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="mb-3">
+                  <label htmlFor="email" className="block text-sm font-medium mb-1 font-bold">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountEmail} disabled
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex flex-wrap justify-between gap-4">
+                  <Link to={`/editprofile/${accountId}`}>
+                    <button
+                      type="button"
+                      className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                    >
+                      Edit
+                    </button>
+                  </Link>
+                  <Link to={`/changepassword/${accountId}`}>
+                    <button
+                      type="button"
+                      className="bg-gray-300 text-black px-6 py-3 font-medium rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                    >
+                      Change Password
+                    </button>
+                  </Link>
+                </div>
+
+              </form>
             </div>
           </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="container mx-auto flex space-x-10 py-10">
-        {/* Left Section (Profile Image) */}
-        <div className="w-1/4 h-1/4 bg-white shadow-lg rounded-lg p-6 flex flex-col items-center">
-          <div className="w-40 h-40 rounded-full bg-blue-200 flex items-center justify-center text-4xl">
-            {/* show image */}
-            <img
-              src={`http://localhost:5000/uploads/${account.accountImage}`}
-              alt="Profile"
-              className="rounded-full w-full h-full object-cover"
-            />
-          </div>
-          <button className="mt-6 bg-cyan-600 text-Black text-lg font-bold px-5 py-3 rounded-md hover:bg-blue-700">
-            Change Image
-          </button>
-        </div>
-
-        {/* Right Section (Profile Form) */}
-        <div className="w-3/4 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Profile</h2>
-          <form>
-            {/* Name */}
-            <div className="mb-4">
-              <label htmlFor="name" className="block text-gray-600 font-medium">Name</label>
-              <input
-                type="text"
-                id="name"
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountName}
-              />
-            </div>
-
-            {/* Birthday */}
-            <div className="mb-4">
-              <label htmlFor="birthday" className="block text-gray-600 font-medium">Birthday</label>
-              <input
-                type="date"
-                id="birthday"
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountDob.split('T')[0]} // get date ISO
-              />
-            </div>
-
-            {/* Gender */}
-            <div className="mb-4">
-              <span className="block text-black-600 font-medium">Gender</span>
-              <label className="mr-4">
-                <input type="radio" name="gender" value="male" defaultChecked={account.accountGender === 'male'} /> Male
-              </label>
-              <label>
-                <input type="radio" name="gender" value="female" defaultChecked={account.accountGender === 'female'} /> Female
-              </label>
-            </div>
-
-            {/* Phone Number */}
-            <div className="mb-4">
-              <label htmlFor="phone" className="block text-gray-600 font-medium">Phone Number</label>
-              <input
-                type="text"
-                id="phone"
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountPhoneNumber}
-              />
-            </div>
-
-            {/* Address */}
-            <div className="mb-4">
-              <label htmlFor="address" className="block text-gray-600 font-medium">Address</label>
-              <input
-                type="text"
-                id="address"
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountAddress}
-              />
-            </div>
-
-            {/* Email */}
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-600 font-medium">Email</label>
-              <input
-                type="email"
-                id="email"
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                value={account.accountEmail} disabled
-              />
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-between">
-              <Link to={`/editprofile/${accountId}`}>
-                <button
-                  type="button"
-                  className="bg-cyan-600 text-Black text-lg font-bold px-5 py-3 rounded-md hover:bg-cyan-700"
-                >
-                  Edit
-                </button>
-              </Link >
-              <Link to={`/changepassword/${accountId}`}>
-                <button
-                  type="button"
-                  className="bg-gray-300 text-black px-6 py-2 font-medium rounded-md hover:bg-cyan-700"
-                >
-                  Change Password
-                </button>
-              </Link>
-
-            </div>
-          </form>
         </div>
       </div>
     </div>

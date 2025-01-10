@@ -7,6 +7,20 @@ const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Hàm giải mã JWT thủ công
+  const parseJwt = (token) => {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+
+    return JSON.parse(jsonPayload);
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(''); // Clear any previous errors
@@ -22,16 +36,33 @@ const Login = () => {
 
       const result = await response.json();
       console.log(result);
+
       if (response.ok && result.flag) {
         // Save token to session storage
         sessionStorage.setItem('token', result.data);
 
-        // Navigate to /account
-        navigate('/account');
+        // Giải mã token để kiểm tra roleId
+        const decodedToken = parseJwt(result.data);
+        console.log('Decoded Token:', decodedToken); // In token đã giải mã
+
+        // Lấy giá trị role từ claim
+        const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+        if (role === 'admin') {
+          // Redirect to dashboard for admin
+          navigate('/account');
+        } else if (role === 'user') {
+          // Redirect to customer page for user
+          navigate('/customer');
+        } else {
+          // Handle other roles or invalid role
+          setError('Invalid role');
+        }
       } else {
         setError(result.message || 'Login failed. Please try again.');
       }
     } catch (err) {
+      console.error('Error occurred during login:', err);
       setError('An error occurred. Please try again.');
     }
   };
@@ -100,7 +131,6 @@ const Login = () => {
               <a href="/register" className="text-cyan-500 hover:underline">Register Now !!</a>
             </p>
           </div>
-          
         </div>
       </div>
     </div>
