@@ -24,7 +24,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 await context.SaveChangesAsync();
                 if (currentEntity is not null && currentEntity.BookingStatusId.ToString().Length > 0)
                 {
-                    return new Response(true, $"{entity.BookingStatusName} added to database successfully");
+                    return new Response(true, $"{entity.BookingStatusName} added to database successfully") { Data = currentEntity };
                 }
                 else
                 {
@@ -56,7 +56,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     bookingStatus.isDeleted = true;
                     context.BookingStatuses.Update(bookingStatus);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingStatusName} marked as deleted.");
+                    return new Response(true, $"{entity.BookingStatusName} marked as deleted.") { Data = bookingStatus };
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     // Permanently delete from the database
                     context.BookingStatuses.Remove(bookingStatus);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingStatusName} permanently deleted.");
+                    return new Response(true, $"{entity.BookingStatusName} permanently deleted.") ;
                 }
             }
             catch (Exception ex)
@@ -144,13 +144,16 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"{entity.BookingStatusName} not found");
                 }
-                var getBookingStatus = await GetByAsync(p => p.BookingStatusName!.Equals(entity.BookingStatusName));
-                if (getBookingStatus is not null && !string.IsNullOrEmpty(getBookingStatus.BookingStatusName))
-                    return new Response(false, $"{entity.BookingStatusName} already added");
+              if(bookingStatus.BookingStatusName != entity.BookingStatusName)
+                {
+                    var getBookingStatus = await GetByAsync(p => p.BookingStatusName!.Equals(entity.BookingStatusName));
+                    if (getBookingStatus is not null && !string.IsNullOrEmpty(getBookingStatus.BookingStatusName))
+                        return new Response(false, $"{entity.BookingStatusName} already added");
+                }
                 context.Entry(bookingStatus).State = EntityState.Detached;
                 context.BookingStatuses.Update(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.BookingStatusName} successfully updated");
+                return new Response(true, $"{entity.BookingStatusName} successfully updated") { Data = entity };
             }
             catch (Exception ex)
             {

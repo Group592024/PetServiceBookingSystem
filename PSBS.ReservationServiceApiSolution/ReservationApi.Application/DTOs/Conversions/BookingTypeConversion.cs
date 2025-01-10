@@ -9,7 +9,7 @@ namespace ReservationApi.Application.DTOs.Conversions
         {
             BookingTypeId = bookingTypeDTO.BookingTypeId,
             BookingTypeName = bookingTypeDTO.BookingTypeName,
-            isDeleted = false
+            isDeleted = bookingTypeDTO.isDeleted,
 
         };
 

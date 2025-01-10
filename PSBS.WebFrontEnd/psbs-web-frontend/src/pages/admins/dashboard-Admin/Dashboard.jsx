@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
+import { Link } from "react-router-dom";
 const Dashboard = () => {
   const sidebarRef = useRef(null);
   return (
@@ -28,34 +29,42 @@ const Dashboard = () => {
             </a>
           </div>
           <ul className="insights">
-            <li>
-              <i className="bx bx-calendar-check"></i>
+          <Link to="/settings/bookingType">
+            <li className="first">
+            <i className="bx bx-calendar-check"></i>
               <span className="info">
-                <h3>1,074</h3>
-                <p>Paid Order</p>
+                <h3>Setting</h3>
+                <p> Booking Type</p>
               </span>
             </li>
-            <li>
-              <i className="bx bx-calendar-check"></i>
+            </Link>
+            <Link to="/settings/bookingStatus">
+            <li className="second">
+            <i className="bx bx-calendar-check"></i>
               <span className="info">
-                <h3>1,074</h3>
-                <p>Paid Order</p>
+                <h3>Setting</h3>
+                <p>Booking Status</p>
               </span>
             </li>
-            <li>
-              <i className="bx bx-calendar-check"></i>
+            </Link>
+            <Link to="/settings/paymentType">
+            <li className="third">
+            <i className="bx bx-calendar-check"></i>
               <span className="info">
-                <h3>1,074</h3>
-                <p>Paid Order</p>
+                <h3>Setting</h3>
+                <p>Payment Type</p>
               </span>
             </li>
-            <li>
-              <i className="bx bx-calendar-check"></i>
+            </Link>
+             <Link to="/settings/pointRule">
+             <li className="fourth">
+            <i className="bx bx-calendar-check"></i>
               <span className="info">
-                <h3>1,074</h3>
-                <p>Paid Order</p>
+                <h3>Setting</h3>
+                <p>Point Rule</p>
               </span>
             </li>
+            </Link>
           </ul>
         </main>
       </div>

@@ -8,7 +8,7 @@ namespace ReservationApi.Application.DTOs.Conversions
         {
             BookingStatusId = bokingStatusDTO.BookingStatusId,
             BookingStatusName = bokingStatusDTO.BookingStatusName,
-            isDeleted = false
+            isDeleted = bokingStatusDTO.isDeleted,
 
         };
 

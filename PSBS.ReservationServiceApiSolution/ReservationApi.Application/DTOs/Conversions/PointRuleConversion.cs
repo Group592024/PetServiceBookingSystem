@@ -10,7 +10,7 @@ namespace ReservationApi.Application.DTOs.Conversions
         {
             PointRuleId = pointRuleDTO.PointRuleId,
             PointRuleRatio = pointRuleDTO.PointRuleRatio,
-            isDeleted = false
+            isDeleted = pointRuleDTO.isDeleted,
 
         };
 
