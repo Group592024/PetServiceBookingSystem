@@ -60,7 +60,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
         {
             try
             {
-                var listMedicines = await context.Medicines.Where(m => !m.isDeleted).ToListAsync();
+                var listMedicines = await context.Medicines.ToListAsync();
                 return listMedicines != null ? listMedicines : null!;
             }
             catch (Exception ex)

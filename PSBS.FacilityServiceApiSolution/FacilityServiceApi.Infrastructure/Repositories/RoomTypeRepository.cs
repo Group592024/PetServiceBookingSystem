@@ -4,11 +4,7 @@ using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace FacilityServiceApi.Infrastructure.Repositories
 {
@@ -23,6 +19,18 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"RoomType with ID {entity.roomTypeId} already exists!");
                 }
+                var existingRoomTypeByName = await context.RoomType
+                                                                  .FirstOrDefaultAsync(rt => rt.name.ToLower() == entity.name.ToLower());
+                if (existingRoomTypeByName != null)
+                {
+                    return new Response(false, $"RoomType with name '{entity.name}' already exists!");
+                }
+
+                if (existingRoomTypeByName != null)
+                {
+                    return new Response(false, $"RoomType with name '{entity.name}' already exists!");
+                }
+
                 entity.isDeleted = false;
                 var currentEntity = context.RoomType.Add(entity).Entity;
                 await context.SaveChangesAsync();
@@ -43,32 +51,57 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var roomUsingRoomType = await context.Room
-                                                      .AnyAsync(r => r.roomTypeId == entity.roomTypeId && !r.isDeleted);
-                if (roomUsingRoomType)
-                {
-                    return new Response(false, $"Cannot delete RoomType with ID {entity.roomTypeId} because there are rooms using it.");
-                }
-
                 var roomType = await context.RoomType.FirstOrDefaultAsync(rt => rt.roomTypeId == entity.roomTypeId);
-                if (roomType != null)
+
+                if (roomType == null)
                 {
-                    if (roomType.isDeleted)
-                    {
-                        context.RoomType.Remove(roomType);
-                        await context.SaveChangesAsync();
-                        return new Response(true, $"RoomType with ID {entity.roomTypeId} has been permanently deleted.");
-                    }
-                    else
-                    {
-                        roomType.isDeleted = true;
-                        context.RoomType.Update(roomType);
-                        await context.SaveChangesAsync();
-                        return new Response(true, "RoomType soft deleted successfully.");
-                    }
+                    return new Response(false, "RoomType not found.");
                 }
 
-                return new Response(false, "RoomType not found.");
+                if (!roomType.isDeleted)
+                {
+                    var roomsToUpdate = await context.Room
+                                                     .Where(r => r.roomTypeId == entity.roomTypeId && !r.isDeleted)
+                                                     .ToListAsync();
+
+                    foreach (var room in roomsToUpdate)
+                    {
+                        var activeRoomHistory = await context.RoomHistories
+                            .Where(rh => rh.RoomId == room.roomId && rh.CheckOutDate == null)
+                            .FirstOrDefaultAsync();
+
+                        if (activeRoomHistory != null)
+                        {
+                            activeRoomHistory.Status = "Soft Deleted";
+                            activeRoomHistory.CheckOutDate = DateTime.Now;
+                            context.RoomHistories.Update(activeRoomHistory);
+                        }
+
+                        room.isDeleted = true;
+                        context.Room.Update(room);
+                    }
+
+                    roomType.isDeleted = true;
+                    context.RoomType.Update(roomType);
+                    await context.SaveChangesAsync();
+
+                    return new Response(true, "RoomType and associated rooms soft deleted successfully.");
+                }
+                else
+                {
+                    var linkedRooms = await context.Room
+                        .Where(r => r.roomTypeId == entity.roomTypeId)
+                        .ToListAsync();
+
+                    if (linkedRooms.Any())
+                    {
+                        return new Response(false, $"Cannot permanently delete RoomType with name {entity.name} because it has associated rooms.");
+                    }
+
+                    context.RoomType.Remove(roomType);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"RoomType with name {entity.name} has been permanently deleted.");
+                }
             }
             catch (Exception ex)
             {
@@ -129,10 +162,27 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                // The UpdateAsync method handles updating room type information:
+                // 1. Checks if the room type exists in the database.
+                // 2. If the room type does not exist, returns a failure message.
+                // 3. If the room type has been deleted, checks if the isDeleted status has changed, and performs a restore.
+                // 4. Updates the room type's information fields such as name, description, hourly price, daily price, and isDeleted status.
+                // 5. Saves the changes to the database and returns a success or failure result.
+
                 var existingRoomType = await GetByIdAsync(entity.roomTypeId);
                 if (existingRoomType == null)
                 {
                     return new Response(false, $"RoomType with ID {entity.roomTypeId} not found or already deleted");
+                }
+                var existingRoomTypeByName = await context.RoomType
+                                                                  .FirstOrDefaultAsync(rt => rt.name.ToLower() == entity.name.ToLower());
+                if (existingRoomTypeByName != null)
+                {
+                    return new Response(false, $"RoomType with name '{entity.name}' already exists!");
+                }
+                if (entity.isDeleted && existingRoomType.isDeleted)
+                {
+                    existingRoomType.isDeleted = false;
                 }
 
                 existingRoomType.name = entity.name;

@@ -80,7 +80,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public async Task<ActionResult<Response>> UpdateRoomType([FromForm] RoomTypeDTO updatingRoomType)
         {
             if (!ModelState.IsValid)

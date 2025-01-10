@@ -21,7 +21,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 }
                 entity.isDeleted = false;
                 entity.createAt = DateTime.UtcNow;
-                entity.updateAt = DateTime.MinValue;
+                entity.updateAt = DateTime.UtcNow;
                 var currentEntity = context.ServiceType.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
@@ -41,32 +41,43 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var serviceUsingServiceType = await context.Service
-                                                           .AnyAsync(s => s.serviceTypeId == entity.serviceTypeId && !s.isDeleted);
-                if (serviceUsingServiceType)
+                var relatedServices = await context.Service
+                                                   .Where(s => s.serviceTypeId == entity.serviceTypeId)
+                                                   .ToListAsync();
+
+                var serviceType = await context.ServiceType
+                                                .FirstOrDefaultAsync(st => st.serviceTypeId == entity.serviceTypeId);
+
+                if (serviceType == null)
                 {
-                    return new Response(false, $"Cannot delete ServiceType with ID {entity.serviceTypeId} because there are services using it.");
+                    return new Response(false, "ServiceType not found.");
                 }
 
-                var serviceType = await context.ServiceType.FirstOrDefaultAsync(st => st.serviceTypeId == entity.serviceTypeId);
-                if (serviceType != null)
+                if (serviceType.isDeleted)
                 {
-                    if (serviceType.isDeleted)
+                    if (relatedServices.Any())
                     {
-                        context.ServiceType.Remove(serviceType);
-                        await context.SaveChangesAsync();
-                        return new Response(true, $"ServiceType with ID {entity.serviceTypeId} has been permanently deleted.");
+                        return new Response(false, $"Cannot delete ServiceType with Name {entity.typeName} because it is still in use by related services.");
                     }
-                    else
-                    {
-                        serviceType.isDeleted = true;
-                        context.ServiceType.Update(serviceType);
-                        await context.SaveChangesAsync();
-                        return new Response(true, "ServiceType soft deleted successfully.");
-                    }
-                }
 
-                return new Response(false, "ServiceType not found.");
+                    context.ServiceType.Remove(serviceType);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"ServiceType with Name {entity.typeName} has been permanently deleted.");
+                }
+                else
+                {
+                    serviceType.isDeleted = true;
+                    context.ServiceType.Update(serviceType);
+
+                    foreach (var service in relatedServices)
+                    {
+                        service.isDeleted = true;
+                        context.Service.Update(service);
+                    }
+
+                    await context.SaveChangesAsync();
+                    return new Response(true, "ServiceType and related services soft deleted successfully.");
+                }
             }
             catch (Exception ex)
             {

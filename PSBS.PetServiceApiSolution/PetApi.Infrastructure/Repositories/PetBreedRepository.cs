@@ -48,7 +48,7 @@ namespace PetApi.Infrastructure.Repositories
                                       .AnyAsync(p => p.PetBreed_ID == entity.PetBreed_ID);
                 if (petUsingPetBreed)
                 {
-                    return new Response(false, $"Cannot delete Treatment with ID {entity.PetBreed_ID} because there are medicines using it.");
+                    return new Response(false, $"Cannot delete Pet Breed with ID {entity.PetBreed_ID} because there are Pets using it.");
                 }
 
                 var breed = await GetByIdAsync(entity.PetBreed_ID);
@@ -138,7 +138,19 @@ namespace PetApi.Infrastructure.Repositories
                 breed.PetBreed_Name = entity.PetBreed_Name;
                 breed.PetBreed_Description = entity.PetBreed_Description;
                 breed.PetBreed_Image = entity.PetBreed_Image;
+
                 breed.IsDelete = entity.IsDelete;
+
+                if (breed.IsDelete == false && breed.PetType_ID != Guid.Empty)
+                {
+                    var petType = await context.PetTypes.FirstOrDefaultAsync(pt => pt.PetType_ID == breed.PetType_ID);
+                    if (petType != null && petType.IsDelete)
+                    {
+                        petType.IsDelete = false; 
+                        context.PetTypes.Update(petType);
+                    }
+                }
+
                 context.PetBreeds.Update(breed);
                 await context.SaveChangesAsync();
                 return new Response(true, $"Pet breed with ID {entity.PetBreed_ID} updated successfully");
