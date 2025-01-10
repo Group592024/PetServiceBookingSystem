@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class migration001 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -198,8 +198,8 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5024), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5040) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 8, 1, 56, 40, 808, DateTimeKind.Local).AddTicks(5043) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1356), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1372) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1375), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1375) }
                 });
 
             migrationBuilder.CreateIndex(

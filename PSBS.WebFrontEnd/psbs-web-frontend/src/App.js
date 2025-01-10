@@ -8,6 +8,11 @@ import PointRuleList from "./pages/admins/subTableInReservation/pointRuleList/Po
 import PaymentTypeList from "./pages/admins/subTableInReservation/paymentTypeList/PaymentTypeList";
 import BookingStatusList from "./pages/admins/subTableInReservation/bookingStatusList/BookingStatusList";
 import BookingTypeList from "./pages/admins/subTableInReservation/bookingTypeList/BookingTypeList";
+import TreatmentList from "./pages/admins/treatment/TreatmentList";
+import ServiceTypeList from "./pages/admins/servicetype/ServiceTypeList";
+import RoomTypeList from "./pages/admins/roomtype/RoomTypeList";
+import MedicineUpdateForm from "./pages/admins/medicines/update-form/MedicineUpdateForm";
+import MedicineDetailForm from "./pages/admins/medicines/detail-form/MedicineDetailForm";
 
 function App() {
   return (
@@ -22,12 +27,20 @@ function App() {
         <Route path="bookingStatus" element={<BookingStatusList />} />
         </Route>
           <Route path="/">
-            <Route index element={<Dashboard />} />
+          <Route index element={<Dashboard />} />
           </Route>
           <Route path="/medicines">
           <Route index element={<List />} />
           <Route path="new" element={<MedicineAddForm />} />
+          <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
+          <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
           </Route>
+          <Route path="/treatments">
+          <Route index element={<TreatmentList/>} /></Route>
+          <Route path="/servicetypes">
+          <Route index element={<ServiceTypeList/>} /></Route>
+          <Route path="/roomtypes">
+          <Route index element={<RoomTypeList/>} /></Route>
         </Routes>
       </BrowserRouter>
     </div>

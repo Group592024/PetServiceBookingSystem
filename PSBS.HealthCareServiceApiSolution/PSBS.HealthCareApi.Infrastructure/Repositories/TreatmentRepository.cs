@@ -34,37 +34,48 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 return new Response(false, $"Error occurred adding new Treatment: {ex.Message}");
             }
         }
-
         public async Task<Response> DeleteAsync(Treatment entity)
         {
             try
             {
-                var medicineUsingTreatment = await context.Medicines
-                                                      .AnyAsync(t => t.treatmentId == entity.treatmentId && !t.isDeleted);
-                if (medicineUsingTreatment)
-                {
-                    return new Response(false, $"Cannot delete Treatment with ID {entity.treatmentId} because there are medicines using it.");
-                }
-
                 var treatment = await context.Treatments.FirstOrDefaultAsync(m => m.treatmentId == entity.treatmentId);
-                if (treatment != null)
+                if (treatment == null)
                 {
-                    if (treatment.isDeleted)
-                    {
-                        context.Treatments.Remove(treatment);
-                        await context.SaveChangesAsync();
-                        return new Response(true, $"Treatment with ID {entity.treatmentId} has been permanently deleted.");
-                    }
-                    else
-                    {
-                        treatment.isDeleted = true;
-                        context.Treatments.Update(treatment);
-                        await context.SaveChangesAsync();
-                        return new Response(true, "Treatment soft deleted successfully.");
-                    }
+                    return new Response(false, "Treatment not found.");
                 }
 
-                return new Response(false, "Treament not found.");
+                if (treatment.isDeleted)
+                {
+                    var medicineUsingTreatment = await context.Medicines
+                                                               .AnyAsync(m => m.treatmentId == entity.treatmentId);
+                    if (medicineUsingTreatment)
+                    {
+                        return new Response(false, $"Cannot permanently delete Treatment with Name {entity.treatmentName} because there are medicines using it.");
+                    }
+
+                    context.Treatments.Remove(treatment);
+                    await context.SaveChangesAsync();
+
+                    return new Response(true, $"Treatment with Name {entity.treatmentName} has been permanently deleted.");
+                }
+                else
+                {
+                    treatment.isDeleted = true;
+                    context.Treatments.Update(treatment);
+
+                    var relatedMedicines = await context.Medicines
+                                                         .Where(m => m.treatmentId == entity.treatmentId)
+                                                         .ToListAsync();
+
+                    foreach (var medicine in relatedMedicines)
+                    {
+                        medicine.isDeleted = true;
+                        context.Medicines.Update(medicine);
+                    }
+
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Treatment and related medicines soft deleted successfully.");
+                }
             }
             catch (Exception ex)
             {

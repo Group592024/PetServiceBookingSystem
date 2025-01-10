@@ -78,18 +78,18 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut]
-        public async Task<ActionResult<Response>> UpdateTreatment([FromForm] TreatmentDTO updatingTreatment)
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Response>> UpdateTreatment(Guid id, [FromForm] TreatmentDTO updatingTreatment)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
             }
 
-            var existingTreatment = await _treatmentService.GetByIdAsync(updatingTreatment.treatmentId);
+            var existingTreatment = await _treatmentService.GetByIdAsync(id);
             if (existingTreatment == null)
             {
-                return NotFound(new Response(false, $"Treatment with ID {updatingTreatment.treatmentId} not found"));
+                return NotFound(new Response(false, $"Treatment with ID {id} not found"));
             }
 
             var updatedTreatmentEntity = TreatmentConversion.ToEntity(updatingTreatment);

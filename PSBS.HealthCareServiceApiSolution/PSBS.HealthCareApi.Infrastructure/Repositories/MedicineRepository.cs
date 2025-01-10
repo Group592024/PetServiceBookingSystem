@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Server;
 using Microsoft.EntityFrameworkCore;
+using PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs;
 using PSBS.HealthCareApi.Application.Interfaces;
 using PSBS.HealthCareApi.Domain;
 using PSBS.HealthCareApi.Infrastructure.Data;
@@ -20,7 +21,8 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
             try
             {
                 var existingMedicine = await GetByIdAsync(entity.medicineId);
-                if (existingMedicine != null)
+                var existingMedicineName = context.Medicines.FirstOrDefault(m => m.medicineName.Equals(entity.medicineName));
+                if (existingMedicine != null || existingMedicineName != null)
                 {
                     return new Response(false, $"{entity.medicineName} already exist! ");
                 }
@@ -39,15 +41,26 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
         {
             try
             {
-                var medicine = await GetByIdAsync(entity.medicineId);
-                if(medicine == null)
+                if (!entity.isDeleted)
                 {
-                    return new Response(false, "Medicine can't not found");
+                    var medicine = await GetByIdAsync(entity.medicineId);
+                    if (medicine == null)
+                    {
+                        return new Response(false, "Medicine can't not found");
+                    }
+                    medicine.isDeleted = true;
+                    context.Medicines.Update(medicine);
+                    context.SaveChanges();
+                    return new Response(true, "Medicine is inactive successfully");
                 }
-                medicine.isDeleted = true;
-                context.Medicines.Update(medicine);
-                context.SaveChanges();
-                return new Response(true, "Medicine is deleted successfully");
+                var existUsingMedicine = context.PetHealthBooks.FirstOrDefault(hb => hb.medicineId == entity.medicineId);
+                if(existUsingMedicine != null)
+                {
+                    return new Response(false, "The medicine is used in Health Book.");
+                }
+                context.Medicines.Remove(entity);
+                await context.SaveChangesAsync();
+                return new Response(true, "Medicine is deleted successfully.");
             }
             catch (Exception ex)
             {
@@ -60,7 +73,20 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
         {
             try
             {
-                var listMedicines = await context.Medicines.Where(m => !m.isDeleted).ToListAsync();
+                var listMedicines = await context.Medicines.ToListAsync();
+                return listMedicines != null ? listMedicines : null!;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error occurred retrieving medication");
+            }
+        }
+
+        public async Task<IEnumerable<Medicine>> GetAllAttributeAsync()
+        {
+            try
+            {
+                var listMedicines = await context.Medicines.ToListAsync();
                 return listMedicines != null ? listMedicines : null!;
             }
             catch (Exception ex)
@@ -86,7 +112,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
         {
             try
             {
-                var medicine = await context.Medicines.FirstOrDefaultAsync(m => m.medicineId == id && m.isDeleted == false);
+                var medicine = await context.Medicines.FirstOrDefaultAsync(m => m.medicineId == id);
                 return medicine != null ? medicine : null!;
             }
             catch (Exception ex)
@@ -100,9 +126,14 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
             try
             {
                 var existingMedicine = await GetByIdAsync(entity.medicineId);
+                var existingMedicineName = context.Medicines.FirstOrDefault(m => m.medicineName.Equals(entity.medicineName) && m.medicineId != entity.medicineId);
                 if (existingMedicine == null)
                 {
                     return new Response(false, "The medication can't not found");
+                }
+                if (existingMedicineName != null)
+                {
+                    return new Response(false, "The medicine name is already exist.");
                 }
                 existingMedicine.treatmentId = entity.treatmentId;
                 existingMedicine.medicineName = entity.medicineName;
