@@ -7,5 +7,6 @@ namespace PetApi.Application.Interfaces
     public interface IPetBreed : IGenericInterface<PetBreed>
     {
         Task<Response> DeleteByPetTypeIdAsync(Guid petTypeId);
+        Task<bool> CheckIfPetTypeHasPetBreed(Guid petTypeId);
     }
 }

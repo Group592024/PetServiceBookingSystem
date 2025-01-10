@@ -184,18 +184,29 @@ namespace PetApi.Presentation.Controllers
             if (existingPetType == null)
                 return NotFound($"Pet type with ID {id} not found");
             Response response;
+            var checkPetType = await _petBreed.CheckIfPetTypeHasPetBreed(id);
+
 
             if (!existingPetType.IsDelete)
             {
                 response = await petInterface.DeleteAsync(existingPetType);
                 var deletePetBreed = await _petBreed.DeleteByPetTypeIdAsync(id);
+                return response.Flag ? Ok(response) : BadRequest(response);
             }
             else
             {
-                response = await petInterface.DeleteSecondAsync(existingPetType);
+                if (!checkPetType)
+                {
+                    response = await petInterface.DeleteSecondAsync(existingPetType);
+                    return response.Flag ? Ok(response) : BadRequest(response);
+                }
+                else
+                {
+                    return Conflict("Can't delete this pet type because it has pet breed");
+                }
             }
 
-            return response.Flag ? Ok(response) : BadRequest(response);
+
 
         }
     }

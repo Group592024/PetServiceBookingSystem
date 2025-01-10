@@ -56,6 +56,8 @@ const PetTypeList = () => {
               }
             );
 
+            console.log(deleteResponse);
+
             if (deleteResponse.ok) {
               Swal.fire(
                 'Deleted!',
@@ -63,11 +65,18 @@ const PetTypeList = () => {
                 'success'
               );
               window.location.reload();
+            } else if (deleteResponse.status == 409) {
+              Swal.fire(
+                'Error!',
+                'Can not delete this pet type because it has pet breed',
+                'error'
+              );
             } else {
-              Swal.fire('Deleted!', 'Failed to delete the pet type', 'error');
+              Swal.fire('Error!', 'Failed to delete the pet type', 'error');
             }
           } catch (error) {
-            Swal.fire('Deleted!', 'Failed to delete the pet type', 'error');
+            console.log(error);
+            Swal.fire('Error!', 'Failed to delete the pet type', 'error');
           }
         };
 

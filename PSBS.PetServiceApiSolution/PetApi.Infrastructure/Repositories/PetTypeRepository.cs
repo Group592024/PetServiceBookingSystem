@@ -40,7 +40,7 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var petType = await GetByIdAsync(entity.PetType_ID);
-                if (petType is null || petType.IsDelete)
+                if (petType is null)
                     return new Response(false, $"{entity.PetType_Name} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 petType.IsDelete = true;

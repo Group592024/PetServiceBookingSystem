@@ -76,6 +76,21 @@ namespace PetApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<bool> CheckIfPetTypeHasPetBreed(Guid petTypeId)
+        {
+            try
+            {
+                var flag = await context.PetBreeds
+                                           .AnyAsync(b => b.PetType_ID == petTypeId);
+                return flag;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred when checking");
+            }
+        }
+
         public async Task<IEnumerable<PetBreed>> GetAllAsync()
         {
             try

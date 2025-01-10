@@ -60,6 +60,14 @@ const AddPetType = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (name == '' && description == '') {
+      setError({
+        description: true,
+        name: true,
+      });
+      return;
+    }
+
     if (name == '') {
       setError((prev) => ({
         ...prev,
@@ -75,6 +83,8 @@ const AddPetType = () => {
       }));
       return;
     }
+
+    
 
     if (selectedImage == null) {
       Swal.fire({
@@ -112,6 +122,7 @@ const AddPetType = () => {
         setName('');
         setDescription('');
         setName(null);
+
         Swal.fire(
           'Add New Pet Type',
           'Pet Type Added Successfully!',
@@ -154,8 +165,14 @@ const AddPetType = () => {
                       borderRadius: '10px',
                       margin: '20px',
                     }}
-                    className='bg-customGrey rounded-3xl p-3 m-10 w-full shadow-lg'
-                    onChange={(e) => setName(e.target.value)}
+                    className=' rounded-3xl p-3 m-10 w-full'
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      setError((prev) => ({
+                        ...prev,
+                        name: false,
+                      }));
+                    }}
                     error={error.name}
                     helperText={error.name ? 'Pet Type Name is required.' : ''}
                   />
@@ -171,10 +188,16 @@ const AddPetType = () => {
                       margin: '20px',
                     }}
                     multiline
-                    className='bg-customGrey rounded-3xl p-3 m-5
-                    w-full shadow-lg resize-none'
+                    className='rounded-3xl p-3 m-5
+                    w-full resize-none'
                     rows='7'
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                      setError((prev) => ({
+                        ...prev,
+                        description: false,
+                      }));
+                    }}
                     error={error.description}
                     helperText={
                       error.description

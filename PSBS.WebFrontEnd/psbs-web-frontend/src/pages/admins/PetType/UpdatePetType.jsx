@@ -4,6 +4,7 @@ import Navbar from '../../../components/navbar/Navbar';
 import sampleImage from '../../../assets/sampleUploadImage.jpg';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { TextField } from '@mui/material';
 
 const UpdatePetType = () => {
   const navigate = useNavigate();
@@ -14,6 +15,10 @@ const UpdatePetType = () => {
   const [imageDisplay, setImageDisplay] = useState(
     `http://localhost:5010${petType.petType_Image}`
   );
+  const [error, setError] = useState({
+    name: false,
+    description: false,
+  });
 
   useEffect(() => {
     return () => {
@@ -95,45 +100,27 @@ const UpdatePetType = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (petType.petType_Name == '') {
-      Swal.fire({
-        title: 'Pet Type Name is required!',
-        showClass: {
-          popup: `
-                     animate__animated
-                     animate__fadeInUp
-                     animate__faster
-                   `,
-        },
-        hideClass: {
-          popup: `
-                     animate__animated
-                     animate__fadeOutDown
-                     animate__faster
-                   `,
-        },
+    if (petType.petType_Name == '' && petType.petType_Description == '') {
+      setError({
+        description: true,
+        name: true,
       });
       return;
     }
 
+    if (petType.petType_Name == '') {
+      setError((prev) => ({
+        ...prev,
+        name: true,
+      }));
+      return;
+    }
+
     if (petType.petType_Description == '') {
-      Swal.fire({
-        title: 'Pet Type Description is required!',
-        showClass: {
-          popup: `
-                     animate__animated
-                     animate__fadeInUp
-                     animate__faster
-                   `,
-        },
-        hideClass: {
-          popup: `
-                     animate__animated
-                     animate__fadeOutDown
-                     animate__faster
-                   `,
-        },
-      });
+      setError((prev) => ({
+        ...prev,
+        description: true,
+      }));
       return;
     }
 
@@ -185,35 +172,60 @@ const UpdatePetType = () => {
               <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
                 <div>
                   <p className='font-semibold text-2xl '>Pet Type Name:</p>
-                  <input
+                  <TextField
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg'
                     value={petType.petType_Name}
-                    onChange={(e) =>
+                    sx={{
+                      borderRadius: '10px',
+                      margin: '20px',
+                    }}
+                    className=' rounded-3xl p-3 m-10 w-full'
+                    onChange={(e) => {
                       setPetType((prev) => ({
                         ...prev,
                         petType_Name: e.target.value,
-                      }))
-                    }
+                      }));
+                      setError((prev) => ({
+                        ...prev,
+                        name: false,
+                      }));
+                    }}
+                    error={error.name}
+                    helperText={error.name ? 'Pet Type Name is required.' : ''}
                   />
                 </div>
                 <div>
                   <p className='font-semibold text-2xl '>
                     Pet Type Description:
                   </p>
-                  <textarea
+                  <TextField
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5
-                    w-full shadow-lg resize-none'
+                    sx={{
+                      borderRadius: '10px',
+                      margin: '20px',
+                    }}
+                    multiline
+                    className='rounded-3xl p-3 m-5
+                    w-full resize-none'
                     rows='7'
                     value={petType.petType_Description}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       setPetType((prev) => ({
                         ...prev,
                         petType_Description: e.target.value,
-                      }))
+                      }));
+                      setError((prev) => ({
+                        ...prev,
+                        description: false,
+                      }));
+                    }}
+                    error={error.description}
+                    helperText={
+                      error.description
+                        ? 'Pet Type Description is required.'
+                        : ''
                     }
-                  ></textarea>
+                  />
                 </div>
 
                 <div className='flex justify-between'>
