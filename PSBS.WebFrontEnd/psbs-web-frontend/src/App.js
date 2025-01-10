@@ -8,7 +8,8 @@ import PointRuleList from "./pages/admins/pointRule/pointRuleList/PointRuleList"
 import TreatmentList from "./pages/admins/treatment/TreatmentList";
 import ServiceTypeList from "./pages/admins/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/roomtype/RoomTypeList";
-
+import MedicineUpdateForm from "./pages/admins/medicines/update-form/MedicineUpdateForm";
+import MedicineDetailForm from "./pages/admins/medicines/detail-form/MedicineDetailForm";
 
 function App() {
   return (
@@ -17,12 +18,14 @@ function App() {
         <Routes>
         <Route path="/customer" element={<Homepage />} />
         <Route path="/pointrule" element={<PointRuleList />} />
-        <Route path="/">
-            <Route index element={<Dashboard />} />
+          <Route path="/">
+          <Route index element={<Dashboard />} />
           </Route>
           <Route path="/medicines">
           <Route index element={<List />} />
           <Route path="new" element={<MedicineAddForm />} />
+          <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
+          <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
           </Route>
           <Route path="/treatments">
           <Route index element={<TreatmentList/>} /></Route>

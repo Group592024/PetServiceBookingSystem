@@ -3,95 +3,140 @@ import { TextField, Autocomplete, Button } from "@mui/material";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import { ToastContainer, toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-function MedicineAddForm() {
+function MedicineUpdateForm() {
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
   const [medicineName, setMedicineName] = useState("");
   const [treatmentFor, setTreatmentFor] = useState(null);
   const [image, setImage] = useState(null);
-  const [treatmentOptions, setTreatmentOptions] = useState([]); // Added state for treatmentOptions
+  const [treatmentOptions, setTreatmentOptions] = useState([]);
+  const { medicineId } = useParams();
+  console.log("Medicine ID:", medicineId);
 
   useEffect(() => {
-    const fetchTreatments = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("http://localhost:5003/api/Treatment/available");
-        const result = await response.json();
-        console.log(result);
+        const treatmentsResponse = await fetch(
+          "http://localhost:5003/api/Treatment/available"
+        );
+        const treatmentsResult = await treatmentsResponse.json();
 
-        if (response.ok && result.flag) {
-          // Prepend the "None" option
-          setTreatmentFor({ id: null, label: "None" });
-          setTreatmentOptions([
-            { id: null, label: "None" },
-            ...result.data.map((t) => ({
+        if (treatmentsResponse.ok && treatmentsResult.flag) {
+          setTreatmentOptions(
+            treatmentsResult.data.map((t) => ({
               id: t.treatmentId,
               label: t.treatmentName,
-            })),
-          ]);
+            }))
+          );
         } else {
-          console.error("Failed to adding treatments:", result.message || "Unknown error");
+          console.error(
+            "Failed to fetch treatments:",
+            treatmentsResult.message || "Unknown error"
+          );
+        }
+
+        const medicineResponse = await fetch(
+          `http://localhost:5003/Medicines/${medicineId}`
+        );
+        const medicineResult = await medicineResponse.json();
+
+        if (medicineResponse.ok && medicineResult.flag) {
+          const medicine = medicineResult.data;
+          setMedicineName(medicine.medicineName);
+          setTreatmentFor({
+            id: medicine.treatmentId, 
+            label: medicine.treatmentName, 
+          });
+
+          if (medicine.medicineImage) {
+            setImage(`http://localhost:5003${medicine.medicineImage}`);
+          }
+        } else {
+          console.error(
+            "Failed to fetch medicine details:",
+            medicineResult.message || "Unknown error"
+          );
         }
       } catch (error) {
-        console.error("Error adding treatments:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
-    fetchTreatments();
-  }, []);
-  
+    fetchData();
+  }, [medicineId]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!medicineName || !treatmentFor || treatmentFor.id === null || !image) {
+    console.log("Medicine Name:", medicineName);
+    console.log("Treatment For:", treatmentFor);
+
+    // Validate required fields
+    if (!medicineName || !treatmentFor || !treatmentFor.id) {
       toast.warning("Please fill all required fields.");
       return;
     }
 
     const formData = new FormData();
+    formData.append("medicineId", medicineId); 
     formData.append("medicineName", medicineName);
-    formData.append("treatmentId", treatmentFor.id);
-    formData.append("imageFile", document.getElementById("fileInput").files[0]);
+    formData.append("treatmentId", treatmentFor.id); 
 
+    if (image && typeof image === "string") {
+      formData.append("medicineImage", image); 
+    } else {
+      // If a new image is selected, leave medicineImage empty
+      formData.append("medicineImage", "");
+    }
+
+    // If user selects a new image file, append it as imageFile
+    const fileInput = document.getElementById("fileInput");
+    if (fileInput.files[0]) {
+      formData.append("imageFile", fileInput.files[0]);
+    }
+
+    // Log FormData entries for debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
+    // Submit the request
     try {
       const response = await fetch("http://localhost:5003/Medicines", {
-        method: "POST",
+        method: "PUT",
         body: formData,
       });
 
-      const data = await response.json();
       if (response.ok) {
-        toast.success(data.message || "Medicine added successfully!");
-        handleCancel();
-        navigate("/medicines"); 
+        console.log("Updated Treatment For:", treatmentFor);
+
+        const data = await response.json();
+        toast.success(data.message || "Medicine updated successfully!");
+        navigate("/medicines");
       } else {
-        toast.error("Error: " + data.message);
+        const errorData = await response.json();
+        toast.error("Error: " + (errorData.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while adding the medicine.");
+      toast.error("An error occurred while updating the medicine.");
     }
   };
 
-  const handleCancel = () => {
-    setMedicineName("");
-    setTreatmentFor({ id: null, label: "None" }); 
-    setImage(null); // Reset image preview
-    document.getElementById("fileInput").value = ""; // Reset file input value
-    toast.warning("Reset the form.");
-  };
-
-  // Handle image file change
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
-      setImage(URL.createObjectURL(file)); // Create image URL for preview
+      setImage(file); // Store the actual file for upload
     } else {
       alert("Please select a valid image file");
     }
   };
+  const handleCancel = () => {
+    navigate("/medicines"); // Redirect to the medicine list page
+  };
+
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -102,7 +147,7 @@ function MedicineAddForm() {
             {/* Form Card */}
             <div className="w-full flex flex-col justify-between">
               <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-                Add Medicine
+                Update Medicine
               </h2>
               <form onSubmit={handleSubmit}>
                 {/* Medicine Name TextField */}
@@ -145,7 +190,7 @@ function MedicineAddForm() {
                     onChange={handleFileChange}
                     className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
                   />
-                  {image && (
+                  {image && typeof image !== "string" && (
                     <p className="text-sm text-gray-500 mt-2">
                       Selected File: {image.name}
                     </p>
@@ -177,13 +222,13 @@ function MedicineAddForm() {
           </div>
 
           {/* Conditionally Display Image Preview */}
-          {image && (
+          {image && typeof image === "string" && (
             <div
               className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between"
               style={{ height: "396px" }}
             >
               <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
-                Image Preview
+                Medicine Image
               </h3>
               <img
                 src={image}
@@ -192,11 +237,26 @@ function MedicineAddForm() {
               />
             </div>
           )}
+          {image && typeof image !== "string" && (
+            <div
+              className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between"
+              style={{ height: "396px" }}
+            >
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+                New Image Preview
+              </h3>
+              <img
+                src={URL.createObjectURL(image)}
+                alt="Preview"
+                className="w-full h-64 object-contain rounded-lg shadow-lg"
+              />
+            </div>
+          )}
         </div>
+        <ToastContainer />
       </div>
-      <ToastContainer/>
     </div>
   );
 }
 
-export default MedicineAddForm;
+export default MedicineUpdateForm;
