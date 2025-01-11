@@ -3,9 +3,27 @@ import "./style.css";
 
 const NavbarCustomer = () => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [userData, setUserData] = useState({
+    name: "Admin", // Mặc định là Admin nếu không có thông tin
+    avatar: "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg", // Mặc định hình ảnh avatar
+  });
+
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
+
+  // Lấy thông tin người dùng từ localStorage (hoặc sessionStorage)
+  useEffect(() => {
+    const savedUserData = localStorage.getItem("userData"); // Giả sử lưu trữ trong localStorage
+    if (savedUserData) {
+      const parsedData = JSON.parse(savedUserData);
+      setUserData({
+        name: parsedData.name || "Admin", // Lấy tên người dùng
+        avatar: parsedData.avatar || "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg", // Lấy ảnh đại diện
+      });
+    }
+  }, []);
+
   useEffect(() => {
     const navbarLinks = document.querySelectorAll(".navbar-links li a");
 
@@ -89,16 +107,16 @@ const NavbarCustomer = () => {
       </div>
 
       {/* Profile Avatar */}
-      <div className="navbar-profile">
+      <div className="navbar-profile" onClick={toggleDropdown}>
         <img
-          src="https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg"
+          src={userData.avatar} // Hiển thị avatar từ state
           alt="Profile Avatar"
           className="profile-avatar"
-        //   onClick={toggleDropdown}
         />
         {dropdownVisible && (
           <div className="dropdown-menu">
             <ul>
+              <li>{userData.name}</li> {/* Hiển thị tên người dùng */}
               <li>View Profile</li>
               <li>Logout</li>
             </ul>

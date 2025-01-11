@@ -48,15 +48,48 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result); // Trả về danh sách tài khoản nếu tìm thấy
         }
+        [HttpGet("deleted")]
+        public async Task<ActionResult<List<GetAccountDTO>>> GetDeletedAccounts() // Lấy danh sách tài khoản đã bị xóa
+        {
+            var result = await account.GetDeletedAccounts(); // Gọi phương thức GetDeletedAccounts từ repository
+            if (result == null )
+            {
+                return NotFound(new { Message = "No deleted accounts found" }); // Nếu không tìm thấy tài khoản bị xóa, trả về lỗi
+            }
+
+            return Ok(result); // Trả về danh sách tài khoản bị xóa nếu có
+        }
+
+        [HttpGet("active")]
+        public async Task<ActionResult<List<GetAccountDTO>>> GetActiveAccounts() // Lấy danh sách tài khoản chưa bị xóa
+        {
+            var result = await account.GetActiveAccounts(); // Gọi phương thức GetActiveAccounts từ repository
+            if (result == null)
+            {
+                return NotFound(new { Message = "No active accounts found" }); // Nếu không tìm thấy tài khoản chưa bị xóa, trả về lỗi
+            }
+
+            return Ok(result); // Trả về danh sách tài khoản chưa bị xóa nếu có
+        }
 
         [HttpPut]
-        public async Task<ActionResult<AddAccount>> UpdateAccount([FromForm] AddAccount model)// Cập nhật thông tin tài khoản người dùng
+        public async Task<ActionResult<AddAccount>> UpdateAccount([FromForm] AddAccount model, Guid accountId)// Cập nhật thông tin tài khoản người dùng
         {
             var result = await account.UpdateAccount(model);// Gọi phương thức UpdateAccount từ repository
             if (result == null)
                 return NotFound(new { Message = "Account not found" });// Nếu không tìm thấy tài khoản, trả về lỗi
 
             return Ok(result);// Trả về thông tin tài khoản đã cập nhật
+        }
+        [HttpDelete("delete/{accountId}")]
+        public async Task<IActionResult> DeleteAccount(Guid accountId)
+        {
+            var result = await account.DeleteAccount(accountId);
+
+            if (result == null)
+                return NotFound(new { Message = "Account not found" });// Nếu không tìm thấy tài khoản, trả về lỗi
+
+            return Ok(result);// Trả về thông tin tài khoản đã xóa
         }
         [HttpPut("ChangePassword{accountId}")] // Đổi mật khẩu của tài khoản người dùng
         public async Task<ActionResult<Response>> ChangePassword(Guid accountId, [FromBody] ChangePasswordDTO changePasswordDTO)

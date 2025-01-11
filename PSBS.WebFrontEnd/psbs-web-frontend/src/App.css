@@ -423,8 +423,9 @@ body{
 .content main .insights li .info p{
   color: var(--dark);
 }
+
 .content main .listContainer{
   background: var(--light);
   padding-bottom: 40px;
   border-radius: 20px;
-}
+
