@@ -22,13 +22,31 @@ const EditProfile = () => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
         .then((response) => response.json())
-        .then((data) => {
+        .then(async (data) => {
           setAccount(data);
-          setImagePreview(data.accountImage ? `http://localhost:5000/uploads/${data.accountImage}` : null);
+  
+          if (data.accountImage) {
+            try {
+              // Fetch image only if image exists
+              const response = await fetch(`http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`);
+              const imageData = await response.json();
+              
+              if (imageData.flag) {
+                const imgContent = imageData.data.fileContents;
+                const imgContentType = imageData.data.contentType;
+                setImagePreview(`data:${imgContentType};base64,${imgContent}`);
+              } else {
+                console.error("Error loading image:", imageData.message);
+              }
+            } catch (error) {
+              console.error("Error fetching image:", error);
+            }
+          }
         })
         .catch((error) => console.error("Error fetching account data:", error));
     }
   }, [accountId]);
+  
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
@@ -38,9 +56,41 @@ const EditProfile = () => {
     }
   };
 
-  const handleEdit = () => {
-    console.log("Edit functionality triggered.");
+  const handleEdit = async () => {
+    const formData = new FormData();
+    formData.append("AccountTempDTO.AccountId", accountId);
+    formData.append("AccountTempDTO.AccountName", account.accountName);
+    formData.append("AccountTempDTO.AccountEmail", account.accountEmail);
+    formData.append("AccountTempDTO.AccountPhoneNumber", account.accountPhoneNumber);
+    formData.append("AccountTempDTO.AccountGender", account.accountGender);
+    formData.append("AccountTempDTO.AccountDob", account.accountDob);
+    formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
+    formData.append("AccountTempDTO.RoleId", account.roleId);
+    formData.append("AccountTempDTO.isPickImage", account.accountImage ? true : false);
+  
+    if (account.accountImage) {
+      formData.append("UploadModel.ImageFile", account.accountImage);
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/Account`, {
+        method: "PUT",
+        body: formData,
+      });
+  
+      const result = await response.json();
+      if (result.flag) {
+        alert("Profile updated successfully!");
+        navigate(-1); // Quay lại trang trước
+      } else {
+        alert(`Error: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Error updating profile!");
+    }
   };
+  
 
   const handleBack = () => {
     navigate(-1); // Go back to previous page

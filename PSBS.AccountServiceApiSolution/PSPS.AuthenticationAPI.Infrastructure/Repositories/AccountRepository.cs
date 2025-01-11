@@ -388,6 +388,42 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
         }
         }
+        public async Task<Response> LoadImage(string fileName)
+        {
+            try
+            {
+                string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+
+                if (!Directory.Exists(uploadPath))
+                {
+                    throw new Exception("Image directory does not exist.");
+                }
+
+                string filePath = Path.Combine(uploadPath, fileName);
+
+                if (!File.Exists(filePath))
+                {
+                    throw new Exception("Image file not found.");
+                }
+                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                string mimeType = "image/jpeg"; 
+                if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                {
+                    mimeType = "image/png";
+                }
+                else if (filePath.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    mimeType = "image/gif";
+                }
+
+                return new Response(true, "User updated without image successfully") { Data= new FileContentResult(fileBytes, mimeType) };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"Internal server error: {ex.Message}");
+            }
+        }
+
 
         public async Task<Response> ChangePassword(Guid accountId, ChangePasswordDTO changePasswordDTO)// Thay đổi mật khẩu người dùng
     {

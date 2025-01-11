@@ -71,6 +71,17 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result); // Trả về danh sách tài khoản chưa bị xóa nếu có
         }
+        [HttpGet("loadImage")]
+        public async Task<ActionResult<List<GetAccountDTO>>> LoadImage(string filename)
+        {
+            var result = await account.LoadImage(filename); 
+            if (result == null)
+            {
+                return NotFound(new { Message = "No active accounts found" }); 
+            }
+
+            return Ok(result);
+        }
 
         [HttpPut]
         public async Task<ActionResult<AddAccount>> UpdateAccount([FromForm] AddAccount model, Guid accountId)// Cập nhật thông tin tài khoản người dùng

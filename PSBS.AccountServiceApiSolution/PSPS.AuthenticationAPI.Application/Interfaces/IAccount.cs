@@ -18,6 +18,7 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<Response> ForgotPassword(string AccountEmail);
         Task<bool> SendPasswordResetEmail(string AccountEmail, string newPassword);
         Task<Response> DeleteAccount(Guid AccountId);
+        Task<Response> LoadImage(string filename);
         Task<Response> GetActiveAccounts();
         Task<Response> GetDeletedAccounts();
 
