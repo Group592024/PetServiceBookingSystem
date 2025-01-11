@@ -91,7 +91,7 @@ const Register = () => {
       formData.append('UploadModel.ImageFile', AccountImage);
       formData.append('RegisterTempDTO.AccountImage', randomImageName); 
     } else {
-      formData.append('RegisterTempDTO.AccountImage', '');
+      formData.append('RegisterTempDTO.AccountImage', 'dummy');
     }
 
     try {

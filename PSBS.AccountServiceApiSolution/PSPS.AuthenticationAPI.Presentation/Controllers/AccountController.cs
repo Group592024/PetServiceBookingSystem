@@ -121,8 +121,5 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result);
         }
-
-
-
     }
 }

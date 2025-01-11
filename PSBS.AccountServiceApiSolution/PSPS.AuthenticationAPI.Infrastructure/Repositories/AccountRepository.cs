@@ -279,7 +279,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             if (!Directory.Exists(imagesPath))
             {
                 Directory.CreateDirectory(imagesPath);
-                return "default.png"; 
+                return "default.jpg"; 
             }
 
             var imageFiles = Directory.GetFiles(imagesPath, "*.*")
@@ -293,7 +293,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return Path.GetFileName(imageFiles[random.Next(imageFiles.Count)]);
             }
 
-            return "default.png"; 
+            return "default.jpg"; 
         }
 
 
