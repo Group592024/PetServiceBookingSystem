@@ -1,14 +1,21 @@
-import React, { useEffect, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect,forwardRef } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import './index.js';
+
 const Sidebar = forwardRef((_, ref) => {
+  const location = useLocation();
+
   useEffect(() => {
-    const sideLinks = document.querySelectorAll(
-      '.sidebar .side-menu li a:not(.logout)'
-    );
+    const sideLinks = document.querySelectorAll('.sidebar .side-menu li a:not(.logout)');
 
     sideLinks.forEach((item) => {
       const li = item.parentElement;
+      if (item.getAttribute('href') === location.pathname) {
+        li.classList.add('active');
+      } else {
+        li.classList.remove('active');
+      }
+
       item.addEventListener('click', () => {
         sideLinks.forEach((i) => {
           i.parentElement.classList.remove('active');
@@ -18,12 +25,12 @@ const Sidebar = forwardRef((_, ref) => {
     });
 
     return () => {
-      // Clean up event listeners
       sideLinks.forEach((item) => {
         item.removeEventListener('click', () => {});
       });
     };
-  }, []);
+  }, [location.pathname]);
+
   return (
     <div className='sidebar' ref={ref}>
       <a href='#' className='logo'>
@@ -34,52 +41,58 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className='side-menu'>
-        <li className='active'>
-          <a href='#'>
+        <li>
+          <Link to='/'>
             <i className='bx bxs-dashboard'></i>
             Dashboard
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/service'>
             <i className='bx bx-store-alt'></i>
             Service
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/medicines'>
+            <i className='bx bxs-capsule'></i>
+            Medicines
+          </Link>
+        </li>
+        <li>
+          <Link to='/room'>
             <i className='bx bx-home-heart'></i>
             Room
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/camera'>
             <i className='bx bxs-webcam'></i>
             Camera
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/pet'>
             <i className='bx bxs-dog'></i>
             Pet
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/gift'>
             <i className='bx bx-gift'></i>
             Gift
-          </a>
+          </Link>
         </li>
         <li>
-          <a href='#'>
+          <Link to='/voucher'>
             <i className='bx bx-wallet'></i>
             Voucher
-          </a>
+          </Link>
         </li>
         <li>
           <Link to='/petType'>
-          <i class='bx bxs-cat'></i>
-          Pet Type
+            <i className='bx bxs-cat'></i>
+            Pet Type
           </Link>
         </li>
       </ul>
