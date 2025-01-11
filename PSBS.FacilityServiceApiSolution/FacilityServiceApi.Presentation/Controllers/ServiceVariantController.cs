@@ -78,7 +78,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             var service = await _service.GetByIdAsync(serviceVariant.serviceId);
             if (service == null)
             {
-                return NotFound(new Response(false, $"Service with ID {service.serviceId} not found"));
+                return NotFound(new Response(false, $"Service with ID {serviceVariant.serviceId} not found"));
             }
 
             var existingVariant = await _serviceVariant.GetByAsync(x => x.serviceId == serviceVariant.serviceId && x.serviceContent.ToLower().Trim().Equals(serviceVariant.serviceContent.ToLower().Trim()));

@@ -26,6 +26,7 @@ namespace PetApi.Infrastructure.Data
                 .HasMany(p => p.PetBreeds)
                 .WithOne(p => p.PetType)
                 .HasForeignKey(p => p.PetType_ID)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 
             modelBuilder.Entity<Pet>()

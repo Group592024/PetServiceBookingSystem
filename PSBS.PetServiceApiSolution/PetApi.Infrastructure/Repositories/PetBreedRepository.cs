@@ -1,9 +1,9 @@
-﻿using PetApi.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using PetApi.Application.Interfaces;
 using PetApi.Domain.Entities;
 using PetApi.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace PetApi.Infrastructure.Repositories
@@ -73,6 +73,43 @@ namespace PetApi.Infrastructure.Repositories
             {
                 LogExceptions.LogException(ex);
                 return new Response(false, "Error occurred performing delete operation on pet breed");
+            }
+        }
+
+        public async Task<Response> DeleteByPetTypeIdAsync(Guid petTypeId)
+        {
+            try
+            {
+                var breeds = await context.PetBreeds
+                                          .Where(b => b.IsDelete == false && b.PetType_ID == petTypeId)
+                                          .ToListAsync();
+                foreach (var breed in breeds)
+                {
+                    breed.IsDelete = true;
+                    context.PetBreeds.Update(breed);
+                    await context.SaveChangesAsync();
+                }
+                return new Response(true, $"Pet breeds with pet type ID {petTypeId} is marked as soft deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred performing soft delete on pet breed with pet type ID");
+            }
+        }
+
+        public async Task<bool> CheckIfPetTypeHasPetBreed(Guid petTypeId)
+        {
+            try
+            {
+                var flag = await context.PetBreeds
+                                           .AnyAsync(b => b.PetType_ID == petTypeId);
+                return flag;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred when checking");
             }
         }
 

@@ -31,7 +31,8 @@ namespace PetApi.Application.DTOs.Conversions
                     pet!.PetType_ID,
                     pet.PetType_Name,
                     pet.PetType_Image,
-                    pet.PetType_Description);
+                    pet.PetType_Description,
+                pet.IsDelete);
                 return (singlePet, null);
             }
 
@@ -43,7 +44,8 @@ namespace PetApi.Application.DTOs.Conversions
                     p.PetType_ID,
                 p.PetType_Name,
                 p.PetType_Image,
-                p.PetType_Description)).ToList();
+                p.PetType_Description,
+                p.IsDelete)).ToList();
 
                 return (null, _pets);
             }
