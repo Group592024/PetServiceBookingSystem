@@ -87,9 +87,9 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
-        public async Task<ActionResult<Response>> UpdatePetType([FromRoute] Guid id, [FromForm] CreatePetTypeDTO pet, IFormFile? imageFile = null)
+        public async Task<ActionResult<Response>> UpdatePetType([FromRoute] Guid id, [FromForm] UpdatePetTypeDTO pet, IFormFile? imageFile = null)
         {
-            Console.WriteLine("id " + id);
+            Console.WriteLine("pet " + pet);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -101,6 +101,7 @@ namespace PetApi.Presentation.Controllers
                 existingPet.PetType_Name != pet.PetType_Name ||
 
                 existingPet.PetType_Description != pet.PetType_Description ||
+                existingPet.IsDelete != pet.IsDelete ||
                 imageFile != null;
 
             if (!hasChanges)
@@ -118,6 +119,11 @@ namespace PetApi.Presentation.Controllers
             // Chuyển đổi và cập nhật
             var updatedEntity = PetTypeConversion.ToEntity(pet, imagePath);
             updatedEntity.PetType_ID = id;
+            Console.WriteLine("update entity: " + updatedEntity.PetType_ID);
+            Console.WriteLine("update entity: " + updatedEntity.PetType_Name);
+            Console.WriteLine("update entity: " + updatedEntity.PetType_Description);
+            Console.WriteLine("update entity: " + updatedEntity.PetType_Image);
+            Console.WriteLine("update entity: " + updatedEntity.IsDelete);
             var response = await petInterface.UpdateAsync(updatedEntity);
 
             Console.WriteLine("response ddaay: " + response);

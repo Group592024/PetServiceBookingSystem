@@ -22,6 +22,15 @@ namespace PetApi.Application.DTOs.Conversions
             IsDelete = false
         };
 
+        public static PetType ToEntity(UpdatePetTypeDTO pet, string imagePath) => new PetType()
+        {
+            PetType_ID = Guid.NewGuid(),
+            PetType_Name = pet.PetType_Name,
+            PetType_Description = pet.PetType_Description,
+            PetType_Image = imagePath,
+            IsDelete = pet.IsDelete
+        };
+
         public static (PetTypeDTO?, IEnumerable<PetTypeDTO>?) FromEntity(PetType? pet, IEnumerable<PetType>? pets)
         {
             //return single
