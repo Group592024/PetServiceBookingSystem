@@ -1,7 +1,7 @@
 ﻿namespace PSPS.AccountAPI.Application.DTOs
 {
     public record RegisterAccountDTO(
-        ImageUploadModel UploadModel,
+        ImageUploadModel? UploadModel,
         RegisterDTO RegisterTempDTO
         );
 }

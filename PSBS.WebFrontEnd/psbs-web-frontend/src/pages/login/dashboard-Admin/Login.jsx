@@ -6,8 +6,6 @@ const Login = () => {
   const [AccountPassword, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-
-  // Hàm giải mã JWT thủ công
   const parseJwt = (token) => {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -20,10 +18,30 @@ const Login = () => {
 
     return JSON.parse(jsonPayload);
   };
+  const validateForm = () => {
+    if (!AccountEmail || !AccountPassword) {
+      setError('Email and password cannot be empty');
+      return false;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(AccountEmail)) {
+      setError('Please enter a valid email address');
+      return false;
+    }
+    if (AccountPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return false;
+    }
+
+    return true;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); // Clear any previous errors
+    setError(''); 
+    if (!validateForm()) {
+      return; 
+    }
 
     try {
       const response = await fetch('http://localhost:5000/api/Account/Login', {
@@ -38,22 +56,21 @@ const Login = () => {
       console.log(result);
 
       if (response.ok && result.flag) {
-        // Save token to session storage
         sessionStorage.setItem('token', result.data);
       
-        // Giải mã token để kiểm tra roleId
         const decodedToken = parseJwt(result.data);
-        console.log('Decoded Token:', decodedToken); // In token đã giải mã
-      
-        // Lấy giá trị role từ claim
-        const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-      
-        if (role === 'user') {
-          // Redirect to customer page for user
-          navigate('/customer');
+        console.log('Decoded Token:', decodedToken); 
+        const isAccountDeleted = decodedToken['AccountIsDeleted'] === 'True'; 
+        if (isAccountDeleted) {
+          setError('Your account has been deleted. Please contact support.');
         } else {
-          // Redirect to dashboard for other roles
-          navigate('/account');
+          const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+          if (role === 'user') {
+            navigate('/customer');
+          } else {
+            navigate('/account');
+          }
         }
       } else {
         setError(result.message || 'Login failed. Please try again.');
@@ -68,19 +85,16 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
-        {/* Left Section (Logo) */}
         <div className="w-1/2 bg-gray-300 flex items-center justify-center">
           <h1 className="text-4xl font-bold">LOGO</h1>
         </div>
 
-        {/* Right Section (Login Form) */}
         <div className="w-1/2 p-8">
           <div className="flex justify-end">
             <button className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Login</h2>
           <form onSubmit={handleLogin}>
-            {/* Email Input */}
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
               <input
@@ -93,7 +107,6 @@ const Login = () => {
                 required
               />
             </div>
-            {/* Password Input */}
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
               <input
@@ -106,15 +119,12 @@ const Login = () => {
                 required
               />
             </div>
-            {/* Error Message */}
             {error && (
               <p className="text-red-500 text-sm mb-4">{error}</p>
             )}
-            {/* Forgot Password */}
             <div className="text-right mb-4">
               <a href="/forgotpassword" className="text-cyan-500 hover:underline text-sm">Forgot Password?</a>
             </div>
-            {/* Login Button */}
             <button
               type="submit"
               className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
@@ -122,7 +132,6 @@ const Login = () => {
               LOGIN
             </button>
           </form>
-          {/* Register Link */}
           <div className="text-center mt-4 text-sm">
             <p>
               You don’t have an account?{' '}

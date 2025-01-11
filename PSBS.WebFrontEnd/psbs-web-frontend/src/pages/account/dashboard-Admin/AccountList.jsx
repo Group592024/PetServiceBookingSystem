@@ -7,17 +7,17 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-import { Link } from "react-router-dom"; // Import Link từ react-router-dom
+import { Link } from "react-router-dom"; 
+import "./AccountList.css"; 
 
 const AccountList = () => {
   const [accounts, setAccounts] = useState([]);
   const sidebarRef = useRef(null);
 
-  // Fetch dữ liệu từ API
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/Account/active");
+        const response = await fetch("http://localhost:5000/api/Account/all");
         const data = await response.json();
         if (data && data.data) {
           setAccounts(data.data);
@@ -30,8 +30,7 @@ const AccountList = () => {
     fetchAccounts();
   }, []);
 
-  // Hàm xử lý xóa
-  const handleDelete = async (accountId, accountName) => {
+  const handleDelete = async (accountId, accountName, isDeleted) => {
     Swal.fire({
       title: "Are you sure?",
       text: `You want to delete account: ${accountName}`,
@@ -43,16 +42,29 @@ const AccountList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:5000/api/Account/delete/${accountId}`, {
+          const apiUrl = isDeleted
+            ? `http://localhost:5000/api/Account/delete/permanent/${accountId}` 
+            : `http://localhost:5000/api/Account/delete/${accountId}`; 
+          const response = await fetch(apiUrl, {
             method: "DELETE",
           });
   
           if (response.ok) {
-            setAccounts((prev) => prev.filter((acc) => acc.accountId !== accountId));
-            Swal.fire("Deleted!", `${accountName} has been deleted.`, "success");
+            setAccounts((prev) =>
+              prev.filter((acc) => acc.accountId !== accountId)
+            );
+            Swal.fire(
+              "Deleted!",
+              `${accountName} has been deleted successfully.`,
+              "success"
+            );
           } else {
             const errorData = await response.json();
-            Swal.fire("Error!", errorData.message || "Failed to delete the account.", "error");
+            Swal.fire(
+              "Error!",
+              errorData.message || "Failed to delete the account.",
+              "error"
+            );
           }
         } catch (error) {
           console.error("Error deleting account:", error);
@@ -61,14 +73,22 @@ const AccountList = () => {
       }
     });
   };
-  
-
-  // Cấu hình cột DataGrid
-  const columns = [
+    const columns = [
     { field: "accountName", headerName: "Name", flex: 1 },
     { field: "accountEmail", headerName: "Email", flex: 1 },
     { field: "accountPhoneNumber", headerName: "Phone", flex: 1 },
     { field: "roleId", headerName: "Role", flex: 0.5 },
+    {
+      field: "status",
+      headerName: "Status",
+      flex: 0.5,
+      renderCell: (params) =>
+        params.row.accountIsDeleted ? (
+          <span style={{ color: "red", fontWeight: "bold" }}>Deleted</span>
+        ) : (
+          <span style={{ color: "green", fontWeight: "bold" }}>Active</span>
+        ),
+    },
     {
       field: "actions",
       headerName: "Actions",
@@ -76,26 +96,19 @@ const AccountList = () => {
       sortable: false,
       renderCell: (params) => (
         <div style={{ display: "flex", gap: "10px" }}>
-          {/* Nút chỉnh sửa dẫn tới trang chỉnh sửa */}
           <Link to={`/editprofile/${params.row.accountId}`}>
             <IconButton color="primary">
               <EditIcon />
             </IconButton>
           </Link>
-
-          {/* Nút xem chi tiết dẫn tới trang xem chi tiết */}
           <Link to={`/profile/${params.row.accountId}`}>
             <IconButton color="custom">
               <VisibilityIcon />
             </IconButton>
           </Link>
-
-          {/* Nút xóa */}
           <IconButton
             color="error"
-            onClick={() =>
-              handleDelete(params.row.accountId, params.row.accountName)
-            }
+            onClick={() => handleDelete(params.row.accountId, params.row.accountName)}
           >
             <DeleteIcon />
           </IconButton>
@@ -106,7 +119,6 @@ const AccountList = () => {
 
   return (
     <div className="flex h-screen bg-dark-grey-100">
-      {/* Sidebar */}
       <Sidebar ref={sidebarRef} />
 
       {/* Main Content */}
@@ -120,11 +132,14 @@ const AccountList = () => {
             <DataGrid
               rows={accounts.map((acc) => ({ ...acc, id: acc.accountId }))}
               columns={columns}
-              pageSize={10} // Giới hạn số dòng mỗi trang
-              rowsPerPageOptions={[10, 15, 20]} // Các tùy chọn chọn số dòng mỗi trang
+              pageSize={10}
+              rowsPerPageOptions={[10, 15, 20]}
               disableSelectionOnClick
               pagination
-              paginationMode="client" // Điều này bật chế độ phân trang
+              paginationMode="client"
+              getRowClassName={(params) =>
+                params.row.accountIsDeleted ? "row-deleted" : ""
+              }
             />
           </div>
         </div>
