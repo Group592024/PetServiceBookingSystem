@@ -78,11 +78,9 @@ function MedicineAddForm() {
   const handleCancel = () => {
     setMedicineName("");
     setTreatmentFor({ id: null, label: "None" }); 
-    setImage(null); // Reset image preview
-    document.getElementById("fileInput").value = ""; // Reset file input value
-    toast.warning("Reset the form.");
+    setImage(null);
+    navigate("/medicines");
   };
-
   // Handle image file change
   const handleFileChange = (event) => {
     const file = event.target.files[0];

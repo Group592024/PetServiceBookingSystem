@@ -14,7 +14,7 @@ const TreatmentList = () => {
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const response = await axios.get('http://localhost:5143/api/Treatment');
+        const response = await axios.get('http://localhost:5003/api/Treatment');
         console.log("API Response:", response.data); 
         const treatmentData = Array.isArray(response.data) ? response.data : response.data.data || [];
         setTreatments(treatmentData);
@@ -124,7 +124,7 @@ const TreatmentList = () => {
               formData.append("treatmentName", result.value.treatmentName);
               formData.append("isDeleted", result.value.isDeleted);
   
-              await axios.put(`http://localhost:5143/api/Treatment/${id}`, formData, {
+              await axios.put(`http://localhost:5003/api/Treatment/${id}`, formData, {
                 headers: {
                   'Content-Type': 'multipart/form-data'
                 }
@@ -160,7 +160,7 @@ const TreatmentList = () => {
         setTreatments(updatedTreatments);
   
         try {
-          const response = await axios.delete(`http://localhost:5143/api/Treatment/${id}`);
+          const response = await axios.delete(`http://localhost:5003/api/Treatment/${id}`);
           const successMessage = response.data.message || `Treatment "${treatment.treatmentName}" has been deleted.`;
           Swal.fire("Deleted!", successMessage, "success").then(() => {
             window.location.reload(); 
@@ -213,7 +213,7 @@ const TreatmentList = () => {
   
         try {
           console.log("Data being sent to API:", newTreatment);
-          const response = await axios.post("http://localhost:5143/api/Treatment", newTreatment, {
+          const response = await axios.post("http://localhost:5003/api/Treatment", newTreatment, {
             headers: {
               'Content-Type': 'multipart/form-data'
             },
