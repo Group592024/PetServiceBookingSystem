@@ -12,6 +12,7 @@ const UpdatePetType = () => {
   const sidebarRef = useRef(null);
 
   const [petType, setPetType] = useState({});
+  const [selectedOption, setSelectedOption] = useState(petType.isDelete);
   const [imageDisplay, setImageDisplay] = useState(
     `http://localhost:5010${petType.petType_Image}`
   );
@@ -83,6 +84,7 @@ const UpdatePetType = () => {
         ).then((response) => response.json());
 
         setPetType(data);
+        setSelectedOption(data.isDelete);
         setImageDisplay(`http://localhost:5010${data.petType_Image}`);
       } catch (error) {
         console.error('Failed fetching api', error);
@@ -96,6 +98,13 @@ const UpdatePetType = () => {
 
     fetchDataUpdate();
   }, []);
+
+  const handleOptionChange = (event) => {
+    setSelectedOption(event.target.value === 'true');
+  };
+
+  console.log(selectedOption);
+  console.log(petType);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -128,6 +137,7 @@ const UpdatePetType = () => {
     formData.append('petType_Name', petType.petType_Name);
     formData.append('petType_Description', petType.petType_Description);
     formData.append('imageFile', petType.petType_Image);
+    formData.append('isDelete', selectedOption);
 
     try {
       const response = await fetch(`http://localhost:5010/api/PetType/${id}`, {
@@ -226,6 +236,33 @@ const UpdatePetType = () => {
                         : ''
                     }
                   />
+                </div>
+                <div className='p-5 '                    >
+                  <p className='font-semibold text-2xl '>Pet Type Status:</p>
+                  <div>
+                    <label>
+                      <input
+                        type='radio'
+                        name='petTypeStatus'
+                        value='false'
+                        checked={selectedOption === false}
+                        onChange={handleOptionChange}
+                      />
+                      Active
+                    </label>
+                  </div>
+                  <div>
+                    <label>
+                      <input
+                        type='radio'
+                        name='petTypeStatus'
+                        value='true'
+                        checked={selectedOption === true}
+                        onChange={handleOptionChange}
+                      />
+                      Inactive
+                    </label>
+                  </div>
                 </div>
 
                 <div className='flex justify-between'>

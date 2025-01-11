@@ -15,23 +15,23 @@ const PetTypeList = () => {
 
   const [data, setData] = useState([]);
 
+  const fetchDataFunction = async () => {
+    try {
+      const fetchData = await fetch('http://localhost:5010/api/PetType');
+      const response = await fetchData.json();
+
+      const result = response.map((item) => ({
+        id: item.petType_ID,
+        ...item,
+      }));
+
+      setData(result);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchDataFunction = async () => {
-      try {
-        const fetchData = await fetch('http://localhost:5010/api/PetType');
-        const response = await fetchData.json();
-
-        const result = response.map((item) => ({
-          id: item.petType_ID,
-          ...item,
-        }));
-
-        setData(result);
-      } catch (error) {
-        console.error('Error fetching data: ', error);
-      }
-    };
-
     fetchDataFunction();
   }, []);
 
@@ -64,7 +64,7 @@ const PetTypeList = () => {
                 'The pet type has been deleted.',
                 'success'
               );
-              window.location.reload();
+              fetchDataFunction();
             } else if (deleteResponse.status == 409) {
               Swal.fire(
                 'Error!',

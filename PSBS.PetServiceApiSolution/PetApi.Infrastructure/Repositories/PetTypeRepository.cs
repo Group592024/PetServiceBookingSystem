@@ -131,12 +131,13 @@ namespace PetApi.Infrastructure.Repositories
             {
                 var pet = await GetByIdAsync(entity.PetType_ID);
 
-                if (pet is null || pet.IsDelete)
+                if (pet is null)
                     return new Response(false, $"{entity.PetType_Name} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 pet.PetType_Name = entity.PetType_Name;
                 pet.PetType_Image = entity.PetType_Image;
                 pet.PetType_Description = entity.PetType_Description;
+                pet.IsDelete = entity.IsDelete;
                 context.PetTypes.Update(pet);
                 await context.SaveChangesAsync();
                 return new Response(true, $"{entity.PetType_Name} is updated successfully");
