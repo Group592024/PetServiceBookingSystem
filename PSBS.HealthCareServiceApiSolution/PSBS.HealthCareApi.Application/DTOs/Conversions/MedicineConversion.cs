@@ -1,4 +1,5 @@
-﻿using PSBS.HealthCareApi.Domain;
+﻿using PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs;
+using PSBS.HealthCareApi.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,34 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             {
                 var listMedicines = medicines!.Select(m =>
                     new MedicineDTO(m.medicineId, m.treatmentId, m.medicineName, m.medicineImage, null)).ToList();
+                return (null, listMedicines);
+            }
+
+            return (null, null);
+        }
+
+        public static (AdminMedicineListDTO?, IEnumerable<AdminMedicineListDTO>?) FromEntityAdmList(Medicine medicine, IEnumerable<Medicine>? medicines)
+        {
+            //return single
+            if (medicine != null || medicines == null)
+            {
+                var singleMedicine = new AdminMedicineListDTO
+                    (
+                        medicine!.medicineId,
+                        medicine.treatmentId,
+                        medicine.medicineName,
+                        medicine.medicineImage,
+                        medicine.isDeleted
+                    );
+                return (singleMedicine, null);
+            }
+
+            //return listy
+
+            if (medicines != null || medicine == null)
+            {
+                var listMedicines = medicines!.Select(m =>
+                    new AdminMedicineListDTO(m.medicineId, m.treatmentId, m.medicineName, m.medicineImage,m.isDeleted)).ToList();
                 return (null, listMedicines);
             }
 

@@ -1,14 +1,23 @@
 import React, { useEffect, forwardRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './index.js';
+
 const Sidebar = forwardRef((_, ref) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
-    const sideLinks = document.querySelectorAll(
-      '.sidebar .side-menu li a:not(.logout)'
-    );
+    const sideLinks = document.querySelectorAll('.sidebar .side-menu li a:not(.logout)');
 
     sideLinks.forEach((item) => {
       const li = item.parentElement;
+      if (item.getAttribute('href') === location.pathname) {
+        li.classList.add('active');
+      } else {
+        li.classList.remove('active');
+      }
+
       item.addEventListener('click', () => {
         sideLinks.forEach((i) => {
           i.parentElement.classList.remove('active');
@@ -18,12 +27,41 @@ const Sidebar = forwardRef((_, ref) => {
     });
 
     return () => {
-      // Clean up event listeners
       sideLinks.forEach((item) => {
         item.removeEventListener('click', () => {});
       });
     };
-  }, []);
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure? You want to log out?",
+      text: "You are about to log out from your account. Make sure you have saved your progress.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#4CD630FF",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("jwtToken");
+        sessionStorage.removeItem("jwtToken");
+        localStorage.removeItem("userData");
+        sessionStorage.removeItem("userData");
+
+        Swal.fire({
+          title: "Logged out",
+          text: "You have been logged out successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/login", { replace: true });
+        });
+      }
+    });
+  };
+
   return (
     <div className='sidebar' ref={ref}>
       <a href='#' className='logo'>
@@ -34,58 +72,71 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className='side-menu'>
-        <li className='active'>
-          <a href='#'>
+        <li className={location.pathname === '/' ? 'active' : ''}>
+          <Link to='/'>
             <i className='bx bxs-dashboard'></i>
             Dashboard
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/service' ? 'active' : ''}>
+          <Link to='/service'>
             <i className='bx bx-store-alt'></i>
             Service
+          </Link>
+        </li>
+        <li className={location.pathname === '/medicines' ? 'active' : ''}>
+          <Link to='/medicines'>
+            <i className='bx bxs-capsule'></i>
+            Medicines
+          </Link>
+        </li>
+ <li>
+          <a href="#">
+            <i className='bx bx-store-alt' ></i>
+            XXXXXXXXX
           </a>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/room' ? 'active' : ''}>
+          <Link to='/room'>
             <i className='bx bx-home-heart'></i>
             Room
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/camera' ? 'active' : ''}>
+          <Link to='/camera'>
             <i className='bx bxs-webcam'></i>
             Camera
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/pet' ? 'active' : ''}>
+          <Link to='/pet'>
             <i className='bx bxs-dog'></i>
             Pet
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/gift' ? 'active' : ''}>
+          <Link to='/gift'>
             <i className='bx bx-gift'></i>
             Gift
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href='#'>
+        <li className={location.pathname === '/voucher' ? 'active' : ''}>
+          <Link to='/voucher'>
             <i className='bx bx-wallet'></i>
             Voucher
-          </a>
+          </Link>
         </li>
-        <li>
+        <li className={location.pathname === '/petType' ? 'active' : ''}>
           <Link to='/petType'>
-          <i class='bx bxs-cat'></i>
-          Pet Type
+            <i className='bx bxs-cat'></i>
+            Pet Type
           </Link>
         </li>
       </ul>
+
       <ul className='side-menu'>
         <li>
-          <a href='#' className='logout'>
+          <a href='#' className='logout' onClick={handleLogout}>
             <i className='bx bx-log-out-circle'></i>
             Logout
           </a>

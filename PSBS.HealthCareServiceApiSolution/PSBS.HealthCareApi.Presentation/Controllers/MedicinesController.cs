@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PSBS.HealthCareApi.Application.DTOs;
 using PSBS.HealthCareApi.Application.Interfaces;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Collections.Generic;
 using PSPS.SharedLibrary.Responses;
 using PSBS.HealthCareApi.Application.DTOs.Conversions;
 using PSBS.HealthCareApi.Domain;
+using PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs;
+using PSBS.HealthCareApi.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,13 +15,20 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class MedicinesController(IMedicine medicineInterface) : ControllerBase
+    public class MedicinesController : ControllerBase
     {
+        private readonly IMedicine _medicineInterface;
+        private readonly HealthCareDbContext _context;
+        public MedicinesController(IMedicine medicineInterface, HealthCareDbContext context)
+        {
+            _medicineInterface = medicineInterface;
+            _context = context;
+        }
         // GET: <MedicinesController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MedicineDTO>>> GetMedicinesList()
         {
-            var medicines = await medicineInterface.GetAllAsync();
+            var medicines = await _medicineInterface.GetAllAsync();
             if (!medicines.Any())
             {
                 return NotFound(new Response(false, "No medicines detected"));
@@ -32,19 +41,37 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             });
         }
 
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<MedicineDTO>>> GetMedicinesListAllAttribute()
+        {
+            var medicines = await _medicineInterface.GetAllAttributeAsync();
+            if (!medicines.Any())
+            {
+                return NotFound(new Response(false, "No medicines detected"));
+            }
+            var (_, listMedicines) = MedicineConversion.FromEntityAdmList(null!, medicines);
+
+            return Ok(new Response(true, "Medicines retrieved successfully!")
+            {
+                Data = listMedicines
+            });
+        }
+
         // GET <MedicinesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MedicineDTO>> GetMedicineById(Guid id)
+        public async Task<ActionResult<MedicineDetailDTO>> GetMedicineById(Guid id)
         {
-            var medicine = await medicineInterface.GetByIdAsync(id);
+            var medicine = await _medicineInterface.GetByIdAsync(id);
             if (medicine == null)
             {
                 return NotFound(new Response(false, "The medicine requested not found"));
             }
-            var (findingMedicine, _) = MedicineConversion.FromEntity(medicine, null!);
+
+            var treatment = await _context.Treatments.FirstOrDefaultAsync(t => t.treatmentId == medicine.treatmentId && !t.isDeleted);
+            MedicineDetailDTO detailDTO = new MedicineDetailDTO(medicine.medicineId, treatment.treatmentName, medicine.medicineName,medicine.medicineImage);
             return Ok(new Response(true, "The medicine retrieved successfully")
             {
-                Data = findingMedicine
+                Data = detailDTO
             });
         }
 
@@ -86,7 +113,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                 imagePath = $"/ImageMedicines/{fileName}";
             }
             var medicine = MedicineConversion.ToEntity(creattingMedicine, imagePath);
-            var response = await medicineInterface.CreateAsync(medicine);
+            var response = await _medicineInterface.CreateAsync(medicine);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
@@ -99,7 +126,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             {
                 return BadRequest(new Response(false, "Fail input") { Data = ModelState });
             }
-            var existingMedicine = await medicineInterface.GetByIdAsync(updateMedicine.medicineId);
+            var existingMedicine = await _medicineInterface.GetByIdAsync(updateMedicine.medicineId);
             if (existingMedicine == null)
             {
                 return NotFound(new Response(false, "The medicine is not found!"));
@@ -134,7 +161,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             {
                 getEntity.medicineImage = existingMedicine.medicineImage;
             }
-            var response = await medicineInterface.UpdateAsync(getEntity);
+            var response = await _medicineInterface.UpdateAsync(getEntity);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
@@ -142,17 +169,13 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<Response>> DeleteMedicine(Guid id)
         {
-            var existingMedicine = await medicineInterface.GetByIdAsync(id);
+            var existingMedicine = await _medicineInterface.GetByIdAsync(id);
             if(existingMedicine == null)
             {
                 return NotFound(new Response(false, "The medicine is not found!"));
             }
-            var response = await medicineInterface.DeleteAsync(existingMedicine);
-            if (response.Flag)
-            {
-                return Ok(new Response() { Flag = true, Message = "The medicine is deleted successfully" });
-            }
-            return BadRequest(new Response() { Flag = false, Message = "Failed to delete the medicine" });
+            var response = await _medicineInterface.DeleteAsync(existingMedicine);
+            return response.Flag ? response : response;
         }
     }
 }

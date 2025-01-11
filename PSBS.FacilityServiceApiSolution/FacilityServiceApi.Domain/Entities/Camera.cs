@@ -16,6 +16,7 @@ namespace FacilityServiceApi.Domain.Entities
         public string cameraStatus { get; set; }
         [Column("isDeleted")]
         public bool isDeleted { get; set; }
+        public virtual ICollection<RoomHistory>? RoomHistories { get; set; }
 
     }
 }

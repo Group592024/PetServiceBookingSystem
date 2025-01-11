@@ -83,6 +83,77 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, $"An error occurred: {ex.Message}");// Xử lý lỗi nếu có ngoại lệ
             }
         }
+        public async Task<Response> GetDeletedAccounts() // Lấy danh sách tài khoản bị xóa (AccountIsDeleted = true)
+        {
+            try
+            {
+                var accounts = await context.Accounts
+                    .Where(account => account.AccountIsDeleted)
+                    .ToListAsync(); // Lấy tất cả tài khoản có AccountIsDeleted = true
+
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response(false, "No deleted accounts found"); // Trả về lỗi nếu không có tài khoản
+                }
+
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
+                    account.AccountId ?? Guid.Empty,
+                    account.AccountName ?? string.Empty,
+                    account.AccountEmail ?? string.Empty,
+                    account.AccountPhoneNumber ?? string.Empty,
+                    account.AccountPassword ?? string.Empty,
+                    account.AccountGender ?? string.Empty,
+                    account.AccountDob ?? DateTime.MinValue,
+                    account.AccountAddress ?? string.Empty,
+                    account.AccountImage ?? string.Empty,
+                    account.AccountLoyaltyPoint,
+                    account.AccountIsDeleted,
+                    account.RoleId
+                )).ToList();
+
+                return new Response(true, "Deleted accounts retrieved successfully") { Data = accountDTOs };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}"); // Xử lý lỗi nếu có ngoại lệ
+            }
+        }
+
+        public async Task<Response> GetActiveAccounts() // Lấy danh sách tài khoản chưa bị xóa (AccountIsDeleted = false)
+        {
+            try
+            {
+                var accounts = await context.Accounts
+                    .Where(account => !account.AccountIsDeleted)
+                    .ToListAsync(); // Lấy tất cả tài khoản có AccountIsDeleted = false
+
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response(false, "No active accounts found"); // Trả về lỗi nếu không có tài khoản
+                }
+
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
+                    account.AccountId ?? Guid.Empty,
+                    account.AccountName ?? string.Empty,
+                    account.AccountEmail ?? string.Empty,
+                    account.AccountPhoneNumber ?? string.Empty,
+                    account.AccountPassword ?? string.Empty,
+                    account.AccountGender ?? string.Empty,
+                    account.AccountDob ?? DateTime.MinValue,
+                    account.AccountAddress ?? string.Empty,
+                    account.AccountImage ?? string.Empty,
+                    account.AccountLoyaltyPoint,
+                    account.AccountIsDeleted,
+                    account.RoleId
+                )).ToList();
+
+                return new Response(true, "Active accounts retrieved successfully") { Data = accountDTOs };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}"); // Xử lý lỗi nếu có ngoại lệ
+            }
+        }
 
 
 
@@ -116,6 +187,9 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             {
                 new(ClaimTypes.Name, account.AccountName!),
                 new(ClaimTypes.Email, account.AccountEmail!),
+                new(ClaimTypes.Role, account.RoleId!),
+
+
             };
             if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
                 claims.Add(new(ClaimTypes.Role, account.RoleId!)); // Thêm claim role nếu có
@@ -214,24 +288,40 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     return new Response(false, "Account does not exist!");
                 }
 
-                // Kiểm tra các trường bắt buộc
-                if (string.IsNullOrEmpty(model.AccountTempDTO.AccountName) ||
-                    string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
+                // Cập nhật từng trường nếu có giá trị
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountName))
                 {
-                    return new Response(false, "Name and Email cannot be empty!");
+                    account.AccountName = model.AccountTempDTO.AccountName;
                 }
 
-                // Validate Email
-                if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
                 {
-                    return new Response(false, "Invalid email!");
+                    // Validate Email nếu có
+                    if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+                    {
+                        return new Response(false, "Invalid email!");
+                    }
+                    account.AccountEmail = model.AccountTempDTO.AccountEmail;
                 }
 
-                // Validate số điện thoại
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber) &&
-                    !Regex.IsMatch(model.AccountTempDTO.AccountPhoneNumber, @"^\d{10,15}$"))
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
                 {
-                    return new Response(false, "Invalid phone number!");
+                    // Validate số điện thoại nếu có
+                    if (!Regex.IsMatch(model.AccountTempDTO.AccountPhoneNumber, @"^\d{10,15}$"))
+                    {
+                        return new Response(false, "Invalid phone number!");
+                    }
+                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
+                }
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
+                {
+                    account.AccountGender = model.AccountTempDTO.AccountGender;
+                }
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountAddress))
+                {
+                    account.AccountAddress = model.AccountTempDTO.AccountAddress;
                 }
                 if (model.AccountTempDTO.isPickImage == true)// Kiểm tra xem người dùng có chọn thay đổi ảnh đại diện không
             {
@@ -267,6 +357,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountDob = model.AccountTempDTO.AccountDob;
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
+                    account.RoleId = model.AccountTempDTO.RoleId;
+
                     context.Accounts.Update(account);
                     await context.SaveChangesAsync();
                     return new Response(true, "User updated successfully");
@@ -280,6 +372,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountDob = model.AccountTempDTO.AccountDob;
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
+                    account.RoleId = model.AccountTempDTO.RoleId;
+
                     context.Accounts.Update(account);
                     await context.SaveChangesAsync();
                     return new Response(true, "User updated without image successfully");
@@ -418,6 +512,38 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 // Log lỗi
                 Console.WriteLine($"Email send failed: {ex.Message}");
                 return false; // Nếu gửi email thất bại
+            }
+        }
+        public async Task<Response> DeleteAccount(Guid accountId)
+        {
+            try
+            {
+                // Tìm tài khoản trong cơ sở dữ liệu theo AccountId
+                var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
+
+                // Kiểm tra nếu tài khoản không tồn tại
+                if (account == null)
+                {
+                    return new Response(false, "Account not found.");
+                }
+
+                // Chuyển trạng thái AccountIsDeleted sang true (chặn tài khoản)
+                if (!account.AccountIsDeleted)
+                {
+                    account.AccountIsDeleted = true; // Thay đổi trạng thái tài khoản thành đã bị xóa (soft delete)
+                    context.Accounts.Update(account); // Cập nhật tài khoản trong cơ sở dữ liệu
+                    await context.SaveChangesAsync(); // Lưu thay đổi
+                    return new Response(true, "Account deleted successfully."); // Trả về kết quả thành công
+                }
+                else
+                {
+                    return new Response(false, "Account is already deleted."); // Trường hợp tài khoản đã bị xóa
+                }
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi nếu có
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
 

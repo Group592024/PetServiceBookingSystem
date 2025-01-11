@@ -8,5 +8,8 @@ namespace PetApi.Application.Interfaces
     {
         Task<Response> DeleteByPetTypeIdAsync(Guid petTypeId);
         Task<bool> CheckIfPetTypeHasPetBreed(Guid petTypeId);
+        Task<IEnumerable<PetBreed>> GetBreedsByPetTypeIdAsync(Guid petTypeId);
+        Task<IEnumerable<PetBreed>> ListAvailablePetBreedAsync();
+
     }
 }
