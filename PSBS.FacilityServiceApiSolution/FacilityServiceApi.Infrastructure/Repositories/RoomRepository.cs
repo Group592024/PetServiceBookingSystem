@@ -1,10 +1,17 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
+using System;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Threading.Channels;
+using System.Diagnostics.Metrics;
+using System.Diagnostics;
 
 namespace FacilityServiceApi.Infrastructure.Repositories
 {
@@ -14,6 +21,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                var roomTypeExists = await context.RoomType.AnyAsync(rt => rt.roomTypeId == entity.roomTypeId && !rt.isDeleted);
+                if (!roomTypeExists)
+                {
+                    return new Response(false, $"RoomType with ID {entity.roomTypeId} is not active or does not exist!");
+                }
                 var existingRoom = await context.Room.FirstOrDefaultAsync(r => r.roomId == entity.roomId);
                 if (existingRoom != null)
                 {
@@ -39,18 +51,90 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var room = await GetByIdAsync(entity.roomId);
+                var room = await context.Room
+                    .Where(r => r.roomId == entity.roomId && r.status == false)
+                    .FirstOrDefaultAsync();
+
                 if (room == null)
-                    return new Response(false, $"{entity.roomId} not found");
-                room.isDeleted = true;
-                context.Room.Update(room);
+                {
+                    return new Response(false, $"{entity.roomId} not found or is already deleted or in use.");
+                }
+
+                var activeRoomHistory = await context.RoomHistories
+                    .Where(rh => rh.RoomId == entity.roomId && rh.CheckOutDate > DateTime.Now && rh.Status == "In Use")
+                    .FirstOrDefaultAsync();
+
+                if (activeRoomHistory != null)
+                {
+                    return new Response(false, $"Room {entity.roomId} cannot be deleted until check-out is complete.");
+                }
+
+                var roomHistoryExists = await context.RoomHistories
+                    .Where(rh => rh.RoomId == entity.roomId)
+                    .AnyAsync();
+
+                if (!roomHistoryExists)
+                {
+                    if (!room.isDeleted)
+                    {
+                        room.isDeleted = true;
+                        context.Room.Update(room);
+                        await context.SaveChangesAsync();
+                        return new Response(true, $"{entity.roomId} has been marked as deleted successfully.");
+
+                    }
+                    else
+                    {
+                        context.Room.Remove(room);
+                        await context.SaveChangesAsync();
+                        return new Response(true, $"{entity.roomId} has been permanently deleted.");
+                    }
+                }
+                else
+                {
+                    var roomHistory = new RoomHistory
+                    {
+                        RoomId = room.roomId,
+                        Status = room.isDeleted ? "Permanently Deleted" : "Soft Deleted",
+                        CheckInDate = DateTime.Now,
+                        CheckOutDate = room.isDeleted ? DateTime.Now : DateTime.MinValue
+                    };
+
+                    context.RoomHistories.Add(roomHistory);
+
+                    if (!room.isDeleted)
+                    {
+                        room.isDeleted = true;
+                        context.Room.Update(room);
+                    }
+                    else
+                    {
+                        context.Room.Remove(room);
+                    }
+                }
+
+                if (room.hasCamera)
+                {
+                    var roomHistoryWithCamera = await context.RoomHistories
+                        .Where(rh => rh.RoomId == entity.roomId)
+                        .OrderByDescending(rh => rh.CheckInDate)
+                        .FirstOrDefaultAsync();
+
+                    if (roomHistoryWithCamera?.Camera != null)
+                    {
+                        var camera = roomHistoryWithCamera.Camera;
+                        camera.cameraStatus = "Inactive";
+                        context.Camera.Update(camera);
+                    }
+                }
+
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.roomId} is marked as deleted successfully");
+                return new Response(true, $"{entity.roomId} has been marked as deleted successfully.");
             }
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-                return new Response(false, "Error occurred performing soft delete on room");
+                return new Response(false, "Error occurred during the delete operation");
             }
         }
 
@@ -59,7 +143,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             try
             {
                 var rooms = await context.Room
-                                          .Where(r => r.isDeleted == false)
                                           .ToListAsync();
                 return rooms ?? new List<Room>();
             }
@@ -90,8 +173,13 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var room = await context.Room.FindAsync(id); 
-                return room != null ? room : null;
+                var room = await context.Room.FindAsync(id);
+                if (room == null)
+                {
+                    LogExceptions.LogException(new Exception($"Room with ID {id} not found"));
+                    return null;
+                }
+                return room;
             }
             catch (Exception ex)
             {
@@ -104,15 +192,69 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                // 1. Check if the room exists in the database and can be updated.
+                // 2. Check the room's usage status: If the room is "in use", it cannot be updated.
+                // 3. Check for incomplete usage history: If there is an incomplete usage history (not checked out), the room cannot be updated.
+                // 4. Record the history of deletion status changes: If the isDeleted status changes, create a history record for the room deletion or restoration action.
+                // 5. Update room information: Update attributes such as room type, description, status, images and other information.
+                // 6. Save changes to database: Save all changes to the database and return a success or failure result.
+
                 var room = await GetByIdAsync(entity.roomId);
                 if (room == null)
-                    return new Response(false, $"{entity.roomId} not found");
-                room.isDeleted = false;
-                room.roomTypeId = entity.roomTypeId;
-                room.description = entity.description;
-                room.status = entity.status;
-                room.roomImage = entity.roomImage;
-                room.hasCamera = entity.hasCamera;
+                {
+                    return new Response(false, $"Room with ID {entity.roomId} not found");
+                }
+
+                if (room.status == true)
+                {
+                    var activeRoomHistory = await context.RoomHistories
+                                                            .Where(rh => rh.RoomId == entity.roomId && rh.Status == "In Use" && rh.CheckOutDate == DateTime.MinValue)
+                                                            .FirstOrDefaultAsync();
+
+                    if (activeRoomHistory != null)
+                    {
+                        return new Response(false, $"Room {entity.roomId} is currently in use and cannot be updated.");
+                    }
+
+                    room.roomTypeId = entity.roomTypeId;
+                    room.description = entity.description;
+                    room.roomImage = entity.roomImage;
+                    room.hasCamera = entity.hasCamera;
+                    room.isDeleted = entity.isDeleted;
+                }
+                else
+                {
+                    var existingRoomHistory = await context.RoomHistories
+                        .Where(rh => rh.RoomId == room.roomId && rh.CheckOutDate == DateTime.MinValue)
+                        .FirstOrDefaultAsync();
+
+                    if (room.isDeleted != entity.isDeleted && existingRoomHistory != null)
+                    {
+                        existingRoomHistory.Status = entity.isDeleted ? "Soft Deleted" : "Not In Use"; 
+                        existingRoomHistory.CheckOutDate = DateTime.Now; 
+                        context.RoomHistories.Update(existingRoomHistory);
+                        await context.SaveChangesAsync();
+                    }
+
+                    room.isDeleted = entity.isDeleted;
+                    room.roomTypeId = entity.roomTypeId;
+                    room.description = entity.description;
+                    room.status = entity.status;
+                    room.roomImage = entity.roomImage;
+                    room.hasCamera = entity.hasCamera;
+                }
+
+                if (entity.isDeleted == false)
+                {
+                    var roomType = await context.RoomType.FindAsync(entity.roomTypeId);
+                    if (roomType != null && roomType.isDeleted == true)
+                    {
+                        roomType.isDeleted = false;
+                        context.RoomType.Update(roomType);
+                        await context.SaveChangesAsync();
+                    }
+                }
+
                 context.Room.Update(room);
                 await context.SaveChangesAsync();
 
@@ -125,5 +267,41 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Room>> ListAvailableRoomsAsync()
+        {
+            try
+            {
+                var rooms = await context.Room
+                                         .Where(r => !r.isDeleted)
+                                         .ToListAsync();
+                return rooms ?? new List<Room>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving non-deleted rooms");
+            }
+        }
+
+        public async Task<Room> GetRoomDetailsAsync(Guid roomId)
+        {
+            try
+            {
+                var room = await context.Room
+                                        .Where(r => r.roomId == roomId && !r.isDeleted)
+                                        .FirstOrDefaultAsync();
+
+                if (room == null)
+                {
+                    throw new InvalidOperationException($"Room with ID {roomId} not found or has been deleted");
+                }
+                return room;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving room details", ex);
+            }
+        }
     }
 }

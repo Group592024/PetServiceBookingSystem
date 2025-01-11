@@ -1,4 +1,5 @@
-﻿using PSBS.HealthCareApi.Domain;
+﻿
+using PSBS.HealthCareApi.Domain;
 using PSPS.SharedLibrary.Interface;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,6 @@ namespace PSBS.HealthCareApi.Application.Interfaces
 {
     public interface IMedicine : IGenericInterface<Medicine>
     {
-
+        Task<IEnumerable<Medicine>> GetAllAttributeAsync();
     }
 }

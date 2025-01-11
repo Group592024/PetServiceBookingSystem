@@ -41,7 +41,7 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetPetBreedsList()
         {
             var petBreeds = (await _petBreed.GetAllAsync())
-                           .Where(pb => !pb.IsDelete)
+                           //.Where(pb => !pb.IsDelete)
                            .ToList();
             if (!petBreeds.Any())
             {
@@ -59,9 +59,9 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<PetBreedDTO>> GetPetBreedById(Guid id)
         {
             var petBreed = await _petBreed.GetByIdAsync(id);
-            if (petBreed == null || petBreed.IsDelete)
+            if (petBreed == null)
             {
-                return NotFound(new Response(false, $"Pet breed with GUID {id} not found or is deleted"));
+                return NotFound(new Response(false, $"Pet breed with GUID {id} not found"));
             }
 
             var (petBreedDto, _) = PetBreedConversion.FromEntity(petBreed, null!);
@@ -102,9 +102,9 @@ namespace PetApi.Presentation.Controllers
             }
 
             var existingPetBreed = await _petBreed.GetByIdAsync(updatingPetBreed.petBreedId);
-            if (existingPetBreed == null || existingPetBreed.IsDelete)
+            if (existingPetBreed == null)
             {
-                return NotFound(new Response(false, $"Pet breed with ID {updatingPetBreed.petBreedId} not found or is deleted"));
+                return NotFound(new Response(false, $"Pet breed with ID {updatingPetBreed.petBreedId} not found"));
             }
             string? imagePath = imageFile != null
                 ? await HandleImageUpload(imageFile, existingPetBreed.PetBreed_Image)
@@ -120,17 +120,15 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeletePetBreed(Guid id)
         {
             var existingPetBreed = await _petBreed.GetByIdAsync(id);
-            if (existingPetBreed == null || existingPetBreed.IsDelete)
+            if (existingPetBreed == null)
             {
-                return NotFound(new Response(false, $"Pet breed with GUID {id} not found or already deleted"));
+                return NotFound(new Response(false, $"Pet breed with GUID {id} not found"));
             }
-
-            // Mark the pet breed as deleted (soft delete)
             var response = await _petBreed.DeleteAsync(existingPetBreed);
 
             return response.Flag
-                ? Ok(new Response(true, "Pet breed deleted successfully"))
-                : BadRequest(new Response(false, "Failed to delete the pet breed"));
+                ? Ok(response)
+                : BadRequest(response);
         }
 
         private async Task<string?> HandleImageUpload(IFormFile? imageFile, string? oldImagePath = null)
@@ -163,5 +161,37 @@ namespace PetApi.Presentation.Controllers
 
             return $"/Images/{fileName}";
         }
+        [HttpGet("byPetType/{petTypeId}")]
+        public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetBreedsByPetTypeId(Guid petTypeId)
+        {
+            var petBreeds = await _petBreed.GetBreedsByPetTypeIdAsync(petTypeId);
+            if (!petBreeds.Any())
+            {
+                return NotFound(new Response(false, "No pet breeds found for the given PetType ID"));
+            }
+
+            var (_, petBreedDtos) = PetBreedConversion.FromEntity(null!, petBreeds);
+            return Ok(new Response(true, "Pet breeds retrieved successfully")
+            {
+                Data = petBreedDtos
+            });
+        }
+        
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetAvailablePetBreeds()
+        {
+            var petbreeds = await _petBreed.ListAvailablePetBreedAsync();
+            if (!petbreeds.Any())
+            {
+                return NotFound(new Response(false, "No available rooms found"));
+            }
+
+            var (_, petBreedDtos) = PetBreedConversion.FromEntity(null!, petbreeds);
+            return Ok(new Response(true, "Available rooms retrieved successfully")
+            {
+                Data = petBreedDtos
+            });
+        }
+
     }
 }
