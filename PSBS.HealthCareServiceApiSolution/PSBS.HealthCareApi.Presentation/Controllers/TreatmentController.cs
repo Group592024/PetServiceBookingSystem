@@ -65,7 +65,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreateTreatment([FromForm] TreatmentDTO creatingTreatment)
+        public async Task<ActionResult<Response>> CreateTreatment([FromBody] TreatmentDTO creatingTreatment)
         {
             if (!ModelState.IsValid)
             {
@@ -78,18 +78,12 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdateTreatment(Guid id, [FromForm] TreatmentDTO updatingTreatment)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateTreatment([FromBody] TreatmentDTO updatingTreatment)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
-            }
-
-            var existingTreatment = await _treatmentService.GetByIdAsync(id);
-            if (existingTreatment == null)
-            {
-                return NotFound(new Response(false, $"Treatment with ID {id} not found"));
             }
 
             var updatedTreatmentEntity = TreatmentConversion.ToEntity(updatingTreatment);
@@ -109,9 +103,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
             var response = await _treatmentService.DeleteAsync(existingTreatment);
 
-            return response.Flag
-                ? Ok(response)
-                : BadRequest(response);
+            return Ok(response);
         }
 
         [HttpGet("available")]

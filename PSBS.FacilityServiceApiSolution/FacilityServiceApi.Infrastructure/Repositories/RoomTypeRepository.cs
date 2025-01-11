@@ -26,17 +26,12 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     return new Response(false, $"RoomType with name '{entity.name}' already exists!");
                 }
 
-                if (existingRoomTypeByName != null)
-                {
-                    return new Response(false, $"RoomType with name '{entity.name}' already exists!");
-                }
-
                 entity.isDeleted = false;
                 var currentEntity = context.RoomType.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
                 if (currentEntity != null && currentEntity.roomTypeId != Guid.Empty)
-                    return new Response(true, $"{entity.roomTypeId} added successfully");
+                    return new Response(true, $"{entity.name} added successfully") { Data = currentEntity };
                 else
                     return new Response(false, "Error occurred while adding the room type");
             }
@@ -85,7 +80,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     context.RoomType.Update(roomType);
                     await context.SaveChangesAsync();
 
-                    return new Response(true, "RoomType and associated rooms soft deleted successfully.");
+                    return new Response(true, "RoomType and associated rooms soft deleted successfully.") { Data = roomType };
                 }
                 else
                 {
@@ -95,7 +90,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                     if (linkedRooms.Any())
                     {
-                        return new Response(false, $"Cannot permanently delete RoomType with name {entity.name} because it has associated rooms.");
+                        return new Response(false, $"Cannot permanently delete RoomType with name {entity.name} because it has associated rooms.") ;
                     }
 
                     context.RoomType.Remove(roomType);
@@ -162,12 +157,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                // The UpdateAsync method handles updating room type information:
-                // 1. Checks if the room type exists in the database.
-                // 2. If the room type does not exist, returns a failure message.
-                // 3. If the room type has been deleted, checks if the isDeleted status has changed, and performs a restore.
-                // 4. Updates the room type's information fields such as name, description, hourly price, daily price, and isDeleted status.
-                // 5. Saves the changes to the database and returns a success or failure result.
 
                 var existingRoomType = await GetByIdAsync(entity.roomTypeId);
                 if (existingRoomType == null)
@@ -175,7 +164,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     return new Response(false, $"RoomType with ID {entity.roomTypeId} not found or already deleted");
                 }
                 var existingRoomTypeByName = await context.RoomType
-                                                                  .FirstOrDefaultAsync(rt => rt.name.ToLower() == entity.name.ToLower());
+                    .FirstOrDefaultAsync(rt => rt.name.ToLower() == entity.name.ToLower() && rt.roomTypeId != entity.roomTypeId);
                 if (existingRoomTypeByName != null)
                 {
                     return new Response(false, $"RoomType with name '{entity.name}' already exists!");
@@ -193,7 +182,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 context.RoomType.Update(existingRoomType);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.roomTypeId} updated successfully");
+                return new Response(true, $"{entity.name} updated successfully") { Data = existingRoomType };
             }
             catch (Exception ex)
             {

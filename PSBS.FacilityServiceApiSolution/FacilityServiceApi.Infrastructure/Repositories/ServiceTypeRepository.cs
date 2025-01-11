@@ -14,19 +14,23 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var existingServiceType = await context.ServiceType.FirstOrDefaultAsync(st => st.serviceTypeId == entity.serviceTypeId);
+                var existingServiceType = await context.ServiceType
+                    .FirstOrDefaultAsync(st => st.typeName.ToLower() == entity.typeName.ToLower());
+
                 if (existingServiceType != null)
                 {
-                    return new Response(false, $"ServiceType with ID {entity.serviceTypeId} already exists!");
+                    return new Response(false, $"ServiceType with Name {entity.typeName} already exists!");
                 }
+
                 entity.isDeleted = false;
                 entity.createAt = DateTime.UtcNow;
                 entity.updateAt = DateTime.UtcNow;
+
                 var currentEntity = context.ServiceType.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
                 if (currentEntity != null && currentEntity.serviceTypeId != Guid.Empty)
-                    return new Response(true, $"{entity.serviceTypeId} added successfully");
+                    return new Response(true, $"{entity.typeName} added successfully") { Data = currentEntity };
                 else
                     return new Response(false, "Error occurred while adding the service type");
             }
@@ -62,7 +66,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                     context.ServiceType.Remove(serviceType);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"ServiceType with Name {entity.typeName} has been permanently deleted.");
+                    return new Response(true, $"ServiceType with Name {entity.typeName} has been permanently deleted.") ;
                 }
                 else
                 {
@@ -76,7 +80,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     }
 
                     await context.SaveChangesAsync();
-                    return new Response(true, "ServiceType and related services soft deleted successfully.");
+                    return new Response(true, "ServiceType and related services soft deleted successfully.") { Data = serviceType };
                 }
             }
             catch (Exception ex)
@@ -144,6 +148,14 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     return new Response(false, $"ServiceType with ID {entity.serviceTypeId} not found or already deleted");
                 }
 
+                var duplicateServiceType = await context.ServiceType
+                    .FirstOrDefaultAsync(st => st.serviceTypeId != entity.serviceTypeId && st.typeName.ToLower() == entity.typeName.ToLower());
+
+                if (duplicateServiceType != null)
+                {
+                    return new Response(false, $"ServiceType with Name {entity.typeName} already exists!");
+                }
+
                 existingServiceType.typeName = entity.typeName;
                 existingServiceType.description = entity.description;
                 existingServiceType.updateAt = DateTime.UtcNow;
@@ -151,7 +163,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 context.ServiceType.Update(existingServiceType);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.serviceTypeId} updated successfully");
+                return new Response(true, $"{entity.typeName} updated successfully") { Data = existingServiceType };
             }
             catch (Exception ex)
             {

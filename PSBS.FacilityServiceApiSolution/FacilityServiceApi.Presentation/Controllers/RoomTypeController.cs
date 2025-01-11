@@ -67,7 +67,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreateRoomType([FromForm] RoomTypeDTO creatingRoomType)
+        public async Task<ActionResult<Response>> CreateRoomType([FromBody] RoomTypeDTO creatingRoomType)
         {
             if (!ModelState.IsValid)
             {
@@ -80,8 +80,8 @@ namespace FacilityServiceApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdateRoomType([FromForm] RoomTypeDTO updatingRoomType)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateRoomType([FromBody] RoomTypeDTO updatingRoomType)
         {
             if (!ModelState.IsValid)
             {
