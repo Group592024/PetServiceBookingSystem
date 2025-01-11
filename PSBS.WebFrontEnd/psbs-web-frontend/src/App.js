@@ -15,15 +15,15 @@ import PointRuleList from "./pages/admins/subTableInReservation/pointRuleList/Po
 import PaymentTypeList from "./pages/admins/subTableInReservation/paymentTypeList/PaymentTypeList";
 import BookingStatusList from "./pages/admins/subTableInReservation/bookingStatusList/BookingStatusList";
 import BookingTypeList from "./pages/admins/subTableInReservation/bookingTypeList/BookingTypeList";
-import TreatmentList from "./pages/admins/treatment/TreatmentList";
-import ServiceTypeList from "./pages/admins/servicetype/ServiceTypeList";
-import RoomTypeList from "./pages/admins/roomtype/RoomTypeList";
+import TreatmentList from "./pages/admins/subTableInFacilityAndHealthcare/treatment/TreatmentList";
 import MedicineUpdateForm from "./pages/admins/medicines/update-form/MedicineUpdateForm";
 import MedicineDetailForm from "./pages/admins/medicines/detail-form/MedicineDetailForm";
 import PetTypeList from './pages/admins/PetType/PetTypeList';
 import AddPetType from './pages/admins/PetType/AddPetType';
 import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
 import UpdatePetType from './pages/admins/PetType/UpdatePetType';
+import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
+import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
 
 function App() {
   return (
@@ -37,6 +37,9 @@ function App() {
             <Route path="paymentType" element={<PaymentTypeList />} />
             <Route path="bookingType" element={<BookingTypeList />} />
             <Route path="bookingStatus" element={<BookingStatusList />} />
+            <Route path="treatments" element={<TreatmentList />} />
+            <Route path="servicetypes" element={<ServiceTypeList />} />
+            <Route path="roomtypes" element={<RoomTypeList />} />
           </Route>
           <Route path="/medicines">
             <Route index element={<List />} />
@@ -44,9 +47,6 @@ function App() {
             <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
             <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
           </Route>
-          <Route path="/treatments" element={<TreatmentList />} />
-          <Route path="/servicetypes" element={<ServiceTypeList />} />
-          <Route path="/roomtypes" element={<RoomTypeList />} />
           <Route path="/petType">
             <Route index element={<PetTypeList />} />
             <Route path="add" element={<AddPetType />} />

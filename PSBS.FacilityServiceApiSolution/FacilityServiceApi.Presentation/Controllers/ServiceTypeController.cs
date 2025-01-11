@@ -66,7 +66,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreateServiceType([FromForm] ServiceTypeDTO creatingServiceType)
+        public async Task<ActionResult<Response>> CreateServiceType([FromBody] ServiceTypeDTO creatingServiceType)
         {
             if (!ModelState.IsValid)
             {
@@ -79,8 +79,8 @@ namespace FacilityServiceApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdateServiceType([FromForm] ServiceTypeDTO updatingServiceType)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateServiceType([FromBody] ServiceTypeDTO updatingServiceType)
         {
             if (!ModelState.IsValid)
             {
