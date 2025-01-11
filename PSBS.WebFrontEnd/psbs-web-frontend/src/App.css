@@ -61,7 +61,7 @@ body{
   background: var(--light);
   width: 230px;
   height: 100%;
-  z-index: 2000;
+  z-index: 1000;
   overflow-x: hidden;
   scrollbar-width: none;
   transition: all 0.3s ease;
@@ -384,7 +384,7 @@ body{
   cursor: pointer;
 }
 
-.content main .insights li .bx{
+.content main .insights li  .bx{
   width: 80px;
   height: 80px;
   border-radius: 10px;
@@ -394,22 +394,22 @@ body{
   justify-content: center;
 }
 
-.content main .insights li:nth-child(1) .bx{
+.content main .insights  .first .bx {
   background: var(--light-primary);
   color: var(--primary);
 }
 
-.content main .insights li:nth-child(2) .bx{
+.content main .insights  .second .bx{
   background: var(--light-warning);
   color: var(--warning);
 }
 
-.content main .insights li:nth-child(3) .bx{
+.content main .insights .third .bx{
   background: var(--light-success);
   color: var(--success);
 }
 
-.content main .insights li:nth-child(4) .bx{
+.content main .insights .fourth .bx{
   background: var(--light-danger);
   color: var(--danger);
 }
@@ -423,3 +423,9 @@ body{
 .content main .insights li .info p{
   color: var(--dark);
 }
+
+.content main .listContainer{
+  background: var(--light);
+  padding-bottom: 40px;
+  border-radius: 20px;
+

@@ -11,14 +11,16 @@ namespace PetApi.Presentation.Controllers
     public class PetTypeController : ControllerBase
     {
         private readonly IPetType petInterface;
+        private readonly IPetBreed _petBreed;
 
-        public PetTypeController(IPetType petInterface)
+        public PetTypeController(IPetType petInterface, IPetBreed petBreed)
         {
             this.petInterface = petInterface;
+            _petBreed = petBreed;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPets()
+        public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPetTypes()
         {
             var pets = await petInterface.GetAllAsync();
             if (!pets.Any())
@@ -66,14 +68,17 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreatePet([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
+        public async Task<ActionResult<Response>> CreatePetType([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            string imagePath = await HandleImageUpload(imageFile) ?? "default_image.jpg";
+            string imagePath = await HandleImageUpload(imageFile);
 
-
+            if (imagePath == null)
+            {
+                return BadRequest(new Response(false, "The uploaded file failed"));
+            }
 
             var getEntity = PetTypeConversion.ToEntity(pet, imagePath);
 
@@ -129,6 +134,23 @@ namespace PetApi.Presentation.Controllers
         {
             if (imageFile != null && imageFile.Length > 0)
             {
+
+                // Kiểm tra MIME type
+                var validImageTypes = new[] { "image/jpeg", "image/png", "image/gif", "image/webp" };
+                if (!validImageTypes.Contains(imageFile.ContentType))
+                {
+                    return null;
+                }
+
+                // Kiểm tra phần mở rộng
+                var validExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var fileExtension = Path.GetExtension(imageFile.FileName).ToLower();
+                if (!validExtensions.Contains(fileExtension))
+                {
+                    return null;
+                }
+
+
                 // Đường dẫn thư mục lưu ảnh
                 var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "images");
                 if (!Directory.Exists(imagesDirectory))
@@ -156,13 +178,36 @@ namespace PetApi.Presentation.Controllers
 
 
         [HttpDelete("{id:Guid}")]
-        public async Task<ActionResult<Response>> DeletePet(Guid id)
+        public async Task<ActionResult<Response>> DeletePetType(Guid id)
         {
-            var existingPet = await petInterface.GetByIdAsync(id);
-            if (existingPet == null)
-                return NotFound($"Pet with ID {id} not found");
-            var response = await petInterface.DeleteAsync(existingPet);
-            return response.Flag ? Ok(response) : BadRequest(response);
+            var existingPetType = await petInterface.GetByIdAsync(id);
+            if (existingPetType == null)
+                return NotFound($"Pet type with ID {id} not found");
+            Response response;
+            var checkPetType = await _petBreed.CheckIfPetTypeHasPetBreed(id);
+
+
+            if (!existingPetType.IsDelete)
+            {
+                response = await petInterface.DeleteAsync(existingPetType);
+                var deletePetBreed = await _petBreed.DeleteByPetTypeIdAsync(id);
+                return response.Flag ? Ok(response) : BadRequest(response);
+            }
+            else
+            {
+                if (!checkPetType)
+                {
+                    response = await petInterface.DeleteSecondAsync(existingPetType);
+                    return response.Flag ? Ok(response) : BadRequest(response);
+                }
+                else
+                {
+                    return Conflict("Can't delete this pet type because it has pet breed");
+                }
+            }
+
+
+
         }
     }
 }

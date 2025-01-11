@@ -6,7 +6,8 @@ namespace PetApi.Application.DTOs
         Guid PetType_ID,
          [Required] string PetType_Name,
          string? PetType_Image,
-         string? PetType_Description
+         string? PetType_Description,
+         bool IsDelete
          );
 
 }

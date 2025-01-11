@@ -30,6 +30,7 @@ namespace FacilityServiceApi.Domain.Entities
         public bool isDeleted { get; set; }
 
         public virtual ServiceType? ServiceType { get; set; }
+        public virtual ICollection<BookingServiceItem>? BookingServiceItems { get; set; }
 
     }
 }

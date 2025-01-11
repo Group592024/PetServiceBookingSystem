@@ -1,13 +1,39 @@
-import React, { useEffect, forwardRef } from "react";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import React, { useEffect, forwardRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import './index.js';
 
 const Sidebar = forwardRef((_, ref) => {
-  const navigate = useNavigate(); // Khởi tạo navigate từ react-router-dom
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const sideLinks = document.querySelectorAll('.sidebar .side-menu li a:not(.logout)');
+
+    sideLinks.forEach((item) => {
+      const li = item.parentElement;
+      if (item.getAttribute('href') === location.pathname) {
+        li.classList.add('active');
+      } else {
+        li.classList.remove('active');
+      }
+
+      item.addEventListener('click', () => {
+        sideLinks.forEach((i) => {
+          i.parentElement.classList.remove('active');
+        });
+        li.classList.add('active');
+      });
+    });
+
+    return () => {
+      sideLinks.forEach((item) => {
+        item.removeEventListener('click', () => {});
+      });
+    };
+  }, [location.pathname]);
 
   const handleLogout = () => {
-    // Hiển thị thông báo với nút Yes và No
     Swal.fire({
       title: "Are you sure? You want to log out?",
       text: "You are about to log out from your account. Make sure you have saved your progress.",
@@ -15,26 +41,21 @@ const Sidebar = forwardRef((_, ref) => {
       showCancelButton: true,
       confirmButtonText: "Yes",
       cancelButtonText: "No",
-      confirmButtonColor: "#4CD630FF", // Màu xanh cho Yes
-      cancelButtonColor: "#d33", // Màu đỏ cho No
+      confirmButtonColor: "#4CD630FF",
+      cancelButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Xóa JWT token từ localStorage hoặc sessionStorage
         localStorage.removeItem("jwtToken");
         sessionStorage.removeItem("jwtToken");
-
-        // Xóa thêm dữ liệu người dùng nếu lưu trữ
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
 
-        // Hiển thị thông báo thành công
         Swal.fire({
           title: "Logged out",
           text: "You have been logged out successfully!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          // Sau khi đăng xuất, chuyển hướng người dùng về trang login và thay thế lịch sử
           navigate("/login", { replace: true });
         });
       }
@@ -42,63 +63,81 @@ const Sidebar = forwardRef((_, ref) => {
   };
 
   return (
-    <div className="sidebar" ref={ref}>
-      <a href="#" className="logo">
+    <div className='sidebar' ref={ref}>
+      <a href='#' className='logo'>
         <i className='bx bxs-cat'></i>
-        <div className="logo-name">
+        <div className='logo-name'>
           <span>Pet</span>Ease
         </div>
       </a>
 
-      <ul className="side-menu">
-        <li className="active">
-          <a href="#">
-            <i className='bx bxs-dashboard' ></i>
+      <ul className='side-menu'>
+        <li className={location.pathname === '/' ? 'active' : ''}>
+          <Link to='/'>
+            <i className='bx bxs-dashboard'></i>
             Dashboard
-          </a>
+          </Link>
         </li>
-        <li>
+        <li className={location.pathname === '/service' ? 'active' : ''}>
+          <Link to='/service'>
+            <i className='bx bx-store-alt'></i>
+            Service
+          </Link>
+        </li>
+        <li className={location.pathname === '/medicines' ? 'active' : ''}>
+          <Link to='/medicines'>
+            <i className='bx bxs-capsule'></i>
+            Medicines
+          </Link>
+        </li>
+ <li>
           <a href="#">
             <i className='bx bx-store-alt' ></i>
             XXXXXXXXX
           </a>
         </li>
-        <li>
-          <a href="#">
-            <i className='bx bx-home-heart' ></i>
+        <li className={location.pathname === '/room' ? 'active' : ''}>
+          <Link to='/room'>
+            <i className='bx bx-home-heart'></i>
             Room
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href="#">
-            <i className='bx bxs-webcam' ></i>
+        <li className={location.pathname === '/camera' ? 'active' : ''}>
+          <Link to='/camera'>
+            <i className='bx bxs-webcam'></i>
             Camera
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href="#">
-            <i className='bx bxs-dog' ></i>
+        <li className={location.pathname === '/pet' ? 'active' : ''}>
+          <Link to='/pet'>
+            <i className='bx bxs-dog'></i>
             Pet
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href="#">
-            <i className='bx bx-gift' ></i>
+        <li className={location.pathname === '/gift' ? 'active' : ''}>
+          <Link to='/gift'>
+            <i className='bx bx-gift'></i>
             Gift
-          </a>
+          </Link>
         </li>
-        <li>
-          <a href="#">
-            <i className='bx bx-wallet' ></i>
+        <li className={location.pathname === '/voucher' ? 'active' : ''}>
+          <Link to='/voucher'>
+            <i className='bx bx-wallet'></i>
             Voucher
-          </a>
+          </Link>
+        </li>
+        <li className={location.pathname === '/petType' ? 'active' : ''}>
+          <Link to='/petType'>
+            <i className='bx bxs-cat'></i>
+            Pet Type
+          </Link>
         </li>
       </ul>
 
-      <ul className="side-menu">
+      <ul className='side-menu'>
         <li>
-          <a href="#" className="logout" onClick={handleLogout}>
-            <i className='bx bx-log-out-circle' ></i>
+          <a href='#' className='logout' onClick={handleLogout}>
+            <i className='bx bx-log-out-circle'></i>
             Logout
           </a>
         </li>
