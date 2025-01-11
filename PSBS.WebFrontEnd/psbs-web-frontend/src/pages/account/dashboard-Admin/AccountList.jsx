@@ -110,11 +110,11 @@ const AccountList = () => {
       <Sidebar ref={sidebarRef} />
 
       {/* Main Content */}
-      <div className="content flex-1">
+      <div className="content ">
         <Navbar sidebarRef={sidebarRef} />
-
-        {/* DataGrid Section */}
-        <div className="p-4 bg-white shadow-md rounded-md">
+<main>
+   {/* DataGrid Section */}
+   <div className="p-4 bg-white shadow-md rounded-md">
           <h2 className="mb-4 text-xl font-bold">Account List</h2>
           <div style={{ height: 600, width: "80%" }}>
             <DataGrid
@@ -128,6 +128,8 @@ const AccountList = () => {
             />
           </div>
         </div>
+</main>
+       
       </div>
     </div>
   );
