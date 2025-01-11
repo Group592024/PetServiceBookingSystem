@@ -14,17 +14,65 @@ const Register = () => {
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
+  
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    return regex.test(email);
+  };
+
+ 
+  const validatePhoneNumber = (phoneNumber) => {
+    const regex = /^0\d{9}$/; 
+    return regex.test(phoneNumber);
+  };
+
+  const validatePassword = (password) => {
+    return password.length >= 6; 
+  };
+
+  const validateDob = (dob) => {
+    const birthDate = new Date(dob);
+    let age = new Date().getFullYear() - birthDate.getFullYear();  
+    const month = new Date().getMonth();
+    const day = new Date().getDate();
+  
+    if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
+      age--; 
+    }
+  
+    return age >= 10; 
+  };  
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-  
-    // check
+
+
     if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
       setError('Please fill in all required fields.');
       return;
     }
-  
+
+    if (!validateEmail(AccountEmail)) {
+      setError('Please enter a valid email address.');
+      return;
+    }
+
+    if (!validatePhoneNumber(AccountPhoneNumber)) {
+      setError('Please enter a valid phone number (starting with 0 and 9 digits).');
+      return;
+    }
+
+    if (!validatePassword(AccountPassword)) {
+      setError('Password must be at least 6 characters long.');
+      return;
+    }
+
+    if (!validateDob(AccountDob)) {
+      setError('You must be at least 10 years old.');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('RegisterTempDTO.AccountName', AccountName);
     formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
@@ -33,13 +81,11 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountGender', AccountGender);
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-  
-    // random name image
+
     const generateRandomName = () => {
       return `image_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.png`;
     };
-  
-    
+
     if (AccountImage) {
       const randomImageName = generateRandomName(); 
       formData.append('UploadModel.ImageFile', AccountImage);
@@ -47,7 +93,7 @@ const Register = () => {
     } else {
       formData.append('RegisterTempDTO.AccountImage', '');
     }
-  
+
     try {
       const response = await fetch('http://localhost:5000/api/Account/register', {
         method: 'POST',
@@ -56,10 +102,10 @@ const Register = () => {
         },
         body: formData,
       });
-  
+
       const result = await response.json();
       console.log('API Response:', result); 
-  
+
       if (response.ok && result.flag) {
         setSuccess('Registration successful! Please log in.');
         setTimeout(() => navigate('/login'), 2000);
@@ -71,25 +117,20 @@ const Register = () => {
       console.error(err);
     }
   };
-  
-  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
-        {/* Left Section (Logo) */}
         <div className="w-1/2 bg-gray-300 flex items-center justify-center">
           <h1 className="text-4xl font-bold">LOGO</h1>
         </div>
 
-        {/* Right Section (Register Form) */}
         <div className="w-1/2 p-8">
           <div className="flex justify-end">
             <button className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Register</h2>
           <form onSubmit={handleRegister}>
-            {/* Image Upload */}
             <div className="mb-4">
               <label htmlFor="image" className="block text-gray-700 font-medium">Profile Image</label>
               <input
@@ -99,7 +140,6 @@ const Register = () => {
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-            {/* Name Input */}
             <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 font-medium">Name</label>
               <input
@@ -112,7 +152,6 @@ const Register = () => {
                 required
               />
             </div>
-            {/* Email Input */}
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
               <input
@@ -125,7 +164,6 @@ const Register = () => {
                 required
               />
             </div>
-            {/* Phone Number Input */}
             <div className="mb-4">
               <label htmlFor="phone" className="block text-gray-700 font-medium">Phone Number</label>
               <input
@@ -138,7 +176,6 @@ const Register = () => {
                 required
               />
             </div>
-            {/* Password Input */}
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
               <input
@@ -151,7 +188,6 @@ const Register = () => {
                 required
               />
             </div>
-            {/* Gender Input */}
             <div className="mb-4">
               <label htmlFor="gender" className="block text-gray-700 font-medium">Gender</label>
               <select
@@ -166,7 +202,6 @@ const Register = () => {
                 <option value="female">Female</option>
               </select>
             </div>
-            {/* Date of Birth Input */}
             <div className="mb-4">
               <label htmlFor="dob" className="block text-gray-700 font-medium">Date of Birth</label>
               <input
@@ -178,7 +213,6 @@ const Register = () => {
                 required
               />
             </div>
-            {/* Address Input */}
             <div className="mb-4">
               <label htmlFor="address" className="block text-gray-700 font-medium">Address</label>
               <input
@@ -191,11 +225,8 @@ const Register = () => {
                 required
               />
             </div>
-            
-            {/* Error or Success Message */}
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
-            {/* Register Button */}
             <button
               type="submit"
               className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
@@ -203,7 +234,6 @@ const Register = () => {
               REGISTER
             </button>
           </form>
-          {/* Login Link */}
           <div className="text-center mt-4 text-sm">
             <p>
               Already have an account?{' '}

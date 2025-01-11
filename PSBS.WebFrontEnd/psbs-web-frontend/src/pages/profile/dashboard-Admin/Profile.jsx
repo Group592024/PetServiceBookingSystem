@@ -22,16 +22,14 @@ const Profile = () => {
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar /> {/* Sidebar */}
-
+      <Sidebar /> 
       <div className="content flex-1 overflow-y-auto">
-        <Navbar /> {/* Navbar */}
+        <Navbar />
 
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Profile</h2>
 
           <div className="flex flex-wrap gap-8">
-            {/* Profile Image Section */}
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
               <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
                 <img
@@ -44,11 +42,8 @@ const Profile = () => {
                 Change Image
               </button>
             </div>
-
-            {/* Profile Details Section */}
             <div className="w-full sm:w-2/3 md:w-2/4 bg-white shadow-md rounded-md p-6">
               <form>
-                {/* Name */}
                 <div className="mb-3">
                   <label htmlFor="name" className="block text-sm font-medium mb-1 font-bold">Name</label>
                   <input
@@ -59,20 +54,16 @@ const Profile = () => {
                     disabled
                   />
                 </div>
-
-                {/* Birthday */}
                 <div className="mb-3">
                   <label htmlFor="birthday" className="block text-sm font-medium mb-1 font-bold">Birthday</label>
                   <input
                     type="date"
                     id="birthday"
                     className="w-full p-3 border rounded-md"
-                    value={account.accountDob.split('T')[0]} // get date ISO
+                    value={account.accountDob.split('T')[0]} 
                     disabled
                   />
                 </div>
-
-                {/* Gender */}
                 <div className="mb-3">
                   <label className="block text-sm font-medium mb-1 font-bold">Gender</label>
                   <div className="flex gap-4">
@@ -84,8 +75,6 @@ const Profile = () => {
                     </label>
                   </div>
                 </div>
-
-                {/* Phone Number */}
                 <div className="mb-3">
                   <label htmlFor="phone" className="block text-sm font-medium mb-1 font-bold">Phone Number</label>
                   <input
@@ -96,8 +85,6 @@ const Profile = () => {
                     disabled
                   />
                 </div>
-
-                {/* Address */}
                 <div className="mb-3">
                   <label htmlFor="address" className="block text-sm font-medium mb-1 font-bold">Address</label>
                   <input
@@ -108,8 +95,6 @@ const Profile = () => {
                     disabled
                   />
                 </div>
-
-                {/* Email */}
                 <div className="mb-3">
                   <label htmlFor="email" className="block text-sm font-medium mb-1 font-bold">Email</label>
                   <input
@@ -119,8 +104,6 @@ const Profile = () => {
                     value={account.accountEmail} disabled
                   />
                 </div>
-
-                {/* Buttons */}
                 <div className="flex flex-wrap justify-between gap-4">
                   <Link to={`/editprofile/${accountId}`}>
                     <button

@@ -1,0 +1,4 @@
+.row-deleted {
+  opacity: 0.5;
+  background-color: #f0f0f0; /* Màu nền nhạt cho các tài khoản đã xóa */
+}
