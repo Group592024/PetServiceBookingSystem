@@ -47,8 +47,8 @@ const Sidebar = forwardRef((_, ref) => {
       cancelButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem("jwtToken");
-        sessionStorage.removeItem("jwtToken");
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
 

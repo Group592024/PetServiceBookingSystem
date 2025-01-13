@@ -1,126 +1,15 @@
-.row-deleted {
-  opacity: 0.5;
-  background-color: #f0f0f0; /* Màu nền nhạt cho các tài khoản đã xóa */
-}
-body, html, #root {
-  height: 100%;
-  margin: 0;
-}
-
-.flex {
-  display: flex;
-  flex-direction: row;
-  height: 100%;
-}
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-h2 {
-  text-align: center;
-}
-
-.row-deleted {
-  background-color: #f8d7da !important;
-}
-
-.bg-dark-grey-100 {
-  background-color: #f4f4f4;
-}
-
-.p-4 {
+.account-list-page .content {
   padding: 16px;
 }
 
-.bg-white {
-  background-color: white;
+.account-list-page .bg-white {
+  padding: 16px;
 }
 
-.shadow-md {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.account-list-page .MuiDataGrid-root {
+  width: 100% !important;
 }
 
-.rounded-md {
-  border-radius: 8px;
-}
-
-.text-xl {
-  font-size: 1.25rem;
-}
-
-.font-bold {
-  font-weight: bold;
-}
-
-/* Responsive adjustments */
-@media (max-width: 1200px) {
-  .content {
-    padding: 10px;
-  }
-
-  .p-4 {
-    padding: 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .flex {
-    flex-direction: column;
-  }
-
-  .content {
-    padding: 0;
-  }
-
-  .p-4 {
-    padding: 8px;
-  }
-
-  h2 {
-    font-size: 1.125rem;
-  }
-
-  .DataGrid {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .text-xl {
-    font-size: 1rem;
-  }
-
-  h2 {
-    font-size: 1rem;
-  }
-
-  .p-4 {
-    padding: 4px;
-  }
-
-  .bg-white {
-    padding: 8px;
-  }
-
-  /* Make sure DataGrid fits */
-  .MuiDataGrid-root {
-    width: 100% !important;
-  }
-
-  .MuiDataGrid-columnHeader {
-    font-size: 0.875rem;
-  }
-
-  .MuiDataGrid-cell {
-    font-size: 0.875rem;
-  }
+.account-list-page h2 {
+  font-size: 2rem;
 }
