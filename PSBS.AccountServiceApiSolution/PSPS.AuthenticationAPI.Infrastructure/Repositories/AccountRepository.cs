@@ -296,13 +296,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             return "default.jpg"; 
         }
 
-
-
-
-
-
-        public async Task<Response> UpdateAccount([FromForm] AddAccount model)// Update Account
-    {
+        public async Task<Response> UpdateAccount([FromForm] AddAccount model) // Update Account
+        {
             try
             {
                 if (model == null || model.AccountTempDTO == null)
@@ -348,70 +343,56 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 {
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
                 }
-                if (model.AccountTempDTO.isPickImage == true)
-            {
-                    if (model.UploadModel.ImageFile != null)
-                    {
-                        List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
-                        string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
-                        if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
-                        {
-                            throw new Exception("File format not supported.");
-                        }
 
-                        string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
-                        if (!Directory.Exists(uploadPath))
-                        {
-                            Directory.CreateDirectory(uploadPath);
-                        }
-
-                        string fileName = Path.GetRandomFileName() + fileExtension;
-                        string filePath = Path.Combine(uploadPath, fileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await model.UploadModel.ImageFile.CopyToAsync(stream);
-                        }
-
-                        account.AccountImage = fileName;
-                    }
-                    account.AccountName = model.AccountTempDTO.AccountName;
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                    account.AccountDob = model.AccountTempDTO.AccountDob;
-                    account.AccountEmail = model.AccountTempDTO.AccountEmail;
-                    account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                    account.RoleId = model.AccountTempDTO.RoleId;
-
-                    context.Accounts.Update(account);
-                    await context.SaveChangesAsync();
-                    return new Response(true, "User updated successfully");
-                    
-                }
-                else
+                if (model.AccountTempDTO.isPickImage == true && model.UploadModel.ImageFile != null)
                 {
-                    account.AccountName = model.AccountTempDTO.AccountName;
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                    account.AccountDob = model.AccountTempDTO.AccountDob;
-                    account.AccountEmail = model.AccountTempDTO.AccountEmail;
-                    account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                    account.RoleId = model.AccountTempDTO.RoleId;
+                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+                    string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
 
-                    context.Accounts.Update(account);
-                    await context.SaveChangesAsync();
-                    return new Response(true, "User updated without image successfully");
-                   
+                    if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
+                    {
+                        throw new Exception("File format not supported.");
+                    }
+
+                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    string fileName = Path.GetRandomFileName() + fileExtension;
+                    string filePath = Path.Combine(uploadPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.UploadModel.ImageFile.CopyToAsync(stream);
+                    }
+
+                    account.AccountImage = fileName;
+                }
+                else if (model.AccountTempDTO.isPickImage != true)
+                {
                 }
 
+                account.AccountDob = model.AccountTempDTO.AccountDob;
 
+                if (model.AccountTempDTO.RoleId != null)
+                {
+                    account.RoleId = model.AccountTempDTO.RoleId;
+                }
+
+                context.Accounts.Update(account);
+                await context.SaveChangesAsync();
+
+                return new Response(true, "User updated successfully");
             }
             catch (Exception ex)
             {
-                return new Response(false, "Internal server error" + ex.Message); 
+                return new Response(false, "Internal server error: " + ex.Message);
+            }
+        }
 
-        }
-        }
+
         public async Task<Response> LoadImage(string fileName) // LoadImage with file Images
         {
             try

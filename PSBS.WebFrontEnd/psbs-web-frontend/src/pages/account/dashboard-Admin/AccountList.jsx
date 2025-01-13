@@ -29,7 +29,7 @@ const AccountList = () => {
 
     fetchAccounts();
   }, []);
-
+  
   const handleDelete = async (accountId, accountName, isDeleted) => {
     Swal.fire({
       title: "Are you sure?",
@@ -43,21 +43,39 @@ const AccountList = () => {
       if (result.isConfirmed) {
         try {
           const apiUrl = isDeleted
-            ? `http://localhost:5000/api/Account/delete/permanent/${accountId}` 
-            : `http://localhost:5000/api/Account/delete/${accountId}`; 
+            ? `http://localhost:5000/api/Account/delete/${accountId}` // Xóa vĩnh viễn
+            : `http://localhost:5000/api/Account/delete/${accountId}`; // Chỉ đánh dấu là xóa
+
           const response = await fetch(apiUrl, {
             method: "DELETE",
           });
-  
+
           if (response.ok) {
-            setAccounts((prev) =>
-              prev.filter((acc) => acc.accountId !== accountId)
-            );
-            Swal.fire(
-              "Deleted!",
-              `${accountName} has been deleted successfully.`,
-              "success"
-            );
+            if (isDeleted) {
+              // Xóa vĩnh viễn
+              setAccounts((prev) =>
+                prev.filter((acc) => acc.accountId !== accountId)
+              );
+              Swal.fire(
+                "Deleted!",
+                `${accountName} has been permanently deleted.`,
+                "success"
+              );
+            } else {
+              // Đánh dấu xóa
+              setAccounts((prev) =>
+                prev.map((acc) =>
+                  acc.accountId === accountId
+                    ? { ...acc, accountIsDeleted: true }
+                    : acc
+                )
+              );
+              Swal.fire(
+                "Deleted!",
+                `${accountName} has been marked as deleted.`,
+                "success"
+              );
+            }
           } else {
             const errorData = await response.json();
             Swal.fire(
@@ -73,29 +91,51 @@ const AccountList = () => {
       }
     });
   };
-    const columns = [
-    { field: "accountName", headerName: "Name", flex: 1 },
-    { field: "accountEmail", headerName: "Email", flex: 1 },
-    { field: "accountPhoneNumber", headerName: "Phone", flex: 1 },
-    { field: "roleId", headerName: "Role", flex: 0.5 },
+
+  const columns = [
+    {
+      field: "serialNumber",
+      headerName: "S.No",
+      flex: 0.5,
+      headerAlign: "center",
+      sortable: true,  // Enable sorting for S.No
+      renderCell: (params) => {
+        return <span>{params.row.id}</span>;  // Rendering serial number based on the row's id
+      },
+      // Sort by the row id
+      sortComparator: (v1, v2) => {
+        return v1 - v2;  // Sorting based on id (serial number)
+      },
+    },
+    { field: "accountName", headerName: "Name", flex: 1, headerAlign: "center" },
+    { field: "accountEmail", headerName: "Email", flex: 1, headerAlign: "center" },
+    { field: "accountPhoneNumber", headerName: "Phone", flex: 1, headerAlign: "center" },
+    { field: "roleId", headerName: "Role", flex: 0.5, headerAlign: "center" },
     {
       field: "status",
       headerName: "Status",
       flex: 0.5,
+      headerAlign: "center",
+      sortable: true,  // Enable sorting for Status
       renderCell: (params) =>
         params.row.accountIsDeleted ? (
           <span style={{ color: "red", fontWeight: "bold" }}>Deleted</span>
         ) : (
           <span style={{ color: "green", fontWeight: "bold" }}>Active</span>
         ),
+      // Sort by the accountIsDeleted status (true or false)
+      sortComparator: (v1, v2) => {
+        return v1 === v2 ? 0 : v1 ? 1 : -1; // Sorting based on accountIsDeleted (true/false)
+      },
     },
     {
       field: "actions",
       headerName: "Actions",
       flex: 1,
       sortable: false,
+      headerAlign: "center",
       renderCell: (params) => (
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
           <Link to={`/editprofile/${params.row.accountId}`}>
             <IconButton color="primary">
               <EditIcon />
@@ -108,7 +148,9 @@ const AccountList = () => {
           </Link>
           <IconButton
             color="error"
-            onClick={() => handleDelete(params.row.accountId, params.row.accountName)}
+            onClick={() =>
+              handleDelete(params.row.accountId, params.row.accountName, params.row.accountIsDeleted)
+            }
           >
             <DeleteIcon />
           </IconButton>
@@ -122,29 +164,28 @@ const AccountList = () => {
       <Sidebar ref={sidebarRef} />
 
       {/* Main Content */}
-      <div className="content ">
+      <div className="content">
         <Navbar sidebarRef={sidebarRef} />
-<main>
-   {/* DataGrid Section */}
-   <div className="p-4 bg-white shadow-md rounded-md">
-          <h2 className="mb-4 text-xl font-bold">Account List</h2>
-          <div style={{ height: 600, width: "80%" }}>
-            <DataGrid
-              rows={accounts.map((acc) => ({ ...acc, id: acc.accountId }))}
-              columns={columns}
-              pageSize={10}
-              rowsPerPageOptions={[10, 15, 20]}
-              disableSelectionOnClick
-              pagination
-              paginationMode="client"
-              getRowClassName={(params) =>
-                params.row.accountIsDeleted ? "row-deleted" : ""
-              }
-            />
+        <main>
+          {/* DataGrid Section */}
+          <div className="p-4 bg-white shadow-md rounded-md">
+            <h2 className="mb-4 text-xl font-bold">Account List</h2>
+            <div style={{ height: 600, width: "80%" }}>
+              <DataGrid
+                rows={accounts.map((acc, index) => ({ ...acc, id: index + 1 }))}  // Add id to rows for sorting
+                columns={columns}
+                pageSize={10}
+                rowsPerPageOptions={[10, 15, 20]}
+                disableSelectionOnClick
+                pagination
+                paginationMode="client"
+                getRowClassName={(params) =>
+                  params.row.accountIsDeleted ? "row-deleted" : ""
+                }
+              />
+            </div>
           </div>
-        </div>
-</main>
-       
+        </main>
       </div>
     </div>
   );

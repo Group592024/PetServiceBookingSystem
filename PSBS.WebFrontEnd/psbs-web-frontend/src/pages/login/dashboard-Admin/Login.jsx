@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Import SweetAlert2
 
 const Login = () => {
   const [AccountEmail, setEmail] = useState('');
   const [AccountPassword, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  
   const parseJwt = (token) => {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -15,21 +16,33 @@ const Login = () => {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-
     return JSON.parse(jsonPayload);
   };
+
   const validateForm = () => {
     if (!AccountEmail || !AccountPassword) {
-      setError('Email and password cannot be empty');
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Email and password cannot be empty',
+      });
       return false;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(AccountEmail)) {
-      setError('Please enter a valid email address');
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Please enter a valid email address',
+      });
       return false;
     }
     if (AccountPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+      Swal.fire({
+        icon: 'error',
+        title: 'Validation Error',
+        text: 'Password must be at least 6 characters',
+      });
       return false;
     }
 
@@ -38,9 +51,9 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError(''); 
+
     if (!validateForm()) {
-      return; 
+      return; // Return early if form is not valid
     }
 
     try {
@@ -57,12 +70,16 @@ const Login = () => {
 
       if (response.ok && result.flag) {
         sessionStorage.setItem('token', result.data);
-      
         const decodedToken = parseJwt(result.data);
-        console.log('Decoded Token:', decodedToken); 
-        const isAccountDeleted = decodedToken['AccountIsDeleted'] === 'True'; 
+        console.log('Decoded Token:', decodedToken);
+
+        const isAccountDeleted = decodedToken['AccountIsDeleted'] === 'True';
         if (isAccountDeleted) {
-          setError('Your account has been deleted. Please contact support.');
+          Swal.fire({
+            icon: 'error',
+            title: 'Account Deleted',
+            text: 'Your account has been deleted. Please contact support.',
+          });
         } else {
           const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
@@ -73,12 +90,20 @@ const Login = () => {
           }
         }
       } else {
-        setError(result.message || 'Login failed. Please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Login Failed',
+          text: result.message || 'Login failed. Please try again.',
+        });
       }
       
     } catch (err) {
       console.error('Error occurred during login:', err);
-      setError('An error occurred. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'An error occurred. Please try again.',
+      });
     }
   };
 
@@ -119,9 +144,7 @@ const Login = () => {
                 required
               />
             </div>
-            {error && (
-              <p className="text-red-500 text-sm mb-4">{error}</p>
-            )}
+
             <div className="text-right mb-4">
               <a href="/forgotpassword" className="text-cyan-500 hover:underline text-sm">Forgot Password?</a>
             </div>

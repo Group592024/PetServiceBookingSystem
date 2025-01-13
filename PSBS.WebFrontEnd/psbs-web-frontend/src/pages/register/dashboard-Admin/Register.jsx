@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2'; // Import SweetAlert
 
 const Register = () => {
   const [AccountEmail, setEmail] = useState('');
@@ -9,70 +10,66 @@ const Register = () => {
   const [AccountGender, setGender] = useState('');
   const [AccountDob, setDob] = useState('');
   const [AccountAddress, setAddress] = useState('');
-  const [AccountImage, setImage] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
 
-  
-  const validateEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
-  };
-
- 
-  const validatePhoneNumber = (phoneNumber) => {
-    const regex = /^0\d{9}$/; 
-    return regex.test(phoneNumber);
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 6; 
-  };
-
-  const validateDob = (dob) => {
-    const birthDate = new Date(dob);
-    let age = new Date().getFullYear() - birthDate.getFullYear();  
-    const month = new Date().getMonth();
-    const day = new Date().getDate();
-  
-    if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
-      age--; 
-    }
-  
-    return age >= 10; 
-  };  
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
-
+    // Kiểm tra nếu có trường nào trống
     if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
-      setError('Please fill in all required fields.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Please fill in all required fields.',
+      });
       return;
     }
 
-    if (!validateEmail(AccountEmail)) {
-      setError('Please enter a valid email address.');
+    // Kiểm tra email hợp lệ
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(AccountEmail)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Email',
+        text: 'Please enter a valid email address.',
+      });
       return;
     }
 
-    if (!validatePhoneNumber(AccountPhoneNumber)) {
-      setError('Please enter a valid phone number (starting with 0 and 9 digits).');
+    // Kiểm tra số điện thoại hợp lệ
+    const phoneRegex = /^0\d{9}$/;
+    if (!phoneRegex.test(AccountPhoneNumber)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Phone Number',
+        text: 'Please enter a valid phone number (starting with 0 and 9 digits).',
+      });
       return;
     }
 
-    if (!validatePassword(AccountPassword)) {
-      setError('Password must be at least 6 characters long.');
+    // Kiểm tra mật khẩu đủ mạnh
+    if (AccountPassword.length < 6) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Weak Password',
+        text: 'Password must be at least 6 characters long.',
+      });
       return;
     }
 
-    if (!validateDob(AccountDob)) {
-      setError('You must be at least 10 years old.');
+    // Kiểm tra ngày sinh hợp lệ
+    const birthDate = new Date(AccountDob);
+    const currentDate = new Date();
+    if (birthDate > currentDate) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid Date of Birth',
+        text: 'Date of birth cannot be in the future.',
+      });
       return;
     }
 
+    // Nếu tất cả điều kiện được thông qua, thực hiện gửi dữ liệu
     const formData = new FormData();
     formData.append('RegisterTempDTO.AccountName', AccountName);
     formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
@@ -81,18 +78,7 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountGender', AccountGender);
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-
-    const generateRandomName = () => {
-      return `image_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.png`;
-    };
-
-    if (AccountImage) {
-      const randomImageName = generateRandomName(); 
-      formData.append('UploadModel.ImageFile', AccountImage);
-      formData.append('RegisterTempDTO.AccountImage', randomImageName); 
-    } else {
-      formData.append('RegisterTempDTO.AccountImage', 'dummy');
-    }
+    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');  
 
     try {
       const response = await fetch('http://localhost:5000/api/Account/register', {
@@ -104,16 +90,25 @@ const Register = () => {
       });
 
       const result = await response.json();
-      console.log('API Response:', result); 
-
       if (response.ok && result.flag) {
-        setSuccess('Registration successful! Please log in.');
-        setTimeout(() => navigate('/login'), 2000);
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'Please log in.',
+        }).then(() => navigate('/login'));
       } else {
-        setError(result.message || 'Registration failed. Please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: result.message || 'Registration failed. Please try again.',
+        });
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'An error occurred',
+        text: 'Please try again later.',
+      });
       console.error(err);
     }
   };
@@ -131,15 +126,6 @@ const Register = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Register</h2>
           <form onSubmit={handleRegister}>
-            <div className="mb-4">
-              <label htmlFor="image" className="block text-gray-700 font-medium">Profile Image</label>
-              <input
-                type="file"
-                id="image"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
             <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 font-medium">Name</label>
               <input
@@ -225,8 +211,6 @@ const Register = () => {
                 required
               />
             </div>
-                        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
             <button
               type="submit"
               className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
