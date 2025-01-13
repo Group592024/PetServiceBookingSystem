@@ -13,3 +13,7 @@
 .account-list-page h2 {
   font-size: 2rem;
 }
+.row-deleted {
+  opacity: 0.5;
+  background-color: #f0f0f0; 
+}

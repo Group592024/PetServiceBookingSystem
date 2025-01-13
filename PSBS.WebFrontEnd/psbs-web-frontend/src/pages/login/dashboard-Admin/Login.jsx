@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2'; // Import SweetAlert2
-
+import Swal from 'sweetalert2'; 
 const Login = () => {
   const [AccountEmail, setEmail] = useState('');
   const [AccountPassword, setPassword] = useState('');
@@ -53,7 +52,7 @@ const Login = () => {
     e.preventDefault();
 
     if (!validateForm()) {
-      return; // Return early if form is not valid
+      return; 
     }
 
     try {
@@ -84,7 +83,7 @@ const Login = () => {
           const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
 
           if (role === 'user') {
-            navigate('/customer');
+            navigate('/');
           } else {
             navigate('/account');
           }

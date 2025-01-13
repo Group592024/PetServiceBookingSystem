@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2'; // Import SweetAlert
+import Swal from 'sweetalert2';
 
 const Register = () => {
   const [AccountEmail, setEmail] = useState('');
@@ -14,8 +14,6 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    // Kiểm tra nếu có trường nào trống
     if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
       Swal.fire({
         icon: 'error',
@@ -24,8 +22,6 @@ const Register = () => {
       });
       return;
     }
-
-    // Kiểm tra email hợp lệ
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(AccountEmail)) {
       Swal.fire({
@@ -35,8 +31,6 @@ const Register = () => {
       });
       return;
     }
-
-    // Kiểm tra số điện thoại hợp lệ
     const phoneRegex = /^0\d{9}$/;
     if (!phoneRegex.test(AccountPhoneNumber)) {
       Swal.fire({
@@ -46,8 +40,6 @@ const Register = () => {
       });
       return;
     }
-
-    // Kiểm tra mật khẩu đủ mạnh
     if (AccountPassword.length < 6) {
       Swal.fire({
         icon: 'error',
@@ -57,7 +49,6 @@ const Register = () => {
       return;
     }
 
-    // Kiểm tra ngày sinh hợp lệ
     const birthDate = new Date(AccountDob);
     const currentDate = new Date();
     if (birthDate > currentDate) {
@@ -68,8 +59,6 @@ const Register = () => {
       });
       return;
     }
-
-    // Nếu tất cả điều kiện được thông qua, thực hiện gửi dữ liệu
     const formData = new FormData();
     formData.append('RegisterTempDTO.AccountName', AccountName);
     formData.append('RegisterTempDTO.AccountEmail', AccountEmail);

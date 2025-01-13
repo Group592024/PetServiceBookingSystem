@@ -43,16 +43,14 @@ const AccountList = () => {
       if (result.isConfirmed) {
         try {
           const apiUrl = isDeleted
-            ? `http://localhost:5000/api/Account/delete/${accountId}` // Xóa vĩnh viễn
-            : `http://localhost:5000/api/Account/delete/${accountId}`; // Chỉ đánh dấu là xóa
-
+            ? `http://localhost:5000/api/Account/delete/${accountId}` 
+            : `http://localhost:5000/api/Account/delete/${accountId}`; 
           const response = await fetch(apiUrl, {
             method: "DELETE",
           });
 
           if (response.ok) {
             if (isDeleted) {
-              // Xóa vĩnh viễn
               setAccounts((prev) =>
                 prev.filter((acc) => acc.accountId !== accountId)
               );
@@ -62,7 +60,6 @@ const AccountList = () => {
                 "success"
               );
             } else {
-              // Đánh dấu xóa
               setAccounts((prev) =>
                 prev.map((acc) =>
                   acc.accountId === accountId
@@ -98,13 +95,12 @@ const AccountList = () => {
       headerName: "S.No",
       flex: 0.5,
       headerAlign: "center",
-      sortable: true,  // Enable sorting for S.No
+      sortable: true,  
       renderCell: (params) => {
-        return <span>{params.row.id}</span>;  // Rendering serial number based on the row's id
+        return <span>{params.row.id}</span>;  
       },
-      // Sort by the row id
       sortComparator: (v1, v2) => {
-        return v1 - v2;  // Sorting based on id (serial number)
+        return v1 - v2;  
       },
     },
     { field: "accountName", headerName: "Name", flex: 1, headerAlign: "center" },
@@ -116,16 +112,16 @@ const AccountList = () => {
       headerName: "Status",
       flex: 0.5,
       headerAlign: "center",
-      sortable: true,  // Enable sorting for Status
+      sortable: true,  
       renderCell: (params) =>
         params.row.accountIsDeleted ? (
           <span style={{ color: "red", fontWeight: "bold" }}>Deleted</span>
         ) : (
           <span style={{ color: "green", fontWeight: "bold" }}>Active</span>
         ),
-      // Sort by the accountIsDeleted status (true or false)
+    
       sortComparator: (v1, v2) => {
-        return v1 === v2 ? 0 : v1 ? 1 : -1; // Sorting based on accountIsDeleted (true/false)
+        return v1 === v2 ? 0 : v1 ? 1 : -1;
       },
     },
     {
@@ -162,17 +158,14 @@ const AccountList = () => {
   return (
     <div className="flex h-screen bg-dark-grey-100">
       <Sidebar ref={sidebarRef} />
-
-      {/* Main Content */}
-      <div className="content flex-1 h-full">
+      <div className="content h-full">
         <Navbar sidebarRef={sidebarRef} />
         <main className="flex-1">
-          {/* DataGrid Section */}
           <div className="p-4 bg-white shadow-md rounded-md h-full">
             <h2 className="mb-4 text-xl font-bold">Account List</h2>
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
               <DataGrid
-                rows={accounts.map((acc, index) => ({ ...acc, id: index + 1 }))}  // Add id to rows for sorting
+                rows={accounts.map((acc, index) => ({ ...acc, id: index + 1 }))}  
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10, 15, 20]}

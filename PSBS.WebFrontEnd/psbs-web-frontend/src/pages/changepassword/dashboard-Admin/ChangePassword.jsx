@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-import Swal from 'sweetalert2'; // Import SweetAlert2
+import Swal from 'sweetalert2'; 
 
 const ChangePassword = () => {
+  const sidebarRef = useRef(null);
   const { accountId } = useParams();
   const navigate = useNavigate();
   const [currentPassword, setCurrentPassword] = useState('');
@@ -37,8 +38,6 @@ const ChangePassword = () => {
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
-
-    // Kiểm tra các trường hợp thông tin không hợp lệ (validate)
     if (!currentPassword || !newPassword || !confirmPassword) {
       Swal.fire({
         icon: 'error',
@@ -90,7 +89,6 @@ const ChangePassword = () => {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-        // Hiển thị thông báo thành công sử dụng SweetAlert2
         Swal.fire({
           icon: 'success',
           title: 'Success',
@@ -98,7 +96,6 @@ const ChangePassword = () => {
         });
       } else {
         const errorData = await response.json();
-        // Hiển thị thông báo lỗi sử dụng SweetAlert2
         Swal.fire({
           icon: 'error',
           title: 'Error',
@@ -106,7 +103,6 @@ const ChangePassword = () => {
         });
       }
     } catch (error) {
-      // Hiển thị thông báo lỗi sử dụng SweetAlert2
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -121,8 +117,9 @@ const ChangePassword = () => {
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar /> 
-      <div className="content flex-1 overflow-y-auto">
+      <Sidebar ref={sidebarRef}/> 
+      <div className="content overflow-y-auto">
+        <Navbar sidebarRef={sidebarRef}/>
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold">Change Password</h2>
 

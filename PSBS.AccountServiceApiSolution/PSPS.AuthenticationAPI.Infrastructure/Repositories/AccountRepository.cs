@@ -189,7 +189,11 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 new(ClaimTypes.Email, account.AccountEmail!),
                 new(ClaimTypes.Role, account.RoleId!),
             };
+            claims.Add(new Claim("AccountId", account.AccountId.ToString()));
+            claims.Add(new Claim("AccountImage", account.AccountImage));
+            claims.Add(new Claim("AccountName", account.AccountName));
             claims.Add(new Claim("AccountIsDeleted", account.AccountIsDeleted.ToString()));
+
             if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
                 claims.Add(new(ClaimTypes.Role, account.RoleId!)); 
         var token = new JwtSecurityToken(           

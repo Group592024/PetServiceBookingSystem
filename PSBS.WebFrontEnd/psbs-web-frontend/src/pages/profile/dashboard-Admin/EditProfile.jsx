@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-import Swal from "sweetalert2";  // Import SweetAlert2
+import Swal from "sweetalert2";  
 
 const EditProfile = () => {
   const { accountId } = useParams();
+  const sidebarRef = useRef(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({
     accountName: "",
@@ -14,18 +15,16 @@ const EditProfile = () => {
     accountGender: "male",
     accountDob: "",
     accountAddress: "",
-    roleId: "user", // default role
+    roleId: "user", 
     accountImage: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
-
-  // UseEffect to load account data
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
         .then((response) => response.json())
         .then(async (data) => {
-          setAccount(data); // Update account data
+          setAccount(data); 
 
           if (data.accountImage) {
             try {
@@ -48,7 +47,6 @@ const EditProfile = () => {
     }
   }, [accountId]);
 
-  // Handle image change
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -57,18 +55,14 @@ const EditProfile = () => {
     }
   };
 
-  // Validate form inputs
   const validateForm = () => {
     let valid = true;
     let errorMessage = "";
 
-    // Validate Name
     if (!account.accountName.trim()) {
       errorMessage = "Name is required";
       valid = false;
     }
-
-    // Validate Email
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!account.accountEmail.trim()) {
       errorMessage = "Email is required";
@@ -77,8 +71,6 @@ const EditProfile = () => {
       errorMessage = "Please enter a valid email address";
       valid = false;
     }
-
-    // Validate Phone Number (Example: Vietnamese phone number)
     const phonePattern = /^0[1-9][0-9]{8}$/;
     if (!account.accountPhoneNumber.trim()) {
       errorMessage = "Phone number is required";
@@ -87,33 +79,23 @@ const EditProfile = () => {
       errorMessage = "Please enter a valid phone number";
       valid = false;
     }
-
-    // Validate Birthday
     if (!account.accountDob.trim()) {
       errorMessage = "Birthday is required";
       valid = false;
     }
-
-    // Validate Gender
     if (!account.accountGender) {
       errorMessage = "Gender is required";
       valid = false;
     }
-
-    // Validate Address
     if (!account.accountAddress.trim()) {
       errorMessage = "Address is required";
       valid = false;
     }
-
     if (!valid) {
       Swal.fire("Validation Error", errorMessage, "error");
     }
-
     return valid;
   };
-
-  // Handle profile edit
   const handleEdit = async () => {
     if (!validateForm()) return;
   
@@ -126,14 +108,12 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountDob", account.accountDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-  
-    // Kiểm tra xem người dùng có chọn hình ảnh mới không
-    if (account.accountImage) {
+      if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
     } else {
       formData.append("AccountTempDTO.isPickImage", false);
-      formData.append("AccountTempDTO.AccountImage", account.accountImage || ""); // Tên file cũ
+      formData.append("AccountTempDTO.AccountImage", account.accountImage || ""); 
     }
   
     console.log("Sending FormData:", {
@@ -160,19 +140,15 @@ const EditProfile = () => {
       Swal.fire("Error", "Error updating profile!", "error");
     }
   };
-  
-  
-
-  // Handle back navigation
-  const handleBack = () => {
+    const handleBack = () => {
     navigate(-1);
   };
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar />
-      <div className="content flex-1 overflow-y-auto">
-        <Navbar />
+      <Sidebar ref={sidebarRef}/>
+      <div className="content  overflow-y-auto">
+        <Navbar sidebarRef={sidebarRef}/>
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Edit Profile</h2>
           <div className="flex flex-wrap gap-8">

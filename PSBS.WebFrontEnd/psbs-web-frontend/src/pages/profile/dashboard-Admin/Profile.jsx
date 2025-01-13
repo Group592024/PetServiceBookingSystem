@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 
 const Profile = () => {
   const [account, setAccount] = useState(null);
+  const sidebarRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const { accountId } = useParams();
 
@@ -46,9 +47,9 @@ const Profile = () => {
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar />
-      <div className="content flex-1 overflow-y-auto">
-        <Navbar />
+      <Sidebar ref={sidebarRef} />
+      <div className="content overflow-y-auto">
+        <Navbar sidebarRef={sidebarRef}/>
 
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Profile</h2>
@@ -80,7 +81,7 @@ const Profile = () => {
                 )}
               </div>
               <div className="mt-4 text-sm font-bold">
-                {account.accountName} {/* Tên người dùng */}
+                {account.accountName} 
               </div>
             </div>
 

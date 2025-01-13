@@ -38,7 +38,6 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
-
           {/* Route yêu cầu bảo vệ */}
           <Route path="/dashboard"
             element={
@@ -49,16 +48,16 @@ function App() {
           />
           <Route path="/profile/:accountId"
             element={
-              <ProtectedRoute>  <Profile /></ProtectedRoute>
-
-
+              <ProtectedRoute>  
+                <Profile />
+              </ProtectedRoute>
             }
           />
           <Route path="/account"
             element={
               <ProtectedRoute>
                 <AccountList />
-</ProtectedRoute>
+              </ProtectedRoute>
             }
           />
           <Route path="/changepassword/:accountId"
@@ -75,7 +74,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           {/* Các route khác */}
           <Route path="/medicines">
             <Route index element={<List />} />

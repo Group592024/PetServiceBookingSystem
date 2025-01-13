@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Swal from 'sweetalert2';  // Import SweetAlert2
+import Swal from 'sweetalert2'; 
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -13,8 +13,6 @@ const ForgotPassword = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    // Kiểm tra email hợp lệ và thông báo bằng SweetAlert
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!email || !regex.test(email)) {
       Swal.fire({
