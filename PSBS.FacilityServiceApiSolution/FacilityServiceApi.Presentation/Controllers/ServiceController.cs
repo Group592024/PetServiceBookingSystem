@@ -12,11 +12,13 @@ namespace FacilityServiceApi.Presentation.Controllers
     {
         private readonly IService _service;
         private readonly IServiceType _serviceType;
+        private readonly IServiceVariant _serviceVariant;
 
-        public ServiceController(IService service, IServiceType serviceType)
+        public ServiceController(IService service, IServiceType serviceType, IServiceVariant serviceVariant)
         {
             _service = service;
             _serviceType = serviceType;
+            _serviceVariant = serviceVariant;
         }
 
         [HttpGet("serviceTypes")]
@@ -213,10 +215,30 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeleteService(Guid id)
         {
             var existingService = await _service.GetByIdAsync(id);
-            if (existingService == null || existingService.isDeleted)
+            if (existingService == null)
                 return NotFound($"Service with ID {id} not found");
-            var response = await _service.DeleteAsync(existingService);
-            return response.Flag ? Ok(response) : BadRequest(response);
+            Response response;
+            var checkService = await _serviceVariant.CheckIfServiceHasVariant(id);
+
+            if (!existingService.isDeleted)
+            {
+                response = await _service.DeleteAsync(existingService);
+                var deleteVariant = await _serviceVariant.DeleteByServiceIdAsync(id);
+                return response.Flag ? Ok(response) : BadRequest(response);
+            }
+            else
+            {
+                if (!checkService)
+                {
+                    response = await _service.DeleteSecondAsync(existingService);
+                    return response.Flag ? Ok(response) : BadRequest(response);
+                }
+                else
+                {
+                    return Conflict("Can't delete this service because it has at least service variant.");
+                }
+
+            }
         }
     }
 }

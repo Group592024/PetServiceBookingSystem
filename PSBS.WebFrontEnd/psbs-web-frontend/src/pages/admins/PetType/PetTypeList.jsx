@@ -85,8 +85,18 @@ const PetTypeList = () => {
     });
   };
 
+  const newRows = data.map((row, index) => ({
+    ...row,
+    index: index + 1,
+  }));
+
   const columns = [
-    { field: 'petType_ID', headerName: 'ID', flex: 1.5 },
+    {
+      field: 'index',
+      headerName: 'No.',
+      flex: 0.5,
+     // renderCell: (params) => <span>{params.rowIndex + 1}</span>,
+    },
     { field: 'petType_Name', headerName: 'Pet Type Name', flex: 1 },
     { field: 'petType_Description', headerName: 'Description', flex: 2 },
     {
@@ -143,11 +153,12 @@ const PetTypeList = () => {
               <span>NEW</span>
             </button>
           </div>
-          <Box sx={{ width: '100%' }}>
+          <Box sx={{ width: '100%', backgroundColor:'white' }}>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <DataGrid
+             
                 columns={columns}
-                rows={data}
+                rows={newRows}
                 initialState={{
                   pagination: {
                     paginationModel: {

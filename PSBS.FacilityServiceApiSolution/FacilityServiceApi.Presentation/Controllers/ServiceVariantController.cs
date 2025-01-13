@@ -12,11 +12,13 @@ namespace FacilityServiceApi.Presentation.Controllers
     {
         private readonly IServiceVariant _serviceVariant;
         private readonly IService _service;
+        private readonly IBookingServiceItem _bookingService;
 
-        public ServiceVariantController(IServiceVariant serviceVariant, IService service)
+        public ServiceVariantController(IServiceVariant serviceVariant, IService service, IBookingServiceItem bookingService)
         {
             _serviceVariant = serviceVariant;
             _service = service;
+            _bookingService = bookingService;
         }
 
         [HttpGet("{id}")]
@@ -146,23 +148,30 @@ namespace FacilityServiceApi.Presentation.Controllers
         [HttpDelete("{id:Guid}")]
         public async Task<ActionResult<Response>> DeleteServiceVariant(Guid id)
         {
-            var existingServiceVariant = await _serviceVariant.GetByIdAsync(id);
-
-            if (existingServiceVariant == null)
-                return NotFound($"Service variant with ID {id} not found");
-
+            var existingVariant = await _serviceVariant.GetByIdAsync(id);
+            if (existingVariant == null)
+                return NotFound(new Response(false, $"Service variant with ID {id} not found"));
             Response response;
+            var checkVariant = await _bookingService.CheckIfVariantHasBooking(id);
 
-            if (!existingServiceVariant.isDeleted)
+            if (!existingVariant.isDeleted)
             {
-                response = await _serviceVariant.DeleteAsync(existingServiceVariant);
+                response = await _serviceVariant.DeleteAsync(existingVariant);
+                return response.Flag ? Ok(response) : BadRequest(response);
             }
             else
             {
-                response = await _serviceVariant.DeleteSecondAsync(existingServiceVariant);
-            }
+                if (!checkVariant)
+                {
+                    response = await _serviceVariant.DeleteSecondAsync(existingVariant);
+                    return response.Flag ? Ok(response) : BadRequest(response);
+                }
+                else
+                {
+                    return Conflict(new Response(false, "Can't delete this service variant because it is in at least booking."));
+                }
 
-            return response.Flag ? Ok(response) : BadRequest(response);
+            }
         }
     }
 }

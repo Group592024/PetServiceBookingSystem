@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FacilityServiceApi.Domain.Entities
 {
     public class Service
     {
-        [Key,Column("service_id")]
+        [Key, Column("service_id")]
         public Guid serviceId { get; set; }
         [ForeignKey("ServiceType")]
         [Column("serviceType_id")]
@@ -18,7 +13,7 @@ namespace FacilityServiceApi.Domain.Entities
         [Column("service_name")]
         public string serviceName { get; set; }
         [Column("service_Image")]
-        public string serviceImage {  get; set; }
+        public string serviceImage { get; set; }
         [Column("service_description")]
         public string serviceDescription { get; set; }
 
@@ -30,7 +25,6 @@ namespace FacilityServiceApi.Domain.Entities
         public bool isDeleted { get; set; }
 
         public virtual ServiceType? ServiceType { get; set; }
-        public virtual ICollection<BookingServiceItem>? BookingServiceItems { get; set; }
 
     }
 }

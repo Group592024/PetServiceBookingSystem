@@ -44,7 +44,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 Service.isDeleted = true;
                 context.Service.Update(Service);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.serviceId} is marked as deleted successfully");
+                return new Response(true, $"{entity.serviceId} is marked as soft deleted successfully");
             }
             catch (Exception ex)
             {
@@ -52,6 +52,24 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 return new Response(false, "Error occurred performing soft delete on service");
             }
         }
+
+        public async Task<Response> DeleteSecondAsync(Service entity)
+        {
+            try
+            {
+                var service = await GetByIdAsync(entity.serviceId);
+
+                context.Service.Remove(service);
+                await context.SaveChangesAsync();
+                return new Response(true, $"{entity.serviceId} is deleted permanently successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred performing delete permanently on service");
+            }
+        }
+
 
         public async Task<IEnumerable<Service>> GetAllAsync()
         {
