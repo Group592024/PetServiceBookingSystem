@@ -296,7 +296,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             return "default.jpg"; 
         }
 
-        public async Task<Response> UpdateAccount([FromForm] AddAccount model) // Update Account
+        public async Task<Response> UpdateAccount([FromForm] AddAccount model)
         {
             try
             {
@@ -312,46 +312,33 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 }
 
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountName))
-                {
                     account.AccountName = model.AccountTempDTO.AccountName;
-                }
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
+                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
+                    account.AccountGender = model.AccountTempDTO.AccountGender;
 
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
                 {
                     if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                    {
                         return new Response(false, "Invalid email!");
-                    }
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                 }
 
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
-                {
-                    if (!Regex.IsMatch(model.AccountTempDTO.AccountPhoneNumber, @"^\d{10,15}$"))
-                    {
-                        return new Response(false, "Invalid phone number!");
-                    }
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
-                }
-
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
-                {
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                }
-
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountAddress))
-                {
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                }
 
-                if (model.AccountTempDTO.isPickImage == true && model.UploadModel.ImageFile != null)
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.RoleId))
+                    account.RoleId = model.AccountTempDTO.RoleId;
+                if (model.AccountTempDTO.isPickImage == true && model.UploadModel?.ImageFile != null)
                 {
                     List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
                     string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
-
                     if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                     {
-                        throw new Exception("File format not supported.");
+                        return new Response(false, "File format not supported.");
                     }
 
                     string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
@@ -370,21 +357,17 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                     account.AccountImage = fileName;
                 }
-                else if (model.AccountTempDTO.isPickImage != true)
+                else if (model.AccountTempDTO.isPickImage == false)
                 {
-                }
-
-                account.AccountDob = model.AccountTempDTO.AccountDob;
-
-                if (model.AccountTempDTO.RoleId != null)
-                {
-                    account.RoleId = model.AccountTempDTO.RoleId;
+                   
                 }
 
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
 
-                return new Response(true, "User updated successfully");
+                return new Response(true, model.AccountTempDTO.isPickImage == true
+                    ? "User updated with new image successfully"
+                    : "User updated without changing image successfully");
             }
             catch (Exception ex)
             {

@@ -164,13 +164,13 @@ const AccountList = () => {
       <Sidebar ref={sidebarRef} />
 
       {/* Main Content */}
-      <div className="content">
+      <div className="content flex-1 h-full">
         <Navbar sidebarRef={sidebarRef} />
-        <main>
+        <main className="flex-1">
           {/* DataGrid Section */}
-          <div className="p-4 bg-white shadow-md rounded-md">
+          <div className="p-4 bg-white shadow-md rounded-md h-full">
             <h2 className="mb-4 text-xl font-bold">Account List</h2>
-            <div style={{ height: 600, width: "80%" }}>
+            <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
               <DataGrid
                 rows={accounts.map((acc, index) => ({ ...acc, id: index + 1 }))}  // Add id to rows for sorting
                 columns={columns}
