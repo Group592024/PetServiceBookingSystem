@@ -5,6 +5,7 @@ using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using PSBS.HealthCareApi.Application.DTOs;
 
 namespace PSBS.HealthCareApi.Infrastructure.Repositories
 {
@@ -144,7 +145,6 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 throw new InvalidOperationException($"Error occurred retrieving Treatment by Id: {ex.Message}");
             }
         }
-
         public async Task<Response> UpdateAsync(Treatment entity)
         {
             try
@@ -169,11 +169,27 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 existingTreatment.treatmentName = entity.treatmentName;
                 existingTreatment.isDeleted = entity.isDeleted;
 
-                context.Entry(existingTreatment).State = EntityState.Detached;
+                var relatedMedicines = await context.Medicines
+                    .Where(m => m.treatmentId == existingTreatment.treatmentId)
+                    .ToListAsync();
+
+                foreach (var medicine in relatedMedicines)
+                {
+                    medicine.isDeleted = entity.isDeleted;
+                    context.Medicines.Update(medicine);
+                }
+
                 context.Treatments.Update(existingTreatment);
                 await context.SaveChangesAsync();
 
-                return new Response(true, $"Treatment with Name {entity.treatmentName} updated successfully.") { Data = existingTreatment };
+                var treatmentDto = new TreatmentDTO
+                {
+                    treatmentId = existingTreatment.treatmentId,
+                    treatmentName = existingTreatment.treatmentName,
+                    isDeleted = existingTreatment.isDeleted
+                };
+
+                return new Response(true, $"Treatment with Name {entity.treatmentName} updated successfully.") { Data = treatmentDto };
             }
             catch (Exception ex)
             {
@@ -181,7 +197,6 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 return new Response(false, $"Error occurred while updating the Treatment: {ex.Message}");
             }
         }
-
         public async Task<IEnumerable<Treatment>> ListAvailableTreatmentAsync()
         {
             try

@@ -17,8 +17,8 @@ const EditableModal = ({
     if (open && initialData) {
       setFormValues({
         ...initialData,
-        pricePerHour: parseInt(initialData.pricePerHour, 10),
-        pricePerDay: parseInt(initialData.pricePerDay, 10),
+        pricePerHour: parseFloat(initialData.pricePerHour), 
+        pricePerDay: parseFloat(initialData.pricePerDay),   
       });
     } else if (open) {
       setFormValues(
@@ -32,7 +32,6 @@ const EditableModal = ({
       setErrors({});
     }
   }, [open, initialData, fields]);
-  
 
   const handleChange = (e) => {
     setFormValues({
@@ -59,13 +58,13 @@ const EditableModal = ({
         }
       }
     });
-  
+
     const pricePerHour = parseFloat(formValues.pricePerHour);
     const pricePerDay = parseFloat(formValues.pricePerDay);
     if (pricePerDay <= pricePerHour) {
       tempErrors.pricePerDay = "Price per Day must be greater than Price per Hour";
     }
-  
+
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
   };
@@ -74,8 +73,8 @@ const EditableModal = ({
     if (validate()) {
       const submittedData = {
         ...formValues,
-        pricePerHour: parseInt(formValues.pricePerHour, 10),
-        pricePerDay: parseInt(formValues.pricePerDay, 10),
+        pricePerHour: parseFloat(formValues.pricePerHour), 
+        pricePerDay: parseFloat(formValues.pricePerDay),   
       };
       
       onSubmit(submittedData);

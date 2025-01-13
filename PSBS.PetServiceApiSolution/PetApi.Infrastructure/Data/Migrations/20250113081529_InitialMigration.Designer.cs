@@ -12,8 +12,8 @@ using PetApi.Infrastructure.Data;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PetDbContext))]
-    [Migration("20250110111859_init")]
-    partial class init
+    [Migration("20250113081529_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,9 @@ namespace PetApi.Infrastructure.Data.Migrations
                     b.Property<string>("Health_Number")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("PetBreed_ID")
                         .HasColumnType("uniqueidentifier");
