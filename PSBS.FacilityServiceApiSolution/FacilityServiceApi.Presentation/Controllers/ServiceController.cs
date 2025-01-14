@@ -1,8 +1,10 @@
 ﻿using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Application.Jobs;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
+using Quartz;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -13,12 +15,15 @@ namespace FacilityServiceApi.Presentation.Controllers
         private readonly IService _service;
         private readonly IServiceType _serviceType;
         private readonly IServiceVariant _serviceVariant;
+        private readonly ISchedulerFactory _schedulerFactory;
 
-        public ServiceController(IService service, IServiceType serviceType, IServiceVariant serviceVariant)
+
+        public ServiceController(IService service, IServiceType serviceType, IServiceVariant serviceVariant, ISchedulerFactory schedulerFactory)
         {
             _service = service;
             _serviceType = serviceType;
             _serviceVariant = serviceVariant;
+            _schedulerFactory = schedulerFactory;
         }
 
         [HttpGet("serviceTypes")]
@@ -125,6 +130,24 @@ namespace FacilityServiceApi.Presentation.Controllers
             var getEntity = ServiceConversion.ToEntity(service, imagePath);
 
             var response = await _service.CreateAsync(getEntity);
+
+            if (response.Flag == true)
+            {
+                var scheduler = await _schedulerFactory.GetScheduler();
+
+                var jobDetail = JobBuilder.Create<DeleteServiceJob>()
+                    .WithIdentity($"DeleteServiceJob-{getEntity.serviceId}")
+                    .UsingJobData("ServiceId", getEntity.serviceId)
+                    .Build();
+
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity($"DeleteServiceTrigger-{getEntity.serviceId}")
+                    .StartAt(DateTimeOffset.Now.AddMinutes(1))
+                    .Build();
+
+                await scheduler.ScheduleJob(jobDetail, trigger);
+            }
+
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
