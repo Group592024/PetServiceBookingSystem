@@ -129,7 +129,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
-        public async Task<ActionResult<Response>> UpdateService([FromRoute] Guid id, [FromForm] CreateServiceDTO pet, IFormFile? imageFile = null)
+        public async Task<ActionResult<Response>> UpdateService([FromRoute] Guid id, [FromForm] UpdateServiceDTO pet, IFormFile? imageFile = null)
         {
             if (!ModelState.IsValid)
             {
@@ -144,18 +144,25 @@ namespace FacilityServiceApi.Presentation.Controllers
             }
 
             var existingService = await _service.GetByIdAsync(id);
-            if (existingService == null || existingService.isDeleted)
+            if (existingService == null)
                 return NotFound(new Response(false, $"Service with ID {id} not found"));
 
             bool hasChanges =
                 existingService.serviceTypeId != pet.serviceTypeId ||
                 existingService.serviceDescription != pet.serviceDescription ||
                 existingService.serviceName != pet.serviceName ||
+                existingService.isDeleted != pet.isDeleted ||
                 imageFile != null;
 
             if (!hasChanges)
             {
                 return NoContent();
+            }
+
+            bool variantInBooking = await _service.CheckIfServiceHasVariantInBooking(id);
+            if (variantInBooking)
+            {
+                return Conflict(new Response(false, $"Service with ID {id} has at least one variant that is in booking"));
             }
 
             // Xử lý hình ảnh

@@ -70,6 +70,22 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<bool> CheckIfServiceHasVariantInBooking(Guid serviceId)
+        {
+            try
+            {
+                var flag = await context.bookingServiceItems.Include(p => p.ServiceVariant)
+                    .ThenInclude(p => p.Service).AnyAsync(p => p.ServiceVariant.Service.serviceId == serviceId);
+
+                return flag;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred when checking");
+            }
+        }
+
 
         public async Task<IEnumerable<Service>> GetAllAsync()
         {

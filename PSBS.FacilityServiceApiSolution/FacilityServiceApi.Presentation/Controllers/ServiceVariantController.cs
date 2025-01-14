@@ -111,7 +111,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             }
 
             var existingServiceVariant = await _serviceVariant.GetByIdAsync(id);
-            if (existingServiceVariant == null || existingServiceVariant.isDeleted)
+            if (existingServiceVariant == null)
                 return NotFound(new Response(false, $"Service variant with ID {id} not found"));
 
             bool hasChanges =
@@ -121,6 +121,12 @@ namespace FacilityServiceApi.Presentation.Controllers
             if (!hasChanges)
             {
                 return NoContent();
+            }
+
+            bool variantInBooking = await _serviceVariant.CheckIfVariantInBooking(id);
+            if (variantInBooking)
+            {
+                return Conflict(new Response(false, $"Service variant with ID {id} is in at least one booking"));
             }
 
             var existingVariant = await _serviceVariant.GetByAsync(x => x.serviceId == existingServiceVariant.serviceId && x.serviceContent.ToLower().Trim().Equals(dto.serviceContent.ToLower().Trim()));

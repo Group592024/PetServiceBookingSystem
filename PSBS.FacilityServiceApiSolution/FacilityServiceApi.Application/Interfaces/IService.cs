@@ -7,5 +7,6 @@ namespace FacilityServiceApi.Application.Interfaces
     public interface IService : IGenericInterface<Service>
     {
         Task<Response> DeleteSecondAsync(Service entity);
+        Task<bool> CheckIfServiceHasVariantInBooking(Guid serviceId);
     }
 }
