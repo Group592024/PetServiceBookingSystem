@@ -17,3 +17,6 @@
   opacity: 0.5;
   background-color: #f0f0f0; 
 }
+.swal2-container {
+  z-index: 2100 !important; 
+}

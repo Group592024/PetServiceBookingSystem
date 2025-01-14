@@ -5,7 +5,6 @@ const Login = () => {
   const [AccountEmail, setEmail] = useState('');
   const [AccountPassword, setPassword] = useState('');
   const navigate = useNavigate();
-  
   const parseJwt = (token) => {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -17,7 +16,6 @@ const Login = () => {
     );
     return JSON.parse(jsonPayload);
   };
-
   const validateForm = () => {
     if (!AccountEmail || !AccountPassword) {
       Swal.fire({
@@ -44,17 +42,13 @@ const Login = () => {
       });
       return false;
     }
-
     return true;
   };
-
   const handleLogin = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) {
       return; 
     }
-
     try {
       const response = await fetch('http://localhost:5000/api/Account/Login', {
         method: 'POST',
@@ -63,10 +57,8 @@ const Login = () => {
         },
         body: JSON.stringify({ AccountEmail, AccountPassword }),
       });
-
       const result = await response.json();
       console.log(result);
-
       if (response.ok && result.flag) {
         sessionStorage.setItem('token', result.data);
         const decodedToken = parseJwt(result.data);
@@ -81,7 +73,6 @@ const Login = () => {
           });
         } else {
           const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-
           if (role === 'user') {
             navigate('/');
           } else {
@@ -94,8 +85,7 @@ const Login = () => {
           title: 'Login Failed',
           text: result.message || 'Login failed. Please try again.',
         });
-      }
-      
+      } 
     } catch (err) {
       console.error('Error occurred during login:', err);
       Swal.fire({
@@ -105,7 +95,6 @@ const Login = () => {
       });
     }
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">

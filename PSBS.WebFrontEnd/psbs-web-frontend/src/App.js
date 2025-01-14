@@ -74,6 +74,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/editprofile/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+         
           {/* Các route khác */}
           <Route path="/medicines">
             <Route index element={<List />} />

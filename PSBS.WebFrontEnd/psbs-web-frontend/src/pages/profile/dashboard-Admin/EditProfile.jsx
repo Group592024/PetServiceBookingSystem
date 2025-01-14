@@ -153,7 +153,7 @@ const EditProfile = () => {
           <h2 className="mb-4 text-xl font-bold text-left">Edit Profile</h2>
           <div className="flex flex-wrap gap-8">
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+              <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -162,7 +162,7 @@ const EditProfile = () => {
                   />
                 ) : (
                   <svg
-                    className="w-12 h-12 text-gray-500"
+                    className="w-[15rem] h-[15rem] text-gray-500"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -301,7 +301,7 @@ const EditProfile = () => {
                     className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full md:w-auto"
                     onClick={handleEdit}
                   >
-                    Edit
+                    Save
                   </button>
                   <button
                     type="button"

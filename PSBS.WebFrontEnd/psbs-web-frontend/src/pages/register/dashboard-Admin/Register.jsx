@@ -10,55 +10,114 @@ const Register = () => {
   const [AccountGender, setGender] = useState('');
   const [AccountDob, setDob] = useState('');
   const [AccountAddress, setAddress] = useState('');
+
+  // Các state để lưu thông báo lỗi cho từng trường
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    gender: '',
+    dob: '',
+    address: '',
+  });
+
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Please fill in all required fields.',
-      });
-      return;
+
+    let valid = true;
+    let errorMessages = { ...errors };
+
+    // Kiểm tra các trường có giá trị không
+    if (!AccountName) {
+      errorMessages.name = 'Name is required';
+      valid = false;
+    } else {
+      errorMessages.name = '';
     }
+    if (!AccountEmail) {
+      errorMessages.email = 'Email is required';
+      valid = false;
+    } else {
+      errorMessages.email = '';
+    }
+    if (!AccountPhoneNumber) {
+      errorMessages.phone = 'Phone number is required';
+      valid = false;
+    } else {
+      errorMessages.phone = '';
+    }
+    if (!AccountPassword) {
+      errorMessages.password = 'Password is required';
+      valid = false;
+    } else {
+      errorMessages.password = '';
+    }
+    if (!AccountGender) {
+      errorMessages.gender = 'Gender is required';
+      valid = false;
+    } else {
+      errorMessages.gender = '';
+    }
+    if (!AccountDob) {
+      errorMessages.dob = 'Date of birth is required';
+      valid = false;
+    } else {
+      errorMessages.dob = '';
+    }
+    if (!AccountAddress) {
+      errorMessages.address = 'Address is required';
+      valid = false;
+    } else {
+      errorMessages.address = '';
+    }
+
+    setErrors(errorMessages);  // Cập nhật thông báo lỗi vào state
+
+    if (!valid) return;
+
+    // Kiểm tra email hợp lệ
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(AccountEmail)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid Email',
-        text: 'Please enter a valid email address.',
-      });
-      return;
-    }
-    const phoneRegex = /^0\d{9}$/;
-    if (!phoneRegex.test(AccountPhoneNumber)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid Phone Number',
-        text: 'Please enter a valid phone number (starting with 0 and 9 digits).',
-      });
-      return;
-    }
-    if (AccountPassword.length < 6) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Weak Password',
-        text: 'Password must be at least 6 characters long.',
-      });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: 'Please enter a valid email address',
+      }));
       return;
     }
 
+    // Kiểm tra số điện thoại hợp lệ
+    const phoneRegex = /^0\d{9}$/;
+    if (!phoneRegex.test(AccountPhoneNumber)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        phone: 'Please enter a valid phone number (starting with 0 and 9 digits)',
+      }));
+      return;
+    }
+
+    // Kiểm tra mật khẩu
+    if (AccountPassword.length < 6) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: 'Password must be at least 6 characters long',
+      }));
+      return;
+    }
+
+    // Kiểm tra ngày sinh không phải là ngày tương lai
     const birthDate = new Date(AccountDob);
     const currentDate = new Date();
     if (birthDate > currentDate) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid Date of Birth',
-        text: 'Date of birth cannot be in the future.',
-      });
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        dob: 'Date of birth cannot be in the future',
+      }));
       return;
     }
+
     const formData = new FormData();
     formData.append('RegisterTempDTO.AccountName', AccountName);
     formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
@@ -67,7 +126,7 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountGender', AccountGender);
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');  
+    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
 
     try {
       const response = await fetch('http://localhost:5000/api/Account/register', {
@@ -126,6 +185,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
@@ -138,6 +198,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="phone" className="block text-gray-700 font-medium">Phone Number</label>
@@ -150,6 +211,7 @@ const Register = () => {
                 placeholder="Enter your phone number"
                 required
               />
+              {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
@@ -162,6 +224,7 @@ const Register = () => {
                 placeholder="Enter your password"
                 required
               />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="gender" className="block text-gray-700 font-medium">Gender</label>
@@ -176,6 +239,7 @@ const Register = () => {
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select>
+              {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="dob" className="block text-gray-700 font-medium">Date of Birth</label>
@@ -187,6 +251,7 @@ const Register = () => {
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
+              {errors.dob && <p className="text-red-500 text-sm">{errors.dob}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="address" className="block text-gray-700 font-medium">Address</label>
@@ -199,6 +264,7 @@ const Register = () => {
                 placeholder="Enter your address"
                 required
               />
+              {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
             </div>
             <button
               type="submit"

@@ -274,6 +274,72 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         }
 
 
+        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model) // Add account
+        {
+            try
+            {
+                var getAccount = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
+                if (getAccount != null)
+                    return new Response(false, "Email existed!");
+
+                string fileName = GetDefaultImage();
+
+                if (model.UploadModel?.ImageFile != null)
+                {
+                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+                    string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
+
+                    if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
+                    {
+                        return new Response(false, "Unsupported file format.");
+                    }
+
+                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    fileName = Path.GetRandomFileName() + fileExtension;
+                    string filePath = Path.Combine(uploadPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.UploadModel.ImageFile.CopyToAsync(stream);
+                    }
+                }
+
+                var newAccount = new Account()
+                {
+                    AccountName = "User",
+                    AccountEmail = model.RegisterTempDTO.AccountEmail,
+                    AccountPassword = BCrypt.Net.BCrypt.HashPassword("123456"), 
+                    AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber, 
+                    AccountGender = "Male", 
+                    AccountAddress = "Address", 
+                    AccountImage = fileName,
+                    AccountDob = DateTime.Now.AddYears(-20), 
+                    AccountId = Guid.NewGuid(),
+                    RoleId = "user"
+                };
+
+                var result = context.Accounts.Add(newAccount);
+                await context.SaveChangesAsync();
+
+                return !string.IsNullOrEmpty(result.Entity.AccountId.ToString())
+                    ? new Response(true, "Account registered successfully")
+                    : new Response(false, "Invalid data provided");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return new Response(false, $"Database error: {dbEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An unexpected error occurred: {ex.Message}");
+            }
+        }
+
 
 
 
@@ -330,7 +396,10 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                         return new Response(false, "Invalid email!");
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                 }
-
+                if (model.AccountTempDTO.AccountDob != null)
+                {
+                    account.AccountDob = model.AccountTempDTO.AccountDob.Value;
+                }
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountAddress))
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
 

@@ -56,7 +56,7 @@ const Profile = () => {
 
           <div className="flex flex-wrap gap-8">
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+              <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -65,7 +65,7 @@ const Profile = () => {
                   />
                 ) : (
                   <svg
-                    className="w-12 h-12 text-gray-500"
+                    className="w-[15rem] h-[15rem] text-gray-500"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"

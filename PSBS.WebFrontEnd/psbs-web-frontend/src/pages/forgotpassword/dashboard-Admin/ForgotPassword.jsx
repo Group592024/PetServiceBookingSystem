@@ -5,21 +5,30 @@ import Swal from 'sweetalert2';
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({ email: '' });
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
 
+  const validateEmail = () => {
+    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!email) {
+      setErrors({ email: 'Email is required' });
+      return false;
+    }
+    if (!regex.test(email)) {
+      setErrors({ email: 'Please enter a valid email address' });
+      return false;
+    }
+    setErrors({ email: '' });
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!email || !regex.test(email)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid Email',
-        text: 'Please enter a valid email address.',
-      });
+    if (!validateEmail()) {
       setLoading(false);
       return;
     }
@@ -90,6 +99,7 @@ const ForgotPassword = () => {
                 placeholder="Enter your email"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
 
             <button
