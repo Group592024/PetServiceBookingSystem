@@ -22,12 +22,6 @@ const RoomTypeList = () => {
 
   const model = [
     {
-      name: "roomTypeId",
-      label: "ID",
-      type: "string",
-      disabled: true,
-    },
-    {
       name: "name",
       label: "Room Type Name",
       type: "string",
@@ -43,31 +37,33 @@ const RoomTypeList = () => {
       label: "Price per Hour",
       type: "decimal",
       customValidation: (value) => {
-        if (!/^\d+$/.test(value)) {
+        if (!/^\d+(\.\d+)?$/.test(value)) {  
           return "Price per Hour must be a valid number";
         }
-        if (parseInt(value) <= 0) {
+        if (parseFloat(value) <= 0) { 
           return "Price per Hour must be greater than 0";
         }
         return null;
       },
+      
     },
     {
       name: "pricePerDay",
       label: "Price per Day",
       type: "decimal",
       customValidation: (value, allValues) => {
-        if (!/^\d+$/.test(value)) {
+        if (!/^\d+(\.\d+)?$/.test(value)) {  
           return "Price per Day must be a valid number";
         }
-        if (parseInt(value) <= 0) {
+        if (parseFloat(value) <= 0) {  
           return "Price per Day must be greater than 0";
         }
-        if (allValues && allValues.pricePerHour && parseInt(value) <= parseInt(allValues.pricePerHour)) {
+        if (allValues && allValues.pricePerHour && parseFloat(value) <= parseFloat(allValues.pricePerHour)) {
           return "Price per Day must be greater than Price per Hour";
         }
         return null;
       },
+      
     },
     {
       name: "description",
@@ -98,10 +94,10 @@ const RoomTypeList = () => {
       label: "Price per Hour",
       type: "decimal",
       customValidation: (value) => {
-        if (!/^\d+$/.test(value)) {
+        if (!/^\d+(\.\d+)?$/.test(value)) {  
           return "Price per Hour must be a valid number";
         }
-        if (parseInt(value) <= 0) {
+        if (parseFloat(value) <= 0) { 
           return "Price per Hour must be greater than 0";
         }
         return null;
@@ -112,13 +108,13 @@ const RoomTypeList = () => {
       label: "Price per Day",
       type: "decimal",
       customValidation: (value, allValues) => {
-        if (!/^\d+$/.test(value)) {
+        if (!/^\d+(\.\d+)?$/.test(value)) {  
           return "Price per Day must be a valid number";
         }
-        if (parseInt(value) <= 0) {
+        if (parseFloat(value) <= 0) {  
           return "Price per Day must be greater than 0";
         }
-        if (allValues && allValues.pricePerHour && parseInt(value) <= parseInt(allValues.pricePerHour)) {
+        if (allValues && allValues.pricePerHour && parseFloat(value) <= parseFloat(allValues.pricePerHour)) {
           return "Price per Day must be greater than Price per Hour";
         }
         return null;

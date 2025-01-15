@@ -38,6 +38,9 @@ namespace PetApi.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("IsDelete")
+                        .HasColumnType("bit");
+
                     b.Property<Guid>("PetBreed_ID")
                         .HasColumnType("uniqueidentifier");
 

@@ -96,7 +96,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             var updatedServiceTypeEntity = ServiceTypeConversion.ToEntity(updatingServiceType);
             var response = await _serviceType.UpdateAsync(updatedServiceTypeEntity);
 
-            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the ServiceType"));
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpDelete("{id}")]

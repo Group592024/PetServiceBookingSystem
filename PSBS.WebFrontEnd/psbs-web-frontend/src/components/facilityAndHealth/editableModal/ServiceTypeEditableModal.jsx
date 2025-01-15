@@ -13,11 +13,26 @@ const EditableModal = ({
   const [formValues, setFormValues] = useState({});
   const [errors, setErrors] = useState({});
 
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
   useEffect(() => {
     if (open && initialData) {
+      console.log("Initial createAt (UTC):", new Date(initialData.createAt).toISOString());
+      console.log("Initial updateAt (UTC):", new Date(initialData.updateAt).toISOString());
+
       setFormValues({
         ...initialData,
-        updateAt: new Date().toISOString(), 
       });
     } else if (open) {
       setFormValues(
@@ -26,17 +41,11 @@ const EditableModal = ({
           return acc;
         }, {})
       );
-      setFormValues(prev => ({
-        ...prev,
-        createAt: new Date().toISOString(), 
-        updateAt: new Date().toISOString(),
-      }));
     } else {
       setFormValues({});
       setErrors({});
     }
   }, [open, initialData, fields]);
-  
 
   const handleChange = (e) => {
     setFormValues({
@@ -69,13 +78,21 @@ const EditableModal = ({
 
   const handleSubmit = () => {
     if (validate()) {
+      const createAtDate = formValues.createAt ? new Date(formValues.createAt) : null;
+      const updateAtDate = new Date();
+  
+      if (createAtDate && !isNaN(createAtDate)) {
+        console.log("Submitted createAt (UTC):", createAtDate.toISOString());
+      } else {
+        console.error("Invalid createAt value");
+      }
+  
+      console.log("Submitted updateAt (UTC):", updateAtDate.toISOString());
+  
       const dataToSubmit = {
         ...formValues,
-        updateAt: new Date().toISOString(), 
+        updateAt: updateAtDate.toISOString(),
       };
-      if (!initialData) {
-        dataToSubmit.createAt = new Date().toISOString(); 
-      }
   
       onSubmit(dataToSubmit);
       onClose();
@@ -123,7 +140,9 @@ const EditableModal = ({
                     margin="normal"
                     label={field.label}
                     name={field.name}
-                    value={formValues[field.name] || ""}
+                    value={field.name === 'createAt' || field.name === 'updateAt' 
+                      ? formatDate(formValues[field.name]) 
+                      : formValues[field.name] || ""}
                     onChange={handleChange}
                     error={!!errors[field.name]}
                     helperText={errors[field.name]}
@@ -136,18 +155,16 @@ const EditableModal = ({
               </div>
             )
           ))}
-        
-            <div className="flex justify-around mt-4">
-              <Button variant="outlined" color="secondary" onClick={onClose}>
-                Close
-              </Button>
-              {!view && (
+          <div className="flex justify-around mt-4">
+            <Button variant="outlined" color="secondary" onClick={onClose}>
+              Close
+            </Button>
+            {!view && (
               <Button variant="contained" color="primary" onClick={handleSubmit}>
                 Submit
               </Button>
-              )}
-            </div>
-        
+            )}
+          </div>
         </div>
       </div>
     </Modal>

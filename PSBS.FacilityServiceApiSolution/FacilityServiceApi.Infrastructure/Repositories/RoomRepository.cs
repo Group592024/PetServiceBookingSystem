@@ -192,13 +192,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                // 1. Check if the room exists in the database and can be updated.
-                // 2. Check the room's usage status: If the room is "in use", it cannot be updated.
-                // 3. Check for incomplete usage history: If there is an incomplete usage history (not checked out), the room cannot be updated.
-                // 4. Record the history of deletion status changes: If the isDeleted status changes, create a history record for the room deletion or restoration action.
-                // 5. Update room information: Update attributes such as room type, description, status, images and other information.
-                // 6. Save changes to database: Save all changes to the database and return a success or failure result.
-
                 var room = await GetByIdAsync(entity.roomId);
                 if (room == null)
                 {
