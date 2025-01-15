@@ -19,7 +19,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"Service with ID {entity.serviceId} already exists!");
                 }
-                entity.isDeleted = false;
                 var currentEntity = context.Service.Add(entity).Entity;
                 await context.SaveChangesAsync();
 

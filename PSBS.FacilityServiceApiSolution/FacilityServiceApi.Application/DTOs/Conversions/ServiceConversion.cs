@@ -27,7 +27,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 serviceTypeId = service.serviceTypeId,
                 serviceDescription = service.serviceDescription,
                 serviceName = service.serviceName,
-                isDeleted = false,
+                isDeleted = true,
                 serviceImage = imagePath,
                 createAt = DateTime.Now,
                 updateAt = DateTime.Now

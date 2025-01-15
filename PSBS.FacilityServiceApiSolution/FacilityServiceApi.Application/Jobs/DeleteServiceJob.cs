@@ -36,8 +36,8 @@ namespace FacilityServiceApi.Application.Jobs
 
             if ((serviceVariants == null || !serviceVariants.Any()))
             {
-                await _serviceInterface.DeleteAsync(service);
-                Console.WriteLine($"Service {serviceId} is deleted automatically!");
+                await _serviceInterface.DeleteSecondAsync(service);
+                Console.WriteLine($"Service {serviceId} is deleted permanently automatically!");
             }
             else
             {

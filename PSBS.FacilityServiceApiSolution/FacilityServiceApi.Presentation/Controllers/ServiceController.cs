@@ -283,7 +283,7 @@ namespace FacilityServiceApi.Presentation.Controllers
                 }
                 else
                 {
-                    return Conflict("Can't delete this service because it has at least service variant.");
+                    return Conflict(new Response(false, "Can't delete this service because it has at least service variant."));
                 }
 
             }
