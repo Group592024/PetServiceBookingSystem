@@ -1,59 +1,73 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2'; 
 
-/**
- * ForgotPassword component handles user email input and submits a reset password request.
- */
 const ForgotPassword = () => {
-  const [email, setEmail] = useState(''); 
-  const [loading, setLoading] = useState(false); 
-  const [error, setError] = useState(''); 
-  const [successMessage, setSuccessMessage] = useState('');
-
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({ email: '' });
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
   };
 
-
-  const validateEmail = (email) => {
+  const validateEmail = () => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
+    if (!email) {
+      setErrors({ email: 'Email is required' });
+      return false;
+    }
+    if (!regex.test(email)) {
+      setErrors({ email: 'Please enter a valid email address' });
+      return false;
+    }
+    setErrors({ email: '' });
+    return true;
   };
 
-
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
-    setLoading(true); 
-    setError(''); 
-    setSuccessMessage(''); 
-
-    if (!email || !validateEmail(email)) {
-      setError('Please enter a valid email.');
+    e.preventDefault();
+    setLoading(true);
+    if (!validateEmail()) {
       setLoading(false);
       return;
     }
 
     try {
-      // Send email request to reset password
       const response = await axios.post(
         `http://localhost:5000/api/Account/ForgotPassword?email=${encodeURIComponent(email)}`
       );
 
       if (response.data && response.data.flag) {
-        setSuccessMessage(response.data.message); 
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: response.data.message,
+        });
       } else {
-        setError('Something went wrong, please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Something went wrong, please try again.',
+        });
       }
     } catch (error) {
       if (error.response) {
         console.error('API Error:', error.response.data);
-        setError(error.response.data.message || 'An error occurred. Please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.response.data.message || 'An error occurred. Please try again.',
+        });
       } else {
-        setError('An error occurred. Please try again later.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'An error occurred. Please try again later.',
+        });
       }
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -80,21 +94,18 @@ const ForgotPassword = () => {
                 type="email"
                 id="email"
                 value={email}
-                onChange={handleEmailChange} 
+                onChange={handleEmailChange}
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 placeholder="Enter your email"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
-
-            {error && <div className="text-red-500 text-sm">{error}</div>}
-
-            {successMessage && <div className="text-green-500 text-sm">{successMessage}</div>}
 
             <button
               type="submit"
               className={`w-full bg-cyan-500 text-white py-2 rounded-lg hover:bg-blue-600 transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={loading} 
+              disabled={loading}
             >
               {loading ? 'Sending...' : 'Reset Password'}
             </button>

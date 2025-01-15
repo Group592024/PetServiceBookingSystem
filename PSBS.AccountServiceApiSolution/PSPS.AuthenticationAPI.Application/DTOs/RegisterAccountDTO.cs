@@ -2,6 +2,7 @@
 {
     public record RegisterAccountDTO(
         ImageUploadModel? UploadModel,
-        RegisterDTO RegisterTempDTO
+        RegisterDTO? RegisterTempDTO
         );
+
 }

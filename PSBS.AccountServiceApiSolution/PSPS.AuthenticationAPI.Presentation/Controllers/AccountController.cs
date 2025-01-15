@@ -21,7 +21,13 @@ namespace PSPS.Presentation.Controllers
             var result = await account.Register(model); 
             return result.Flag ? Ok(result) : BadRequest(Request);
         }
-
+        [HttpPost("addaccount")]// Add new account
+        public async Task<ActionResult<Response>> AddAccount([FromForm] RegisterAccountDTO model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await account.AddAccount(model);
+            return result.Flag ? Ok(result) : BadRequest(Request);
+        }
         [HttpPost("Login")]// Login account
         public async Task<ActionResult<Response>> Login(LoginDTO loginDTO)
         {

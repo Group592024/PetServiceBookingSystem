@@ -1,4 +1,22 @@
+.account-list-page .content {
+  padding: 16px;
+}
+
+.account-list-page .bg-white {
+  padding: 16px;
+}
+
+.account-list-page .MuiDataGrid-root {
+  width: 100% !important;
+}
+
+.account-list-page h2 {
+  font-size: 2rem;
+}
 .row-deleted {
   opacity: 0.5;
-  background-color: #f0f0f0; /* Màu nền nhạt cho các tài khoản đã xóa */
+  background-color: #f0f0f0; 
+}
+.swal2-container {
+  z-index: 2100 !important; 
 }

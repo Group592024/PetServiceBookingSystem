@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const Register = () => {
   const [AccountEmail, setEmail] = useState('');
@@ -9,67 +10,111 @@ const Register = () => {
   const [AccountGender, setGender] = useState('');
   const [AccountDob, setDob] = useState('');
   const [AccountAddress, setAddress] = useState('');
-  const [AccountImage, setImage] = useState(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  // Các state để lưu thông báo lỗi cho từng trường
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    gender: '',
+    dob: '',
+    address: '',
+  });
+
   const navigate = useNavigate();
 
-  
-  const validateEmail = (email) => {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    return regex.test(email);
-  };
-
- 
-  const validatePhoneNumber = (phoneNumber) => {
-    const regex = /^0\d{9}$/; 
-    return regex.test(phoneNumber);
-  };
-
-  const validatePassword = (password) => {
-    return password.length >= 6; 
-  };
-
-  const validateDob = (dob) => {
-    const birthDate = new Date(dob);
-    let age = new Date().getFullYear() - birthDate.getFullYear();  
-    const month = new Date().getMonth();
-    const day = new Date().getDate();
-  
-    if (month < birthDate.getMonth() || (month === birthDate.getMonth() && day < birthDate.getDate())) {
-      age--; 
-    }
-  
-    return age >= 10; 
-  };  
   const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
+    let valid = true;
+    let errorMessages = { ...errors };
 
-    if (!AccountName || !AccountEmail || !AccountPhoneNumber || !AccountPassword || !AccountGender || !AccountDob || !AccountAddress) {
-      setError('Please fill in all required fields.');
+    // Kiểm tra các trường có giá trị không
+    if (!AccountName) {
+      errorMessages.name = 'Name is required';
+      valid = false;
+    } else {
+      errorMessages.name = '';
+    }
+    if (!AccountEmail) {
+      errorMessages.email = 'Email is required';
+      valid = false;
+    } else {
+      errorMessages.email = '';
+    }
+    if (!AccountPhoneNumber) {
+      errorMessages.phone = 'Phone number is required';
+      valid = false;
+    } else {
+      errorMessages.phone = '';
+    }
+    if (!AccountPassword) {
+      errorMessages.password = 'Password is required';
+      valid = false;
+    } else {
+      errorMessages.password = '';
+    }
+    if (!AccountGender) {
+      errorMessages.gender = 'Gender is required';
+      valid = false;
+    } else {
+      errorMessages.gender = '';
+    }
+    if (!AccountDob) {
+      errorMessages.dob = 'Date of birth is required';
+      valid = false;
+    } else {
+      errorMessages.dob = '';
+    }
+    if (!AccountAddress) {
+      errorMessages.address = 'Address is required';
+      valid = false;
+    } else {
+      errorMessages.address = '';
+    }
+
+    setErrors(errorMessages);  // Cập nhật thông báo lỗi vào state
+
+    if (!valid) return;
+
+    // Kiểm tra email hợp lệ
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(AccountEmail)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        email: 'Please enter a valid email address',
+      }));
       return;
     }
 
-    if (!validateEmail(AccountEmail)) {
-      setError('Please enter a valid email address.');
+    // Kiểm tra số điện thoại hợp lệ
+    const phoneRegex = /^0\d{9}$/;
+    if (!phoneRegex.test(AccountPhoneNumber)) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        phone: 'Please enter a valid phone number (starting with 0 and 9 digits)',
+      }));
       return;
     }
 
-    if (!validatePhoneNumber(AccountPhoneNumber)) {
-      setError('Please enter a valid phone number (starting with 0 and 9 digits).');
+    // Kiểm tra mật khẩu
+    if (AccountPassword.length < 6) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        password: 'Password must be at least 6 characters long',
+      }));
       return;
     }
 
-    if (!validatePassword(AccountPassword)) {
-      setError('Password must be at least 6 characters long.');
-      return;
-    }
-
-    if (!validateDob(AccountDob)) {
-      setError('You must be at least 10 years old.');
+    // Kiểm tra ngày sinh không phải là ngày tương lai
+    const birthDate = new Date(AccountDob);
+    const currentDate = new Date();
+    if (birthDate > currentDate) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        dob: 'Date of birth cannot be in the future',
+      }));
       return;
     }
 
@@ -81,18 +126,7 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountGender', AccountGender);
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-
-    const generateRandomName = () => {
-      return `image_${Math.random().toString(36).substring(2, 15)}_${Date.now()}.png`;
-    };
-
-    if (AccountImage) {
-      const randomImageName = generateRandomName(); 
-      formData.append('UploadModel.ImageFile', AccountImage);
-      formData.append('RegisterTempDTO.AccountImage', randomImageName); 
-    } else {
-      formData.append('RegisterTempDTO.AccountImage', 'dummy');
-    }
+    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
 
     try {
       const response = await fetch('http://localhost:5000/api/Account/register', {
@@ -104,16 +138,25 @@ const Register = () => {
       });
 
       const result = await response.json();
-      console.log('API Response:', result); 
-
       if (response.ok && result.flag) {
-        setSuccess('Registration successful! Please log in.');
-        setTimeout(() => navigate('/login'), 2000);
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'Please log in.',
+        }).then(() => navigate('/login'));
       } else {
-        setError(result.message || 'Registration failed. Please try again.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Registration Failed',
+          text: result.message || 'Registration failed. Please try again.',
+        });
       }
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      Swal.fire({
+        icon: 'error',
+        title: 'An error occurred',
+        text: 'Please try again later.',
+      });
       console.error(err);
     }
   };
@@ -132,15 +175,6 @@ const Register = () => {
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Register</h2>
           <form onSubmit={handleRegister}>
             <div className="mb-4">
-              <label htmlFor="image" className="block text-gray-700 font-medium">Profile Image</label>
-              <input
-                type="file"
-                id="image"
-                onChange={(e) => setImage(e.target.files[0])}
-                className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
-            </div>
-            <div className="mb-4">
               <label htmlFor="name" className="block text-gray-700 font-medium">Name</label>
               <input
                 type="text"
@@ -151,6 +185,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 required
               />
+              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
@@ -163,6 +198,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 required
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="phone" className="block text-gray-700 font-medium">Phone Number</label>
@@ -175,6 +211,7 @@ const Register = () => {
                 placeholder="Enter your phone number"
                 required
               />
+              {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
@@ -187,6 +224,7 @@ const Register = () => {
                 placeholder="Enter your password"
                 required
               />
+              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="gender" className="block text-gray-700 font-medium">Gender</label>
@@ -201,6 +239,7 @@ const Register = () => {
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select>
+              {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="dob" className="block text-gray-700 font-medium">Date of Birth</label>
@@ -212,6 +251,7 @@ const Register = () => {
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
+              {errors.dob && <p className="text-red-500 text-sm">{errors.dob}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="address" className="block text-gray-700 font-medium">Address</label>
@@ -224,9 +264,8 @@ const Register = () => {
                 placeholder="Enter your address"
                 required
               />
+              {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
             </div>
-                        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            {success && <p className="text-green-500 text-sm mb-4">{success}</p>}
             <button
               type="submit"
               className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"

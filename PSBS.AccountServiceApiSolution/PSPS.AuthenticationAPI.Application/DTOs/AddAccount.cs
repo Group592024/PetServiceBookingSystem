@@ -5,7 +5,7 @@ namespace PSPS.AccountAPI.Application.DTOs
 {
     public record AddAccount(
         [ValidateNever] ImageUploadModel? UploadModel,
-        UpdateAccountDTO AccountTempDTO
+        UpdateAccountDTO? AccountTempDTO
         );
    
 }
