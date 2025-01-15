@@ -45,9 +45,9 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("price");
 
-                    b.Property<Guid>("ServiceId")
+                    b.Property<Guid>("ServiceVariantId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("service_id");
+                        .HasColumnName("serviceVariant_id");
 
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("datetime2")
@@ -55,7 +55,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
 
                     b.HasKey("BookingServiceItemId");
 
-                    b.HasIndex("ServiceId");
+                    b.HasIndex("ServiceVariantId");
 
                     b.ToTable("bookingServiceItems");
                 });
@@ -321,20 +321,20 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1356),
+                            createAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(835),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1372)
+                            updateAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(848)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1375),
+                            createAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(852),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 8, 14, 22, 34, 534, DateTimeKind.Local).AddTicks(1375)
+                            updateAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(853)
                         });
                 });
 
@@ -379,13 +379,13 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.BookingServiceItem", b =>
                 {
-                    b.HasOne("FacilityServiceApi.Domain.Entities.Service", "Service")
+                    b.HasOne("FacilityServiceApi.Domain.Entities.ServiceVariant", "ServiceVariant")
                         .WithMany("BookingServiceItems")
-                        .HasForeignKey("ServiceId")
+                        .HasForeignKey("ServiceVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Service");
+                    b.Navigation("ServiceVariant");
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Room", b =>
@@ -455,7 +455,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                     b.Navigation("Rooms");
                 });
 
-            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Service", b =>
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceVariant", b =>
                 {
                     b.Navigation("BookingServiceItems");
                 });
