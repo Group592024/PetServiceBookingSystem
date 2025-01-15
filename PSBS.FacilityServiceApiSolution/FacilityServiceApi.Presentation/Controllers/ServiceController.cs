@@ -49,21 +49,39 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetServicesList()
+        public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetServicesList([FromQuery] bool showAll)
         {
-            var services = (await _service.GetAllAsync())
+            if (showAll)
+            {
+                var services = (await _service.GetAllAsync())
+                        .ToList();
+                if (!services.Any())
+                {
+                    return NotFound(new Response(false, "No services found in the database"));
+                }
+
+                var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
+                return Ok(new Response(true, "Services retrieved successfully")
+                {
+                    Data = serviceDtos
+                });
+            }
+            else
+            {
+                var services = (await _service.GetAllAsync())
                         .Where(r => !r.isDeleted)
                         .ToList();
-            if (!services.Any())
-            {
-                return NotFound(new Response(false, "No services found in the database"));
-            }
+                if (!services.Any())
+                {
+                    return NotFound(new Response(false, "No services found in the database"));
+                }
 
-            var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
-            return Ok(new Response(true, "Services retrieved successfully")
-            {
-                Data = serviceDtos
-            });
+                var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
+                return Ok(new Response(true, "Services retrieved successfully")
+                {
+                    Data = serviceDtos
+                });
+            }
         }
 
         [HttpGet("{id}")]

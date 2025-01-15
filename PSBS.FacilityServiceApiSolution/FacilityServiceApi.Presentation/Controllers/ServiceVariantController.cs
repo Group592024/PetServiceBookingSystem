@@ -38,27 +38,52 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("/service/{serviceId}")]
-        public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid serviceId)
+        public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid serviceId, [FromQuery] bool showAll)
         {
-            var service = await _service.GetByIdAsync(serviceId);
-            if (service == null || service.isDeleted)
+            if (showAll)
             {
-                return NotFound(new Response(false, $"Service with GUID {serviceId} not found or is deleted"));
-            }
+                var service = await _service.GetByIdAsync(serviceId);
+                if (service == null || service.isDeleted)
+                {
+                    return NotFound(new Response(false, $"Service with GUID {serviceId} not found or is deleted"));
+                }
 
-            var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(serviceId))
-                        .Where(r => !r.isDeleted)
-                        .ToList();
-            if (!serviceVariants.Any())
-            {
-                return NotFound(new Response(false, "No service variants found in the database"));
-            }
+                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(serviceId))
 
-            var (_, serviceVariantDtos) = ServiceVariantConversion.FromEntity(null!, serviceVariants);
-            return Ok(new Response(true, "Service variants retrieved successfully")
+                            .ToList();
+                if (!serviceVariants.Any())
+                {
+                    return NotFound(new Response(false, "No service variants found in the database"));
+                }
+
+                var (_, serviceVariantDtos) = ServiceVariantConversion.FromEntity(null!, serviceVariants);
+                return Ok(new Response(true, "Service variants retrieved successfully")
+                {
+                    Data = serviceVariantDtos
+                });
+            }
+            else
             {
-                Data = serviceVariantDtos
-            });
+                var service = await _service.GetByIdAsync(serviceId);
+                if (service == null || service.isDeleted)
+                {
+                    return NotFound(new Response(false, $"Service with GUID {serviceId} not found or is deleted"));
+                }
+
+                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(serviceId))
+                            .Where(r => !r.isDeleted)
+                            .ToList();
+                if (!serviceVariants.Any())
+                {
+                    return NotFound(new Response(false, "No service variants found in the database"));
+                }
+
+                var (_, serviceVariantDtos) = ServiceVariantConversion.FromEntity(null!, serviceVariants);
+                return Ok(new Response(true, "Service variants retrieved successfully")
+                {
+                    Data = serviceVariantDtos
+                });
+            }
         }
 
 
