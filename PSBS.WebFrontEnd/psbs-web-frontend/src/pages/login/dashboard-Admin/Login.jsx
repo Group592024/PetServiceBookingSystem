@@ -76,7 +76,7 @@ const Login = () => {
           if (role === 'user') {
             navigate('/');
           } else {
-            navigate('/account');
+            navigate('/dashboard');
           }
         }
       } else {
