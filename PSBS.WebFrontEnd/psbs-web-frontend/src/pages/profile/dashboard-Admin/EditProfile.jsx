@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
+import Swal from "sweetalert2";  
 
 const EditProfile = () => {
   const { accountId } = useParams();
+  const sidebarRef = useRef(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({
     accountName: "",
@@ -13,44 +15,35 @@ const EditProfile = () => {
     accountGender: "male",
     accountDob: "",
     accountAddress: "",
-    accountRoleId: "user",
+    roleId: "user", 
     accountImage: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
-  const [errors, setErrors] = useState({
-    accountName: "",
-    accountEmail: "",
-    accountPhoneNumber: "",
-    accountDob: "",
-    accountGender: "",
-    accountAddress: "",
-  });
-
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
         .then((response) => response.json())
         .then(async (data) => {
-          setAccount(data);
+          setAccount(data); 
 
           if (data.accountImage) {
             try {
               const response = await fetch(`http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`);
               const imageData = await response.json();
-
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
                 const imgContentType = imageData.data.contentType;
                 setImagePreview(`data:${imgContentType};base64,${imgContent}`);
-              } else {
-                console.error("Error loading image:", imageData.message);
               }
             } catch (error) {
               console.error("Error fetching image:", error);
             }
           }
         })
-        .catch((error) => console.error("Error fetching account data:", error));
+        .catch((error) => {
+          console.error("Error fetching account data:", error);
+          Swal.fire("Error", "Error loading account data.", "error");
+        });
     }
   }, [accountId]);
 
@@ -64,71 +57,48 @@ const EditProfile = () => {
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = { ...errors };
+    let errorMessage = "";
 
-    // Validate Name
     if (!account.accountName.trim()) {
-      newErrors.accountName = "Name is required";
+      errorMessage = "Name is required";
       valid = false;
-    } else {
-      newErrors.accountName = "";
     }
-
-    // Validate Email
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!account.accountEmail.trim()) {
-      newErrors.accountEmail = "Email is required";
+      errorMessage = "Email is required";
       valid = false;
     } else if (!emailPattern.test(account.accountEmail)) {
-      newErrors.accountEmail = "Please enter a valid email address";
+      errorMessage = "Please enter a valid email address";
       valid = false;
-    } else {
-      newErrors.accountEmail = "";
     }
-
-    // Validate Phone Number (Example: Vietnamese phone number)
     const phonePattern = /^0[1-9][0-9]{8}$/;
     if (!account.accountPhoneNumber.trim()) {
-      newErrors.accountPhoneNumber = "Phone number is required";
+      errorMessage = "Phone number is required";
       valid = false;
     } else if (!phonePattern.test(account.accountPhoneNumber)) {
-      newErrors.accountPhoneNumber = "Please enter a valid phone number";
+      errorMessage = "Please enter a valid phone number";
       valid = false;
-    } else {
-      newErrors.accountPhoneNumber = "";
     }
-
-    // Validate Birthday
     if (!account.accountDob.trim()) {
-      newErrors.accountDob = "Birthday is required";
+      errorMessage = "Birthday is required";
       valid = false;
-    } else {
-      newErrors.accountDob = "";
     }
-
-    // Validate Gender
     if (!account.accountGender) {
-      newErrors.accountGender = "Gender is required";
+      errorMessage = "Gender is required";
       valid = false;
-    } else {
-      newErrors.accountGender = "";
     }
-
-    // Validate Address
     if (!account.accountAddress.trim()) {
-      newErrors.accountAddress = "Address is required";
+      errorMessage = "Address is required";
       valid = false;
-    } else {
-      newErrors.accountAddress = "";
     }
-
-    setErrors(newErrors);
+    if (!valid) {
+      Swal.fire("Validation Error", errorMessage, "error");
+    }
     return valid;
   };
-
   const handleEdit = async () => {
     if (!validateForm()) return;
-
+  
     const formData = new FormData();
     formData.append("AccountTempDTO.AccountId", accountId);
     formData.append("AccountTempDTO.AccountName", account.accountName);
@@ -137,49 +107,53 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountGender", account.accountGender);
     formData.append("AccountTempDTO.AccountDob", account.accountDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
-    formData.append("AccountTempDTO.RoleId", account.accountRoleId);
-    formData.append("AccountTempDTO.isPickImage", account.accountImage ? true : false);
-
-    if (account.accountImage) {
+    formData.append("AccountTempDTO.roleId", account.roleId);
+      if (account.accountImage) {
+      formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
+    } else {
+      formData.append("AccountTempDTO.isPickImage", false);
+      formData.append("AccountTempDTO.AccountImage", account.accountImage || ""); 
     }
-
+  
+    console.log("Sending FormData:", {
+      accountId,
+      ...account,
+      roleId: account.roleId,
+    });
+  
     try {
       const response = await fetch(`http://localhost:5000/api/Account`, {
         method: "PUT",
         body: formData,
       });
-
+  
       const result = await response.json();
       if (result.flag) {
-        alert("Profile updated successfully!");
-        navigate(-1); 
+        Swal.fire("Success", "Profile updated successfully!", "success");
+        navigate(-1);
       } else {
-        alert(`Error: ${result.message}`);
+        Swal.fire("Error", result.message || "Something went wrong", "error");
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Error updating profile!");
+      Swal.fire("Error", "Error updating profile!", "error");
     }
   };
-
-  const handleBack = () => {
-    navigate(-1); 
+    const handleBack = () => {
+    navigate(-1);
   };
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar />
-
-      <div className="content flex-1 overflow-y-auto">
-        <Navbar />
-
+      <Sidebar ref={sidebarRef}/>
+      <div className="content  overflow-y-auto">
+        <Navbar sidebarRef={sidebarRef}/>
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Edit Profile</h2>
-
           <div className="flex flex-wrap gap-8">
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
-              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
+              <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
                 {imagePreview ? (
                   <img
                     src={imagePreview}
@@ -188,7 +162,7 @@ const EditProfile = () => {
                   />
                 ) : (
                   <svg
-                    className="w-12 h-12 text-gray-500"
+                    className="w-[15rem] h-[15rem] text-gray-500"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -230,9 +204,6 @@ const EditProfile = () => {
                     value={account.accountName || ""}
                     onChange={(e) => setAccount({ ...account, accountName: e.target.value })}
                   />
-                  {errors.accountName && (
-                    <p className="text-red-500 text-sm">{errors.accountName}</p>
-                  )}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="email" className="block text-sm font-medium mb-1 font-bold">
@@ -245,9 +216,6 @@ const EditProfile = () => {
                     value={account.accountEmail || ""}
                     onChange={(e) => setAccount({ ...account, accountEmail: e.target.value })}
                   />
-                  {errors.accountEmail && (
-                    <p className="text-red-500 text-sm">{errors.accountEmail}</p>
-                  )}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="role" className="block text-sm font-medium mb-1 font-bold">
@@ -256,8 +224,8 @@ const EditProfile = () => {
                   <select
                     id="role"
                     className="w-full p-3 border rounded-md"
-                    value={account.accountRoleId || "user"}
-                    onChange={(e) => setAccount({ ...account, accountRoleId: e.target.value })}
+                    value={account.roleId}
+                    onChange={(e) => setAccount({ ...account, roleId: e.target.value })}
                   >
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
@@ -275,9 +243,6 @@ const EditProfile = () => {
                     value={account.accountDob?.split("T")[0] || ""}
                     onChange={(e) => setAccount({ ...account, accountDob: e.target.value })}
                   />
-                  {errors.accountDob && (
-                    <p className="text-red-500 text-sm">{errors.accountDob}</p>
-                  )}
                 </div>
                 <div className="mb-3">
                   <label className="block text-sm font-medium mb-1 font-bold">Gender</label>
@@ -303,9 +268,6 @@ const EditProfile = () => {
                       Female
                     </label>
                   </div>
-                  {errors.accountGender && (
-                    <p className="text-red-500 text-sm">{errors.accountGender}</p>
-                  )}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="phone" className="block text-sm font-medium mb-1 font-bold">
@@ -318,9 +280,6 @@ const EditProfile = () => {
                     value={account.accountPhoneNumber || ""}
                     onChange={(e) => setAccount({ ...account, accountPhoneNumber: e.target.value })}
                   />
-                  {errors.accountPhoneNumber && (
-                    <p className="text-red-500 text-sm">{errors.accountPhoneNumber}</p>
-                  )}
                 </div>
 
                 <div className="mb-3">
@@ -334,22 +293,19 @@ const EditProfile = () => {
                     value={account.accountAddress || ""}
                     onChange={(e) => setAccount({ ...account, accountAddress: e.target.value })}
                   />
-                  {errors.accountAddress && (
-                    <p className="text-red-500 text-sm">{errors.accountAddress}</p>
-                  )}
                 </div>
 
                 <div className="flex flex-wrap justify-between space-x-4 gap-4">
                   <button
                     type="button"
-                    className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                    className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full md:w-auto"
                     onClick={handleEdit}
                   >
-                    Edit
+                    Save
                   </button>
                   <button
                     type="button"
-                    className="bg-gray-300 text-black px-6 py-3 font-medium rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                    className="bg-gray-500 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-gray-700 w-full md:w-auto"
                     onClick={handleBack}
                   >
                     Back

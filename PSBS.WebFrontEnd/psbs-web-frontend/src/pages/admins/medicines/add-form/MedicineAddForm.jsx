@@ -11,17 +11,20 @@ function MedicineAddForm() {
   const [medicineName, setMedicineName] = useState("");
   const [treatmentFor, setTreatmentFor] = useState(null);
   const [image, setImage] = useState(null);
-  const [treatmentOptions, setTreatmentOptions] = useState([]); // Added state for treatmentOptions
+  const [treatmentOptions, setTreatmentOptions] = useState([]);
+
+  const [errors, setErrors] = useState({
+    medicineName: "",
+    treatmentFor: "",
+    image: "",
+  });
 
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
         const response = await fetch("http://localhost:5003/api/Treatment/available");
         const result = await response.json();
-        console.log(result);
-
         if (response.ok && result.flag) {
-          // Prepend the "None" option
           setTreatmentFor({ id: null, label: "None" });
           setTreatmentOptions([
             { id: null, label: "None" },
@@ -31,24 +34,34 @@ function MedicineAddForm() {
             })),
           ]);
         } else {
-          console.error("Failed to adding treatments:", result.message || "Unknown error");
+          console.error("Failed to fetch treatments:", result.message || "Unknown error");
         }
       } catch (error) {
-        console.error("Error adding treatments:", error);
+        console.error("Error fetching treatments:", error);
       }
     };
 
     fetchTreatments();
   }, []);
-  
+
+  const validateForm = () => {
+    const newErrors = {
+      medicineName: medicineName ? "" : "Medicine Name is required.",
+      treatmentFor:
+        treatmentFor && treatmentFor.id !== null
+          ? ""
+          : "Please select a valid treatment.",
+      image: image ? "" : "Image is required.",
+    };
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!medicineName || !treatmentFor || treatmentFor.id === null || !image) {
-      toast.warning("Please fill all required fields.");
-      return;
-    }
+    if (!validateForm()) return;
 
     const formData = new FormData();
     formData.append("medicineName", medicineName);
@@ -65,7 +78,7 @@ function MedicineAddForm() {
       if (response.ok) {
         toast.success(data.message || "Medicine added successfully!");
         handleCancel();
-        navigate("/medicines"); 
+        navigate("/medicines");
       } else {
         toast.error("Error: " + data.message);
       }
@@ -77,19 +90,33 @@ function MedicineAddForm() {
 
   const handleCancel = () => {
     setMedicineName("");
-    setTreatmentFor({ id: null, label: "None" }); 
+    setTreatmentFor({ id: null, label: "None" });
     setImage(null);
+    setErrors({
+      medicineName: "",
+      treatmentFor: "",
+      image: "",
+    });
     navigate("/medicines");
   };
-  // Handle image file change
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith("image/")) {
-      setImage(URL.createObjectURL(file)); // Create image URL for preview
-    } else {
-      alert("Please select a valid image file");
+    if (file) {
+      if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImage(reader.result); // Set the Base64 URL for preview
+          setErrors((prevErrors) => ({ ...prevErrors, image: "" }));
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setErrors((prevErrors) => ({ ...prevErrors, image: "Please select a valid image file." }));
+        setImage(null);
+      }
     }
   };
+
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -97,29 +124,39 @@ function MedicineAddForm() {
         <Navbar sidebarRef={sidebarRef} />
         <div className="flex justify-center items-center min-h-screen bg-dark-grey-100 p-4">
           <div className="flex w-full sm:w-96 bg-white rounded-lg shadow-lg p-6">
-            {/* Form Card */}
             <div className="w-full flex flex-col justify-between">
               <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
                 Add Medicine
               </h2>
               <form onSubmit={handleSubmit}>
-                {/* Medicine Name TextField */}
+                {/* Medicine Name */}
                 <div className="mb-4">
                   <TextField
                     label="Medicine Name"
                     variant="outlined"
                     fullWidth
                     value={medicineName}
-                    onChange={(e) => setMedicineName(e.target.value)}
-                    className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    onChange={(e) => {
+                      setMedicineName(e.target.value);
+                      if (e.target.value) {
+                        setErrors((prevErrors) => ({ ...prevErrors, medicineName: "" }));
+                      }
+                    }}
+                    error={!!errors.medicineName}
+                    helperText={errors.medicineName}
                   />
                 </div>
 
-                {/* Treatment For Autocomplete */}
+                {/* Treatment For */}
                 <div className="mb-6">
                   <Autocomplete
                     value={treatmentFor}
-                    onChange={(event, newValue) => setTreatmentFor(newValue)}
+                    onChange={(event, newValue) => {
+                      setTreatmentFor(newValue);
+                      if (newValue && newValue.id !== null) {
+                        setErrors((prevErrors) => ({ ...prevErrors, treatmentFor: "" }));
+                      }
+                    }}
                     options={treatmentOptions}
                     getOptionLabel={(option) => option.label}
                     renderInput={(params) => (
@@ -127,14 +164,15 @@ function MedicineAddForm() {
                         {...params}
                         label="Treatment For"
                         variant="outlined"
-                        className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        error={!!errors.treatmentFor}
+                        helperText={errors.treatmentFor}
                       />
                     )}
                     fullWidth
                   />
                 </div>
 
-                {/* Image File Upload */}
+                {/* Image Upload */}
                 <div className="mb-6">
                   <input
                     id="fileInput"
@@ -143,10 +181,8 @@ function MedicineAddForm() {
                     onChange={handleFileChange}
                     className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
                   />
-                  {image && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Selected File: {image.name}
-                    </p>
+                  {errors.image && (
+                    <p className="text-sm text-red-500 mt-2">{errors.image}</p>
                   )}
                 </div>
 
@@ -192,7 +228,7 @@ function MedicineAddForm() {
           )}
         </div>
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </div>
   );
 }

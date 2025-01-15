@@ -10,6 +10,7 @@ namespace PSPS.AccountAPI.Application.Interfaces
     public interface IAccount : IGenericInterface<Account>
     {
         Task<Response> Register([FromForm] RegisterAccountDTO model);
+        Task<Response> AddAccount([FromForm] RegisterAccountDTO model);
         Task<Response> Login(LoginDTO loginDTO);
         Task<GetAccountDTO> GetAccount(Guid AccountId);
         Task<Response> UpdateAccount([FromForm] AddAccount model);
