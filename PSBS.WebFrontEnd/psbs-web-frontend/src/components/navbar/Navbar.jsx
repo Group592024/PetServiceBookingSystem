@@ -1,20 +1,24 @@
+import React, { useEffect, useState } from 'react';
+import jwt_decode from 'jwt-decode';
 
-import React, { useEffect, useState } from "react";
-import jwt_decode from "jwt-decode";  
 const Navbar = ({ sidebarRef }) => {
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [userData, setUserData] = useState({
+    name: "Admin",
+    avatar: "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg",
+  });
   const [accountName, setAccountName] = useState(null);
   const [accountImage, setAccountImage] = useState(null);
   const [accountId, setAccountId] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token"); 
-
+    const token = sessionStorage.getItem("token");
     if (token) {
-      const decodedToken = jwt_decode(token); 
-      setAccountName(decodedToken.AccountName); 
+      const decodedToken = jwt_decode(token);
+      setAccountName(decodedToken.AccountName);
       setAccountImage(decodedToken.AccountImage);
-      setAccountId(decodedToken.AccountId); 
+      setAccountId(decodedToken.AccountId);
 
       if (decodedToken.AccountImage) {
         fetch(`http://localhost:5000/api/Account/loadImage?filename=${decodedToken.AccountImage}`)
@@ -32,6 +36,10 @@ const Navbar = ({ sidebarRef }) => {
       }
     }
   }, []);
+
+  const toggleDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
+  };
 
   const handleMenuClick = () => {
     if (sidebarRef.current) {
@@ -53,21 +61,25 @@ const Navbar = ({ sidebarRef }) => {
       <input type="checkbox" id="theme-toggle" hidden />
       <label htmlFor="theme-toggle"></label>
       <a href="#" className="notifications">
-        <i className="bx bx-bell"></i>
+        <i className="bx bx-message-square-dots"></i>
         <span className="count">12</span>
       </a>
-      <span>{accountName}</span>
-      <a href={`/profile/${accountId}`} className="profile">
+      <div className="navbar-profile" onClick={toggleDropdown}>
         {imagePreview ? (
-          <img
-            src={imagePreview}
-            alt="Profile"
-          />
+          <img src={imagePreview} alt="Profile Avatar" className="profile-avatar" />
         ) : (
-          <div className="default-profile-pic"> </div>
+          <img src={userData.avatar} alt="Profile Avatar" className="profile-avatar" />
         )}
-        
-      </a>
+        {dropdownVisible && (
+          <div className="dropdown-menu">
+            <ul>
+              <li>{accountName || userData.name}</li>
+              <li>View Profile</li>
+              <li>Logout</li>
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
