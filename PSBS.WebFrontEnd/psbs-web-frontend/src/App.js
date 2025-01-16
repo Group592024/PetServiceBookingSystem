@@ -9,6 +9,8 @@ import Login from "./pages/login/dashboard-Admin/Login";
 import ChangePassword from "./pages/changepassword/dashboard-Admin/ChangePassword";
 import ForgotPassword from "./pages/forgotpassword/dashboard-Admin/ForgotPassword";
 import Profile from "./pages/profile/dashboard-Admin/Profile";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 import EditProfile from "./pages/profile/dashboard-Admin/EditProfile";
 import AccountList from "./pages/account/dashboard-Admin/AccountList";
 import Register from "./pages/register/dashboard-Admin/Register";
@@ -27,6 +29,7 @@ import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
 import UpdatePetType from './pages/admins/PetType/UpdatePetType';
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
 
 function App() {
   return (
@@ -53,6 +56,13 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/profilecustomer/:accountId"
+            element={
+              <ProtectedRoute>  
+                <ProfileCustomer />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/account"
             element={
               <ProtectedRoute>
@@ -67,10 +77,24 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/changepasswordcustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordCustomer />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/editprofile/:accountId"
             element={
               <ProtectedRoute>
                 <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/editprofilecustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfileCustomer />
               </ProtectedRoute>
             }
           />

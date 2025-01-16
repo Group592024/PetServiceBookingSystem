@@ -192,6 +192,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             claims.Add(new Claim("AccountId", account.AccountId.ToString()));
             claims.Add(new Claim("AccountImage", account.AccountImage));
             claims.Add(new Claim("AccountName", account.AccountName));
+            claims.Add(new Claim("RoleId", account.RoleId));
             claims.Add(new Claim("AccountIsDeleted", account.AccountIsDeleted.ToString()));
 
             if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 const Login = () => {
   const [AccountEmail, setEmail] = useState('');
   const [AccountPassword, setPassword] = useState('');
@@ -47,7 +47,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
-      return; 
+      return;
     }
     try {
       const response = await fetch('http://localhost:5000/api/Account/Login', {
@@ -62,7 +62,6 @@ const Login = () => {
       if (response.ok && result.flag) {
         sessionStorage.setItem('token', result.data);
         const decodedToken = parseJwt(result.data);
-        console.log('Decoded Token:', decodedToken);
 
         const isAccountDeleted = decodedToken['AccountIsDeleted'] === 'True';
         if (isAccountDeleted) {
@@ -73,6 +72,7 @@ const Login = () => {
           });
         } else {
           const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+          localStorage.setItem('role', role);
           if (role === 'user') {
             navigate('/');
           } else {
@@ -85,7 +85,7 @@ const Login = () => {
           title: 'Login Failed',
           text: result.message || 'Login failed. Please try again.',
         });
-      } 
+      }
     } catch (err) {
       console.error('Error occurred during login:', err);
       Swal.fire({
