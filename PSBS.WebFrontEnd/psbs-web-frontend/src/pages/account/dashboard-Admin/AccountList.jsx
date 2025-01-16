@@ -18,19 +18,11 @@ const AccountList = () => {
   const [accountEmail, setAccountEmail] = useState("");
   const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
   const sidebarRef = useRef(null);
-
-  const userRole = localStorage.getItem("role"); 
-
   const fetchAccounts = async () => {
     try {
       const response = await fetch("http://localhost:5000/api/Account/all");
       const data = await response.json();
       if (data && data.data) {
-        console.log("Filtered accounts:", filteredAccounts);
-        console.log(accounts);
-        console.log("RoleId:", userRole);
-        console.log(localStorage.getItem("role"));
-
         setAccounts(data.data);
       }
     } catch (error) {
@@ -41,7 +33,6 @@ const AccountList = () => {
   useEffect(() => {
     fetchAccounts();
   }, []);
-
   const handleDelete = async (accountId, accountName, isDeleted) => {
     Swal.fire({
       title: "Are you sure?",
@@ -101,30 +92,10 @@ const AccountList = () => {
     });
   };
 
-  const filteredAccounts = accounts.filter((account) => {
-    console.log("Current account:", account);
-  
-    if (!userRole) {
-      console.log("No user role - showing all accounts");
-      return true;
-    }
-  
-    if (userRole === "admin") {
-      console.log("Admin role - filtering staff and user roles");
-      return ["staff", "user"].includes(account.roleId);
-    }
-  
-    if (userRole === "staff") {
-      console.log("Staff role - filtering only user roles");
-      return account.roleId === "user";
-    }
-  
-    console.log("No matching role - excluding account");
-    return false;
-  });
-  
-  
-  
+  const filteredAccounts = accounts.filter((account) =>
+    account.accountName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    account.accountEmail.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleSubmit = async () => {
     if (!accountEmail || !accountPhoneNumber) {
@@ -132,26 +103,9 @@ const AccountList = () => {
         icon: "error",
         title: "Oops...",
         text: "Please fill in all required fields.",
-      });
-      return;
-    }
-  
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(accountEmail)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Email",
-        text: "Please enter a valid email address (e.g., username@gmail.com)",
-      });
-      return;
-    }
-  
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
-    if (!phoneRegex.test(accountPhoneNumber)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Phone",
-        text: "Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)",
+        customClass: {
+          container: 'swal2-container',
+        },
       });
       return;
     }
@@ -168,8 +122,8 @@ const AccountList = () => {
   
       const data = await response.json();
       if (response.ok) {
-        Swal.fire("Success", "Account added successfully!", "success");
-        setOpenDialog(false);
+        Swal.fire("Success", "Account added successfully!", "success",);
+        setOpenDialog(false); 
         fetchAccounts();
         setAccountEmail("");
         setAccountPhoneNumber("");
@@ -259,10 +213,10 @@ const AccountList = () => {
                   type="search"
                   id="search-dropdown"
                   className="block w-64 p-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-l-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
-                  placeholder="Search Accounts..."
+                  placeholder="Search Medicines..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  aria-label="Search accounts"
+                  aria-label="Search medicines"
                   required
                 />
                 <button
@@ -290,7 +244,7 @@ const AccountList = () => {
 
               <button
                 type="button"
-                onClick={() => setOpenDialog(true)}
+                onClick={() => setOpenDialog(true)} 
                 className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
               >
                 <svg
@@ -319,7 +273,9 @@ const AccountList = () => {
                 disableSelectionOnClick
                 pagination
                 paginationMode="client"
-                getRowClassName={(params) => params.row.accountIsDeleted ? "row-deleted" : ""}
+                getRowClassName={(params) =>
+                  params.row.accountIsDeleted ? "row-deleted" : ""
+                }
               />
             </div>
           </div>
@@ -330,30 +286,43 @@ const AccountList = () => {
           Create New Account
         </DialogTitle>
         <DialogContent className="py-4">
-          <Box display="flex" flexDirection="column" gap={2}> 
-            <TextField
-              placeholder="Email"
-              variant="outlined"
-              fullWidth
-              value={accountEmail}
-              onChange={(e) => setAccountEmail(e.target.value)}
-              className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
-            />
-            <TextField
-              placeholder="Phone Number"
-              variant="outlined"
-              fullWidth
-              value={accountPhoneNumber}
-              onChange={(e) => setAccountPhoneNumber(e.target.value)}
-              className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
-            />
+        <Box display="flex" flexDirection="column" gap={2}> 
+          <TextField
+            placeholder="Email"
+            variant="outlined"
+            fullWidth
+            value={accountEmail}
+            onChange={(e) => setAccountEmail(e.target.value)}
+            className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
+          />
+          <TextField
+            placeholder="Phone Number"
+            variant="outlined"
+            fullWidth
+            value={accountPhoneNumber}
+            onChange={(e) => setAccountPhoneNumber(e.target.value)}
+            className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
+          />
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">Cancel</Button>
-          <Button onClick={handleSubmit} color="primary">Submit</Button>
+        <DialogActions className="py-4 justify-center">
+          <Button
+            onClick={() => setOpenDialog(false)}
+            color="secondary"
+            className="px-6 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            color="primary"
+            className="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg focus:ring-4 focus:outline-none focus:ring-blue-300 transition-colors duration-200"
+          >
+            Create
+          </Button>
         </DialogActions>
       </Dialog>
+
     </div>
   );
 };
