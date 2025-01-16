@@ -1,4 +1,5 @@
-﻿using FacilityServiceApi.Application.Interfaces;
+﻿using FacilityServiceApi.Application.DTO;
+using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -157,21 +158,38 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-
                 var existingRoomType = await GetByIdAsync(entity.roomTypeId);
                 if (existingRoomType == null)
                 {
-                    return new Response(false, $"RoomType with ID {entity.roomTypeId} not found or already deleted");
+                    return new Response(false, $"RoomType with ID {entity.roomTypeId} not found or already deleted.");
                 }
+
                 var existingRoomTypeByName = await context.RoomType
                     .FirstOrDefaultAsync(rt => rt.name.ToLower() == entity.name.ToLower() && rt.roomTypeId != entity.roomTypeId);
                 if (existingRoomTypeByName != null)
                 {
                     return new Response(false, $"RoomType with name '{entity.name}' already exists!");
                 }
-                if (entity.isDeleted && existingRoomType.isDeleted)
+
+                if (entity.isDeleted != existingRoomType.isDeleted)
                 {
-                    existingRoomType.isDeleted = false;
+                    var relatedRooms = await context.Room
+                        .Where(r => r.roomTypeId == existingRoomType.roomTypeId)
+                        .ToListAsync();
+
+                    foreach (var room in relatedRooms)
+                    {
+                        if (entity.isDeleted && !room.isDeleted)
+                        {
+                            room.isDeleted = true;
+                            context.Room.Update(room);
+                        }
+                        else if (!entity.isDeleted && room.isDeleted)
+                        {
+                            room.isDeleted = false;
+                            context.Room.Update(room);
+                        }
+                    }
                 }
 
                 existingRoomType.name = entity.name;
@@ -182,7 +200,18 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 context.RoomType.Update(existingRoomType);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.name} updated successfully") { Data = existingRoomType };
+
+                var roomTypeDto = new RoomTypeDTO
+                {
+                    roomTypeId = existingRoomType.roomTypeId,
+                    name = existingRoomType.name,
+                    pricePerHour = existingRoomType.pricePerHour,
+                    pricePerDay = existingRoomType.pricePerDay,
+                    description = existingRoomType.description,
+                    isDeleted = existingRoomType.isDeleted
+                };
+
+                return new Response(true, $"{entity.name} updated successfully") { Data = roomTypeDto };
             }
             catch (Exception ex)
             {

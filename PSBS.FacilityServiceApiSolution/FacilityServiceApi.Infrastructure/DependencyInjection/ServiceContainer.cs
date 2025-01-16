@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSPS.SharedLibrary.DependencyInjection;
+using Quartz;
 
 
 namespace FacilityServiceApi.Infrastructure.DependencyInjection
@@ -22,9 +23,17 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
             services.AddScoped<IService, ServiceRepository>();
             services.AddScoped<IServiceType, ServiceTypeRepository>();
             services.AddScoped<IServiceVariant, ServiceVariantRepository>();
+            services.AddScoped<IBookingServiceItem, BookingServiceItemRepository>();
 
             services.AddScoped<IRoomType, RoomTypeRepository>();
             services.AddScoped<IServiceType, ServiceTypeRepository>();
+
+            services.AddQuartz(q =>
+            {
+                q.UseInMemoryStore();
+            });
+
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
 
             return services;

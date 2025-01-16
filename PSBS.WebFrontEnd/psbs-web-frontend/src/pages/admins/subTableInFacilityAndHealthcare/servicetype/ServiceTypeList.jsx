@@ -22,12 +22,6 @@ const ServiceTypeList = () => {
 
   const model = [
     {
-      name: "serviceTypeId",
-      label: "ID",
-      type: "string",
-      disabled: true,
-    },
-    {
       name: "typeName",
       label: "Service Type Name",
       type: "string",

@@ -74,8 +74,8 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className="side-menu">
-        <li className={location.pathname === "/" ? "active" : ""}>
-          <Link to="/">
+        <li className={location.pathname === "/dashboard" ? "active" : ""}>
+          <Link to="/dashboard">
             <i className="bx bxs-dashboard"></i>
             Dashboard
           </Link>

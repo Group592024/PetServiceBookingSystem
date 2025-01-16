@@ -1,4 +1,5 @@
-﻿using FacilityServiceApi.Application.Interfaces;
+﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -23,8 +24,8 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 }
 
                 entity.isDeleted = false;
-                entity.createAt = DateTime.UtcNow;
-                entity.updateAt = DateTime.UtcNow;
+                entity.createAt = DateTime.Now;
+                entity.updateAt = DateTime.Now;
 
                 var currentEntity = context.ServiceType.Add(entity).Entity;
                 await context.SaveChangesAsync();
@@ -66,17 +67,20 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                     context.ServiceType.Remove(serviceType);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"ServiceType with Name {entity.typeName} has been permanently deleted.") ;
+                    return new Response(true, $"ServiceType with Name {entity.typeName} has been permanently deleted.");
                 }
                 else
                 {
                     serviceType.isDeleted = true;
                     context.ServiceType.Update(serviceType);
 
+                    serviceType.updateAt = DateTime.Now; 
+
                     foreach (var service in relatedServices)
                     {
                         service.isDeleted = true;
                         context.Service.Update(service);
+                        service.updateAt = DateTime.Now;  
                     }
 
                     await context.SaveChangesAsync();
@@ -137,7 +141,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 throw new InvalidOperationException($"Error occurred retrieving ServiceType by Id: {ex.Message}");
             }
         }
-
         public async Task<Response> UpdateAsync(ServiceType entity)
         {
             try
@@ -158,12 +161,23 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 existingServiceType.typeName = entity.typeName;
                 existingServiceType.description = entity.description;
-                existingServiceType.updateAt = DateTime.UtcNow;
+                existingServiceType.updateAt = DateTime.Now;
                 existingServiceType.isDeleted = entity.isDeleted;
 
                 context.ServiceType.Update(existingServiceType);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.typeName} updated successfully") { Data = existingServiceType };
+
+                var serviceTypeDto = new ServiceTypeDTO
+                {
+                    serviceTypeId = existingServiceType.serviceTypeId,
+                    typeName = existingServiceType.typeName,
+                    description = existingServiceType.description,
+                    createAt = existingServiceType.createAt,
+                    updateAt = existingServiceType.updateAt,
+                    isDeleted = existingServiceType.isDeleted
+                };
+
+                return new Response(true, $"{entity.typeName} updated successfully") { Data = serviceTypeDto };
             }
             catch (Exception ex)
             {
@@ -171,6 +185,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 return new Response(false, $"Error occurred updating the ServiceType: {ex.Message}");
             }
         }
+
 
         public async Task<IEnumerable<ServiceType>> ListAvailableServiceTypeAsync()
         {

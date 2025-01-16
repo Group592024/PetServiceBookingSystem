@@ -89,7 +89,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             var updatedTreatmentEntity = TreatmentConversion.ToEntity(updatingTreatment);
             var response = await _treatmentService.UpdateAsync(updatedTreatmentEntity);
 
-            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the Treatment"));
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpDelete("{id}")]
@@ -103,7 +103,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
             var response = await _treatmentService.DeleteAsync(existingTreatment);
 
-            return Ok(response);
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpGet("available")]

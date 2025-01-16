@@ -12,43 +12,47 @@ function MedicineUpdateForm() {
   const [treatmentFor, setTreatmentFor] = useState(null);
   const [image, setImage] = useState(null);
   const [treatmentOptions, setTreatmentOptions] = useState([]);
+  const [errors, setErrors] = useState({ medicineName: "", treatmentFor: "" }); // Error state for validation
   const { medicineId } = useParams();
   console.log("Medicine ID:", medicineId);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const treatmentsResponse = await fetch(
-          "http://localhost:5003/api/Treatment/available"
-        );
-        const treatmentsResult = await treatmentsResponse.json();
+  const fetchData = async () => {
+    try {
+      const treatmentsResponse = await fetch(
+        "http://localhost:5003/api/Treatment/available"
+      );
+      const treatmentsResult = await treatmentsResponse.json();
 
-        if (treatmentsResponse.ok && treatmentsResult.flag) {
-          setTreatmentOptions(
-            treatmentsResult.data.map((t) => ({
-              id: t.treatmentId,
-              label: t.treatmentName,
-            }))
-          );
-        } else {
-          console.error(
-            "Failed to fetch treatments:",
-            treatmentsResult.message || "Unknown error"
-          );
-        }
+      if (treatmentsResponse.ok && treatmentsResult.flag) {
+        const treatments = treatmentsResult.data;
+        setTreatmentOptions(
+          treatments.map((t) => ({
+            id: t.treatmentId,
+            label: t.treatmentName,
+          }))
+        );
 
         const medicineResponse = await fetch(
-          `http://localhost:5003/Medicines/${medicineId}`
+          `http://localhost:5003/Medicines/all-data/${medicineId}`
         );
         const medicineResult = await medicineResponse.json();
 
         if (medicineResponse.ok && medicineResult.flag) {
           const medicine = medicineResult.data;
           setMedicineName(medicine.medicineName);
-          setTreatmentFor({
-            id: medicine.treatmentId, 
-            label: medicine.treatmentName, 
-          });
+
+          const selectedTreatment = treatments.find(
+            (treatment) => treatment.treatmentId === medicine.treatmentId
+          );
+
+          if (selectedTreatment) {
+            setTreatmentFor({
+              id: selectedTreatment.treatmentId,
+              label: selectedTreatment.treatmentName,
+            });
+          } else {
+            console.error("Treatment ID not found in available treatments.");
+          }
 
           if (medicine.medicineImage) {
             setImage(`http://localhost:5003${medicine.medicineImage}`);
@@ -59,50 +63,55 @@ function MedicineUpdateForm() {
             medicineResult.message || "Unknown error"
           );
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } else {
+        console.error(
+          "Failed to fetch treatments:",
+          treatmentsResult.message || "Unknown error"
+        );
       }
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [medicineId]);
 
+  const validateForm = () => {
+    const newErrors = {
+      medicineName: medicineName ? "" : "Medicine Name is required.",
+      treatmentFor:
+        treatmentFor && treatmentFor.id !== null
+          ? ""
+          : "Please select a valid treatment.",
+      image: image ? "" : "Image is required.",
+    };
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-    console.log("Medicine Name:", medicineName);
-    console.log("Treatment For:", treatmentFor);
-
-    // Validate required fields
-    if (!medicineName || !treatmentFor || !treatmentFor.id) {
-      toast.warning("Please fill all required fields.");
-      return;
-    }
+    if (!validateForm()) return;
 
     const formData = new FormData();
-    formData.append("medicineId", medicineId); 
+    formData.append("medicineId", medicineId);
     formData.append("medicineName", medicineName);
-    formData.append("treatmentId", treatmentFor.id); 
+    formData.append("treatmentId", treatmentFor.id);
 
     if (image && typeof image === "string") {
-      formData.append("medicineImage", image); 
+      formData.append("medicineImage", image);
     } else {
-      // If a new image is selected, leave medicineImage empty
       formData.append("medicineImage", "");
     }
 
-    // If user selects a new image file, append it as imageFile
     const fileInput = document.getElementById("fileInput");
     if (fileInput.files[0]) {
       formData.append("imageFile", fileInput.files[0]);
     }
 
-    // Log FormData entries for debugging
-    for (let pair of formData.entries()) {
-      console.log(pair[0] + ": " + pair[1]);
-    }
-
-    // Submit the request
     try {
       const response = await fetch("http://localhost:5003/Medicines", {
         method: "PUT",
@@ -110,8 +119,6 @@ function MedicineUpdateForm() {
       });
 
       if (response.ok) {
-        console.log("Updated Treatment For:", treatmentFor);
-
         const data = await response.json();
         toast.success(data.message || "Medicine updated successfully!");
         navigate("/medicines");
@@ -128,13 +135,29 @@ function MedicineUpdateForm() {
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
-      setImage(file); // Store the actual file for upload
+      setImage(file);
     } else {
-      alert("Please select a valid image file");
+      setErrors((prevErrors) => ({ ...prevErrors, image: "Please select a valid image file." }));
+        setImage(null);
     }
   };
+
   const handleCancel = () => {
-    navigate("/medicines"); // Redirect to the medicine list page
+    navigate("/medicines");
+  };
+
+  const handleInputChange = (event) => {
+    setMedicineName(event.target.value);
+    if (event.target.value) {
+      setErrors({ ...errors, medicineName: "" }); 
+    }
+  };
+
+  const handleTreatmentChange = (event, newValue) => {
+    setTreatmentFor(newValue);
+    if (newValue && newValue.id) {
+      setErrors({ ...errors, treatmentFor: "" }); 
+    }
   };
 
   return (
@@ -144,29 +167,28 @@ function MedicineUpdateForm() {
         <Navbar sidebarRef={sidebarRef} />
         <div className="flex justify-center items-center min-h-screen bg-dark-grey-100 p-4">
           <div className="flex w-full sm:w-96 bg-white rounded-lg shadow-lg p-6">
-            {/* Form Card */}
             <div className="w-full flex flex-col justify-between">
               <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800">
                 Update Medicine
               </h2>
               <form onSubmit={handleSubmit}>
-                {/* Medicine Name TextField */}
                 <div className="mb-4">
                   <TextField
                     label="Medicine Name"
                     variant="outlined"
                     fullWidth
                     value={medicineName}
-                    onChange={(e) => setMedicineName(e.target.value)}
+                    onChange={handleInputChange}
                     className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    error={!!errors.medicineName}
+                    helperText={errors.medicineName}
                   />
                 </div>
 
-                {/* Treatment For Autocomplete */}
                 <div className="mb-6">
                   <Autocomplete
                     value={treatmentFor}
-                    onChange={(event, newValue) => setTreatmentFor(newValue)}
+                    onChange={handleTreatmentChange}
                     options={treatmentOptions}
                     getOptionLabel={(option) => option.label}
                     renderInput={(params) => (
@@ -175,13 +197,14 @@ function MedicineUpdateForm() {
                         label="Treatment For"
                         variant="outlined"
                         className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        error={!!errors.treatmentFor}
+                        helperText={errors.treatmentFor}
                       />
                     )}
                     fullWidth
                   />
                 </div>
 
-                {/* Image File Upload */}
                 <div className="mb-6">
                   <input
                     id="fileInput"
@@ -190,14 +213,11 @@ function MedicineUpdateForm() {
                     onChange={handleFileChange}
                     className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
                   />
-                  {image && typeof image !== "string" && (
-                    <p className="text-sm text-gray-500 mt-2">
-                      Selected File: {image.name}
-                    </p>
-                  )}
+                  {errors.image && (
+              <p className="text-sm text-red-500 mt-2">{errors.image}</p>
+            )}
                 </div>
 
-                {/* Submit and Cancel Buttons */}
                 <div className="flex justify-around">
                   <Button
                     type="submit"
@@ -221,7 +241,6 @@ function MedicineUpdateForm() {
             </div>
           </div>
 
-          {/* Conditionally Display Image Preview */}
           {image && typeof image === "string" && (
             <div
               className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between"
@@ -237,6 +256,7 @@ function MedicineUpdateForm() {
               />
             </div>
           )}
+
           {image && typeof image !== "string" && (
             <div
               className="w-full sm:w-96 bg-white rounded-lg shadow-lg p-6 ml-8 flex flex-col justify-between"

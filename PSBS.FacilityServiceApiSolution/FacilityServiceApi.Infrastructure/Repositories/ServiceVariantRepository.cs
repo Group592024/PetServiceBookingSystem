@@ -71,6 +71,59 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<bool> CheckIfServiceHasVariant(Guid serviceId)
+        {
+            try
+            {
+                var flag = await context.ServiceVariant
+                                           .AnyAsync(b => b.serviceId == serviceId);
+                return flag;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred when checking");
+            }
+        }
+
+        public async Task<Response> DeleteByServiceIdAsync(Guid serviceId)
+        {
+            try
+            {
+                var variants = await context.ServiceVariant
+                                          .Where(b => b.isDeleted == false && b.serviceId == serviceId)
+                                          .ToListAsync();
+                foreach (var variant in variants)
+                {
+                    variant.isDeleted = true;
+                    context.ServiceVariant.Update(variant);
+                    await context.SaveChangesAsync();
+                }
+                return new Response(true, $"Service variants with service ID {serviceId} is marked as soft deleted successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred performing soft delete on service variants with service ID");
+            }
+        }
+
+        public async Task<bool> CheckIfVariantInBooking(Guid serviceVariantId)
+        {
+            try
+            {
+                var flag = await context.bookingServiceItems
+                    .AnyAsync(p => p.ServiceVariantId == serviceVariantId);
+
+                return flag;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred when checking");
+            }
+        }
+
         public async Task<IEnumerable<ServiceVariant>> GetAllAsync()
         {
             try
