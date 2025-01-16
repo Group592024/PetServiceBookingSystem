@@ -3,7 +3,7 @@ import Sidebar from '../../../components/sidebar/Sidebar';
 import Navbar from '../../../components/navbar/Navbar';
 import { useParams } from 'react-router-dom';
 
-const PetTypeDetail = () => {
+const ServiceDetail = () => {
   const sidebarRef = useRef(null);
 
   const [detail, setDetail] = useState({});
@@ -14,10 +14,16 @@ const PetTypeDetail = () => {
     const fetchDetail = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5010/api/PetType/${id}`
+          `http://localhost:5023/api/Service/${id}`
         ).then((response) => response.json());
         console.log(response);
-        setDetail(response);
+
+         const newData = {
+           ...response.data,
+           serviceTypeName: response.data.serviceType.typeName,
+         };
+
+        setDetail(newData);
       } catch (error) {
         console.error('Failed fetching data: ', error);
       }
@@ -25,7 +31,13 @@ const PetTypeDetail = () => {
     if (id) fetchDetail();
   }, [id]);
 
-  const imageURL = `http://localhost:5010${detail.petType_Image}`;
+  
+
+ 
+
+  console.log(detail.serviceType);
+
+  const imageURL = `http://localhost:5023${detail.serviceImage}`;
 
   return (
     <div>
@@ -35,28 +47,46 @@ const PetTypeDetail = () => {
         <main>
           <div className='header'>
             <div className='left flex justify-center w-full'>
-              <h1 className=''>Pet Type Detail</h1>
+              <h1 className=''>Service Detail</h1>
             </div>
           </div>
 
           <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
             <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
               <div>
-                <p className='font-semibold text-2xl '>Pet Type Name:</p>
+                <p className='font-semibold text-2xl '>Service Name:</p>
                 <p
                   type='text'
                   className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
                 >
-                  {detail.petType_Name}
+                  {detail.serviceName}
                 </p>
               </div>
               <div>
-                <p className='font-semibold text-2xl '>Pet Type Description:</p>
+                <p className='font-semibold text-2xl '>Service Type</p>
                 <p
                   type='text'
                   className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
                 >
-                  {detail.petType_Description}
+                  {detail.serviceTypeName}
+                </p>
+              </div>
+              <div>
+                <p className='font-semibold text-2xl '>Status: </p>
+                <p
+                  type='text'
+                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                >
+                  {detail.isDeleted ? 'Inactive' : 'Active'}
+                </p>
+              </div>
+              <div>
+                <p className='font-semibold text-2xl '>Service Description: </p>
+                <p
+                  type='text'
+                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                >
+                  {detail.serviceDescription}
                 </p>
               </div>
             </div>
@@ -64,7 +94,7 @@ const PetTypeDetail = () => {
               <img
                 className='w-3/4 rounded-3xl'
                 src={imageURL}
-                alt={detail.petType_Name}
+                alt={detail.serviceName}
               />
             </div>
           </div>
@@ -74,4 +104,4 @@ const PetTypeDetail = () => {
   );
 };
 
-export default PetTypeDetail;
+export default ServiceDetail;

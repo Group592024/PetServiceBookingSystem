@@ -8,7 +8,7 @@ using PSPS.AccountAPI.Infrastructure.Data;
 
 #nullable disable
 
-namespace PSPS.AccountAPI.Infrastructure.Migrations
+namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
     partial class PSPSDbContextModelSnapshot : ModelSnapshot

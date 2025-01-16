@@ -90,7 +90,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var Services = await context.Service
+                var Services = await context.Service.Include(p => p.ServiceType)
                                           .ToListAsync();
                 return Services ?? new List<Service>();
             }
@@ -121,8 +121,8 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var Service = await context.Service.FindAsync(id);
-                return Service != null ? Service : null;
+                var Service = await context.Service.Include(p => p.ServiceType).FirstOrDefaultAsync(p => p.serviceId == id);
+                return Service ?? null!;
             }
             catch (Exception ex)
             {

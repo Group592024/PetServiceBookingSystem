@@ -88,7 +88,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<ServiceDTO>> GetServiceById(Guid id)
         {
             var service = await _service.GetByIdAsync(id);
-            if (service == null || service.isDeleted)
+            if (service == null)
             {
                 return NotFound(new Response(false, $"Service with GUID {id} not found or is deleted"));
             }
