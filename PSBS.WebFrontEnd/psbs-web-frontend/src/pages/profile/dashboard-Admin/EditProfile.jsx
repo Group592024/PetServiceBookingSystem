@@ -2,15 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-import Swal from "sweetalert2";
-import { format } from 'date-fns';
-import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import Swal from "sweetalert2";  
 
 const EditProfile = () => {
   const { accountId } = useParams();
   const sidebarRef = useRef(null);
-  const [selectedDate] = useState(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({
     accountName: "",
@@ -19,33 +15,17 @@ const EditProfile = () => {
     accountGender: "male",
     accountDob: "",
     accountAddress: "",
-    roleId: "user",
+    roleId: "user", 
     accountImage: null,
   });
   const [imagePreview, setImagePreview] = useState(null);
-  const [errorMessages, setErrorMessages] = useState({
-    accountDob: "",
-    accountName: "",
-    accountEmail: "",
-    accountPhoneNumber: "",
-    accountAddress: "",
-    accountGender: "",
-  });
-
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
         .then((response) => response.json())
         .then(async (data) => {
-          console.log("Dữ liệu nhận được từ API:", data);  // Thêm log để kiểm tra
-          setAccount(data);
-          if (data.accountDob) {
-            const dob = new Date(data.accountDob);
-            setAccount((prevState) => ({
-              ...prevState,
-              accountDob: dob,
-            }));
-          }
+          setAccount(data); 
+
           if (data.accountImage) {
             try {
               const response = await fetch(`http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`);
@@ -67,7 +47,6 @@ const EditProfile = () => {
     }
   }, [accountId]);
 
-
   const handleImageChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -78,133 +57,98 @@ const EditProfile = () => {
 
   const validateForm = () => {
     let valid = true;
-    const today = new Date().toISOString().split("T")[0];
-    const errors = { ...errorMessages };
-
-    if (!account.accountDob) {
-      errors.accountDob = "Birthday is required";
-      valid = false;
-    } else {
-      const birthDate = new Date(account.accountDob);
-      const currentDate = new Date();
-
-      if (birthDate > currentDate) {
-        errors.accountDob = "Birthday cannot be in the future";
-        valid = false;
-      } else {
-        let age = currentDate.getFullYear() - birthDate.getFullYear();
-        const monthDifference = currentDate.getMonth() - birthDate.getMonth();
-        if (monthDifference < 0 || (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())) {
-          age--;
-        }
-        if (age > 100) {
-          errors.accountDob = "Age cannot be greater than 100 years";
-          valid = false;
-        } else {
-          errors.accountDob = "";
-        }
-      }
-    }
+    let errorMessage = "";
 
     if (!account.accountName.trim()) {
-      errors.accountName = "Name is required";
+      errorMessage = "Name is required";
       valid = false;
     }
-
-    if (!account.accountAddress.trim()) {
-      errors.accountAddress = "Address is required";
-      valid = false;
-    }
-
-    if (!account.accountGender) {
-      errors.accountGender = "Gender is required";
-      valid = false;
-    }
-
     const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!account.accountEmail.trim()) {
-      errors.accountEmail = "Email is required";
+      errorMessage = "Email is required";
       valid = false;
     } else if (!emailPattern.test(account.accountEmail)) {
-      errors.accountEmail = "Please enter a valid email address (e.g., username@gmail.com)";
+      errorMessage = "Please enter a valid email address";
       valid = false;
     }
-
-    const phonePattern = /^(03|05|07|08|09)\d{8}$/;
+    const phonePattern = /^0[1-9][0-9]{8}$/;
     if (!account.accountPhoneNumber.trim()) {
-      errors.accountPhoneNumber = "Phone number is required";
+      errorMessage = "Phone number is required";
       valid = false;
     } else if (!phonePattern.test(account.accountPhoneNumber)) {
-      errors.accountPhoneNumber = "Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)";
+      errorMessage = "Please enter a valid phone number";
       valid = false;
     }
-
-    setErrorMessages(errors);
+    if (!account.accountDob.trim()) {
+      errorMessage = "Birthday is required";
+      valid = false;
+    }
+    if (!account.accountGender) {
+      errorMessage = "Gender is required";
+      valid = false;
+    }
+    if (!account.accountAddress.trim()) {
+      errorMessage = "Address is required";
+      valid = false;
+    }
+    if (!valid) {
+      Swal.fire("Validation Error", errorMessage, "error");
+    }
     return valid;
   };
-
   const handleEdit = async () => {
     if (!validateForm()) return;
-
-    let formattedDob = account.accountDob ? format(account.accountDob, 'yyyy-MM-dd') : '';
-
+  
     const formData = new FormData();
     formData.append("AccountTempDTO.AccountId", accountId);
     formData.append("AccountTempDTO.AccountName", account.accountName);
     formData.append("AccountTempDTO.AccountEmail", account.accountEmail);
     formData.append("AccountTempDTO.AccountPhoneNumber", account.accountPhoneNumber);
     formData.append("AccountTempDTO.AccountGender", account.accountGender);
-    formData.append("AccountTempDTO.AccountDob", formattedDob);
+    formData.append("AccountTempDTO.AccountDob", account.accountDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-
-    if (account.accountImage) {
+      if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
     } else {
       formData.append("AccountTempDTO.isPickImage", false);
-      formData.append("AccountTempDTO.AccountImage", account.accountImage || "");
+      formData.append("AccountTempDTO.AccountImage", account.accountImage || ""); 
     }
-
-    const response = await fetch(`http://localhost:5000/api/Account`, {
-      method: "PUT",
-      body: formData,
+  
+    console.log("Sending FormData:", {
+      accountId,
+      ...account,
+      roleId: account.roleId,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error from server:", errorData);
-      Swal.fire("Error", errorData.message || "Something went wrong", "error");
-      return;
-    }
-
-    const result = await response.json();
-    if (result.flag) {
-      Swal.fire("Success", "Profile updated successfully!", "success");
-      navigate(-1);
-    } else {
-      Swal.fire("Error", result.message || "Something went wrong", "error");
+  
+    try {
+      const response = await fetch(`http://localhost:5000/api/Account`, {
+        method: "PUT",
+        body: formData,
+      });
+  
+      const result = await response.json();
+      if (result.flag) {
+        Swal.fire("Success", "Profile updated successfully!", "success");
+        navigate(-1);
+      } else {
+        Swal.fire("Error", result.message || "Something went wrong", "error");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Swal.fire("Error", "Error updating profile!", "error");
     }
   };
-
-
-  const convertToDate = (dateString) => {
-    const parts = dateString.split('/');
-    if (parts.length === 3) {
-      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
-    }
-    return null;
-  };
-
-  const handleBack = () => {
+    const handleBack = () => {
     navigate(-1);
   };
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar ref={sidebarRef} />
-      <div className="content overflow-y-auto">
-        <Navbar sidebarRef={sidebarRef} />
+      <Sidebar ref={sidebarRef}/>
+      <div className="content  overflow-y-auto">
+        <Navbar sidebarRef={sidebarRef}/>
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Edit Profile</h2>
           <div className="flex flex-wrap gap-8">
@@ -258,28 +202,9 @@ const EditProfile = () => {
                     id="name"
                     className="w-full p-3 border rounded-md"
                     value={account.accountName || ""}
-                    onChange={(e) => {
-                      const newAccountName = e.target.value;
-                      setAccount({ ...account, accountName: newAccountName });
-                      if (newAccountName.trim()) {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountName: "",
-                        }));
-                      } else {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountName: "Name is required",
-                        }));
-                      }
-                    }}
+                    onChange={(e) => setAccount({ ...account, accountName: e.target.value })}
                   />
-
-                  {errorMessages.accountName && (
-                    <p className="text-red-500 text-sm mt-1">{errorMessages.accountName}</p>
-                  )}
                 </div>
-
                 <div className="mb-3">
                   <label htmlFor="email" className="block text-sm font-medium mb-1 font-bold">
                     Email
@@ -289,7 +214,7 @@ const EditProfile = () => {
                     id="email"
                     className="w-full p-3 border rounded-md"
                     value={account.accountEmail || ""}
-                    disabled
+                    onChange={(e) => setAccount({ ...account, accountEmail: e.target.value })}
                   />
                 </div>
                 <div className="mb-3">
@@ -311,76 +236,52 @@ const EditProfile = () => {
                   <label htmlFor="birthday" className="block text-sm font-medium mb-1 font-bold">
                     Birthday
                   </label>
-                  <DatePicker
-                    selected={account.accountDob ? account.accountDob : null}
-                    onChange={(date) => {
-                      setAccount({ ...account, accountDob: date });
-                    }}
-                    dateFormat="dd/MM/yyyy"
-                    customInput={<input className="w-full p-3 border rounded-md" />}
+                  <input
+                    type="date"
+                    id="birthday"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountDob?.split("T")[0] || ""}
+                    onChange={(e) => setAccount({ ...account, accountDob: e.target.value })}
                   />
-                  {errorMessages.accountDob && (
-                    <p className="text-red-500 text-sm mt-1">{errorMessages.accountDob}</p>
-                  )}
                 </div>
-
                 <div className="mb-3">
-                  <label className="block text-sm font-medium mb-1 font-bold">
-                    Gender
-                  </label>
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="male"
-                      checked={account.accountGender === "male"}
-                      onChange={(e) => setAccount({ ...account, accountGender: e.target.value })}
-                    />
-                    <label className="ml-2 text-sm">Male</label>
-                    <input
-                      type="radio"
-                      name="gender"
-                      value="female"
-                      checked={account.accountGender === "female"}
-                      onChange={(e) => setAccount({ ...account, accountGender: e.target.value })}
-                      className="ml-4"
-                    />
-                    <label className="ml-2 text-sm">Female</label>
+                  <label className="block text-sm font-medium mb-1 font-bold">Gender</label>
+                  <div className="flex gap-4">
+                    <label>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="male"
+                        checked={account.accountGender === "male"}
+                        onChange={() => setAccount({ ...account, accountGender: "male" })}
+                      />{" "}
+                      Male
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="gender"
+                        value="female"
+                        checked={account.accountGender === "female"}
+                        onChange={() => setAccount({ ...account, accountGender: "female" })}
+                      />{" "}
+                      Female
+                    </label>
                   </div>
-
-                  {errorMessages.accountGender && (
-                    <p className="text-red-500 text-sm mt-1">{errorMessages.accountGender}</p>
-                  )}
                 </div>
                 <div className="mb-3">
                   <label htmlFor="phone" className="block text-sm font-medium mb-1 font-bold">
-                    Phone
+                    Phone Number
                   </label>
                   <input
                     type="text"
                     id="phone"
                     className="w-full p-3 border rounded-md"
                     value={account.accountPhoneNumber || ""}
-                    onChange={(e) => {
-                      const newPhoneNumber = e.target.value;
-                      setAccount({ ...account, accountPhoneNumber: newPhoneNumber });
-                      if (newPhoneNumber.trim()) {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountPhoneNumber: "",
-                        }));
-                      } else {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountPhoneNumber: "Phone number is required",
-                        }));
-                      }
-                    }}
+                    onChange={(e) => setAccount({ ...account, accountPhoneNumber: e.target.value })}
                   />
-                  {errorMessages.accountPhoneNumber && (
-                    <p className="text-red-500 text-sm mt-1">{errorMessages.accountPhoneNumber}</p>
-                  )}
                 </div>
+
                 <div className="mb-3">
                   <label htmlFor="address" className="block text-sm font-medium mb-1 font-bold">
                     Address
@@ -390,44 +291,25 @@ const EditProfile = () => {
                     id="address"
                     className="w-full p-3 border rounded-md"
                     value={account.accountAddress || ""}
-                    onChange={(e) => {
-                      const newAddress = e.target.value;
-                      setAccount({ ...account, accountAddress: newAddress });
-                      if (newAddress.trim()) {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountAddress: "",
-                        }));
-                      } else {
-                        setErrorMessages((prevState) => ({
-                          ...prevState,
-                          accountAddress: "Address is required",
-                        }));
-                      }
-                    }}
+                    onChange={(e) => setAccount({ ...account, accountAddress: e.target.value })}
                   />
-
-                  {errorMessages.accountAddress && (
-                    <p className="text-red-500 text-sm mt-1">{errorMessages.accountAddress}</p>
-                  )}
                 </div>
 
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between space-x-4 gap-4">
                   <button
                     type="button"
+                    className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full md:w-auto"
                     onClick={handleEdit}
-                    className="bg-teal-600 text-white font-bold py-2 px-4 rounded-md hover:bg-cyan-700"
                   >
                     Save
                   </button>
                   <button
                     type="button"
+                    className="bg-gray-500 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-gray-700 w-full md:w-auto"
                     onClick={handleBack}
-                    className="bg-gray-600 text-white font-bold py-2 px-4 rounded-md hover:bg-gray-700"
                   >
                     Back
                   </button>
-
                 </div>
               </form>
             </div>
