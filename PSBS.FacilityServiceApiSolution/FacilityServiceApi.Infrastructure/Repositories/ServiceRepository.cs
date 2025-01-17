@@ -137,7 +137,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var Service = await GetByIdAsync(entity.serviceId);
 
-                Service.isDeleted = false;
+                Service.isDeleted = entity.isDeleted;
                 Service.serviceTypeId = entity.serviceTypeId;
                 Service.serviceName = entity.serviceName;
                 Service.serviceImage = entity.serviceImage;

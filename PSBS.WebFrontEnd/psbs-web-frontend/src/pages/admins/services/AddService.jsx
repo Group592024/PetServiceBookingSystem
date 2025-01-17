@@ -4,19 +4,54 @@ import Navbar from '../../../components/navbar/Navbar';
 import sampleImage from '../../../assets/sampleUploadImage.jpg';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
-import { TextField } from '@mui/material';
+import { MenuItem, TextField, Select } from '@mui/material';
 
-const AddPetType = () => {
+const AddService = () => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
   const [tmpImage, setTmpImage] = useState(sampleImage);
+  const [service, setService] = useState({
+    serviceTypeId: '',
+    serviceName: '',
+    serviceDescription: '',
+    selectedImage: null,
+  });
+
   const [error, setError] = useState({
     name: false,
     description: false,
   });
+
+  const [serviceType, setServiceType] = useState([]);
+
+  const fetchDataFunction = async () => {
+    try {
+      const fetchData = await fetch(
+        'http://localhost:5023/api/Service/serviceTypes'
+      );
+      const response = await fetchData.json();
+
+      const result = response.data.map((item, index) => ({
+        id: index,
+        ...item,
+      }));
+
+      if (result.length > 0 && !service.serviceTypeId) {
+        setService((prev) => ({
+          ...prev,
+          serviceTypeId: result[0].serviceTypeId,
+        }));
+
+        setServiceType(result);
+      }
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDataFunction();
+  }, []);
 
   const handleImageChange = (event) => {
     const fileImage = event.target.files[0];
@@ -50,7 +85,10 @@ const AddPetType = () => {
         return;
       } else {
         const tmpUrl = URL.createObjectURL(fileImage);
-        setSelectedImage(fileImage);
+        setService((prev) => ({
+          ...prev,
+          selectedImage: fileImage,
+        }));
         setTmpImage(tmpUrl);
       }
     }
@@ -60,7 +98,7 @@ const AddPetType = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (name == '' && description == '') {
+    if (service.serviceName == '' && service.serviceDescription == '') {
       setError({
         description: true,
         name: true,
@@ -68,7 +106,7 @@ const AddPetType = () => {
       return;
     }
 
-    if (name == '') {
+    if (service.serviceName == '') {
       setError((prev) => ({
         ...prev,
         name: true,
@@ -76,7 +114,7 @@ const AddPetType = () => {
       return;
     }
 
-    if (description == '') {
+    if (service.serviceDescription == '') {
       setError((prev) => ({
         ...prev,
         description: true,
@@ -84,9 +122,9 @@ const AddPetType = () => {
       return;
     }
 
-    if (selectedImage == null) {
+    if (service.selectedImage == null) {
       Swal.fire({
-        title: 'Pet Type Image is required!',
+        title: 'Service Image is required!',
         showClass: {
           popup: `
                  animate__animated
@@ -106,35 +144,39 @@ const AddPetType = () => {
     }
 
     const formData = new FormData();
-    formData.append('petType_Name', name);
-    formData.append('petType_Description', description);
-    formData.append('imageFile', selectedImage);
+    formData.append('serviceTypeId', service.serviceTypeId);
+    formData.append('serviceName', service.serviceName);
+    formData.append('serviceDescription', service.serviceDescription);
+    formData.append('imageFile', service.selectedImage);
 
     try {
-      const response = await fetch('http://localhost:5010/api/PetType', {
+      const response = await fetch('http://localhost:5023/api/Service', {
         method: 'POST',
         body: formData,
       });
 
       if (response.ok) {
-        setName('');
-        setDescription('');
-        setName(null);
+        setService({
+          serviceTypeId: '',
+          serviceName: '',
+          serviceDescription: '',
+          selectedImage: null,
+        });
 
         Swal.fire(
-          'Add New Pet Type',
-          'Pet Type Added Successfully!',
+          'Add New Service',
+          'Service Added Successfully! Now you should add at least one service variant for this service!',
           'success'
         );
-        navigate('/petType');
+        //hien popup add variant
       } else {
-        Swal.fire('Add New Pet Type', 'Failed To Add Pet Type!', 'error');
+        Swal.fire('Add New Service', 'Failed To Add Service!', 'error');
         navigate('/petType/add');
         console.error('Failed create');
       }
     } catch (error) {
       console.error('Failed fetching api', error);
-      Swal.fire('Add New Pet Type', 'Failed To Add Pet Type!', 'error');
+      Swal.fire('Add New Service', 'Failed To Add Service!', 'error');
       navigate('/petType/add');
       console.error('Failed create');
     }
@@ -148,7 +190,7 @@ const AddPetType = () => {
         <main>
           <div className='header'>
             <div className='left flex justify-center w-full'>
-              <h1 className=''>Add New Pet Type</h1>
+              <h1 className=''>Add New Service</h1>
             </div>
           </div>
 
@@ -156,7 +198,7 @@ const AddPetType = () => {
             <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
               <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
                 <div>
-                  <p className='font-semibold text-2xl '>Pet Type Name:</p>
+                  <p className='font-semibold text-2xl '>Service Name:</p>
                   <TextField
                     type='text'
                     sx={{
@@ -165,19 +207,51 @@ const AddPetType = () => {
                     }}
                     className=' rounded-3xl p-3 m-10 w-full'
                     onChange={(e) => {
-                      setName(e.target.value);
+                      setService((prev) => ({
+                        ...prev,
+                        serviceName: e.target.value,
+                      }));
                       setError((prev) => ({
                         ...prev,
                         name: false,
                       }));
                     }}
                     error={error.name}
-                    helperText={error.name ? 'Pet Type Name is required.' : ''}
+                    helperText={error.name ? 'Service Name is required.' : ''}
                   />
                 </div>
+
+                <div>
+                  <p className='font-semibold text-2xl '>Service Type:</p>
+                  <Select
+                    labelId='demo-simple-select-label'
+                    value={service.serviceTypeId}
+                    onChange={(e) => {
+                      setService((prev) => ({
+                        ...prev,
+                        serviceTypeId: e.target.value,
+                      }));
+                    }}
+                    fullWidth
+                    sx={{
+                      borderRadius: '10px',
+                      margin: '20px',
+                    }}
+                  >
+                    {serviceType.map((item, index) => (
+                      <MenuItem
+                        key={item.serviceTypeId}
+                        value={item.serviceTypeId}
+                      >
+                        {item.typeName}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </div>
+
                 <div>
                   <p className='font-semibold text-2xl '>
-                    Pet Type Description:
+                    Service Description:
                   </p>
                   <TextField
                     type='text'
@@ -190,7 +264,10 @@ const AddPetType = () => {
                     w-full resize-none'
                     rows='7'
                     onChange={(e) => {
-                      setDescription(e.target.value);
+                      setService((prev) => ({
+                        ...prev,
+                        serviceDescription: e.target.value,
+                      }));
                       setError((prev) => ({
                         ...prev,
                         description: false,
@@ -199,7 +276,7 @@ const AddPetType = () => {
                     error={error.description}
                     helperText={
                       error.description
-                        ? 'Pet Type Description is required.'
+                        ? 'Service Description is required.'
                         : ''
                     }
                   />
@@ -219,7 +296,7 @@ const AddPetType = () => {
                   hover:bg-customPrimary hover:text-customLightPrimary'
                     onClick={(e) => {
                       e.preventDefault();
-                      navigate('/petType');
+                      navigate('/service');
                     }}
                   >
                     Cancel
@@ -249,4 +326,4 @@ const AddPetType = () => {
   );
 };
 
-export default AddPetType;
+export default AddService;
