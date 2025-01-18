@@ -101,26 +101,30 @@ const AccountList = () => {
     });
   };
 
-  const filteredAccounts = accounts.filter((account) => {
-    console.log("Current account:", account);
-  
+  const filteredAccounts = accounts
+  .filter((account) => {  
     if (!userRole) {
-      console.log("No user role - showing all accounts");
       return true;
     }
   
     if (userRole === "admin") {
-      console.log("Admin role - filtering staff and user roles");
       return ["staff", "user"].includes(account.roleId);
     }
   
     if (userRole === "staff") {
-      console.log("Staff role - filtering only user roles");
       return account.roleId === "user";
     }
   
-    console.log("No matching role - excluding account");
     return false;
+  }) .filter((account) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      !searchQuery ||
+      account.accountPhoneNumber.includes(query) ||
+      account.accountEmail.toLowerCase().includes(query) ||
+      account.accountName.toLowerCase().includes(query) 
+
+    );
   });
   
   
@@ -146,12 +150,12 @@ const AccountList = () => {
       return;
     }
   
-    const phoneRegex = /^(0[3|5|7|8|9])+([0-9]{8})$/;
+    const phoneRegex = /^0\d{9}$/;
     if (!phoneRegex.test(accountPhoneNumber)) {
       Swal.fire({
         icon: "error",
         title: "Invalid Phone",
-        text: "Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)",
+        text: "Please enter a valid phone number",
       });
       return;
     }
@@ -287,7 +291,7 @@ const AccountList = () => {
                   </svg>
                 </button>
               </form>
-
+              {userRole === "staff" && (
               <button
                 type="button"
                 onClick={() => setOpenDialog(true)}
@@ -309,10 +313,11 @@ const AccountList = () => {
                 </svg>
                 New
               </button>
+              )}
             </div>
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
               <DataGrid
-                rows={filteredAccounts.map((acc, index) => ({ ...acc, id: index + 1 }))}
+                rows={filteredAccounts.sort((a, b) => a.accountIsDeleted - b.accountIsDeleted).map((acc, index) => ({ ...acc, id: index + 1 }))}
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10, 15, 20]}

@@ -53,9 +53,9 @@ const Register = () => {
       errorMessages.phone = 'Phone number is required';
       valid = false;
     } else {
-      const phoneRegex = /^(03|05|07|08|09)\d{8}$/; 
+      const phoneRegex =/^0\d{9}$/; 
       if (!phoneRegex.test(AccountPhoneNumber)) {
-        errorMessages.phone = 'Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)';
+        errorMessages.phone = 'Please enter a valid phone number';
         valid = false;
       } else {
         errorMessages.phone = '';
