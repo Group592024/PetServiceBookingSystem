@@ -1,13 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
 import Sidebar from '../../../components/sidebar/Sidebar';
 import Navbar from '../../../components/navbar/Navbar';
-import { Box, IconButton, Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import Swal from 'sweetalert2';
-import InfoIcon from '@mui/icons-material/Info';
 import Datatable from '../../../components/services/Datatable';
 
 const ServiceList = () => {
@@ -18,7 +13,9 @@ const ServiceList = () => {
 
   const fetchDataFunction = async () => {
     try {
-      const fetchData = await fetch('http://localhost:5023/api/Service?showAll=true');
+      const fetchData = await fetch(
+        'http://localhost:5023/api/Service?showAll=true'
+      );
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({
@@ -85,10 +82,8 @@ const ServiceList = () => {
   const newRows = data.map((row, index) => ({
     index: index + 1,
     serviceTypeName: row.serviceType.typeName,
-    ...row
+    ...row,
   }));
-
-
 
   const columns = [
     {

@@ -1,7 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../../../components/sidebar/Sidebar';
 import Navbar from '../../../components/navbar/Navbar';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import Accordion from '@mui/material/Accordion';
+import AccordionActions from '@mui/material/AccordionActions';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import Typography from '@mui/material/Typography';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Button from '@mui/material/Button';
 
 const ServiceDetail = () => {
   const sidebarRef = useRef(null);
@@ -9,6 +16,9 @@ const ServiceDetail = () => {
   const [detail, setDetail] = useState({});
 
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [dataVariant, setDataVariant] = useState([]);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -18,10 +28,10 @@ const ServiceDetail = () => {
         ).then((response) => response.json());
         console.log(response);
 
-         const newData = {
-           ...response.data,
-           serviceTypeName: response.data.serviceType.typeName,
-         };
+        const newData = {
+          ...response.data,
+          serviceTypeName: response.data.serviceType.typeName,
+        };
 
         setDetail(newData);
       } catch (error) {
@@ -31,13 +41,103 @@ const ServiceDetail = () => {
     if (id) fetchDetail();
   }, [id]);
 
-  
-
- 
-
   console.log(detail.serviceType);
 
   const imageURL = `http://localhost:5023${detail.serviceImage}`;
+
+  //api variant
+  // const fetchDataFunction = async () => {
+  //   try {
+  //     const fetchData = await fetch(
+  //       'http://localhost:5023/api/Service?showAll=true'
+  //     );
+  //     const response = await fetchData.json();
+
+  //     const result = response.data.map((item) => ({
+  //       id: item.serviceId,
+  //       ...item,
+  //     }));
+
+  //     setData(result);
+  //   } catch (error) {
+  //     console.error('Error fetching data: ', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchDataFunction();
+  // }, []);
+
+  // const handleDelete = (id) => {
+  //   Swal.fire({
+  //     title: 'Are you sure?',
+  //     text: 'Do you want to delete this item?',
+  //     icon: 'warning',
+  //     showCancelButton: true,
+  //     confirmButtonText: 'Delete',
+  //     cancelButtonText: 'Cancel',
+  //     confirmButtonColor: '#d33',
+  //     cancelButtonColor: '#3085d6',
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       const fetchDelete = async () => {
+  //         try {
+  //           const deleteResponse = await fetch(
+  //             `http://localhost:5023/api/Service/${id}`,
+  //             {
+  //               method: 'DELETE',
+  //             }
+  //           );
+
+  //           console.log(deleteResponse);
+
+  //           if (deleteResponse.ok) {
+  //             Swal.fire('Deleted!', 'The service has been deleted.', 'success');
+  //             fetchDataFunction();
+  //           } else if (deleteResponse.status == 409) {
+  //             Swal.fire(
+  //               'Error!',
+  //               'Can not delete this service because it has service variant',
+  //               'error'
+  //             );
+  //           } else {
+  //             Swal.fire('Error!', 'Failed to delete the service', 'error');
+  //           }
+  //         } catch (error) {
+  //           console.log(error);
+  //           Swal.fire('Error!', 'Failed to delete the service', 'error');
+  //         }
+  //       };
+
+  //       fetchDelete();
+  //     }
+  //   });
+  // };
+
+  // const newRows = data.map((row, index) => ({
+  //   index: index + 1,
+  //   serviceTypeName: row.serviceType.typeName,
+  //   ...row,
+  // }));
+
+  const columns = [
+    {
+      field: 'index',
+      headerName: 'No.',
+      flex: 0.5,
+      // renderCell: (params) => <span>{params.rowIndex + 1}</span>,
+    },
+    { field: 'serviceName', headerName: 'Service Name', flex: 1 },
+    { field: 'serviceTypeName', headerName: 'Service Type', flex: 2 },
+    {
+      field: 'isDeleted',
+      headerName: 'Status',
+      flex: 1,
+      renderCell: (params) => (
+        <span>{params.row.isDeleted ? 'Inactive' : 'Active'}</span>
+      ),
+    },
+  ];
 
   return (
     <div>
@@ -88,6 +188,25 @@ const ServiceDetail = () => {
                 >
                   {detail.serviceDescription}
                 </p>
+              </div>
+
+              <div className='m-5'>
+                <Accordion>
+                  <AccordionSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls='panel1-content'
+                    id='panel1-header'
+                  >
+                    <p className='font-semibold text-2xl '>
+                      View variants of this service{' '}
+                    </p>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    Suspendisse malesuada lacus ex, sit amet blandit leo
+                    lobortis eget.
+                  </AccordionDetails>
+                </Accordion>
               </div>
             </div>
             <div className='w-1/2 flex justify-center items-center'>
