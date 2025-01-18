@@ -33,33 +33,15 @@ const RoomTypeList = () => {
       },
     },
     {
-      name: "pricePerHour",
-      label: "Price per Hour",
+      name: "price",
+      label: "Price ",
       type: "decimal",
       customValidation: (value) => {
         if (!/^\d+(\.\d+)?$/.test(value)) {  
-          return "Price per Hour must be a valid number";
+          return "Price must be a valid number";
         }
         if (parseFloat(value) <= 0) { 
-          return "Price per Hour must be greater than 0";
-        }
-        return null;
-      },
-      
-    },
-    {
-      name: "pricePerDay",
-      label: "Price per Day",
-      type: "decimal",
-      customValidation: (value, allValues) => {
-        if (!/^\d+(\.\d+)?$/.test(value)) {  
-          return "Price per Day must be a valid number";
-        }
-        if (parseFloat(value) <= 0) {  
-          return "Price per Day must be greater than 0";
-        }
-        if (allValues && allValues.pricePerHour && parseFloat(value) <= parseFloat(allValues.pricePerHour)) {
-          return "Price per Day must be greater than Price per Hour";
+          return "Price must be greater than 0";
         }
         return null;
       },
@@ -90,32 +72,15 @@ const RoomTypeList = () => {
       },
     },
     {
-      name: "pricePerHour",
-      label: "Price per Hour",
+      name: "price",
+      label: "Price",
       type: "decimal",
       customValidation: (value) => {
         if (!/^\d+(\.\d+)?$/.test(value)) {  
-          return "Price per Hour must be a valid number";
+          return "Price must be a valid number";
         }
         if (parseFloat(value) <= 0) { 
-          return "Price per Hour must be greater than 0";
-        }
-        return null;
-      },
-    },
-    {
-      name: "pricePerDay",
-      label: "Price per Day",
-      type: "decimal",
-      customValidation: (value, allValues) => {
-        if (!/^\d+(\.\d+)?$/.test(value)) {  
-          return "Price per Day must be a valid number";
-        }
-        if (parseFloat(value) <= 0) {  
-          return "Price per Day must be greater than 0";
-        }
-        if (allValues && allValues.pricePerHour && parseFloat(value) <= parseFloat(allValues.pricePerHour)) {
-          return "Price per Day must be greater than Price per Hour";
+          return "Price must be greater than 0";
         }
         return null;
       },
@@ -148,37 +113,37 @@ const RoomTypeList = () => {
     },    
     { 
       field: "name", 
-      headerName: "Room Type Name", 
+      headerName: " Name", 
       width: 200,
       headerAlign: 'center', 
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-          Room Type Name
+          Name
         </div>
       ),
     },
     { 
-      field: "pricePerHour", 
-      headerName: "Price per Hour", 
+      field: "description", 
+      headerName: "Description", 
       width: 200,
       headerAlign: 'center', 
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-          Price per Hour
+          Description
         </div>
       ),
     },
     { 
-      field: "pricePerDay", 
-      headerName: "Price per Day", 
+      field: "price", 
+      headerName: "Price", 
       width: 200,
       headerAlign: 'center', 
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-          Price per Day
+          Price 
         </div>
       ),
     },

@@ -42,7 +42,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 return new Response(false, $"Error occurred adding new RoomType: {ex.Message}");
             }
         }
-
         public async Task<Response> DeleteAsync(RoomType entity)
         {
             try
@@ -54,25 +53,27 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     return new Response(false, "RoomType not found.");
                 }
 
-                if (!roomType.isDeleted)
+                var linkedRooms = await context.Room
+                                               .Where(r => r.roomTypeId == entity.roomTypeId)
+                                               .ToListAsync();
+
+                if (roomType.isDeleted)
                 {
-                    var roomsToUpdate = await context.Room
-                                                     .Where(r => r.roomTypeId == entity.roomTypeId && !r.isDeleted)
-                                                     .ToListAsync();
-
-                    foreach (var room in roomsToUpdate)
+                    if (!linkedRooms.Any())
                     {
-                        var activeRoomHistory = await context.RoomHistories
-                            .Where(rh => rh.RoomId == room.roomId && rh.CheckOutDate == null)
-                            .FirstOrDefaultAsync();
-
-                        if (activeRoomHistory != null)
-                        {
-                            activeRoomHistory.Status = "Soft Deleted";
-                            activeRoomHistory.CheckOutDate = DateTime.Now;
-                            context.RoomHistories.Update(activeRoomHistory);
-                        }
-
+                        context.RoomType.Remove(roomType);
+                        await context.SaveChangesAsync();
+                        return new Response(true, $"RoomType with name {entity.name} has been permanently deleted.");
+                    }
+                    else
+                    {
+                        return new Response(false, $"Cannot permanently delete RoomType with name {entity.name} because there are linked rooms.");
+                    }
+                }
+                else
+                {
+                    foreach (var room in linkedRooms)
+                    {
                         room.isDeleted = true;
                         context.Room.Update(room);
                     }
@@ -81,22 +82,16 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     context.RoomType.Update(roomType);
                     await context.SaveChangesAsync();
 
-                    return new Response(true, "RoomType and associated rooms soft deleted successfully.") { Data = roomType };
-                }
-                else
-                {
-                    var linkedRooms = await context.Room
-                        .Where(r => r.roomTypeId == entity.roomTypeId)
-                        .ToListAsync();
-
-                    if (linkedRooms.Any())
+                    var roomTypeDto = new RoomTypeDTO
                     {
-                        return new Response(false, $"Cannot permanently delete RoomType with name {entity.name} because it has associated rooms.") ;
-                    }
+                        roomTypeId = roomType.roomTypeId,
+                        name = roomType.name,
+                        price = roomType.price,
+                        description = roomType.description,
+                        isDeleted = roomType.isDeleted
+                    };
 
-                    context.RoomType.Remove(roomType);
-                    await context.SaveChangesAsync();
-                    return new Response(true, $"RoomType with name {entity.name} has been permanently deleted.");
+                    return new Response(true, "RoomType and associated rooms soft deleted successfully.") { Data = roomTypeDto };
                 }
             }
             catch (Exception ex)
@@ -105,7 +100,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 return new Response(false, $"Error occurred while deleting RoomType: {ex.Message}");
             }
         }
-
         public async Task<IEnumerable<RoomType>> GetAllAsync()
         {
             try
@@ -171,31 +165,9 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     return new Response(false, $"RoomType with name '{entity.name}' already exists!");
                 }
 
-                if (entity.isDeleted != existingRoomType.isDeleted)
-                {
-                    var relatedRooms = await context.Room
-                        .Where(r => r.roomTypeId == existingRoomType.roomTypeId)
-                        .ToListAsync();
-
-                    foreach (var room in relatedRooms)
-                    {
-                        if (entity.isDeleted && !room.isDeleted)
-                        {
-                            room.isDeleted = true;
-                            context.Room.Update(room);
-                        }
-                        else if (!entity.isDeleted && room.isDeleted)
-                        {
-                            room.isDeleted = false;
-                            context.Room.Update(room);
-                        }
-                    }
-                }
-
                 existingRoomType.name = entity.name;
                 existingRoomType.description = entity.description;
-                existingRoomType.pricePerHour = entity.pricePerHour;
-                existingRoomType.pricePerDay = entity.pricePerDay;
+                existingRoomType.price = entity.price;
                 existingRoomType.isDeleted = entity.isDeleted;
 
                 context.RoomType.Update(existingRoomType);
@@ -205,8 +177,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 {
                     roomTypeId = existingRoomType.roomTypeId,
                     name = existingRoomType.name,
-                    pricePerHour = existingRoomType.pricePerHour,
-                    pricePerDay = existingRoomType.pricePerDay,
+                    price = existingRoomType.price,
                     description = existingRoomType.description,
                     isDeleted = existingRoomType.isDeleted
                 };

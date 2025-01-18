@@ -13,6 +13,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
             {
                 roomId = room.roomId,
                 roomTypeId = room.roomTypeId,
+                roomName = room.roomName,
                 description = room.description,
                 status = room.status,
                 isDeleted = room.isDeleted ?? false,
@@ -30,6 +31,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 {
                     roomId = room.roomId,
                     roomTypeId = room.roomTypeId,
+                    roomName = room.roomName,
                     description = room.description,
                     status = room.status,
                     roomImage = room.roomImage,
@@ -46,6 +48,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 {
                     roomId = p.roomId,
                     roomTypeId = p.roomTypeId,
+                    roomName = p.roomName,
                     description = p.description,
                     status = p.status,
                     roomImage = p.roomImage,

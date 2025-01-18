@@ -45,8 +45,7 @@ namespace FacilityServiceApi.Infrastructure.Data
                 {
                     roomTypeId = Guid.Parse("a6f9a846-212a-4c5a-b39f-bc0ecfef023f"),
                     name = "Small Room",
-                    pricePerHour = 50.00m,
-                    pricePerDay = 400.00m,
+                    price = 50.00m,
                     description = "Small room for small pets",
                     isDeleted = false
                 },
@@ -54,8 +53,7 @@ namespace FacilityServiceApi.Infrastructure.Data
                 {
                     roomTypeId = Guid.Parse("d34d32d7-1e8a-4a55-bef9-8725b084b1b6"),
                     name = "Medium Room",
-                    pricePerHour = 80.00m,
-                    pricePerDay = 600.00m,
+                    price = 80.00m,
                     description = "Medium room for medium-sized pets",
                     isDeleted = false
                 },
@@ -63,8 +61,7 @@ namespace FacilityServiceApi.Infrastructure.Data
                 {
                     roomTypeId = Guid.Parse("58d5fd73-6017-4b8d-b52a-053b49d8c1be"),
                     name = "Large Room",
-                    pricePerHour = 120.00m,
-                    pricePerDay = 1000.00m,
+                    price = 120.00m,
                     description = "Large room for large pets",
                     isDeleted = false
                 }
