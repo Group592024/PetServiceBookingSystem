@@ -22,7 +22,29 @@ namespace VoucherApi.Presentation.Controllers
                 return NotFound("No vouchers detected in the database");
             // convert data from entity to DTO and return
             var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
-            return list!.Any() ? Ok(list) : NotFound("No voucher found");
+            return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
+            {
+                Data = list
+            }) : NotFound(new Response(false, "No Voucher detected"));
+
+
+        }
+
+        // GET: api/<VoucherController>
+        [HttpGet("customer")]
+        public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchersForCustomer()
+        {
+            // get all vouchers from repo
+            var vouchers = await voucherInteface.GetAllForCustomer();
+            if (!vouchers.Any())
+                return NotFound("No vouchers detected in the database");
+            // convert data from entity to DTO and return
+            var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
+            return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
+            {
+                Data = list
+            }) : NotFound(new Response(false, "No Voucher detected"));
+
 
         }
 
@@ -38,7 +60,8 @@ namespace VoucherApi.Presentation.Controllers
             }
             // convert from entity to DTO and return
             var (_voucher, _) = VoucherConversion.FromEntity(voucher, null);
-            return _voucher is not null ? Ok(_voucher) : NotFound("voucher requested not found");
+            return _voucher is not null ? Ok(new Response(true, "The Voucher retrieved successfully") { Data = _voucher })
+            : NotFound(new Response(false, "Voucher requested not found"));
         }
 
         // POST api/<VoucherController>
@@ -55,19 +78,15 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         // PUT api/<VoucherController>/5
-        [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdateVoucher(Guid id, [FromBody] VoucherDTO voucher)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateVoucher( [FromBody] UpdateVoucherDTO voucher)
         {
-            if (!id.Equals(voucher.Id))
-            {
-                return BadRequest(new Response(false, "The id is not match"));
-            }
-            ModelState.Remove("VoucherStartDate");
+        
             // CHECK model state is all data annotations are passed
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             // convert to entity to DT         
-            var getEntity = VoucherConversion.ToEntity(voucher);
+            var getEntity = VoucherConversion.UpdateToEntity(voucher);
             var response = await voucherInteface.UpdateAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
