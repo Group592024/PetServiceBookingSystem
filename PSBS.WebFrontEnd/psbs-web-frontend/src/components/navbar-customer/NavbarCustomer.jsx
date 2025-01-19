@@ -1,53 +1,86 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import jwt_decode from "jwt-decode";
+import Swal from "sweetalert2"; // Import SweetAlert2
 import "./style.css";
 
 const NavbarCustomer = () => {
+  const [accountName, setAccountName] = useState("Admin");
+  const [accountImage, setAccountImage] = useState(
+    "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg"
+  );
+  const [accountId, setAccountId] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [userData, setUserData] = useState({
-    name: "Admin", // Mặc định là Admin nếu không có thông tin
-    avatar: "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg", // Mặc định hình ảnh avatar
-  });
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+
+    if (token) {
+      const decodedToken = jwt_decode(token);
+      const { AccountName, AccountImage, AccountId } = decodedToken;
+
+      setAccountName(AccountName || "Admin");
+      setAccountId(AccountId);
+
+      if (AccountImage) {
+        fetch(`http://localhost:5000/api/Account/loadImage?filename=${AccountImage}`)
+          .then((response) => response.json())
+          .then((imageData) => {
+            if (imageData.flag) {
+              const imgContent = imageData.data.fileContents;
+              const imgContentType = imageData.data.contentType;
+              setAccountImage(`data:${imgContentType};base64,${imgContent}`);
+            } else {
+              console.error("Error loading image:", imageData.message);
+            }
+          })
+          .catch((error) => console.error("Error fetching image:", error));
+      }
+    }
+  }, []);
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
-  // Lấy thông tin người dùng từ localStorage (hoặc sessionStorage)
-  useEffect(() => {
-    const savedUserData = localStorage.getItem("userData"); // Giả sử lưu trữ trong localStorage
-    if (savedUserData) {
-      const parsedData = JSON.parse(savedUserData);
-      setUserData({
-        name: parsedData.name || "Admin", // Lấy tên người dùng
-        avatar: parsedData.avatar || "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg", // Lấy ảnh đại diện
-      });
-    }
-  }, []);
+  const handleViewProfile = () => {
+    navigate(`/profilecustomer/${accountId}`);
+  };
 
-  useEffect(() => {
-    const navbarLinks = document.querySelectorAll(".navbar-links li a");
+  const handleLogout = () => {
+    Swal.fire({
+      title: "Are you sure? You want to log out?",
+      text: "You are about to log out from your account. Make sure you have saved your progress.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#4CD630FF",
+      cancelButtonColor: "#d33",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Remove token and user data from storage
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
+        localStorage.removeItem("userData");
+        sessionStorage.removeItem("userData");
 
-    navbarLinks.forEach((item) => {
-      const li = item.parentElement;
-      item.addEventListener("click", () => {
-        navbarLinks.forEach((i) => {
-          i.parentElement.classList.remove("active");
+        // Show success message and redirect to login page
+        Swal.fire({
+          title: "Logged out",
+          text: "You have been logged out successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/login", { replace: true });
         });
-        li.classList.add("active");
-      });
+      }
     });
-
-    return () => {
-      // Cleanup event listeners
-      navbarLinks.forEach((item) => {
-        item.removeEventListener("click", () => {});
-      });
-    };
-  }, []);
+  };
 
   return (
     <div className="navbarCustomer">
-      {/* Logo */}
       <a href="#" className="logo">
         <i className="bx bxs-cat"></i>
         <div className="logo-name">
@@ -55,7 +88,6 @@ const NavbarCustomer = () => {
         </div>
       </a>
 
-      {/* Central section (Search bar + Links) */}
       <div className="navbar-central">
         <form action="#">
           <div className="form-input">
@@ -103,22 +135,23 @@ const NavbarCustomer = () => {
               Voucher
             </a>
           </li>
+          
         </ul>
       </div>
-
-      {/* Profile Avatar */}
+      <div><li><a>{accountName}</a></li></div>
       <div className="navbar-profile" onClick={toggleDropdown}>
         <img
-          src={userData.avatar} // Hiển thị avatar từ state
+          src={accountImage}
           alt="Profile Avatar"
           className="profile-avatar"
         />
+
         {dropdownVisible && (
           <div className="dropdown-menu">
             <ul>
-              <li>{userData.name}</li> {/* Hiển thị tên người dùng */}
-              <li>View Profile</li>
-              <li>Logout</li>
+              
+              <li onClick={handleViewProfile}>View Profile</li>
+              <li onClick={handleLogout}>Logout</li>
             </ul>
           </div>
         )}

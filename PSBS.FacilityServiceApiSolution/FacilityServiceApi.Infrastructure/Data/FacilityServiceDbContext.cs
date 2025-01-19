@@ -25,9 +25,9 @@ namespace FacilityServiceApi.Infrastructure.Data
 
 
             modelBuilder.Entity<BookingServiceItem>()
-            .HasOne(p => p.Service)
+            .HasOne(p => p.ServiceVariant)
             .WithMany(c => c.BookingServiceItems)
-            .HasForeignKey(r => r.ServiceId);
+            .HasForeignKey(r => r.ServiceVariantId);
 
             modelBuilder.Entity<RoomHistory>()
              .HasOne(p => p.Room)

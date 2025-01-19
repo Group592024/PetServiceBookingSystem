@@ -9,6 +9,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<PSPSDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();

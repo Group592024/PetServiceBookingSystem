@@ -59,7 +59,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // GET <MedicinesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<MedicineDetailDTO>> GetMedicineById(Guid id)
+        public async Task<ActionResult<MedicineDetailDTO>> GetMedicineDetailById(Guid id)
         {
             var medicine = await _medicineInterface.GetByIdAsync(id);
             if (medicine == null)
@@ -72,6 +72,21 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             return Ok(new Response(true, "The medicine retrieved successfully")
             {
                 Data = detailDTO
+            });
+        }
+
+        [HttpGet("all-data/{id}")]
+        public async Task<ActionResult<MedicineDTO>> GetMedicineDTOFormById(Guid id)
+        {
+            var existingMedicine = await _medicineInterface.GetByIdAsync(id);
+            if (existingMedicine == null)
+            {
+                return NotFound(new Response(false, "The medicine requested not found"));
+            }
+            var (medicine,_) = MedicineConversion.FromEntity(existingMedicine, null!);
+            return Ok(new Response(true, "The medicine retrieved successfully")
+            {
+                Data = medicine
             });
         }
 
@@ -174,7 +189,18 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The medicine is not found!"));
             }
+            var medicineDeleteState = existingMedicine.isDeleted;
+            var medicineImagePath = existingMedicine.medicineImage;
             var response = await _medicineInterface.DeleteAsync(existingMedicine);
+            if(medicineDeleteState &&  response.Flag)
+            {
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), medicineImagePath.TrimStart('/'));
+
+                if (!string.IsNullOrEmpty(existingMedicine.medicineImage) && System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
+            }
             return response.Flag ? response : response;
         }
     }

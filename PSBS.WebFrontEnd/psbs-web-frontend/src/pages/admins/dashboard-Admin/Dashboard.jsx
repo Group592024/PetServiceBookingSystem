@@ -15,11 +15,11 @@ const Dashboard = () => {
               <h1>Dashboard</h1>
               <ul className="breadcrumb">
                 <li>
-                  <a href="#">Analytics</a>
+                  <a href="#">Settings</a>
                 </li>
                 /
                 <li>
-                  <a href="#">Shop</a>
+                  <a href="#">Sub-Table in Bookings</a>
                 </li>
               </ul>
             </div>
@@ -31,7 +31,7 @@ const Dashboard = () => {
           <ul className="insights">
           <Link to="/settings/bookingType">
             <li className="first">
-            <i className="bx bx-calendar-check"></i>
+            <i class='bx bx-cog'></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p> Booking Type</p>
@@ -40,7 +40,7 @@ const Dashboard = () => {
             </Link>
             <Link to="/settings/bookingStatus">
             <li className="second">
-            <i className="bx bx-calendar-check"></i>
+            <i class='bx bxs-cog' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Booking Status</p>
@@ -49,7 +49,7 @@ const Dashboard = () => {
             </Link>
             <Link to="/settings/paymentType">
             <li className="third">
-            <i className="bx bx-calendar-check"></i>
+            <i class='bx bx-cog'></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Payment Type</p>
@@ -58,15 +58,34 @@ const Dashboard = () => {
             </Link>
              <Link to="/settings/pointRule">
              <li className="fourth">
-            <i className="bx bx-calendar-check"></i>
+             <i class='bx bxs-cog' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Point Rule</p>
               </span>
             </li>
             </Link>
+           
+          </ul>
+          <div className="header">
+            <div className="left">
+            
+              <ul className="breadcrumb">
+                <li>
+                  <a href="#">Settings</a>
+                </li>
+                /
+                <li>
+                  <a href="#">Sub-Table in Bookings</a>
+                </li>
+              </ul>
+            </div>
+          
+          </div>
+          <ul className="insights">
+          
             <Link to="/settings/treatments">
-             <li className="fifth">
+             <li className="first">
             <i className="bx bx-calendar-check"></i>
               <span className="info">
                 <h3>Setting</h3>
@@ -75,7 +94,7 @@ const Dashboard = () => {
             </li>
             </Link>
             <Link to="/settings/servicetypes">
-             <li className="sixth">
+             <li className="second">
             <i className="bx bx-calendar-check"></i>
               <span className="info">
                 <h3>Setting</h3>
@@ -84,7 +103,7 @@ const Dashboard = () => {
             </li>
             </Link>
             <Link to="/settings/roomtypes">
-             <li className="seventh">
+             <li className="third">
             <i className="bx bx-calendar-check"></i>
               <span className="info">
                 <h3>Setting</h3>

@@ -18,25 +18,25 @@ using System.Text.RegularExpressions;
 
 namespace PSPS.AccountAPI.Infrastructure.Repositories
 {
-    // Lớp AccountRepository thực thi interface IAccount, cung cấp các chức năng liên quan đến tài khoản người dùng.
+    
     internal class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository) : IAccount
     {
-        private const string ImageUploadPath = "images";// Định nghĩa đường dẫn lưu trữ ảnh người dùng
+        private const string ImageUploadPath = "images";
 
-        // Hàm giúp lấy tài khoản người dùng từ cơ sở dữ liệu qua email
+     
         private async Task<Account> GetAccountByAccountEmail(string email)
         {
-            var account = await context.Accounts.FirstOrDefaultAsync(u =>u.AccountEmail == email);// Truy vấn tài khoản qua email
-            return account is null ? null! : account; // Nếu không có tài khoản thì trả về null
+            var account = await context.Accounts.FirstOrDefaultAsync(u =>u.AccountEmail == email);
+            return account is null ? null! : account; 
         }
-        // Lấy thông tin tài khoản bằng GUID của tài khoản
-        public async Task<GetAccountDTO?> GetAccount(Guid AccountId)
+       
+        public async Task<GetAccountDTO?> GetAccount(Guid AccountId)// Get account by AccountId
         {
-            var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountId == AccountId);// Lấy tài khoản qua GUID
+            var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountId == AccountId);
             if (account == null)
-                return null;// Nếu không có tài khoản, trả về null
+                return null;
 
-            return new GetAccountDTO(// Trả về DTO chứa thông tin tài khoản nếu tìm thấy
+            return new GetAccountDTO(
                 account.AccountId ?? Guid.Empty,                             
                 account.AccountName ?? string.Empty,      
                 account.AccountEmail ?? string.Empty,
@@ -51,17 +51,17 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 account.RoleId
             );
         }
-        public async Task<Response> GetAllAccount() // Lấy tất cả tài khoản từ cơ sở dữ liệu
+        public async Task<Response> GetAllAccount() // Get all accountlist
         {
             try
             {
-                var accounts = await context.Accounts.ToListAsync();// Lấy tất cả tài khoản
+                var accounts = await context.Accounts.ToListAsync();
                 if (accounts == null || !accounts.Any())
                 {
-                    return new Response(false, "No accounts found");// Trả về lỗi nếu không có tài khoản
+                    return new Response(false, "No accounts found");
                 }
 
-                var accountDTOs = accounts.Select(account => new GetAccountDTO(// Chuyển tất cả tài khoản thành danh sách DTO và trả về
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
                     account.AccountId ?? Guid.Empty,
                     account.AccountName ?? string.Empty,
                     account.AccountEmail ?? string.Empty,
@@ -76,24 +76,24 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.RoleId
                 )).ToList();
 
-                return new Response(true, "Accounts retrieved successfully") { Data = accountDTOs };// Trả về danh sách tài khoản thành công
+                return new Response(true, "Accounts retrieved successfully") { Data = accountDTOs };
             }
             catch (Exception ex)
             {
-                return new Response(false, $"An error occurred: {ex.Message}");// Xử lý lỗi nếu có ngoại lệ
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
-        public async Task<Response> GetDeletedAccounts() // Lấy danh sách tài khoản bị xóa (AccountIsDeleted = true)
+        public async Task<Response> GetDeletedAccounts() // get list accoint  AccountIsDeleted = true
         {
             try
             {
                 var accounts = await context.Accounts
                     .Where(account => account.AccountIsDeleted)
-                    .ToListAsync(); // Lấy tất cả tài khoản có AccountIsDeleted = true
+                    .ToListAsync(); 
 
                 if (accounts == null || !accounts.Any())
                 {
-                    return new Response(false, "No deleted accounts found"); // Trả về lỗi nếu không có tài khoản
+                    return new Response(false, "No deleted accounts found"); 
                 }
 
                 var accountDTOs = accounts.Select(account => new GetAccountDTO(
@@ -115,21 +115,21 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                return new Response(false, $"An error occurred: {ex.Message}"); // Xử lý lỗi nếu có ngoại lệ
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
 
-        public async Task<Response> GetActiveAccounts() // Lấy danh sách tài khoản chưa bị xóa (AccountIsDeleted = false)
+        public async Task<Response> GetActiveAccounts() // Lget list account AccountIsDeleted = false
         {
             try
             {
                 var accounts = await context.Accounts
                     .Where(account => !account.AccountIsDeleted)
-                    .ToListAsync(); // Lấy tất cả tài khoản có AccountIsDeleted = false
+                    .ToListAsync();
 
                 if (accounts == null || !accounts.Any())
                 {
-                    return new Response(false, "No active accounts found"); // Trả về lỗi nếu không có tài khoản
+                    return new Response(false, "No active accounts found");
                 }
 
                 var accountDTOs = accounts.Select(account => new GetAccountDTO(
@@ -151,13 +151,13 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                return new Response(false, $"An error occurred: {ex.Message}"); // Xử lý lỗi nếu có ngoại lệ
+                return new Response(false, $"An error occurred: {ex.Message}"); 
             }
         }
 
 
 
-        public async Task<Response> Login(LoginDTO loginDTO)
+        public async Task<Response> Login(LoginDTO loginDTO) //Login
         {
             try
             {
@@ -178,252 +178,344 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
         }
 
-        private string GenerateToken(Account account)       // Hàm tạo mã thông báo JWT cho tài khoản
+        private string GenerateToken(Account account)       // Generatoken with jwt
     {
-            var key = Encoding.UTF8.GetBytes(config.GetSection("Authentication:Key").Value!);// Lấy khóa bí mật từ cấu hình
+            var key = Encoding.UTF8.GetBytes(config.GetSection("Authentication:Key").Value!);
         var securityKey = new SymmetricSecurityKey(key);
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256); // Thiết lập phương thức ký
-        var claims = new List<Claim>// Tạo danh sách claims để đính kèm thông tin tài khoản vào token
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256); 
+        var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, account.AccountName!),
                 new(ClaimTypes.Email, account.AccountEmail!),
                 new(ClaimTypes.Role, account.RoleId!),
-
-
             };
-            if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
-                claims.Add(new(ClaimTypes.Role, account.RoleId!)); // Thêm claim role nếu có
-        var token = new JwtSecurityToken(            // Tạo JWT Token
+            claims.Add(new Claim("AccountId", account.AccountId.ToString()));
+            claims.Add(new Claim("AccountImage", account.AccountImage));
+            claims.Add(new Claim("AccountName", account.AccountName));
+            claims.Add(new Claim("AccountIsDeleted", account.AccountIsDeleted.ToString()));
 
-                issuer: config["Authentication:Issuer"],// Thiết lập Issuer
-                audience: config["Authentication:Audience"],// Thiết lập Audience
+            if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
+                claims.Add(new(ClaimTypes.Role, account.RoleId!)); 
+        var token = new JwtSecurityToken(           
+
+                issuer: config["Authentication:Issuer"],
+                audience: config["Authentication:Audience"],
                 claims: claims,
-                expires: null,// Không giới hạn thời gian hết hạn
-                signingCredentials: credentials// Thiết lập thông tin chữ ký
+                expires: null,
+                signingCredentials: credentials
                  );
-            return new JwtSecurityTokenHandler().WriteToken(token);// Trả về chuỗi token
+            return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-        public async Task<Response> Register([FromForm] RegisterAccountDTO model)// Đăng ký tài khoản người dùng mới
-    {
+        public async Task<Response> Register([FromForm] RegisterAccountDTO model)//Register account
+        {
             try
             {
-                // Kiểm tra email đã tồn tại
-
                 var getAccount = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
-                if (getAccount != null) return new Response(false, "Email existed!");// Nếu email đã tồn tại thì trả về lỗi
+                if (getAccount != null)
+                    return new Response(false, "Email existed!");
 
+                string fileName = GetDefaultImage(); 
 
+                if (model.UploadModel?.ImageFile != null)
+                {
+                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+                    string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
 
-                if (model.UploadModel.ImageFile != null)// Kiểm tra và lưu ảnh đại diện người dùng nếu có
-            {
-                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };// Kiểm tra loại file ảnh
-                string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
                     if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                     {
-                        throw new Exception("File format not supported.");// Kiểm tra định dạng file
-                }
+                        return new Response(false, "Unsupported file format.");
+                    }
 
-                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);// Đường dẫn lưu ảnh
-                if (!Directory.Exists(uploadPath))
+                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+                    if (!Directory.Exists(uploadPath))
                     {
-                        Directory.CreateDirectory(uploadPath);// Nếu thư mục chưa tồn tại thì tạo mới
-                }
+                        Directory.CreateDirectory(uploadPath);
+                    }
 
-                    string fileName = Path.GetRandomFileName() + fileExtension;// Tạo tên file ngẫu nhiên
-                string filePath = Path.Combine(uploadPath, fileName);
+                    fileName = Path.GetRandomFileName() + fileExtension;
+                    string filePath = Path.Combine(uploadPath, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        await model.UploadModel.ImageFile.CopyToAsync(stream);// Lưu file vào thư mục
+                        await model.UploadModel.ImageFile.CopyToAsync(stream);
+                    }
                 }
 
-                    var newAccount = new Account()// Tạo tài khoản mới
-                    {
-                        AccountName = model.RegisterTempDTO.AccountName,
-                        AccountEmail = model.RegisterTempDTO.AccountEmail,
-                        AccountPassword = BCrypt.Net.BCrypt.HashPassword(model.RegisterTempDTO.AccountPassword),// Mã hóa mật khẩu
-                        AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
-                        AccountGender = model.RegisterTempDTO.AccountGender,
-                        AccountAddress = model.RegisterTempDTO.AccountAddress,
-                        AccountImage = fileName,
-                        AccountDob = model.RegisterTempDTO.AccountDob,
-                        AccountId = Guid.NewGuid(), // Tạo GUID mới cho tài khoản
-                        RoleId = "user"// Mặc định là người dùng
-                    };
-                    var result = context.Accounts.Add(newAccount);// Thêm tài khoản mới vào cơ sở dữ liệu
-                await context.SaveChangesAsync();// Lưu thay đổi vào cơ sở dữ liệu
+                var newAccount = new Account()
+                {
+                    AccountName = model.RegisterTempDTO.AccountName,
+                    AccountEmail = model.RegisterTempDTO.AccountEmail,
+                    AccountPassword = BCrypt.Net.BCrypt.HashPassword(model.RegisterTempDTO.AccountPassword),
+                    AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
+                    AccountGender = model.RegisterTempDTO.AccountGender,
+                    AccountAddress = model.RegisterTempDTO.AccountAddress,
+                    AccountImage = fileName, 
+                    AccountDob = model.RegisterTempDTO.AccountDob,
+                    AccountId = Guid.NewGuid(),
+                    RoleId = "user"
+                };
+
+                var result = context.Accounts.Add(newAccount);
+                await context.SaveChangesAsync();
+
                 return !string.IsNullOrEmpty(result.Entity.AccountId.ToString())
-                        ? new Response(true, "Account registered successfully")// Đăng ký thành công
-                        : new Response(false, "Invalid data provided");// Nếu có lỗi
-            }
-                // Kiểm tra kết quả
-                return new Response(false, "Invalid data provided");
+                    ? new Response(true, "Account registered successfully")
+                    : new Response(false, "Invalid data provided");
             }
             catch (DbUpdateException dbEx)
             {
-                // Xử lý ngoại lệ liên quan đến cơ sở dữ liệu
                 return new Response(false, $"Database error: {dbEx.Message}");
             }
             catch (Exception ex)
             {
-                // Xử lý ngoại lệ chung
                 return new Response(false, $"An unexpected error occurred: {ex.Message}");
             }
         }
-        public async Task<Response> UpdateAccount([FromForm] AddAccount model)// Cập nhật thông tin tài khoản người dùng
-    {
+
+
+        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model) // Add account
+        {
             try
             {
-                // Validate dữ liệu đầu vào
+                var getAccount = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
+                if (getAccount != null)
+                    return new Response(false, "Email existed!");
+
+                string fileName = GetDefaultImage();
+
+                if (model.UploadModel?.ImageFile != null)
+                {
+                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+                    string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
+
+                    if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
+                    {
+                        return new Response(false, "Unsupported file format.");
+                    }
+
+                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    fileName = Path.GetRandomFileName() + fileExtension;
+                    string filePath = Path.Combine(uploadPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.UploadModel.ImageFile.CopyToAsync(stream);
+                    }
+                }
+
+                var newAccount = new Account()
+                {
+                    AccountName = "User",
+                    AccountEmail = model.RegisterTempDTO.AccountEmail,
+                    AccountPassword = BCrypt.Net.BCrypt.HashPassword("123456"), 
+                    AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber, 
+                    AccountGender = "Male", 
+                    AccountAddress = "Address", 
+                    AccountImage = fileName,
+                    AccountDob = DateTime.Now.AddYears(-20), 
+                    AccountId = Guid.NewGuid(),
+                    RoleId = "user"
+                };
+
+                var result = context.Accounts.Add(newAccount);
+                await context.SaveChangesAsync();
+
+                return !string.IsNullOrEmpty(result.Entity.AccountId.ToString())
+                    ? new Response(true, "Account registered successfully")
+                    : new Response(false, "Invalid data provided");
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return new Response(false, $"Database error: {dbEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An unexpected error occurred: {ex.Message}");
+            }
+        }
+
+
+
+
+        private string GetDefaultImage() 
+        {
+            string imagesPath = Path.Combine(_hostingEnvironment.ContentRootPath, "images");
+            if (!Directory.Exists(imagesPath))
+            {
+                Directory.CreateDirectory(imagesPath);
+                return "default.jpg"; 
+            }
+
+            var imageFiles = Directory.GetFiles(imagesPath, "*.*")
+                                       .Where(file => new[] { ".jpg", ".jpeg", ".png", ".gif" }
+                                       .Contains(Path.GetExtension(file), StringComparer.OrdinalIgnoreCase))
+                                       .ToList();
+
+            if (imageFiles.Any())
+            {
+                Random random = new Random();
+                return Path.GetFileName(imageFiles[random.Next(imageFiles.Count)]);
+            }
+
+            return "default.jpg"; 
+        }
+
+        public async Task<Response> UpdateAccount([FromForm] AddAccount model)
+        {
+            try
+            {
                 if (model == null || model.AccountTempDTO == null)
                 {
                     return new Response(false, "Invalid model!");
                 }
 
-                // Kiểm tra Account tồn tại
                 var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountId == model.AccountTempDTO.AccountId);
                 if (account == null)
                 {
                     return new Response(false, "Account does not exist!");
                 }
 
-                // Cập nhật từng trường nếu có giá trị
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountName))
-                {
                     account.AccountName = model.AccountTempDTO.AccountName;
-                }
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
+                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
+                    account.AccountGender = model.AccountTempDTO.AccountGender;
 
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
                 {
-                    // Validate Email nếu có
                     if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
-                    {
                         return new Response(false, "Invalid email!");
-                    }
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                 }
-
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
+                if (model.AccountTempDTO.AccountDob != null)
                 {
-                    // Validate số điện thoại nếu có
-                    if (!Regex.IsMatch(model.AccountTempDTO.AccountPhoneNumber, @"^\d{10,15}$"))
-                    {
-                        return new Response(false, "Invalid phone number!");
-                    }
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
+                    account.AccountDob = model.AccountTempDTO.AccountDob.Value;
                 }
-
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
-                {
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                }
-
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountAddress))
-                {
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                }
-                if (model.AccountTempDTO.isPickImage == true)// Kiểm tra xem người dùng có chọn thay đổi ảnh đại diện không
-            {
-                    if (model.UploadModel.ImageFile != null)
+
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.RoleId))
+                    account.RoleId = model.AccountTempDTO.RoleId;
+                if (model.AccountTempDTO.isPickImage == true && model.UploadModel?.ImageFile != null)
+                {
+                    List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
+                    string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
+                    if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                     {
-                        List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
-                        string fileExtension = Path.GetExtension(model.UploadModel.ImageFile.FileName);
-                        if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
-                        {
-                            throw new Exception("File format not supported.");
-                        }
-
-                        string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
-                        if (!Directory.Exists(uploadPath))
-                        {
-                            Directory.CreateDirectory(uploadPath);
-                        }
-
-                        string fileName = Path.GetRandomFileName() + fileExtension;
-                        string filePath = Path.Combine(uploadPath, fileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await model.UploadModel.ImageFile.CopyToAsync(stream);
-                        }
-
-                        account.AccountImage = fileName;
+                        return new Response(false, "File format not supported.");
                     }
-                // Cập nhật các thông tin khác của tài khoản
-                    account.AccountName = model.AccountTempDTO.AccountName;
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                    account.AccountDob = model.AccountTempDTO.AccountDob;
-                    account.AccountEmail = model.AccountTempDTO.AccountEmail;
-                    account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                    account.RoleId = model.AccountTempDTO.RoleId;
 
-                    context.Accounts.Update(account);
-                    await context.SaveChangesAsync();
-                    return new Response(true, "User updated successfully");
-                    
+                    string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+                    if (!Directory.Exists(uploadPath))
+                    {
+                        Directory.CreateDirectory(uploadPath);
+                    }
+
+                    string fileName = Path.GetRandomFileName() + fileExtension;
+                    string filePath = Path.Combine(uploadPath, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.UploadModel.ImageFile.CopyToAsync(stream);
+                    }
+
+                    account.AccountImage = fileName;
                 }
-                else
+                else if (model.AccountTempDTO.isPickImage == false)
                 {
-                    account.AccountName = model.AccountTempDTO.AccountName;
-                    account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
-                    account.AccountGender = model.AccountTempDTO.AccountGender;
-                    account.AccountDob = model.AccountTempDTO.AccountDob;
-                    account.AccountEmail = model.AccountTempDTO.AccountEmail;
-                    account.AccountAddress = model.AccountTempDTO.AccountAddress;
-                    account.RoleId = model.AccountTempDTO.RoleId;
-
-                    context.Accounts.Update(account);
-                    await context.SaveChangesAsync();
-                    return new Response(true, "User updated without image successfully");
                    
                 }
 
+                context.Accounts.Update(account);
+                await context.SaveChangesAsync();
 
+                return new Response(true, model.AccountTempDTO.isPickImage == true
+                    ? "User updated with new image successfully"
+                    : "User updated without changing image successfully");
             }
             catch (Exception ex)
             {
-                return new Response(false, "Internal server error" + ex.Message); // Xử lý lỗi server
-
+                return new Response(false, "Internal server error: " + ex.Message);
+            }
         }
+
+
+        public async Task<Response> LoadImage(string fileName) // LoadImage with file Images
+        {
+            try
+            {
+                string uploadPath = Path.Combine(_hostingEnvironment.ContentRootPath, ImageUploadPath);
+
+                if (!Directory.Exists(uploadPath))
+                {
+                    throw new Exception("Image directory does not exist.");
+                }
+
+                string filePath = Path.Combine(uploadPath, fileName);
+
+                if (!File.Exists(filePath))
+                {
+                    throw new Exception("Image file not found.");
+                }
+                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+                string mimeType = "image/jpeg"; 
+                if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
+                {
+                    mimeType = "image/png";
+                }
+                else if (filePath.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
+                {
+                    mimeType = "image/gif";
+                }
+
+                return new Response(true, "User updated without image successfully") { Data= new FileContentResult(fileBytes, mimeType) };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"Internal server error: {ex.Message}");
+            }
         }
 
-        public async Task<Response> ChangePassword(Guid accountId, ChangePasswordDTO changePasswordDTO)// Thay đổi mật khẩu người dùng
+
+        public async Task<Response> ChangePassword(Guid accountId, ChangePasswordDTO changePasswordDTO)//Changepassword Account
     {
             try
             {
-            // Lấy thông tin tài khoản từ cơ sở dữ liệu
+        
             var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
 
                 if (account == null)
                 {
                     return new Response(false, "Account not found");
                 }
-            // Kiểm tra mật khẩu hiện tại có đúng không
+          
             bool isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(changePasswordDTO.CurrentPassword, account.AccountPassword);
                 if (!isCurrentPasswordValid)
                 {
                     return new Response(false, "Current password is incorrect");
                 }
 
-            // Kiểm tra mật khẩu mới không trùng với mật khẩu cũ
             if (changePasswordDTO.NewPassword != changePasswordDTO.ConfirmPassword)
                 {
                     return new Response(false, "New password and confirm password do not match");
                 }
 
-            // Cập nhật mật khẩu mới vào cơ sở dữ liệu
+       
             bool isNewPasswordSameAsCurrent = BCrypt.Net.BCrypt.Verify(changePasswordDTO.NewPassword, account.AccountPassword);
                 if (isNewPasswordSameAsCurrent)
                 {
                     return new Response(false, "New password cannot be the same as the current password");
                 }
-
-                // Hash the new password before updating
                 account.AccountPassword = BCrypt.Net.BCrypt.HashPassword(changePasswordDTO.NewPassword);
-
-                // Update the account's password in the database
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
 
@@ -431,33 +523,26 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Handle and log exceptions as needed
-                return new Response(false, $"An error occurred: {ex.Message}");// Xử lý lỗi nếu có
+     
+                return new Response(false, $"An error occurred: {ex.Message}");
         }
         }
-        public async Task<Response> ForgotPassword(string AccountEmail)
+        public async Task<Response> ForgotPassword(string AccountEmail) // Forgotpassword with Email
         {
             try
             {
-                // Lấy tài khoản theo email
+     
                 var account = await GetAccountByAccountEmail(AccountEmail);
                 if (account == null)
                 {
-                    // Trả về thông báo chung để tránh lộ thông tin tài khoản
                     return new Response(false, "If the account exists, a password reset email has been sent.");
                 }
-
-                // Tạo mật khẩu mới
                 string newPassword = GenerateRandomPassword();
-
-                // Gửi email chứa mật khẩu mới trước khi cập nhật mật khẩu
                 var emailSent = await SendPasswordResetEmail(AccountEmail, newPassword);
                 if (!emailSent)
                 {
                     return new Response(false, "Failed to send password reset email. Please try again.");
                 }
-
-                // Hash mật khẩu mới và lưu vào cơ sở dữ liệu
                 account.AccountPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
@@ -466,15 +551,13 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Log lỗi
                 Console.WriteLine($"ForgotPassword Error: {ex.Message}");
                 return new Response(false, "An error occurred. Please try again later.");
             }
         }
 
-        private string GenerateRandomPassword()
+        private string GenerateRandomPassword() //Random new password
         {
-            // Tạo mật khẩu ngẫu nhiên với độ dài 8 ký tự
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var password = new char[8];
             using (var rng = RandomNumberGenerator.Create())
@@ -489,11 +572,10 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             return new string(password);
         }
 
-        public async Task<bool> SendPasswordResetEmail(string AccountEmail, string newPassword)
+        public async Task<bool> SendPasswordResetEmail(string AccountEmail, string newPassword) //Sendoassword with email
         {
             try
             {
-                // Nội dung email
                 var mailContent = new MailContent
                 {
                     Subject = "Password Reset Request",
@@ -502,52 +584,44 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             <p><strong>{newPassword}</strong></p>
             <p>Please change your password after logging in.</p>"
                 };
-
-                // Gửi email
                 await _emailRepository.SendMail(mailContent);
-                return true; // Nếu gửi email thành công
+                return true; 
             }
             catch (Exception ex)
             {
-                // Log lỗi
                 Console.WriteLine($"Email send failed: {ex.Message}");
-                return false; // Nếu gửi email thất bại
+                return false; 
             }
         }
-        public async Task<Response> DeleteAccount(Guid accountId)
+        public async Task<Response> DeleteAccount(Guid accountId) //Delete account
         {
             try
             {
-                // Tìm tài khoản trong cơ sở dữ liệu theo AccountId
                 var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
 
-                // Kiểm tra nếu tài khoản không tồn tại
                 if (account == null)
-                {
-                    return new Response(false, "Account not found.");
-                }
+                    return null; 
 
-                // Chuyển trạng thái AccountIsDeleted sang true (chặn tài khoản)
                 if (!account.AccountIsDeleted)
                 {
-                    account.AccountIsDeleted = true; // Thay đổi trạng thái tài khoản thành đã bị xóa (soft delete)
-                    context.Accounts.Update(account); // Cập nhật tài khoản trong cơ sở dữ liệu
-                    await context.SaveChangesAsync(); // Lưu thay đổi
-                    return new Response(true, "Account deleted successfully."); // Trả về kết quả thành công
+                    account.AccountIsDeleted = true;
+                    context.Accounts.Update(account);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Account marked as deleted (soft delete).");
                 }
                 else
                 {
-                    return new Response(false, "Account is already deleted."); // Trường hợp tài khoản đã bị xóa
+                    context.Accounts.Remove(account);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Account permanently deleted (hard delete).");
                 }
             }
             catch (Exception ex)
             {
-                // Xử lý lỗi nếu có
                 return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
 
-        // Implement từ base interface nhưng cấu trúc của Account phức tạp hơn cần parameter đặc thù vẫn giữ nguyên cho các service khác
         public Task<Response> CreateAsync(Account entity)
         {
             throw new NotImplementedException();

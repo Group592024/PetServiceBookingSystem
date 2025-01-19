@@ -1,5 +1,8 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./protectPageRoute";  // Import ProtectedRoute
+
+// Các import khác của bạn
 import Dashboard from "./pages/admins/dashboard-Admin/Dashboard";
 import Homepage from "./pages/customers/homepage-Customer/Homepage";
 import Login from "./pages/login/dashboard-Admin/Login";
@@ -35,14 +38,93 @@ import RoomEdit from './pages/admins/rooms/RoomEdit';
 import CustomerRoomList from './pages/customers/Room/RoomList';
 import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
 
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 
 function App() {
   return (
     <div className='App'>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/customer" element={<Homepage />} />
+          {/* Route không yêu cầu bảo vệ */}
+          <Route path="/" element={<Homepage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgotpassword" element={<ForgotPassword />} />
+          {/* Route yêu cầu bảo vệ */}
+          <Route path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/profile/:accountId"
+            element={
+              <ProtectedRoute>  
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/profilecustomer/:accountId"
+            element={
+              <ProtectedRoute>  
+                <ProfileCustomer/>
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/account"
+            element={
+              <ProtectedRoute>
+                <AccountList />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/changepassword/:accountId"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/changepasswordcustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <ChangePasswordCustomer />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/editprofile/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/editprofilecustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfileCustomer />
+              </ProtectedRoute>
+            }
+          />
+         
+          {/* Các route khác */}
+          <Route path="/medicines">
+            <Route index element={<List />} />
+            <Route path="new" element={<MedicineAddForm />} />
+            <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
+            <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
+          </Route>
+
+          <Route path="/petType">
+            <Route index element={<PetTypeList />} />
+            <Route path="add" element={<AddPetType />} />
+            <Route path=":id" element={<PetTypeDetail />} />
+            <Route path="edit/:id" element={<UpdatePetType />} />
+          </Route>
+
           <Route path="/settings">
             <Route path="pointrule" element={<PointRuleList />} />
             <Route path="paymentType" element={<PaymentTypeList />} />

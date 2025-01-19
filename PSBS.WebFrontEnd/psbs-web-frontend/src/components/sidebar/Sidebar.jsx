@@ -47,8 +47,8 @@ const Sidebar = forwardRef((_, ref) => {
       cancelButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem("jwtToken");
-        sessionStorage.removeItem("jwtToken");
+        localStorage.removeItem("token");
+        sessionStorage.removeItem("token");
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
 
@@ -74,8 +74,8 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className="side-menu">
-        <li className={location.pathname === "/" ? "active" : ""}>
-          <Link to="/">
+        <li className={location.pathname === "/dashboard" ? "active" : ""}>
+          <Link to="/dashboard">
             <i className="bx bxs-dashboard"></i>
             Dashboard
           </Link>

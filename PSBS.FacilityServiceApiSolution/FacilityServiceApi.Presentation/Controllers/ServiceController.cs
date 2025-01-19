@@ -1,8 +1,10 @@
 ﻿using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Application.Jobs;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
+using Quartz;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -12,11 +14,16 @@ namespace FacilityServiceApi.Presentation.Controllers
     {
         private readonly IService _service;
         private readonly IServiceType _serviceType;
+        private readonly IServiceVariant _serviceVariant;
+        private readonly ISchedulerFactory _schedulerFactory;
 
-        public ServiceController(IService service, IServiceType serviceType)
+
+        public ServiceController(IService service, IServiceType serviceType, IServiceVariant serviceVariant, ISchedulerFactory schedulerFactory)
         {
             _service = service;
             _serviceType = serviceType;
+            _serviceVariant = serviceVariant;
+            _schedulerFactory = schedulerFactory;
         }
 
         [HttpGet("serviceTypes")]
@@ -42,21 +49,39 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetServicesList()
+        public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetServicesList([FromQuery] bool showAll)
         {
-            var services = (await _service.GetAllAsync())
+            if (showAll)
+            {
+                var services = (await _service.GetAllAsync())
+                        .ToList();
+                if (!services.Any())
+                {
+                    return NotFound(new Response(false, "No services found in the database"));
+                }
+
+                var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
+                return Ok(new Response(true, "Services retrieved successfully")
+                {
+                    Data = serviceDtos
+                });
+            }
+            else
+            {
+                var services = (await _service.GetAllAsync())
                         .Where(r => !r.isDeleted)
                         .ToList();
-            if (!services.Any())
-            {
-                return NotFound(new Response(false, "No services found in the database"));
-            }
+                if (!services.Any())
+                {
+                    return NotFound(new Response(false, "No services found in the database"));
+                }
 
-            var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
-            return Ok(new Response(true, "Services retrieved successfully")
-            {
-                Data = serviceDtos
-            });
+                var (_, serviceDtos) = ServiceConversion.FromEntity(null!, services);
+                return Ok(new Response(true, "Services retrieved successfully")
+                {
+                    Data = serviceDtos
+                });
+            }
         }
 
         [HttpGet("{id}")]
@@ -123,11 +148,29 @@ namespace FacilityServiceApi.Presentation.Controllers
             var getEntity = ServiceConversion.ToEntity(service, imagePath);
 
             var response = await _service.CreateAsync(getEntity);
+
+            if (response.Flag == true)
+            {
+                var scheduler = await _schedulerFactory.GetScheduler();
+
+                var jobDetail = JobBuilder.Create<DeleteServiceJob>()
+                    .WithIdentity($"DeleteServiceJob-{getEntity.serviceId}")
+                    .UsingJobData("ServiceId", getEntity.serviceId)
+                    .Build();
+
+                var trigger = TriggerBuilder.Create()
+                    .WithIdentity($"DeleteServiceTrigger-{getEntity.serviceId}")
+                    .StartAt(DateTimeOffset.Now.AddMinutes(1))
+                    .Build();
+
+                await scheduler.ScheduleJob(jobDetail, trigger);
+            }
+
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpPut("{id:Guid}")]
-        public async Task<ActionResult<Response>> UpdateService([FromRoute] Guid id, [FromForm] CreateServiceDTO pet, IFormFile? imageFile = null)
+        public async Task<ActionResult<Response>> UpdateService([FromRoute] Guid id, [FromForm] UpdateServiceDTO pet, IFormFile? imageFile = null)
         {
             if (!ModelState.IsValid)
             {
@@ -142,18 +185,25 @@ namespace FacilityServiceApi.Presentation.Controllers
             }
 
             var existingService = await _service.GetByIdAsync(id);
-            if (existingService == null || existingService.isDeleted)
+            if (existingService == null)
                 return NotFound(new Response(false, $"Service with ID {id} not found"));
 
             bool hasChanges =
                 existingService.serviceTypeId != pet.serviceTypeId ||
                 existingService.serviceDescription != pet.serviceDescription ||
                 existingService.serviceName != pet.serviceName ||
+                existingService.isDeleted != pet.isDeleted ||
                 imageFile != null;
 
             if (!hasChanges)
             {
                 return NoContent();
+            }
+
+            bool variantInBooking = await _service.CheckIfServiceHasVariantInBooking(id);
+            if (variantInBooking)
+            {
+                return Conflict(new Response(false, $"Service with ID {id} has at least one variant that is in booking"));
             }
 
             // Xử lý hình ảnh
@@ -213,10 +263,30 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeleteService(Guid id)
         {
             var existingService = await _service.GetByIdAsync(id);
-            if (existingService == null || existingService.isDeleted)
+            if (existingService == null)
                 return NotFound($"Service with ID {id} not found");
-            var response = await _service.DeleteAsync(existingService);
-            return response.Flag ? Ok(response) : BadRequest(response);
+            Response response;
+            var checkService = await _serviceVariant.CheckIfServiceHasVariant(id);
+
+            if (!existingService.isDeleted)
+            {
+                response = await _service.DeleteAsync(existingService);
+                var deleteVariant = await _serviceVariant.DeleteByServiceIdAsync(id);
+                return response.Flag ? Ok(response) : BadRequest(response);
+            }
+            else
+            {
+                if (!checkService)
+                {
+                    response = await _service.DeleteSecondAsync(existingService);
+                    return response.Flag ? Ok(response) : BadRequest(response);
+                }
+                else
+                {
+                    return Conflict(new Response(false, "Can't delete this service because it has at least service variant."));
+                }
+
+            }
         }
     }
 }

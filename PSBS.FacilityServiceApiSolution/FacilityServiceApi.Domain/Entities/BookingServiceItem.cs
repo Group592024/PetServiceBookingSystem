@@ -1,7 +1,7 @@
 ﻿
 
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace FacilityServiceApi.Domain.Entities
 {
@@ -11,8 +11,8 @@ namespace FacilityServiceApi.Domain.Entities
         public Guid BookingServiceItemId { get; set; }
         [Column("booking_Id")]
         public Guid BookingId { get; set; }
-        [Column("service_id")]
-        public Guid ServiceId { get; set; }
+        [Column("serviceVariant_id")]
+        public Guid ServiceVariantId { get; set; }
         [Column("pet_id")]
         public Guid PetId { get; set; }
         [Column("price")]
@@ -21,6 +21,6 @@ namespace FacilityServiceApi.Domain.Entities
         public DateTime CreateAt { get; set; }
         [Column("updateAt")]
         public DateTime UpdateAt { get; set; }
-        public virtual Service Service { get; set; } = null!;
+        public virtual ServiceVariant ServiceVariant { get; set; } = null!;
     }
 }
