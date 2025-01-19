@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
-using VoucherApi.Application.DTOs;
 using VoucherApi.Application.DTOs.Conversions;
+using VoucherApi.Application.DTOs.GiftDTOs;
 using VoucherApi.Application.Interfaces;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,14 +14,30 @@ namespace VoucherApi.Presentation.Controllers
     {
         // GET: api/<GiftsController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GiftDTO>>> GetGiftsList()
+        public async Task<ActionResult<IEnumerable<GiftDTO>>> GetGiftsListForCustomer()
+        {
+            var gifts = await giftInterface.GetGiftListForCustomerAsync();
+            if (!gifts.Any())
+            {
+                return NotFound(new Response(false, "No gifts detected"));
+            }
+            var (_, listGifts) = GiftConversion.FromEntityCustomerFormat(null!, gifts);
+
+            return Ok(new Response(true, "Gifts retrieved successfully!")
+            {
+                Data = listGifts
+            });
+        }
+
+        [HttpGet("admin-gift-list")]
+        public async Task<ActionResult<IEnumerable<AdminGiftListDTO>>> GetGiftsListWithAdminFormat()
         {
             var gifts = await giftInterface.GetAllAsync();
             if (!gifts.Any())
             {
                 return NotFound(new Response(false, "No gifts detected"));
             }
-            var (_, listGifts) = GiftConversion.FromEntity(null!, gifts);
+            var (_, listGifts) = GiftConversion.FromEntityAdminListFormat(null!, gifts);
 
             return Ok(new Response(true, "Gifts retrieved successfully!")
             {
@@ -39,6 +55,21 @@ namespace VoucherApi.Presentation.Controllers
                 return NotFound(new Response(false, "The gift requested not found"));
             }
             var (findingGift, _) = GiftConversion.FromEntity(gift, null!);
+            return Ok(new Response(true, "The gift retrieved successfully")
+            {
+                Data = findingGift
+            });
+        }
+
+        [HttpGet("detail/{id}")]
+        public async Task<ActionResult<CustomerGiftDTOs>> GetGiftByIdForCustomer(Guid id)
+        {
+            var gift = await giftInterface.GetGiftDetailForCustomerAsync(id);
+            if (gift == null)
+            {
+                return NotFound(new Response(false, "The gift requested not found"));
+            }
+            var (findingGift, _) = GiftConversion.FromEntityCustomerFormat(gift, null!);
             return Ok(new Response(true, "The gift retrieved successfully")
             {
                 Data = findingGift
@@ -150,12 +181,19 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The gift is not found!"));
             }
+            var giftDeleteState = existingGift.GiftStatus;
+            var giftImagePath = existingGift.GiftImage;
             var response = await giftInterface.DeleteAsync(existingGift);
-            if (response.Flag)
+            if (giftDeleteState && response.Flag)
             {
-                return Ok(response);
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), giftImagePath.TrimStart('/'));
+
+                if (!string.IsNullOrEmpty(existingGift.GiftImage) && System.IO.File.Exists(oldFilePath))
+                {
+                    System.IO.File.Delete(oldFilePath);
+                }
             }
-            return BadRequest(new Response() { Flag = false, Message = "Failed to delete the gift" });
+            return response.Flag ? response : response;
         }
     }
 }
