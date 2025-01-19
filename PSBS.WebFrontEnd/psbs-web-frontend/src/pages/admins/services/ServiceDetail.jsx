@@ -3,12 +3,14 @@ import Sidebar from '../../../components/sidebar/Sidebar';
 import Navbar from '../../../components/navbar/Navbar';
 import { useNavigate, useParams } from 'react-router-dom';
 import Accordion from '@mui/material/Accordion';
-import AccordionActions from '@mui/material/AccordionActions';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
-import Typography from '@mui/material/Typography';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Button from '@mui/material/Button';
+import Swal from 'sweetalert2';
+import Datatable from '../../../components/services/Datatable';
+import UpdateVariantModal from '../../../components/services/UpdateVariantModal';
+import VariantDetailModal from '../../../components/services/VariantDetailModal';
+import AddVariantModal from '../../../components/services/AddVariantModal';
 
 const ServiceDetail = () => {
   const sidebarRef = useRef(null);
@@ -19,6 +21,27 @@ const ServiceDetail = () => {
   const navigate = useNavigate();
 
   const [dataVariant, setDataVariant] = useState([]);
+  const [idVariant, setIdVariant] = useState('');
+
+  const [openUpdate, setOpenUpdate] = React.useState(false);
+  const handleOpenUpdate = (id) => {
+    setOpenUpdate(true);
+    setIdVariant(id);
+  };
+  const handleCloseUpdate = () => setOpenUpdate(false);
+
+  const [openDetail, setOpenDetail] = React.useState(false);
+  const handleOpenDetail = (id) => {
+    setOpenDetail(true);
+    setIdVariant(id);
+  };
+  const handleCloseDetail = () => setOpenDetail(false);
+
+  const [openAdd, setOpenAdd] = React.useState(false);
+  const handleOpenAdd = () => {
+    setOpenAdd(true);
+  };
+  const handleCloseAdd = () => setOpenAdd(false);
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -26,7 +49,6 @@ const ServiceDetail = () => {
         const response = await fetch(
           `http://localhost:5023/api/Service/${id}`
         ).then((response) => response.json());
-        console.log(response);
 
         const newData = {
           ...response.data,
@@ -38,87 +60,87 @@ const ServiceDetail = () => {
         console.error('Failed fetching data: ', error);
       }
     };
-    if (id) fetchDetail();
+    if (id) {
+      fetchDetail();
+      fetchDataFunction();
+    }
   }, [id]);
-
-  console.log(detail.serviceType);
 
   const imageURL = `http://localhost:5023${detail.serviceImage}`;
 
   //api variant
-  // const fetchDataFunction = async () => {
-  //   try {
-  //     const fetchData = await fetch(
-  //       'http://localhost:5023/api/Service?showAll=true'
-  //     );
-  //     const response = await fetchData.json();
+  const fetchDataFunction = async () => {
+    try {
+      console.log('id: ', id);
+      const fetchData = await fetch(`http://localhost:5023/service/${id}`);
+      const response = await fetchData.json();
 
-  //     const result = response.data.map((item) => ({
-  //       id: item.serviceId,
-  //       ...item,
-  //     }));
+      const result = response.data.map((item) => ({
+        id: item.serviceVariantId,
+        ...item,
+      }));
+      console.log(result);
 
-  //     setData(result);
-  //   } catch (error) {
-  //     console.error('Error fetching data: ', error);
-  //   }
-  // };
+      setDataVariant(result);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
+  };
 
-  // useEffect(() => {
-  //   fetchDataFunction();
-  // }, []);
+  const handleDelete = (id) => {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'Do you want to delete this item?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const fetchDelete = async () => {
+          try {
+            const deleteResponse = await fetch(
+              `http://localhost:5023/api/ServiceVariant/${id}`,
+              {
+                method: 'DELETE',
+              }
+            );
 
-  // const handleDelete = (id) => {
-  //   Swal.fire({
-  //     title: 'Are you sure?',
-  //     text: 'Do you want to delete this item?',
-  //     icon: 'warning',
-  //     showCancelButton: true,
-  //     confirmButtonText: 'Delete',
-  //     cancelButtonText: 'Cancel',
-  //     confirmButtonColor: '#d33',
-  //     cancelButtonColor: '#3085d6',
-  //   }).then((result) => {
-  //     if (result.isConfirmed) {
-  //       const fetchDelete = async () => {
-  //         try {
-  //           const deleteResponse = await fetch(
-  //             `http://localhost:5023/api/Service/${id}`,
-  //             {
-  //               method: 'DELETE',
-  //             }
-  //           );
+            if (deleteResponse.ok) {
+              Swal.fire(
+                'Deleted!',
+                'The service variant has been deleted.',
+                'success'
+              );
+              fetchDataFunction();
+            } else if (deleteResponse.status == 409) {
+              Swal.fire(
+                'Error!',
+                'Can not delete this service variant because it is in at least one booking.',
+                'error'
+              );
+            } else {
+              Swal.fire(
+                'Error!',
+                'Failed to delete the service variant',
+                'error'
+              );
+            }
+          } catch (error) {
+            Swal.fire(
+              'Error!',
+              'Failed to delete the service variant',
+              'error'
+            );
+          }
+        };
 
-  //           console.log(deleteResponse);
-
-  //           if (deleteResponse.ok) {
-  //             Swal.fire('Deleted!', 'The service has been deleted.', 'success');
-  //             fetchDataFunction();
-  //           } else if (deleteResponse.status == 409) {
-  //             Swal.fire(
-  //               'Error!',
-  //               'Can not delete this service because it has service variant',
-  //               'error'
-  //             );
-  //           } else {
-  //             Swal.fire('Error!', 'Failed to delete the service', 'error');
-  //           }
-  //         } catch (error) {
-  //           console.log(error);
-  //           Swal.fire('Error!', 'Failed to delete the service', 'error');
-  //         }
-  //       };
-
-  //       fetchDelete();
-  //     }
-  //   });
-  // };
-
-  // const newRows = data.map((row, index) => ({
-  //   index: index + 1,
-  //   serviceTypeName: row.serviceType.typeName,
-  //   ...row,
-  // }));
+        fetchDelete();
+      }
+    });
+  };
 
   const columns = [
     {
@@ -127,8 +149,8 @@ const ServiceDetail = () => {
       flex: 0.5,
       // renderCell: (params) => <span>{params.rowIndex + 1}</span>,
     },
-    { field: 'serviceName', headerName: 'Service Name', flex: 1 },
-    { field: 'serviceTypeName', headerName: 'Service Type', flex: 2 },
+    { field: 'serviceContent', headerName: 'Service Content', flex: 2 },
+    { field: 'servicePrice', headerName: 'Service Price', flex: 1 },
     {
       field: 'isDeleted',
       headerName: 'Status',
@@ -144,78 +166,119 @@ const ServiceDetail = () => {
       <Sidebar ref={sidebarRef} />
       <div class='content'>
         <Navbar sidebarRef={sidebarRef} />
-        <main>
-          <div className='header'>
+        <main className=''>
+          <div className='bg-customLightPrimary text-3xl font-bold p-5 rounded-lg'>
             <div className='left flex justify-center w-full'>
               <h1 className=''>Service Detail</h1>
             </div>
+
+            <div className='p-10  rounded-lg flex justify-between'>
+              <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
+                <div>
+                  <p className='font-semibold text-2xl '>Service Name:</p>
+                  <p
+                    type='text'
+                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                  >
+                    {detail.serviceName}
+                  </p>
+                </div>
+                <div>
+                  <p className='font-semibold text-2xl '>Service Type</p>
+                  <p
+                    type='text'
+                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                  >
+                    {detail.serviceTypeName}
+                  </p>
+                </div>
+                <div>
+                  <p className='font-semibold text-2xl '>Status: </p>
+                  <p
+                    type='text'
+                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                  >
+                    {detail.isDeleted ? 'Inactive' : 'Active'}
+                  </p>
+                </div>
+                <div>
+                  <p className='font-semibold text-2xl '>
+                    Service Description:{' '}
+                  </p>
+                  <p
+                    type='text'
+                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                  >
+                    {detail.serviceDescription}
+                  </p>
+                </div>
+              </div>
+              <div className='w-1/2 flex justify-center items-center'>
+                <img
+                  className='w-3/4 rounded-3xl'
+                  src={imageURL}
+                  alt={detail.serviceName}
+                />
+              </div>
+            </div>
           </div>
 
-          <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
-            <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
-              <div>
-                <p className='font-semibold text-2xl '>Service Name:</p>
-                <p
-                  type='text'
-                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
-                >
-                  {detail.serviceName}
-                </p>
-              </div>
-              <div>
-                <p className='font-semibold text-2xl '>Service Type</p>
-                <p
-                  type='text'
-                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
-                >
-                  {detail.serviceTypeName}
-                </p>
-              </div>
-              <div>
-                <p className='font-semibold text-2xl '>Status: </p>
-                <p
-                  type='text'
-                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
-                >
-                  {detail.isDeleted ? 'Inactive' : 'Active'}
-                </p>
-              </div>
-              <div>
-                <p className='font-semibold text-2xl '>Service Description: </p>
-                <p
-                  type='text'
-                  className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
-                >
-                  {detail.serviceDescription}
-                </p>
-              </div>
+          <div className='flex justify-center mt-5'>
+            <button
+              onClick={() => handleOpenAdd()}
+              className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                    hover:bg-customLightPrimary hover:text-customPrimary'
+            >
+              Add variant
+            </button>
+          </div>
 
-              <div className='m-5'>
-                <Accordion>
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls='panel1-content'
-                    id='panel1-header'
-                  >
-                    <p className='font-semibold text-2xl '>
-                      View variants of this service{' '}
-                    </p>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Suspendisse malesuada lacus ex, sit amet blandit leo
-                    lobortis eget.
-                  </AccordionDetails>
-                </Accordion>
-              </div>
-            </div>
-            <div className='w-1/2 flex justify-center items-center'>
-              <img
-                className='w-3/4 rounded-3xl'
-                src={imageURL}
-                alt={detail.serviceName}
-              />
-            </div>
+          <div className='flex justify-center'>
+            <Accordion sx={{ width: '70%', margin: '30px' }}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls='panel1-content'
+                id='panel1-header'
+              >
+                <p className='font-semibold text-2xl '>
+                  Variants of this service{' '}
+                </p>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Datatable
+                  columns={columns}
+                  data={dataVariant}
+                  pageSize={5}
+                  pageSizeOptions={[5, 10, 15]}
+                  onDelete={handleDelete}
+                  onEdit={handleOpenUpdate}
+                  onView={handleOpenDetail}
+                />
+                {openDetail && (
+                  <VariantDetailModal
+                    id={idVariant}
+                    open={openDetail}
+                    handleClose={handleCloseDetail}
+                  />
+                )}
+
+                {openUpdate && (
+                  <UpdateVariantModal
+                    id={idVariant}
+                    open={openUpdate}
+                    handleClose={handleCloseUpdate}
+                  />
+                )}
+
+                {openAdd && (
+                  <AddVariantModal
+                    id={id}
+                    open={openAdd}
+                    handleClose={handleCloseAdd}
+                  />
+                )}
+              </AccordionDetails>
+            </Accordion>
           </div>
         </main>
       </div>
