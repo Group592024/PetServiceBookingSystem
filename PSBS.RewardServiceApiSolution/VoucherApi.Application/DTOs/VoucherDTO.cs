@@ -9,7 +9,7 @@ namespace VoucherApi.Application.DTOs
 {
     public record VoucherDTO
     (
-        Guid Id,
+        Guid voucherId,
         [Required]  string VoucherName,
         [Required] string VoucherDescription,
         [Required, Range(0, int.MaxValue)] int VoucherQuantity,
@@ -22,6 +22,7 @@ namespace VoucherApi.Application.DTOs
 
         [Required, CompareDates(nameof(VoucherStartDate))]
         DateTime VoucherEndDate,
-        [Required] bool isGift
+        [Required] bool isGift,
+         [Required] bool isDeleted
     );
 }

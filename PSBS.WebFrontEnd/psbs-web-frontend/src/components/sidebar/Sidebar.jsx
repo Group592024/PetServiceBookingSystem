@@ -1,4 +1,4 @@
-import React, { useEffect, forwardRef } from "react";
+import React, { forwardRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./index.js";
@@ -6,34 +6,6 @@ import "./index.js";
 const Sidebar = forwardRef((_, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const sideLinks = document.querySelectorAll(
-      ".sidebar .side-menu li a:not(.logout)"
-    );
-
-    sideLinks.forEach((item) => {
-      const li = item.parentElement;
-      if (item.getAttribute("href") === location.pathname) {
-        li.classList.add("active");
-      } else {
-        li.classList.remove("active");
-      }
-
-      item.addEventListener("click", () => {
-        sideLinks.forEach((i) => {
-          i.parentElement.classList.remove("active");
-        });
-        li.classList.add("active");
-      });
-    });
-
-    return () => {
-      sideLinks.forEach((item) => {
-        item.removeEventListener("click", () => {});
-      });
-    };
-  }, [location.pathname]);
 
   const handleLogout = () => {
     Swal.fire({
@@ -74,62 +46,55 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className="side-menu">
-        <li className={location.pathname === "/dashboard" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/dashboard") ? "active" : ""}>
           <Link to="/dashboard">
             <i className="bx bxs-dashboard"></i>
             Dashboard
           </Link>
         </li>
-        <li className={location.pathname === "/service" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/service") ? "active" : ""}>
           <Link to="/service">
             <i className="bx bx-store-alt"></i>
             Service
           </Link>
         </li>
-        <li className={location.pathname === "/medicines" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/medicines") ? "active" : ""}>
           <Link to="/medicines">
             <i className="bx bxs-capsule"></i>
             Medicines
           </Link>
         </li>
-        <li className={location.pathname === "/account" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/account") ? "active" : ""}>
           <Link to="/account">
-            <i class="bx bxs-user-account"></i>
+            <i className="bx bxs-user-account"></i>
             Accounts
           </Link>
         </li>
-
-        <li className={location.pathname === "/room" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/room") ? "active" : ""}>
           <Link to="/room">
             <i className="bx bx-home-heart"></i>
             Room
           </Link>
         </li>
-        <li className={location.pathname === "/camera" ? "active" : ""}>
-          <Link to="/camera">
-            <i className="bx bxs-webcam"></i>
-            Camera
-          </Link>
-        </li>
-        <li className={location.pathname === "/pet" ? "active" : ""}>
-          <Link to="/pet">
+        <li className={location.pathname.startsWith("/pets") ? "active" : ""}>
+          <Link to="/pets">
             <i className="bx bxs-dog"></i>
             Pet
           </Link>
         </li>
-        <li className={location.pathname === "/gift" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/gift") ? "active" : ""}>
           <Link to="/gift">
             <i className="bx bx-gift"></i>
             Gift
           </Link>
         </li>
-        <li className={location.pathname === "/voucher" ? "active" : ""}>
-          <Link to="/voucher">
-            <i className="bx bx-wallet"></i>
+        <li className={location.pathname.startsWith("/vouchers") ? "active" : ""}>
+          <Link to="/vouchers">
+            <i className="bx bxs-coupon"></i>
             Voucher
           </Link>
         </li>
-        <li className={location.pathname === "/petType" ? "active" : ""}>
+        <li className={location.pathname.startsWith("/petType") ? "active" : ""}>
           <Link to="/petType">
             <i className="bx bxs-cat"></i>
             Pet Type

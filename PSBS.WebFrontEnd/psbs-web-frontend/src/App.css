@@ -431,3 +431,11 @@ body{
   padding-bottom: 40px;
   border-radius: 20px;
 }
+
+
+.customerContainer{
+  position: relative;
+  padding: 10px 20px;
+  width: 100% ;
+  transition: all 0.3s ease;
+}

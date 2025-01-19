@@ -27,6 +27,12 @@ import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
 import UpdatePetType from './pages/admins/PetType/UpdatePetType';
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
+import VoucherList from "./pages/admins/vouchers/voucherList/VoucherList";
+import VoucherAdd from "./pages/admins/vouchers/voucherAdd/VoucherAdd";
+import VoucherEdit from "./pages/admins/vouchers/voucherEdit/VoucherEdit";
+import VoucherDetail from "./pages/admins/vouchers/voucherDetail/VoucherDetail";
+import CustomerVoucherList from "./pages/customers/vouchers/voucherList/VoucherList";
+import CustomerVoucherDetail from "./pages/customers/vouchers/voucherDetail/VoucherDetail";
 import GiftsList from "./pages/admins/gifts/list-pages/GiftList";
 import GiftAddForm from "./pages/admins/gifts/add-form/GiftAddForm";
 import GiftDetailForm from "./pages/admins/gifts/detail-form/GiftDetailForm";
@@ -48,6 +54,7 @@ import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePas
 import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
 import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 
+
 function App() {
   return (
     <div className='App'>
@@ -58,6 +65,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
+
+
           {/* Route yêu cầu bảo vệ */}
           <Route path="/dashboard"
             element={
@@ -152,6 +161,18 @@ function App() {
             <Route path="servicetypes" element={<ServiceTypeList />} />
             <Route path="roomtypes" element={<RoomTypeList />} />
           </Route>
+
+
+          <Route path="/vouchers">
+            <Route index element={<VoucherList />} />
+            <Route path="new" element={<VoucherAdd />} />
+            <Route path="update/:voucherId" element={<VoucherEdit />} />
+            <Route path="detail/:voucherId" element={<VoucherDetail />} />
+          </Route>
+          <Route path="/customer/vouchers">
+            <Route index element={<CustomerVoucherList />} />          
+            <Route path="detail/:voucherId" element={<CustomerVoucherDetail />} />
+             </Route>
           <Route path="/medicines">
             <Route index element={<List />} />
             <Route path="new" element={<MedicineAddForm />} />
