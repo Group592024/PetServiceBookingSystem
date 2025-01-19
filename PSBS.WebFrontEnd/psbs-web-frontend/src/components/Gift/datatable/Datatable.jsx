@@ -1,43 +1,30 @@
-import "./datatable.css";
 import React, { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
+import { DataGrid } from "@mui/x-data-grid";
+import Box from "@mui/material/Box";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Swal from "sweetalert2";
+import "./datatable.css";
 
-const Datatable = () => {
-  const [medicines, setMedicines] = useState([]);
-  const [treatments, setTreatments] = useState([]);
+const GiftDatatable = () => {
+  const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  const fetchMedicinesAndTreatments = async () => {
+  const fetchGifts = async () => {
     try {
-      const medicinesResponse = await axios.get(
-        "http://localhost:5003/Medicines/all"
-      );
-      const treatmentsResponse = await axios.get(
-        "http://localhost:5003/api/Treatment/available"
+      const giftResponse = await axios.get(
+        "http://localhost:5022/Gifts/admin-gift-list"
       );
 
-      if (medicinesResponse.data.flag) {
+      if (giftResponse.data.flag) {
         toast.success(
-          medicinesResponse.data.message ||
-            "Medicines data fetched successfully!"
+          giftResponse.data.message || "Gifts data fetched successfully!"
         );
-        setMedicines(medicinesResponse.data.data);
+        setGifts(giftResponse.data.data);
       } else {
-        setError(medicinesResponse.data.message || "No medicines found");
-        toast.error(medicinesResponse.data.message || "No medicines found");
-      }
-
-      if (treatmentsResponse.data.flag) {
-        setTreatments(treatmentsResponse.data.data);
-      } else {
-        setError(treatmentsResponse.data.message || "No treatments found");
-        toast.error(treatmentsResponse.data.message || "No treatments found");
+        setError(giftResponse.data.message || "No gifts found");
+        toast.error(giftResponse.data.message || "No gifts found");
       }
     } catch (err) {
       setError("Error fetching data: " + err.message);
@@ -46,17 +33,9 @@ const Datatable = () => {
       setLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchMedicinesAndTreatments();
+    fetchGifts();
   }, []);
-
-  const getTreatmentName = (medicineTreatmentId) => {
-    const treatment = treatments.find(
-      (t) => t.treatmentId === medicineTreatmentId
-    );
-    return treatment ? treatment.treatmentName : "Unknown";
-  };
 
   const columns = [
     {
@@ -70,15 +49,15 @@ const Datatable = () => {
       ),
     },
     {
-      field: "medicineName",
-      headerName: "Name",
+      field: "giftName",
+      headerName: "Gift Name",
       flex: 3,
       headerAlign: "center",
       renderCell: (params) => (
         <div className="cellWithTable">
           <img
             className="cellImg"
-            src={`http://localhost:5003${params.row.medicineImg}`}
+            src={`http://localhost:5022${params.row.giftImage}`}
             alt="medicine"
           />
           {params.value}
@@ -86,38 +65,37 @@ const Datatable = () => {
       ),
     },
     {
-      field: "treatmentId",
-      headerName: "Treatment",
+      field: "giftCode",
+      headerName: "Gift Code",
       flex: 2,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => (
-        <div className="cellWithTable">{getTreatmentName(params.value)}</div>
+        <div className="cellWithTable">{params.value || "N/A"}</div>
       ),
     },
     {
-      field: "isDeleted",
+      field: "giftStatus",
       headerName: "Active",
       flex: 1,
       headerAlign: "center",
       align: "center",
       renderCell: (params) => {
-        const isDeleted = params.row.isDeleted;
+        const giftStatus = params.row.giftStatus;
         return (
           <div
             style={{
-              color: isDeleted ? "red" : "green",
+              color: giftStatus ? "red" : "green",
               fontWeight: "bold",
               textAlign: "center",
             }}
           >
-            {isDeleted ? "Inactive" : "Active"}
+            {giftStatus ? "Inactive" : "Active"}
           </div>
         );
       },
     },
   ];
-
   const actionColumn = [
     {
       field: "action",
@@ -125,14 +103,14 @@ const Datatable = () => {
       headerAlign: "center",
       flex: 2,
       renderCell: (params) => {
-        const medicineId = params.row.medicineId;
+        const giftId = params.row.giftId;
         return (
           <div
             className="cellAction"
             class="flex justify-around items-center w-full h-full"
           >
             <Link
-              to={`/medicines/detail/${medicineId}`}
+              to={`/gifts/detail/${giftId}`}
               className="detailBtn"
               style={{ textDecoration: "none" }}
             >
@@ -154,7 +132,7 @@ const Datatable = () => {
               </svg>
             </Link>
             <Link
-              to={`/medicines/update/${medicineId}`}
+              to={`/gifts/update/${giftId}`}
               className="editBtn"
               style={{ textDecoration: "none" }}
             >
@@ -175,7 +153,7 @@ const Datatable = () => {
                 />
               </svg>
             </Link>
-            <div className="deleteBtn" onClick={() => handleDelete(medicineId)}>
+            <div className="deleteBtn" onClick={() => handleDelete(giftId)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -193,45 +171,14 @@ const Datatable = () => {
       },
     },
   ];
-  const handleDelete = (medicineId) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await axios.delete(
-            `http://localhost:5003/Medicines/${medicineId}`
-          );
-          if (response.data.flag) {
-            toast.success(
-              response.data.message || "Medicine deleted successfully!"
-            );
-            fetchMedicinesAndTreatments();
-          } else {
-            toast.error(response.data.message || "Fail to delete medicine");
-          }
-        } catch (error) {
-          toast.error("Error deleting medicine: " + error.message);
-        }
-      }
-    });
-  };
-
-  const medicinesRows = medicines.map((medicine,index) => ({
-    id : index + 1 ,
-    medicineId: medicine.medicineId,
-    medicineName: medicine.medicineName,
-    medicineImg: medicine.medicineImage,
-    treatmentId: medicine.treatmentId,
-    isDeleted: medicine.isDeleted,
+  const giftsRows = gifts.map((gift, index) => ({
+    id: index + 1,
+    giftId: gift.giftId,
+    giftName: gift.giftName,
+    giftImage: gift.giftImage,
+    giftCode: gift.giftCode,
+    giftStatus: gift.giftStatus,
   }));
-
   if (loading) {
     return (
       <div class="flex items-center justify-center h-svh">
@@ -257,6 +204,35 @@ const Datatable = () => {
       </div>
     );
   }
+  const handleDelete = (giftId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.delete(
+            `http://localhost:5022/Gifts/${giftId}`
+          );
+          if (response.data.flag) {
+            toast.success(
+              response.data.message || "Gift deleted successfully!"
+            );
+            fetchGifts();
+          } else {
+            toast.error(response.data.message || "Fail to delete gift");
+          }
+        } catch (error) {
+          toast.error("Error deleting gift: " + error.message);
+        }
+      }
+    });
+  };
 
   return (
     <div className="Datatable">
@@ -286,7 +262,7 @@ const Datatable = () => {
         }}
       >
         <DataGrid
-          rows={medicinesRows}
+          rows={giftsRows}
           columns={columns.concat(actionColumn)}
           initialState={{
             pagination: {
@@ -304,4 +280,4 @@ const Datatable = () => {
   );
 };
 
-export default Datatable;
+export default GiftDatatable;

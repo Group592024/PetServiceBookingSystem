@@ -27,6 +27,13 @@ import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
 import UpdatePetType from './pages/admins/PetType/UpdatePetType';
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
+import GiftsList from "./pages/admins/gifts/list-pages/GiftList";
+import GiftAddForm from "./pages/admins/gifts/add-form/GiftAddForm";
+import GiftDetailForm from "./pages/admins/gifts/detail-form/GiftDetailForm";
+import GiftUpdatePage from "./pages/admins/gifts/update-form/GiftUpdateForm";
+import GiftListPage from "./pages/customers/gifts/list-page/GiftListPage";
+import GiftDetailPage from "./pages/customers/gifts/detail-page/GiftDetailPage";
+
 
 function App() {
   return (
@@ -88,6 +95,18 @@ function App() {
             <Route path="new" element={<MedicineAddForm />} />
             <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
             <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
+          </Route>
+
+          <Route path="/gifts">
+            <Route index element={<GiftsList/>} />
+            <Route path="new" element={<GiftAddForm />} />
+            <Route path="update/:giftId" element={<GiftUpdatePage />} />
+            <Route path="detail/:giftId" element={<GiftDetailForm />} />
+          </Route>
+
+          <Route path="/customer/gifts">
+            <Route index element={<GiftListPage/>} />
+            <Route path="detail/:giftId" element={<GiftDetailPage />} />
           </Route>
 
           <Route path="/petType">

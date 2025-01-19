@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using PSPS.SharedLibrary.Responses;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using VoucherApi.Application.DTOs.GiftDTOs;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
 using VoucherApi.Infrastructure.Data;
@@ -46,9 +48,24 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                entity.GiftStatus = true;
-                context.Gifts.Update(entity);
-                context.SaveChanges();
+                if (entity == null)
+                {
+                    return new Response(false, "Gift can't not found");
+                }
+                if (!entity.GiftStatus)
+                {
+                    entity.GiftStatus = true;
+                    context.Gifts.Update(entity);
+                    context.SaveChanges();
+                    return new Response(true, "Gift is inactive successfully");
+                }
+                var existUsingGifts = context.RedeemGiftHistories.FirstOrDefault(rgh => rgh.GiftId == entity.GiftId);
+                if (existUsingGifts != null)
+                {
+                    return new Response(false, "The gift has an redeem history that cannot be erased.");
+                }
+                context.Gifts.Remove(entity);
+                await context.SaveChangesAsync();
                 return new Response { Flag = true, Message = "The gift is deleted successfully" };
             }
             catch (Exception ex)
@@ -61,7 +78,7 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var listGifts = await context.Gifts.Where(g => !g.GiftStatus).ToListAsync();
+                var listGifts = await context.Gifts.ToListAsync();
                 return listGifts != null ? listGifts : null!;
             }
             catch (Exception ex)
@@ -87,8 +104,34 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id && g.GiftStatus == false);
+                var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id);
                 return gift != null ? gift : null!;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error occurred retrieving gift");
+            }
+        }
+
+        public async Task<Gift> GetGiftDetailForCustomerAsync(Guid id)
+        {
+            try
+            {
+                var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id && !g.GiftStatus);
+                return gift != null ? gift : null!;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error occurred retrieving gift");
+            }
+        }
+
+        public async Task<IEnumerable<Gift>> GetGiftListForCustomerAsync()
+        {
+            try
+            {
+                var listGifts = await context.Gifts.Where(g => !g.GiftStatus).ToListAsync();
+                return listGifts != null ? listGifts : null!;
             }
             catch (Exception ex)
             {
@@ -113,11 +156,16 @@ namespace VoucherApi.Infrastructure.Repositories
                         return new Response(false, $"{entity.GiftCode} already exist! ");
                     }
                 }
+                 if(entity.GiftCode.IsNullOrEmpty())
+                {
+                    entity.GiftCode = "";
+                }
                 existingGift.GiftName = entity.GiftName;
                 existingGift.GiftDescription = entity.GiftDescription;
                 existingGift.GiftImage = entity.GiftImage;
                 existingGift.GiftPoint = entity.GiftPoint;
                 existingGift.GiftCode = entity.GiftCode;
+                
                 context.Entry(existingGift).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 return new Response(true, " The gift is updated successfully");
@@ -127,5 +175,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 return new Response(false, "Error occured updating the gift");
             }
         }
+
+
     }
 }
