@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 import Swal from "sweetalert2";
 import { format } from 'date-fns';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
+import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 
-const EditProfile = () => {
+const EditProfileCustomer = () => {
   const { accountId } = useParams();
   const sidebarRef = useRef(null);
+
   const [selectedDate] = useState(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({
@@ -37,7 +38,7 @@ const EditProfile = () => {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
         .then((response) => response.json())
         .then(async (data) => {
-          console.log("Dữ liệu nhận được từ API:", data);  // Thêm log để kiểm tra
+          console.log("Dữ liệu nhận được từ API:", data);  
           setAccount(data);
           if (data.accountDob) {
             const dob = new Date(data.accountDob);
@@ -158,6 +159,7 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
 
+    // Xử lý ảnh nếu có
     if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
@@ -202,12 +204,12 @@ const EditProfile = () => {
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
-      <Sidebar ref={sidebarRef} />
-      <div className="content overflow-y-auto">
-        <Navbar sidebarRef={sidebarRef} />
+      <div className=" overflow-y-auto w-full">
+        <NavbarCustomer sidebarRef={sidebarRef} />
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Edit Profile</h2>
-          <div className="flex flex-wrap gap-8">
+          <div className="flex justify-center
+ flex-wrap gap-8">
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
               <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
                 {imagePreview ? (
@@ -247,7 +249,7 @@ const EditProfile = () => {
                 onChange={handleImageChange}
               />
             </div>
-            <div className="w-full sm:w-2/3 md:w-2/4 bg-white shadow-md rounded-md p-6">
+            <div className="w-full sm:w-2/3 bg-white shadow-md rounded-md p-6">
               <form>
                 <div className="mb-3">
                   <label htmlFor="name" className="block text-sm font-medium mb-1 font-bold">
@@ -438,4 +440,4 @@ const EditProfile = () => {
   );
 };
 
-export default EditProfile;
+export default EditProfileCustomer;

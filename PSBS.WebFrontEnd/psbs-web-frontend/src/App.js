@@ -27,6 +27,9 @@ import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
 import UpdatePetType from './pages/admins/PetType/UpdatePetType';
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 
 function App() {
   return (
@@ -53,6 +56,13 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/profilecustomer/:accountId"
+            element={
+              <ProtectedRoute>  
+                <ProfileCustomer/>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/account"
             element={
               <ProtectedRoute>
@@ -67,10 +77,10 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/editprofile/:accountId"
+          <Route path="/changepasswordcustomer/:accountId"
             element={
               <ProtectedRoute>
-                <EditProfile />
+                <ChangePasswordCustomer />
               </ProtectedRoute>
             }
           />
@@ -78,6 +88,13 @@ function App() {
             element={
               <ProtectedRoute>
                 <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/editprofilecustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfileCustomer />
               </ProtectedRoute>
             }
           />
