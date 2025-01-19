@@ -10,10 +10,12 @@ namespace FacilityServiceApi.Domain.Entities
         [ForeignKey("RoomType")]
         [Column("roomType_id")]
         public Guid roomTypeId { get; set; }
+        [Column("roomName")]
+        public string roomName { get; set; }
         [Column("description")]
         public string description { get; set; }
         [Column("status")]
-        public bool status { get; set; }
+        public string status { get; set; }
         [Column("isDeleted")]
         public bool isDeleted { get; set; }
         [Column("room_image")]

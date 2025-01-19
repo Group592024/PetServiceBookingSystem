@@ -9,10 +9,8 @@ namespace FacilityServiceApi.Domain.Entities
         public Guid roomTypeId { get; set; }
         [Column("name")]
         public string name { get; set; }
-        [Column("pricePerHour")]
-        public decimal pricePerHour { get; set; }
-        [Column("pricePerDay")]
-        public decimal pricePerDay { get; set; }
+        [Column("price")]
+        public decimal price { get; set; }
         [Column("description")]
         public string description { get; set; }
         [Column("isDeleted")]
