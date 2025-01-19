@@ -33,7 +33,20 @@ import GiftDetailForm from "./pages/admins/gifts/detail-form/GiftDetailForm";
 import GiftUpdatePage from "./pages/admins/gifts/update-form/GiftUpdateForm";
 import GiftListPage from "./pages/customers/gifts/list-page/GiftListPage";
 import GiftDetailPage from "./pages/customers/gifts/detail-page/GiftDetailPage";
+import PetBreedList from './pages/admins/Pets/PetBreed/PetBreedList';
+import PetBreedDetail from './pages/admins/Pets/PetBreed/PetBreedDetail';
+import PetBreedCreate from './pages/admins/Pets/PetBreed/PetBreedCreate';
+import PetBreedEdit from './pages/admins/Pets/PetBreed/PetBreedEdit';
+import RoomList from './pages/admins/rooms/RoomList';
+import RoomDetail from './pages/admins/rooms/RoomDetail';
+import RoomCreate from './pages/admins/rooms/RoomCreate';
+import RoomEdit from './pages/admins/rooms/RoomEdit';
+import CustomerRoomList from './pages/customers/Room/RoomList';
+import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
 
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 
 function App() {
   return (
@@ -60,6 +73,13 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/profilecustomer/:accountId"
+            element={
+              <ProtectedRoute>  
+                <ProfileCustomer/>
+              </ProtectedRoute>
+            }
+          />
           <Route path="/account"
             element={
               <ProtectedRoute>
@@ -74,10 +94,10 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/editprofile/:accountId"
+          <Route path="/changepasswordcustomer/:accountId"
             element={
               <ProtectedRoute>
-                <EditProfile />
+                <ChangePasswordCustomer />
               </ProtectedRoute>
             }
           />
@@ -85,6 +105,13 @@ function App() {
             element={
               <ProtectedRoute>
                 <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/editprofilecustomer/:accountId"
+            element={
+              <ProtectedRoute>
+                <EditProfileCustomer />
               </ProtectedRoute>
             }
           />
@@ -124,6 +151,55 @@ function App() {
             <Route path="treatments" element={<TreatmentList />} />
             <Route path="servicetypes" element={<ServiceTypeList />} />
             <Route path="roomtypes" element={<RoomTypeList />} />
+          </Route>
+          <Route path="/medicines">
+            <Route index element={<List />} />
+            <Route path="new" element={<MedicineAddForm />} />
+            <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
+            <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
+          </Route>
+          <Route path="/petType">
+            <Route index element={<PetTypeList />} />
+            <Route path="add" element={<AddPetType />} />
+            <Route path=":id" element={<PetTypeDetail />} />
+            <Route path="edit/:id" element={<UpdatePetType />} />
+          </Route>
+          <Route path="/petBreed">
+            <Route index element={<PetBreedList />} />
+            <Route path=":id" element={<PetBreedDetail />} />
+            <Route path="add" element={<PetBreedCreate />} />
+            <Route path="edit/:id" element={<PetBreedEdit />} />
+          </Route>
+          <Route path="/room">
+            <Route index element={<RoomList />} />
+            <Route path=":id" element={<RoomDetail />} />
+            <Route path="add" element={<RoomCreate />} />
+            <Route path="edit/:id" element={<RoomEdit />} />
+          </Route>
+          <Route path="/customerRoom">
+            <Route index element={<CustomerRoomList />} />
+            <Route path=":id" element={<CustomerRoomDetail />} />
+          </Route>
+          <Route path="/register">
+            <Route index element={<Register />} />
+          </Route>
+          <Route path="/login">
+            <Route index element={<Login />} />
+          </Route>
+          <Route path="/changepassword/:accountId">
+            <Route index element={<ChangePassword />} />
+          </Route>
+          <Route path="/forgotpassword">
+            <Route index element={<ForgotPassword />} />
+          </Route>
+          <Route path="/profile/:accountId">
+            <Route index element={<Profile />} />
+          </Route>
+          <Route path="/editprofile/:accountId">
+            <Route index element={<EditProfile />} />
+          </Route>
+          <Route path="/account">
+            <Route index element={<AccountList />} />
           </Route>
         </Routes>
       </BrowserRouter>

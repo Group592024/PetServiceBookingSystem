@@ -95,7 +95,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             var updatedRoom = RoomConversion.ToEntity(updatingRoom with { roomImage = imagePath });
             var response = await _room.UpdateAsync(updatedRoom);
 
-            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the room"));
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpDelete("{id}")]

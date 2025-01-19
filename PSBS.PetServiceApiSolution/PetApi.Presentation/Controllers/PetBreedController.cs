@@ -113,7 +113,7 @@ namespace PetApi.Presentation.Controllers
             var updatedPetBreed = PetBreedConversion.ToEntity(updatingPetBreed with { petBreedImage = imagePath });
             var response = await _petBreed.UpdateAsync(updatedPetBreed);
 
-            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the pet breed"));
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpDelete("{id}")]

@@ -211,9 +211,21 @@ namespace PetApi.Presentation.Controllers
                     return Conflict("Can't delete this pet type because it has pet breed");
                 }
             }
+        }
+        [HttpGet("available")]
+        public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetAvailablePetTypes()
+        {
+            var pettypes = await petInterface.ListAvailablePetTypeAsync();
+            if (!pettypes.Any())
+            {
+                return NotFound(new Response(false, "No available rooms found"));
+            }
 
-
-
+            var (_, petTypeDtos) = PetTypeConversion.FromEntity(null!, pettypes);
+            return Ok(new Response(true, "Available rooms retrieved successfully")
+            {
+                Data = petTypeDtos
+            });
         }
     }
 }

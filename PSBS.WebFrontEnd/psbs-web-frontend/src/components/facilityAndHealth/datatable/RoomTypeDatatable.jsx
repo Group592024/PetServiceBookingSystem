@@ -78,45 +78,60 @@ const Datatable = ({
     setSelectedData(null);
   };
   const handleEditSubmit = async (data) => {
-    console.log("Edited Data:", data);
-    // API call or other handling logic for updated data
-    try {
-      const response = await updateData(`${basePath}`, data);
-      if (response.flag) {
-        Swal.fire({
-          title: 'Success!',
-          text: response.message,
-          icon: 'success',
-          confirmButtonText: 'OK'
-        });
+    document.getElementsByClassName('swal2-container')[0]?.style.setProperty('z-index', '2000', 'important');
 
-        setRows((prevRows) =>
-          prevRows.map((row) =>
-            row[rowId] === data[rowId] ? { ...row, ...response.data } : row
-          )
-        );
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This update may affect related data in the system.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Update',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#1976d2',
+      cancelButtonColor: '#9ca3af',
+      backdrop: `rgba(0,0,0,0.7)`,
+      allowOutsideClick: false,
+      position: 'center'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await updateData(`${basePath}`, data);
+        if (response.flag) {
+          Swal.fire({
+            title: 'Success!',
+            text: response.message,
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
+
+          setRows((prevRows) =>
+            prevRows.map((row) =>
+              row[rowId] === data[rowId] ? { ...row, ...response.data } : row
+            )
+          );
+        } else {
+          Swal.fire({
+            title: 'Error!',
+            text: response.message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
+      } catch (error) {
+        console.error("Error submitting data:", error);
+        toast.error("Failed to submit data.");
       }
-      else {
-        Swal.fire({
-          title: 'Error!',
-          text: response.message,
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
-      }
-    }
-    catch (error) {
-      console.error("Error submitting data:", error);
-      toast.error("Failed to submit data.");
     }
   };
+
   const actionColumn = [
     {
       field: "action",
       headerName: "Action",
       width: 200,
-      headerAlign: 'center', 
-      align: 'center', 
+      headerAlign: 'center',
+      align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
           Action
@@ -126,7 +141,7 @@ const Datatable = ({
         const handleDelete = async () => {
           Swal.fire({
             title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            text: "Do you want to delete this item? This action may affect related data in the system.",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -136,40 +151,45 @@ const Datatable = ({
           }).then(async (result) => {
             if (result.isConfirmed) {
               try {
-                // Call the deleteData API with the appropriate path
                 const response = await deleteData(`${basePath}/${params.id}`);
-
                 if (response.flag === true) {
-                  toast.success("Deleted successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
+                  Swal.fire({
+                    title: 'Deleted!',
+                    text: 'Item has been deleted successfully.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
                   });
-                  if(response.data != null){
-                    setRows((prevRows) => 
-                      prevRows.map((row) => 
+
+                  if (response.data != null) {
+                    setRows((prevRows) =>
+                      prevRows.map((row) =>
                         row[rowId] === response.data[rowId] ? { ...row, ...response.data } : row
                       )
-                    );    
-                  }else{
-                     // Update the rows state to exclude the deleted user
-                  setRows((prevRows) =>
-                    prevRows.filter((row) => row[rowId] !== params.id)
-                  );
+                    );
+                  } else {
+                    setRows((prevRows) =>
+                      prevRows.filter((row) => row[rowId] !== params.id)
+                    );
                   }
                 } else {
-                  toast.error("Failed to delete user.");
+                  Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to delete item.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                  });
                 }
               } catch (error) {
-                toast.error("An error occurred while deleting.");
+                Swal.fire({
+                  title: 'Error!',
+                  text: 'An error occurred while deleting.',
+                  icon: 'error',
+                  confirmButtonText: 'OK'
+                });
               }
             }
           });
-        };       
+        };
 
         return (
           <div className="cellAction flex space-x-2">

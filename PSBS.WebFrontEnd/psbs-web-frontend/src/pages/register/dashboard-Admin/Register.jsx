@@ -11,7 +11,6 @@ const Register = () => {
   const [AccountDob, setDob] = useState('');
   const [AccountAddress, setAddress] = useState('');
 
-  // Các state để lưu thông báo lỗi cho từng trường
   const [errors, setErrors] = useState({
     name: '',
     email: '',
@@ -26,140 +25,151 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+  
     let valid = true;
     let errorMessages = { ...errors };
-
-    // Kiểm tra các trường có giá trị không
+  
     if (!AccountName) {
       errorMessages.name = 'Name is required';
       valid = false;
     } else {
       errorMessages.name = '';
     }
+  
     if (!AccountEmail) {
       errorMessages.email = 'Email is required';
       valid = false;
     } else {
-      errorMessages.email = '';
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+      if (!emailRegex.test(AccountEmail)) {
+        errorMessages.email = 'Please enter a valid email address (e.g., username@gmail.com)';
+        valid = false;
+      } else {
+        errorMessages.email = '';
+      }
     }
+  
     if (!AccountPhoneNumber) {
       errorMessages.phone = 'Phone number is required';
       valid = false;
     } else {
-      errorMessages.phone = '';
+      const phoneRegex =/^0\d{9}$/; 
+      if (!phoneRegex.test(AccountPhoneNumber)) {
+        errorMessages.phone = 'Please enter a valid phone number';
+        valid = false;
+      } else {
+        errorMessages.phone = '';
+      }
     }
+    
+  
     if (!AccountPassword) {
       errorMessages.password = 'Password is required';
+      valid = false;
+    } else if (AccountPassword.length < 6) {
+      errorMessages.password = 'Password must be at least 6 characters long';
       valid = false;
     } else {
       errorMessages.password = '';
     }
+  
     if (!AccountGender) {
       errorMessages.gender = 'Gender is required';
       valid = false;
     } else {
       errorMessages.gender = '';
     }
+  
     if (!AccountDob) {
       errorMessages.dob = 'Date of birth is required';
       valid = false;
     } else {
-      errorMessages.dob = '';
+      const birthDate = new Date(AccountDob); 
+      const currentDate = new Date();
+    
+      if (isNaN(birthDate)) {
+        errorMessages.dob = 'Invalid date format';
+        valid = false;
+      } else {
+        if (birthDate > currentDate) {
+          errorMessages.dob = 'Date of birth cannot be in the future';
+          valid = false;
+        } else {
+          let age = currentDate.getFullYear() - birthDate.getFullYear();
+          const monthDifference = currentDate.getMonth() - birthDate.getMonth();
+          if (monthDifference < 0 || (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())) {
+            age--;
+          }
+          if (age > 100) {
+            errorMessages.dob = 'Age cannot be greater than 100 years';
+            valid = false;
+          } else {
+            errorMessages.dob = '';
+          }
+        }
+      }
     }
+    
+    
+  
     if (!AccountAddress) {
       errorMessages.address = 'Address is required';
       valid = false;
     } else {
       errorMessages.address = '';
     }
-
-    setErrors(errorMessages);  // Cập nhật thông báo lỗi vào state
-
+  
+    setErrors(errorMessages);  
+  
     if (!valid) return;
 
-    // Kiểm tra email hợp lệ
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    if (!emailRegex.test(AccountEmail)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        email: 'Please enter a valid email address',
-      }));
-      return;
-    }
+  const formData = new FormData();
+  formData.append('RegisterTempDTO.AccountName', AccountName);
+  formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
+  formData.append('RegisterTempDTO.AccountPhoneNumber', AccountPhoneNumber);
+  formData.append('RegisterTempDTO.AccountPassword', AccountPassword);
+  formData.append('RegisterTempDTO.AccountGender', AccountGender);
+  formData.append('RegisterTempDTO.AccountDob', AccountDob);
+  formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
+  formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
 
-    // Kiểm tra số điện thoại hợp lệ
-    const phoneRegex = /^0\d{9}$/;
-    if (!phoneRegex.test(AccountPhoneNumber)) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        phone: 'Please enter a valid phone number (starting with 0 and 9 digits)',
-      }));
-      return;
-    }
+  try {
+    const response = await fetch('http://localhost:5000/api/Account/register', {
+      method: 'POST',
+      headers: {
+        'accept': 'text/plain',
+      },
+      body: formData,
+    });
 
-    // Kiểm tra mật khẩu
-    if (AccountPassword.length < 6) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        password: 'Password must be at least 6 characters long',
-      }));
-      return;
-    }
+    const result = await response.json();
+    if (response.ok && result.flag) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Registration Successful!',
+        text: 'Please log in.',
+      }).then(() => navigate('/login'));
+    } else {
+      console.log(result);  
 
-    // Kiểm tra ngày sinh không phải là ngày tương lai
-    const birthDate = new Date(AccountDob);
-    const currentDate = new Date();
-    if (birthDate > currentDate) {
-      setErrors((prevErrors) => ({
-        ...prevErrors,
-        dob: 'Date of birth cannot be in the future',
-      }));
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('RegisterTempDTO.AccountName', AccountName);
-    formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
-    formData.append('RegisterTempDTO.AccountPhoneNumber', AccountPhoneNumber);
-    formData.append('RegisterTempDTO.AccountPassword', AccountPassword);
-    formData.append('RegisterTempDTO.AccountGender', AccountGender);
-    formData.append('RegisterTempDTO.AccountDob', AccountDob);
-    formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
-
-    try {
-      const response = await fetch('http://localhost:5000/api/Account/register', {
-        method: 'POST',
-        headers: {
-          'accept': 'text/plain',
-        },
-        body: formData,
-      });
-
-      const result = await response.json();
-      if (response.ok && result.flag) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Registration Successful!',
-          text: 'Please log in.',
-        }).then(() => navigate('/login'));
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: result.message || 'Registration failed. Please try again.',
-        });
-      }
-    } catch (err) {
       Swal.fire({
         icon: 'error',
-        title: 'An error occurred',
-        text: 'Please try again later.',
+        title: 'Registration Failed',
+        text: result.message || 'Registration failed. Please try again.',
+        footer: result.details || 'Additional details about the error.',
       });
-      console.error(err);
     }
-  };
+  } catch (err) {
+    console.error(err);  
+    Swal.fire({
+      icon: 'error',
+      title: 'An error occurred',
+      text: err.message || 'Please try again later.',
+      footer: 'Network or server error. Please check your connection.',
+    });
+  }
+};
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">

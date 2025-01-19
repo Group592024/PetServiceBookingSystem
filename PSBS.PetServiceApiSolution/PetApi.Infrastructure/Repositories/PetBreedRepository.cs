@@ -57,42 +57,22 @@ namespace PetApi.Infrastructure.Repositories
 
                 if (!petBreed.IsDelete)
                 {
-                    petBreed.IsDelete = true;  
-                    context.PetBreeds.Update(petBreed);  
-
-                    var relatedPets = await context.Pets
-                                                   .Where(p => p.PetBreed_ID == entity.PetBreed_ID)
-                                                   .ToListAsync();
-
-                    foreach (var pet in relatedPets)
-                    {
-                        if (!pet.IsDelete) 
-                        {
-                            pet.IsDelete = true;
-                            context.Pets.Update(pet);  
-                        }
-                    }
-
-                    await context.SaveChangesAsync();  
-
-                    return new Response(true, "Pet breed and related pets soft deleted successfully.") { Data = petBreed };
+                    petBreed.IsDelete = true;
+                    context.PetBreeds.Update(petBreed);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"Pet breed {entity.PetBreed_Name} has been soft deleted successfully.") { Data = petBreed };
                 }
-                else
+
+                var hasRelatedPets = await context.Pets.AnyAsync(p => p.PetBreed_ID == entity.PetBreed_ID);
+                if (hasRelatedPets)
                 {
-                    var relatedPets = await context.Pets
-                                                   .Where(p => p.PetBreed_ID == entity.PetBreed_ID && !p.IsDelete)
-                                                   .ToListAsync();
-
-                    if (relatedPets.Any())
-                    {
-                        return new Response(false, $"Cannot permanently delete Pet Breed {entity.PetBreed_Name} because there are pets using it.");
-                    }
-
-                    context.PetBreeds.Remove(petBreed);  
-                    await context.SaveChangesAsync();  
-
-                    return new Response(true, $"Pet breed {entity.PetBreed_Name} has been permanently deleted.");
+                    return new Response(false, $"Cannot permanently delete Pet Breed {entity.PetBreed_Name} because there are pets using it.");
                 }
+
+                context.PetBreeds.Remove(petBreed);
+                await context.SaveChangesAsync();
+
+                return new Response(true, $"Pet breed {entity.PetBreed_Name} has been permanently deleted.");
             }
             catch (Exception ex)
             {
@@ -100,7 +80,6 @@ namespace PetApi.Infrastructure.Repositories
                 return new Response(false, "An error occurred while deleting the Pet Breed.");
             }
         }
-
         public async Task<Response> DeleteByPetTypeIdAsync(Guid petTypeId)
         {
             try
@@ -207,42 +186,19 @@ namespace PetApi.Infrastructure.Repositories
                 breed.PetBreed_Name = entity.PetBreed_Name;
                 breed.PetBreed_Description = entity.PetBreed_Description;
                 breed.PetBreed_Image = entity.PetBreed_Image;
-
-                if (breed.IsDelete != entity.IsDelete)
-                {
-                    breed.IsDelete = entity.IsDelete;
-
-                    var relatedPets = await context.Pets
-                                                   .Where(p => p.PetBreed_ID == breed.PetBreed_ID)
-                                                   .ToListAsync();
-
-                    foreach (var pet in relatedPets)
-                    {
-                        pet.IsDelete = entity.IsDelete;
-                        context.Pets.Update(pet);
-                    }
-                }
+                breed.IsDelete = entity.IsDelete;
 
                 context.PetBreeds.Update(breed);
                 await context.SaveChangesAsync();
 
-                var petBreedDto = new PetBreedDTO
-                {
-                    petBreedId = breed.PetBreed_ID,
-                    petBreedName = breed.PetBreed_Name,
-                    petBreedDescription = breed.PetBreed_Description,
-                    petBreedImage = breed.PetBreed_Image,
-                    isDelete = breed.IsDelete
-                };
-
-                return new Response(true, $"Pet breed with Name {entity.PetBreed_Name} updated successfully") { Data = petBreedDto };
+                return new Response(true, "Pet breed updated successfully");
             }
             catch (Exception ex)
             {
-                LogExceptions.LogException(ex);
-                return new Response(false, "An error occurred while updating the pet breed");
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
+
         public async Task<IEnumerable<PetBreed>> GetBreedsByPetTypeIdAsync(Guid petTypeId)
         {
             try
