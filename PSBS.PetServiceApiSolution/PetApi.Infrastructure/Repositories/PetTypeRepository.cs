@@ -149,5 +149,21 @@ namespace PetApi.Infrastructure.Repositories
             }
 
         }
+        public async Task<IEnumerable<PetType>> ListAvailablePetTypeAsync()
+        {
+            try
+            {
+                var pettypes = await context.PetTypes
+                                         .Where(r => !r.IsDelete)
+                                         .ToListAsync();
+                return pettypes ?? new List<PetType>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving non-deleted rooms");
+            }
+        }
+
     }
 }

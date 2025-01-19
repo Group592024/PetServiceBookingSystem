@@ -13,8 +13,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
             {
                 roomTypeId = roomType.roomTypeId,
                 name = roomType.name,
-                pricePerHour = roomType.pricePerHour,
-                pricePerDay = roomType.pricePerDay,
+                price = roomType.price,
                 description = roomType.description,
                 isDeleted = roomType.isDeleted ?? false
             };
@@ -28,8 +27,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 {
                     roomTypeId = roomType.roomTypeId,
                     name = roomType.name,
-                    pricePerHour = roomType.pricePerHour,
-                    pricePerDay = roomType.pricePerDay,
+                    price = roomType.price,
                     description = roomType.description,
                     isDeleted = roomType.isDeleted
                 };
@@ -42,8 +40,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 {
                     roomTypeId = rt.roomTypeId,
                     name = rt.name,
-                    pricePerHour = rt.pricePerHour,
-                    pricePerDay = rt.pricePerDay,
+                    price = rt.price,
                     description = rt.description,
                     isDeleted = rt.isDeleted
                 }).ToList();

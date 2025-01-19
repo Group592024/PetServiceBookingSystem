@@ -8,7 +8,13 @@ const Profile = () => {
   const sidebarRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
   const { accountId } = useParams();
-
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
   useEffect(() => {
     if (accountId) {
       fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
@@ -49,7 +55,7 @@ const Profile = () => {
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
       <Sidebar ref={sidebarRef} />
       <div className="content overflow-y-auto">
-        <Navbar sidebarRef={sidebarRef}/>
+        <Navbar sidebarRef={sidebarRef} />
 
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Profile</h2>
@@ -81,7 +87,7 @@ const Profile = () => {
                 )}
               </div>
               <div className="mt-4 text-sm font-bold">
-                {account.accountName} 
+                {account.accountName}
               </div>
             </div>
 
@@ -119,10 +125,11 @@ const Profile = () => {
                     type="text"
                     id="birthday"
                     className="w-full p-3 border rounded-md"
-                    value={account.accountDob}
+                    value={account.accountDob ? formatDate(account.accountDob) : ""}
                     disabled
                   />
                 </div>
+
                 <div className="mb-3">
                   <label className="block text-sm font-medium mb-1 font-bold">Gender</label>
                   <div className="flex gap-4">

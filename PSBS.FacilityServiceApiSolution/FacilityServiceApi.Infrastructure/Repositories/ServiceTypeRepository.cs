@@ -186,7 +186,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
-
         public async Task<IEnumerable<ServiceType>> ListAvailableServiceTypeAsync()
         {
             try

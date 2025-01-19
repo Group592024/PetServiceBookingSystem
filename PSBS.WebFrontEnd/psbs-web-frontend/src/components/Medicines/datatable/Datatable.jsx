@@ -125,7 +125,7 @@ const Datatable = () => {
       headerAlign: "center",
       flex: 2,
       renderCell: (params) => {
-        const medicineId = params.row.id;
+        const medicineId = params.row.medicineId;
         return (
           <div
             className="cellAction"
@@ -223,8 +223,9 @@ const Datatable = () => {
     });
   };
 
-  const medicinesRows = medicines.map((medicine) => ({
-    id: medicine.medicineId,
+  const medicinesRows = medicines.map((medicine,index) => ({
+    id : index + 1 ,
+    medicineId: medicine.medicineId,
     medicineName: medicine.medicineName,
     medicineImg: medicine.medicineImage,
     treatmentId: medicine.treatmentId,

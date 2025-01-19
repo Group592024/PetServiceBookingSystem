@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace FacilityServiceApi.Infrastructure.Data.Migrations
+namespace FacilityServiceApi.Infrastructure.Data
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class migrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,8 +34,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     roomType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    pricePerHour = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    pricePerDay = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -66,8 +65,9 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     room_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     roomType_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    roomName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    status = table.Column<bool>(type: "bit", nullable: false),
+                    status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false),
                     room_image = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     has_camera = table.Column<bool>(type: "bit", nullable: false)
@@ -185,12 +185,12 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "RoomType",
-                columns: new[] { "roomType_id", "description", "isDeleted", "name", "pricePerDay", "pricePerHour" },
+                columns: new[] { "roomType_id", "description", "isDeleted", "name", "price" },
                 values: new object[,]
                 {
-                    { new Guid("58d5fd73-6017-4b8d-b52a-053b49d8c1be"), "Large room for large pets", false, "Large Room", 1000.00m, 120.00m },
-                    { new Guid("a6f9a846-212a-4c5a-b39f-bc0ecfef023f"), "Small room for small pets", false, "Small Room", 400.00m, 50.00m },
-                    { new Guid("d34d32d7-1e8a-4a55-bef9-8725b084b1b6"), "Medium room for medium-sized pets", false, "Medium Room", 600.00m, 80.00m }
+                    { new Guid("58d5fd73-6017-4b8d-b52a-053b49d8c1be"), "Large room for large pets", false, "Large Room", 120.00m },
+                    { new Guid("a6f9a846-212a-4c5a-b39f-bc0ecfef023f"), "Small room for small pets", false, "Small Room", 50.00m },
+                    { new Guid("d34d32d7-1e8a-4a55-bef9-8725b084b1b6"), "Medium room for medium-sized pets", false, "Medium Room", 80.00m }
                 });
 
             migrationBuilder.InsertData(
@@ -198,8 +198,8 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(835), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(848) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(852), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(853) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5602), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5613) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5615), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5616) }
                 });
 
             migrationBuilder.CreateIndex(
