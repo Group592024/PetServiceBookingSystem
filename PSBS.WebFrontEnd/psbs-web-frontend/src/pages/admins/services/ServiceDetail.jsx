@@ -167,7 +167,7 @@ const ServiceDetail = () => {
       <div class='content'>
         <Navbar sidebarRef={sidebarRef} />
         <main className=''>
-          <div className='bg-customLightPrimary text-3xl font-bold p-5 rounded-lg'>
+          <div className='bg-customLightPrimary text-3xl font-bold p-5 rounded-lg mb-5'>
             <div className='left flex justify-center w-full'>
               <h1 className=''>Service Detail</h1>
             </div>
@@ -178,7 +178,7 @@ const ServiceDetail = () => {
                   <p className='font-semibold text-2xl '>Service Name:</p>
                   <p
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                    className='bg-customGrey rounded-3xl p-3 my-5 w-full shadow-lg text-xl font-semibold'
                   >
                     {detail.serviceName}
                   </p>
@@ -187,7 +187,7 @@ const ServiceDetail = () => {
                   <p className='font-semibold text-2xl '>Service Type</p>
                   <p
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                    className='bg-customGrey rounded-3xl p-3 my-5 w-full shadow-lg text-xl font-semibold'
                   >
                     {detail.serviceTypeName}
                   </p>
@@ -196,7 +196,7 @@ const ServiceDetail = () => {
                   <p className='font-semibold text-2xl '>Status: </p>
                   <p
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                    className='bg-customGrey rounded-3xl p-3 my-5 w-full shadow-lg text-xl font-semibold'
                   >
                     {detail.isDeleted ? 'Inactive' : 'Active'}
                   </p>
@@ -207,7 +207,7 @@ const ServiceDetail = () => {
                   </p>
                   <p
                     type='text'
-                    className='bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold'
+                    className='bg-customGrey rounded-3xl p-3 my-5 w-full shadow-lg text-xl font-semibold'
                   >
                     {detail.serviceDescription}
                   </p>
@@ -223,7 +223,7 @@ const ServiceDetail = () => {
             </div>
           </div>
 
-          <div className='flex justify-center mt-5'>
+          <div className='flex justify-center mt-5 mb-5'>
             <button
               onClick={() => handleOpenAdd()}
               className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
@@ -233,8 +233,8 @@ const ServiceDetail = () => {
             </button>
           </div>
 
-          <div className='flex justify-center'>
-            <Accordion sx={{ width: '70%', margin: '30px' }}>
+          <div className='flex justify-center my-5'>
+            <Accordion sx={{ width: '100%', margin: '30px' }}>
               <AccordionSummary
                 expandIcon={<ExpandMoreIcon />}
                 aria-controls='panel1-content'
@@ -274,7 +274,7 @@ const ServiceDetail = () => {
                   <AddVariantModal
                     id={id}
                     open={openAdd}
-                    handleClose={handleCloseAdd}
+                    handleClose={setOpenAdd}
                   />
                 )}
               </AccordionDetails>

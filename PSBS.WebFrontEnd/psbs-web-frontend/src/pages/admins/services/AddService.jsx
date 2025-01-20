@@ -5,11 +5,13 @@ import sampleImage from '../../../assets/sampleUploadImage.jpg';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import { MenuItem, TextField, Select } from '@mui/material';
+import AddVariantModal from '../../../components/services/AddVariantModal';
 
 const AddService = () => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [tmpImage, setTmpImage] = useState(sampleImage);
+  const [open, setOpen] = useState(false);
   const [service, setService] = useState({
     serviceTypeId: '',
     serviceName: '',
@@ -95,6 +97,8 @@ const AddService = () => {
     event.target.value = '';
   };
 
+ 
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -156,6 +160,9 @@ const AddService = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('serviceId', data.data.serviceId);
+
         setService({
           serviceTypeId: '',
           serviceName: '',
@@ -168,7 +175,10 @@ const AddService = () => {
           'Service Added Successfully! Now you should add at least one service variant for this service!',
           'success'
         );
+
         //hien popup add variant
+
+        setOpen(true);
       } else {
         Swal.fire('Add New Service', 'Failed To Add Service!', 'error');
         navigate('/petType/add');
@@ -187,6 +197,12 @@ const AddService = () => {
       <Sidebar ref={sidebarRef} />
       <div class='content'>
         <Navbar sidebarRef={sidebarRef} />
+        <AddVariantModal
+          id={localStorage.getItem('serviceId')}
+          open={open}
+          handleClose={setOpen}
+          disableBackdrop={true}
+        />
         <main>
           <div className='header'>
             <div className='left flex justify-center w-full'>
@@ -203,7 +219,8 @@ const AddService = () => {
                     type='text'
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     className=' rounded-3xl p-3 m-10 w-full'
                     onChange={(e) => {
@@ -235,7 +252,8 @@ const AddService = () => {
                     fullWidth
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                   >
                     {serviceType.map((item, index) => (
@@ -257,7 +275,8 @@ const AddService = () => {
                     type='text'
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     multiline
                     className='rounded-3xl p-3 m-5

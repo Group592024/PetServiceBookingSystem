@@ -116,10 +116,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
 
   return (
     <div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-      >
+      <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
             position: 'absolute',
@@ -152,7 +149,8 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       value={variant.serviceContent}
                       sx={{
                         borderRadius: '10px',
-                        margin: '20px',
+                        marginBottom: '20px',
+                        marginTop: '20px',
                       }}
                       className=' rounded-3xl p-3 m-10 w-full'
                       onChange={(e) => {
@@ -177,7 +175,8 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       type='text'
                       sx={{
                         borderRadius: '10px',
-                        margin: '20px',
+                        marginBottom: '20px',
+                        marginTop: '20px',
                       }}
                       multiline
                       className='rounded-3xl p-3 m-5

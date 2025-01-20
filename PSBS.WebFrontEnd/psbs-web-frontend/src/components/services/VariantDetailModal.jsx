@@ -74,7 +74,8 @@ const VariantDetailModal = ({ id, open, handleClose }) => {
                     }}
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     className=' rounded-3xl p-3 m-10 w-full'
                   />
@@ -85,7 +86,8 @@ const VariantDetailModal = ({ id, open, handleClose }) => {
                     type='text'
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     slotProps={{
                       input: {

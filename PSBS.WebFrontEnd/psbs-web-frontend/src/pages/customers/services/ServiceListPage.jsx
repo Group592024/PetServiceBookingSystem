@@ -12,7 +12,7 @@ const ServiceListPage = () => {
   const fetchDataFunction = async () => {
     try {
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service?showAll=true'
+        'http://localhost:5023/api/Service?showAll=false'
       );
       const response = await fetchData.json();
 

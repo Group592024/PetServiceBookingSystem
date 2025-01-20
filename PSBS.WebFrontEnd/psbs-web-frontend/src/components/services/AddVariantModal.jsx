@@ -3,7 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { Box, Modal, TextField } from '@mui/material';
 
-const AddVariantModal = ({ id, open, handleClose }) => {
+const AddVariantModal = ({
+  id,
+  open,
+  handleClose,
+  disableBackdrop = false,
+}) => {
   const navigate = useNavigate();
 
   const sidebarRef = useRef(null);
@@ -17,6 +22,10 @@ const AddVariantModal = ({ id, open, handleClose }) => {
     content: false,
     price: '',
   });
+
+  const handleBackdropClick = (event) => {
+    event.stopPropagation();
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -71,7 +80,7 @@ const AddVariantModal = ({ id, open, handleClose }) => {
           'Service Variant Added Successfully!',
           'success'
         );
-
+        localStorage.removeItem('serviceId');
         window.location.reload();
       } else {
         console.error('Failed create');
@@ -93,7 +102,13 @@ const AddVariantModal = ({ id, open, handleClose }) => {
 
   return (
     <div>
-      <Modal open={open} onClose={handleClose}>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          backdrop: disableBackdrop ? { onClick: handleBackdropClick } : {},
+        }}
+      >
         <Box
           sx={{
             position: 'absolute',
@@ -188,7 +203,26 @@ const AddVariantModal = ({ id, open, handleClose }) => {
                       className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
                   hover:bg-customPrimary hover:text-customLightPrimary'
                       onClick={(e) => {
-                        e.preventDefault();
+                        if (disableBackdrop) {
+                          Swal.fire({
+                            title: 'Are you sure?',
+                            text: 'If you close this popup, the service you just created will be deleted after some minutes',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'OK',
+                            cancelButtonText: 'Cancel',
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                          }).then((result) => {
+                            if (result.isConfirmed) {
+                              handleClose(false);
+                              navigate('/service');
+                            }
+                          });
+                        } else {
+                          handleClose(false);
+                          navigate(`/service/${id}`);
+                        }
                       }}
                     >
                       Cancel

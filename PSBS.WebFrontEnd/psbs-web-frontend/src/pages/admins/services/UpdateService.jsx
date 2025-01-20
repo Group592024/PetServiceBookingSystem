@@ -242,7 +242,8 @@ const UpdateService = () => {
                     value={service.serviceName}
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     className=' rounded-3xl p-3 m-10 w-full'
                     onChange={(e) => {
@@ -274,7 +275,8 @@ const UpdateService = () => {
                     fullWidth
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                   >
                     {serviceType.map((item, index) => (
@@ -296,7 +298,8 @@ const UpdateService = () => {
                     type='text'
                     sx={{
                       borderRadius: '10px',
-                      margin: '20px',
+                      marginBottom: '20px',
+                      marginTop: '20px',
                     }}
                     multiline
                     className='rounded-3xl p-3 m-5
