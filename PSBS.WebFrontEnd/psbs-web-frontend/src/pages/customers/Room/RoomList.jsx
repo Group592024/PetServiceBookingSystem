@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Navbar from "../../../components/navbar/Navbar";
-import Sidebar from "../../../components/sidebar/Sidebar";
 import { useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
+import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
 
 const CustomerRoomList = () => {
     const sidebarRef = useRef(null);
@@ -51,16 +50,16 @@ const CustomerRoomList = () => {
     };
 
     return (
-        <div className="bg-white min-h-screen flex flex-col">
-            <Sidebar ref={sidebarRef} />
-            <div className="content flex-1 overflow-hidden">
-                <Navbar sidebarRef={sidebarRef} />
-                <main className="flex-1 overflow-auto">
-                    <div className="flex items-center mb-6 mx-auto w-full">
+        <div className="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex flex-col">
+            <div className=" flex-1 overflow-hidden">
+                <NavbarCustomer/>
+                <main className="flex-1 overflow-auto p-8">
+                    <div className="flex items-center mb-10 mx-auto w-full">
                         <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
+                            <h1 className="text-4xl font-bold text-gray-800 tracking-wide">
                                 Rooms For Your Pets
-                            </button>
+                                <div className="h-1 w-32 bg-yellow-400 mx-auto mt-4 rounded-full"></div>
+                            </h1>
                         </div>
                     </div>
 
@@ -69,46 +68,55 @@ const CustomerRoomList = () => {
                             <CircularProgress />
                         </div>
                     ) : (
-                        <div className="bg-gray-100 p-6 rounded-xl">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+                        <div className="bg-gray-50/80 p-8 rounded-2xl shadow-lg">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-10">
                                 {rooms.map((room) => (
-                                    <div key={room.roomId} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                                        <img
-                                            src={`http://localhost:5023${room.roomImage}`}
-                                            alt={room.roomName}
-                                            className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                                        />
-                                        <div className="p-4">
-                                            <div className="flex justify-between items-center mb-5">
-                                                <h2 className="text-xl font-bold text-gray-800">{room.roomName}</h2>
-                                                <span className="text-lg font-semibold text-green-600">
+                                    <div key={room.roomId}
+                                        className="bg-white/90 rounded-2xl overflow-hidden transform transition-all duration-300 
+                                    hover:scale-[1.02] shadow-[0_8px_30px_rgb(0,0,0,0.12)] 
+                                    hover:shadow-[0_20px_40px_rgba(0,0,0,0.2)] 
+                                    border border-gray-200">
+                                        <div className="relative group">
+                                            <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-10"></div>
+                                            <img
+                                                src={`http://localhost:5023${room.roomImage}`}
+                                                alt={room.roomName}
+                                                className="w-full h-96 object-cover"
+                                            />
+                                        </div>
+                                        <div className="p-6 space-y-6">
+                                            <div className="flex justify-between items-center">
+                                                <h2 className="text-2xl font-bold text-gray-800 tracking-wide">
+                                                    {room.roomName}
+                                                </h2>
+                                                <span className="text-2xl font-bold text-green-600">
                                                     {getRoomTypePrice(room.roomTypeId)}
                                                 </span>
                                             </div>
+
                                             <div className="flex justify-between items-center">
-                                                <div className="flex flex-col">
-                                                    <p className="text-gray-600 font-semibold mb-5">
+                                                <div className="space-y-4">
+                                                    <p className="text-xl text-gray-600 font-medium">
                                                         {getRoomTypeName(room.roomTypeId)}
                                                     </p>
-                                                    <div className="mt-1">
-                                                        <span className={`px-3 py-1 rounded-full font-semibold ${room.status === 'Free' ? 'bg-green-100 text-green-600' :
-                                                                room.status === 'In Use' ? 'bg-orange-100 text-orange-600' :
-                                                                    'bg-red-100 text-red-600'
-                                                            }`}>
-                                                            {room.status}
-                                                        </span>
-                                                    </div>
+                                                    <span className={`inline-block px-4 py-2 rounded-full font-semibold text-base
+                                                        ${room.status === 'Free'
+                                                            ? 'bg-green-100 text-green-600'
+                                                            : room.status === 'In Use'
+                                                                ? 'bg-orange-100 text-orange-600'
+                                                                : 'bg-red-100 text-red-600'}`}>
+                                                        {room.status}
+                                                    </span>
                                                 </div>
-                                                <div className="self-end">
-                                                    <button
-                                                        onClick={() => navigate(`/customerRoom/${room.roomId}`)}
-                                                        className="bg-yellow-300 text-black px-4 py-2 rounded-lg font-semibold hover:bg-yellow-400 transition-colors"
-                                                    >
-                                                        See More
-                                                    </button>
-                                                </div>
+                                                <button
+                                                    onClick={() => navigate(`/customerRoom/${room.roomId}`)}
+                                                    className="bg-yellow-400 text-gray-900 px-6 py-3 rounded-xl font-semibold 
+                                                             hover:bg-yellow-500 transition-all duration-300 transform hover:scale-105
+                                                             hover:shadow-md"
+                                                >
+                                                    See more
+                                                </button>
                                             </div>
-
                                         </div>
                                     </div>
                                 ))}

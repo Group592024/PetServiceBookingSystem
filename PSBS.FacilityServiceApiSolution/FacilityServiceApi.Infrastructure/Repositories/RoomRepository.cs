@@ -215,7 +215,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             try
             {
                 var rooms = await context.Room
-                                         .Where(r => !r.isDeleted)
+                                         .Where(r => !r.isDeleted && r.status == "Free")
                                          .ToListAsync();
                 return rooms ?? new List<Room>();
             }
