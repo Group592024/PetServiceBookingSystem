@@ -26,7 +26,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 serviceId = Guid.NewGuid(),
                 servicePrice = dto.servicePrice,
                 serviceContent = dto.serviceContent,
-                isDeleted = false,
+                isDeleted = dto.isDeleted,
                 createAt = DateTime.Now,
                 updateAt = DateTime.Now
             };
@@ -44,7 +44,9 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     servicePrice = serviceVariant.servicePrice,
                     serviceContent = serviceVariant.serviceContent,
                     createAt = serviceVariant.createAt,
-                    updateAt = serviceVariant.updateAt
+                    updateAt = serviceVariant.updateAt,
+                    isDeleted = serviceVariant.isDeleted,
+
                 };
                 return (singleServiceVariant, null);
             }
@@ -59,7 +61,8 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     servicePrice = p.servicePrice,
                     serviceContent = p.serviceContent,
                     createAt = p.createAt,
-                    updateAt = p.updateAt
+                    updateAt = p.updateAt,
+                    isDeleted = p.isDeleted,
                 }).ToList();
 
                 return (null, _serviceVariants);

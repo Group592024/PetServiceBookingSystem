@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace PSPS.AccountAPI.Infrastructure.Migrations
+namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Add : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

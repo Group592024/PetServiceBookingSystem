@@ -9,11 +9,11 @@ using PSPS.AccountAPI.Infrastructure.Data;
 
 #nullable disable
 
-namespace PSPS.AccountAPI.Infrastructure.Migrations
+namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
-    [Migration("20250102064210_Add")]
-    partial class Add
+    [Migration("20250116071043_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
