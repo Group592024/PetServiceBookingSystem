@@ -169,27 +169,10 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 existingTreatment.treatmentName = entity.treatmentName;
                 existingTreatment.isDeleted = entity.isDeleted;
 
-                var relatedMedicines = await context.Medicines
-                    .Where(m => m.treatmentId == existingTreatment.treatmentId)
-                    .ToListAsync();
-
-                foreach (var medicine in relatedMedicines)
-                {
-                    medicine.isDeleted = entity.isDeleted;
-                    context.Medicines.Update(medicine);
-                }
-
                 context.Treatments.Update(existingTreatment);
                 await context.SaveChangesAsync();
 
-                var treatmentDto = new TreatmentDTO
-                {
-                    treatmentId = existingTreatment.treatmentId,
-                    treatmentName = existingTreatment.treatmentName,
-                    isDeleted = existingTreatment.isDeleted
-                };
-
-                return new Response(true, $"Treatment with Name {entity.treatmentName} updated successfully.") { Data = treatmentDto };
+                return new Response(true, $"Treatment with Name {entity.treatmentName} updated successfully.") { Data = existingTreatment };
             }
             catch (Exception ex)
             {

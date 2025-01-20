@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Data.Migrations
+namespace FacilityServiceApi.Infrastructure.Data
 {
     [DbContext(typeof(FacilityServiceDbContext))]
     partial class FacilityServiceDbContextModelSnapshot : ModelSnapshot
@@ -116,12 +116,18 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("room_image");
 
+                    b.Property<string>("roomName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("roomName");
+
                     b.Property<Guid>("roomTypeId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("roomType_id");
 
-                    b.Property<bool>("status")
-                        .HasColumnType("bit")
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
                         .HasColumnName("status");
 
                     b.HasKey("roomId");
@@ -197,13 +203,9 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("name");
 
-                    b.Property<decimal>("pricePerDay")
+                    b.Property<decimal>("price")
                         .HasColumnType("decimal(18,2)")
-                        .HasColumnName("pricePerDay");
-
-                    b.Property<decimal>("pricePerHour")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("pricePerHour");
+                        .HasColumnName("price");
 
                     b.HasKey("roomTypeId");
 
@@ -216,8 +218,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                             description = "Small room for small pets",
                             isDeleted = false,
                             name = "Small Room",
-                            pricePerDay = 400.00m,
-                            pricePerHour = 50.00m
+                            price = 50.00m
                         },
                         new
                         {
@@ -225,8 +226,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                             description = "Medium room for medium-sized pets",
                             isDeleted = false,
                             name = "Medium Room",
-                            pricePerDay = 600.00m,
-                            pricePerHour = 80.00m
+                            price = 80.00m
                         },
                         new
                         {
@@ -234,8 +234,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                             description = "Large room for large pets",
                             isDeleted = false,
                             name = "Large Room",
-                            pricePerDay = 1000.00m,
-                            pricePerHour = 120.00m
+                            price = 120.00m
                         });
                 });
 
@@ -321,20 +320,20 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(835),
+                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5602),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(848)
+                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5613)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(852),
+                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5615),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 13, 22, 22, 37, 706, DateTimeKind.Local).AddTicks(853)
+                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5616)
                         });
                 });
 

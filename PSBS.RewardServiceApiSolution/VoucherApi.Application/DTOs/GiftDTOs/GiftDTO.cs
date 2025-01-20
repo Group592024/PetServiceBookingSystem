@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VoucherApi.Application.DTOs
+namespace VoucherApi.Application.DTOs.GiftDTOs
 {
     public record GiftDTO
     (
     Guid giftId,
-    [Required]string giftName,
+    [Required] string giftName,
     string? giftDescription,
     string? giftImage,
     IFormFile? imageFile,

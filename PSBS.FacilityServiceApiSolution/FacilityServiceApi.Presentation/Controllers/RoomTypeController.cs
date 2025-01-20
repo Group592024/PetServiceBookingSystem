@@ -29,8 +29,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             {
                 roomTypeId = roomType.roomTypeId,
                 name = roomType.name,
-                pricePerHour = roomType.pricePerHour,
-                pricePerDay = roomType.pricePerDay,
+                price = roomType.price,
                 description = roomType.description,
                 isDeleted = roomType.isDeleted
             });
@@ -54,8 +53,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             {
                 roomTypeId = roomType.roomTypeId,
                 name = roomType.name,
-                pricePerHour = roomType.pricePerHour,
-                pricePerDay = roomType.pricePerDay,
+                price = roomType.price,
                 description = roomType.description,
                 isDeleted = roomType.isDeleted
             };
@@ -97,7 +95,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             var updatedRoomTypeEntity = RoomTypeConversion.ToEntity(updatingRoomType);
             var response = await _roomType.UpdateAsync(updatedRoomTypeEntity);
 
-            return response.Flag ? Ok(response) : BadRequest(new Response(false, "Failed to update the RoomType"));
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         [HttpDelete("{id}")]

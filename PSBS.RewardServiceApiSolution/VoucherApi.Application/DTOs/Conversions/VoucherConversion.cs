@@ -9,7 +9,7 @@ namespace VoucherApi.Application.DTOs.Conversions
     {
         public static Voucher ToEntity(VoucherDTO voucherDTO) => new()
         {
-            VoucherId = voucherDTO.Id,
+            VoucherId = voucherDTO.voucherId,
             VoucherName = voucherDTO.VoucherName,
             VoucherDescription = voucherDTO.VoucherDescription,
             VoucherQuantity = voucherDTO.VoucherQuantity,
@@ -19,7 +19,24 @@ namespace VoucherApi.Application.DTOs.Conversions
             VoucherCode = voucherDTO.VoucherCode,
             VoucherStartDate = voucherDTO.VoucherStartDate,
             VoucherEndDate = voucherDTO.VoucherEndDate,
-            IsDeleted = false
+            IsDeleted = voucherDTO.isDeleted,
+            IsGift = voucherDTO.isGift,
+        };
+
+        public static Voucher UpdateToEntity(UpdateVoucherDTO voucherDTO) => new()
+        {
+            VoucherId = voucherDTO.voucherId,
+            VoucherName = voucherDTO.VoucherName,
+            VoucherDescription = voucherDTO.VoucherDescription,
+            VoucherQuantity = voucherDTO.VoucherQuantity,
+            VoucherDiscount = voucherDTO.VoucherDiscount,
+            VoucherMaximum = voucherDTO.VoucherMaximum,
+            VoucherMinimumSpend = voucherDTO.VoucherMinimumSpend,
+            VoucherCode = voucherDTO.VoucherCode,
+            VoucherStartDate = voucherDTO.VoucherStartDate,
+            VoucherEndDate = voucherDTO.VoucherEndDate,
+            IsDeleted = voucherDTO.isDeleted,
+            IsGift = voucherDTO.isGift
         };
         public static (VoucherDTO?, IEnumerable<VoucherDTO>?) FromEntity(Voucher voucher, IEnumerable<Voucher>? vouchers)
         {
@@ -36,7 +53,8 @@ namespace VoucherApi.Application.DTOs.Conversions
                     voucher.VoucherCode,
                     voucher.VoucherStartDate,
                     voucher.VoucherEndDate, 
-                    voucher.IsGift
+                    voucher.IsGift,
+                    voucher.IsDeleted
                     );
                 return (singleVoucher, null);
             }
@@ -54,7 +72,8 @@ namespace VoucherApi.Application.DTOs.Conversions
                     p.VoucherCode,
                     p.VoucherStartDate,
                     p.VoucherEndDate,
-                    p.IsGift
+                    p.IsGift,
+                    p.IsDeleted
                     )).ToList();
                 return (null, list);
             }

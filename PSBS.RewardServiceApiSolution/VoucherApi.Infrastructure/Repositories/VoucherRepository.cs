@@ -48,24 +48,43 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-
                 var voucher = await GetByIdAsync(entity.VoucherId);
                 if (voucher is null)
                 {
                     return new Response(false, $"{entity.VoucherName} not found");
                 }
-                entity.IsDeleted = true;
-                context.Entry(voucher).State = EntityState.Detached;
-                context.Vouchers.Update(entity);
-                await context.SaveChangesAsync();
-                return new Response(true, $"{entity.VoucherName} successfully deleted");
+
+                if (!voucher.IsDeleted)
+                {
+                    // First deletion attempt: mark as deleted
+                    voucher.IsDeleted = true;
+                    context.Vouchers.Update(voucher);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"{entity.VoucherName} marked as deleted.") { Data = voucher };
+                }
+                else
+                {
+                    //// Check if BookingStatusId is still referenced in Bookings table
+                    //bool isReferencedInBookings = await context.Bookings
+                    //    .AnyAsync(b => b.BookingStatusId == entity.BookingStatusId);
+
+                    //if (isReferencedInBookings)
+                    //{
+                    //    return new Response(false, $"Cannot permanently delete {entity.BookingStatusName} because it is referenced in existing bookings.");
+                    //}
+
+                    // Permanently delete from the database
+                    context.Vouchers.Remove(voucher);
+                    await context.SaveChangesAsync();
+                    return new Response(true, $"{entity.VoucherName} permanently deleted.");
+                }
             }
             catch (Exception ex)
             {
-                // log the orginal exception
+                // Log the original exception
                 LogExceptions.LogException(ex);
-                // display scary-free message to the client
-                return new Response(false, "Error occurred updating existing voucher");
+                // Display a user-friendly message to the client
+                return new Response(false, "An error occurred while deleting the booking status.");
             }
         }
 
@@ -75,7 +94,6 @@ namespace VoucherApi.Infrastructure.Repositories
             {
                 var vouchers = await context.Vouchers
                     .AsNoTracking()
-                    .Where(v => !v.IsDeleted) // Filter where isDeleted is false
                     .ToListAsync();
                 return vouchers;
             }
@@ -88,6 +106,24 @@ namespace VoucherApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Voucher>> GetAllForCustomer()
+        {
+            try
+            {
+                var vouchers = await context.Vouchers
+                    .AsNoTracking()
+                    .Where(v => !v.IsDeleted && !v.IsGift) // Filter where isDeleted is false
+                    .ToListAsync();
+                return vouchers;
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a client-friendly error message
+                throw new Exception("Error occurred while retrieving vouchers.");
+            }
+        }
 
         public async Task<Voucher> GetByAsync(Expression<Func<Voucher, bool>> predicate)
         {
@@ -111,7 +147,7 @@ namespace VoucherApi.Infrastructure.Repositories
             {
                 var voucher = await context.Vouchers
                     .AsNoTracking()
-                    .SingleOrDefaultAsync(v => v.VoucherId == id && !v.IsDeleted); // Filter by ID and isDeleted
+                    .SingleOrDefaultAsync(v => v.VoucherId == id); 
                 return voucher!;
             }
             catch (Exception ex)
@@ -128,23 +164,52 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var voucher = await GetByIdAsync(entity.VoucherId);
-                if (voucher is null)
+                var existingVoucher = await GetByIdAsync(entity.VoucherId);
+                if (existingVoucher is null)
                 {
                     return new Response(false, $"{entity.VoucherName} not found");
                 }
-                context.Entry(voucher).State = EntityState.Detached;
+
+                // Check if the new name already exists in another voucher
+                if (entity.VoucherName != existingVoucher.VoucherName)
+                {
+                    var nameExists = await context.Vouchers.AnyAsync(v => v.VoucherName == entity.VoucherName && v.VoucherId != entity.VoucherId);
+                    if (nameExists)
+                    {
+                        return new Response(false, $"Voucher name '{entity.VoucherName}' is already in use.");
+                    }
+                }
+
+                // Check if the new code already exists in another voucher
+                if (entity.VoucherCode != existingVoucher.VoucherCode)
+                {
+                    var codeExists = await context.Vouchers.AnyAsync(v => v.VoucherCode == entity.VoucherCode && v.VoucherId != entity.VoucherId);
+                    if (codeExists)
+                    {
+                        return new Response(false, $"Voucher code '{entity.VoucherCode}' is already in use.");
+                    }
+                }
+
+                // Update other fields as needed
+                entity.VoucherStartDate = existingVoucher.VoucherStartDate;
+
+                // Detach the existing entity to prevent conflicts
+                context.Entry(existingVoucher).State = EntityState.Detached;
+
+                // Update the entity
                 context.Vouchers.Update(entity);
                 await context.SaveChangesAsync();
+
                 return new Response(true, $"{entity.VoucherName} successfully updated");
             }
             catch (Exception ex)
             {
-                // log the orginal exception
+                // Log the original exception
                 LogExceptions.LogException(ex);
-                // display scary-free message to the client
+                // Display a user-friendly message to the client
                 return new Response(false, "Error occurred updating existing voucher");
             }
         }
+
     }
 }

@@ -5,5 +5,6 @@ namespace VoucherApi.Application.Interfaces
 {
     public interface IVoucher : IGenericInterface<Voucher>
     {
+        Task<IEnumerable<Voucher>> GetAllForCustomer();
     }
 }

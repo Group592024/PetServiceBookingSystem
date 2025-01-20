@@ -21,12 +21,6 @@ const TreatmentList = () => {
   }, []);
 
   const model = [
-    {
-      name: "treatmentId",
-      label: "ID",
-      type: "string",
-      disabled: true,
-    },
     { name: "treatmentName", label: "Name", type: "string" },
     { name: "isDeleted", label: "Status", type: "bool" },
   ];

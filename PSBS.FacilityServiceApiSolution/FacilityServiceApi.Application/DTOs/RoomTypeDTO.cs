@@ -10,11 +10,8 @@ namespace FacilityServiceApi.Application.DTO
         [Required]
         public string name { get; set; }
         [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price per hour must be greater than 0.")]
-        public decimal pricePerHour { get; set; }
-        [Required]
-        [Range(0.01, double.MaxValue, ErrorMessage = "Price per day must be greater than 0.")]
-        public decimal pricePerDay { get; set; }
+        [Range(0.01, double.MaxValue, ErrorMessage = "Price must be greater than 0.")]
+        public decimal price { get; set; }
         public string description { get; set; }
         public bool? isDeleted { get; set; }
     }

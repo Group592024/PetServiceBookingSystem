@@ -7,5 +7,7 @@ namespace PetApi.Application.Interfaces
     public interface IPetType : IGenericInterface<PetType>
     {
         Task<Response> DeleteSecondAsync(PetType entity);
+        Task<IEnumerable<PetType>> ListAvailablePetTypeAsync();
+
     }
 }
