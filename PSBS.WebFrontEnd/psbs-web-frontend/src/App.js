@@ -49,11 +49,11 @@ import RoomCreate from './pages/admins/rooms/RoomCreate';
 import RoomEdit from './pages/admins/rooms/RoomEdit';
 import CustomerRoomList from './pages/customers/Room/RoomList';
 import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
-
 import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
 import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
 import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
-
+import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
+import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
 
 function App() {
   return (
@@ -138,6 +138,14 @@ function App() {
             <Route path="new" element={<GiftAddForm />} />
             <Route path="update/:giftId" element={<GiftUpdatePage />} />
             <Route path="detail/:giftId" element={<GiftDetailForm />} />
+          </Route>
+
+          <Route path="/customer/redeemHistory">
+            <Route index element={<CustomerRedeemHistory/>} />
+          </Route>
+
+          <Route path="redeemHistory">
+            <Route index element={<AdminRedeemHistory/>} />
           </Route>
 
           <Route path="/customer/gifts">

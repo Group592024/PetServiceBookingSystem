@@ -11,6 +11,10 @@ const GiftsList = () => {
   const handleNewButtonClick = () => {
     navigate("/gifts/new");
   };
+
+  const handleHistoryClick = () => {
+    navigate("/redeemHistory");
+  };
   return (
     <div className="list">
       <Sidebar ref={sidebarRef} />
@@ -51,6 +55,7 @@ const GiftsList = () => {
             </form>
             <button
               type="button"
+              onClick={handleHistoryClick}
               className="flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
             >
               <svg

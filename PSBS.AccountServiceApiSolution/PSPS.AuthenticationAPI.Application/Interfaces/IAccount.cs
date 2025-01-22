@@ -22,6 +22,9 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<Response> LoadImage(string filename);
         Task<Response> GetActiveAccounts();
         Task<Response> GetDeletedAccounts();
+        Task<Account> GetAccountByIdAsync(Guid accountId);
+        Task<bool> UpdateAccountAsync(Account account);
+        Task<Response> RedeemPointsAsync(Guid accountId, RedeemRequest model);
 
     }
 }

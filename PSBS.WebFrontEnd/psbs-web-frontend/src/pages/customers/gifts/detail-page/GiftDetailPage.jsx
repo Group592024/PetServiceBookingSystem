@@ -1,53 +1,108 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 
 const GiftDetailPage = () => {
-  const { giftId } = useParams(); // Get the gift ID from the URL
+  const { giftId } = useParams();
   const navigate = useNavigate();
-  const [gift, setGift] = useState(null); // State to store gift details
+  const [gift, setGift] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const accountId = sessionStorage.getItem('accountId');
 
   useEffect(() => {
-    // Fetch gift details by ID
     const fetchGift = async () => {
       try {
         const response = await axios.get(
           `http://localhost:5022/Gifts/detail/${giftId}`
         );
         if (response.data.flag) {
-          setGift(response.data.data); // Set gift details
+          setGift(response.data.data);
         } else {
-          setError(response.data.message); // Handle API error response
+          setError(response.data.message);
         }
       } catch (err) {
         setError("An error occurred while fetching gift details.");
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
     fetchGift();
   }, [giftId]);
 
-  if (loading) {
-    return (
-      <div className="text-center text-gray-600">Loading gift details...</div>
-    );
-  }
+  const handleRedeem = async () => {
+    const confirmResult = await Swal.fire({
+      title: 'Confirm Redemption',
+      text: `Are you sure you want to use ${gift.giftPoint} points to redeem this gift?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Redeem',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33'
+    });
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+    if (confirmResult.isConfirmed) {
+      try {
+        const redeemPointsResponse = await axios.post(
+          `http://localhost:5000/api/Account/redeem-points/${accountId}`,
+          {
+            giftId: giftId,
+            requiredPoints: gift.giftPoint
+          }
+        );
+
+        if (redeemPointsResponse.data.flag) {
+          const redeemHistoryPayload = {
+            redeemHistoryId: crypto.randomUUID(),
+            giftId: giftId,
+            accountId: accountId,
+            redeemPoint: gift.giftPoint,
+            redeemDate: new Date().toISOString()
+          };
+
+          const redeemHistoryResponse = await axios.post(
+            'http://localhost:5022/redeemhistory',
+            redeemHistoryPayload
+          );
+
+          if (redeemHistoryResponse.data.flag) {
+            Swal.fire({
+              title: 'Success',
+              text: redeemHistoryResponse.data.message,
+              icon: 'success'
+            }).then(() => {
+              navigate('/customer/gifts');
+            });
+          }
+        } else {
+          Swal.fire({
+            title: 'Points Check Failed',
+            text: redeemPointsResponse.data.message,
+            icon: 'warning'
+          });
+        }
+      } catch (error) {
+        Swal.fire({
+          title: error.response?.data?.title || 'Error',
+          text: error.response?.data?.message || 'Request failed',
+          icon: 'error'
+        });
+      }
+    }
+};
+
+  if (loading) return <div className="text-center text-gray-600">Loading gift details...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
     <div>
       <NavbarCustomer />
       <div className="p-6 flex justify-center">
         <div className="flex flex-col md:flex-row bg-gray-200 p-6 rounded-lg shadow-lg w-full md:w-3/4 lg:w-2/3">
-          {/* Image */}
           <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6 flex justify-center items-center h-full">
             <img
               src={`http://localhost:5022${gift.giftImage}`}
@@ -56,7 +111,6 @@ const GiftDetailPage = () => {
             />
           </div>
 
-          {/* Details */}
           <div className="flex-grow bg-gray-400 p-4 rounded-lg">
             <div className="mb-4">
               <h2 className="text-lg font-bold mb-2">Gift Name</h2>
@@ -68,20 +122,23 @@ const GiftDetailPage = () => {
             </div>
             <div className="mb-4">
               <h2 className="text-lg font-bold mb-2">Gift Code</h2>
-              <p className="p-2 bg-gray-300 rounded">
-                {gift.giftCode || "N/A"}
-              </p>
+              <p className="p-2 bg-gray-300 rounded">{gift.giftCode || "N/A"}</p>
             </div>
             <div className="mb-4">
               <h2 className="text-lg font-bold mb-2">Gift Description</h2>
-              <p className="p-2 bg-gray-300 rounded">{gift.giftDescription}</p>
+              <p className="p-2 bg-gray-300 rounded">{gift.giftDescription || "N/A"}</p>
             </div>
 
-            {/* Back Button */}
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end space-x-4 mt-4">
+              <button
+                onClick={handleRedeem}
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition duration-300"
+              >
+                Redeem
+              </button>
               <button
                 onClick={() => navigate(-1)}
-                className="px-4 py-2 bg-gray-500 text-white rounded shadow hover:bg-gray-600"
+                className="px-6 py-2 bg-gray-500 text-white rounded-lg shadow hover:bg-gray-600 transition duration-300"
               >
                 Back
               </button>

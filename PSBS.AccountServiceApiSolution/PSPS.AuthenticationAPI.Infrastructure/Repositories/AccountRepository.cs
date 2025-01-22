@@ -10,6 +10,7 @@ using PSPS.AccountAPI.Infrastructure.Data;
 using PSPS.SharedLibrary.Responses;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
+using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,7 +20,7 @@ using System.Text.RegularExpressions;
 namespace PSPS.AccountAPI.Infrastructure.Repositories
 {
     
-    internal class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository) : IAccount
+    internal class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository, IHttpClientFactory _httpClientFactory) : IAccount
     {
         private const string ImageUploadPath = "images";
 
@@ -51,6 +52,66 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 account.RoleId
             );
         }
+        public async Task<bool> UpdateAccountAsync(Account account)
+        {
+            context.Accounts.Update(account);
+            return await context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<Account> GetAccountByIdAsync(Guid accountId)
+        {
+            return await context.Accounts.FindAsync(accountId);
+        }
+        public async Task<Response> RedeemPointsAsync(Guid accountId, RedeemRequest model)
+        {
+            using var transaction = await context.Database.BeginTransactionAsync();
+            try
+            {
+                var account = await GetAccountByIdAsync(accountId);
+                if (account == null)
+                {
+                    return new Response(false, "Account not found");
+                }
+                if (account.AccountLoyaltyPoint < model.RequiredPoints)
+                {
+                    return new Response(false, "Not enough points to redeem gift");
+                }
+
+                account.AccountLoyaltyPoint -= model.RequiredPoints;
+                var updateResult = await UpdateAccountAsync(account);
+                if (!updateResult)
+                {
+                    return new Response(false, "Failed to update account");
+                }
+
+                var redeemHistoryRequest = new RedeemHistoryRequestDTO
+                {
+                    AccountId = accountId,
+                    GiftId = model.GiftId,
+                    RedeemPoint = model.RequiredPoints,
+                    RedeemDate = DateTime.UtcNow
+                };
+
+                var client = _httpClientFactory.CreateClient();
+                var apiUrl = "http://localhost:5022/redeemhistory";
+                var response = await client.PostAsJsonAsync(apiUrl, redeemHistoryRequest);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await transaction.CommitAsync();
+                    return new Response(true, "Gift redeemed successfully");
+                }
+
+                await transaction.RollbackAsync();
+                return new Response(false, "Failed to redeem gift");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new Response(false, $"Error: {ex.Message}");
+            }
+        }
+
         public async Task<Response> GetAllAccount() // Get all accountlist
         {
             try
@@ -340,9 +401,6 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
         }
 
-
-
-
         private string GetDefaultImage() 
         {
             string imagesPath = Path.Combine(_hostingEnvironment.ContentRootPath, "images");
@@ -447,7 +505,6 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, "Internal server error: " + ex.Message);
             }
         }
-
 
         public async Task<Response> LoadImage(string fileName) // LoadImage with file Images
         {
