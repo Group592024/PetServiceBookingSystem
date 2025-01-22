@@ -8,5 +8,6 @@
         public string serviceContent { get; set; }
         public DateTime createAt { get; set; }
         public DateTime updateAt { get; set; }
+        public bool isDeleted { get; set; }
     }
 }

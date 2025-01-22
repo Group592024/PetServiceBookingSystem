@@ -191,6 +191,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 serviceVariant.servicePrice = entity.servicePrice;
                 serviceVariant.serviceContent = entity.serviceContent;
+                serviceVariant.isDeleted = entity.isDeleted;
                 serviceVariant.updateAt = DateTime.Now;
                 context.ServiceVariant.Update(serviceVariant);
                 await context.SaveChangesAsync();

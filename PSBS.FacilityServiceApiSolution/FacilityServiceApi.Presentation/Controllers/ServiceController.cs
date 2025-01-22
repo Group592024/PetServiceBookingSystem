@@ -88,7 +88,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<ServiceDTO>> GetServiceById(Guid id)
         {
             var service = await _service.GetByIdAsync(id);
-            if (service == null || service.isDeleted)
+            if (service == null)
             {
                 return NotFound(new Response(false, $"Service with GUID {id} not found or is deleted"));
             }
@@ -200,11 +200,8 @@ namespace FacilityServiceApi.Presentation.Controllers
                 return NoContent();
             }
 
-            bool variantInBooking = await _service.CheckIfServiceHasVariantInBooking(id);
-            if (variantInBooking)
-            {
-                return Conflict(new Response(false, $"Service with ID {id} has at least one variant that is in booking"));
-            }
+            //bool variantInBooking = await _service.CheckIfServiceHasVariantInBooking(id);
+
 
             // Xử lý hình ảnh
             string? imagePath = existingService.serviceImage; // Giữ nguyên đường dẫn cũ nếu không có tệp mới
@@ -224,7 +221,6 @@ namespace FacilityServiceApi.Presentation.Controllers
             {
                 return BadRequest(response);
             }
-
 
             return Ok(response);
         }

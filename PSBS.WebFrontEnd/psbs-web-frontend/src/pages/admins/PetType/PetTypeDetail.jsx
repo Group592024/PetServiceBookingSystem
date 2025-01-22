@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Sidebar from '../../../components/sidebar/Sidebar';
 import Navbar from '../../../components/navbar/Navbar';
-import sampleImage from '../../../assets/sampleUploadImage.jpg';
 import { useParams } from 'react-router-dom';
 
 const PetTypeDetail = () => {
