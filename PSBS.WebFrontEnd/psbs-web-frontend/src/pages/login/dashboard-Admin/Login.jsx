@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+
 const Login = () => {
   const [AccountEmail, setEmail] = useState('');
   const [AccountPassword, setPassword] = useState('');
   const navigate = useNavigate();
+
   const parseJwt = (token) => {
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -16,6 +18,7 @@ const Login = () => {
     );
     return JSON.parse(jsonPayload);
   };
+
   const validateForm = () => {
     if (!AccountEmail || !AccountPassword) {
       Swal.fire({
@@ -25,6 +28,7 @@ const Login = () => {
       });
       return false;
     }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(AccountEmail)) {
       Swal.fire({
@@ -34,6 +38,7 @@ const Login = () => {
       });
       return false;
     }
+
     if (AccountPassword.length < 6) {
       Swal.fire({
         icon: 'error',
@@ -44,11 +49,13 @@ const Login = () => {
     }
     return true;
   };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateForm()) {
       return;
     }
+
     try {
       const response = await fetch('http://localhost:5000/api/Account/Login', {
         method: 'POST',
@@ -57,11 +64,16 @@ const Login = () => {
         },
         body: JSON.stringify({ AccountEmail, AccountPassword }),
       });
+
       const result = await response.json();
-      console.log(result);
+      
       if (response.ok && result.flag) {
         sessionStorage.setItem('token', result.data);
         const decodedToken = parseJwt(result.data);
+        
+        // Store accountId from token
+        const accountId = decodedToken['AccountId'];
+        sessionStorage.setItem('accountId', accountId);
 
         const isAccountDeleted = decodedToken['AccountIsDeleted'] === 'True';
         if (isAccountDeleted) {
@@ -73,6 +85,7 @@ const Login = () => {
         } else {
           const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
           localStorage.setItem('role', role);
+          
           if (role === 'user') {
             navigate('/');
           } else {
@@ -95,6 +108,7 @@ const Login = () => {
       });
     }
   };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
@@ -106,7 +120,9 @@ const Login = () => {
           <div className="flex justify-end">
             <button className="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
           </div>
+          
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Login</h2>
+          
           <form onSubmit={handleLogin}>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
@@ -120,6 +136,7 @@ const Login = () => {
                 required
               />
             </div>
+
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
               <input
@@ -136,6 +153,7 @@ const Login = () => {
             <div className="text-right mb-4">
               <a href="/forgotpassword" className="text-cyan-500 hover:underline text-sm">Forgot Password?</a>
             </div>
+
             <button
               type="submit"
               className="w-full bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 transition"
@@ -143,9 +161,10 @@ const Login = () => {
               LOGIN
             </button>
           </form>
+
           <div className="text-center mt-4 text-sm">
             <p>
-              You don’t have an account?{' '}
+              You don't have an account?{' '}
               <a href="/register" className="text-cyan-500 hover:underline">Register Now !!</a>
             </p>
           </div>
