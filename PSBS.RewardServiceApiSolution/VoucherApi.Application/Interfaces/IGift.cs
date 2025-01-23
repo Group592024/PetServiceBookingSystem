@@ -13,5 +13,6 @@ namespace VoucherApi.Application.Interfaces
     {
         Task<IEnumerable<Gift>> GetGiftListForCustomerAsync();
         Task<Gift> GetGiftDetailForCustomerAsync(Guid id);
+        Task<Gift> GetGift(Guid id);
     }
 }

@@ -14,6 +14,23 @@ namespace PSPS.Presentation.Controllers
     [ApiController]
     public class AccountController(IAccount account) : ControllerBase
     {
+        [HttpPost("redeem-points/{accountId}")]
+        public async Task<IActionResult> RedeemPoints(Guid accountId, [FromBody] RedeemRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new Response(false, "Invalid request"));
+            }
+
+            var response = await account.RedeemPointsAsync(accountId, model);
+            if (!response.Flag)
+            {
+                return BadRequest(response);
+            }
+
+            return Ok(response);
+        }
+
         [HttpPost("register")]// Register new account
         public async Task<ActionResult<Response>> Register([FromForm] RegisterAccountDTO model)
         {

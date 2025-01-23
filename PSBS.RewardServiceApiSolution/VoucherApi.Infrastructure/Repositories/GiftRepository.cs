@@ -1,13 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PSPS.SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-using VoucherApi.Application.DTOs.GiftDTOs;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
 using VoucherApi.Infrastructure.Data;
@@ -176,6 +170,9 @@ namespace VoucherApi.Infrastructure.Repositories
             }
         }
 
-
+        public async Task<Gift> GetGift(Guid id)
+        {
+            return await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id);
+        }
     }
 }
