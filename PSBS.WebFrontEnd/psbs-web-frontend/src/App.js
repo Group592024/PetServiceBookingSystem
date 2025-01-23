@@ -102,7 +102,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/detail/:healthBookId"
+          <Route path="/detailcus/:healthBookId"
             element={
               <ProtectedRoute>
                 <PetHealthBookDetailCus />

@@ -143,12 +143,13 @@ const PetHealthBookDetailCus = () => {
             <div className="overflow-y-auto w-full">
                 <NavbarCustomer />
 
-                <div className="p-6 bg-white shadow-md rounded-md max-w-full">
+                <div className="p-6 bg-white shadow-md rounded-md w-full">
                     <h2 className="mb-4 text-xl font-bold text-left">Pet Health Book Detail</h2>
 
-                    <div className="flex flex-wrap">
+                    <div className="flex justify-center
+ flex-wrap gap-8 w-full">
                         {/* Left Column */}
-                        <div className="w-full sm:w-1/3 bg-white shadow-md rounded-md p-6">
+                        <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
                             <div className="flex flex-col items-center">
                                 <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
                                     {petImage ? (

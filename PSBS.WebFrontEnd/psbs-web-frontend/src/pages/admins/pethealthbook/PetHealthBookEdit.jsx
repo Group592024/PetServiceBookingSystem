@@ -123,14 +123,14 @@ const PetHealthBookEdit = () => {
         Swal.fire("Error", errorData.message || "Failed to update data", "error");
         return;
       }
-    
+
       Swal.fire("Success", "Pet health book updated successfully!", "success");
       navigate(-1);
     } catch (error) {
       console.error("Error updating data:", error);
       Swal.fire("Error", "Failed to update data. Please try again later.", "error");
     }
-    
+
   };
 
   const handleBack = () => {
@@ -146,20 +146,40 @@ const PetHealthBookEdit = () => {
           <h2 className="mb-4 text-xl font-bold">Edit Pet Health Book</h2>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Booking Type</label>
-            <select
-              className="w-full p-3 border rounded-md"
-              value={visitDetails.bookingId}
-              onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
-            >
-              <option value="">Select a Booking Type</option>
-              {bookingTypes.map((type) => (
-                <option key={type.bookingTypeId} value={type.bookingTypeId}>
-                  {type.bookingTypeName}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full">
+              {/* Dropdown */}
+              <select
+                className="w-full p-3 pr-10 border rounded-md appearance-none"
+                value={visitDetails.bookingId}
+                onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
+              >
+                <option value="">Select a Medicine</option>
+                {bookingTypes.map((type) => (
+                  <option key={type.bookingTypeId} value={type.bookingTypeId}>
+                    {type.bookingTypeName}
+                  </option>
+                ))}
+              </select>
+              {/* Icon dropdown */}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-black-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
-
+          
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Perform by</label>
             <input
@@ -192,18 +212,39 @@ const PetHealthBookEdit = () => {
 
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Medicine</label>
-            <select
-              className="w-full p-3 border rounded-md"
-              value={visitDetails.medicineId}
-              onChange={(e) => setVisitDetails({ ...visitDetails, medicineId: e.target.value })}
-            >
-              <option value="">Select a Medicine</option>
-              {medicines.map((medicine) => (
-                <option key={medicine.medicineId} value={medicine.medicineId}>
-                  {medicine.medicineName}
-                </option>
-              ))}
-            </select>
+            <div className="relative w-full">
+              {/* Dropdown */}
+              <select
+                className="w-full p-3 pr-10 border rounded-md appearance-none"
+                value={visitDetails.medicineId}
+                onChange={(e) => setVisitDetails({ ...visitDetails, medicineId: e.target.value })}
+              >
+                <option value="">Select a Medicine</option>
+                {medicines.map((medicine) => (
+                  <option key={medicine.medicineId} value={medicine.medicineId}>
+                    {medicine.medicineName}
+                  </option>
+                ))}
+              </select>
+              {/* Icon dropdown */}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-5 h-5 text-black-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+
           </div>
 
           <div className="flex justify-between">

@@ -1,31 +1,15 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import { IconButton, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import EditIcon from "@mui/icons-material/Edit";
+import React, { useEffect, useState, useCallback } from "react";
+import { IconButton, TextField } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
-import Sidebar from "../../../components/sidebar/Sidebar";
-import Navbar from "../../../components/navbar/Navbar";
 import { Link } from "react-router-dom";
-import { Box } from "@mui/material";
-import moment from 'moment';
-import { useNavigate } from "react-router-dom";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
+import moment from "moment";
 
 const PetHealthBookListCus = () => {
   const [pets, setPets] = useState([]);
   const [medicines, setMedicines] = useState([]);
-  const navigate = useNavigate();
-  const [treatments, setTreatments] = useState([]);
-  const [bookings, setBookings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [openDialog, setOpenDialog] = useState(false);
-  const [petName, setPetName] = useState("");
-  const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
-  const sidebarRef = useRef(null);
-
-  const userRole = localStorage.getItem("role");
 
   const fetchPetHealthBooks = useCallback(async () => {
     try {
@@ -36,42 +20,33 @@ const PetHealthBookListCus = () => {
         fetch("http://localhost:5115/api/Booking"),
       ]);
 
-      const [petsData, medicinesData, treatmentsData, bookingsData] = await Promise.all([
+      const [petsData, medicinesData, bookingsData] = await Promise.all([
         petsRes.json(),
         medicinesRes.json(),
-        treatmentsRes.json(),
         bookingsRes.json(),
       ]);
-
-      // Log the fetched data
-      console.log("Fetched Pet Data:", petsData);
-      console.log("Fetched Medicines Data:", medicinesData);
-      console.log("Fetched Treatments Data:", treatmentsData);
-      console.log("Fetched Bookings Data:", bookingsData);
-
+      console.log(petsData);
       const petsWithDetails = await Promise.all(petsData.data.map(async (pet) => {
         const booking = bookingsData.data.find((b) => b.bookingId === pet.bookingId);
-        const accountId = booking ? booking.accountId : null;
-
-       // const accountPhoneNumber = accountId ? await fetchAccountPhoneNumber(accountId) : "No Phone Number";
         const medicine = medicinesData.data.find((m) => m.medicineId === pet.medicineId);
-        const treatment = treatmentsData.data.find((t) => t.treatmentId === medicine?.treatmentId);
-        const treatmentName = treatment ? treatment.treatmentName : "No Treatment Assigned";
-        const petName = pet.petName || "Temporary Pet Name";  // Gán tạm
-        const breed = pet.breed || "Temporary Breed"; 
+        const performBy = pet ? pet.performBy : "Unknown";
+        const createdAt = pet ? pet.createdAt : "Unknown";
+        const medicineName = medicine ? medicine.medicineName : "No Medicine";
+
         return {
           ...pet,
-          accountPhoneNumber,
-          treatmentName,
-          petName,  // Đảm bảo có giá trị petName tạm thời
-          breed,  // Đảm bảo có giá trị breed tạm thời
+          createdAt,
+          medicineName,
+          performBy,
         };
       }));
 
       setPets(petsWithDetails);
+
+
+
+      setPets(petsWithDetails);
       setMedicines(medicinesData.data || []);
-      setTreatments(treatmentsData.data || []);
-      setBookings(bookingsData.data || []);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -79,145 +54,64 @@ const PetHealthBookListCus = () => {
     }
   }, []);
 
-//   const fetchAccountPhoneNumber = async (accountId) => {
-//     try {
-//       const accountResponse = await fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`);
-//       const accountData = await accountResponse.json();
-//       console.log("Fetched Account Data:", accountData);
-//       return accountData.accountPhoneNumber || "No Phone Number"; // Default if no phone number
-//     } catch (error) {
-//       console.error("Error fetching account phone number:", error);
-//       return "No Phone Number"; // Default value if fetching phone number fails
-//     }
-//   };
-
   useEffect(() => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
 
-//   const handleDelete = async (petId, petName, isDeleted) => {
-//     Swal.fire({
-//       title: "Are you sure?",
-//       text: `You want to delete pet: ${petName}`,
-//       icon: "warning",
-//       showCancelButton: true,
-//       confirmButtonColor: "#d33",
-//       cancelButtonColor: "#3085d6",
-//       confirmButtonText: "Yes, delete it!",
-//     }).then(async (result) => {
-//       if (result.isConfirmed) {
-//         try {
-//           const apiUrl = `http://localhost:5003/api/PetHealthBook/delete/${petId}`;
-//           const response = await fetch(apiUrl, {
-//             method: "DELETE",
-//           });
-
-//           if (response.ok) {
-//             setPets((prev) => prev.filter((pet) => pet.healthBookId !== petId));
-//             Swal.fire("Deleted!", `${petName} has been permanently deleted.`, "success");
-//           } else {
-//             const errorData = await response.json();
-//             Swal.fire("Error!", errorData.message || "Failed to delete the pet.", "error");
-//           }
-//         } catch (error) {
-//           console.error("Error deleting pet:", error);
-//           Swal.fire("Error!", "An error occurred while deleting the pet.", "error");
-//         }
-//       }
-//     });
-//   };
-
   const filteredPets = pets.filter((pet) => {
     const query = searchQuery.toLowerCase();
-    
+    const isValidDate = moment(searchQuery, "DD/MM/YYYY", true).isValid();
+    const petDate = moment(pet.createdAt).format("DD/MM/YYYY").toLowerCase(); 
+  
     return (
       !searchQuery ||
-      pet.petName.toLowerCase().includes(query) ||
-      pet.accountPhoneNumber.includes(query) ||
-      pet.breed.toLowerCase().includes(query) ||
-      (pet.treatmentName && pet.treatmentName.toLowerCase().includes(query)) ||
-      (pet.createAt && moment(pet.createAt).format("DD-MM-YYYY").includes(query)) ||
-      (pet.performBy && pet.performBy.toLowerCase().includes(query))
+      (pet.performBy && pet.performBy.toLowerCase().includes(query)) ||
+      (pet.medicineName && pet.medicineName.toLowerCase().includes(query)) ||
+      (isValidDate && petDate.includes(query)) 
     );
   });
+  
 
-//   const handleSubmit = async () => {
-//     // if (!petName || !accountPhoneNumber) {
-//     //   Swal.fire({ icon: "error", title: "Oops...", text: "Please fill in all required fields." });
-//     //   return;
-//     // }
 
-//     // const phoneRegex = /^0\d{9}$/;
-//     // if (!phoneRegex.test(accountPhoneNumber)) {
-//     //   Swal.fire({ icon: "error", title: "Invalid Phone", text: "Please enter a valid phone number" });
-//     //   return;
-//     // }
-
-//     const formData = new FormData();
-//     formData.append("PetHealthBookDTO.petName", petName);
-//     formData.append("PetHealthBookDTO.accountPhoneNumber", accountPhoneNumber);
-
-//     try {
-//       const response = await fetch("http://localhost:5003/api/PetHealthBook/addpet", {
-//         method: "POST",
-//         body: formData,
-//       });
-
-//       const data = await response.json();
-//       if (response.ok) {
-//         Swal.fire("Success", "Pet added successfully!", "success");
-//         setOpenDialog(false);
-//         fetchPetHealthBooks();
-//         setPetName("");
-//         setAccountPhoneNumber("");
-//       } else {
-//         Swal.fire("Error", data.message || "Error adding pet", "error");
-//       }
-//     } catch (error) {
-//       console.error("Error submitting form:", error);
-//       Swal.fire("Error", "An error occurred while adding the pet.", "error");
-//     }
-//   };
-
-  const columns = [
-    { field: "treatmentName", headerName: "Treatment", flex: 1 },
-    {
-      field: "createAt",
-      headerName: "Date",
-      flex: 1,
-      renderCell: (params) => moment(params.row.createAt).isValid() ? moment(params.row.createAt).format('DD-MM-YYYY') : "Invalid Date",
-    },
-    { field: "performBy", headerName: "PerForm By", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Actions",
-      flex: 0.5,
-      sortable: false,
-      renderCell: (params) => (
-        <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-          {/* <Link to={`/update/${params.row.healthBookId}`}>
-            <IconButton color="primary"><EditIcon /></IconButton>
-          </Link> */}
-          <Link to={`/detail/${params.row.healthBookId}`}>
-            <IconButton color="default"><VisibilityIcon /></IconButton>
-          </Link>
-          {/* <IconButton color="error" onClick={() => handleDelete(params.row.healthBookId, params.row.petName, params.row.isDeleted)}>
-            <DeleteIcon />
-          </IconButton> */}
-        </div>
-      ),
-    },
-  ];
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    return moment(dateString).format("DD-MM-YYYY");
+  };
 
   return (
     <div className="flex h-screen bg-dark-grey-100">
-      <div className="overflow-y-auto w-full">
+      <div className="w-full">
         <NavbarCustomer />
-        <main className="flex-1">
-          <div className="p-4 bg-white shadow-md rounded-md h-full">
-            <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
-            <div className="flex justify-end mb-4">
-            <form className="relative flex items-center mr-4">
+        <main className="flex-1 p-4">
+          <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
+          <div className="flex gap-8">
+            {/* Left Column - Pet Information */}
+            <div className="w-1/3 items-center justify-center flex rounded-md p-6">
+              {filteredPets.length > 0 && (
+                <div className="w-[600px] h-[600px] bg-white shadow-md rounded-md p-6">
+                  <div className="flex flex-col items-center">
+                    <div className="w-[300px] h-[300px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mb-4">
+                      {filteredPets[0].petImage ? (
+                        <img src={filteredPets[0].petImage} alt={filteredPets[0].petName} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-gray-500">No Image</span>
+                      )}
+                    </div>
+                    <div className="text-center">
+                      <h3 className="text-xl font-semibold">Bull {filteredPets[0].petName}</h3>
+                      <p className="text-md text-gray-600">17/02/2024 {formatDate(filteredPets[0].petDob)}</p>
+                    </div>
+                  </div>
+                </div>
+
+              )}
+            </div>
+
+
+            {/* Right Column - Pet Health Book List */}
+            <form className="w-full sm:w-2/3 bg-white shadow-md rounded-md p-6">
+              {/* Search Form */}
+              <div className="relative flex items-center justify-end mb-4">
                 <input
                   type="search"
                   id="search-dropdown"
@@ -249,44 +143,47 @@ const PetHealthBookListCus = () => {
                     />
                   </svg>
                 </button>
-              </form>
-              {/* {userRole === "staff" && (
-                <button
-                type="button"
-                onClick={() => navigate("/add")}
-                className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg"
-              >
-                New
-              </button>
-              )} */}
-            </div>
+              </div>
 
-            <div className="h-96">
-              <DataGrid
-                rows={filteredPets.sort((a, b) => a.accountIsDeleted - b.accountIsDeleted).map((acc, index) => ({ ...acc, id: index + 1 }))}
-                columns={columns}
-                pageSize={5}
-                rowsPerPageOptions={[5]}
-                disableSelectionOnClick
-                pagination
-                getRowId={(row) => row.healthBookId}
-              />
-            </div>
+              {/* Pet Health Book List */}
+              <div className="w-full space-y-6">
+                {filteredPets.map((pet) => (
+                  <div key={pet.healthBookId} className="flex justify-between items-center bg-gray-600 shadow-md rounded-md p-4">
+                    <div className="text-sm text-white truncate w-1/4">{pet.medicineName}</div>
+                    <div className="text-sm text-white truncate w-1/4">{pet.performBy}</div>
+                    <div className="text-sm text-white truncate w-1/4">
+                      {moment(pet.createdAt).format("DD/MM/YYYY")}
+                    </div>
+                    <div className="flex items-center">
+                      <Link to={`/detailcus/${pet.healthBookId}`}>
+                        <IconButton
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: '50%',
+                            border: '2px solid black',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            color: 'black',
+                          }}
+                        >
+                          !
+                        </IconButton>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </form>
+
+
           </div>
         </main>
-      </div>
-      {/* <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Add Pet</DialogTitle>
-        <DialogContent>
-          <TextField label="Pet Name" value={petName} onChange={(e) => setPetName(e.target.value)} fullWidth margin="normal" />
-          <TextField label="Owner's Phone Number" value={accountPhoneNumber} onChange={(e) => setAccountPhoneNumber(e.target.value)} fullWidth margin="normal" />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="default">Cancel</Button>
-          <Button onClick={handleSubmit} color="primary">Add</Button>
-        </DialogActions>
-      </Dialog> */}
-    </div>
+      </div >
+    </div >
   );
 };
 
