@@ -39,23 +39,17 @@ import GiftDetailForm from "./pages/admins/gifts/detail-form/GiftDetailForm";
 import GiftUpdatePage from "./pages/admins/gifts/update-form/GiftUpdateForm";
 import GiftListPage from "./pages/customers/gifts/list-page/GiftListPage";
 import GiftDetailPage from "./pages/customers/gifts/detail-page/GiftDetailPage";
-import PetHealthBookListCus from "./pages/customers/pethealthbook/PetHealthBookListCus";
-import PetHealthBookDetailCus from "./pages/customers/pethealthbook/PetHealthBookDetailCus";
 import PetBreedList from './pages/admins/Pets/PetBreed/PetBreedList';
 import PetBreedDetail from './pages/admins/Pets/PetBreed/PetBreedDetail';
 import PetBreedCreate from './pages/admins/Pets/PetBreed/PetBreedCreate';
 import PetBreedEdit from './pages/admins/Pets/PetBreed/PetBreedEdit';
 import RoomList from './pages/admins/rooms/RoomList';
 import RoomDetail from './pages/admins/rooms/RoomDetail';
-import PetHealthBookList from './pages/admins/pethealthbook/PetHealthBookList';
-import PetHealthBookDetail from './pages/admins/pethealthbook/PetHealthBookDetail';
-import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreate';
-
-import PetHealthBookEdit from './pages/admins/pethealthbook/PetHealthBookEdit';
 import RoomCreate from './pages/admins/rooms/RoomCreate';
 import RoomEdit from './pages/admins/rooms/RoomEdit';
 import CustomerRoomList from './pages/customers/Room/RoomList';
 import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
+
 import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
 import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
 import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
@@ -95,20 +89,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/pethealthbookcus"
-            element={
-              <ProtectedRoute>
-                <PetHealthBookListCus />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/detail/:healthBookId"
-            element={
-              <ProtectedRoute>
-                <PetHealthBookDetailCus />
-              </ProtectedRoute>
-            }
-          />
           <Route path="/account"
             element={
               <ProtectedRoute>
@@ -144,33 +124,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/update/:healthBookId"
-            element={
-              <ProtectedRoute>
-                <PetHealthBookEdit />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/detail/:healthBookId"
-            element={
-              <ProtectedRoute>
-                <PetHealthBookDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/add"
-            element={
-              <ProtectedRoute>
-                <PetHealthBookCreate />
-              </ProtectedRoute>
-            }
-          />
-         <Route path="/pethealthbook"element={
-              <ProtectedRoute>
-                <PetHealthBookList />
-              </ProtectedRoute>
-            }
-          />
+         
           {/* Các route khác */}
           <Route path="/medicines">
             <Route index element={<List />} />

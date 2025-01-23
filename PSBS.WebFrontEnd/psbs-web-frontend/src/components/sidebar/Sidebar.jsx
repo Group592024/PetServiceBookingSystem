@@ -77,7 +77,7 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
         <li className={location.pathname.startsWith("/pets") ? "active" : ""}>
-          <Link to="/pethealthbook">
+          <Link to="/pets">
             <i className="bx bxs-dog"></i>
             Pet
           </Link>
