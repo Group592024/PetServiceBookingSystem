@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Data
+namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20250119091613_migrations")]
-    partial class migrations
+    [Migration("20250123152229_Migration01")]
+    partial class Migration01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -323,20 +323,20 @@ namespace FacilityServiceApi.Infrastructure.Data
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5602),
+                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(816),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5613)
+                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(832)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5615),
+                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5616)
+                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834)
                         });
                 });
 

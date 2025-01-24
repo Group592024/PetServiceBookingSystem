@@ -8,6 +8,5 @@ namespace PetApi.Application.Interfaces
     {
         Task<Response> DeleteSecondAsync(PetType entity);
         Task<IEnumerable<PetType>> ListAvailablePetTypeAsync();
-
     }
 }

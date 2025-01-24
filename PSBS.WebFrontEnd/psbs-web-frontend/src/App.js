@@ -54,6 +54,14 @@ import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer"
 import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
 import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
 import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import CustomerPetList from './pages/customers/pets/PetList';
+import CustomerPetDetail from './pages/customers/pets/PetDetail';
+import CustomerPetCreate from './pages/customers/pets/PetCreate';
+import CustomerPetEdit from './pages/customers/pets/PetEdit';
+import AdminPetList from './pages/admins/Pets/Pet/PetList';
+import AdminPetDetail from './pages/admins/Pets/Pet/PetDetail';
+import AdminPetCreate from './pages/admins/Pets/Pet/PetCreate';
+import AdminPetEdit from './pages/admins/Pets/Pet/PetEdit';
 
 function App() {
   return (
@@ -208,6 +216,18 @@ function App() {
           <Route path="/customerRoom">
             <Route index element={<CustomerRoomList />} />
             <Route path=":id" element={<CustomerRoomDetail />} />
+          </Route>
+          <Route path="/pet">
+            <Route index element={<AdminPetList />} />
+            <Route path=":id" element={<AdminPetDetail />} />
+            <Route path="add" element={<AdminPetCreate />} />
+            <Route path="edit/:id" element={<AdminPetEdit />} />
+          </Route>
+          <Route path="/customer/pet">
+            <Route index element={<CustomerPetList />} />
+            <Route path=":id" element={<CustomerPetDetail />} />
+            <Route path="add" element={<CustomerPetCreate />} />
+            <Route path="edit/:id" element={<CustomerPetEdit />} />
           </Route>
           <Route path="/register">
             <Route index element={<Register />} />

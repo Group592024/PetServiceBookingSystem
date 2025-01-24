@@ -19,6 +19,8 @@ namespace PetApi.Infrastructure.DependencyInjection
             //Create Dependency Injection
             services.AddScoped<IPetType, PetTypeRepository>();
             services.AddScoped<IPetBreed, PetBreedRepository>();
+            services.AddScoped<IPet, PetRepository>();
+
             return services;
         }
 
