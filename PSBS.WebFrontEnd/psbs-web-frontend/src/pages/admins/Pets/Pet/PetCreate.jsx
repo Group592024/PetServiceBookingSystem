@@ -166,6 +166,42 @@ const AdminPetCreate = () => {
         account.accountName.toLowerCase().includes(search.toLowerCase()) && account.roleId === "user"
     ); // Assuming roleId is "user"
 
+    const handleBlur = (e) => {
+        setTimeout(() => {
+            if (document.activeElement === e.relatedTarget) {
+                return;
+            }
+            const matchedAccount = accounts.find(
+                (account) =>
+                    account.accountName.toLowerCase() === search.toLowerCase() &&
+                    account.roleId === "user"
+            );
+            if (matchedAccount) {
+                setPet((prevPet) => ({ ...prevPet, accountId: matchedAccount.accountId }));
+                setErrors((prevErrors) => ({ ...prevErrors, accountId: "" }));
+            } else {
+                setErrors((prevErrors) => ({ ...prevErrors, accountId: "Please select a valid owner from the list." }));
+                setPet((prevPet) => ({ ...prevPet, accountId: "" }));
+            }
+            setShowDropdown(false);
+        }, 200);
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === "Enter") {
+            const matchedAccount = accounts.find(
+                (account) =>
+                    account.accountName.toLowerCase() === search.toLowerCase() && account.roleId === "user"
+            );
+
+            if (matchedAccount) {
+                handleSelect(matchedAccount.accountId, matchedAccount.accountName);
+            } else {
+                setErrors({ ...errors, accountId: "Please select a valid owner from the list." });
+            }
+        }
+    };
+
     const handleSelect = (accountId, accountName) => {
         setPet({ ...pet, accountId });
         setErrors({ ...errors, accountId: "" });
@@ -177,7 +213,7 @@ const AdminPetCreate = () => {
         <div className="bg-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
-                <Navbar sidebarRef={sidebarRef}/>
+                <Navbar sidebarRef={sidebarRef} />
                 <main className="flex-1 overflow-auto p-6">
                     <div className="flex items-center mb-6 mx-auto w-full">
                         <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
@@ -261,8 +297,8 @@ const AdminPetCreate = () => {
                                             value={pet.petNote}
                                             onChange={(e) => {
                                                 setPet({ ...pet, petNote: e.target.value });
-                                                setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));  
-                                            }}                                
+                                                setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));
+                                            }}
                                         />
                                         {errors.petNote && <span className="text-red-500 text-sm mt-1">{errors.petNote}</span>}
                                     </div>
@@ -279,23 +315,25 @@ const AdminPetCreate = () => {
                                             value={search}
                                             onChange={(e) => {
                                                 setSearch(e.target.value);
+                                                setPet((prevPet) => ({ ...prevPet, accountId: "" }));
                                                 setShowDropdown(true);
                                             }}
                                             onFocus={() => setShowDropdown(true)}
-                                            className="w-full p-2 rounded border border-gray-300"
+                                            onBlur={handleBlur}
+                                            onKeyPress={handleKeyPress}
+                                            className={`w-full p-2 rounded border ${errors.accountId ? "border-red-500" : "border-gray-300"
+                                                }`}
                                         />
-                                        {errors.accountId && (
-                                            <p className="text-red-500 text-sm mt-1">{errors.accountId}</p>
-                                        )}
-                                        {/* Dropdown */}
+                                        {errors.accountId && <p className="text-red-500 text-sm mt-1">{errors.accountId}</p>}
                                         {showDropdown && (
                                             <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-md max-h-40 overflow-y-auto">
                                                 {filteredAccounts.length > 0 ? (
                                                     filteredAccounts.map((account) => (
                                                         <li
                                                             key={account.accountId}
+                                                            tabIndex={0}
                                                             className="p-2 cursor-pointer hover:bg-gray-200"
-                                                            onClick={() => handleSelect(account.accountId, account.accountName)}
+                                                            onMouseDown={() => handleSelect(account.accountId, account.accountName)}
                                                         >
                                                             {account.accountName}
                                                         </li>

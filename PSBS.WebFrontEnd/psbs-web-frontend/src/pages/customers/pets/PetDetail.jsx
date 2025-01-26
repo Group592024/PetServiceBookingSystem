@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
 import Swal from 'sweetalert2';
+import diaryicon from "../../../assets/diaryicon.png";
+import medicalhistoryicon from "../../../assets/health-checkicon.png";
 
 const CustomerPetDetail = () => {
     const [pet, setPet] = useState(null);
@@ -124,7 +126,7 @@ const CustomerPetDetail = () => {
                     {/* Form Section */}
                     <div className="w-3/4">
                         <div className="bg-gray-300 rounded-xl p-8 shadow-lg">
-                            <div className="flex flex-col md:flex-row gap-12">
+                            <div className="flex flex-col md:flex-row gap-16">
                                 {/* Left side - Image and Name */}
                                 <div className="md:w-5/12 flex flex-col items-center">
                                     <div className="bg-gray-100 p-4 rounded-xl shadow-md w-full">
@@ -146,7 +148,7 @@ const CustomerPetDetail = () => {
                                 </div>
 
                                 {/* Right side - Form */}
-                                <div className="md:w-7/12">
+                                <div className="md:w-6/12">
                                     <div className="space-y-4">
                                         <InfoRow label="Breed" value={petBreed ? petBreed.petBreedName : 'Loading...'} isFirst={true} />
                                         <InfoRow label="Weight" value={`${pet.petWeight} kg`} />
@@ -202,16 +204,18 @@ const CustomerPetDetail = () => {
                     {/* Buttons Section */}
                     <div className="w-1/4 flex flex-col gap-6">
                         <button
-                            onClick={() => navigate(`/customer/pets/diary/${pet.petId}`)}
-                            className="bg-blue-500 text-white text-lg font-semibold px-6 py-4 rounded-lg hover:bg-blue-600 shadow-lg transition"
+                            onClick={() => navigate(`/customer/pet/diary/${pet.petId}`)}
+                            className="bg-[#f9e79f] text-black text-lg font-semibold px-12 py-16 rounded-lg hover:bg-[#f1d37b] shadow-lg transition flex items-center gap-6"
                         >
-                            Pet Diary
+                            <img src={diaryicon} alt="Diary Icon" className="w-24 h-24" />
+                            <span className="text-xl">Pet Diary</span>
                         </button>
                         <button
-                            onClick={() => navigate(`/customer/pets/medical-history/${pet.petId}`)}
-                            className="bg-purple-500 text-white text-lg font-semibold px-6 py-4 rounded-lg hover:bg-purple-600 shadow-lg transition"
+                            onClick={() => navigate(`/customer/pet/medical-history/${pet.petId}`)}
+                            className="bg-[#d1c4e9] text-black text-lg font-semibold px-12 py-16 rounded-lg hover:bg-[#b39ddb] shadow-lg transition flex items-center gap-6"
                         >
-                            Medical History
+                            <img src={medicalhistoryicon} alt="Medical Icon" className="w-24 h-24" />
+                            <span className="text-xl">Pet Medical History</span>
                         </button>
                     </div>
                 </div>
