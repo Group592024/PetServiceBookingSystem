@@ -20,7 +20,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("diaries/{id}")]
-        public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId(Guid id)
+        public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId(Guid id, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 4)
         {
             var pet = await _pet.GetByIdAsync(id);
             if (pet == null)
@@ -28,7 +28,7 @@ namespace PetApi.Presentation.Controllers
                 return NotFound(new Response(false, $"Pet with GUID {id} not found or is deleted"));
             }
 
-            var diaries = (await _diary.GetAllDiariesByPetIdsAsync(id));
+            var diaries = (await _diary.GetAllDiariesByPetIdsAsync(id, pageIndex, pageSize));
 
 
             if (!diaries.Any())
@@ -38,7 +38,6 @@ namespace PetApi.Presentation.Controllers
 
             var (_, diariesDtos) = PetDiaryConversion.FromEntity(null!, diaries);
 
-            Console.WriteLine("day ne " + diariesDtos.Count());
             return Ok(new Response(true, "Pet diaries retrieved successfully")
             {
                 Data = diariesDtos
@@ -47,7 +46,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Response>> CreatePetDiary([FromForm] CreatePetDiaryDTO pet)
+        public async Task<ActionResult<Response>> CreatePetDiary([FromBody] CreatePetDiaryDTO pet)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -59,7 +58,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
-        public async Task<ActionResult<Response>> UpdatePetDiary([FromRoute] Guid id, [FromForm] UpdatePetDiaryDTO pet)
+        public async Task<ActionResult<Response>> UpdatePetDiary([FromRoute] Guid id, [FromBody] UpdatePetDiaryDTO pet)
         {
             Console.WriteLine("pet " + pet);
             if (!ModelState.IsValid)
