@@ -39,8 +39,8 @@ const AddDiaryModal = ({ open, onClose }) => {
   };
 
   const handleSave = async () => {
-    if (content.trim() === '') {
-      Swal.fire({
+    if (content === '') {
+      return Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'The content can not be empty!',
@@ -60,12 +60,12 @@ const AddDiaryModal = ({ open, onClose }) => {
 
       if (!response.ok) {
         const errorMessage = await response.json();
-        Swal.fire({
+
+        return Swal.fire({
           icon: 'error',
           title: 'Error',
           text: `Failed to create pet diary: ${errorMessage?.message}`,
         });
-        return;
       }
 
       Swal.fire({
@@ -73,6 +73,7 @@ const AddDiaryModal = ({ open, onClose }) => {
         title: 'Success',
         text: `Pet Diary Created Successfully!`,
       });
+
       setContent('');
       onClose();
     } catch (error) {

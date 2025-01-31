@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import PetDiaryCard from './PetDiaryCard';
-import { Button, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import Swal from 'sweetalert2';
 import EditDiaryModal from './EditDiaryModal';
 
-const PetDiaryCardList = ({ data, onCLickNext, onClickPrevious }) => {
+const PetDiaryCardList = ({ data }) => {
   const [diaries, setDiaries] = useState(data);
   const [clickedDiary, setClickedDiary] = useState(null);
 
@@ -81,14 +81,6 @@ const PetDiaryCardList = ({ data, onCLickNext, onClickPrevious }) => {
         ))}
       </div>
 
-      <div className='flex justify-center items-center gap-4 w-1/3 mx-auto mt-4'>
-        <Button variant='contained' onClick={onClickPrevious}>
-          Previous
-        </Button>
-        <Button variant='contained' onClick={onCLickNext}>
-          Next
-        </Button>
-      </div>
       {clickedDiary && (
         <EditDiaryModal
           open={open}

@@ -23,12 +23,13 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId(Guid id, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 4)
         {
             var pet = await _pet.GetByIdAsync(id);
+
             if (pet == null)
             {
                 return NotFound(new Response(false, $"Pet with GUID {id} not found or is deleted"));
             }
 
-            var diaries = (await _diary.GetAllDiariesByPetIdsAsync(id, pageIndex, pageSize));
+            var (diaries, totalPages) = await _diary.GetAllDiariesByPetIdsAsync(id, pageIndex, pageSize);
 
 
             if (!diaries.Any())
@@ -40,9 +41,16 @@ namespace PetApi.Presentation.Controllers
 
             return Ok(new Response(true, "Pet diaries retrieved successfully")
             {
-                Data = diariesDtos
+                Data = new
+                {
+                    data = diariesDtos,
+                    meta = new
+                    {
+                        currentPage = pageIndex,
+                        totalPages = (int)Math.Ceiling((double)totalPages / pageSize),
+                    }
+                }
             });
-
         }
 
         [HttpPost]

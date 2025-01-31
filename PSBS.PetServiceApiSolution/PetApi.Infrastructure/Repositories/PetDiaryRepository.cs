@@ -10,7 +10,7 @@ namespace PetApi.Infrastructure.Repositories
 {
     public class PetDiaryRepository(PetDbContext context) : IPetDiary
     {
-        public async Task<IEnumerable<PetDiary>> GetAllDiariesByPetIdsAsync(Guid id, int pageIndex = 1, int pageSize = 4)
+        public async Task<(IEnumerable<PetDiary>, int totalRecords)> GetAllDiariesByPetIdsAsync(Guid id, int pageIndex = 1, int pageSize = 4)
         {
             try
             {
@@ -21,7 +21,11 @@ namespace PetApi.Infrastructure.Repositories
                     .Take(pageSize)
                     .ToListAsync();
 
-                return diaries ?? new List<PetDiary>();
+                var totalRecords = await context.PetDiarys
+                    .Where(p => p.Pet_ID == id)
+                    .CountAsync();
+
+                return (diaries ?? new List<PetDiary>(), totalRecords);
             }
             catch (Exception ex)
             {

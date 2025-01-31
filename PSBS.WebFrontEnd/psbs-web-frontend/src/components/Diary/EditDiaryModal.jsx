@@ -42,7 +42,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
   // Edit diary processing
   const handleSave = async () => {
     if (content === '') {
-      Swal.fire({
+      return Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'The content can not be empty!',
