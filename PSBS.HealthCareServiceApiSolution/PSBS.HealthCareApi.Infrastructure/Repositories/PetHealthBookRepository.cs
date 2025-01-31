@@ -10,39 +10,101 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PSBS.HealthCareApi.Infrastructure.Repositories
 {
     public class PetHealthBookRepository(HealthCareDbContext context) : IPetHealthBook
     {
-        public async Task<Response> CreateAsync(PetHealthBook entity)
-        {
-            try
-            {
-                var getPetHealthBook = await GetByAsync(p => p.healthBookId!.Equals(entity.healthBookId));
-                var currentEntity = context.PetHealthBooks.Add(entity).Entity;
-                await context.SaveChangesAsync();
-                if (currentEntity is not null && currentEntity.healthBookId.ToString().Length > 0)
-                {
-                    return new Response(true, $"{entity.healthBookId} added to database successfully") { Data = currentEntity };
-                }
-                else
-                {
-                    return new Response(false, $"{entity.healthBookId} cannot be added due to errors");
-                }
-            }
-            catch (Exception ex)
-            {
-                // log the orginal exception
-                LogExceptions.LogException(ex);
-                // display scary-free message to the client
-                return new Response(false, "Error occured adding new PetHealthBook");
-            }
-        }
-       
+ 
 
-        public async Task<Response> DeleteAsync(PetHealthBook entity)
+public async Task<Response> CreateAsync(PetHealthBook entity)
+    {
+        try
+        {
+            // 1. Kiểm tra nếu medicineId là rỗng
+            if (entity.medicineId == Guid.Empty)
+            {
+                return new Response(false, "MedicineId cannot be empty");
+            }
+
+            // 2. Kiểm tra xem medicineId có tồn tại trong bảng Medicine hay không
+            var existingMedicine = await context.Medicines
+                                                 .FirstOrDefaultAsync(m => m.medicineId == entity.medicineId);
+
+            if (existingMedicine == null)
+            {
+                return new Response(false, "MedicineId does not exist in the database");
+            }
+
+            // 3. Kiểm tra xem treatmentId liên kết với Medicine có tồn tại trong bảng Treatment không
+            var existingTreatment = await context.Treatments
+                                                 .FirstOrDefaultAsync(t => t.treatmentId == existingMedicine.treatmentId);
+
+            if (existingTreatment == null)
+            {
+                return new Response(false, "The specified treatmentId does not exist in the Treatment table");
+            }
+
+            // 4. Kiểm tra nếu medicineId đã tồn tại trong bảng PetHealthBook
+            var existingEntity = await context.PetHealthBooks
+                                              .FirstOrDefaultAsync(p => p.medicineId == entity.medicineId);
+
+            if (existingEntity != null)
+            {
+                // Nếu medicineId đã tồn tại, cập nhật các trường cần thiết
+                existingEntity.bookingId = entity.bookingId;
+                existingEntity.visitDate = entity.visitDate;
+                existingEntity.nextVisitDate = entity.nextVisitDate;
+                existingEntity.performBy = entity.performBy;
+                existingEntity.updatedAt = DateTime.UtcNow;
+
+                // Lưu thay đổi vào cơ sở dữ liệu
+                context.PetHealthBooks.Update(existingEntity);
+                await context.SaveChangesAsync();
+
+                // Xử lý circular reference
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                    WriteIndented = true
+                };
+
+                return new Response(true, $"PetHealthBook with MedicineId {entity.medicineId} updated successfully")
+                {
+                    Data = JsonSerializer.Serialize(existingEntity, options)
+                };
+            }
+
+            // 5. Nếu medicineId không tồn tại, thêm mới bản ghi vào PetHealthBook
+            var currentEntity = context.PetHealthBooks.Add(entity).Entity;
+            await context.SaveChangesAsync();
+
+            // Xử lý circular reference
+            var jsonOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+                WriteIndented = true
+            };
+
+            return new Response(true, $"PetHealthBook with HealthBookId {entity.healthBookId} added successfully")
+            {
+                Data = JsonSerializer.Serialize(currentEntity, jsonOptions)
+            };
+        }
+        catch (Exception ex)
+        {
+            LogExceptions.LogException(ex); // Log lỗi chi tiết
+            return new Response(false, $"An error occurred: {ex.Message}");
+        }
+    }
+
+
+
+    public async Task<Response> DeleteAsync(PetHealthBook entity)
         {
             try
             {

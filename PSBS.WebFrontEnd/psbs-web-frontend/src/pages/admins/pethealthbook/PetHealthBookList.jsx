@@ -57,7 +57,7 @@ const PetHealthBookList = () => {
         const treatment = treatmentsData.data.find((t) => t.treatmentId === medicine?.treatmentId);
         const treatmentName = treatment ? treatment.treatmentName : "No Treatment Assigned";
         const petName = pet.petName || "Temporary Pet Name";  // Gán tạm
-        const breed = pet.breed || "Temporary Breed"; 
+        const breed = pet.breed || "Temporary Breed";
         return {
           ...pet,
           accountPhoneNumber,
@@ -131,7 +131,7 @@ const PetHealthBookList = () => {
 
   const filteredPets = pets.filter((pet) => {
     const query = searchQuery.toLowerCase();
-    
+
     return (
       !searchQuery ||
       pet.petName.toLowerCase().includes(query) ||
@@ -207,9 +207,6 @@ const PetHealthBookList = () => {
           <Link to={`/detail/${params.row.healthBookId}`}>
             <IconButton color="default"><VisibilityIcon /></IconButton>
           </Link>
-          <IconButton color="error" onClick={() => handleDelete(params.row.healthBookId, params.row.petName, params.row.isDeleted)}>
-            <DeleteIcon />
-          </IconButton>
         </div>
       ),
     },
@@ -224,7 +221,7 @@ const PetHealthBookList = () => {
           <div className="p-4 bg-white shadow-md rounded-md h-full">
             <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
             <div className="flex justify-end mb-4">
-            <form className="relative flex items-center mr-4">
+              <form className="relative flex items-center mr-4">
                 <input
                   type="search"
                   id="search-dropdown"
@@ -258,28 +255,29 @@ const PetHealthBookList = () => {
                 </button>
               </form>
               {userRole === "staff" && (
-              <button
-                type="button"
-                onClick={() => setOpenDialog(true)}
-                className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+                <button
+                  type="button"
+                  onClick={() => navigate("/add")}
+                  className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                New
-              </button>
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  New
+                </button>
               )}
+
             </div>
 
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
@@ -292,7 +290,7 @@ const PetHealthBookList = () => {
                 pagination
                 paginationMode="client"
                 getRowId={(row) => row.healthBookId}
-                
+
               />
             </div>
           </div>

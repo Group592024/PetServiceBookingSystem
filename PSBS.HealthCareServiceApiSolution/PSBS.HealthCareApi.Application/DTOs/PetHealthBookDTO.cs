@@ -12,7 +12,7 @@ namespace PSBS.HealthCareApi.Application.DTOs
     public record PetHealthBookDTO(
      Guid healthBookId,
      [Required] Guid bookingId ,
-     [Required] Guid medicineId ,
+     Guid medicineId ,
      DateTime visitDate,
      DateTime? nextVisitDate,
      [Required] string performBy,
