@@ -64,8 +64,13 @@ import ServiceCardList from './pages/customers/services/ServiceListPage';
 import ServiceListPage from './pages/customers/services/ServiceListPage';
 import ServiceCard from './components/ServiceCustomer/ServiceCard';
 import ServiceDetailPage from './pages/customers/services/ServiceDetailPage';
-
+import Chat from './pages/admins/chat/Chat';
+import signalRService from './lib/ChatService';
+import { useEffect } from 'react';
 function App() {
+  useEffect(() => {
+    signalRService.startConnection("http://localhost:5159/chatHub");
+  }, []);
   return (
     <div className='App'>
       <BrowserRouter>
@@ -265,10 +270,12 @@ function App() {
           <Route path='/account'>
             <Route index element={<AccountList />} />
           </Route>
+          <Route path='/chat'>
+            <Route index element={<Chat />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </div>
   );
 }
-
 export default App;

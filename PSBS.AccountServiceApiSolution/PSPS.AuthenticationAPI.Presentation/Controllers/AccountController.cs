@@ -144,5 +144,19 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result);
         }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<GetAccountDTO>> GetAccountChat(Guid id)// Get account by AccountId for chat
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            var result = await account.GetAccount(id);
+            if (result == null)
+                return NotFound(new Response(false, "Account requested not found"));
+
+            return Ok(new Response(true, "The Account retrieved successfully") { Data = result });
+        }
+
     }
 }
