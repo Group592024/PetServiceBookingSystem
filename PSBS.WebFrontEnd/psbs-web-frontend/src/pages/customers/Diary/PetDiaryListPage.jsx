@@ -17,7 +17,7 @@ const PetDiaryListPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
-  const [petDiary, setPetDiary] = useState();
+  const [petDiary, setPetDiary] = useState({ data: [], meta: null });
 
   const [addModalOpen, setAddModalOpen] = useState(false);
 
@@ -32,6 +32,10 @@ const PetDiaryListPage = () => {
           },
         }
       );
+
+      if (!response.ok) {
+        if (response.status === 404) return;
+      }
 
       const data = await response.json();
 
@@ -55,7 +59,7 @@ const PetDiaryListPage = () => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: `Failed to create pet diary: ${data.message}`,
+          text: `${data.message}`,
         });
       }
     } catch {
@@ -109,9 +113,9 @@ const PetDiaryListPage = () => {
               <div className='py-8 px-6 bg-customPrimary rounded-xl'>
                 <img
                   src={
-                    (petDiary &&
-                      `http://localhost:5010${petDiary?.data[0]?.pet?.pet_Image}`) ||
-                    SampleImage
+                    petDiary?.data?.length !== 0
+                      ? `http://localhost:5010${petDiary?.data[0]?.pet?.pet_Image}`
+                      : SampleImage
                   }
                   alt='sample-image'
                   className='rounded-[2.6rem]'
@@ -135,25 +139,34 @@ const PetDiaryListPage = () => {
             </Stack>
 
             <Stack className='w-2/3'>
-              <PetDiaryCardList data={petDiary?.data} />
-              <div className='flex justify-center items-center gap-4 w-1/3 mx-auto mt-4'>
-                <Button
-                  variant='contained'
-                  onClick={handleClickPrevious}
-                  disabled={pageIndex <= 1}
-                  className='flex justify-center items-center gap-1'
-                >
-                  <ArrowBackIosIcon fontSize='1rem' /> Previous
-                </Button>
-                <Button
-                  variant='contained'
-                  onClick={handleClickNext}
-                  disabled={pageIndex >= petDiary?.meta?.totalPages}
-                  className='flex justify-center items-center gap-1'
-                >
-                  Next <ArrowForwardIosIcon fontSize='1rem' />
-                </Button>
-              </div>
+              {console.log(petDiary?.data?.length)}
+              {petDiary?.data?.length !== 0 ? (
+                <>
+                  <PetDiaryCardList data={petDiary?.data} />
+                  <div className='flex justify-center items-center gap-4 w-1/3 mx-auto mt-4'>
+                    <Button
+                      variant='contained'
+                      onClick={handleClickPrevious}
+                      disabled={pageIndex <= 1}
+                      className='flex justify-center items-center gap-1'
+                    >
+                      <ArrowBackIosIcon fontSize='1rem' /> Previous
+                    </Button>
+                    <Button
+                      variant='contained'
+                      onClick={handleClickNext}
+                      disabled={pageIndex >= petDiary?.meta?.totalPages}
+                      className='flex justify-center items-center gap-1'
+                    >
+                      Next <ArrowForwardIosIcon fontSize='1rem' />
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <p className='text-2xl font-semibold text-center'>
+                  No diaries found
+                </p>
+              )}
             </Stack>
           </div>
         </>
