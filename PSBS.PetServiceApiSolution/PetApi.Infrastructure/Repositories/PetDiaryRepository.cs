@@ -141,7 +141,7 @@ namespace PetApi.Infrastructure.Repositories
                     return new Response(false, $"Diary with ID {entity.Diary_ID} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 pet.Diary_Content = entity.Diary_Content;
-                pet.Diary_Date = entity.Diary_Date;
+
 
                 context.PetDiarys.Update(pet);
                 await context.SaveChangesAsync();
