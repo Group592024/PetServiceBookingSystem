@@ -55,8 +55,8 @@ import RoomCreate from './pages/admins/rooms/RoomCreate';
 import RoomEdit from './pages/admins/rooms/RoomEdit';
 import CustomerRoomList from './pages/customers/Room/RoomList';
 import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
-import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
-import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import CustomerRedeemHistory from './pages/customers/gifts/gift-history/CustomerRedeemHistory';
+import AdminRedeemHistory from './pages/admins/gifts/gift-history/AdminRedeemHistory';
 import ChangePasswordCustomer from './pages/customers/profile-Customer/ChangePasswordCustomer';
 import ProfileCustomer from './pages/customers/profile-Customer/ProfileCustomer';
 import EditProfileCustomer from './pages/customers/profile-Customer/EditProfileCustomer';
@@ -64,6 +64,9 @@ import ServiceCardList from './pages/customers/services/ServiceListPage';
 import ServiceListPage from './pages/customers/services/ServiceListPage';
 import ServiceCard from './components/ServiceCustomer/ServiceCard';
 import ServiceDetailPage from './pages/customers/services/ServiceDetailPage';
+import PetDiaryListPage from './pages/customers/Diary/PetDiaryListPage';
+import AddPetDiaryPage from './pages/customers/Diary/AddPetDiaryPage';
+import EditPetDiaryPage from './pages/customers/Diary/EditPetDiaryPage';
 
 function App() {
   return (
@@ -161,18 +164,17 @@ function App() {
             <Route path='detail/:giftId' element={<GiftDetailForm />} />
           </Route>
 
-
-          <Route path="/customer/redeemHistory">
-            <Route index element={<CustomerRedeemHistory/>} />
+          <Route path='/customer/redeemHistory'>
+            <Route index element={<CustomerRedeemHistory />} />
           </Route>
 
-          <Route path="redeemHistory">
-            <Route index element={<AdminRedeemHistory/>} />
+          <Route path='redeemHistory'>
+            <Route index element={<AdminRedeemHistory />} />
           </Route>
 
-          <Route path="/customer/gifts">
-            <Route index element={<GiftListPage/>} />
-            <Route path="detail/:giftId" element={<GiftDetailPage />} />
+          <Route path='/customer/gifts'>
+            <Route index element={<GiftListPage />} />
+            <Route path='detail/:giftId' element={<GiftDetailPage />} />
           </Route>
 
           <Route path='/petType'>
@@ -243,6 +245,9 @@ function App() {
           <Route path='/customer/services'>
             <Route index element={<ServiceListPage />} />
             <Route path=':id' element={<ServiceDetailPage />} />
+          </Route>
+          <Route path='/customer/pet-diaries'>
+            <Route index element={<PetDiaryListPage />} />
           </Route>
           <Route path='/register'>
             <Route index element={<Register />} />
