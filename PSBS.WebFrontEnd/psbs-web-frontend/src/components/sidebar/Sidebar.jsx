@@ -58,10 +58,10 @@ const Sidebar = forwardRef((_, ref) => {
             Service
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/medicines") ? "active" : ""}>
-          <Link to="/medicines">
+        <li className={location.pathname.startsWith("/pethealthbook") ? "active" : ""}>
+          <Link to="/pethealthbook">
             <i className="bx bxs-capsule"></i>
-            Medicines
+            PetHealthBook
           </Link>
         </li>
         <li className={location.pathname.startsWith("/account") ? "active" : ""}>
@@ -77,7 +77,7 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
         <li className={location.pathname.startsWith("/pets") ? "active" : ""}>
-          <Link to="/pethealthbook">
+          <Link to="/pet">
             <i className="bx bxs-dog"></i>
             Pet
           </Link>

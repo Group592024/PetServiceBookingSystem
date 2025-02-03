@@ -254,7 +254,6 @@ const PetHealthBookList = () => {
                   </svg>
                 </button>
               </form>
-              {userRole === "staff" && (
                 <button
                   type="button"
                   onClick={() => navigate("/add")}
@@ -276,8 +275,6 @@ const PetHealthBookList = () => {
                   </svg>
                   New
                 </button>
-              )}
-
             </div>
 
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>

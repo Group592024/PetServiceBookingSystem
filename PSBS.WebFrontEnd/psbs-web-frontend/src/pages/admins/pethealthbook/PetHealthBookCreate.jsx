@@ -69,7 +69,7 @@ const PetHealthBookCreate = () => {
     });
   };
 
- const handleCreate = async () => {
+  const handleCreate = async () => {
     console.log("Visit Details before submission:", visitDetails);
   
     if (!visitDetails.bookingId || !visitDetails.medicineId || !visitDetails.visitDate || !visitDetails.performBy) {
@@ -78,18 +78,18 @@ const PetHealthBookCreate = () => {
     }
   
     const newVisitDetails = {
-      healthBookId: generateGuid(),  
-      bookingId: visitDetails.bookingId,  
-      medicineId: visitDetails.medicineId,  
-      visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,  
-      nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,  
-      performBy: visitDetails.performBy, 
-      createdAt: new Date().toISOString(),  
-      updatedAt: new Date().toISOString(), 
-      isDeleted: visitDetails.isDeleted || false,  
+      healthBookId: generateGuid(),
+      bookingId: visitDetails.bookingId,
+      medicineId: visitDetails.medicineId,
+      visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
+      nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
+      performBy: visitDetails.performBy,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      isDeleted: visitDetails.isDeleted || false,
     };
   
-    console.log("Data to be sent to the API (Correct Order):", newVisitDetails);
+    console.log("Data to be sent to the API:", newVisitDetails);
   
     try {
       const response = await fetch("http://localhost:5003/api/PetHealthBook", {
@@ -102,17 +102,25 @@ const PetHealthBookCreate = () => {
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("API error:", errorData); 
+        console.error("API error:", errorData);
         Swal.fire("Error", errorData.message || "Failed to create data", "error");
       } else {
         console.log("API Response:", await response.json());
-        Swal.fire("Success", "Pet health book created successfully!", "success");
+        Swal.fire({
+          title: "Success",
+          text: "Pet health book created successfully!",
+          icon: "success",
+          confirmButtonText: "OK",
+        }).then(() => {
+          navigate("/pethealthbook");
+        });
       }
     } catch (error) {
       console.error("Error sending data:", error);
       Swal.fire("Error", "Failed to create data. Please try again later.", "error");
     }
   };
+  
   
   
   
