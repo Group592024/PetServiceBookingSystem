@@ -49,5 +49,10 @@ namespace ChatServiceApi.Application.Services
          return  await _chatRepository.CreateChatRoom(senderId, receiverId);
 
         }
+
+        public async Task<List<Guid>> GetChatRoomParticipants(Guid chatRoomId)
+        {
+            return await _chatRepository.GetChatRoomParticipantsAsync(chatRoomId);
+        }
     }
 }

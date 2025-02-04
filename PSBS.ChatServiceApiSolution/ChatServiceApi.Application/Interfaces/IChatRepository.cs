@@ -12,5 +12,6 @@ namespace ChatServiceApi.Application.Interfaces
         Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId);
         Task SaveChangesAsync();
         Task<Response> CreateChatRoom(Guid SenderId, Guid ReceiverId);
+        Task<List<Guid>> GetChatRoomParticipantsAsync(Guid chatRoomId);
     }
 }

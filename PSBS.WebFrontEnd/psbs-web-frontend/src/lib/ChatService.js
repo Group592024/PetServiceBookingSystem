@@ -5,31 +5,43 @@ class SignalRService {
   isConnected = false;
   retryCount = 0;
   MAX_RETRIES = 5;
-  hubUrl = null; // Store the hubUrl as a class property
+  hubUrl = null;
+  reconnecting = false;
+
+  setHubUrl(hubUrl) {
+    this.hubUrl = hubUrl;
+  }
 
   async startConnection(hubUrl) {
-    this.hubUrl = hubUrl; // Set the hubUrl when starting the connection
+    if (!hubUrl) return;
 
-    if (
-      this.connection?.state === signalR.HubConnectionState.Connected ||
-      this.connection?.state === signalR.HubConnectionState.Connecting
-    ) {
+    if (this.isConnected || this.reconnecting) return;
+
+    this.reconnecting = true;
+
+    if (this.connection?.state === signalR.HubConnectionState.Connecting) {
       return;
     }
 
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)
-      .withAutomaticReconnect()
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: (retryContext) => {
+          return retryContext.retryCount < 3 ? 1000 : 5000;
+        }
+      })
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
     try {
       await this.connection.start();
-      this.isConnected = true;
-      this.retryCount = 0; // Reset retry count on successful connection
+      this.isConnected = this.connection.state === signalR.HubConnectionState.Connected;
+      this.reconnecting = false;
+      this.retryCount = 0;
       console.log("✅ SignalR Connected.");
     } catch (error) {
       console.error("❌ SignalR Connection Error:", error);
+      this.reconnecting = false;
       this.retryCount++;
       if (this.retryCount < this.MAX_RETRIES) {
         setTimeout(() => this.startConnection(hubUrl), 5000);
@@ -39,31 +51,45 @@ class SignalRService {
     }
 
     this.connection.onclose(() => {
-      console.warn("⚠️ SignalR Disconnected. Reconnecting...");
+      console.warn("⚠️ SignalR Disconnected.");
       this.isConnected = false;
-      this.startConnection(hubUrl);
+      this.retryCount = 0;
+      if (!this.reconnecting) {
+        this.startConnection(hubUrl);
+      }
     });
   }
 
   async invoke(methodName, ...args) {
-    if (this.connection?.state !== signalR.HubConnectionState.Connected) {
-      console.error("SignalR is not connected yet. Retrying...");
-      await this.startConnection(this.hubUrl); // Use the stored hubUrl
-      return this.invoke(methodName, ...args); // Retry the invocation
+    if (!this.isConnected) {
+      console.warn("SignalR is not connected. Queuing invocation.");
+      return new Promise((resolve, reject) => {
+        const intervalId = setInterval(() => {
+          if (this.isConnected) {
+            clearInterval(intervalId);
+            this.connection.invoke(methodName, ...args)
+              .then(resolve)
+              .catch(reject);
+          }
+        }, 500);
+        setTimeout(() => {
+          clearInterval(intervalId);
+          reject("SignalR connection timed out.");
+        }, 10000);
+      });
     }
 
     try {
-      await this.connection.invoke(methodName, ...args);
-      return true;
+      return await this.connection.invoke(methodName, ...args);
     } catch (error) {
       console.error(`❌ Error invoking ${methodName}:`, error);
-      return false;
+      return Promise.reject(`Error invoking ${methodName}: ${error}`);
     }
   }
 
   on(methodName, callback) {
     if (this.connection) {
-      this.connection.off(methodName); // Remove previous listener
+      this.connection.off(methodName);
       this.connection.on(methodName, callback);
     }
   }
@@ -75,5 +101,5 @@ class SignalRService {
   }
 }
 
-// Export a singleton instance of SignalRService
-export default new SignalRService();
+const signalRService = new SignalRService();
+export default signalRService;

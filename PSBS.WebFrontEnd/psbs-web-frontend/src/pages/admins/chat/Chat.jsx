@@ -5,11 +5,11 @@ import List from "../../../components/chat/list/List";
 import ChatBox from "../../../components/chat/chatbox/ChatBox";
 import "./chat.css";
 import { useUserStore } from "../../../lib/userStore";
-
+import { useChatStore } from "../../../lib/chatStore";
 const Chat = () => {
     const sidebarRef = useRef(null);
     const { currentUser, fetchUserInfo } = useUserStore();
-
+    const {chatId} = useChatStore();
     useEffect(() => {
       const storedAccountId = sessionStorage.getItem('accountId');
       if (!currentUser && storedAccountId) {
@@ -27,7 +27,7 @@ const Chat = () => {
             <div className="chatBody">
             <div className="chatContainer">
             <List/>
-            <ChatBox/>
+          {chatId &&   <ChatBox/>}
            </div>
             </div>
           

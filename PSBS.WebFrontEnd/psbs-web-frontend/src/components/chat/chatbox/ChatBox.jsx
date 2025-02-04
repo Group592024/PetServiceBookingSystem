@@ -1,24 +1,80 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./chatbox.css";
 import EmojiPicker from "emoji-picker-react";
+import signalRService from "../../../lib/ChatService";
+import { useChatStore } from "../../../lib/chatStore";
+import { useUserStore } from "../../../lib/userStore";
 const ChatBox = () => {
   const [open, setOpen] = useState(false);
+  const [chat, setChat] = useState([]); // Ensure it's initialized as an array
   const [text, setText] = useState("");
+  const { chatId, user } = useChatStore();
+  const {currentUser} = useUserStore();
+  const endRef = useRef(null);
+
   const handleEmoji = (e) => {
     setText((pre) => pre + e.emoji);
     setOpen(false);
   };
-  const endRef = useRef(null);
+
+  useEffect(() => {
+    // Function to handle chat updates (fetching previous messages)
+    const handleUpdateChatMessages = (messages) => {
+      console.log("Received chat messages:", messages);
+      setChat(messages);
+    };
+
+    // Function to handle receiving a new message in real-time
+    const handleReceiveMessage = (senderId, messageText) => {
+      console.log("New message received:", { senderId, messageText });
+
+      // Append the new message to the existing chat
+      setChat((prevChat) => [
+        ...prevChat,
+        {
+          chatMessageId: Date.now(), // Temporary unique key
+          senderId,
+          text: messageText,
+        },
+      ]);
+    };
+     signalRService.invoke("JoinChatRoom", chatId);
+    // Listen for initial chat messages
+    signalRService.on("UpdateChatMessages", handleUpdateChatMessages);
+
+    // Listen for new messages in real-time
+    signalRService.on("ReceiveMessage", handleReceiveMessage);
+
+    // Fetch chat messages for the user
+    signalRService.invoke("GetChatMessages", chatId);
+
+    return () => {
+      signalRService.off("UpdateChatMessages", handleUpdateChatMessages);
+      signalRService.off("ReceiveMessage", handleReceiveMessage);
+    };
+  }, [chatId]);
+
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
+  }, [chat]);
+
+  const handleSend = async () => {
+    if (text.trim() === "") return;
+    try {
+      await signalRService.invoke("SendMessage", chatId, currentUser.accountId, text);
+      setText(""); // Clear input after sending
+    } catch (err) {
+      console.log("Error sending message:", err);
+    }
+  };
+
   return (
     <div className="chat">
       <div className="top">
         <div className="user">
           <img src="./avatar.png" alt="" />
           <div className="texts">
-            <span>Jane Doe</span>
+            <span>{user?.accountName || "Unknown"}</span>
             <p>Hey it's all me just don't go</p>
           </div>
         </div>
@@ -29,67 +85,22 @@ const ChatBox = () => {
         </div>
       </div>
       <div className="center">
-        <div className="message own">
-          <div className="texts">
-            <p>Fever dream high in the quite of the night</p>
-            <span>1 min ago</span>
+        {chat.map((message) => (
+          <div
+            className={`message ${
+              message.senderId === currentUser.accountId ? "own" : ""
+            }`}
+            key={message.chatMessageId}
+          >
+            <div className="texts">
+              <p>{message.text}</p>
+              <span>1 min ago</span>
+            </div>
           </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>You know that I caught it</p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              Bad, bad boy, shiny toy with a price. You know that I bought it
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <p>
-              Killing me slow, out the window I'm always waiting for you to be
-              waiting below Devils roll the dice, angels roll their eyes What
-              doesn't kill me makes me want you more
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message">
-          <img src="./avatar.png" alt="" />
-          <div className="texts">
-            <p>
-              And it's new, the shape of your body It's blue, the feeling I've
-              got And it's ooh, woah-oh It's a cruel summer It's cool, that's
-              what I tell 'em No rules in breakable heaven But ooh, woah-oh It's
-              a cruel summer with you
-            </p>
-            <span>1 min ago</span>
-          </div>
-        </div>
-        <div className="message own">
-          <div className="texts">
-            <img
-              src="https://i.pinimg.com/736x/5b/13/1e/5b131e15a00be812fdec5573db0b23a0.jpg"
-              alt=""
-            />
-            <span>1 min ago</span>
-          </div>
-        </div>
+        ))}
         <div ref={endRef}></div>
       </div>
       <div className="bottom">
-        <div className="icons">
-          <img src="./img.png" alt="" />
-          <img src="./camera.png" alt="" />
-          <img src="./mic.png" alt="" />
-        </div>
         <input
           type="text"
           placeholder="Type a message..."
@@ -106,7 +117,9 @@ const ChatBox = () => {
             <EmojiPicker open={open} onEmojiClick={handleEmoji} />
           </div>
         </div>
-        <button className="sendButton">Send</button>
+        <button className="sendButton" onClick={handleSend}>
+          Send
+        </button>
       </div>
     </div>
   );

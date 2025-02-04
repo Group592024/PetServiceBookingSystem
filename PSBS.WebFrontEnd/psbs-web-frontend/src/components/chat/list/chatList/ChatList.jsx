@@ -1,15 +1,14 @@
 import React, { useEffect, useState, useCallback } from "react";
 import "./chatList.css";
 import AddUser from "./addUser/AddUser";
-import { useUserStore } from "../../../../lib/userStore";
-import signalRService from "../../../../lib/ChatService"; // Ensure correct import
 import { getData } from "../../../../Utilities/ApiFunctions";
+import { useChatStore } from "../../../../lib/chatStore";
 
-const ChatList = () => {
+const ChatList = ({ signalRService, currentUser}) => {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
-  const { currentUser } = useUserStore();
-
+  const { chatId, ChangeChat } = useChatStore();
+  console.log(chatId);
   // Fetch user details for each chat room
   const fetchUserDetails = useCallback(async (chatRooms) => {
     const promises = chatRooms.map(async (item) => {
@@ -17,46 +16,68 @@ const ChatList = () => {
         const user = await getData(`api/Account/${item.receiverId}`);
         return { ...item, user };
       } catch (error) {
-        console.error(`Error fetching user for receiverId: ${item.receiverId}`, error);
-        return { ...item, user: { accountName: "Unknown", avatar: "./default-avatar.png" } }; // Fallback data
+        console.error(
+          `Error fetching user for receiverId: ${item.receiverId}`,
+          error
+        );
+        return {
+          ...item,
+          user: {
+            data: { accountName: "Unknown", avatar: "./default-avatar.png" },
+          },
+        }; // Fallback data
       }
     });
 
     const chatData = await Promise.all(promises);
-    return chatData.sort((a, b) => new Date(b.UpdatedAt) - new Date(a.UpdatedAt));
+    return chatData.sort(
+      (a, b) => new Date(b.updateAt) - new Date(a.updateAt)
+    );
   }, []);
-
-  // Connect to SignalR and set up listeners
+ 
+  // Set up SignalR listeners
   useEffect(() => {
-    const connectToHub = async () => {
-      if (!currentUser) return;
-
-      // Start the SignalR connection
-      await signalRService.startConnection("http://localhost:5159/chatHub");
-
-      // Listen for the UpdateChatList event
-      signalRService.on("UpdateChatList", async (chatRooms) => {
-        console.log("UpdateChatList event received:", chatRooms);
-        const sortedChats = await fetchUserDetails(chatRooms);
-        setChats(sortedChats);
-      });
-
-      // Request the chat list from the server
-      await signalRService.invoke("ChatRoomList", currentUser.accountId);
+    console.log("Starting SignalR...");
+  
+    const handleUpdateChatList = async (chatRooms) => {
+      console.log("UpdateChatList event received:", chatRooms);
+      const sortedChats = await fetchUserDetails(chatRooms);
+      setChats(sortedChats);
     };
-
-    connectToHub();
-
-    // Clean up the listener when the component unmounts
+  
+    const startSignalR = async () => {
+      try {
+        if (!signalRService) {
+          console.error("❌ SignalRService is not initialized.");
+          return;
+        }
+  
+        // Use startConnection() instead of start()
+        await signalRService.startConnection("http://localhost:5159/chatHub");
+        console.log("✅ SignalR Connected");
+  
+        signalRService.on("updatechatlist", handleUpdateChatList);
+        await signalRService.invoke("ChatRoomList", currentUser.accountId);
+      } catch (error) {
+        console.error("❌ SignalR Connection Failed:", error);
+      }
+    };
+  
+    startSignalR();
+  
     return () => {
-      signalRService.off("UpdateChatList");
+      signalRService.off("updatechatlist");
     };
   }, [currentUser, fetchUserDetails]);
+  
+  
+  
 
-  if (!currentUser) {
-    return <div className="userInfo">Loading...</div>;
-  }
 
+  const handleSelect = async (chat) => {
+    ChangeChat(chat.chatRoomId, chat.user.data);
+  };
+  console.log("chat nay:"+chats);
   return (
     <div className="chatList">
       <div className="search">
@@ -72,15 +93,21 @@ const ChatList = () => {
         />
       </div>
       {chats.map((chat) => (
-        <div key={chat.chatRoomId} className="item">
-          <img src={chat.user.avatar || "./avatar.png"} alt="" />
+        <div
+          key={chat.chatRoomId}
+          className="item"
+          onClick={() => handleSelect(chat)}
+        >
+          <img src={chat.user.data?.avatar || "./avatar.png"} alt="" />
           <div className="texts">
-            <span>{chat.user.data.accountName}</span>
-            <p>{chat.lastMessage}</p>
+            <span>{chat.user.data?.accountName || "Unknown"}</span>
+            <p>{chat?.lastMessage || "null"}</p>
           </div>
         </div>
       ))}
-      {addMode && <AddUser signalRService={signalRService} currentUser={currentUser} />}
+      {addMode && (
+        <AddUser signalRService={signalRService} currentUser={currentUser} />
+      )}
     </div>
   );
 };

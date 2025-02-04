@@ -12,5 +12,7 @@ namespace ChatServiceApi.Application.Interfaces
         Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId);
         Task SendMessageAsync(Guid chatRoomId, Guid senderId, string message);
         Task<Response> CreateChatRoom(Guid senderId, Guid receiverId);
+
+        Task<List<Guid>> GetChatRoomParticipants(Guid chatRoomId);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
+using PSPS.SharedLibrary.PSBSLogs;
 
 namespace ChatServiceApi.Presentation.Hubs
 {
@@ -18,7 +19,32 @@ namespace ChatServiceApi.Presentation.Hubs
             try
             {
                 Console.WriteLine($"SendMessage invoked: chatRoomId={chatRoomId}, userId={userId}, message={message}");
-                await Clients.Group(chatRoomId).SendAsync("ReceiveMessage", userId, message);
+
+                // Validate GUID formats
+                if (!Guid.TryParse(chatRoomId, out Guid chatRoomGuid))
+                    throw new ArgumentException("Invalid chatRoomId format.", nameof(chatRoomId));
+
+                if (!Guid.TryParse(userId, out Guid userGuid))
+                    throw new ArgumentException("Invalid userId format.", nameof(userId));
+
+                // Send message via service
+                await _chatService.SendMessageAsync(chatRoomGuid, userGuid, message);
+
+                // Broadcast message to all clients in the chat room
+                await Clients.Group(chatRoomId).SendAsync("ReceiveMessage", userGuid, message);
+
+                //// Get chat room participants
+                //var participants = await _chatService.GetChatRoomParticipants(chatRoomGuid);
+
+                //if (participants != null && participants.Any())
+                //{
+                //    foreach (var participant in participants)
+                //    {
+                //        LogExceptions.LogToConsole("toy tu choi hiu nha" + "  :    " + participant);
+                //        await Clients.User(participant.ToString()).SendAsync("UpdateChatList",
+                //            await _chatService.GetUserChatRoomsAsync(participant));
+                //    }
+                //}
             }
             catch (Exception ex)
             {
@@ -26,6 +52,8 @@ namespace ChatServiceApi.Presentation.Hubs
                 throw;
             }
         }
+
+
 
 
         // Add the current connection to a chat room
@@ -50,18 +78,30 @@ namespace ChatServiceApi.Presentation.Hubs
 
         public async Task ChatRoomList(Guid uid)
         {
-          
             try
-            {              
+            {
                 await Clients.Caller.SendAsync("UpdateChatList", await _chatService.GetUserChatRoomsAsync(uid));
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error in SendMessage: {ex.Message}");
-                throw;
+                Console.WriteLine($"Error in ChatRoomList: {ex.Message}");
+                throw; // Re-throw the exception for proper error handling
             }
         }
 
+        public async Task GetChatMessages(Guid uid)
+        {
+
+            try
+            {
+                await Clients.Caller.SendAsync("UpdateChatMessages", await _chatService.GetChatMessagesAsync(uid));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in retrieving messages: {ex.Message}");
+                throw;
+            }
+        }
 
         // Method to create a chat room
         public async Task CreateChatRoom(Guid senderId, Guid receiverId)

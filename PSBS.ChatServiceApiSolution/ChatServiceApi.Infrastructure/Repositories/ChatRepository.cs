@@ -36,7 +36,19 @@ namespace ChatServiceApi.Infrastructure.Repositories
         public async Task AddChatMessageAsync(ChatMessage message)
         {
             await _context.ChatMessages.AddAsync(message);
+
+            var userChat = await _context.ChatRooms.FindAsync(message.ChatRoomId);
+            if (userChat != null) // Ensure the chat room exists
+            {
+                userChat.LastMessage = message.Text;
+                userChat.UpdateAt = DateTime.UtcNow; // Use UTC for consistency
+
+                _context.ChatRooms.Update(userChat); // Explicitly mark as updated
+            }
+
+            await _context.SaveChangesAsync(); // Save changes to DB
         }
+
 
         public async Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId)
         {
@@ -102,5 +114,13 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 }
             };
         }
+        public async Task<List<Guid>> GetChatRoomParticipantsAsync(Guid chatRoomId)
+        {
+            return await _context.RoomParticipants
+                .Where(rp => rp.ChatRoomId == chatRoomId)
+                .Select(rp => rp.UserId)
+                .ToListAsync();
+        }
+
     }
 }
