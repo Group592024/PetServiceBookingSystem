@@ -4,12 +4,13 @@ import EmojiPicker from "emoji-picker-react";
 import signalRService from "../../../lib/ChatService";
 import { useChatStore } from "../../../lib/chatStore";
 import { useUserStore } from "../../../lib/userStore";
+import { formatDate } from "../../../Utilities/convertDateTime";
 const ChatBox = () => {
   const [open, setOpen] = useState(false);
   const [chat, setChat] = useState([]); // Ensure it's initialized as an array
   const [text, setText] = useState("");
   const { chatId, user } = useChatStore();
-  const {currentUser} = useUserStore();
+  const { currentUser } = useUserStore();
   const endRef = useRef(null);
 
   const handleEmoji = (e) => {
@@ -18,39 +19,43 @@ const ChatBox = () => {
   };
 
   useEffect(() => {
-    // Function to handle chat updates (fetching previous messages)
+    if (!chatId) return; // Ensure chatId exists before joining
+
+    signalRService.invoke("JoinChatRoom", chatId);
+
     const handleUpdateChatMessages = (messages) => {
       console.log("Received chat messages:", messages);
       setChat(messages);
     };
 
-    // Function to handle receiving a new message in real-time
     const handleReceiveMessage = (senderId, messageText) => {
       console.log("New message received:", { senderId, messageText });
-
-      // Append the new message to the existing chat
       setChat((prevChat) => [
         ...prevChat,
         {
-          chatMessageId: Date.now(), // Temporary unique key
+          chatMessageId: Date.now(),
           senderId,
           text: messageText,
         },
       ]);
     };
-     signalRService.invoke("JoinChatRoom", chatId);
-    // Listen for initial chat messages
-    signalRService.on("UpdateChatMessages", handleUpdateChatMessages);
 
-    // Listen for new messages in real-time
+    signalRService.on("UpdateChatMessages", handleUpdateChatMessages);
     signalRService.on("ReceiveMessage", handleReceiveMessage);
 
-    // Fetch chat messages for the user
-    signalRService.invoke("GetChatMessages", chatId);
+    signalRService.invoke("GetChatMessages", chatId, currentUser.accountId);
+
+    // Store current chatId in a variable for cleanup
+    const currentChatId = chatId;
 
     return () => {
       signalRService.off("UpdateChatMessages", handleUpdateChatMessages);
       signalRService.off("ReceiveMessage", handleReceiveMessage);
+
+      // Use the stored chatId to leave the room correctly
+      if (currentChatId) {
+        signalRService.invoke("LeaveChatRoom", currentChatId);
+      }
     };
   }, [chatId]);
 
@@ -61,13 +66,23 @@ const ChatBox = () => {
   const handleSend = async () => {
     if (text.trim() === "") return;
     try {
-      await signalRService.invoke("SendMessage", chatId, currentUser.accountId, text);
+      await signalRService.invoke(
+        "SendMessage",
+        chatId,
+        currentUser.accountId,
+        text
+      );
       setText(""); // Clear input after sending
     } catch (err) {
       console.log("Error sending message:", err);
     }
   };
-
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevents new line creation
+      handleSend(); // Call handleSend when Enter is pressed
+    }
+  };
   return (
     <div className="chat">
       <div className="top">
@@ -78,23 +93,23 @@ const ChatBox = () => {
             <p>Hey it's all me just don't go</p>
           </div>
         </div>
-        <div className="icons">
+        {/* <div className="icons">
           <img src="./phone.png" alt="" />
           <img src="./video.png" alt="" />
           <img src="./info.png" alt="" />
-        </div>
+        </div> */}
       </div>
       <div className="center">
         {chat.map((message) => (
           <div
             className={`message ${
-              message.senderId === currentUser.accountId ? "own" : ""
+              message.senderId === currentUser.accountId ? "own" : "notOwn"
             }`}
             key={message.chatMessageId}
           >
             <div className="texts">
               <p>{message.text}</p>
-              <span>1 min ago</span>
+              {/* <span>{formatDate(message.createdAt)}</span> */}
             </div>
           </div>
         ))}
@@ -106,6 +121,7 @@ const ChatBox = () => {
           placeholder="Type a message..."
           value={text}
           onChange={(e) => setText(e.target.value)}
+          onKeyDown={handleKeyPress}
         />
         <div className="emoji">
           <img

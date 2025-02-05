@@ -14,13 +14,13 @@
   form{
     display: flex;
     gap: 20px;
-    justify-content: center;
-    align-items: center;
+
     input{
       padding: 20px;
       border-radius: 10px;
       border: none;
       outline: none;
+      color: black;
     }
 
     button{
@@ -61,93 +61,4 @@
       cursor: pointer;
     }
   }
-}.addUser{
-  width: max-content;
-  height: max-content;
-  padding: 30px;
-  background-color: rgba(17, 25, 40, 0.781);
-  border-radius: 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-
-  form{
-    display: flex;
-    gap: 20px;
-
-    input{
-      padding: 20px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-
-    button{
-      padding: 20px;
-      border-radius: 10px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  }
-.userContainer{
-  margin: 10px;
-  max-height: 250px;
-  height: 250px;
-  padding-right: 10px;
-  overflow: auto;
-  /* Custom scrollbar styles */
-&::-webkit-scrollbar {
-width: 8px; /* Set the width of the scrollbar */
-}
-
-&::-webkit-scrollbar-thumb {
-background: rgba(255, 255, 255, 0.5); /* Thumb (scrolling handle) color */
-border-radius: 4px; /* Rounded corners for the scrollbar thumb */
-}
-
-&::-webkit-scrollbar-thumb:hover {
-background: rgba(255, 255, 255, 0.7); /* Slightly brighter thumb on hover */
-}
-
-&::-webkit-scrollbar-track {
-background: rgba(17, 25, 40, 0.5); /* Track color */
-border-radius: 4px;
-}
-  .user{
-    margin-top: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    .detail{
-      display: flex;
-      align-items: center;
-      gap: 20px;
-
-      img{
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-      }
-    }
-
-    button{
-      padding: 10px;
-      border-radius: 10px;
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-  }
-  .user:first-child {
-    margin-top: 0; /* Remove margin-top for the first child */
-  }
-}
 }

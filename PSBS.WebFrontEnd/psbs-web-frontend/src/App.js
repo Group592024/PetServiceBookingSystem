@@ -68,8 +68,9 @@ import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
 function App() {
+ const userId = sessionStorage.getItem('accountId');
   useEffect(() => {
-    signalRService.startConnection("http://localhost:5159/chatHub");
+    signalRService.startConnection("http://localhost:5159/chatHub", userId );
 
     return () => {
       signalRService.stopConnection(); // Cleanup

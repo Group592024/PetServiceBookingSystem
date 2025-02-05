@@ -3,11 +3,9 @@ namespace ChatServiceApi.Application.DTOs
 {
     public record ChatRoomDTO
     (
-     Guid ChatRoomId ,
-     Guid ReceiverId ,
+     Guid ChatRoomId ,   
      string LastMessage  ,
-     DateTime UpdateAt ,
-     bool IsSeen 
+     DateTime UpdateAt 
         
         );
 }

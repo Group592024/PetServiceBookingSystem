@@ -4,22 +4,19 @@ import AddUser from "./addUser/AddUser";
 import { getData } from "../../../../Utilities/ApiFunctions";
 import { useChatStore } from "../../../../lib/chatStore";
 
-const ChatList = ({ signalRService, currentUser}) => {
+const ChatList = ({ signalRService, currentUser }) => {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
+  const [currentChat, setCurrentChat] = useState(null); // Track the active chat
   const { chatId, ChangeChat } = useChatStore();
-  console.log(chatId);
-  // Fetch user details for each chat room
+
   const fetchUserDetails = useCallback(async (chatRooms) => {
     const promises = chatRooms.map(async (item) => {
       try {
-        const user = await getData(`api/Account/${item.receiverId}`);
+        const user = await getData(`api/Account/${item.serveFor}`);
         return { ...item, user };
       } catch (error) {
-        console.error(
-          `Error fetching user for receiverId: ${item.receiverId}`,
-          error
-        );
+        console.error(`Error fetching user for receiverId: ${item.serveFor}`, error);
         return {
           ...item,
           user: {
@@ -30,54 +27,65 @@ const ChatList = ({ signalRService, currentUser}) => {
     });
 
     const chatData = await Promise.all(promises);
-    return chatData.sort(
-      (a, b) => new Date(b.updateAt) - new Date(a.updateAt)
-    );
+    return chatData.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
   }, []);
- 
-  // Set up SignalR listeners
+
   useEffect(() => {
-    console.log("Starting SignalR...");
-  
     const handleUpdateChatList = async (chatRooms) => {
-      console.log("UpdateChatList event received:", chatRooms);
       const sortedChats = await fetchUserDetails(chatRooms);
-      setChats(sortedChats);
+
+      // Update chats: mark active chat as seen
+      const updatedChats = sortedChats.map((chat) => {
+        if (chat.chatRoomId === currentChat) {
+          return { ...chat, isSeen: true }; // Only mark the active chat as seen
+        }
+        return chat; // Other chats remain unchanged
+      });
+
+      setChats(updatedChats);
     };
-  
+
     const startSignalR = async () => {
       try {
         if (!signalRService) {
           console.error("❌ SignalRService is not initialized.");
           return;
         }
-  
-        // Use startConnection() instead of start()
-        await signalRService.startConnection("http://localhost:5159/chatHub");
+
+        await signalRService.startConnection("http://localhost:5159/chatHub", currentUser.accountId);
         console.log("✅ SignalR Connected");
-  
-        signalRService.on("updatechatlist", handleUpdateChatList);
+
+        signalRService.on("getList", handleUpdateChatList);
+        signalRService.on("updateaftercreate", handleUpdateChatList);
         await signalRService.invoke("ChatRoomList", currentUser.accountId);
       } catch (error) {
         console.error("❌ SignalR Connection Failed:", error);
       }
     };
-  
+
     startSignalR();
-  
+
     return () => {
       signalRService.off("updatechatlist");
     };
-  }, [currentUser, fetchUserDetails]);
-  
-  
-  
-
+  }, [currentUser, fetchUserDetails, signalRService, currentChat]);
 
   const handleSelect = async (chat) => {
-    ChangeChat(chat.chatRoomId, chat.user.data);
+    setCurrentChat(chat.chatRoomId); // Set the active chat ID
+    // Create a new array with updated isSeen value for the selected chat
+    const updatedChats = chats.map((item) => {
+      if (item.chatRoomId === chat.chatRoomId) {
+        return { ...item, isSeen: true }; // Mark selected chat as seen
+      }
+      return item;
+    });
+
+    setChats(updatedChats); // Update the chats state
+    ChangeChat(chat.chatRoomId, chat.user.data); // Change the active chat in the store
   };
-  console.log("chat nay:"+chats);
+
+  console.log("chat nay:", chats);
+
   return (
     <div className="chatList">
       <div className="search">
@@ -92,21 +100,31 @@ const ChatList = ({ signalRService, currentUser}) => {
           onClick={() => setAddMode((prev) => !prev)}
         />
       </div>
+
       {chats.map((chat) => (
         <div
           key={chat.chatRoomId}
           className="item"
           onClick={() => handleSelect(chat)}
+          style={{
+            backgroundColor: chat.chatRoomId === currentChat ? "transparent" : (chat.isSeen ? "transparent" : "#51833e"),
+          }} // Only change background if the chat is not active and is unseen
         >
           <img src={chat.user.data?.avatar || "./avatar.png"} alt="" />
           <div className="texts">
             <span>{chat.user.data?.accountName || "Unknown"}</span>
-            <p>{chat?.lastMessage || "null"}</p>
+          <p className="truncate max-w-[200px]">{chat?.lastMessage || "null"}</p>
+
           </div>
         </div>
       ))}
+
       {addMode && (
-        <AddUser signalRService={signalRService} currentUser={currentUser} />
+        <AddUser
+          signalRService={signalRService}
+          currentUser={currentUser}
+          currentList={chats}
+        />
       )}
     </div>
   );

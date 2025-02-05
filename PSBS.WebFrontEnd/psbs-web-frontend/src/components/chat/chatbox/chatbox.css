@@ -92,6 +92,9 @@
             }
           }
         }
+        &.notOwn{
+          align-self: flex-start;
+        }
   
         img {
           width: 30px;

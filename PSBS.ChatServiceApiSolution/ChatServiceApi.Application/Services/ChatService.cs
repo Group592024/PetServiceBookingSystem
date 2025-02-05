@@ -1,4 +1,5 @@
 ﻿
+using ChatServiceApi.Application.DTOs;
 using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using PSPS.SharedLibrary.PSBSLogs;
@@ -20,13 +21,41 @@ namespace ChatServiceApi.Application.Services
             return await _chatRepository.GetChatRoomByIdAsync(chatRoomId);
         }
 
-        public async Task<List<ChatRoom>> GetUserChatRoomsAsync(Guid userId)
+        public async Task<List<ChatUserDTO>> GetUserChatRoomsAsync(Guid userId)
         {
-            return await _chatRepository.GetUserChatRoomsAsync(userId);
+            // Get all chat rooms where the user is a participant
+            var chatRooms = await _chatRepository.GetUserChatRoomsAsync(userId);
+
+            var chatUsers = new List<ChatUserDTO>();
+
+            foreach (var room in chatRooms)
+            {
+                // Fetch participants of the room
+                var participants = await _chatRepository.GetRoomParticipantsAsync(room.ChatRoomId);
+
+                // Get the participant that matches the given userId
+                var participant = participants.FirstOrDefault(p => p.UserId == userId);
+
+                if (participant != null)
+                {
+                    chatUsers.Add(new ChatUserDTO(
+                        room.ChatRoomId,
+                        participant.ServeFor,
+                        participant.UserId,  // RoomOwner is the user's ID
+                        room.LastMessage,
+                        room.UpdateAt,
+                        participant.IsSeen
+                    ));
+                }
+            }
+
+            return chatUsers;
         }
 
-        public async Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId)
+
+        public async Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId, Guid uid)
         {
+            await _chatRepository.UpdateIsSeenAsync(chatRoomId, uid);
             return await _chatRepository.GetChatMessagesAsync(chatRoomId);
         }
 

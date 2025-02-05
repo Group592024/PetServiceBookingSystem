@@ -7,13 +7,10 @@ namespace ChatServiceApi.Domain.Entities
     public class ChatRoom
     {
         [Key]
-        public Guid ChatRoomId { get; set; }
-        public Guid ReceiverId { get; set; }
+        public Guid ChatRoomId { get; set; }    
         public string LastMessage { get; set; } = null!;
         public DateTime UpdateAt { get; set; }
-
-        public bool IsSeen { get; set; }
-
+       
         [JsonIgnore]
         public virtual ICollection<ChatMessage>? ChatMessages { get; set; }
         [JsonIgnore]

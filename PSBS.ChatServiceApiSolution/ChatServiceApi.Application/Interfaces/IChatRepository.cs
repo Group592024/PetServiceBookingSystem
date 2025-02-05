@@ -13,5 +13,7 @@ namespace ChatServiceApi.Application.Interfaces
         Task SaveChangesAsync();
         Task<Response> CreateChatRoom(Guid SenderId, Guid ReceiverId);
         Task<List<Guid>> GetChatRoomParticipantsAsync(Guid chatRoomId);
+        Task<List<RoomParticipant>> GetRoomParticipantsAsync(Guid chatRoomId);
+        Task UpdateIsSeenAsync(Guid chatRoomId, Guid userId);
     }
 }

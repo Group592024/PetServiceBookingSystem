@@ -9,9 +9,8 @@ namespace ChatServiceApi.Application.DTOs.Conversions
         public static ChatRoom ToEntity(ChatRoomDTO chatRoomDTO) => new()
         {
             ChatRoomId = chatRoomDTO.ChatRoomId,
-            ReceiverId = chatRoomDTO.ReceiverId,
-            LastMessage = chatRoomDTO.LastMessage,
-            IsSeen = chatRoomDTO.IsSeen,
+           
+            LastMessage = chatRoomDTO.LastMessage,        
             UpdateAt = chatRoomDTO.UpdateAt,      
         };
 
@@ -22,10 +21,10 @@ namespace ChatServiceApi.Application.DTOs.Conversions
             {
                 var singleChatRoom = new ChatRoomDTO(
                     chatRoom!.ChatRoomId,
-                    chatRoom.ReceiverId,
+                  
                     chatRoom.LastMessage!,
-                    chatRoom.UpdateAt,
-                    chatRoom.IsSeen
+                    chatRoom.UpdateAt
+                 
                     );
                 return (singleChatRoom, null);
             }
@@ -34,10 +33,9 @@ namespace ChatServiceApi.Application.DTOs.Conversions
                 var list = chatRooms!.Select(p =>
                 new ChatRoomDTO(
                    p!.ChatRoomId,
-                    p.ReceiverId,
+                 
                     p.LastMessage!,
-                    p.UpdateAt,
-                    p.IsSeen
+                    p.UpdateAt      
                     )).ToList();
                 return (null, list);
             }

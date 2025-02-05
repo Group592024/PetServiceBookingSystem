@@ -12,7 +12,7 @@ class SignalRService {
     this.hubUrl = hubUrl;
   }
 
-  async startConnection(hubUrl) {
+  async startConnection(hubUrl, userId) {
     if (!hubUrl) return;
 
     if (this.isConnected || this.reconnecting) return;
@@ -22,9 +22,9 @@ class SignalRService {
     if (this.connection?.state === signalR.HubConnectionState.Connecting) {
       return;
     }
-
+    const urlWithUserId = `${hubUrl}?userId=${encodeURIComponent(userId)}`;
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl)
+      .withUrl(urlWithUserId)
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
           return retryContext.retryCount < 3 ? 1000 : 5000;

@@ -57,15 +57,9 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsSeen")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastMessage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("UpdateAt")
                         .HasColumnType("datetime2");
@@ -82,6 +76,12 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ChatRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsSeen")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ServeFor")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("UserId")

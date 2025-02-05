@@ -2,49 +2,80 @@
 using ChatServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.SignalR;
 using PSPS.SharedLibrary.PSBSLogs;
+using System.Collections.Concurrent;
 
 namespace ChatServiceApi.Presentation.Hubs
 {
     public class ChatHub : Hub
     {
+        private static readonly ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
         private readonly IChatService _chatService;
 
         public ChatHub(IChatService chatService)
         {
             _chatService = chatService;
         }
-        // When a client sends a message, broadcast it to the specific chat room
+
+        public override Task OnConnectedAsync()
+        {
+            string userId = Context.GetHttpContext()?.Request.Query["userId"]!;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                Console.WriteLine("No userId provided.");
+            }
+            else
+            {
+                _connections[userId] = Context.ConnectionId; // Safe update using ConcurrentDictionary
+                Console.WriteLine($"User {userId} connected with ConnectionId: {Context.ConnectionId}");
+            }
+
+            return base.OnConnectedAsync();
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            var userId = _connections.FirstOrDefault(x => x.Value == Context.ConnectionId).Key;
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                _connections.TryRemove(userId, out _); // Safe removal
+                Console.WriteLine($"User {userId} disconnected");
+            }
+
+            return base.OnDisconnectedAsync(exception);
+        }
+
         public async Task SendMessage(string chatRoomId, string userId, string message)
         {
             try
             {
                 Console.WriteLine($"SendMessage invoked: chatRoomId={chatRoomId}, userId={userId}, message={message}");
 
-                // Validate GUID formats
                 if (!Guid.TryParse(chatRoomId, out Guid chatRoomGuid))
                     throw new ArgumentException("Invalid chatRoomId format.", nameof(chatRoomId));
 
                 if (!Guid.TryParse(userId, out Guid userGuid))
                     throw new ArgumentException("Invalid userId format.", nameof(userId));
 
-                // Send message via service
                 await _chatService.SendMessageAsync(chatRoomGuid, userGuid, message);
 
-                // Broadcast message to all clients in the chat room
                 await Clients.Group(chatRoomId).SendAsync("ReceiveMessage", userGuid, message);
 
-                //// Get chat room participants
-                //var participants = await _chatService.GetChatRoomParticipants(chatRoomGuid);
+                var participants = await _chatService.GetChatRoomParticipants(chatRoomGuid);
 
-                //if (participants != null && participants.Any())
-                //{
-                //    foreach (var participant in participants)
-                //    {
-                //        LogExceptions.LogToConsole("toy tu choi hiu nha" + "  :    " + participant);
-                //        await Clients.User(participant.ToString()).SendAsync("UpdateChatList",
-                //            await _chatService.GetUserChatRoomsAsync(participant));
-                //    }
-                //}
+                if (participants != null && participants.Any())
+                {
+                    foreach (var participant in participants)
+                    {
+                        if (_connections.TryGetValue(participant.ToString(), out var connectionId))
+                        {
+                            LogExceptions.LogToConsole("Participant: " + participant);
+                            await Clients.Client(connectionId).SendAsync("GetList",
+                                await _chatService.GetUserChatRoomsAsync(participant));
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -53,26 +84,17 @@ namespace ChatServiceApi.Presentation.Hubs
             }
         }
 
-
-
-
-        // Add the current connection to a chat room
         public async Task JoinChatRoom(Guid chatRoomId)
         {
             Console.WriteLine($"JoinChatRoom invoked: chatRoomId={chatRoomId}, connectionId={Context.ConnectionId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomId.ToString());
-
-            // Notify the client they successfully joined
             await Clients.Caller.SendAsync("JoinedChatRoom", chatRoomId);
         }
 
-        // Remove the current connection from a chat room
         public async Task LeaveChatRoom(Guid chatRoomId)
         {
             Console.WriteLine($"LeaveChatRoom invoked: chatRoomId={chatRoomId}, connectionId={Context.ConnectionId}");
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatRoomId.ToString());
-
-            // Notify the client they successfully left
             await Clients.Caller.SendAsync("LeftChatRoom", chatRoomId);
         }
 
@@ -80,21 +102,20 @@ namespace ChatServiceApi.Presentation.Hubs
         {
             try
             {
-                await Clients.Caller.SendAsync("UpdateChatList", await _chatService.GetUserChatRoomsAsync(uid));
+                await Clients.Caller.SendAsync("GetList", await _chatService.GetUserChatRoomsAsync(uid));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in ChatRoomList: {ex.Message}");
-                throw; // Re-throw the exception for proper error handling
+                throw;
             }
         }
 
-        public async Task GetChatMessages(Guid uid)
+        public async Task GetChatMessages(Guid chatRoomId, Guid uid)
         {
-
             try
             {
-                await Clients.Caller.SendAsync("UpdateChatMessages", await _chatService.GetChatMessagesAsync(uid));
+                await Clients.Caller.SendAsync("UpdateChatMessages", await _chatService.GetChatMessagesAsync(chatRoomId, uid));
             }
             catch (Exception ex)
             {
@@ -103,7 +124,6 @@ namespace ChatServiceApi.Presentation.Hubs
             }
         }
 
-        // Method to create a chat room
         public async Task CreateChatRoom(Guid senderId, Guid receiverId)
         {
             try
@@ -112,17 +132,20 @@ namespace ChatServiceApi.Presentation.Hubs
 
                 if (response.Flag)
                 {
-                    // Notify the caller that the chat room was created successfully
+                    var chatRoomId = response.Data.ToString();
+                    Console.WriteLine($"Chat room created successfully: {chatRoomId}");
+
                     await Clients.Caller.SendAsync("ChatRoomCreated", response.Data);
+                    await Groups.AddToGroupAsync(Context.ConnectionId, chatRoomId);
 
-                    // Notify both users to refresh their chat list
-                    await Clients.User(senderId.ToString()).SendAsync("UpdateChatList", await _chatService.GetUserChatRoomsAsync(receiverId));
-                    await Clients.User(receiverId.ToString()).SendAsync("UpdateChatList", await _chatService.GetUserChatRoomsAsync(senderId));
+                    var senderChatRooms = await _chatService.GetUserChatRoomsAsync(senderId);
+                    var receiverChatRooms = await _chatService.GetUserChatRoomsAsync(receiverId);
 
+                    await Clients.Group(chatRoomId).SendAsync("UpdateAfterCreate", senderChatRooms);
+                    await Clients.Group(chatRoomId).SendAsync("UpdateAfterCreate", receiverChatRooms);
                 }
                 else
                 {
-                    // Notify the caller that the chat room creation failed
                     await Clients.Caller.SendAsync("ChatRoomCreationFailed", response.Message);
                 }
             }
@@ -132,7 +155,5 @@ namespace ChatServiceApi.Presentation.Hubs
                 await Clients.Caller.SendAsync("ChatRoomCreationFailed", "An error occurred while creating the chat room.");
             }
         }
-
-
     }
 }

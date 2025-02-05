@@ -30,8 +30,10 @@ namespace ChatServiceApi.Infrastructure.Repositories
             return await _context.ChatRooms
                 .Where(cr => _context.RoomParticipants
                     .Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.UserId == userId))
+                .OrderByDescending(m => m.UpdateAt) // Sorting in descending order
                 .ToListAsync();
         }
+
 
         public async Task AddChatMessageAsync(ChatMessage message)
         {
@@ -46,8 +48,29 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 _context.ChatRooms.Update(userChat); // Explicitly mark as updated
             }
 
-            await _context.SaveChangesAsync(); // Save changes to DB
+            // Fetch all participants in the chat room
+            var participants = await _context.RoomParticipants
+                .Where(p => p.ChatRoomId == message.ChatRoomId)
+                .ToListAsync();
+
+            foreach (var participant in participants)
+            {
+                if (participant.UserId == message.SenderId)
+                {
+                    participant.IsSeen = true; // Sender sees their own message
+                }
+                else
+                {
+                    participant.IsSeen = false; // Other participants haven't seen it yet
+                }
+
+                _context.RoomParticipants.Update(participant);
+            }
+
+            await _context.SaveChangesAsync(); // Save all changes to DB
         }
+
+
 
 
         public async Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId)
@@ -79,9 +102,9 @@ namespace ChatServiceApi.Infrastructure.Repositories
             ChatRoom chatRoom = new ChatRoom()
             {
                 UpdateAt = DateTime.Now,
-                ReceiverId = receiverId,
+              
                 LastMessage = "",
-                IsSeen = false
+               
             };
 
             var createdChatRoom = _context.ChatRooms.Add(chatRoom);
@@ -91,13 +114,15 @@ namespace ChatServiceApi.Infrastructure.Repositories
             var roomParticipant1 = new RoomParticipant
             {
                 ChatRoomId = createdChatRoom.Entity.ChatRoomId,
-                UserId = senderId
+                UserId = senderId,
+                ServeFor = receiverId,
             };
 
             var roomParticipant2 = new RoomParticipant
             {
                 ChatRoomId = createdChatRoom.Entity.ChatRoomId,
-                UserId = receiverId
+                UserId = receiverId,
+                ServeFor = senderId,
             };
 
             _context.RoomParticipants.Add(roomParticipant1);
@@ -109,8 +134,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             {
                 Data = new
                 {
-                    ChatRoomId = createdChatRoom.Entity.ChatRoomId,
-                    Participants = new List<Guid> { senderId, receiverId }
+                   createdChatRoom.Entity.ChatRoomId                  
                 }
             };
         }
@@ -122,5 +146,31 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<RoomParticipant>> GetRoomParticipantsAsync(Guid chatRoomId)
+        {
+            return await _context.RoomParticipants
+           .Where(p => p.ChatRoomId == chatRoomId)
+           .ToListAsync();
+        }
+
+        public async Task UpdateIsSeenAsync(Guid chatRoomId, Guid userId)
+        {
+            // Find the participant record for the user in the chat room
+            var participant = await _context.RoomParticipants
+                .FirstOrDefaultAsync(rp => rp.ChatRoomId == chatRoomId && rp.UserId == userId);
+
+            if (participant != null)
+            {
+                // Update the IsSeen flag to true
+                participant.IsSeen = true;
+
+                // Save changes to the database
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("User is not a participant of this chat room.");
+            }
+        }
     }
 }
