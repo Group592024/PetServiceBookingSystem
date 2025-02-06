@@ -24,6 +24,7 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             //Create Dependency Injection
             services.AddScoped<IMedicine, MedicineRepository>();
             services.AddScoped<ITreatment, TreatmentRepository>();
+            services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
             return services;
         }
 
