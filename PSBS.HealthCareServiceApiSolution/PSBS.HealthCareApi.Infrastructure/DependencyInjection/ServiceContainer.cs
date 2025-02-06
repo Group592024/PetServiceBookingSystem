@@ -22,9 +22,9 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             SharedServiceContainer.AddSharedServices<HealthCareDbContext>(services, config, config["MySerilog:FineName"]!);
 
             //Create Dependency Injection
-            services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
             services.AddScoped<IMedicine, MedicineRepository>();
             services.AddScoped<ITreatment, TreatmentRepository>();
+            services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
             return services;
         }
 

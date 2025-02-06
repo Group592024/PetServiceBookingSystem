@@ -1,6 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ProtectedRoute from "./protectPageRoute";  // Import ProtectedRoute
+import ProtectedRoute from "./protectPageRoute"; // Import ProtectedRoute
 
 // Các import khác của bạn
 import Dashboard from "./pages/admins/dashboard-Admin/Dashboard";
@@ -21,10 +21,17 @@ import BookingTypeList from "./pages/admins/subTableInReservation/bookingTypeLis
 import TreatmentList from "./pages/admins/subTableInFacilityAndHealthcare/treatment/TreatmentList";
 import MedicineUpdateForm from "./pages/admins/medicines/update-form/MedicineUpdateForm";
 import MedicineDetailForm from "./pages/admins/medicines/detail-form/MedicineDetailForm";
-import PetTypeList from './pages/admins/PetType/PetTypeList';
-import AddPetType from './pages/admins/PetType/AddPetType';
-import PetTypeDetail from './pages/admins/PetType/PetTypeDetail';
-import UpdatePetType from './pages/admins/PetType/UpdatePetType';
+import PetTypeList from "./pages/admins/PetType/PetTypeList";
+import AddPetType from "./pages/admins/PetType/AddPetType";
+import PetTypeDetail from "./pages/admins/PetType/PetTypeDetail";
+import UpdatePetType from "./pages/admins/PetType/UpdatePetType";
+
+import ServiceList from "./pages/admins/services/ServiceList";
+import AddService from "./pages/admins/services/AddService";
+import UpdateService from "./pages/admins/services/UpdateService";
+import ServiceDetail from "./pages/admins/services/ServiceDetail";
+import PetHealthBookListCus from "./pages/customers/pethealthbook/PetHealthBookListCus";
+import PetHealthBookDetailCus from "./pages/customers/pethealthbook/PetHealthBookDetailCus";
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
 import VoucherList from "./pages/admins/vouchers/voucherList/VoucherList";
@@ -39,133 +46,156 @@ import GiftDetailForm from "./pages/admins/gifts/detail-form/GiftDetailForm";
 import GiftUpdatePage from "./pages/admins/gifts/update-form/GiftUpdateForm";
 import GiftListPage from "./pages/customers/gifts/list-page/GiftListPage";
 import GiftDetailPage from "./pages/customers/gifts/detail-page/GiftDetailPage";
-import PetHealthBookListCus from "./pages/customers/pethealthbook/PetHealthBookListCus";
-import PetHealthBookDetailCus from "./pages/customers/pethealthbook/PetHealthBookDetailCus";
-import PetBreedList from './pages/admins/Pets/PetBreed/PetBreedList';
-import PetBreedDetail from './pages/admins/Pets/PetBreed/PetBreedDetail';
-import PetBreedCreate from './pages/admins/Pets/PetBreed/PetBreedCreate';
-import PetBreedEdit from './pages/admins/Pets/PetBreed/PetBreedEdit';
-import RoomList from './pages/admins/rooms/RoomList';
-import RoomDetail from './pages/admins/rooms/RoomDetail';
+import PetBreedList from "./pages/admins/Pets/PetBreed/PetBreedList";
+import PetBreedDetail from "./pages/admins/Pets/PetBreed/PetBreedDetail";
+import PetBreedCreate from "./pages/admins/Pets/PetBreed/PetBreedCreate";
+import PetBreedEdit from "./pages/admins/Pets/PetBreed/PetBreedEdit";
+import RoomList from "./pages/admins/rooms/RoomList";
+import RoomDetail from "./pages/admins/rooms/RoomDetail";
+import RoomCreate from "./pages/admins/rooms/RoomCreate";
+import RoomEdit from "./pages/admins/rooms/RoomEdit";
+import CustomerRoomList from "./pages/customers/Room/RoomList";
+import CustomerRoomDetail from "./pages/customers/Room/RoomDetail";
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
+import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
+import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import CustomerPetList from "./pages/customers/pets/PetList";
+import CustomerPetDetail from "./pages/customers/pets/PetDetail";
+import CustomerPetCreate from "./pages/customers/pets/PetCreate";
+import CustomerPetEdit from "./pages/customers/pets/PetEdit";
+import AdminPetList from "./pages/admins/Pets/Pet/PetList";
+import AdminPetDetail from "./pages/admins/Pets/Pet/PetDetail";
+import AdminPetCreate from "./pages/admins/Pets/Pet/PetCreate";
+import AdminPetEdit from "./pages/admins/Pets/Pet/PetEdit";
+import ServiceCardList from "./pages/customers/services/ServiceListPage";
+import ServiceListPage from "./pages/customers/services/ServiceListPage";
+import ServiceCard from "./components/ServiceCustomer/ServiceCard";
+import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+import PetDiaryListPage from "./pages/customers/Diary/PetDiaryListPage";
+import AddPetDiaryPage from "./pages/customers/Diary/AddPetDiaryPage";
+import EditPetDiaryPage from "./pages/customers/Diary/EditPetDiaryPage";
 import PetHealthBookList from './pages/admins/pethealthbook/PetHealthBookList';
 import PetHealthBookDetail from './pages/admins/pethealthbook/PetHealthBookDetail';
 import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreate';
 
 import PetHealthBookEdit from './pages/admins/pethealthbook/PetHealthBookEdit';
-import RoomCreate from './pages/admins/rooms/RoomCreate';
-import RoomEdit from './pages/admins/rooms/RoomEdit';
-import CustomerRoomList from './pages/customers/Room/RoomList';
-import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
-import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
-import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
-import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
-
-
 function App() {
   return (
-    <div className='App'>
+    <div className="App">
       <BrowserRouter>
         <Routes>
           {/* Route không yêu cầu bảo vệ */}
+
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
 
-
           {/* Route yêu cầu bảo vệ */}
-          <Route path="/dashboard"
+          <Route
+            path="/dashboard"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              //<ProtectedRoute>
+              <Dashboard />
+              // </ProtectedRoute>
             }
           />
-          <Route path="/profile/:accountId"
+          <Route
+            path="/profile/:accountId"
             element={
-              <ProtectedRoute>  
+              <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
             }
           />
-          <Route path="/profilecustomer/:accountId"
-            element={
-              <ProtectedRoute>  
-                <ProfileCustomer/>
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/pethealthbookcus"
+
+          <Route
+            path="/profilecustomer/:accountId"
             element={
               <ProtectedRoute>
-                <PetHealthBookListCus />
+                <ProfileCustomer />
               </ProtectedRoute>
             }
           />
-          <Route path="/detailcus/:healthBookId"
+          <Route
+            path="/detailcus/:healthBookId"
             element={
               <ProtectedRoute>
                 <PetHealthBookDetailCus />
               </ProtectedRoute>
             }
           />
-          <Route path="/account"
+          <Route
+            path="/account"
             element={
               <ProtectedRoute>
                 <AccountList />
               </ProtectedRoute>
             }
           />
-          <Route path="/changepassword/:accountId"
+          <Route
+            path="/changepassword/:accountId"
             element={
               <ProtectedRoute>
                 <ChangePassword />
               </ProtectedRoute>
             }
           />
-          <Route path="/changepasswordcustomer/:accountId"
+
+          <Route
+            path="/changepasswordcustomer/:accountId"
             element={
               <ProtectedRoute>
                 <ChangePasswordCustomer />
               </ProtectedRoute>
             }
           />
-          <Route path="/editprofile/:accountId"
+          <Route
+            path="/editprofile/:accountId"
             element={
               <ProtectedRoute>
                 <EditProfile />
               </ProtectedRoute>
             }
           />
-          <Route path="/editprofilecustomer/:accountId"
+
+          <Route
+            path="/editprofilecustomer/:accountId"
             element={
               <ProtectedRoute>
                 <EditProfileCustomer />
               </ProtectedRoute>
             }
           />
-          <Route path="/update/:healthBookId"
+          <Route
+            path="/update/:healthBookId"
             element={
               <ProtectedRoute>
                 <PetHealthBookEdit />
               </ProtectedRoute>
             }
           />
-          <Route path="/detail/:healthBookId"
+          <Route
+            path="/detail/:healthBookId"
             element={
               <ProtectedRoute>
                 <PetHealthBookDetail />
               </ProtectedRoute>
             }
           />
-          <Route path="/add"
+          <Route
+            path="/add"
             element={
               <ProtectedRoute>
                 <PetHealthBookCreate />
               </ProtectedRoute>
             }
           />
-         <Route path="/pethealthbook"element={
+          <Route
+            path="/pethealthbook"
+            element={
               <ProtectedRoute>
                 <PetHealthBookList />
               </ProtectedRoute>
@@ -180,14 +210,22 @@ function App() {
           </Route>
 
           <Route path="/gifts">
-            <Route index element={<GiftsList/>} />
+            <Route index element={<GiftsList />} />
             <Route path="new" element={<GiftAddForm />} />
             <Route path="update/:giftId" element={<GiftUpdatePage />} />
             <Route path="detail/:giftId" element={<GiftDetailForm />} />
           </Route>
 
+          <Route path="/customer/redeemHistory">
+            <Route index element={<CustomerRedeemHistory />} />
+          </Route>
+
+          <Route path="redeemHistory">
+            <Route index element={<AdminRedeemHistory />} />
+          </Route>
+
           <Route path="/customer/gifts">
-            <Route index element={<GiftListPage/>} />
+            <Route index element={<GiftListPage />} />
             <Route path="detail/:giftId" element={<GiftDetailPage />} />
           </Route>
 
@@ -208,6 +246,12 @@ function App() {
             <Route path="roomtypes" element={<RoomTypeList />} />
           </Route>
 
+          <Route path="/service">
+            <Route index element={<ServiceList />} />
+            <Route path="add" element={<AddService />} />
+            <Route path=":id" element={<ServiceDetail />} />
+            <Route path="edit/:id" element={<UpdateService />} />
+          </Route>
 
           <Route path="/vouchers">
             <Route index element={<VoucherList />} />
@@ -216,9 +260,12 @@ function App() {
             <Route path="detail/:voucherId" element={<VoucherDetail />} />
           </Route>
           <Route path="/customer/vouchers">
-            <Route index element={<CustomerVoucherList />} />          
-            <Route path="detail/:voucherId" element={<CustomerVoucherDetail />} />
-             </Route>
+            <Route index element={<CustomerVoucherList />} />
+            <Route
+              path="detail/:voucherId"
+              element={<CustomerVoucherDetail />}
+            />
+          </Route>
           <Route path="/medicines">
             <Route index element={<List />} />
             <Route path="new" element={<MedicineAddForm />} />
@@ -246,6 +293,25 @@ function App() {
           <Route path="/customerRoom">
             <Route index element={<CustomerRoomList />} />
             <Route path=":id" element={<CustomerRoomDetail />} />
+          </Route>
+          <Route path="/customer/services">
+            <Route index element={<ServiceListPage />} />
+            <Route path=":id" element={<ServiceDetailPage />} />
+          </Route>
+          <Route path="/customer/pet-diaries">
+            <Route index element={<PetDiaryListPage />} />
+          </Route>
+          <Route path="/pet">
+            <Route index element={<AdminPetList />} />
+            <Route path=":id" element={<AdminPetDetail />} />
+            <Route path="add" element={<AdminPetCreate />} />
+            <Route path="edit/:id" element={<AdminPetEdit />} />
+          </Route>
+          <Route path="/customer/pet">
+            <Route index element={<CustomerPetList />} />
+            <Route path=":id" element={<CustomerPetDetail />} />
+            <Route path="add" element={<CustomerPetCreate />} />
+            <Route path="edit/:id" element={<CustomerPetEdit />} />
           </Route>
           <Route path="/register">
             <Route index element={<Register />} />

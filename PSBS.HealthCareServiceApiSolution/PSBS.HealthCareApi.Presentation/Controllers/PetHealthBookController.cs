@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PSBS.HealthCareApi.Application.DTOs;
 using PSBS.HealthCareApi.Application.DTOs.Conversions;
 using PSBS.HealthCareApi.Application.Interfaces;
+using PSBS.HealthCareApi.Domain;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 
@@ -58,7 +59,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             var response = await petHealthBookInterface.CreateAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
-       
+
 
         // PUT api/<BookingStatusController>/5
         [HttpPut("{id}")]

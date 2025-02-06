@@ -15,15 +15,15 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
         {
             return new PetHealthBook()
             {
-                healthBookId = petHealthBookDTO.healthBookId, 
-                bookingId = petHealthBookDTO.bookingId,       
-                medicineId = petHealthBookDTO.medicineId,     
-                visitDate = petHealthBookDTO.visitDate,       
+                healthBookId = petHealthBookDTO.healthBookId,
+                bookingId = petHealthBookDTO.bookingId,
+                medicineId = petHealthBookDTO.medicineId,
+                visitDate = petHealthBookDTO.visitDate,
                 nextVisitDate = petHealthBookDTO.nextVisitDate,
-                performBy = petHealthBookDTO.performBy,       
-                createdAt = petHealthBookDTO.createdAt,       
-                updatedAt = petHealthBookDTO.updatedAt,       
-                isDeleted = petHealthBookDTO.isDeleted       
+                performBy = petHealthBookDTO.performBy,
+                createdAt = petHealthBookDTO.createdAt,
+                updatedAt = petHealthBookDTO.updatedAt,
+                isDeleted = petHealthBookDTO.isDeleted
             };
         }
 
@@ -33,15 +33,15 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             {
                 var singlePetHealthBook = new PetHealthBookDTO
                 (
-                    petHealthBook.healthBookId,    
-                    petHealthBook.bookingId,       
-                    petHealthBook.medicineId,      
-                    petHealthBook.visitDate,       
-                    petHealthBook.nextVisitDate,  
-                    petHealthBook.performBy,       
-                    petHealthBook.createdAt,       
-                    petHealthBook.updatedAt,      
-                    petHealthBook.isDeleted       
+                    petHealthBook.healthBookId,
+                    petHealthBook.bookingId,
+                    petHealthBook.medicineId,
+                    petHealthBook.visitDate,
+                    petHealthBook.nextVisitDate,
+                    petHealthBook.performBy,
+                    petHealthBook.createdAt,
+                    petHealthBook.updatedAt,
+                    petHealthBook.isDeleted
                 );
                 return (singlePetHealthBook, null);
             }
@@ -50,15 +50,15 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             {
                 var list = petHealthBooks!.Select(t => new PetHealthBookDTO
                     (
-                        t.healthBookId,    
-                        t.bookingId,      
-                        t.medicineId,      
-                        t.visitDate,      
-                        t.nextVisitDate,   
-                        t.performBy,       
-                        t.createdAt,      
-                        t.updatedAt,      
-                        t.isDeleted       
+                        t.healthBookId,
+                        t.bookingId,
+                        t.medicineId,
+                        t.visitDate,
+                        t.nextVisitDate,
+                        t.performBy,
+                        t.createdAt,
+                        t.updatedAt,
+                        t.isDeleted
                     )).ToList();
 
                 return (null, list);

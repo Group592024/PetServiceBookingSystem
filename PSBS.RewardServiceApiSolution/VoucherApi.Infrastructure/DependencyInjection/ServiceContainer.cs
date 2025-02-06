@@ -19,6 +19,8 @@ namespace VoucherApi.Infrastructure.DependencyInjection
             // create DI
             services.AddScoped<IVoucher, VoucherRepository>();
             services.AddScoped<IGift, GiftRepository>();
+            services.AddScoped<IRedeemGiftHistory, RedeemGiftHistoryRepository>();
+
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)

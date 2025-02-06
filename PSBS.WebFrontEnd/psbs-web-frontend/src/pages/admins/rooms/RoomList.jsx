@@ -76,6 +76,12 @@ const RoomList = () => {
         console.log('Room Data state:', data);
     }, [data]);
 
+    useEffect(() => {
+        if (data.length === 0) {
+            console.log("No rooms available!");
+        }
+    }, [data]);    
+
     const handleDelete = (id) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -106,6 +112,12 @@ const RoomList = () => {
                                 'success'
                             );
                             fetchDataFunction();
+                            setData((prevData) => {
+                                if (prevData.length === 1) {
+                                    return []; 
+                                }
+                               
+                            });
                         } else {
                             Swal.fire(
                                 'Error!',
@@ -123,7 +135,6 @@ const RoomList = () => {
             }
         });
     };
-    
 
     const columns = [
         {

@@ -2,6 +2,7 @@
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
+using PetApi.Infrastructure.Repositories;
 using PSPS.SharedLibrary.Responses;
 
 namespace PetApi.Presentation.Controllers
