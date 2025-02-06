@@ -38,9 +38,9 @@ namespace PetApi.Application.DTOs.Conversions
                     Diary_Date = petDiary.Diary_Date,
                     Pet = new PetDTO
                     {
-                        Pet_Name = petDiary.Pet.Pet_Name,
-                        Pet_Image = petDiary.Pet.Pet_Image,
-                        Date_Of_Birth = petDiary.Pet.Date_Of_Birth,
+                        petName = petDiary.Pet.Pet_Name,
+                        petImage = petDiary.Pet.Pet_Image,
+                        dateOfBirth = petDiary.Pet.Date_Of_Birth,
 
                     }
                 };
@@ -57,9 +57,9 @@ namespace PetApi.Application.DTOs.Conversions
                     Diary_Date = p.Diary_Date,
                     Pet = new PetDTO
                     {
-                        Pet_Name = p.Pet.Pet_Name,
-                        Pet_Image = p.Pet.Pet_Image,
-                        Date_Of_Birth = p.Pet.Date_Of_Birth,
+                        petName = p.Pet.Pet_Name,
+                        petImage = p.Pet.Pet_Image,
+                        dateOfBirth = p.Pet.Date_Of_Birth,
 
                     }
                 }).ToList();
