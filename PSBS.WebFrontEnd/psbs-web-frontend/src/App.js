@@ -55,8 +55,19 @@ import RoomCreate from './pages/admins/rooms/RoomCreate';
 import RoomEdit from './pages/admins/rooms/RoomEdit';
 import CustomerRoomList from './pages/customers/Room/RoomList';
 import CustomerRoomDetail from './pages/customers/Room/RoomDetail';
-import CustomerRedeemHistory from './pages/customers/gifts/gift-history/CustomerRedeemHistory';
-import AdminRedeemHistory from './pages/admins/gifts/gift-history/AdminRedeemHistory';
+import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
+import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
+import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
+import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
+import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import CustomerPetList from './pages/customers/pets/PetList';
+import CustomerPetDetail from './pages/customers/pets/PetDetail';
+import CustomerPetCreate from './pages/customers/pets/PetCreate';
+import CustomerPetEdit from './pages/customers/pets/PetEdit';
+import AdminPetList from './pages/admins/Pets/Pet/PetList';
+import AdminPetDetail from './pages/admins/Pets/Pet/PetDetail';
+import AdminPetCreate from './pages/admins/Pets/Pet/PetCreate';
+import AdminPetEdit from './pages/admins/Pets/Pet/PetEdit';
 import ChangePasswordCustomer from './pages/customers/profile-Customer/ChangePasswordCustomer';
 import ProfileCustomer from './pages/customers/profile-Customer/ProfileCustomer';
 import EditProfileCustomer from './pages/customers/profile-Customer/EditProfileCustomer';
@@ -67,6 +78,7 @@ import ServiceDetailPage from './pages/customers/services/ServiceDetailPage';
 import PetDiaryListPage from './pages/customers/Diary/PetDiaryListPage';
 import AddPetDiaryPage from './pages/customers/Diary/AddPetDiaryPage';
 import EditPetDiaryPage from './pages/customers/Diary/EditPetDiaryPage';
+
 
 function App() {
   return (
@@ -249,7 +261,19 @@ function App() {
           <Route path='/customer/pet-diaries'>
             <Route index element={<PetDiaryListPage />} />
           </Route>
-          <Route path='/register'>
+          <Route path="/pet">
+            <Route index element={<AdminPetList />} />
+            <Route path=":id" element={<AdminPetDetail />} />
+            <Route path="add" element={<AdminPetCreate />} />
+            <Route path="edit/:id" element={<AdminPetEdit />} />
+          </Route>
+          <Route path="/customer/pet">
+            <Route index element={<CustomerPetList />} />
+            <Route path=":id" element={<CustomerPetDetail />} />
+            <Route path="add" element={<CustomerPetCreate />} />
+            <Route path="edit/:id" element={<CustomerPetEdit />} />
+          </Route>
+          <Route path="/register">
             <Route index element={<Register />} />
           </Route>
           <Route path='/login'>
