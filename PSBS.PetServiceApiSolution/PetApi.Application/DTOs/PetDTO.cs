@@ -1,4 +1,5 @@
-﻿using System;
+
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace PetApi.Application.DTOs
@@ -32,5 +33,6 @@ namespace PetApi.Application.DTOs
         [Required]
         public Guid accountId { get; set; }
         public Guid? petTypeId { get; set; }
+
     }
 }

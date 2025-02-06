@@ -1,5 +1,4 @@
-
- *{
+* {
   font-family: 'Nunito', sans-serif;
   margin: 0;
   padding: 0;
@@ -7,54 +6,54 @@
 }
 :root {
   --light: #f6f6f9;
-  --primary: #1976D2;
-  --light-primary: #CFE8FF;
+  --primary: #1976d2;
+  --light-primary: #cfe8ff;
   --grey: #eee;
-  --dark-grey: #AAAAAA;
+  --dark-grey: #aaaaaa;
   --dark: #363949;
-  --danger: #D32F2F;
---light-danger: #FECDD3;
-  --warning: #FBC02D;
-  --light-warning: #FFF2C6;
-  --success: #388E3C;
-  --light-success: #BBF7D0;
+  --danger: #d32f2f;
+  --light-danger: #fecdd3;
+  --warning: #fbc02d;
+  --light-warning: #fff2c6;
+  --success: #388e3c;
+  --light-success: #bbf7d0;
 }
 
-*{
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
 }
 
-.bx{
+.bx {
   font-size: 1.7rem;
 }
 
-a{
+a {
   text-decoration: none;
 }
 
-li{
+li {
   list-style: none;
 }
 
-html{
+html {
   overflow-x: hidden;
 }
 
-body.dark{
+body.dark {
   --light: #181a1e;
   --grey: #25252c;
-  --dark: #fbfbfb
+  --dark: #fbfbfb;
 }
 
-body{
+body {
   background: var(--grey);
   overflow-x: hidden;
 }
 
-.sidebar{
+.sidebar {
   position: fixed;
   top: 0;
   left: 0;
@@ -67,15 +66,15 @@ body{
   transition: all 0.3s ease;
 }
 
-.sidebar::-webkit-scrollbar{
+.sidebar::-webkit-scrollbar {
   display: none;
 }
 
-.sidebar.close{
+.sidebar.close {
   width: 60px;
 }
 
-.sidebar .logo{
+.sidebar .logo {
   font-size: 24px;
   font-weight: 700;
   height: 56px;
@@ -87,23 +86,23 @@ body{
   box-sizing: content-box;
 }
 
-.sidebar .logo .logo-name span{
+.sidebar .logo .logo-name span {
   color: var(--dark);
 }
 
-.sidebar .logo .bx{
+.sidebar .logo .bx {
   min-width: 60px;
   display: flex;
   justify-content: center;
   font-size: 2.2rem;
 }
 
-.sidebar .side-menu{
+.sidebar .side-menu {
   width: 100%;
   margin-top: 48px;
 }
 
-.sidebar .side-menu li{
+.sidebar .side-menu li {
   height: 48px;
   background: transparent;
   margin-left: 6px;
@@ -111,13 +110,13 @@ body{
   padding: 4px;
 }
 
-.sidebar .side-menu li.active{
+.sidebar .side-menu li.active {
   background: var(--grey);
   position: relative;
 }
 
-.sidebar .side-menu li.active::before{
-  content: "";
+.sidebar .side-menu li.active::before {
+  content: '';
   position: absolute;
   width: 40px;
   height: 40px;
@@ -128,8 +127,8 @@ body{
   z-index: -1;
 }
 
-.sidebar .side-menu li.active::after{
-  content: "";
+.sidebar .side-menu li.active::after {
+  content: '';
   position: absolute;
   width: 40px;
   height: 40px;
@@ -140,7 +139,7 @@ body{
   z-index: -1;
 }
 
-.sidebar .side-menu li a{
+.sidebar .side-menu li a {
   width: 100%;
   height: 100%;
   background: var(--light);
@@ -154,39 +153,39 @@ body{
   transition: all 0.3s ease;
 }
 
-.sidebar .side-menu li.active a{
+.sidebar .side-menu li.active a {
   color: var(--success);
 }
 
-.sidebar.close .side-menu li a{
+.sidebar.close .side-menu li a {
   width: calc(48px - (4px * 2));
   transition: all 0.3s ease;
 }
 
-.sidebar .side-menu li a .bx{
+.sidebar .side-menu li a .bx {
   min-width: calc(60px - ((4px + 6px) * 2));
   display: flex;
   font-size: 1.6rem;
   justify-content: center;
 }
 
-.sidebar .side-menu li a.logout{
+.sidebar .side-menu li a.logout {
   color: var(--danger);
 }
 
-.content{
+.content {
   position: relative;
   width: calc(100% - 230px);
   left: 230px;
   transition: all 0.3s ease;
 }
 
-.sidebar.close~.content{
+.sidebar.close ~ .content {
   width: calc(100% - 60px);
   left: 60px;
 }
 
-.content .nav{
+.content .nav {
   height: 56px;
   background: var(--light);
   padding: 0 24px 0 0;
@@ -199,8 +198,8 @@ body{
   z-index: 1000;
 }
 
-.content .nav::before{
-  content: "";
+.content .nav::before {
+  content: '';
   position: absolute;
   width: 40px;
   height: 40px;
@@ -210,28 +209,28 @@ body{
   box-shadow: -20px -20px 0 var(--light);
 }
 
-.content .nav a{
+.content .nav a {
   color: var(--dark);
 }
 
-.content .nav .bx.bx-menu{
+.content .nav .bx.bx-menu {
   cursor: pointer;
   color: var(--dark);
 }
 
-.content .nav form{
+.content .nav form {
   max-width: 400px;
   width: 100%;
   margin-right: auto;
 }
 
-.content .nav form .form-input{
+.content .nav form .form-input {
   display: flex;
   align-items: center;
   height: 36px;
 }
 
-.content .nav form .form-input input{
+.content .nav form .form-input input {
   flex-grow: 1;
   padding: 0 16px;
   height: 100%;
@@ -243,7 +242,7 @@ body{
   color: var(--dark);
 }
 
-.content .nav form .form-input button{
+.content .nav form .form-input button {
   width: 80px;
   height: 100%;
   display: flex;
@@ -258,12 +257,12 @@ body{
   cursor: pointer;
 }
 
-.content .nav .notifications{
+.content .nav .notifications {
   font-size: 20px;
   position: relative;
 }
 
-.content .nav .notifications .count{
+.content .nav .notifications .count {
   position: absolute;
   top: -6px;
   right: -6px;
@@ -280,14 +279,14 @@ body{
   justify-content: center;
 }
 
-.content .nav .profile img{
+.content .nav .profile img {
   width: 36px;
   height: 36px;
   object-fit: cover;
   border-radius: 50%;
 }
 
-.content .nav .theme-toggle{
+.content .nav .theme-toggle {
   display: block;
   min-width: 50px;
   height: 25px;
@@ -297,8 +296,8 @@ body{
   border-radius: 25px;
 }
 
-.content .nav .theme-toggle::before{
-  content: "";
+.content .nav .theme-toggle::before {
+  content: '';
   position: absolute;
   top: 2px;
   left: 2px;
@@ -309,17 +308,17 @@ body{
   transition: all 0.3s ease;
 }
 
-.content .nav #theme-toggle:checked+.theme-toggle::before{
+.content .nav #theme-toggle:checked + .theme-toggle::before {
   left: calc(100% - (25px - 4px) - 2px);
 }
 
-.content main{
+.content main {
   width: 100%;
   padding: 36px 24px;
   max-height: calc(100vh - 56px);
 }
 
-.content main .header{
+.content main .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -327,34 +326,34 @@ body{
   flex-wrap: wrap;
 }
 
-.content main .header .left h1{
+.content main .header .left h1 {
   font-size: 36px;
   font-weight: 600;
   margin-bottom: 10px;
   color: var(--dark);
 }
 
-.content main .header .left .breadcrumb{
+.content main .header .left .breadcrumb {
   display: flex;
   align-items: center;
   grid-gap: 16px;
 }
 
-.content main .header .left .breadcrumb li{
+.content main .header .left .breadcrumb li {
   color: var(--dark);
 }
 
-.content main .header .left .breadcrumb li a{
+.content main .header .left .breadcrumb li a {
   color: var(--dark-grey);
   pointer-events: none;
 }
 
-.content main .header .left .breadcrumb li a.active{
+.content main .header .left .breadcrumb li a.active {
   color: var(--primary);
   pointer-events: none;
 }
 
-.content main .header .report{
+.content main .header .report {
   height: 36px;
   padding: 0 16px;
   border-radius: 36px;
@@ -367,7 +366,7 @@ body{
   font-weight: 500;
 }
 
-.content main .insights{
+.content main .insights {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   grid-gap: 24px;
@@ -375,7 +374,7 @@ body{
   margin-bottom: 36px;
 }
 
-.content main .insights li{
+.content main .insights li {
   padding: 24px;
   background: var(--light);
   border-radius: 20px;
@@ -386,7 +385,7 @@ body{
   transition: all 0.3s ease;
 }
 
-.content main .insights li  .bx{
+.content main .insights li .bx {
   width: 80px;
   height: 80px;
   border-radius: 10px;
@@ -396,46 +395,49 @@ body{
   justify-content: center;
 }
 
-.content main .insights  .first .bx {
+.content main .insights .first .bx {
   background: var(--light-primary);
   color: var(--primary);
 }
 
-.content main .insights  .second .bx{
+.content main .insights .second .bx {
   background: var(--light-warning);
   color: var(--warning);
 }
 
-.content main .insights .third .bx{
+.content main .insights .third .bx {
   background: var(--light-success);
   color: var(--success);
 }
 
-.content main .insights .fourth .bx{
+.content main .insights .fourth .bx {
   background: var(--light-danger);
   color: var(--danger);
 }
 
-.content main .insights li .info h3{
+.content main .insights li .info h3 {
   font-size: 24px;
   font-weight: 600;
   color: var(--dark);
 }
 
-.content main .insights li .info p{
+.content main .insights li .info p {
   color: var(--dark);
 }
 
-.content main .listContainer{
+.content main .listContainer {
   background: var(--light);
   padding-bottom: 40px;
   border-radius: 20px;
 }
 
-
-.customerContainer{
+.customerContainer {
   position: relative;
   padding: 10px 20px;
-  width: 100% ;
+  width: 100%;
   transition: all 0.3s ease;
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
 }

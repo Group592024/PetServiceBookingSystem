@@ -7,5 +7,6 @@ namespace PetApi.Application.Interfaces
     {
         Task<IEnumerable<Pet>> ListAvailablePetAsync(Guid accountId);
 
+
     }
 }

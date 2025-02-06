@@ -95,6 +95,7 @@ namespace PetApi.Infrastructure.Repositories
                 return new Response(false, "An error occurred while deleting the Pet.");
             }
         }
+
         public async Task<Pet?> GetByIdAsync(Guid id)
         {
             try
@@ -138,12 +139,13 @@ namespace PetApi.Infrastructure.Repositories
             {
                 var existingPetByName = await context.Pets
                                       .FirstOrDefaultAsync(p => p.Pet_Name == entity.Pet_Name && p.Account_ID == entity.Account_ID
-                                      && p.Pet_ID != entity.Pet_ID);//&& !p.IsDelete); //Only check active pet
+                                      && p.Pet_ID != entity.Pet_ID);
 
                 if (existingPetByName != null)
                 {
                     return new Response(false, $"Pet with Name {entity.Pet_Name} already exists!");
                 }
+
                 var petToUpdate = await context.Pets
                                                 .FirstOrDefaultAsync(p => p.Pet_ID == entity.Pet_ID);
                 if (petToUpdate == null)
@@ -197,12 +199,12 @@ namespace PetApi.Infrastructure.Repositories
             {
                 var pet = await context.Pets.Where(predicate).FirstOrDefaultAsync();
 
-                return pet ?? throw new InvalidOperationException("Pet  not found");
+                return pet ?? throw new InvalidOperationException("Pet not found");
             }
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-                throw new InvalidOperationException("Error occurred retrieving pet ", ex);
+                throw new InvalidOperationException("Error occurred retrieving pet", ex);
             }
         }
     }

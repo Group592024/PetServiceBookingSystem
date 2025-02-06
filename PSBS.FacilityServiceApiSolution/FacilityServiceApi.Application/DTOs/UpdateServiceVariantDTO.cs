@@ -4,5 +4,7 @@
     {
         public decimal servicePrice { get; set; }
         public string serviceContent { get; set; }
+
+        public bool isDeleted { get; set; }
     }
 }

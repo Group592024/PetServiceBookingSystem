@@ -25,7 +25,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<ServiceVariantDTO>> GetServiceVariantById(Guid id)
         {
             var serviceVariant = await _serviceVariant.GetByIdAsync(id);
-            if (serviceVariant == null || serviceVariant.isDeleted)
+            if (serviceVariant == null)
             {
                 return NotFound(new Response(false, $"Service variant with GUID {id} not found or is deleted"));
             }
@@ -37,18 +37,18 @@ namespace FacilityServiceApi.Presentation.Controllers
             });
         }
 
-        [HttpGet("/service/{serviceId}")]
-        public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid serviceId, [FromQuery] bool showAll)
+        [HttpGet("/service/{id}")]
+        public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid id, [FromQuery] bool showAll)
         {
             if (showAll)
             {
-                var service = await _service.GetByIdAsync(serviceId);
-                if (service == null || service.isDeleted)
+                var service = await _service.GetByIdAsync(id);
+                if (service == null)
                 {
-                    return NotFound(new Response(false, $"Service with GUID {serviceId} not found or is deleted"));
+                    return NotFound(new Response(false, $"Service with GUID {id} not found or is deleted"));
                 }
 
-                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(serviceId))
+                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(id))
 
                             .ToList();
                 if (!serviceVariants.Any())
@@ -64,14 +64,13 @@ namespace FacilityServiceApi.Presentation.Controllers
             }
             else
             {
-                var service = await _service.GetByIdAsync(serviceId);
-                if (service == null || service.isDeleted)
+                var service = await _service.GetByIdAsync(id);
+                if (service == null)
                 {
-                    return NotFound(new Response(false, $"Service with GUID {serviceId} not found or is deleted"));
+                    return NotFound(new Response(false, $"Service with GUID {id} not found or is deleted"));
                 }
 
-                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(serviceId))
-                            .Where(r => !r.isDeleted)
+                var serviceVariants = (await _serviceVariant.GetAllVariantsAsync(id))
                             .ToList();
                 if (!serviceVariants.Any())
                 {
@@ -141,17 +140,12 @@ namespace FacilityServiceApi.Presentation.Controllers
 
             bool hasChanges =
                 existingServiceVariant.servicePrice != dto.servicePrice ||
-                existingServiceVariant.serviceContent != dto.serviceContent;
+                existingServiceVariant.serviceContent != dto.serviceContent ||
+                existingServiceVariant.isDeleted != dto.isDeleted;
 
             if (!hasChanges)
             {
                 return NoContent();
-            }
-
-            bool variantInBooking = await _serviceVariant.CheckIfVariantInBooking(id);
-            if (variantInBooking)
-            {
-                return Conflict(new Response(false, $"Service variant with ID {id} is in at least one booking"));
             }
 
             var existingVariant = await _serviceVariant.GetByAsync(x => x.serviceId == existingServiceVariant.serviceId && x.serviceContent.ToLower().Trim().Equals(dto.serviceContent.ToLower().Trim()));

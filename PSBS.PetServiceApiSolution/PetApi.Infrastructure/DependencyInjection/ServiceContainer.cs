@@ -21,6 +21,8 @@ namespace PetApi.Infrastructure.DependencyInjection
             services.AddScoped<IPetBreed, PetBreedRepository>();
             services.AddScoped<IPet, PetRepository>();
 
+            services.AddScoped<IPetDiary, PetDiaryRepository>();
+
             return services;
         }
 

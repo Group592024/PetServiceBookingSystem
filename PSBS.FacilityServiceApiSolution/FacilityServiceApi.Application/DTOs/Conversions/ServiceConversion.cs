@@ -12,10 +12,11 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 serviceTypeId = service.serviceTypeId,
                 serviceDescription = service.serviceDescription,
                 serviceName = service.serviceName,
-                isDeleted = false,
+                isDeleted = service.isDeleted,
                 serviceImage = service.serviceImage,
                 createAt = service.createAt,
-                updateAt = service.updateAt
+                updateAt = service.updateAt,
+                ServiceType = service.ServiceType,
             };
         }
 
@@ -63,7 +64,9 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     serviceName = service.serviceName,
                     serviceImage = service.serviceImage,
                     createAt = service.createAt,
-                    updateAt = service.updateAt
+                    updateAt = service.updateAt,
+                    ServiceType = service.ServiceType,
+                    isDeleted = service.isDeleted
                 };
                 return (singleservice, null);
             }
@@ -79,7 +82,9 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     serviceName = p.serviceName,
                     serviceImage = p.serviceImage,
                     createAt = p.createAt,
-                    updateAt = p.updateAt
+                    updateAt = p.updateAt,
+                    ServiceType = p.ServiceType,
+                    isDeleted = p.isDeleted
                 }).ToList();
 
                 return (null, _services);
