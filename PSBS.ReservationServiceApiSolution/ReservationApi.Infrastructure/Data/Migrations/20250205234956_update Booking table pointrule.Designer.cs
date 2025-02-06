@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ReservationApi.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ReservationApi.Infrastructure.Data;
 namespace ReservationApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ReservationServiceDBContext))]
-    partial class ReservationServiceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250205234956_update Booking table pointrule")]
+    partial class updateBookingtablepointrule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

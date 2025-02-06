@@ -1,0 +1,61 @@
+﻿using FacilityServiceApi.Domain.Entities;
+using FacilityServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PSPS.SharedLibrary.Responses;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace FacilityServiceApi.Presentation.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class RoomHistoriesController : ControllerBase
+    {
+        private readonly FacilityServiceDbContext _context;
+        public RoomHistoriesController(FacilityServiceDbContext context)
+        {
+            _context = context;
+        }
+        // GET: api/<RoomHistoriesController>
+        [HttpGet]
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
+
+        // GET api/<RoomHistoriesController>/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<BookingServiceItem>> GetRoomHistoryByBookingId(Guid id)
+        {
+            var bookingRoomItems = await _context.RoomHistories.Where(i => i.BookingId == id).ToListAsync();
+            if (!bookingRoomItems.Any())
+            {
+                return NotFound(new Response(false, "No item detected"));
+            }
+
+            return Ok(new Response(true, "Booking room item retrieved successfully!")
+            {
+                Data = bookingRoomItems
+            });
+        }
+
+        // POST api/<RoomHistoriesController>
+        [HttpPost]
+        public void Post([FromBody] string value)
+        {
+        }
+
+        // PUT api/<RoomHistoriesController>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
+
+        // DELETE api/<RoomHistoriesController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
+        }
+    }
+}

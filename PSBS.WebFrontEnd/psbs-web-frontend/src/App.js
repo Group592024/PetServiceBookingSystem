@@ -64,6 +64,11 @@ import ServiceCardList from './pages/customers/services/ServiceListPage';
 import ServiceListPage from './pages/customers/services/ServiceListPage';
 import ServiceCard from './components/ServiceCustomer/ServiceCard';
 import ServiceDetailPage from './pages/customers/services/ServiceDetailPage';
+import Booking from './pages/customers/bookings/AddBooking';
+import AdminBookingList from './pages/admins/bookings/list-pages/AdminBookingList';
+import ServiceBookingDetailPage from './pages/admins/bookings/detail-form/ServiceBookingDetailPage';
+import RoomBookingDetailPage from './pages/admins/bookings/detail-form/RoomBookingDetailPage';
+import CustomerBookingList from './pages/customers/bookings/list-pages/CustomerBookingList';
 
 function App() {
   return (
@@ -152,6 +157,17 @@ function App() {
             <Route path='new' element={<MedicineAddForm />} />
             <Route path='update/:medicineId' element={<MedicineUpdateForm />} />
             <Route path='detail/:medicineId' element={<MedicineDetailForm />} />
+          </Route>
+
+          <Route path='/bookings'>
+          <Route index element={<CustomerBookingList />} />
+            <Route path='new' element={<Booking />} />
+          </Route>
+
+          <Route path='/admin/bookings'>
+          <Route index element={<AdminBookingList />} />
+          <Route path='detail/ServiceBookingDetailPage/:bookingId' element={<ServiceBookingDetailPage />} />
+          <Route path='detail/RoomBookingDetailPage/:bookingId' element={<RoomBookingDetailPage />} />
           </Route>
 
           <Route path='/gifts'>
