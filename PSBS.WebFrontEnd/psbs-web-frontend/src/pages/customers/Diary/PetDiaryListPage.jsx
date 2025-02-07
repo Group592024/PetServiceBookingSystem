@@ -10,10 +10,11 @@ import Swal from 'sweetalert2';
 import { formatDateString } from '../../../Utilities/formatDate';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { useParams } from 'react-router-dom';
 
 const PetDiaryListPage = () => {
-  const petId =
-    localStorage.getItem('petId') || '3fa85f64-5717-4562-b3fc-2c963f66afa6';
+  const { petId } = useParams();
+  const petInfo = JSON.parse(localStorage.getItem('petInfo'));
 
   const [loading, setLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
@@ -40,18 +41,6 @@ const PetDiaryListPage = () => {
       const data = await response.json();
 
       if (data.flag) {
-        localStorage.setItem(
-          'petInfo',
-          JSON.stringify({
-            petId:
-              localStorage.getItem('petId') ||
-              '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-            petName: data?.data?.data[0]?.pet?.pet_Name,
-            petImage: data?.data?.data[0]?.pet?.pet_Image,
-            petDoB: data?.data?.data[0]?.pet?.date_Of_Birth,
-          })
-        );
-
         setPetDiary(data?.data);
       }
 
@@ -113,19 +102,18 @@ const PetDiaryListPage = () => {
               <div className='py-8 px-6 bg-customPrimary rounded-xl'>
                 <img
                   src={
-                    petDiary?.data?.length !== 0
-                      ? `http://localhost:5010${petDiary?.data[0]?.pet?.pet_Image}`
+                    petInfo
+                      ? `http://localhost:5010${petInfo.petImage}`
                       : SampleImage
                   }
                   alt='sample-image'
                   className='rounded-[2.6rem]'
                 />
                 <h2 className='text-4xl font-bold text-center mt-4 mb-1 text-white'>
-                  {petDiary && petDiary?.data[0]?.pet?.pet_Name}
+                  {petInfo && petInfo.petName}
                 </h2>
                 <p className='text-lg text-center text-white'>
-                  {petDiary &&
-                    formatDateString(petDiary?.data[0]?.pet?.date_Of_Birth)}
+                  {petInfo && formatDateString(petInfo.petDoB)}
                 </p>
               </div>
 
@@ -139,7 +127,6 @@ const PetDiaryListPage = () => {
             </Stack>
 
             <Stack className='w-2/3'>
-              {console.log(petDiary?.data?.length)}
               {petDiary?.data?.length !== 0 ? (
                 <>
                   <PetDiaryCardList data={petDiary?.data} />

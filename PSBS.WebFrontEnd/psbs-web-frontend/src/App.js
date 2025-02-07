@@ -298,7 +298,7 @@ function App() {
             <Route index element={<ServiceListPage />} />
             <Route path=":id" element={<ServiceDetailPage />} />
           </Route>
-          <Route path="/customer/pet-diaries">
+          <Route path="/customer/pet-diaries/:petId">
             <Route index element={<PetDiaryListPage />} />
           </Route>
           <Route path="/pet">
