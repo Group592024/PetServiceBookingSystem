@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace PSBS.HealthCareApi.Domain
@@ -16,8 +17,8 @@ namespace PSBS.HealthCareApi.Domain
         [Column("booking_Id")]
         public Guid bookingId { get; set; }
 
-        [ForeignKey("Medicine")]
         [Column("medicine_id")]
+        [JsonIgnore]
         public Guid medicineId { get; set; }
         public virtual Medicine? Medicine { get; set; }
 

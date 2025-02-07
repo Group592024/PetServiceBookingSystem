@@ -4,16 +4,19 @@ using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Data
+namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    partial class FacilityServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250123152229_Migration01")]
+    partial class Migration01
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -320,20 +323,20 @@ namespace FacilityServiceApi.Infrastructure.Data
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 2, 5, 0, 12, 59, 622, DateTimeKind.Local).AddTicks(5582),
+                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(816),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 2, 5, 0, 12, 59, 622, DateTimeKind.Local).AddTicks(5597)
+                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(832)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 2, 5, 0, 12, 59, 622, DateTimeKind.Local).AddTicks(5601),
+                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 2, 5, 0, 12, 59, 622, DateTimeKind.Local).AddTicks(5602)
+                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834)
                         });
                 });
 
@@ -420,7 +423,7 @@ namespace FacilityServiceApi.Infrastructure.Data
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Service", b =>
                 {
                     b.HasOne("FacilityServiceApi.Domain.Entities.ServiceType", "ServiceType")
-                        .WithMany("Services")
+                        .WithMany()
                         .HasForeignKey("serviceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -452,11 +455,6 @@ namespace FacilityServiceApi.Infrastructure.Data
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomType", b =>
                 {
                     b.Navigation("Rooms");
-                });
-
-            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceType", b =>
-                {
-                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceVariant", b =>

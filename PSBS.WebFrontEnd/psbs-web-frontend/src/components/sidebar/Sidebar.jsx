@@ -46,25 +46,35 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className="side-menu">
-        <li className={location.pathname.startsWith("/dashboard") ? "active" : ""}>
+        <li
+          className={location.pathname.startsWith("/dashboard") ? "active" : ""}
+        >
           <Link to="/dashboard">
             <i className="bx bxs-dashboard"></i>
             Dashboard
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/service") ? "active" : ""}>
+        <li
+          className={location.pathname.startsWith("/service") ? "active" : ""}
+        >
           <Link to="/service">
             <i className="bx bx-store-alt"></i>
             Service
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/medicines") ? "active" : ""}>
-          <Link to="/medicines">
+        <li
+          className={
+            location.pathname.startsWith("/pethealthbook") ? "active" : ""
+          }
+        >
+          <Link to="/pethealthbook">
             <i className="bx bxs-capsule"></i>
-            Medicines
+            PetHealthBook
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/account") ? "active" : ""}>
+        <li
+          className={location.pathname.startsWith("/account") ? "active" : ""}
+        >
           <Link to="/account">
             <i className="bx bxs-user-account"></i>
             Accounts
@@ -88,13 +98,17 @@ const Sidebar = forwardRef((_, ref) => {
             Gift
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/vouchers") ? "active" : ""}>
+        <li
+          className={location.pathname.startsWith("/vouchers") ? "active" : ""}
+        >
           <Link to="/vouchers">
             <i className="bx bxs-coupon"></i>
             Voucher
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/petType") ? "active" : ""}>
+        <li
+          className={location.pathname.startsWith("/petType") ? "active" : ""}
+        >
           <Link to="/petType">
             <i className="bx bxs-cat"></i>
             Pet Type
