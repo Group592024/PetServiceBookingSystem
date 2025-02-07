@@ -1,7 +1,6 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -25,18 +24,20 @@ namespace FacilityServiceApi.Presentation.Controllers
             if (!roomTypes.Any())
                 return NotFound(new Response(false, "No room types found in the database"));
 
-            var roomTypeDtos = roomTypes.Select(roomType => new RoomTypeDTO
-            {
-                roomTypeId = roomType.roomTypeId,
-                name = roomType.name,
-                price = roomType.price,
-                description = roomType.description,
-                isDeleted = roomType.isDeleted
-            });
+            //var roomTypeDtos = roomTypes.Select(roomType => new RoomTypeDTO
+            //{
+            //    roomTypeId = roomType.roomTypeId,
+            //    name = roomType.name,
+            //    price = roomType.price,
+            //    description = roomType.description,
+            //    isDeleted = roomType.isDeleted
+            //});
+
+            var (_, roomTypeResponse) = RoomTypeConversion.FromEntity(null, roomTypes);
 
             return Ok(new Response(true, "Room types retrieved successfully")
             {
-                Data = roomTypeDtos
+                Data = roomTypeResponse
             });
         }
 

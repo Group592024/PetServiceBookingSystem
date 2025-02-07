@@ -56,7 +56,7 @@ const AddDiaryModal = ({ open, onClose }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          pet_ID: petInfo?.petId ? petInfo?.petId : '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+          pet_ID: petInfo?.petId,
           diary_Content: content,
         }),
       });

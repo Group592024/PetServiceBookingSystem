@@ -104,7 +104,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var roomtypes = await context.RoomType
+                var roomtypes = await context.RoomType.Include(p => p.Rooms)
                           .ToListAsync();
                 return roomtypes ?? new List<RoomType>();
             }
@@ -197,6 +197,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var roomtypes = await context.RoomType
                                          .Where(r => !r.isDeleted)
+                                         .Include(p => p.Rooms)
                                          .ToListAsync();
                 return roomtypes ?? new List<RoomType>();
             }

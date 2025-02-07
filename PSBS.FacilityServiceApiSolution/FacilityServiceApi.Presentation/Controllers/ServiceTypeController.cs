@@ -1,8 +1,8 @@
-﻿using FacilityServiceApi.Application.DTOs.Conversions;
+﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
-using FacilityServiceApi.Application.DTOs;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -21,22 +21,15 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> GetServiceTypes()
         {
             var serviceTypes = await _serviceType.GetAllAsync();
+
             if (!serviceTypes.Any())
                 return NotFound(new Response(false, "No service types found in the database"));
 
-            var serviceTypeDtos = serviceTypes.Select(serviceType => new ServiceTypeDTO
-            {
-                serviceTypeId = serviceType.serviceTypeId,
-                typeName = serviceType.typeName,
-                createAt = serviceType.createAt,
-                updateAt = serviceType.updateAt,
-                description = serviceType.description,
-                isDeleted = serviceType.isDeleted
-            });
+            var (_, responseData) = ServiceTypeConversion.FromEntity(null, serviceTypes);
 
             return Ok(new Response(true, "Service types retrieved successfully")
             {
-                Data = serviceTypeDtos
+                Data = responseData
             });
         }
 
