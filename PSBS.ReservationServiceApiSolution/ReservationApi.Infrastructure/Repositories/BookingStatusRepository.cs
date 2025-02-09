@@ -72,7 +72,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     // Permanently delete from the database
                     context.BookingStatuses.Remove(bookingStatus);
                     await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingStatusName} permanently deleted.") ;
+                    return new Response(true, $"{entity.BookingStatusName} permanently deleted.");
                 }
             }
             catch (Exception ex)
@@ -123,7 +123,7 @@ namespace ReservationApi.Infrastructure.Repositories
             {
                 var bookingStatus = await context.BookingStatuses
                     .AsNoTracking()
-                    .SingleOrDefaultAsync(v => v.BookingStatusId == id); 
+                    .SingleOrDefaultAsync(v => v.BookingStatusId == id);
                 return bookingStatus!;
             }
             catch (Exception ex)
@@ -144,7 +144,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, $"{entity.BookingStatusName} not found");
                 }
-              if(bookingStatus.BookingStatusName != entity.BookingStatusName)
+                if (bookingStatus.BookingStatusName != entity.BookingStatusName)
                 {
                     var getBookingStatus = await GetByAsync(p => p.BookingStatusName!.Equals(entity.BookingStatusName));
                     if (getBookingStatus is not null && !string.IsNullOrEmpty(getBookingStatus.BookingStatusName))

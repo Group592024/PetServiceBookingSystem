@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSPS.SharedLibrary.DependencyInjection;
-using ReservationApi.Application.DTOs.Conversions;
 using ReservationApi.Application.Intefaces;
 using ReservationApi.Infrastructure.Data;
 using ReservationApi.Infrastructure.Repositories;
@@ -19,10 +18,11 @@ namespace ReservationApi.Infrastructure.DependencyInjection
             // add authentication scheme
             SharedServiceContainer.AddSharedServices<ReservationServiceDBContext>(services, config, config["MySerilog:FineName"]!);
             // create DI
-           services.AddScoped<IBookingStatus, BookingStatusRepository>();
-           services.AddScoped<IBookingType, BookingTypeRepository>();
+            services.AddScoped<IBookingStatus, BookingStatusRepository>();
+            services.AddScoped<IBookingType, BookingTypeRepository>();
             services.AddScoped<IPointRule, PointRuleRepository>();
             services.AddScoped<IPaymentType, PaymentTypeRepository>();
+            services.AddScoped<IReport, ReportBookingRepository>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)
