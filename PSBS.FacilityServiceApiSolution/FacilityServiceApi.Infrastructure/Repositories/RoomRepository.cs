@@ -46,7 +46,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                         description = currentEntity.description,
                         roomImage = currentEntity.roomImage,
                         hasCamera = currentEntity.hasCamera,
-                        isDeleted  = currentEntity.isDeleted,
+                        isDeleted = currentEntity.isDeleted,
                     };
 
                     return new Response(true, $"{entity.roomId} added successfully") { Data = roomDto };
