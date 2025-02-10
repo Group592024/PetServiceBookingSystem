@@ -13,46 +13,46 @@ const PetHealthBookCreate = () => {
   const [visitDetails, setVisitDetails] = useState({
     healthBookId: "",
     bookingId: "",
-    medicineId: "",
+    medicineIds: [],
     visitDate: null,
     nextVisitDate: null,
     performBy: "",
-    medicineName: "",
     createdAt: "",
     updatedAt: "",
     isDeleted: false,
   });
 
   const [bookings, setBookings] = useState([]);
-  const [bookingTypes, setBookingTypes] = useState([]);
   const [medicines, setMedicines] = useState([]);
+  const [notes, setNotes] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bookingsResponse, medicinesResponse, typesResponse] = await Promise.all([
+        const [bookingsResponse, medicinesResponse] = await Promise.all([
           fetch("http://localhost:5115/api/Booking"),
-          fetch("http://localhost:5003/Medicines"),
-          fetch("http://localhost:5115/api/BookingType"),
+          fetch("http://localhost:5003/Medicines")
         ]);
 
-        if (!bookingsResponse.ok || !medicinesResponse.ok || !typesResponse.ok) {
+        if (!bookingsResponse.ok || !medicinesResponse.ok) {
           throw new Error("Failed to fetch data from server.");
         }
 
-        const [bookingsData, medicinesData, typesData] = await Promise.all([ 
+        const [bookingsData, medicinesData] = await Promise.all([
           bookingsResponse.json(),
-          medicinesResponse.json(),
-          typesResponse.json(),
+          medicinesResponse.json()
         ]);
-        console.log("Visit Details before submission:", visitDetails);
-        console.log("Fetched Bookings:", bookingsData);
-        console.log("Fetched Medicines:", medicinesData);
-        console.log("Fetched Booking Types:", typesData);
 
-        setBookings(bookingsData);
+        if (bookingsData && bookingsData.data && Array.isArray(bookingsData.data)) {
+          const notesData = bookingsData.data.map((booking) => booking.notes);
+          setNotes(notesData);
+          setBookings(bookingsData.data);
+        } else {
+          console.error("Bookings data is not in the expected format:", bookingsData);
+          Swal.fire("Error", "Invalid data format for bookings.", "error");
+        }
+
         setMedicines(medicinesData.data || medicinesData);
-        setBookingTypes(typesData.data || typesData);
       } catch (error) {
         console.error("Error fetching data:", error);
         Swal.fire("Error", "Failed to load data. Please try again later.", "error");
@@ -63,24 +63,17 @@ const PetHealthBookCreate = () => {
   }, []);
 
   const generateGuid = () => {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
   };
 
   const handleCreate = async () => {
-    console.log("Visit Details before submission:", visitDetails);
-  
-    if (!visitDetails.bookingId || !visitDetails.medicineId || !visitDetails.visitDate || !visitDetails.performBy) {
-      Swal.fire("Error", "Please fill all required fields", "error");
-      return;
-    }
-  
     const newVisitDetails = {
       healthBookId: generateGuid(),
       bookingId: visitDetails.bookingId,
-      medicineId: visitDetails.medicineId,
+      medicineIds: visitDetails.medicineIds,  // Gửi mảng các medicineIds
       visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
       nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
       performBy: visitDetails.performBy,
@@ -88,9 +81,7 @@ const PetHealthBookCreate = () => {
       updatedAt: new Date().toISOString(),
       isDeleted: visitDetails.isDeleted || false,
     };
-  
-    console.log("Data to be sent to the API:", newVisitDetails);
-  
+
     try {
       const response = await fetch("http://localhost:5003/api/PetHealthBook", {
         method: "POST",
@@ -99,13 +90,12 @@ const PetHealthBookCreate = () => {
         },
         body: JSON.stringify(newVisitDetails),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("API error:", errorData);
         Swal.fire("Error", errorData.message || "Failed to create data", "error");
       } else {
-        console.log("API Response:", await response.json());
+        const responseData = await response.json();
         Swal.fire({
           title: "Success",
           text: "Pet health book created successfully!",
@@ -120,13 +110,19 @@ const PetHealthBookCreate = () => {
       Swal.fire("Error", "Failed to create data. Please try again later.", "error");
     }
   };
-  
-  
-  
-  
-  
+
   const handleBack = () => {
     navigate(-1);
+  };
+
+  const handleMedicineChange = (e) => {
+    const { value, checked } = e.target;
+    setVisitDetails((prevState) => {
+      const newMedicineIds = checked
+        ? [...prevState.medicineIds, value]
+        : prevState.medicineIds.filter((id) => id !== value);
+      return { ...prevState, medicineIds: newMedicineIds };
+    });
   };
 
   return (
@@ -136,17 +132,18 @@ const PetHealthBookCreate = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-4 bg-white shadow-md rounded-md h-full">
           <h2 className="mb-4 text-xl font-bold">Create Pet Health Book</h2>
+
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Booking Type</label>
+            <label className="block text-sm font-medium mb-1">Note</label>
             <select
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
               onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
             >
-              <option value="">Select a Booking Type</option>
-              {bookingTypes.map((type) => (
-                <option key={type.bookingTypeId} value={type.bookingTypeId}>
-                  {type.bookingTypeName}
+              <option value="">Select a Note</option>
+              {notes.map((note, index) => (
+                <option key={index} value={note}>
+                  {note}
                 </option>
               ))}
             </select>
@@ -184,18 +181,20 @@ const PetHealthBookCreate = () => {
 
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Medicine</label>
-            <select
-              className="w-full p-3 border rounded-md"
-              value={visitDetails.medicineId}
-              onChange={(e) => setVisitDetails({ ...visitDetails, medicineId: e.target.value })}
-            >
-              <option value="">Select a Medicine</option>
+            <div className="space-y-2">
               {medicines.map((medicine) => (
-                <option key={medicine.medicineId} value={medicine.medicineId}>
-                  {medicine.medicineName}
-                </option>
+                <div key={medicine.medicineId} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    value={medicine.medicineId}
+                    checked={visitDetails.medicineIds.includes(medicine.medicineId)}
+                    onChange={handleMedicineChange}
+                    className="mr-2"
+                  />
+                  <label>{medicine.medicineName}</label>
+                </div>
               ))}
-            </select>
+            </div>
           </div>
 
           <div className="flex justify-between">
