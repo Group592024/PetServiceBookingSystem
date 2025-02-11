@@ -1,13 +1,14 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-class ForgotPassword extends StatefulWidget {
+class ForgotPasswordPage extends StatefulWidget {
   @override
-  _ForgotPasswordState createState() => _ForgotPasswordState();
+  _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final TextEditingController emailController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
@@ -44,7 +45,8 @@ class _ForgotPasswordState extends State<ForgotPassword> {
         );
       }
     } on DioError catch (error) {
-      String errorMessage = error.response?.data['message'] ?? 'An error occurred. Please try again later.';
+      String errorMessage = error.response?.data['message'] ??
+          'An error occurred. Please try again later.';
       Fluttertoast.showToast(
         msg: errorMessage,
         toastLength: Toast.LENGTH_LONG,
@@ -73,69 +75,117 @@ class _ForgotPasswordState extends State<ForgotPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // To ensure the background is white
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    color: Colors.grey[300],
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Text(
-                      "LOGO",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Logo section moved out of the card
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 32.0, horizontal: 48.0),
+                  color: Colors.grey[300], // Set gray background color
+                  child: Text(
+                    'Logo',
+                    style: TextStyle(
+                      fontSize: 48, // Adjust font size
+                      fontWeight: FontWeight.bold, // Make it bold
+                      color: Colors.black, // Set the text color to white
                     ),
                   ),
-                  Padding(
+                ),
+                SizedBox(height: 32),
+                // Card for form input
+                Card(
+                  color: Colors.white,
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0)), // Bo góc
+                  child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                            CrossAxisAlignment.center, // Căn giữa
                         children: [
                           Text(
                             "Forgot Password",
-                            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
-                          Text(
-                            "Remember your password? Login here",
-                            style: TextStyle(fontSize: 14),
+                          // Sử dụng RichText để chia văn bản
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: "Remember your password? ",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.black),
+                                ),
+                                TextSpan(
+                                  text: "Login here",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.cyan),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      // Điều hướng tới trang đăng nhập
+                                      Navigator.pushNamed(context, '/login');
+                                    },
+                                ),
+                              ],
+                            ),
                           ),
                           SizedBox(height: 16),
+                          // Ô nhập email
                           TextFormField(
                             controller: emailController,
                             decoration: InputDecoration(
                               labelText: "Email address",
-                              border: OutlineInputBorder(),
+                              labelStyle:
+                                  TextStyle(color: Colors.black), // Màu nhãn
+                              filled: true,
+                              fillColor: Colors.grey[100], // Màu nền ô input
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(
+                                    12.0), // Bo góc cho ô input
+                              ),
                             ),
                             validator: validateEmail,
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 16),
+                          // Nút Reset Password màu cyan, chữ trắng
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: isLoading ? null : handleSubmit,
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      12.0), // Bo góc button
+                                ),
+                                backgroundColor: Colors.cyan, // Màu nền cyan
+                              ),
                               child: isLoading
                                   ? CircularProgressIndicator(
-                                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                          Colors.white),
                                     )
-                                  : Text("Reset Password"),
+                                  : Text("Reset Password",
+                                      style: TextStyle(color: Colors.white)),
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

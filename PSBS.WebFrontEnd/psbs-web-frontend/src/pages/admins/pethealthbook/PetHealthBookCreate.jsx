@@ -13,7 +13,7 @@ const PetHealthBookCreate = () => {
   const [visitDetails, setVisitDetails] = useState({
     healthBookId: "",
     bookingId: "",
-    medicineIds: [],
+    medicineId: [],
     visitDate: null,
     nextVisitDate: null,
     performBy: "",
@@ -45,10 +45,13 @@ const PetHealthBookCreate = () => {
 
         if (bookingsData && bookingsData.data && Array.isArray(bookingsData.data)) {
           const notesData = bookingsData.data.map((booking) => booking.notes);
+          
           setNotes(notesData);
           setBookings(bookingsData.data);
+          console.log("Bookings data:", bookingsData.data);
         } else {
           console.error("Bookings data is not in the expected format:", bookingsData);
+
           Swal.fire("Error", "Invalid data format for bookings.", "error");
         }
 
@@ -68,20 +71,27 @@ const PetHealthBookCreate = () => {
       return v.toString(16);
     });
   };
-
+  const currentDate = new Date().toISOString();
   const handleCreate = async () => {
+    if (!visitDetails.bookingId || !visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
+      Swal.fire("Error", "Please fill all required fields", "error");
+      return;
+    }
+  
     const newVisitDetails = {
-      healthBookId: generateGuid(),
       bookingId: visitDetails.bookingId,
-      medicineIds: visitDetails.medicineIds,  // Gửi mảng các medicineIds
+      medicineId: visitDetails.medicineId,
       visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
       nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
       performBy: visitDetails.performBy,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: currentDate, 
+      updatedAt: currentDate,
       isDeleted: visitDetails.isDeleted || false,
     };
-
+  
+    // Log dữ liệu trước khi gửi lên API
+    console.log("Data sent to API:", newVisitDetails);
+  
     try {
       const response = await fetch("http://localhost:5003/api/PetHealthBook", {
         method: "POST",
@@ -90,12 +100,17 @@ const PetHealthBookCreate = () => {
         },
         body: JSON.stringify(newVisitDetails),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
+        console.error("Error response from API:", errorData);
         Swal.fire("Error", errorData.message || "Failed to create data", "error");
       } else {
-        const responseData = await response.json();
+        const result = await response.json();
+        
+        // Log dữ liệu nhận từ API sau khi tạo thành công
+        console.log("Response from API:", result);
+  
         Swal.fire({
           title: "Success",
           text: "Pet health book created successfully!",
@@ -110,6 +125,8 @@ const PetHealthBookCreate = () => {
       Swal.fire("Error", "Failed to create data. Please try again later.", "error");
     }
   };
+  
+  
 
   const handleBack = () => {
     navigate(-1);
@@ -118,10 +135,10 @@ const PetHealthBookCreate = () => {
   const handleMedicineChange = (e) => {
     const { value, checked } = e.target;
     setVisitDetails((prevState) => {
-      const newMedicineIds = checked
-        ? [...prevState.medicineIds, value]
-        : prevState.medicineIds.filter((id) => id !== value);
-      return { ...prevState, medicineIds: newMedicineIds };
+      const newMedicineId = checked
+        ? [...prevState.medicineId, value]
+        : prevState.medicineId.filter((id) => id !== value);
+      return { ...prevState, medicineId: newMedicineId };
     });
   };
 
@@ -134,16 +151,16 @@ const PetHealthBookCreate = () => {
           <h2 className="mb-4 text-xl font-bold">Create Pet Health Book</h2>
 
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Note</label>
+            <label className="block text-sm font-medium mb-1">Booking</label>
             <select
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
               onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
             >
-              <option value="">Select a Note</option>
-              {notes.map((note, index) => (
-                <option key={index} value={note}>
-                  {note}
+              <option value="">Select a Booking</option>
+              {bookings.map((item, index) => (
+                <option key={index} value={item.bookingId}>
+                  {item.notes}
                 </option>
               ))}
             </select>
@@ -187,7 +204,7 @@ const PetHealthBookCreate = () => {
                   <input
                     type="checkbox"
                     value={medicine.medicineId}
-                    checked={visitDetails.medicineIds.includes(medicine.medicineId)}
+                    checked={visitDetails.medicineId.includes(medicine.medicineId)}
                     onChange={handleMedicineChange}
                     className="mr-2"
                   />

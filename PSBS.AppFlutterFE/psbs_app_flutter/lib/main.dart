@@ -1,11 +1,17 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/Account/login_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet_page.dart';
 import 'package:psbs_app_flutter/pages/profile_page.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
+
+import 'pages/Account/editprofile_page.dart';
+import 'pages/Account/forgotpassword_page.dart';
+import 'pages/Account/profile_page.dart';
+import 'pages/Account/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,7 +45,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home:  EditProfilePage(accountId: 'd16f43b2-17cf-4a1e-8d9a-16fa813a13fb',),
     );
   }
 }
@@ -71,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
     PetPage(),
     BookingPage(),
     VoucherPage(),
-    ProfilePage(),
+    ProfilePages(),
   ];
   @override
   Widget build(BuildContext context) {

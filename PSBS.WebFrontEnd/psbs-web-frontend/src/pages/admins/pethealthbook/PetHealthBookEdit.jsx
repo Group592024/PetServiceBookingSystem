@@ -144,10 +144,10 @@ const PetHealthBookEdit = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-4 bg-white shadow-md rounded-md h-full">
           <h2 className="mb-4 text-xl font-bold">Edit Pet Health Book</h2>
-          <div className="mb-3">
+          {/* <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Booking Type</label>
             <div className="relative w-full">
-              {/* Dropdown */}
+             
               <select
                 className="w-full p-3 pr-10 border rounded-md appearance-none"
                 value={visitDetails.bookingId}
@@ -160,7 +160,7 @@ const PetHealthBookEdit = () => {
                   </option>
                 ))}
               </select>
-              {/* Icon dropdown */}
+              
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -178,7 +178,7 @@ const PetHealthBookEdit = () => {
                 </svg>
               </div>
             </div>
-          </div>
+          </div> */}
           
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Perform by</label>
