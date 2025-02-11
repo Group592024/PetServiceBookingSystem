@@ -7,5 +7,6 @@ namespace FacilityServiceApi.Application.Interfaces
         Task<IEnumerable<RoomStatusDTO>> GetRoomStatusList();
         Task<IEnumerable<RoomHistoryQuantityDTO>> GetRoomTypeQuantity();
         Task<IEnumerable<RoomHistoryQuantityDTO>> GetServiceQuantity();
+        Task<IEnumerable<PetCountDTO>> GetAllBookingByPet(Guid id);
     }
 }

@@ -2,6 +2,7 @@
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using PSPS.SharedLibrary.PSBSLogs;
 
 namespace FacilityServiceApi.Infrastructure.Repositories
 {
@@ -80,6 +81,35 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
 
             return response ?? new List<RoomHistoryQuantityDTO>();
+        }
+
+        public async Task<IEnumerable<PetCountDTO>> GetAllBookingByPet(Guid id)
+        {
+            try
+            {
+                var serviceVariants = await context.ServiceVariant.Where(p => p.serviceId == id).ToListAsync();
+
+                List<BookingPetDTO> result = new List<BookingPetDTO>();
+
+                foreach (var serviceVariant in serviceVariants)
+                {
+                    var bookingPetDtos = await context.bookingServiceItems
+                        .Where(p => p.ServiceVariantId == serviceVariant.serviceVariantId)
+                        .Select(s => new BookingPetDTO(s.BookingId, s.PetId)).ToListAsync();
+
+                    result.AddRange(bookingPetDtos);
+                }
+
+                var response = result.GroupBy(p => p.petId)
+                        .Select(s => new PetCountDTO(s.Key, s.Count())).ToList();
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred retrieving bookings by oet");
+            }
         }
     }
 }

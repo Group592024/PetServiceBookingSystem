@@ -55,6 +55,16 @@ namespace FacilityServiceApi.Presentation.Controllers
             });
         }
 
+        [HttpGet("petCount/{id}")]
+        public async Task<ActionResult<IEnumerable<PetCountDTO>>> GetPetCount([FromRoute] Guid id)
+        {
+            var petCountDTOs = await _report.GetAllBookingByPet(id);
+            if (!petCountDTOs.Any())
+                return NotFound(new Response(false, "No pet count dtos found in the database"));
+
+            return Ok(petCountDTOs);
+        }
+
 
     }
 }
