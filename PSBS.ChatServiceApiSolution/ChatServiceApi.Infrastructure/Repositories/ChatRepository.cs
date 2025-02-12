@@ -29,8 +29,9 @@ namespace ChatServiceApi.Infrastructure.Repositories
         {
             return await _context.ChatRooms
                 .Where(cr => _context.RoomParticipants
-                    .Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.UserId == userId))
-                .OrderByDescending(m => m.UpdateAt) // Sorting in descending order
+                    .Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.UserId == userId && !rp.IsLeave))
+                .OrderByDescending(cr => cr.IsSupportRoom) // Order by IsSupport (true first)
+                .ThenByDescending(cr => cr.UpdateAt)    // Then order by UpdateAt (most recent first)
                 .ToListAsync();
         }
 
@@ -80,18 +81,13 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 .OrderBy(m => m.CreatedAt)
                 .ToListAsync();
         }
-
-        public async Task SaveChangesAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<Response> CreateChatRoom(Guid senderId, Guid receiverId)
         {
-            // Check if a chat room already exists between the sender and receiver
-            var existingChatRoom = _context.ChatRooms
-                .FirstOrDefault(cr => cr.Participants!.Any(rp => rp.UserId == senderId) &&
-                                     cr.Participants!.Any(rp => rp.UserId == receiverId));
+            // Check if a chat room already exists between the sender and receiver (excluding support rooms)
+            var existingChatRoom = await _context.ChatRooms
+                .Where(cr => !cr.IsSupportRoom) // Ensure we only check non-support chat rooms
+                .FirstOrDefaultAsync(cr => cr.Participants.Any(rp => rp.UserId == senderId) &&
+                                           cr.Participants.Any(rp => rp.UserId == receiverId));
 
             if (existingChatRoom != null)
             {
@@ -101,10 +97,8 @@ namespace ChatServiceApi.Infrastructure.Repositories
             // Create a new chat room
             ChatRoom chatRoom = new ChatRoom()
             {
-                UpdateAt = DateTime.Now,
-              
+                UpdateAt = DateTime.UtcNow, 
                 LastMessage = "",
-               
             };
 
             var createdChatRoom = _context.ChatRooms.Add(chatRoom);
@@ -116,6 +110,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 ChatRoomId = createdChatRoom.Entity.ChatRoomId,
                 UserId = senderId,
                 ServeFor = receiverId,
+                IsSupporter = false
             };
 
             var roomParticipant2 = new RoomParticipant
@@ -123,21 +118,20 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 ChatRoomId = createdChatRoom.Entity.ChatRoomId,
                 UserId = receiverId,
                 ServeFor = senderId,
+                IsSupporter = false
             };
 
             _context.RoomParticipants.Add(roomParticipant1);
             _context.RoomParticipants.Add(roomParticipant2);
             await _context.SaveChangesAsync();
-            LogExceptions.LogToConsole("ua ta vao toi buoc nay r ma");
-            // Return success response with the created chat room
+
+            // Return success response with the created chat room ID
             return new Response(true, "Chat room created successfully")
             {
-                Data = new
-                {
-                   createdChatRoom.Entity.ChatRoomId                  
-                }
+                Data = new { createdChatRoom.Entity.ChatRoomId }
             };
         }
+
         public async Task<List<Guid>> GetChatRoomParticipantsAsync(Guid chatRoomId)
         {
             return await _context.RoomParticipants
@@ -171,6 +165,172 @@ namespace ChatServiceApi.Infrastructure.Repositories
             {
                 throw new Exception("User is not a participant of this chat room.");
             }
+        }
+
+        public async Task<Response> AssignStaffToChatRoom(Guid chatRoomId, Guid staffId, Guid customerId)
+        {
+            var existingParticipant = await _context.RoomParticipants
+                .FirstOrDefaultAsync(rp => rp.ChatRoomId == chatRoomId && rp.UserId == staffId); // Find ANY existing record (even if IsLeave is true)
+
+            if (existingParticipant != null)
+            {
+                if (!existingParticipant.IsLeave) // If they are already in the room
+                {
+                    return new Response(false, "Staff is already assigned to this chat room.");
+                }
+                else // Staff was in the room before but left
+                {
+                    existingParticipant.IsLeave = false; // Re-activate them
+                    _context.RoomParticipants.Update(existingParticipant);
+                    await _context.SaveChangesAsync();
+                    return new Response(true, "Staff re-assigned successfully.");
+                }
+
+            }
+            else // No previous record exists
+            {
+                var newParticipant = new RoomParticipant
+                {
+                    ChatRoomId = chatRoomId,
+                    UserId = staffId, // The staff member's ID
+                    ServeFor = customerId, // Staff serves for themselves
+                    IsSeen = false,
+                    IsLeave = false,
+                     IsSupporter = true
+                };
+
+                _context.RoomParticipants.Add(newParticipant);
+                await _context.SaveChangesAsync();
+                return new Response(true, "Staff assigned successfully.");
+            }
+        }
+
+        public async Task<Response> RemoveStaffFromChatRoom(Guid chatRoomId, Guid staffId)
+        {
+            var participant = await _context.RoomParticipants
+                .FirstOrDefaultAsync(rp => rp.ChatRoomId == chatRoomId && rp.UserId == staffId && !rp.IsLeave);
+
+            if (participant == null)
+            {
+                return new Response(false, "Staff is not assigned to this chat room.");
+            }
+
+            participant.IsLeave = true;
+            await _context.SaveChangesAsync();
+            return new Response(true, "Staff removed successfully.");
+        }
+
+
+        public async Task<RoomParticipant?> GetStaffInChatRoom(Guid chatRoomId)
+        {
+            return await _context.RoomParticipants
+                .Where(rp => rp.ChatRoomId == chatRoomId && rp.ServeFor != rp.UserId && !rp.IsLeave) // Staff serves for others and is not leave
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<ChatRoom>> GetPendingSupportChatRoomsAsync()
+        {
+            return await _context.ChatRooms
+                .Where(cr => cr.IsSupportRoom &&
+                    (
+                        // Condition 1: No supporters in the room, and at least one message from a non-supporter
+                        (!_context.RoomParticipants.Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.IsSupporter) &&
+                         _context.ChatMessages.Any(cm => cm.ChatRoomId == cr.ChatRoomId &&
+                                                         _context.RoomParticipants.Any(rp => rp.ChatRoomId == cr.ChatRoomId &&
+                                                                                             rp.UserId == cm.SenderId &&
+                                                                                             !rp.IsSupporter)))
+
+                        // Condition 2: Supporters existed but all have left, and at least one message is unseen
+                        || (!_context.RoomParticipants.Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.IsSupporter && !rp.IsLeave) &&
+                            _context.RoomParticipants.Any(rp => rp.ChatRoomId == cr.ChatRoomId && rp.IsSupporter && !rp.IsSeen))
+                    )
+                )
+                .Include(cr => cr.ChatMessages) // Include messages for better performance
+                .ToListAsync();
+        }
+
+        public async Task<Response> InitiateSupportChatRoomAsync(Guid customerId)
+        {
+            // Check if the customer already has an active support chat room
+            var existingSupportRoom = await _context.ChatRooms
+                .FirstOrDefaultAsync(cr =>
+                    cr.IsSupportRoom && // It's a support room
+                    _context.RoomParticipants.Any(rp =>
+                        rp.ChatRoomId == cr.ChatRoomId &&
+                        rp.UserId == customerId && // Customer is a participant
+                        !rp.IsLeave // Customer hasn't left the room
+                    )
+                );
+
+            if (existingSupportRoom != null)
+            {
+                return new Response(false, "You already have an active support chat room.");
+            }
+
+            // Create a new support chat room
+            var chatRoom = new ChatRoom
+            {
+                UpdateAt = DateTime.UtcNow,
+                LastMessage = "Support chat initiated.",
+                IsSupportRoom = true // Mark as a support room
+            };
+
+            // Add the chat room to the database
+            var createdChatRoom = _context.ChatRooms.Add(chatRoom);
+            await _context.SaveChangesAsync();
+
+            // Add the customer as a participant
+            var customerParticipant = new RoomParticipant
+            {
+                ChatRoomId = createdChatRoom.Entity.ChatRoomId,
+                UserId = customerId,
+                ServeFor = customerId, // Customer serves for themselves
+                IsSeen = false,
+                IsLeave = false,
+                IsSupporter = false // Customer is not a supporter
+            };
+
+            _context.RoomParticipants.Add(customerParticipant);
+            await _context.SaveChangesAsync();
+
+            return new Response(true, "Support chat room created successfully.")
+            {
+                Data = new
+                {
+                    createdChatRoom.Entity.ChatRoomId
+                }
+            };
+        }
+        public async Task<Response> RequestNewSupporter(Guid chatRoomId)
+        {
+            // Get all supporters in the chat room
+            var supporters = await _context.RoomParticipants
+                .Where(rp => rp.ChatRoomId == chatRoomId && rp.IsSupporter) // Ensure it's a supporter
+                .ToListAsync();
+
+            if (!supporters.Any())
+            {
+                return new Response(false, "No supporters found in this chat room.");
+            }
+
+            // Mark all supporters as leaving and unseen
+            foreach (var supporter in supporters)
+            {
+                supporter.IsLeave = true;
+                supporter.IsSeen = false;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new Response(true, "All supporters have been marked as leaving and unseen.");
+        }
+        public async Task<Response> CheckIfAllSupportersLeftAndUnseen(Guid chatRoomId)
+        {
+            var allLeftAndUnseen = await _context.RoomParticipants
+                .Where(rp => rp.ChatRoomId == chatRoomId && rp.IsSupporter)
+                .AllAsync(rp => rp.IsLeave && !rp.IsSeen);
+
+            return new Response(allLeftAndUnseen, allLeftAndUnseen ? "All supporters have left and are unseen." : "There are active supporters.");
         }
     }
 }

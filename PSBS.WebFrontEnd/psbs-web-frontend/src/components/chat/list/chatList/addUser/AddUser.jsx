@@ -16,7 +16,7 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
           const filtered = data.data.filter(
             (user) =>
               user.accountId !== currentUser.accountId &&
-            !currentList.some((chat) => chat.serveFor === user.accountId) // Exclude users in currentList
+            !currentList.some((chat) => chat.serveFor === user.accountId && !chat.isSupportRoom) // Exclude users in currentList
           );
           setUserList(filtered);
           setFilteredUserList(filtered); // Set the filtered list initially to full list

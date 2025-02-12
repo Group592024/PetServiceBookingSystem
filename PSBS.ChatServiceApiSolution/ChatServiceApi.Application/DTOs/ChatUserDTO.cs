@@ -9,6 +9,7 @@ namespace ChatServiceApi.Application.DTOs
     Guid RoomOwner,
     string LastMessage,
     DateTime UpdateAt,
-    bool IsSeen
+    bool IsSeen,
+    bool IsSupportRoom
        );
 }

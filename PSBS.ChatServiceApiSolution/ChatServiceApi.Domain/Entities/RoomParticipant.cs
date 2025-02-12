@@ -16,6 +16,8 @@ namespace ChatServiceApi.Domain.Entities
         public Guid ServeFor { get; set; }
 
         public bool IsSeen { get; set; }
+        public bool IsLeave { get; set; }
+        public bool IsSupporter { get; set; } = false;
         public virtual ChatRoom? ChatRoom { get; set; }
     }
 }

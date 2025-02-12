@@ -3,7 +3,8 @@ import "./chatList.css";
 import AddUser from "./addUser/AddUser";
 import { getData } from "../../../../Utilities/ApiFunctions";
 import { useChatStore } from "../../../../lib/chatStore";
-
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import Swal from "sweetalert2";
 const ChatList = ({ signalRService, currentUser }) => {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
@@ -16,7 +17,10 @@ const ChatList = ({ signalRService, currentUser }) => {
         const user = await getData(`api/Account/${item.serveFor}`);
         return { ...item, user };
       } catch (error) {
-        console.error(`Error fetching user for receiverId: ${item.serveFor}`, error);
+        console.error(
+          `Error fetching user for receiverId: ${item.serveFor}`,
+          error
+        );
         return {
           ...item,
           user: {
@@ -27,7 +31,9 @@ const ChatList = ({ signalRService, currentUser }) => {
     });
 
     const chatData = await Promise.all(promises);
-    return chatData.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    return chatData.sort(
+      (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+    );
   }, []);
 
   useEffect(() => {
@@ -52,11 +58,18 @@ const ChatList = ({ signalRService, currentUser }) => {
           return;
         }
 
-        await signalRService.startConnection("http://localhost:5159/chatHub", currentUser.accountId);
+        await signalRService.startConnection(
+          "http://localhost:5159/chatHub",
+          currentUser.accountId
+        );
         console.log("✅ SignalR Connected");
 
         signalRService.on("getList", handleUpdateChatList);
         signalRService.on("updateaftercreate", handleUpdateChatList);
+        signalRService.on("staffremoved", (message) => {
+          Swal.fire("Success", "Leave room successfully", "success");
+          ChangeChat(null, null, null);
+        });
         await signalRService.invoke("ChatRoomList", currentUser.accountId);
       } catch (error) {
         console.error("❌ SignalR Connection Failed:", error);
@@ -81,7 +94,8 @@ const ChatList = ({ signalRService, currentUser }) => {
     });
 
     setChats(updatedChats); // Update the chats state
-    ChangeChat(chat.chatRoomId, chat.user.data); // Change the active chat in the store
+    console.log("trong change chat ne", chat.isSupportRoom);
+    ChangeChat(chat.chatRoomId, chat.user.data, chat.isSupportRoom); // Change the active chat in the store
   };
 
   console.log("chat nay:", chats);
@@ -90,11 +104,11 @@ const ChatList = ({ signalRService, currentUser }) => {
     <div className="chatList">
       <div className="search">
         <div className="searchBar">
-          <img src="./search.png" alt="" />
+          <img src="/search.png" alt="" />
           <input type="text" placeholder="Search" />
         </div>
         <img
-          src={addMode ? "./minus.png" : "./plus.png"}
+          src={addMode ? "/minus.png" : "/plus.png"}
           alt=""
           className="add"
           onClick={() => setAddMode((prev) => !prev)}
@@ -104,18 +118,24 @@ const ChatList = ({ signalRService, currentUser }) => {
       {chats.map((chat) => (
         <div
           key={chat.chatRoomId}
-          className="item"
+          className={`item ${chat.isSupportRoom ? "support" : ""}`} // Apply support class dynamically
           onClick={() => handleSelect(chat)}
-          style={{
-            backgroundColor: chat.chatRoomId === currentChat ? "transparent" : (chat.isSeen ? "transparent" : "#51833e"),
-          }} // Only change background if the chat is not active and is unseen
         >
-          <img src={chat.user.data?.avatar || "./avatar.png"} alt="" />
+          <img src={chat.user.data?.avatar || "/avatar.png"} alt="" />
           <div className="texts">
-            <span>{chat.user.data?.accountName || "Unknown"}</span>
-          <p className="truncate max-w-[200px]">{chat?.lastMessage || "null"}</p>
-
+            <span>
+              {chat.isSupportRoom && currentUser.roleId === "user"
+                ? "Support Agent"
+                : chat.user.data?.accountName}
+            </span>
+            <p className="truncate max-w-[200px]">
+              {chat?.lastMessage || "null"}
+            </p>
           </div>
+
+          {/* Show unread dot if the message is unread */}
+          {!chat.isSeen && <div className="unreadDot"></div>}
+          {chat.isSupportRoom && <SupportAgentIcon className="supportIcon" />}
         </div>
       ))}
 

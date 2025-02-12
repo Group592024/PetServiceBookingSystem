@@ -57,6 +57,9 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsSupportRoom")
+                        .HasColumnType("bit");
+
                     b.Property<string>("LastMessage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -78,7 +81,13 @@ namespace ChatServiceApi.Infrastructure.Migrations
                     b.Property<Guid>("ChatRoomId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("IsLeave")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsSeen")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSupporter")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("ServeFor")

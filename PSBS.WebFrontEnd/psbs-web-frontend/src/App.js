@@ -67,6 +67,7 @@ import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
 import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
+import CustomerChatPage from "./pages/customers/chat/CustomerChatPage";
 function App() {
  const userId = sessionStorage.getItem('accountId');
   useEffect(() => {
@@ -276,6 +277,7 @@ function App() {
           </Route>
           <Route path="/chat">
             <Route index element={<Chat />} />
+            <Route path="customer" element={<CustomerChatPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
