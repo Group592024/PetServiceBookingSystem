@@ -144,19 +144,31 @@ namespace FacilityServiceApi.Infrastructure.Data
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("roomHistory_id");
 
+                    b.Property<bool>("BookingCamera")
+                        .HasColumnType("bit")
+                        .HasColumnName("booking_camera");
+
+                    b.Property<DateTime>("BookingEndDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("booking_end_date");
+
                     b.Property<Guid>("BookingId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("booking_Id");
 
-                    b.Property<Guid>("CameraId")
+                    b.Property<DateTime>("BookingStartDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("booking_start_date");
+
+                    b.Property<Guid?>("CameraId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("camera_id");
 
-                    b.Property<DateTime>("CheckInDate")
+                    b.Property<DateTime?>("CheckInDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("checkin_date");
 
-                    b.Property<DateTime>("CheckOutDate")
+                    b.Property<DateTime?>("CheckOutDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("checkout_date");
 
@@ -320,20 +332,20 @@ namespace FacilityServiceApi.Infrastructure.Data
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5602),
+                            createAt = new DateTime(2025, 2, 12, 21, 56, 9, 281, DateTimeKind.Local).AddTicks(2006),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5613)
+                            updateAt = new DateTime(2025, 2, 12, 21, 56, 9, 281, DateTimeKind.Local).AddTicks(2020)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5615),
+                            createAt = new DateTime(2025, 2, 12, 21, 56, 9, 281, DateTimeKind.Local).AddTicks(2023),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 19, 16, 16, 13, 704, DateTimeKind.Local).AddTicks(5616)
+                            updateAt = new DateTime(2025, 2, 12, 21, 56, 9, 281, DateTimeKind.Local).AddTicks(2024)
                         });
                 });
 
@@ -402,9 +414,7 @@ namespace FacilityServiceApi.Infrastructure.Data
                 {
                     b.HasOne("FacilityServiceApi.Domain.Entities.Camera", "Camera")
                         .WithMany("RoomHistories")
-                        .HasForeignKey("CameraId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CameraId");
 
                     b.HasOne("FacilityServiceApi.Domain.Entities.Room", "Room")
                         .WithMany("RoomHistories")

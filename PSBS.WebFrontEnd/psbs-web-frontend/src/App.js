@@ -69,6 +69,8 @@ import AdminBookingList from './pages/admins/bookings/list-pages/AdminBookingLis
 import ServiceBookingDetailPage from './pages/admins/bookings/detail-form/ServiceBookingDetailPage';
 import RoomBookingDetailPage from './pages/admins/bookings/detail-form/RoomBookingDetailPage';
 import CustomerBookingList from './pages/customers/bookings/list-pages/CustomerBookingList';
+import { BookingProvider } from './components/Booking/add-form/BookingContext';
+import AddBooking from './pages/customers/bookings/AddBooking';
 
 function App() {
   return (
@@ -161,7 +163,7 @@ function App() {
 
           <Route path='/bookings'>
           <Route index element={<CustomerBookingList />} />
-            <Route path='new' element={<Booking />} />
+          <Route path='new' element={<BookingProvider>  <AddBooking /> </BookingProvider>} />
           </Route>
 
           <Route path='/admin/bookings'>

@@ -10,6 +10,9 @@ namespace ReservationApi.Domain.Entities
         [Column("booking_Id")]
         [Key]
         public Guid BookingId { get; set; }
+        [Column("booking_Code")]
+        public String? BookingCode { get; set; }
+
         [Column("account_Id")]
         public Guid AccountId { get; set; }
         [Column("bookingStatus_Id")]

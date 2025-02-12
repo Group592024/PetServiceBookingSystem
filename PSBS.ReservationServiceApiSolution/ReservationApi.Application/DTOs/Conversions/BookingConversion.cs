@@ -11,15 +11,22 @@ namespace ReservationApi.Application.DTOs.Conversions
 {
     public class BookingConversion
     {
-        public static Booking ToEntity(AddBookingDTO addBookingDTO) => new()
+        public static Booking ToEntityForCreate(AddBookingDTO addBookingDTO) => new()
         {
+            BookingId = Guid.Empty,
+            BookingCode = $"ORD-{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}",
             AccountId = addBookingDTO.AccountId,
             PaymentTypeId = addBookingDTO.PaymentTypeId,
             VoucherId = addBookingDTO.VoucherId,
             BookingTypeId = addBookingDTO.BookingTypeId,
-            PointRuleId = addBookingDTO.PointRuleId,
+            PointRuleId = null,
             TotalAmount = addBookingDTO.TotalAmount,
-            Notes = addBookingDTO.Notes
+            Notes = addBookingDTO.Notes,
+            BookingDate = DateTime.Now,
+            CreateAt = DateTime.Now,
+            UpdateAt = DateTime.Now,
+            isPaid = false,
+            BookingStatusId = addBookingDTO.BookingStatusId,
         };
         public static (BookingDTO?, IEnumerable<BookingDTO>?) FromEntity(Booking booking, IEnumerable<Booking> bookings)
         {
@@ -27,6 +34,7 @@ namespace ReservationApi.Application.DTOs.Conversions
             {
                 var singleBooking = new BookingDTO(
                     booking.BookingId,
+                    booking.BookingCode,
                     booking.AccountId,
                     booking.BookingStatusId,
                     booking.PaymentTypeId,
@@ -46,6 +54,7 @@ namespace ReservationApi.Application.DTOs.Conversions
             {
                 var list = bookings!.Select(b => new BookingDTO(
                     b.BookingId,
+                    b.BookingCode,
                     b.AccountId,
                     b.BookingStatusId,
                     b.PaymentTypeId,

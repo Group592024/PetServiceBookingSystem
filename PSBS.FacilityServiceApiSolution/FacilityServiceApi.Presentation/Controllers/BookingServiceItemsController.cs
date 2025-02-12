@@ -1,4 +1,7 @@
-﻿using FacilityServiceApi.Domain.Entities;
+﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.DTOs.Conversions;
+using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +16,11 @@ namespace FacilityServiceApi.Presentation.Controllers
     public class BookingServiceItemsController : ControllerBase
     {
         private readonly FacilityServiceDbContext _context;
-        public BookingServiceItemsController(FacilityServiceDbContext context)
+        private readonly IBookingServiceItem bookingServiceItemInterface;
+        public BookingServiceItemsController(FacilityServiceDbContext context, IBookingServiceItem _bookingServiceItemInterface)
         {
             _context = context;
+            bookingServiceItemInterface = _bookingServiceItemInterface;
         }
         // GET: api/<BookingServiceItemsController>
         [HttpGet]
@@ -42,8 +47,12 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<BookingServiceItemsController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Response>> CreateServiceItem([FromBody] CreateBookingServiceItemDTO createBookingServiceItem)
         {
+
+            var createEntity = BookingServiceItemConversion.ToEntityForCreate(createBookingServiceItem);
+            var response = await bookingServiceItemInterface.CreateAsync(createEntity);
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         // PUT api/<BookingServiceItemsController>/5

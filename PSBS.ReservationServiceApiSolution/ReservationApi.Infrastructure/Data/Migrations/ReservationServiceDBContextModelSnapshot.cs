@@ -33,6 +33,10 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("account_Id");
 
+                    b.Property<string>("BookingCode")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("booking_Code");
+
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("bookingDate");

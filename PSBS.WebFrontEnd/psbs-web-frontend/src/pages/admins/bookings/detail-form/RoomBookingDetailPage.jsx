@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import Swal from "sweetalert2"; // Import SweetAlert2
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
+import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
 
 const RoomBookingDetailPage = () => {
   const sidebarRef = useRef(null);
@@ -19,38 +21,32 @@ const RoomBookingDetailPage = () => {
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
-        // Fetch booking details
         const bookingResponse = await axios.get(
           `http://localhost:5115/Bookings/${bookingId}`
         );
         setBooking(bookingResponse.data.data);
 
-        // Fetch payment type name
         const paymentResponse = await axios.get(
           `http://localhost:5115/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`
         );
         setPaymentTypeName(paymentResponse.data?.data?.paymentTypeName || "Unknown");
 
-        // Fetch account name using accountId
         const accountResponse = await axios.get(
           `http://localhost:5000/api/Account?AccountId=${bookingResponse.data.data.accountId}`
         );
         setAccountName(accountResponse.data?.accountName || "Unknown");
 
-        // Fetch booking status name using bookingStatusId
         const statusResponse = await axios.get(
           `http://localhost:5115/api/BookingStatus/${bookingResponse.data.data.bookingStatusId}`
         );
         setBookingStatusName(statusResponse.data?.data?.bookingStatusName || "Unknown");
 
-        // Fetch room history details
         const historyResponse = await axios.get(
           `http://localhost:5023/api/RoomHistories/${bookingId}`
         );
         setRoomHistory(historyResponse.data.data);
 
-        // Fetch room details using roomId from roomHistory (assuming roomHistory contains roomId)
-        const roomId = historyResponse.data.data[0]?.roomId; // Use the first entry's roomId
+        const roomId = historyResponse.data.data[0]?.roomId;
         if (roomId) {
           const roomResponse = await axios.get(
             `http://localhost:5023/api/Room/${roomId}`
@@ -67,9 +63,55 @@ const RoomBookingDetailPage = () => {
     setLoading(false);
   }, [bookingId]);
 
+  const handleCancelBooking = async () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Do you really want to cancel this booking?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, cancel it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await axios.put(
+            `http://localhost:5115/Bookings/cancel/${bookingId}`
+          );
+
+          if (response.data.flag) {
+            Swal.fire({
+              title: "Cancelled!",
+              text: response.data.message || "Booking has been cancelled.",
+              icon: "success",
+            });
+
+            // Refresh the booking details after cancellation
+            setBooking((prevBooking) => ({
+              ...prevBooking,
+              bookingStatusId: "Cancelled",
+            }));
+            setBookingStatusName("Cancelled");
+          } else {
+            Swal.fire({
+              title: "Failed!",
+              text: response.data.message || "The booking can't be cancelled.",
+              icon: "error",
+            });
+          }
+        } catch (error) {
+          Swal.fire({
+            title: "Error!",
+            text: "An error occurred while cancelling the booking.",
+            icon: "error",
+          });
+        }
+      }
+    });
+  };
+
   if (loading)
     return <p className="text-center text-xl font-semibold">Loading...</p>;
-  if (error) return <p className="text-center text-xl text-red-500">{error}</p>;
 
   return (
     <div>
@@ -80,11 +122,12 @@ const RoomBookingDetailPage = () => {
           <h2 className="text-2xl font-bold mb-4 text-center">
             Room Booking Details
           </h2>
+          <BookingRoomStatus bookingStatus={bookingStatusName} />
           {booking && (
             <div className="space-y-4 p-6 bg-white shadow-md rounded-lg">
               <div className="flex justify-between text-lg">
                 <p>
-                  <strong>Booking ID:</strong> {booking.bookingId}
+                  <strong>Booking Code:</strong> {booking.bookingCode}
                 </p>
                 <p>
                   <strong>Total Amount:</strong> {booking.totalAmount}
@@ -116,16 +159,24 @@ const RoomBookingDetailPage = () => {
             </div>
           )}
 
-          <h3 className="text-xl font-semibold mt-6 mb-4">Room History</h3>
+          <h3 className="text-xl font-semibold mt-6 mb-4 text-center">Room Bookings</h3>
           {roomHistory.length > 0 ? (
-            <div className="bg-white p-6 shadow-md rounded-lg space-y-4">
+            <div className="mt-4 space-y-4">
               {roomHistory.map((history, index) => (
-                <div key={index} className="space-y-2 p-4 border-b">
+                <div key={index} className="p-4 bg-gray-50 rounded-lg shadow-md">
                   <p>
-                    <strong>Room ID:</strong> {history.roomId}
+                    <strong>Room Name:</strong> {roomName}
                   </p>
                   <p>
-                    <strong>Room Name:</strong> {roomName} {/* Use roomName from state */}
+                    <strong>Pet ID:</strong> {history.petId}
+                  </p>
+                  <p>
+                    <strong>Check-in Date:</strong>{" "}
+                    {new Date(history.bookingStartDate).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <strong>Check-out Date:</strong>{" "}
+                    {new Date(history.bookingEndDate).toLocaleDateString()}
                   </p>
                   <p>
                     <strong>Check-in Date:</strong>{" "}
@@ -144,6 +195,16 @@ const RoomBookingDetailPage = () => {
           ) : (
             <p>No room history found for this booking.</p>
           )}
+          
+              {/* Cancel Booking Button */}
+              <div className="mt-4 text-center">
+                <button
+                  onClick={handleCancelBooking}
+                  className="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg shadow-md hover:bg-red-700 transition duration-300"
+                >
+                  Cancel Booking
+                </button>
+              </div>
         </div>
       </div>
     </div>

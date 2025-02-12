@@ -159,6 +159,51 @@ namespace VoucherApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Voucher>> GetValidVoucherForCustomer()
+        {
+            try
+            {
+                var vouchers = await context.Vouchers
+                    .AsNoTracking()
+                    .Where(v => !v.IsDeleted && !v.IsGift && v.VoucherQuantity > 0 && v.VoucherStartDate <= DateTime.Now && v.VoucherEndDate >= DateTime.Now) 
+                    .ToListAsync();
+                return vouchers;
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a client-friendly error message
+                throw new Exception("Error occurred while retrieving vouchers.");
+            }
+        }
+
+        public async Task<Response> MinusVoucherQuanitty(Guid id)
+        {
+            try
+            {
+                var existingVoucher = await context.Vouchers.FirstOrDefaultAsync(v => v.VoucherId == id);
+                if (existingVoucher == null)
+                {
+                    return new Response(false, "Voucher does not exist.");
+                }
+                existingVoucher.VoucherQuantity--;
+                if(existingVoucher.VoucherQuantity == 0)
+                {
+                    existingVoucher.IsDeleted = true;
+                }
+                context.Vouchers.Update(existingVoucher);
+                await context.SaveChangesAsync();
+                return new Response(true, "Voucher quantity updated successfully.");
+            }
+            catch(Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a client-friendly error message
+                throw new Exception("Error occurred update voucher quantity.");
+            }
+        }
 
         public async Task<Response> UpdateAsync(Voucher entity)
         {

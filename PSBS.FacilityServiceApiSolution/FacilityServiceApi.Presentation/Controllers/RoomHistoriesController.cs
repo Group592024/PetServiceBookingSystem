@@ -1,4 +1,7 @@
-﻿using FacilityServiceApi.Domain.Entities;
+﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.DTOs.Conversions;
+using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,13 +13,13 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RoomHistoriesController : ControllerBase
+    public class RoomHistoriesController (IRoomHistory roomHistoryInterface) : ControllerBase
     {
-        private readonly FacilityServiceDbContext _context;
-        public RoomHistoriesController(FacilityServiceDbContext context)
-        {
-            _context = context;
-        }
+        //private readonly FacilityServiceDbContext _context;
+        //public RoomHistoriesController(FacilityServiceDbContext context)
+        //{
+        //    _context = context;
+        //}
         // GET: api/<RoomHistoriesController>
         [HttpGet]
         public IEnumerable<string> Get()
@@ -26,9 +29,9 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // GET api/<RoomHistoriesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BookingServiceItem>> GetRoomHistoryByBookingId(Guid id)
+        public async Task<ActionResult<RoomHistoryDTO>> GetRoomHistoryByBookingId(Guid id)
         {
-            var bookingRoomItems = await _context.RoomHistories.Where(i => i.BookingId == id).ToListAsync();
+            var bookingRoomItems = await roomHistoryInterface.GetRoomHistoryByBookingId(id);
             if (!bookingRoomItems.Any())
             {
                 return NotFound(new Response(false, "No item detected"));
@@ -42,8 +45,11 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<RoomHistoriesController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<ActionResult<Response>> CreateRoomHistory([FromBody] CreateRoomHistoryDTO roomHistoryDTO)
         {
+            var createEntity = RoomHistoryConversion.ToEntityForCreate(roomHistoryDTO);
+            var response = await roomHistoryInterface.CreateAsync(createEntity);
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         // PUT api/<RoomHistoriesController>/5

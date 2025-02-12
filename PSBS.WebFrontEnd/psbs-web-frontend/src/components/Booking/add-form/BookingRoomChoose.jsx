@@ -1,128 +1,118 @@
 import React, { useEffect, useState } from "react";
 
-const BookingRoomChoose = ({ formData, handleChange }) => {
+const BookingRoomChoose = ({ bookingData, onBookingDataChange }) => {
   const [rooms, setRooms] = useState([]);
   const [pets, setPets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedRoomType, setSelectedRoomType] = useState(null); // For storing room type details (including price)
-  const [totalPrice, setTotalPrice] = useState(null); // To store calculated total price
+  const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [formData, setFormData] = useState(bookingData || {
+    room: "",
+    pet: "",
+    start: "",
+    end: "",
+    price: "",
+    camera: false,
+  });
 
-  const fetchRooms = async () => {
-    try {
-      const response = await fetch("http://localhost:5023/api/Room/available");
-      const data = await response.json();
-
-      if (data.flag) {
-        setRooms(data.data);
-      } else {
-        setError("Failed to fetch rooms.");
-      }
-    } catch (err) {
-      setError("Error fetching rooms.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchPets = async () => {
-    // Simulating a fake API response for pets
-    const fakePetsData = [
-      { petId: "1", petName: "Buddy" },
-      { petId: "2", petName: "Milo" },
-      { petId: "3", petName: "Bella" },
-      { petId: "4", petName: "Charlie" },
-      { petId: "5", petName: "Lucy" },
-    ];
-
-    // Simulating the structure of a response with a flag and data
-    const data = { flag: true, data: fakePetsData };
-
-    if (data.flag) {
-      setPets(data.data);
-    } else {
-      setError("Failed to fetch pets.");
-    }
-  };
-
-  // Fetch available rooms and pets from the fake API
+  // Fetch available rooms and pets
   useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch("http://localhost:5023/api/Room/available");
+        const data = await response.json();
+        if (data.flag) {
+          setRooms(data.data);
+        } else {
+          setError("Failed to fetch rooms.");
+        }
+      } catch (err) {
+        setError("Error fetching rooms.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const fetchPets = async () => {
+      const fakePetsData = [
+        { petId: "1BFCD3F7-27AD-4415-9B1A-56F0248564E5", petName: "Max" },
+        { petId: "6AE2F8F6-5502-4CB2-A6CC-86B1A3142BF3", petName: "Buddy" },
+        { petId: "1EA82E00-00E8-4E28-AD68-C858B4D44888", petName: "Bella" },
+      ];
+      setPets(fakePetsData);
+    };
+
     fetchRooms();
     fetchPets();
   }, []);
 
-  // Fetch room type details when the room is selected
-  const fetchRoomType = async (roomTypeId) => {
-    try {
-      const response = await fetch(`http://localhost:5023/api/RoomType/${roomTypeId}`);
-      const data = await response.json();
-      if (data.flag && data.data) {
-        setSelectedRoomType(data.data); // Set the selected room type details (including price)
-      } else {
-        setError("Failed to fetch room type.");
-      }
-    } catch (err) {
-      setError("Error fetching room type.");
-    }
-  };
-
-  // Handle room selection and fetch corresponding room type details
-  const handleRoomChange = (e) => {
-    handleChange(e); // Call the passed handleChange function
-    const selectedRoom = rooms.find(room => room.roomId === e.target.value);
-    if (selectedRoom) {
-      fetchRoomType(selectedRoom.roomTypeId); // Fetch room type details for the selected room
-      // Recalculate the price whenever room is changed
-      if (formData.start && formData.end) {
-        if (validateDates(formData.start, formData.end)) {
-          calculatePrice(formData.start, formData.end);
-        }
+  // Fetch room type details when a room is selected
+  useEffect(() => {
+    if (formData.room) {
+      const selectedRoom = rooms.find((room) => room.roomId === formData.room);
+      if (selectedRoom) {
+        const fetchRoomType = async () => {
+          try {
+            const response = await fetch(`http://localhost:5023/api/RoomType/${selectedRoom.roomTypeId}`);
+            const data = await response.json();
+            if (data.flag && data.data) {
+              setSelectedRoomType(data.data);
+            } else {
+              setError("Failed to fetch room type.");
+            }
+          } catch (err) {
+            setError("Error fetching room type.");
+          }
+        };
+        fetchRoomType();
       }
     }
-  };
+  }, [formData.room, rooms]);
 
-  // Validate start and end dates
-  const validateDates = (start, end) => {
-    const startDate = new Date(start);
-    const endDate = new Date(end);
+  // Recalculate price whenever formData or selectedRoomType changes
+  useEffect(() => {
+    if (formData.start && formData.end && selectedRoomType) {
+      const startDate = new Date(formData.start);
+      const endDate = new Date(formData.end);
 
-    // Ensure start date is not after end date
-    if (startDate >= endDate) {
-      setError("End date must be after start date.");
-      return false;
-    }
+      if (startDate >= endDate) {
+        setError("End date must be after start date.");
+        return;
+      }
 
-    // Reset the error if dates are valid
-    setError(null);
-    return true;
-  };
+      setError(null);
 
-  // Calculate total price based on start and end dates
-  const calculatePrice = (start, end) => {
-    if (!selectedRoomType) return;
-
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-
-    // If start date and end date are on the same day
-    if (startDate.toDateString() === endDate.toDateString()) {
-      setTotalPrice(selectedRoomType.price); // Price * 1 (same day)
-    } else {
       const daysDifference = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
-      setTotalPrice(selectedRoomType.price * daysDifference); // Price * 2 (multiple days)
-    }
-  };
+      let totalPrice = selectedRoomType.price * daysDifference;
 
-  // Handle changes to start and end dates
-  const handleDateChange = (e) => {
-    handleChange(e); // Call the passed handleChange function
-
-    // Only validate and calculate if both start and end dates are provided
-    if (formData.start && formData.end) {
-      if (validateDates(formData.start, formData.end)) {
-        calculatePrice(formData.start, formData.end);
+      // Add 50,000 VND if camera is selected
+      if (formData.camera) {
+      totalPrice += 50000;
       }
+
+      setFormData((prevData) => ({
+        ...prevData,
+        price: totalPrice,
+      }));
+  
+      onBookingDataChange({ ...formData, price: totalPrice }); 
+
+      // Update formData with the new price
+      // const updatedData = { ...formData, price: totalPrice };
+      // setFormData(updatedData);
+      // onBookingDataChange(updatedData); // Notify parent of the change
     }
+  }, [formData.start, formData.end, selectedRoomType, formData.camera]);
+
+  // Handle input changes
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const updatedData = {
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    };
+    setFormData(updatedData);
+    onBookingDataChange(updatedData); // Notify parent of the change
   };
 
   // Get current date and time for min attribute
@@ -137,21 +127,16 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
           <select
             name="room"
             value={formData.room}
-            onChange={handleRoomChange} // Use custom handleRoomChange
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
             disabled={isLoading}
           >
-            {isLoading ? (
-              <option>Loading...</option>
-            ) : error ? (
-              <option>{error}</option>
-            ) : (
-              rooms.map((room) => (
-                <option key={room.roomId} value={room.roomId}>
-                  {room.roomName} - {room.description}
-                </option>
-              ))
-            )}
+            <option value="">Select a room</option>
+            {rooms.map((room) => (
+              <option key={room.roomId} value={room.roomId}>
+                {room.roomName} - {room.description}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -164,17 +149,12 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
             onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
-            {isLoading ? (
-              <option>Loading...</option>
-            ) : error ? (
-              <option>{error}</option>
-            ) : (
-              pets.map((pet) => (
-                <option key={pet.petId} value={pet.petId}>
-                  {pet.petName}
-                </option>
-              ))
-            )}
+            <option value="">Select a pet</option>
+            {pets.map((pet) => (
+              <option key={pet.petId} value={pet.petId}>
+                {pet.petName}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -185,9 +165,9 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
             type="datetime-local"
             name="start"
             value={formData.start}
-            onChange={handleDateChange} // Use custom handleDateChange
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            min={now} // Set the minimum date/time to now
+            min={now}
           />
         </div>
 
@@ -198,9 +178,9 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
             type="datetime-local"
             name="end"
             value={formData.end}
-            onChange={handleDateChange} // Use custom handleDateChange
+            onChange={handleChange}
             className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            min={now} // Set the minimum date/time to now
+            min={now}
           />
         </div>
 
@@ -210,7 +190,7 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
           <input
             type="text"
             name="price"
-            value={totalPrice !== null ? `${totalPrice} VND` : 'N/A'}
+            value={formData.price ? `${formData.price} VND` : "N/A"}
             readOnly
             className="w-full p-3 border border-gray-300 rounded-md bg-gray-200 text-gray-500"
           />
@@ -223,7 +203,7 @@ const BookingRoomChoose = ({ formData, handleChange }) => {
               type="checkbox"
               name="camera"
               checked={formData.camera}
-              onChange={handleChange} // Toggle the checkbox state on change
+              onChange={handleChange}
               className="form-checkbox h-5 w-5 text-blue-500 transition-all"
             />
             <span className="ml-2">Camera</span>
