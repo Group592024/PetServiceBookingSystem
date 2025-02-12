@@ -11,8 +11,8 @@ namespace PSPS.AccountAPI.Presentation.Controllers
     public class ReportAccountController(IAccount account) : ControllerBase
     {
 
-        [HttpGet("countStaff")]
-        public async Task<ActionResult<List<GetAccountDTO>>> GetAllStaffs()
+        [HttpGet("count/{role}")]
+        public async Task<ActionResult<List<GetAccountDTO>>> GetAllAccounts([FromQuery] string role)
         {
             var result = await account.GetAllStaffAccount();
             if (result == null)
