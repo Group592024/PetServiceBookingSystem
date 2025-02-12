@@ -1,288 +1,313 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:intl/intl.dart';
-import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final String accountId;
-
-  const EditProfilePage({Key? key, required this.accountId}) : super(key: key);
+  const EditProfilePage(
+      {Key? key, required String title, required String accountId})
+      : super(key: key);
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  Map<String, dynamic>? account;
-  String? imagePreview;
   final _formKey = GlobalKey<FormState>();
-  TextEditingController? nameController;
-  TextEditingController? emailController;
-  TextEditingController? phoneController;
-  TextEditingController? addressController;
-  String? selectedGender;
-  File? _image;
-  final ImagePicker _picker = ImagePicker();
+  TextEditingController nameController = TextEditingController();
+  TextEditingController phoneController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  String accountId = '';
+  String? email;
+  String role = "user";
+  String gender = "male";
+  DateTime? dob;
+  File? profileImage;
+  String? imagePreview;
+  
+  get filename => null;
 
   @override
   void initState() {
     super.initState();
-    fetchAccountData();
+    _loadAccountId();
   }
 
-  // Fetch account data from API
-  Future<void> fetchAccountData() async {
+  Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accountId = prefs.getString('accountId') ?? '';
+    });
+    if (accountId.isNotEmpty) {
+      _fetchAccountData();
+    }
+  }
+
+  Future<void> _fetchAccountData() async {
+    if (accountId.isEmpty) return;
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/Account?AccountId=${widget.accountId}'),
+        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-
         setState(() {
-          account = data;
-          if (account?['accountImage'] != null) {
-            fetchImage(account?['accountImage']);
-          }
-
-          // Initialize controllers with fetched data
-          nameController = TextEditingController(text: account?['accountName']);
-          emailController = TextEditingController(text: account?['accountEmail']);
-          phoneController = TextEditingController(text: account?['accountPhoneNumber']);
-          addressController = TextEditingController(text: account?['accountAddress']);
-          selectedGender = account?['accountGender'];
+          nameController.text = data['accountName'] ?? '';
+          email = data['accountEmail'];
+          phoneController.text = data['accountPhoneNumber'] ?? '';
+          addressController.text = data['accountAddress'] ?? '';
+          gender = data['accountGender'] ?? 'male';
+          role = data['roleId'] ?? 'user';
+          dob = data['accountDob'] != null
+              ? DateTime.parse(data['accountDob'])
+              : null;
+          imagePreview = data['accountImage'] != null
+              ? 'http://localhost:5000/api/Account/loadImage?filename=$filename'
+              : null;
         });
+      } else {
+        _showErrorDialog('Failed to load account data.');
       }
     } catch (error) {
-      print("Error calling API: $error");
+      _showErrorDialog('Error fetching account data: $error');
     }
   }
 
-  // Fetch profile image
-  Future<void> fetchImage(String filename) async {
+  Future<void> _saveProfile() async {
+    if (!_formKey.currentState!.validate()) return;
+
     try {
-      final imageResponse = await http.get(
-        Uri.parse('http://localhost:5000/api/Account/loadImage?filename=$filename'),
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('http://localhost:5000/api/Account'),
       );
 
-      if (imageResponse.statusCode == 200) {
-        final imageData = jsonDecode(imageResponse.body);
-        if (imageData['flag']) {
-          setState(() {
-            imagePreview = "data:image/png;base64,${imageData['data']['fileContents']}";
-          });
+      request.fields['AccountTempDTO.AccountId'] = accountId;
+      request.fields['AccountTempDTO.AccountName'] = nameController.text;
+      request.fields['AccountTempDTO.AccountEmail'] = email ?? '';
+      request.fields['AccountTempDTO.AccountPhoneNumber'] =
+          phoneController.text;
+      request.fields['AccountTempDTO.AccountGender'] = gender;
+      request.fields['AccountTempDTO.AccountDob'] =
+          dob != null ? DateFormat('yyyy-MM-dd').format(dob!) : '';
+      request.fields['AccountTempDTO.AccountAddress'] = addressController.text;
+      request.fields['AccountTempDTO.roleId'] = role;
+
+      // Send the profile image if a new image is picked
+      if (profileImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'UploadModel.ImageFile',
+          profileImage!.path,
+        ));
+      }
+
+      final response = await request.send();
+
+      if (response.statusCode == 200) {
+        final result = json.decode(await response.stream.bytesToString());
+        if (result['flag']) {
+          _showSuccessDialog('Profile updated successfully!');
+        } else {
+          _showErrorDialog(result['message'] ?? 'Something went wrong.');
         }
+      } else {
+        _showErrorDialog('Error saving profile.');
       }
     } catch (error) {
-      print("Error fetching image: $error");
+      _showErrorDialog('Error: $error');
     }
   }
 
-  // Format date of birth
-  String formatDate(String date) {
-    try {
-      DateTime parsedDate = DateTime.parse(date);
-      return DateFormat('dd/MM/yyyy').format(parsedDate);
-    } catch (e) {
-      return date;
-    }
-  }
-
-  // Handle image selection from gallery
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _image = File(pickedFile.path);
+        profileImage = File(pickedFile.path);
+        imagePreview = null; // Reset image preview when selecting a new image
       });
     }
   }
 
-  // Update profile API
-  // Update profile API
-Future<void> updateProfile() async {
-  try {
-    final uri = Uri.parse('http://localhost:5000/api/Account');
-    var request = http.MultipartRequest('PUT', uri);
-
-    // Prepare the profile data
-    request.fields['accountId'] = widget.accountId;
-    request.fields['accountName'] = nameController?.text ?? '';
-    request.fields['accountEmail'] = emailController?.text ?? '';
-    request.fields['accountPhoneNumber'] = phoneController?.text ?? '';
-    request.fields['accountAddress'] = addressController?.text ?? '';
-    request.fields['accountGender'] = selectedGender ?? '';
-
-    // Log the profile data before sending
-    print("Request Profile Data: ${request.fields}");
-
-    // Add image file if available
-    if (_image != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-        'accountImage', _image!.path,
-      ));
-    }
-
-    // Send the request
-    final response = await request.send();
-
-    // Log the response status code
-    print("Response Status Code: ${response.statusCode}");
-
-    if (response.statusCode == 200) {
-      final responseBody = await response.stream.bytesToString();
-      final data = jsonDecode(responseBody);
-
-      // Log the response body
-      print("Response Body: $data");
-
-      if (data['status'] == 'success') {
-        // Successfully updated
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Profile updated successfully")));
-      } else {
-        // Update failed
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to update profile")));
-      }
-    } else {
-      // Log error response
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error updating profile: ${response.statusCode}")));
-      print("Error updating profile, status code: ${response.statusCode}");
-    }
-  } catch (error) {
-    // Log the error
-    print("Error updating profile: $error");
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error updating profile")));
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
-}
 
+  void _showSuccessDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Success'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-        backgroundColor: Colors.white,
+        title: const Text('Edit Profile'),
         elevation: 0,
         centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar + Name
-              GestureDetector(
-                onTap: _pickImage, // Pick an image when tapped
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
-                  ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
+              Container(
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                ),
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: CircleAvatar(
                         radius: 80,
-                        backgroundImage: _image != null
-                            ? FileImage(_image!)
-                            : imagePreview != null
-                                ? NetworkImage(imagePreview!)
-                                : null,
-                        child: _image == null && imagePreview == null
+                        backgroundImage: imagePreview != null
+                            ? NetworkImage(imagePreview!)
+                            : null,
+                        child: imagePreview == null
                             ? Icon(Icons.person, size: 80, color: Colors.grey)
                             : null,
                       ),
-                    ],
-                  ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      nameController.text,
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 16),
-
-              // Editable personal information
-              Form(
-                key: _formKey,
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+              const SizedBox(height: 20),
+              ProfileField(label: 'Name', controller: nameController),
+              const SizedBox(height: 20),
+              ProfileField(
+                  label: 'Email',
+                  controller: TextEditingController(text: email),
+                  enabled: false),
+              const SizedBox(height: 20),
+              TextFormField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  labelText: 'Birthday',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.calendar_today),
+                    onPressed: () async {
+                      final selectedDate = await showDatePicker(
+                        context: context,
+                        initialDate: dob ?? DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime.now(),
+                      );
+                      if (selectedDate != null) {
+                        setState(() => dob = selectedDate);
+                      }
+                    },
                   ),
-                  child: Column(
-                    children: [
-                      ProfileField(label: "Name", controller: nameController),
-                      ProfileField(label: "Email", controller: emailController, enabled: false),
-                      ProfileField(label: "Birthday", value: formatDate(account?['accountDob'])),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text("Gender", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black)),
-                            SizedBox(width: 16),
-                            Radio<String>(
+                ),
+                controller: TextEditingController(
+                  text:
+                      dob != null ? DateFormat('dd/MM/yyyy').format(dob!) : '',
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text("Gender:",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            title: const Text('Male'),
+                            leading: Radio<String>(
                               value: 'male',
-                              groupValue: selectedGender,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedGender = value;
-                                });
-                              },
+                              groupValue: gender,
+                              onChanged: (value) =>
+                                  setState(() => gender = value!),
                             ),
-                            Text("Male"),
-                            SizedBox(width: 16),
-                            Radio<String>(
-                              value: 'female',
-                              groupValue: selectedGender,
-                              onChanged: (value) {
-                                setState(() {
-                                  selectedGender = value;
-                                });
-                              },
-                            ),
-                            Text("Female"),
-                          ],
+                          ),
                         ),
-                      ),
-                      ProfileField(label: "Phone Number", controller: phoneController),
-                      ProfileField(label: "Address", controller: addressController),
-                    ],
+                        Expanded(
+                          child: ListTile(
+                            title: const Text('Female'),
+                            leading: Radio<String>(
+                              value: 'female',
+                              groupValue: gender,
+                              onChanged: (value) =>
+                                  setState(() => gender = value!),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-              SizedBox(height: 16),
-
-              // Edit button to update profile
+              const SizedBox(height: 20),
+              ProfileField(label: 'Phone Number', controller: phoneController),
+              const SizedBox(height: 20),
+              ProfileField(label: 'Address', controller: addressController),
+              const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        updateProfile();
-                      }
-                    },
+                    onPressed: _saveProfile,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
-                    child: Text("Save", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: Text("Save",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context); // Go back to the previous screen
-                    },
+                  OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey,
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                     ),
-                    child: Text("Back", style: TextStyle(color: Colors.white, fontSize: 16)),
+                    child: Text("Back",
+                        style: TextStyle(color: Colors.white, fontSize: 16)),
                   ),
                 ],
               ),
@@ -294,14 +319,17 @@ Future<void> updateProfile() async {
   }
 }
 
-// Widget to display editable profile fields
 class ProfileField extends StatelessWidget {
   final String label;
-  final String? value;
-  final TextEditingController? controller;
+  final TextEditingController controller;
   final bool enabled;
 
-  const ProfileField({Key? key, required this.label, this.value, this.controller, this.enabled = true}) : super(key: key);
+  const ProfileField({
+    Key? key,
+    required this.label,
+    required this.controller,
+    this.enabled = true,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -310,23 +338,20 @@ class ProfileField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black)),
-          SizedBox(height: 4),
+          Text(label,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.black)),
+          const SizedBox(height: 4),
           TextFormField(
             controller: controller,
-            initialValue: value,
             enabled: enabled,
             decoration: InputDecoration(
               border: OutlineInputBorder(),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Colors.grey[100],
             ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return '$label is required';
-              }
-              return null;
-            },
           ),
         ],
       ),

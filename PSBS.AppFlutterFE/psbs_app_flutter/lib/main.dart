@@ -6,7 +6,9 @@ import 'package:psbs_app_flutter/pages/booking_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet_page.dart';
 import 'package:psbs_app_flutter/pages/profile_page.dart';
+import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pages/Account/editprofile_page.dart';
 import 'pages/Account/forgotpassword_page.dart';
@@ -25,60 +27,53 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'PetEase App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
+        
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home:  EditProfilePage(accountId: 'd16f43b2-17cf-4a1e-8d9a-16fa813a13fb',),
+      initialRoute: '/login', // Trang khởi động
+      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+  final String accountId;
+  
+  final dynamic title;
+  const MyHomePage({super.key, required this.title, required this.accountId});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
-
 class _MyHomePageState extends State<MyHomePage> {
+  late String accountId;
   int index = 0;
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
-
   final screens = [
     HomePage(),
     PetPage(),
     BookingPage(),
     VoucherPage(),
-    ProfilePages(),
+    ProfilePage(accountId: '', title: '',),
+    EditProfilePage(accountId: '', title: '',),
   ];
+  @override
+  void initState() {
+    super.initState();
+    _loadAccountId(); 
+  }
+
+  Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accountId = widget.accountId.isNotEmpty
+          ? widget.accountId
+          : (prefs.getString('accountId') ?? ''); 
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final items = <Widget>[

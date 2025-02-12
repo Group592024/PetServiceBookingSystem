@@ -60,7 +60,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       });
     }
   }
-
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -71,11 +70,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
     return null;
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // To ensure the background is white
+      backgroundColor: Colors.white, 
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -83,34 +81,32 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Logo section moved out of the card
                 Container(
                   padding:
                       EdgeInsets.symmetric(vertical: 32.0, horizontal: 48.0),
-                  color: Colors.grey[300], // Set gray background color
+                  color: Colors.grey[300], 
                   child: Text(
                     'Logo',
                     style: TextStyle(
-                      fontSize: 48, // Adjust font size
-                      fontWeight: FontWeight.bold, // Make it bold
-                      color: Colors.black, // Set the text color to white
+                      fontSize: 48, 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.black, 
                     ),
                   ),
                 ),
                 SizedBox(height: 32),
-                // Card for form input
                 Card(
                   color: Colors.white,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0)), // Bo góc
+                      borderRadius: BorderRadius.circular(16.0)), 
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
                         crossAxisAlignment:
-                            CrossAxisAlignment.center, // Căn giữa
+                            CrossAxisAlignment.center, 
                         children: [
                           Text(
                             "Forgot Password",
@@ -118,7 +114,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                 fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           SizedBox(height: 8),
-                          // Sử dụng RichText để chia văn bản
                           RichText(
                             text: TextSpan(
                               children: [
@@ -133,7 +128,6 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                                       fontSize: 14, color: Colors.cyan),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      // Điều hướng tới trang đăng nhập
                                       Navigator.pushNamed(context, '/login');
                                     },
                                 ),
@@ -141,25 +135,24 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             ),
                           ),
                           SizedBox(height: 16),
-                          // Ô nhập email
                           TextFormField(
                             controller: emailController,
                             decoration: InputDecoration(
                               labelText: "Email address",
                               labelStyle:
-                                  TextStyle(color: Colors.black), // Màu nhãn
+                                  TextStyle(color: Colors.black), 
                               filled: true,
-                              fillColor: Colors.grey[100], // Màu nền ô input
+                              fillColor: Colors.grey[100], 
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(
-                                    12.0), // Bo góc cho ô input
+                                    12.0), 
                               ),
                             ),
                             validator: validateEmail,
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 16),
-                          // Nút Reset Password màu cyan, chữ trắng
+                         
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -167,9 +160,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(
-                                      12.0), // Bo góc button
+                                      12.0), 
                                 ),
-                                backgroundColor: Colors.cyan, // Màu nền cyan
+                                backgroundColor: Colors.cyan,
                               ),
                               child: isLoading
                                   ? CircularProgressIndicator(

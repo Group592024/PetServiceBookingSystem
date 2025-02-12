@@ -1,247 +1,296 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class ChangePasswordPage extends StatefulWidget {
+  final String accountId;
+  ChangePasswordPage({required this.accountId, required String title});
   @override
-  _ChangePasswordPageState createState() =>
-      _ChangePasswordPageState();
+  _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
-
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  TextEditingController currentPasswordController = TextEditingController();
-  TextEditingController newPasswordController = TextEditingController();
-  TextEditingController confirmPasswordController = TextEditingController();
-  bool showCurrentPassword = false;
-  bool showNewPassword = false;
-  bool showConfirmPassword = false;
-  String accountName = 'Admin';
+  final _formKey = GlobalKey<FormState>();
+  bool _showCurrentPassword = false;
+  bool _showNewPassword = false;
+  bool _showConfirmPassword = false;
+  String accountId = '';
+  TextEditingController _currentPasswordController = TextEditingController();
+  TextEditingController _newPasswordController = TextEditingController();
+  TextEditingController _confirmPasswordController = TextEditingController();
+  Future<void>? _fetchDataFuture;
   String? imagePreview;
-
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  Map<String, String> errors = {};
-
+  String? accountName;
   @override
   void initState() {
     super.initState();
-    // Fetch account name and image on initialization
-    _fetchAccountData();
+    fetchAccountData();
+    _loadAccountId();
   }
-
-  _fetchAccountData() async {
-    // Assuming that we retrieve account data based on an accountId
+  Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accountId = prefs.getString('accountId') ?? '';
+    });
+    print("Loaded Account ID: $accountId");
+    if (accountId.isNotEmpty) {
+      setState(() {
+        _fetchDataFuture =
+            fetchAccountData(); 
+      });
+    }
+  }
+  Future<void> fetchAccountData() async {
     try {
       final response = await http.get(
-          Uri.parse('http://localhost:5000/api/Account?AccountId=d16f43b2-17cf-4a1e-8d9a-16fa813a13fb'));
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        setState(() {
-          accountName = data['accountName'] ?? 'Admin';
-          imagePreview = data['accountImage']; // assuming this is a URL or base64 string
-        });
-      } else {
-        throw Exception('Failed to load account data');
-      }
-    } catch (e) {
-      // Handle error, show a SnackBar or something
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error fetching account data: $e"),
-        backgroundColor: Colors.red,
-      ));
-    }
-  }
-
-  Future<void> _changePassword() async {
-    setState(() {
-      errors.clear();
-    });
-
-    // Validate fields
-    if (currentPasswordController.text.isEmpty ||
-        newPasswordController.text.isEmpty ||
-        confirmPasswordController.text.isEmpty) {
-      setState(() {
-        errors['general'] = 'All fields are required.';
-      });
-      return;
-    }
-
-    if (newPasswordController.text.length < 6) {
-      setState(() {
-        errors['newPassword'] = 'New password must be at least 6 characters.';
-      });
-      return;
-    }
-
-    if (newPasswordController.text != confirmPasswordController.text) {
-      setState(() {
-        errors['confirmPassword'] = 'Passwords do not match.';
-      });
-      return;
-    }
-
-    final requestData = {
-      'currentPassword': currentPasswordController.text,
-      'newPassword': newPasswordController.text,
-      'confirmPassword': confirmPasswordController.text
-    };
-
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:5000/api/Account/ChangePassword'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestData),
+        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
       );
-
       if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         setState(() {
-          currentPasswordController.clear();
-          newPasswordController.clear();
-          confirmPasswordController.clear();
+          accountName = data['accountName'] ?? 'N/A';
+          if (data['accountImage'] != null) {
+            fetchImage(data['accountImage']);
+          }
         });
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Password changed successfully!"),
-          backgroundColor: Colors.green,
-        ));
-      } else {
-        final errorData = jsonDecode(response.body);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(errorData['message'] ?? 'Failed to change password'),
-          backgroundColor: Colors.red,
-        ));
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('An error occurred. Please try again later.'),
-        backgroundColor: Colors.red,
-      ));
+    } catch (error) {
+      print("Lỗi khi gọi API: $error");
     }
   }
-
-  void _togglePasswordVisibility(bool field) {
-    setState(() {
-      if (field == true) {
-        showCurrentPassword = !showCurrentPassword;
-      } else if (field == false) {
-        showNewPassword = !showNewPassword;
-      } else {
-        showConfirmPassword = !showConfirmPassword;
+  Future<void> fetchImage(String filename) async {
+    try {
+      final imageResponse = await http.get(
+        Uri.parse(
+            'http://localhost:5000/api/Account/loadImage?filename=$filename'),
+      );
+      if (imageResponse.statusCode == 200) {
+        final imageData = jsonDecode(imageResponse.body);
+        if (imageData['flag']) {
+          setState(() {
+            imagePreview =
+                "data:image/png;base64,${imageData['data']['fileContents']}";
+          });
+        }
       }
-    });
+    } catch (error) {
+      print("Lỗi khi lấy ảnh: $error");
+    }
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text("Change Password"),
-        backgroundColor: Colors.teal,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Profile Section
-            Center(
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 75,
-                    backgroundColor: Colors.grey[200],
-                    child: imagePreview != null
-                        ? ClipOval(
-                            child: Image.network(
-                              imagePreview!,
-                              width: 150,
-                              height: 150,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : Icon(Icons.account_circle, size: 150),
-                  ),
-                  SizedBox(height: 16),
-                  Text(accountName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            // Password Form
-            TextField(
-              controller: currentPasswordController,
-              obscureText: !showCurrentPassword,
-              decoration: InputDecoration(
-                labelText: "Current Password",
-                suffixIcon: IconButton(
-                  icon: Icon(showCurrentPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
-                  onPressed: () => _togglePasswordVisibility(true),
-                ),
-              ),
-            ),
-            if (errors['general'] != null) ...[
-              SizedBox(height: 8),
-              Text(errors['general']!, style: TextStyle(color: Colors.red)),
-            ],
-            SizedBox(height: 12),
-            TextField(
-              controller: newPasswordController,
-              obscureText: !showNewPassword,
-              decoration: InputDecoration(
-                labelText: "New Password",
-                suffixIcon: IconButton(
-                  icon: Icon(showNewPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
-                  onPressed: () => _togglePasswordVisibility(false),
-                ),
-              ),
-            ),
-            if (errors['newPassword'] != null) ...[
-              SizedBox(height: 8),
-              Text(errors['newPassword']!, style: TextStyle(color: Colors.red)),
-            ],
-            SizedBox(height: 12),
-            TextField(
-              controller: confirmPasswordController,
-              obscureText: !showConfirmPassword,
-              decoration: InputDecoration(
-                labelText: "Confirm Password",
-                suffixIcon: IconButton(
-                  icon: Icon(showConfirmPassword
-                      ? Icons.visibility
-                      : Icons.visibility_off),
-                  onPressed: () => _togglePasswordVisibility(false),
-                ),
-              ),
-            ),
-            if (errors['confirmPassword'] != null) ...[
-              SizedBox(height: 8),
-              Text(errors['confirmPassword']!, style: TextStyle(color: Colors.red)),
-            ],
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: _changePassword,
-                  child: Text("Change Password"),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Go back to the previous page
-                  },
-                  child: Text("Back"),
-                ),
-              ],
-            ),
-          ],
-        ),
+  Future<void> _changePassword() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    final String apiUrl =
+        'http://localhost:5000/api/Account/ChangePassword$accountId';
+    final response = await http.put(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'currentPassword': _currentPasswordController.text,
+        'newPassword': _newPasswordController.text,
+        'confirmPassword': _confirmPasswordController.text,
+      }),
+    );
+    if (response.statusCode == 200) {
+      _showAlert('Success', 'Password changed successfully!');
+    } else {
+      final errorData = jsonDecode(response.body);
+      _showAlert('Error', errorData['message'] ?? 'Failed to change password');
+    }
+  }
+  void _showAlert(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
       ),
     );
   }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text('',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        iconTheme: IconThemeData(color: Colors.black),
+        automaticallyImplyLeading: false,
+      ),
+      body: _fetchDataFuture == null
+          ? Center(
+              child:
+                  CircularProgressIndicator()) 
+          : FutureBuilder<void>(
+              future:
+                  _fetchDataFuture, 
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasError) {
+                  return Center(child: Text('Lỗi khi tải dữ liệu'));
+                }
+                return SingleChildScrollView(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(color: Colors.black12, blurRadius: 5)
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundImage: imagePreview != null
+                                  ? NetworkImage(imagePreview!)
+                                  : null,
+                              child: imagePreview == null
+                                  ? Icon(Icons.person,
+                                      size: 60, color: Colors.grey)
+                                  : null,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              accountName ?? 'Loading...',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: buildPasswordField(
+                                  'Current Password',
+                                  _currentPasswordController,
+                                  _showCurrentPassword, () {
+                                setState(() => _showCurrentPassword =
+                                    !_showCurrentPassword);
+                              }),
+                            ),
+                            SizedBox(height: 16),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: buildPasswordField('New Password',
+                                  _newPasswordController, _showNewPassword, () {
+                                setState(
+                                    () => _showNewPassword = !_showNewPassword);
+                              }),
+                            ),
+                            SizedBox(height: 16),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 6),
+                              decoration: BoxDecoration(
+                                border:
+                                    Border.all(color: Colors.grey, width: 1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: buildPasswordField(
+                                  'Confirm Password',
+                                  _confirmPasswordController,
+                                  _showConfirmPassword, () {
+                                setState(() => _showConfirmPassword =
+                                    !_showConfirmPassword);
+                              }),
+                            ),
+                            SizedBox(height: 24),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _changePassword,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.teal,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                  ),
+                                  child: Text("Change Password",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16)),
+                                ),
+                                OutlinedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.grey,
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 20, vertical: 12),
+                                  ),
+                                  child: Text("Back",
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 16)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+Widget buildPasswordField(String label, TextEditingController controller,
+    bool obscureText, VoidCallback toggleVisibility) {
+  return TextFormField(
+    controller: controller,
+    obscureText: !obscureText,
+    decoration: InputDecoration(
+      labelText: label,
+      suffixIcon: IconButton(
+        icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+        onPressed: toggleVisibility,
+      ),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent), 
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent),
+      ),
+    ),
+    validator: (value) {
+      if (value == null || value.isEmpty) {
+        return 'Please enter $label';
+      }
+      return null;
+    },
+  );
 }
