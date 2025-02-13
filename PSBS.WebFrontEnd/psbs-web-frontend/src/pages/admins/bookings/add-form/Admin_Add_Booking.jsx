@@ -220,32 +220,28 @@ const Admin_Add_Booking = () => {
             });
 
             console.log("BookingCode Response:", bookingCode);
-            const vnpayResponse = await fetch(
-              "http://localhost:5115/Bookings/VNPay",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  Name: formData.name,
-                  Amount: discountedPrice,
-                  OrderType: "other",
-                  OrderDescription: bookingCode.trim(),
-                }),
-              }
-            );
+            const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+              discountedPrice
+            )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback/admin`;
+            
+            console.log("VNPay URL:", vnpayUrl);
 
-            const vnpayResult = await vnpayResponse.json();
-            console.log("VNPay API Response:", vnpayResult.data);
+            const vnpayResponse = await fetch(vnpayUrl, {
+              method: "GET",
+              headers: { "Content-Type": "application/json" },
+            });
 
-            if (vnpayResult.flag && vnpayResult.data) {
-              // window.location.href = vnpayResult.data;
+            const vnpayResult = await vnpayResponse.text();
+            console.log("VNPay API Response:", vnpayResult);
+            
+            if (vnpayResult.startsWith("http")) {
+              window.location.href = vnpayResult; // Redirect to VNPay
               return;
             } else {
               alert("VNPay payment failed!");
             }
           }
-          alert("Booking confirmed successfully!");
-          // window.location.href = "/bookings";
+          window.location.href = "/admin/bookings";
         } else {
           throw new Error(result.message || "Failed to submit booking");
         }

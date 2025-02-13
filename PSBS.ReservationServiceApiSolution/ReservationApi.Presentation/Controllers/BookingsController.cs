@@ -10,7 +10,6 @@ using ReservationApi.Application.DTOs.Conversions;
 using ReservationApi.Application.Intefaces;
 using ReservationApi.Domain.Entities;
 using ReservationApi.Infrastructure.Data;
-using ReservationApi.Presentation.Services.VNPay;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -358,12 +357,27 @@ namespace ReservationApi.Presentation.Controllers
         {
             var booking = await context.Bookings.FindAsync(bookingId);
             if (booking == null) return NotFound(new Response(false, "Booking not found."));
+
             var bookingCancel = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Cancelled"));
+
             var statusOrder = new List<string> { "Pending", "Confirmed", "Checked in", "Checked out" };
             if (!statusOrder.Contains(request.Status) || booking.BookingStatusId == bookingCancel.BookingStatusId)
                 return BadRequest(new { flag = false, message = "Invalid status transition." });
+
             var updatedBookingStatus = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains(request.Status));
             if (updatedBookingStatus == null) return BadRequest(new { flag = false, message = "Invalid status transition." });
+            if (request.Status == "Checked out")
+            {
+                var bookingPaymentType = await context.PaymentTypes.FirstOrDefaultAsync(p => p.PaymentTypeId == booking.PaymentTypeId);
+                if (bookingPaymentType == null)
+                {
+                    return BadRequest(new { flag = false, message = "Invalid status transition." });
+                }
+                if (bookingPaymentType.PaymentTypeName.Contains("COD"))
+                {
+                    booking.isPaid = true;
+                }
+            }
             booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
             context.Bookings.Update(booking);
             await context.SaveChangesAsync();
@@ -376,11 +390,27 @@ namespace ReservationApi.Presentation.Controllers
             var booking = await context.Bookings.FindAsync(bookingId);
             if (booking == null) return NotFound(new Response(false, "Booking not found."));
             var bookingCancel = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Cancelled"));
+
             var statusOrder = new List<string> { "Pending", "Confirmed", "Processing", "Completed" };
+
             if (!statusOrder.Contains(request.Status) || booking.BookingStatusId == bookingCancel.BookingStatusId)
                 return BadRequest(new { flag = false, message = "Invalid status transition." });
+
             var updatedBookingStatus = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains(request.Status));
             if (updatedBookingStatus == null) return BadRequest(new { flag = false, message = "Invalid status transition." });
+
+            if (request.Status == "Completed")
+            {
+                var bookingPaymentType = await context.PaymentTypes.FirstOrDefaultAsync(p => p.PaymentTypeId == booking.PaymentTypeId);
+                if (bookingPaymentType == null)
+                {
+                    return BadRequest(new { flag = false, message = "Invalid status transition." });
+                }
+                if (bookingPaymentType.PaymentTypeName.Contains("COD"))
+                {
+                    booking.isPaid = true;
+                }
+            }
             booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
             context.Bookings.Update(booking);
             await context.SaveChangesAsync();
@@ -471,10 +501,10 @@ namespace ReservationApi.Presentation.Controllers
                         await context.SaveChangesAsync();
                         LogExceptions.LogToConsole("payment" + existingBooking.isPaid);
                         Console.WriteLine("qua day nuaaaaaaaaaaaaaaaaaaa roi");
-                        return Redirect("http://localhost:3000/bookings?status=success"); // Redirect to frontend with status
+                        return Redirect("http://localhost:3000/bookings?status=success");
                     }
 
-                    return Redirect("http://localhost:3000/bookings?status=failed"); // Redirect to frontend with failure
+                    return Redirect("http://localhost:3000/bookings?status=failed"); 
                 }
                 catch (Exception ex)
                 {
@@ -485,5 +515,49 @@ namespace ReservationApi.Presentation.Controllers
             return Redirect("http://localhost:3000/bookings?status=notfound");
         }
 
+        [HttpGet("Vnpay/Callback/admin")]
+        public async Task<IActionResult> CallbackVnPayForAdmin()
+        {
+            if (Request.QueryString.HasValue)
+            {
+                try
+                {
+                    var paymentResult = vnpay.GetPaymentResult(Request.Query);
+                    foreach (var key in Request.Query.Keys)
+                    {
+                        LogExceptions.LogToConsole($"{key}: {Request.Query[key]}");
+                    }
+                    var resultDescription = paymentResult.PaymentResponse.Description;
+                    // var resultDescription = $"{paymentResult.PaymentResponse.Description}. {paymentResult.TransactionStatus.Description}.";
+                    var bookingCode = Request.Query["vnp_OrderInfo"];
+                    if (paymentResult.IsSuccess)
+                    {
+                        LogExceptions.LogToConsole("bookingCode " + bookingCode);
+                        Console.WriteLine("bookingCode " + bookingCode);
+                        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+                        if (existingBooking == null)
+                        {
+                            return Redirect("http://localhost:3000/bookings?status=failed");
+                        }
+                        LogExceptions.LogToConsole("booking" + existingBooking.BookingId);
+                        Console.WriteLine("qua day roi");
+                        existingBooking.isPaid = true;
+                        context.Bookings.Update(existingBooking);
+                        await context.SaveChangesAsync();
+                        LogExceptions.LogToConsole("payment" + existingBooking.isPaid);
+                        Console.WriteLine("qua day nuaaaaaaaaaaaaaaaaaaa roi");
+                        return Redirect("http://localhost:3000/admin/bookings?status=success");
+                    }
+
+                    return Redirect("http://localhost:3000/admin/bookings?status=failed");
+                }
+                catch (Exception ex)
+                {
+                    return Redirect("http://localhost:3000/admin/bookings?status=error");
+                }
+            }
+
+            return Redirect("http://localhost:3000/admin/bookings?status=notfound");
+        }
     }
 }

@@ -251,7 +251,6 @@ const AddBooking = () => {
               alert("VNPay payment failed!");
             }
           }
-          alert("Booking confirmed successfully!");
           window.location.href = "/bookings";
         } else {
           throw new Error(result.message || "Failed to submit booking");

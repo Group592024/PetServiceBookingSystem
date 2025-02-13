@@ -9,7 +9,7 @@ const AdminBookingList = () => {
     const navigate = useNavigate();
   
     const handleNewButtonClick = () => {
-      navigate("/bookings/new"); 
+      navigate("/admin/bookings/new"); 
     };
   
     return (
