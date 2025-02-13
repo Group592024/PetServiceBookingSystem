@@ -118,9 +118,8 @@ namespace PetApi.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Diary_Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Diary_Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("Pet_ID")
                         .HasColumnType("uniqueidentifier");

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace FacilityServiceApi.Domain.Entities
@@ -22,7 +23,7 @@ namespace FacilityServiceApi.Domain.Entities
         [Column("isDeleted")]
         public bool isDeleted { get; set; }
         public virtual Service? Service { get; set; }
-
+        [JsonIgnore]
         public virtual ICollection<BookingServiceItem>? BookingServiceItems { get; set; }
 
     }

@@ -26,6 +26,8 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<bool> UpdateAccountAsync(Account account);
         Task<Response> RedeemPointsAsync(Guid accountId, RedeemRequest model);
         Task<GetAccountDTO> GetAccountByPhone(string phone);
+        Task<Response> GetAllStaffAccount();
+        Task<Response> GetAllCustomerAccount();
 
     }
 }

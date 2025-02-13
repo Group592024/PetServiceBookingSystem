@@ -1,10 +1,4 @@
-﻿using FacilityServiceApi.Application.DTO;
-using FacilityServiceApi.Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FacilityServiceApi.Domain.Entities;
 
 namespace FacilityServiceApi.Application.DTOs.Conversions
 {
@@ -29,12 +23,13 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
             {
                 var singleServiceType = new ServiceTypeDTO
                 {
-                    serviceTypeId= serviceType.serviceTypeId,
-                    typeName= serviceType.typeName,
-                    description= serviceType.description,
+                    serviceTypeId = serviceType.serviceTypeId,
+                    typeName = serviceType.typeName,
+                    description = serviceType.description,
                     createAt = serviceType.createAt,
                     updateAt = serviceType.updateAt,
-                    isDeleted = serviceType.isDeleted
+                    isDeleted = serviceType.isDeleted,
+                    Services = new List<Service>()
                 };
                 return (singleServiceType, null);
             }
@@ -48,7 +43,18 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     createAt = st.createAt,
                     updateAt = st.updateAt,
                     description = st.description,
-                    isDeleted = st.isDeleted
+                    isDeleted = st.isDeleted,
+                    Services = st.Services.Select(s => new Service
+                    {
+                        serviceId = s.serviceId,
+                        serviceTypeId = s.serviceTypeId,
+                        serviceName = s.serviceName,
+                        serviceImage = s.serviceImage,
+                        serviceDescription = s.serviceDescription,
+                        createAt = s.createAt,
+                        updateAt = s.updateAt,
+                        isDeleted = s.isDeleted
+                    }).ToList()
                 }).ToList();
 
                 return (null, _serviceTypes);

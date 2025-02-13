@@ -26,7 +26,15 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+
+        public async Task<bool> CheckBookingsForPetAsync(Guid petId)
+        {
+            return await context.bookingServiceItems
+                .AnyAsync(b => b.PetId == petId);
+        }
+
         public async Task<Response> CreateAsync(BookingServiceItem entity)
+
         {
             try
             {

@@ -1,7 +1,5 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Domain.Entities;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace FacilityServiceApi.Application.DTOs.Conversions
 {
@@ -29,7 +27,18 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     name = roomType.name,
                     price = roomType.price,
                     description = roomType.description,
-                    isDeleted = roomType.isDeleted
+                    isDeleted = roomType.isDeleted,
+                    Rooms = roomType.Rooms.Select(p => new Room
+                    {
+                        roomTypeId = p.roomTypeId,
+                        roomName = p.roomName,
+                        description = p.description,
+                        isDeleted = p.isDeleted,
+                        hasCamera = p.hasCamera,
+                        roomImage = p.roomImage,
+                        status = p.status,
+                        roomId = p.roomId
+                    }).ToList()
                 };
                 return (singleRoomType, null);
             }
@@ -42,7 +51,18 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     name = rt.name,
                     price = rt.price,
                     description = rt.description,
-                    isDeleted = rt.isDeleted
+                    isDeleted = rt.isDeleted,
+                    Rooms = rt.Rooms.Select(p => new Room
+                    {
+                        roomTypeId = p.roomTypeId,
+                        roomName = p.roomName,
+                        description = p.description,
+                        isDeleted = p.isDeleted,
+                        hasCamera = p.hasCamera,
+                        roomImage = p.roomImage,
+                        status = p.status,
+                        roomId = p.roomId
+                    }).ToList(),
                 }).ToList();
 
                 return (null, _roomTypes);
