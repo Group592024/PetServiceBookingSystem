@@ -82,7 +82,8 @@ import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreat
 
 import PetHealthBookEdit from './pages/admins/pethealthbook/PetHealthBookEdit';
 import ReportSquareCard from './components/report/ReportSquareCard';
-import ReportPet from './components/report/ReportPet';
+import ReportIncome from './components/report/ReportIncome';
+import ReportBookingPage from './pages/admins/reports/ReportBookingPage';
 function App() {
   return (
     <div className='App'>
@@ -90,7 +91,7 @@ function App() {
         <Routes>
           {/* Route không yêu cầu bảo vệ */}
 
-          <Route path='/' element={<ReportPet />} />
+          <Route path='/' element={<Homepage />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
           <Route path='/forgotpassword' element={<ForgotPassword />} />
@@ -335,6 +336,13 @@ function App() {
           </Route>
           <Route path='/account'>
             <Route index element={<AccountList />} />
+          </Route>
+
+          <Route path='/report'>
+            <Route index element={<ReportBookingPage />} />
+            {/* <Route path='new' element={<MedicineAddForm />} />
+            <Route path='update/:medicineId' element={<MedicineUpdateForm />} />
+            <Route path='detail/:medicineId' element={<MedicineDetailForm />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>

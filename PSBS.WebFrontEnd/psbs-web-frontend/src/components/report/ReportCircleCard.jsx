@@ -34,13 +34,13 @@ const ReportCircleCard = ({ data }) => {
 
   return (
     <div>
-      <PieChart width={600} height={600}>
+      <PieChart width={450} height={450}>
         <Pie
           data={data}
           cx='50%'
           cy='50%'
           labelLine={false}
-          outerRadius={300}
+          outerRadius={200}
           fill='#8884d8'
           dataKey='quantity'
         >
