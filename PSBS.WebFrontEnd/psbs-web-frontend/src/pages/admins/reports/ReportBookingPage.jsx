@@ -9,13 +9,14 @@ import ReportServiceType from '../../../components/report/ReportServiceType';
 import ReportRoomStatusList from '../../../components/report/ReportRoomStatusList';
 import ReportRoomType from '../../../components/report/ReportRoomType';
 import ReportPet from '../../../components/report/ReportPet';
+import ReportAccountList from '../../../components/report/ReportAccountList';
 
 const ReportBookingPage = () => {
   const sidebarRef = useRef(null);
 
   const [type, setType] = useState('Booking');
 
-  const selectedTypes = ['Booking', 'Service', 'Room', 'Pet'];
+  const selectedTypes = ['Booking', 'Service', 'Room', 'Pet','User'];
 
   return (
     <div className=''>
@@ -124,13 +125,31 @@ const ReportBookingPage = () => {
               <div className='mb-5'>
                 <div className='flex justify-center'>
                   <p className='text-2xl font-bold rounded-lg  p-3'>
-                    Service booking rate by pet breed <span className='italic text-xl'> (unit: number of pets)</span>
+                    Service booking rate by pet breed{' '}
+                    <span className='italic text-xl'>
+                      {' '}
+                      (unit: number of pets)
+                    </span>
                   </p>
                 </div>
                 <div className='flex justify-center'>
                   <ReportPet />
                 </div>
               </div>
+            </div>
+          )}
+
+          {type === 'User' && (
+            <div className='p-3 rounded-3xl bg-neutral-200'>
+              <div className='mb-5'>
+                <div className='flex justify-center'>
+                  <p className='text-2xl font-bold rounded-lg  p-3'>
+                    Number of user
+                  </p>
+                </div>
+                <ReportAccountList />
+              </div>
+              
             </div>
           )}
         </main>
