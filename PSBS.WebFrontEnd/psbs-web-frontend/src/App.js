@@ -30,7 +30,8 @@ import ServiceList from "./pages/admins/services/ServiceList";
 import AddService from "./pages/admins/services/AddService";
 import UpdateService from "./pages/admins/services/UpdateService";
 import ServiceDetail from "./pages/admins/services/ServiceDetail";
-
+import PetHealthBookListCus from "./pages/customers/pethealthbook/PetHealthBookListCus";
+import PetHealthBookDetailCus from "./pages/customers/pethealthbook/PetHealthBookDetailCus";
 import ServiceTypeList from "./pages/admins/subTableInFacilityAndHealthcare/servicetype/ServiceTypeList";
 import RoomTypeList from "./pages/admins/subTableInFacilityAndHealthcare/roomtype/RoomTypeList";
 import VoucherList from "./pages/admins/vouchers/voucherList/VoucherList";
@@ -68,6 +69,36 @@ import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
 import CustomerChatPage from "./pages/customers/chat/CustomerChatPage";
+import Booking from "./pages/customers/bookings/AddBooking";
+import AdminBookingList from "./pages/admins/bookings/list-pages/AdminBookingList";
+import ServiceBookingDetailPage from "./pages/admins/bookings/detail-form/ServiceBookingDetailPage";
+import RoomBookingDetailPage from "./pages/admins/bookings/detail-form/RoomBookingDetailPage";
+import CustomerBookingList from "./pages/customers/bookings/list-pages/CustomerBookingList";
+import { BookingProvider } from "./components/Booking/add-form/BookingContext";
+import AddBooking from "./pages/customers/bookings/AddBooking";
+import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Booking";
+import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
+import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
+
+import CustomerPetList from "./pages/customers/pets/PetList";
+import CustomerPetDetail from "./pages/customers/pets/PetDetail";
+import CustomerPetCreate from "./pages/customers/pets/PetCreate";
+import CustomerPetEdit from "./pages/customers/pets/PetEdit";
+import AdminPetList from "./pages/admins/Pets/Pet/PetList";
+import AdminPetDetail from "./pages/admins/Pets/Pet/PetDetail";
+import AdminPetCreate from "./pages/admins/Pets/Pet/PetCreate";
+import AdminPetEdit from "./pages/admins/Pets/Pet/PetEdit";
+
+import PetDiaryListPage from "./pages/customers/Diary/PetDiaryListPage";
+import AddPetDiaryPage from "./pages/customers/Diary/AddPetDiaryPage";
+import EditPetDiaryPage from "./pages/customers/Diary/EditPetDiaryPage";
+
+import PetHealthBookList from "./pages/admins/pethealthbook/PetHealthBookList";
+import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetail";
+import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
+
+import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
+
 function App() {
  const userId = sessionStorage.getItem('accountId');
   useEffect(() => {
@@ -115,6 +146,14 @@ function App() {
             }
           />
           <Route
+            path="/detailcus/:healthBookId"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookDetailCus />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/account"
             element={
               <ProtectedRoute>
@@ -156,13 +195,85 @@ function App() {
               </ProtectedRoute>
             }
           />
-
+          <Route
+            path="/update/:healthBookId"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookEdit />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/detail/:healthBookId"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/add"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookCreate />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pethealthbook"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookList />
+              </ProtectedRoute>
+            }
+          />
           {/* Các route khác */}
           <Route path="/medicines">
             <Route index element={<List />} />
             <Route path="new" element={<MedicineAddForm />} />
             <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
             <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
+          </Route>
+          <Route path="/bookings">
+            <Route index element={<CustomerBookingList />} />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <AddBooking />{" "}
+                </BookingProvider>
+              }
+            />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<CustomerServiceBookingDetail />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<CustomerRoomBookingDetail />}
+            />
+          </Route>
+
+          <Route path="/admin/bookings">
+            <Route index element={<AdminBookingList />} />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<ServiceBookingDetailPage />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<RoomBookingDetailPage />}
+            />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <Admin_Add_Booking />{" "}
+                </BookingProvider>
+              }
+            />
           </Route>
 
           <Route path="/gifts">
@@ -253,6 +364,23 @@ function App() {
           <Route path="/customer/services">
             <Route index element={<ServiceListPage />} />
             <Route path=":id" element={<ServiceDetailPage />} />
+
+          </Route>
+          <Route path="/customer/pet-diaries/:petId">
+            <Route index element={<PetDiaryListPage />} />
+          </Route>
+          <Route path="/pet">
+            <Route index element={<AdminPetList />} />
+            <Route path=":id" element={<AdminPetDetail />} />
+            <Route path="add" element={<AdminPetCreate />} />
+            <Route path="edit/:id" element={<AdminPetEdit />} />
+          </Route>
+          <Route path="/customer/pet">
+            <Route index element={<CustomerPetList />} />
+            <Route path=":id" element={<CustomerPetDetail />} />
+            <Route path="add" element={<CustomerPetCreate />} />
+            <Route path="edit/:id" element={<CustomerPetEdit />} />
+
           </Route>
           <Route path="/register">
             <Route index element={<Register />} />

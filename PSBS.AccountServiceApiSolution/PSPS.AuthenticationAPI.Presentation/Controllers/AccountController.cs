@@ -144,8 +144,6 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result);
         }
-
-
         [HttpGet("{id}")]
         public async Task<ActionResult<GetAccountDTO>> GetAccountChat(Guid id)// Get account by AccountId for chat
         {
@@ -156,6 +154,15 @@ namespace PSPS.Presentation.Controllers
                 return NotFound(new Response(false, "Account requested not found"));
 
             return Ok(new Response(true, "The Account retrieved successfully") { Data = result });
+
+        [HttpGet("by-phone/{phone}")]
+        public async Task<ActionResult<GetAccountDTO>> GetAccountByPhone(string phone)
+        {
+            var result = await account.GetAccountByPhone(phone);
+            if (result == null)
+                return NotFound(new Response( false, "Account not found with this phone number"));
+
+            return Ok(new Response(true, "Account with this phone number") { Data = result});
         }
 
     }

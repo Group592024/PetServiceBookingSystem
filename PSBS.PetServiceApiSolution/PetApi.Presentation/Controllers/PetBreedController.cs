@@ -183,11 +183,11 @@ namespace PetApi.Presentation.Controllers
             var petbreeds = await _petBreed.ListAvailablePetBreedAsync();
             if (!petbreeds.Any())
             {
-                return NotFound(new Response(false, "No available rooms found"));
+                return NotFound(new Response(false, "No available pet breeds found"));
             }
 
             var (_, petBreedDtos) = PetBreedConversion.FromEntity(null!, petbreeds);
-            return Ok(new Response(true, "Available rooms retrieved successfully")
+            return Ok(new Response(true, "Available pet breeds retrieved successfully")
             {
                 Data = petBreedDtos
             });

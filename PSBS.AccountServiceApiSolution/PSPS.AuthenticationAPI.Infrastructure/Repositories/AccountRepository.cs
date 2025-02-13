@@ -19,18 +19,18 @@ using System.Text.RegularExpressions;
 
 namespace PSPS.AccountAPI.Infrastructure.Repositories
 {
-    
+
     internal class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository, IHttpClientFactory _httpClientFactory) : IAccount
     {
         private const string ImageUploadPath = "images";
 
-     
+
         private async Task<Account> GetAccountByAccountEmail(string email)
         {
-            var account = await context.Accounts.FirstOrDefaultAsync(u =>u.AccountEmail == email);
-            return account is null ? null! : account; 
+            var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountEmail == email);
+            return account is null ? null! : account;
         }
-       
+
         public async Task<GetAccountDTO?> GetAccount(Guid AccountId)// Get account by AccountId
         {
             var account = await context.Accounts.FirstOrDefaultAsync(u => u.AccountId == AccountId);
@@ -38,16 +38,16 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return null;
 
             return new GetAccountDTO(
-                account.AccountId ?? Guid.Empty,                             
-                account.AccountName ?? string.Empty,      
+                account.AccountId ?? Guid.Empty,
+                account.AccountName ?? string.Empty,
                 account.AccountEmail ?? string.Empty,
                 account.AccountPhoneNumber ?? string.Empty,
                 account.AccountPassword ?? string.Empty,
                 account.AccountGender ?? string.Empty,
-                account.AccountDob ?? DateTime.MinValue, 
+                account.AccountDob ?? DateTime.MinValue,
                 account.AccountAddress ?? string.Empty,
                 account.AccountImage ?? string.Empty,
-                account.AccountLoyaltyPoint,         
+                account.AccountLoyaltyPoint,
                 account.AccountIsDeleted,
                 account.RoleId
             );
@@ -144,17 +144,84 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
+
+        public async Task<Response> GetAllStaffAccount() // Get all active staff
+        {
+            try
+            {
+                var accounts = await context.Accounts.Where(p => !p.AccountIsDeleted && p.RoleId.Equals("staff")).ToListAsync();
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response(false, "No staff accounts found");
+                }
+
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
+                    account.AccountId ?? Guid.Empty,
+                    account.AccountName ?? string.Empty,
+                    account.AccountEmail ?? string.Empty,
+                    account.AccountPhoneNumber ?? string.Empty,
+                    account.AccountPassword ?? string.Empty,
+                    account.AccountGender ?? string.Empty,
+                    account.AccountDob ?? DateTime.MinValue,
+                    account.AccountAddress ?? string.Empty,
+                    account.AccountImage ?? string.Empty,
+                    account.AccountLoyaltyPoint,
+                    account.AccountIsDeleted,
+                    account.RoleId
+                )).ToList();
+
+                return new Response(true, "Staff accounts retrieved successfully") { Data = accountDTOs };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        public async Task<Response> GetAllCustomerAccount() // Get all customer
+        {
+            try
+            {
+                var accounts = await context.Accounts.Where(p => !p.AccountIsDeleted && p.RoleId.Equals("user")).ToListAsync();
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response(false, "No customer accounts found");
+                }
+
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
+                    account.AccountId ?? Guid.Empty,
+                    account.AccountName ?? string.Empty,
+                    account.AccountEmail ?? string.Empty,
+                    account.AccountPhoneNumber ?? string.Empty,
+                    account.AccountPassword ?? string.Empty,
+                    account.AccountGender ?? string.Empty,
+                    account.AccountDob ?? DateTime.MinValue,
+                    account.AccountAddress ?? string.Empty,
+                    account.AccountImage ?? string.Empty,
+                    account.AccountLoyaltyPoint,
+                    account.AccountIsDeleted,
+                    account.RoleId
+                )).ToList();
+
+                return new Response(true, "Customer accounts retrieved successfully") { Data = accountDTOs };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+        }
+
         public async Task<Response> GetDeletedAccounts() // get list accoint  AccountIsDeleted = true
         {
             try
             {
                 var accounts = await context.Accounts
                     .Where(account => account.AccountIsDeleted)
-                    .ToListAsync(); 
+                    .ToListAsync();
 
                 if (accounts == null || !accounts.Any())
                 {
-                    return new Response(false, "No deleted accounts found"); 
+                    return new Response(false, "No deleted accounts found");
                 }
 
                 var accountDTOs = accounts.Select(account => new GetAccountDTO(
@@ -212,7 +279,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                return new Response(false, $"An error occurred: {ex.Message}"); 
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -240,11 +307,11 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         }
 
         private string GenerateToken(Account account)       // Generatoken with jwt
-    {
+        {
             var key = Encoding.UTF8.GetBytes(config.GetSection("Authentication:Key").Value!);
-        var securityKey = new SymmetricSecurityKey(key);
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256); 
-        var claims = new List<Claim>
+            var securityKey = new SymmetricSecurityKey(key);
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new List<Claim>
             {
                 new(ClaimTypes.Name, account.AccountName!),
                 new(ClaimTypes.Email, account.AccountEmail!),
@@ -256,17 +323,17 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             claims.Add(new Claim("AccountIsDeleted", account.AccountIsDeleted.ToString()));
 
             if (!string.IsNullOrEmpty(account.RoleId) && Guid.TryParse(account.RoleId, out _))
-                claims.Add(new(ClaimTypes.Role, account.RoleId!)); 
-        var token = new JwtSecurityToken(           
+                claims.Add(new(ClaimTypes.Role, account.RoleId!));
+            var token = new JwtSecurityToken(
 
-                issuer: config["Authentication:Issuer"],
-                audience: config["Authentication:Audience"],
-                claims: claims,
-                expires: null,
-                signingCredentials: credentials
-                 );
+                    issuer: config["Authentication:Issuer"],
+                    audience: config["Authentication:Audience"],
+                    claims: claims,
+                    expires: null,
+                    signingCredentials: credentials
+                     );
             return new JwtSecurityTokenHandler().WriteToken(token);
-    }
+        }
 
         public async Task<Response> Register([FromForm] RegisterAccountDTO model)//Register account
         {
@@ -276,7 +343,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 if (getAccount != null)
                     return new Response(false, "Email existed!");
 
-                string fileName = GetDefaultImage(); 
+                string fileName = GetDefaultImage();
 
                 if (model.UploadModel?.ImageFile != null)
                 {
@@ -311,7 +378,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
                     AccountGender = model.RegisterTempDTO.AccountGender,
                     AccountAddress = model.RegisterTempDTO.AccountAddress,
-                    AccountImage = fileName, 
+                    AccountImage = fileName,
                     AccountDob = model.RegisterTempDTO.AccountDob,
                     AccountId = Guid.NewGuid(),
                     RoleId = "user"
@@ -374,12 +441,12 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 {
                     AccountName = "User",
                     AccountEmail = model.RegisterTempDTO.AccountEmail,
-                    AccountPassword = BCrypt.Net.BCrypt.HashPassword("123456"), 
-                    AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber, 
-                    AccountGender = "Male", 
-                    AccountAddress = "Address", 
+                    AccountPassword = BCrypt.Net.BCrypt.HashPassword("123456"),
+                    AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
+                    AccountGender = "Male",
+                    AccountAddress = "Address",
                     AccountImage = fileName,
-                    AccountDob = DateTime.Now.AddYears(-20), 
+                    AccountDob = DateTime.Now.AddYears(-20),
                     AccountId = Guid.NewGuid(),
                     RoleId = "user"
                 };
@@ -401,13 +468,13 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
         }
 
-        private string GetDefaultImage() 
+        private string GetDefaultImage()
         {
             string imagesPath = Path.Combine(_hostingEnvironment.ContentRootPath, "images");
             if (!Directory.Exists(imagesPath))
             {
                 Directory.CreateDirectory(imagesPath);
-                return "default.jpg"; 
+                return "default.jpg";
             }
 
             var imageFiles = Directory.GetFiles(imagesPath, "*.*")
@@ -421,7 +488,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return Path.GetFileName(imageFiles[random.Next(imageFiles.Count)]);
             }
 
-            return "default.jpg"; 
+            return "default.jpg";
         }
 
         public async Task<Response> UpdateAccount([FromForm] AddAccount model)
@@ -490,7 +557,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 }
                 else if (model.AccountTempDTO.isPickImage == false)
                 {
-                   
+
                 }
 
                 context.Accounts.Update(account);
@@ -524,7 +591,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     throw new Exception("Image file not found.");
                 }
                 byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
-                string mimeType = "image/jpeg"; 
+                string mimeType = "image/jpeg";
                 if (filePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
                 {
                     mimeType = "image/png";
@@ -534,7 +601,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     mimeType = "image/gif";
                 }
 
-                return new Response(true, "User updated without image successfully") { Data= new FileContentResult(fileBytes, mimeType) };
+                return new Response(true, "User updated without image successfully") { Data = new FileContentResult(fileBytes, mimeType) };
             }
             catch (Exception ex)
             {
@@ -544,30 +611,30 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
 
         public async Task<Response> ChangePassword(Guid accountId, ChangePasswordDTO changePasswordDTO)//Changepassword Account
-    {
+        {
             try
             {
-        
-            var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
+
+                var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
 
                 if (account == null)
                 {
                     return new Response(false, "Account not found");
                 }
-          
-            bool isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(changePasswordDTO.CurrentPassword, account.AccountPassword);
+
+                bool isCurrentPasswordValid = BCrypt.Net.BCrypt.Verify(changePasswordDTO.CurrentPassword, account.AccountPassword);
                 if (!isCurrentPasswordValid)
                 {
                     return new Response(false, "Current password is incorrect");
                 }
 
-            if (changePasswordDTO.NewPassword != changePasswordDTO.ConfirmPassword)
+                if (changePasswordDTO.NewPassword != changePasswordDTO.ConfirmPassword)
                 {
                     return new Response(false, "New password and confirm password do not match");
                 }
 
-       
-            bool isNewPasswordSameAsCurrent = BCrypt.Net.BCrypt.Verify(changePasswordDTO.NewPassword, account.AccountPassword);
+
+                bool isNewPasswordSameAsCurrent = BCrypt.Net.BCrypt.Verify(changePasswordDTO.NewPassword, account.AccountPassword);
                 if (isNewPasswordSameAsCurrent)
                 {
                     return new Response(false, "New password cannot be the same as the current password");
@@ -580,15 +647,15 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-     
+
                 return new Response(false, $"An error occurred: {ex.Message}");
-        }
+            }
         }
         public async Task<Response> ForgotPassword(string AccountEmail) // Forgotpassword with Email
         {
             try
             {
-     
+
                 var account = await GetAccountByAccountEmail(AccountEmail);
                 if (account == null)
                 {
@@ -642,12 +709,12 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             <p>Please change your password after logging in.</p>"
                 };
                 await _emailRepository.SendMail(mailContent);
-                return true; 
+                return true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Email send failed: {ex.Message}");
-                return false; 
+                return false;
             }
         }
         public async Task<Response> DeleteAccount(Guid accountId) //Delete account
@@ -657,7 +724,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 var account = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == accountId);
 
                 if (account == null)
-                    return null; 
+                    return null;
 
                 if (!account.AccountIsDeleted)
                 {
@@ -712,6 +779,28 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         public Task<Account> GetByIdAsync(Guid id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
+        {
+            var account = await context.Accounts.Where(a => a.AccountPhoneNumber == phone).FirstOrDefaultAsync();
+            if (account == null)
+                return null;
+
+            return new GetAccountDTO(
+                account.AccountId ?? Guid.Empty,
+                account.AccountName ?? string.Empty,
+                account.AccountEmail ?? string.Empty,
+                account.AccountPhoneNumber ?? string.Empty,
+                account.AccountPassword ?? string.Empty,
+                account.AccountGender ?? string.Empty,
+                account.AccountDob ?? DateTime.MinValue,
+                account.AccountAddress ?? string.Empty,
+                account.AccountImage ?? string.Empty,
+                account.AccountLoyaltyPoint,
+                account.AccountIsDeleted,
+                account.RoleId
+            );
         }
     }
 }

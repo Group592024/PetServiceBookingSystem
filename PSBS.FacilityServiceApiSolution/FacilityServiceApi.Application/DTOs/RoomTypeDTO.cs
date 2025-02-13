@@ -1,5 +1,6 @@
 ﻿
 
+using FacilityServiceApi.Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
 namespace FacilityServiceApi.Application.DTO
@@ -14,5 +15,6 @@ namespace FacilityServiceApi.Application.DTO
         public decimal price { get; set; }
         public string description { get; set; }
         public bool? isDeleted { get; set; }
+        public ICollection<Room> Rooms { get; set; }
     }
 }
