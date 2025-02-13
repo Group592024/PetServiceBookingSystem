@@ -1,7 +1,10 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
-const API_BASE_URL = "http://localhost:5023"; // Replace with your actual API URL
+
+const API_BASE_URL = 'http://localhost:5000'; // Replace with your actual API URL
+ // Replace with your actual API URL
+
 
 // Helper function to handle the response
 const handleResponse = (response) => {

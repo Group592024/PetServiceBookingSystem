@@ -89,7 +89,7 @@ const Navbar = ({ sidebarRef }) => {
       </form>
       <input type="checkbox" id="theme-toggle" hidden />
       <label htmlFor="theme-toggle"></label>
-      <a href="#" className="notifications">
+      <a href="chat" className="notifications">
         <i className="bx bx-message-square-dots"></i>
         <span className="count">12</span>
       </a>

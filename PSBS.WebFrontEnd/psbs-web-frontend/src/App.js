@@ -65,6 +65,10 @@ import ServiceCardList from "./pages/customers/services/ServiceListPage";
 import ServiceListPage from "./pages/customers/services/ServiceListPage";
 import ServiceCard from "./components/ServiceCustomer/ServiceCard";
 import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+import Chat from "./pages/admins/chat/Chat";
+import signalRService from "./lib/ChatService";
+import { useEffect } from "react";
+import CustomerChatPage from "./pages/customers/chat/CustomerChatPage";
 import Booking from "./pages/customers/bookings/AddBooking";
 import AdminBookingList from "./pages/admins/bookings/list-pages/AdminBookingList";
 import ServiceBookingDetailPage from "./pages/admins/bookings/detail-form/ServiceBookingDetailPage";
@@ -94,7 +98,16 @@ import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetai
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
 
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
+
 function App() {
+ const userId = sessionStorage.getItem('accountId');
+  useEffect(() => {
+    signalRService.startConnection("http://localhost:5159/chatHub", userId );
+
+    return () => {
+      signalRService.stopConnection(); // Cleanup
+    };
+  }, []);
   return (
     <div className="App">
       <BrowserRouter>
@@ -221,7 +234,6 @@ function App() {
             <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
             <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
           </Route>
-
           <Route path="/bookings">
             <Route index element={<CustomerBookingList />} />
             <Route
@@ -352,6 +364,7 @@ function App() {
           <Route path="/customer/services">
             <Route index element={<ServiceListPage />} />
             <Route path=":id" element={<ServiceDetailPage />} />
+
           </Route>
           <Route path="/customer/pet-diaries/:petId">
             <Route index element={<PetDiaryListPage />} />
@@ -367,6 +380,7 @@ function App() {
             <Route path=":id" element={<CustomerPetDetail />} />
             <Route path="add" element={<CustomerPetCreate />} />
             <Route path="edit/:id" element={<CustomerPetEdit />} />
+
           </Route>
           <Route path="/register">
             <Route index element={<Register />} />
@@ -389,10 +403,13 @@ function App() {
           <Route path="/account">
             <Route index element={<AccountList />} />
           </Route>
+          <Route path="/chat">
+            <Route index element={<Chat />} />
+            <Route path="customer" element={<CustomerChatPage />} />
+          </Route>
         </Routes>
       </BrowserRouter>
     </div>
   );
 }
-
 export default App;
