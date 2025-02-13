@@ -1,9 +1,7 @@
 ﻿
-
 using ChatServiceApi.Application.DTOs;
 using ChatServiceApi.Domain.Entities;
 using PSPS.SharedLibrary.Responses;
-
 namespace ChatServiceApi.Application.Interfaces
 {
     public interface IChatService
