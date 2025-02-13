@@ -1,4 +1,4 @@
-import React, { useCallback,useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import "./chatbox.css";
 import EmojiPicker from "emoji-picker-react";
 import signalRService from "../../../lib/ChatService";
@@ -13,7 +13,7 @@ const ChatBox = () => {
   const [chat, setChat] = useState([]); // Ensure it's initialized as an array
   const [text, setText] = useState("");
   const [userMap, setUserMap] = useState({});
-  const { chatId, user, isSupportChat,  ChangeChat } = useChatStore();
+  const { chatId, user, isSupportChat, ChangeChat } = useChatStore();
   const { currentUser } = useUserStore();
   const endRef = useRef(null);
   console.log("day la is support room ne", isSupportChat);
@@ -26,10 +26,19 @@ const ChatBox = () => {
     const promises = uniqueIds.map(async (id) => {
       try {
         const response = await getData(`api/Account/${id}`);
-        return { id, user: response?.data || { accountName: "Unknown", avatar: "./default-avatar.png" } };
+        return {
+          id,
+          user: response?.data || {
+            accountName: "Unknown",
+            avatar: "./default-avatar.png",
+          },
+        };
       } catch (error) {
         console.error(`Error fetching user details for senderId: ${id}`, error);
-        return { id, user: { accountName: "Unknown", avatar: "./default-avatar.png" } }; // Fallback user data
+        return {
+          id,
+          user: { accountName: "Unknown", avatar: "./default-avatar.png" },
+        }; // Fallback user data
       }
     });
 
@@ -46,12 +55,12 @@ const ChatBox = () => {
 
     signalRService.invoke("JoinChatRoom", chatId);
 
-    const handleUpdateChatMessages = async  (messages) => {
+    const handleUpdateChatMessages = async (messages) => {
       console.log("Received chat messages:", messages);
       setChat(messages);
-         // Extract unique sender IDs
-         const senderIds = messages.map((msg) => msg.senderId);
-         await fetchUserDetails(senderIds); // Fetch user details
+      // Extract unique sender IDs
+      const senderIds = messages.map((msg) => msg.senderId);
+      await fetchUserDetails(senderIds); // Fetch user details
     };
 
     const handleReceiveMessage = (senderId, messageText, updatedAt) => {
@@ -59,6 +68,7 @@ const ChatBox = () => {
       setChat((prevChat) => [
         ...prevChat,
         {
+          name: currentUser.accountName,
           createdAt: updatedAt,
           senderId,
           text: messageText,
@@ -199,7 +209,9 @@ const ChatBox = () => {
             key={message.chatMessageId}
           >
             <div className="texts">
-            <strong>{userMap[message.senderId]?.accountName || "Unknown"}:</strong>
+              <strong>
+                {userMap[message.senderId]?.accountName || message.name}:
+              </strong>
               <p>{message.text}</p>
               <span>{formatDate(message.createdAt)}</span>
             </div>

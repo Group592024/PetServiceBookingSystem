@@ -35,7 +35,7 @@ namespace PSPS.Presentation.Controllers
         public async Task<ActionResult<Response>> Register([FromForm] RegisterAccountDTO model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await account.Register(model); 
+            var result = await account.Register(model);
             return result.Flag ? Ok(result) : BadRequest(Request);
         }
         [HttpPost("addaccount")]// Add new account
@@ -56,17 +56,17 @@ namespace PSPS.Presentation.Controllers
         public async Task<ActionResult<GetAccountDTO>> GetAccount(Guid AccountId)// Get account by AccountId
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState); 
+                return BadRequest(ModelState);
             var result = await account.GetAccount(AccountId);
             if (result == null)
                 return NotFound(new { Message = "Account not found" });
 
-            return Ok(result); 
+            return Ok(result);
         }
         [HttpGet("all")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetAllAccount()// Get all account
         {
-            var result = await account.GetAllAccount(); 
+            var result = await account.GetAllAccount();
             if (result == null)
                 return NotFound(new { Message = "No accounts found" });
 
@@ -75,33 +75,33 @@ namespace PSPS.Presentation.Controllers
         [HttpGet("deleted")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetDeletedAccounts() // Get account by AccountIsDeleted = true
         {
-            var result = await account.GetDeletedAccounts(); 
-            if (result == null )
+            var result = await account.GetDeletedAccounts();
+            if (result == null)
             {
-                return NotFound(new { Message = "No deleted accounts found" }); 
+                return NotFound(new { Message = "No deleted accounts found" });
             }
 
-            return Ok(result); 
+            return Ok(result);
         }
 
         [HttpGet("active")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetActiveAccounts() // Get account by AccountIsDeleted = false
         {
-            var result = await account.GetActiveAccounts(); 
+            var result = await account.GetActiveAccounts();
             if (result == null)
             {
-                return NotFound(new { Message = "No active accounts found" }); 
+                return NotFound(new { Message = "No active accounts found" });
             }
 
-            return Ok(result); 
+            return Ok(result);
         }
         [HttpGet("loadImage")]
         public async Task<ActionResult<List<GetAccountDTO>>> LoadImage(string filename)// Upload image
         {
-            var result = await account.LoadImage(filename); 
+            var result = await account.LoadImage(filename);
             if (result == null)
             {
-                return NotFound(new { Message = "No active accounts found" }); 
+                return NotFound(new { Message = "No active accounts found" });
             }
 
             return Ok(result);
@@ -155,15 +155,17 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(new Response(true, "The Account retrieved successfully") { Data = result });
 
+          
+
+        }
         [HttpGet("by-phone/{phone}")]
         public async Task<ActionResult<GetAccountDTO>> GetAccountByPhone(string phone)
         {
             var result = await account.GetAccountByPhone(phone);
             if (result == null)
-                return NotFound(new Response( false, "Account not found with this phone number"));
+                return NotFound(new Response(false, "Account not found with this phone number"));
 
-            return Ok(new Response(true, "Account with this phone number") { Data = result});
+            return Ok(new Response(true, "Account with this phone number") { Data = result });
         }
-
     }
 }
