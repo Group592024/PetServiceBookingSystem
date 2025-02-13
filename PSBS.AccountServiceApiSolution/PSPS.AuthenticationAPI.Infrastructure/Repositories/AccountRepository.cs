@@ -713,5 +713,27 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+
+        public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
+        {
+            var account = await context.Accounts.Where(a => a.AccountPhoneNumber == phone).FirstOrDefaultAsync();
+            if (account == null)
+                return null;
+
+            return new GetAccountDTO(
+                account.AccountId ?? Guid.Empty,
+                account.AccountName ?? string.Empty,
+                account.AccountEmail ?? string.Empty,
+                account.AccountPhoneNumber ?? string.Empty,
+                account.AccountPassword ?? string.Empty,
+                account.AccountGender ?? string.Empty,
+                account.AccountDob ?? DateTime.MinValue,
+                account.AccountAddress ?? string.Empty,
+                account.AccountImage ?? string.Empty,
+                account.AccountLoyaltyPoint,
+                account.AccountIsDeleted,
+                account.RoleId
+            );
+        }
     }
 }

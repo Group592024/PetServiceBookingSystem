@@ -6,7 +6,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import BookingServiceStatus from "../../../../components/Booking/booking-status/BookingServiceStatus";
 
-const ServiceBookingDetailPage = () => {
+const CustomerServiceBookingDetail = () => {
   const sidebarRef = useRef(null);
   const { bookingId } = useParams();
   const [booking, setBooking] = useState(null);
@@ -128,42 +128,7 @@ const ServiceBookingDetailPage = () => {
       }
     });
   };
-  const handleNextStatus = async () => {
-    const statusOrder = ["Pending", "Confirmed", "Processing", "Completed"];
-    const currentIndex = statusOrder.indexOf(bookingStatusName);
 
-    if (currentIndex === -1 || bookingStatusName === "Cancelled") return; // Do nothing if cancelled or unknown status
-
-    const nextStatus = statusOrder[currentIndex + 1];
-
-    try {
-      const response = await axios.put(
-        `http://localhost:5115/Bookings/updateServiceStatus/${bookingId}`,
-        { status: nextStatus }
-      );
-
-      if (response.data.flag) {
-        setBookingStatusName(nextStatus);
-        Swal.fire(
-          "Success!",
-          `Booking status updated to ${nextStatus}.`,
-          "success"
-        );
-      } else {
-        Swal.fire(
-          "Failed!",
-          response.data.message || "Could not update status.",
-          "error"
-        );
-      }
-    } catch (error) {
-      Swal.fire(
-        "Error!",
-        "An error occurred while updating the status.",
-        "error"
-      );
-    }
-  };
   if (loading)
     return <p className="text-center text-xl font-semibold">Loading...</p>;
   if (error) return <p className="text-center text-xl text-red-500">{error}</p>;
@@ -178,19 +143,6 @@ const ServiceBookingDetailPage = () => {
             Service Booking Details
           </h2>
           <BookingServiceStatus bookingStatus={bookingStatusName} />
-          {["Pending", "Confirmed", "Processing"].includes(
-            bookingStatusName
-          ) && (
-            <div className="mt-4 text-center">
-              <button
-                onClick={handleNextStatus}
-                className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-              >
-                Move to Next Status
-              </button>
-            </div>
-          )}
-
           {booking && (
             <div className="space-y-4 p-6 bg-white shadow-md rounded-lg">
               <div className="flex justify-between text-lg">
@@ -276,4 +228,4 @@ const ServiceBookingDetailPage = () => {
   );
 };
 
-export default ServiceBookingDetailPage;
+export default CustomerServiceBookingDetail;

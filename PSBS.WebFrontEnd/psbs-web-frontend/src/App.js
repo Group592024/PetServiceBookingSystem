@@ -71,6 +71,9 @@ import RoomBookingDetailPage from './pages/admins/bookings/detail-form/RoomBooki
 import CustomerBookingList from './pages/customers/bookings/list-pages/CustomerBookingList';
 import { BookingProvider } from './components/Booking/add-form/BookingContext';
 import AddBooking from './pages/customers/bookings/AddBooking';
+import Admin_Add_Booking from './pages/admins/bookings/add-form/Admin_Add_Booking';
+import CustomerServiceBookingDetail from './pages/customers/bookings/detail-pages/CustomerServiceBookingDetail';
+import CustomerRoomBookingDetail from './pages/customers/bookings/detail-pages/CustomerRoomBookingDetail';
 
 function App() {
   return (
@@ -164,12 +167,15 @@ function App() {
           <Route path='/bookings'>
           <Route index element={<CustomerBookingList />} />
           <Route path='new' element={<BookingProvider>  <AddBooking /> </BookingProvider>} />
+          <Route path='detail/ServiceBookingDetailPage/:bookingId' element={<CustomerServiceBookingDetail />} />
+          <Route path='detail/RoomBookingDetailPage/:bookingId' element={<CustomerRoomBookingDetail />} />
           </Route>
 
           <Route path='/admin/bookings'>
           <Route index element={<AdminBookingList />} />
           <Route path='detail/ServiceBookingDetailPage/:bookingId' element={<ServiceBookingDetailPage />} />
           <Route path='detail/RoomBookingDetailPage/:bookingId' element={<RoomBookingDetailPage />} />
+          <Route path='new' element={<BookingProvider>  <Admin_Add_Booking /> </BookingProvider>} />
           </Route>
 
           <Route path='/gifts'>

@@ -1,22 +1,24 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useRef } from "react";
 import { Button, Stepper, Step, StepLabel } from "@mui/material";
-import BookingStyleStep from "../../../components/Booking/add-form/BookingStyleStep";
-import BookingInformationStep from "../../../components/Booking/add-form/BookingInformationStep";
-import BookingRoomForm from "../../../components/Booking/add-form/BookingRoomForm";
-import BookingServiceForm from "../../../components/Booking/add-form/BookingServiceForm";
-import BookingConfirmStep from "../../../components/Booking/add-form/BookingConfirmStep";
-import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
-import { BookingContext } from "../../../components/Booking/add-form/BookingContext";
 import jwtDecode from "jwt-decode";
+import Sidebar from "../../../../components/sidebar/Sidebar";
+import Navbar from "../../../../components/navbar/Navbar";
+import AdminBookingInformation from "../../../../components/Booking/add-form/AdminBookingInformation";
+import BookingConfirmStep from "../../../../components/Booking/add-form/BookingConfirmStep";
+import BookingRoomForm from "../../../../components/Booking/add-form/BookingRoomForm";
+import BookingServiceForm from "../../../../components/Booking/add-form/BookingServiceForm";
+import BookingStyleStep from "../../../../components/Booking/add-form/BookingStyleStep";
+import { BookingContext } from "../../../../components/Booking/add-form/BookingContext";
 
 const steps = [
   "Booking Type",
-  "Booking Details",
   "Booking Information",
+  "Booking Details",
   "Confirm Booking",
 ];
 
-const AddBooking = () => {
+const Admin_Add_Booking = () => {
+  const sidebarRef = useRef(null);
   const {
     selectedOption,
     setSelectedOption,
@@ -40,6 +42,7 @@ const AddBooking = () => {
   useEffect(() => {
     const fetchData = async () => {
       const token = sessionStorage.getItem("token");
+      if (!token) return;
 
       try {
         const decodedToken = jwtDecode(token);
@@ -56,18 +59,16 @@ const AddBooking = () => {
         if (data) {
           setFormData((prevData) => ({
             ...prevData,
-            cusId: accountId || "",
-            name: data.accountName || "",
-            address: data.accountAddress || "",
-            phone: data.accountPhoneNumber || "",
+            cusId: "",
+            name: "",
+            address: "",
+            phone: "",
             note: "",
             paymentMethod: "",
           }));
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
-      } finally {
-        // setLoading(false);
       }
     };
 
@@ -82,11 +83,17 @@ const AddBooking = () => {
       return;
     }
 
-    if (activeStep === 1 && selectedOption === "Room") {
+    if (activeStep === 1 && !formData.phone) {
+        if(!formData.name ||!formData.address ||!formData.paymentMethod)
+        alert("Please fill all input and select payment type before proceeding.");
+        return;
+    }
+    if (activeStep === 2 && selectedOption === "Room") {
       if (bookingRooms.length === 0) {
         alert("Please add at least one booking room.");
         return;
       }
+
       // Validate each booking room
       for (const roomData of bookingRooms) {
         if (
@@ -100,18 +107,17 @@ const AddBooking = () => {
         }
 
         const now = new Date();
-        const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
+        const fiveMinutesLater = new Date(now.getTime() + 5 * 60 * 1000);
         const selectedStartDateTime = new Date(roomData.start);
         const selectedEndDateTime = new Date(roomData.end);
 
         console.log("Current Time:", now);
-        console.log("One Hour Later:", oneHourLater);
         console.log("Selected Start Date:", selectedStartDateTime);
         console.log("Selected End Date:", selectedEndDateTime);
 
         // Check if start date is at least 1 hour from now
-        if (selectedStartDateTime < oneHourLater) {
-          alert("Booking start time must be at least 1 hour from now.");
+        if (selectedStartDateTime < fiveMinutesLater) {
+          alert("Booking start time must be at least 5 minutes from now.");
           return;
         }
 
@@ -123,7 +129,7 @@ const AddBooking = () => {
       }
     }
 
-    if (activeStep === 1 && selectedOption === "Service") {
+    if (activeStep === 2 && selectedOption === "Service") {
       if (bookingServices.length === 0) {
         alert("Please add at least one booking service.");
         return;
@@ -147,24 +153,10 @@ const AddBooking = () => {
         alert("Please select a booking date and time.");
         return;
       }
-
-      const now = new Date();
-      const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Current time + 1 hour
-      const selectedDateTime = new Date(bookingServicesDate);
-      if (selectedDateTime < oneHourLater) {
-        alert("Booking date and time must be at least 1 hour from now.");
-        return;
-      }
-    }
-
-    if (activeStep === 2 && !formData.paymentMethod) {
-      alert("Please select a payment type before proceeding.");
-      return;
     }
 
     if (activeStep === steps.length - 1) {
-      console.log("Preparing to send booking data to API...");
-
+      console.log("Submitting booking data...");
       let requestData = {};
       let apiUrl = "";
       let paymentTypeName = "";
@@ -205,7 +197,6 @@ const AddBooking = () => {
       }
 
       console.log("Request Payload:", JSON.stringify(requestData, null, 2)); // Log data before sending
-
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -223,36 +214,38 @@ const AddBooking = () => {
             const bookingCode = result.data;
             console.log("VNPay Request Data:", {
               Name: formData.name,
-              Amount: Math.round(discountedPrice), // Ensure it's an integer
+              Amount: discountedPrice,
               OrderType: "billpayment",
               OrderDescription: bookingCode.trim(),
             });
 
             console.log("BookingCode Response:", bookingCode);
+            const vnpayResponse = await fetch(
+              "http://localhost:5115/Bookings/VNPay",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  Name: formData.name,
+                  Amount: discountedPrice,
+                  OrderType: "other",
+                  OrderDescription: bookingCode.trim(),
+                }),
+              }
+            );
 
-            const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
-              discountedPrice
-            )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback`;
-            
-            console.log("VNPay URL:", vnpayUrl);
+            const vnpayResult = await vnpayResponse.json();
+            console.log("VNPay API Response:", vnpayResult.data);
 
-            const vnpayResponse = await fetch(vnpayUrl, {
-              method: "GET",
-              headers: { "Content-Type": "application/json" },
-            });
-
-            const vnpayResult = await vnpayResponse.text();
-            console.log("VNPay API Response:", vnpayResult);
-            
-            if (vnpayResult.startsWith("http")) {
-              window.location.href = vnpayResult; // Redirect to VNPay
+            if (vnpayResult.flag && vnpayResult.data) {
+              // window.location.href = vnpayResult.data;
               return;
             } else {
               alert("VNPay payment failed!");
             }
           }
           alert("Booking confirmed successfully!");
-          window.location.href = "/bookings";
+          // window.location.href = "/bookings";
         } else {
           throw new Error(result.message || "Failed to submit booking");
         }
@@ -279,19 +272,20 @@ const AddBooking = () => {
           />
         );
       case 1:
-        return selectedOption === "Room" ? (
-          <BookingRoomForm />
-        ) : (
-          <BookingServiceForm />
-        );
-      case 2:
         return (
-          <BookingInformationStep
+          <AdminBookingInformation
             formData={formData}
             setFormData={setFormData}
             loading={loading}
           />
         );
+      case 2:
+        return selectedOption === "Room" ? (
+          <BookingRoomForm />
+        ) : (
+          <BookingServiceForm />
+        );
+
       case 3:
         return (
           <BookingConfirmStep
@@ -307,43 +301,46 @@ const AddBooking = () => {
 
   return (
     <div>
-      <NavbarCustomer />
-      <div className="p-6 bg-gray-100 h-screen flex flex-col items-center">
-        <h1 className="text-xl font-bold mb-4">New Booking</h1>
-        <Stepper
-          activeStep={activeStep}
-          alternativeLabel
-          className="w-full max-w-2xl"
-        >
-          {steps.map((label, index) => (
-            <Step key={index}>
-              <StepLabel>
-                <span
-                  className={
-                    activeStep === index ? "text-green-500 font-semibold" : ""
-                  }
-                >
-                  {label}
-                </span>
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
+      <Sidebar ref={sidebarRef} />
+      <div className="listContainer content">
+        <Navbar sidebarRef={sidebarRef} />
+        <div className="p-6 bg-gray-100 h-screen flex flex-col items-center">
+          <h1 className="text-xl font-bold mb-4">Admin New Booking</h1>
+          <Stepper
+            activeStep={activeStep}
+            alternativeLabel
+            className="w-full max-w-2xl"
+          >
+            {steps.map((label, index) => (
+              <Step key={index}>
+                <StepLabel>
+                  <span
+                    className={
+                      activeStep === index ? "text-green-500 font-semibold" : ""
+                    }
+                  >
+                    {label}
+                  </span>
+                </StepLabel>
+              </Step>
+            ))}
+          </Stepper>
 
-        <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg mt-6 p-6">
-          {renderStepContent(activeStep)}
-          <div className="flex justify-between mt-6">
-            <Button
-              onClick={handleBack}
-              variant="contained"
-              color="secondary"
-              disabled={activeStep === 0}
-            >
-              Back
-            </Button>
-            <Button onClick={handleNext} variant="contained" color="primary">
-              {activeStep === steps.length - 1 ? "Finish" : "Next"}
-            </Button>
+          <div className="w-full max-w-2xl bg-white rounded-lg shadow-lg mt-6 p-6">
+            {renderStepContent(activeStep)}
+            <div className="flex justify-between mt-6">
+              <Button
+                onClick={handleBack}
+                variant="contained"
+                color="secondary"
+                disabled={activeStep === 0}
+              >
+                Back
+              </Button>
+              <Button onClick={handleNext} variant="contained" color="primary">
+                {activeStep === steps.length - 1 ? "Finish" : "Next"}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -351,4 +348,4 @@ const AddBooking = () => {
   );
 };
 
-export default AddBooking;
+export default Admin_Add_Booking;

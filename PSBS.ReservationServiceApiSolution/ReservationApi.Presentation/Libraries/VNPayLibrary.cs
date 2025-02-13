@@ -107,13 +107,15 @@ namespace ReservationApi.Presentation.Libraries
             var querystring = data.ToString();
 
             baseUrl += "?" + querystring;
-            var signData = querystring;
+            var signData = querystring.TrimEnd('&');
+            Console.WriteLine("Sign Data (Before Hashing): " + signData);
             if (signData.Length > 0)
             {
                 signData = signData.Remove(data.Length - 1, 1);
             }
 
             var vnpSecureHash = HmacSha512(vnpHashSecret, signData);
+            Console.WriteLine("Generated Secure Hash: " + vnpSecureHash);
             baseUrl += "vnp_SecureHash=" + vnpSecureHash;
 
             return baseUrl;

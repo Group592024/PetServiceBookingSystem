@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using ReservationApi.Application.DTOs;
 using ReservationApi.Application.DTOs.Conversions;
@@ -15,6 +16,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Web;
+using VNPAY.NET;
+using VNPAY.NET.Enums;
+using VNPAY.NET.Models;
+using VNPAY.NET.Utilities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,8 +27,36 @@ namespace ReservationApi.Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class BookingsController(IBooking bookingInterface, ReservationServiceDBContext context, IVnPayService _vnPayService) : ControllerBase
+    public class BookingsController : ControllerBase
     {
+        private readonly IVnpay vnpay;
+        private readonly IBooking bookingInterface;
+        private readonly ReservationServiceDBContext context;
+        private readonly IConfiguration configuration;
+        public BookingsController(IBooking _bookingInterface, ReservationServiceDBContext _context, IVnpay vnPayservice, IConfiguration _configuration)
+        {
+            vnpay = vnPayservice;
+            configuration = _configuration;
+            context = _context;
+            bookingInterface = _bookingInterface;
+            var tmnCode = configuration["Vnpay:TmnCode"];
+            var hashSecret = configuration["Vnpay:HashSecret"];
+            var baseUrl = configuration["Vnpay:BaseUrl"];
+            var callbackUrl = configuration["Vnpay:CallbackUrl"];
+
+            Console.WriteLine($"TmnCode: {tmnCode}");
+            Console.WriteLine($"HashSecret: {hashSecret}");
+            Console.WriteLine($"BaseUrl: {baseUrl}");
+            Console.WriteLine($"CallbackUrl: {callbackUrl}");
+
+            if (string.IsNullOrEmpty(tmnCode) || string.IsNullOrEmpty(hashSecret) || string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(callbackUrl))
+            {
+                throw new ArgumentException("Không tìm thấy BaseUrl, TmnCode, HashSecret, hoặc CallbackUrl");
+            }
+
+            vnpay.Initialize(tmnCode, hashSecret, baseUrl, callbackUrl);
+            //vnpay.Initialize(configuration["Vnpay:TmnCode"], configuration["Vnpay:HashSecret"], configuration["Vnpay:BaseUrl"], configuration["Vnpay:CallbackUrl"]);
+        }
         // GET: api/<BookingsController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BookingDTO>>> GetBookingsForAdmin()
@@ -128,13 +161,13 @@ namespace ReservationApi.Presentation.Controllers
                 var bookingStatusRequest = await context.BookingStatuses.Where(bt => bt.BookingStatusName.Contains("Pending")).FirstOrDefaultAsync();
                 Console.WriteLine("BookingStatus Id" + bookingTypeRequest.BookingTypeId);
 
-                var createBookingDetail = new AddBookingDTO(bookingRequest.Customer.CusId, new Guid (bookingRequest.Customer.PaymentMethod), bookingRequest.VoucherId, bookingTypeRequest.BookingTypeId, bookingStatusRequest.BookingStatusId, Guid.Empty, bookingRequest.DiscountedPrice, bookingRequest.Customer.Note);
+                var createBookingDetail = new AddBookingDTO(bookingRequest.Customer.CusId, new Guid(bookingRequest.Customer.PaymentMethod), bookingRequest.VoucherId, bookingTypeRequest.BookingTypeId, bookingStatusRequest.BookingStatusId, Guid.Empty, bookingRequest.DiscountedPrice, bookingRequest.Customer.Note);
                 var createEntity = BookingConversion.ToEntityForCreate(createBookingDetail);
                 Console.WriteLine(createEntity.ToString());
                 var bookingResponse = await bookingInterface.CreateAsync(createEntity);
                 if (!bookingResponse.Flag)
                 {
-                     return BadRequest(bookingResponse);
+                    return BadRequest(bookingResponse);
                 }
                 //Create Room History
                 using (HttpClient client = new HttpClient())
@@ -149,7 +182,7 @@ namespace ReservationApi.Presentation.Controllers
                         {
                             PetId = room.Pet,
                             RoomId = room.Room,
-                            BookingId = createEntity.BookingId, 
+                            BookingId = createEntity.BookingId,
                             BookingStartDate = room.Start,
                             BookingEndDate = room.End,
                             BookingCamera = room.Camera
@@ -164,11 +197,11 @@ namespace ReservationApi.Presentation.Controllers
                             var deleteInvalidBooking = await context.Bookings.FirstOrDefaultAsync(b => b.BookingId == createEntity.BookingId);
                             context.Bookings.Remove(deleteInvalidBooking);
                             await context.SaveChangesAsync();
-                            return BadRequest(new Response(false , "Fail to create a booking."));
+                            return BadRequest(new Response(false, "Fail to create a booking."));
                         }
                     }
                 }
-                if(bookingRequest.VoucherId != Guid.Empty)
+                if (bookingRequest.VoucherId != Guid.Empty)
                 {
                     using (HttpClient client = new HttpClient())
                     {
@@ -298,7 +331,7 @@ namespace ReservationApi.Presentation.Controllers
                     }
                 }
                 var createdBooking = await bookingInterface.GetByIdAsync(createEntity.BookingId);
-                
+
                 return Ok(new Response(true, "Add booking service success") { Data = createdBooking.BookingCode });
             }
             catch (Exception ex)
@@ -319,34 +352,138 @@ namespace ReservationApi.Presentation.Controllers
 
         }
 
-        [HttpPost("VNPay")]
-        public async Task<ActionResult<Response>> CreateVNPayPayment([FromBody] VNPayRequestDTO request)
+
+        [HttpPut("updateRoomStatus/{bookingId}")]
+        public async Task<IActionResult> UpdateBookingRoomStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
-            if (request == null)
-            {
-                return BadRequest(new Response(false, "Invalid request data"));
-            }
-
-            var url = _vnPayService.CreatePaymentUrl(request, HttpContext);
-            Console.WriteLine("VNPay Request Data: " + JsonConvert.SerializeObject(request, Formatting.Indented));
-
-            if (string.IsNullOrEmpty(url))
-            {
-                return BadRequest(new Response(false, "VNPay URL generation failed"));
-            }
-            Console.WriteLine("Generated VNPay URL: " + url);
-            return new Response(true, "VNPay") { Data = url };
+            var booking = await context.Bookings.FindAsync(bookingId);
+            if (booking == null) return NotFound(new Response(false, "Booking not found."));
+            var bookingCancel = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Cancelled"));
+            var statusOrder = new List<string> { "Pending", "Confirmed", "Checked in", "Checked out" };
+            if (!statusOrder.Contains(request.Status) || booking.BookingStatusId == bookingCancel.BookingStatusId)
+                return BadRequest(new { flag = false, message = "Invalid status transition." });
+            var updatedBookingStatus = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains(request.Status));
+            if (updatedBookingStatus == null) return BadRequest(new { flag = false, message = "Invalid status transition." });
+            booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
+            context.Bookings.Update(booking);
+            await context.SaveChangesAsync();
+            return Ok(new Response(true, "Status updated successfully."));
         }
 
-        [HttpGet("VNPayReturn")]
-        public async Task<ActionResult<Response>> VNPayReturn()
+        [HttpPut("updateServiceStatus/{bookingId}")]
+        public async Task<IActionResult> UpdateBookingServiceStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
-            var response = _vnPayService.PaymentExecute(Request.Query);
-
-            return new Response(true, "VNPay") { Data = response };
-
+            var booking = await context.Bookings.FindAsync(bookingId);
+            if (booking == null) return NotFound(new Response(false, "Booking not found."));
+            var bookingCancel = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Cancelled"));
+            var statusOrder = new List<string> { "Pending", "Confirmed", "Processing", "Completed" };
+            if (!statusOrder.Contains(request.Status) || booking.BookingStatusId == bookingCancel.BookingStatusId)
+                return BadRequest(new { flag = false, message = "Invalid status transition." });
+            var updatedBookingStatus = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains(request.Status));
+            if (updatedBookingStatus == null) return BadRequest(new { flag = false, message = "Invalid status transition." });
+            booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
+            context.Bookings.Update(booking);
+            await context.SaveChangesAsync();
+            return Ok(new Response(true, "Status updated successfully."));
         }
 
+        [HttpGet("CreatePaymentUrl")]
+        public ActionResult<string> CreatePaymentUrl(double moneyToPay, string description)
+        {
+            try
+            {
+                var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+
+                var request = new PaymentRequest
+                {
+                    PaymentId = DateTime.Now.Ticks,
+                    Money = moneyToPay,
+                    Description = description,
+                    IpAddress = ipAddress,
+                    BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
+                    CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
+                    Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
+                    Language = DisplayLanguage.Vietnamese // Tùy chọn. Mặc định là tiếng Việt
+                };
+                var paymentUrl = vnpay.GetPaymentUrl(request);
+
+                return Created(paymentUrl, paymentUrl);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("IpnAction")]
+        public IActionResult IpnAction()
+        {
+            if (Request.QueryString.HasValue)
+            {
+                try
+                {
+                    var paymentResult = vnpay.GetPaymentResult(Request.Query);
+                    if (paymentResult.IsSuccess)
+                    {
+                        // Thực hiện hành động nếu thanh toán thành công tại đây. Ví dụ: Cập nhật trạng thái đơn hàng trong cơ sở dữ liệu.
+                        return Ok();
+                    }
+
+                    // Thực hiện hành động nếu thanh toán thất bại tại đây. Ví dụ: Hủy đơn hàng.
+                    return BadRequest("Thanh toán thất bại");
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(ex.Message);
+                }
+            }
+
+            return NotFound("Không tìm thấy thông tin thanh toán.");
+        }
+
+        [HttpGet("Vnpay/Callback")]
+        public async Task<IActionResult> Callback()
+        {
+            if (Request.QueryString.HasValue)
+            {
+                try
+                {
+                    var paymentResult = vnpay.GetPaymentResult(Request.Query);
+                    foreach (var key in Request.Query.Keys)
+                    {
+                        LogExceptions.LogToConsole($"{key}: {Request.Query[key]}");
+                    }
+                    var resultDescription = paymentResult.PaymentResponse.Description;
+                    // var resultDescription = $"{paymentResult.PaymentResponse.Description}. {paymentResult.TransactionStatus.Description}.";
+                    var bookingCode = Request.Query["vnp_OrderInfo"];
+                    if (paymentResult.IsSuccess)
+                    {
+                        LogExceptions.LogToConsole("bookingCode " + bookingCode);
+                        Console.WriteLine("bookingCode " + bookingCode);
+                        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+                        if (existingBooking == null)
+                        {
+                            return Redirect("http://localhost:3000/bookings?status=failed");
+                        }
+                        LogExceptions.LogToConsole("booking" + existingBooking.BookingId);
+                        Console.WriteLine("qua day roi");
+                        existingBooking.isPaid = true;
+                        context.Bookings.Update(existingBooking);
+                        await context.SaveChangesAsync();
+                        LogExceptions.LogToConsole("payment" + existingBooking.isPaid);
+                        Console.WriteLine("qua day nuaaaaaaaaaaaaaaaaaaa roi");
+                        return Redirect("http://localhost:3000/bookings?status=success"); // Redirect to frontend with status
+                    }
+
+                    return Redirect("http://localhost:3000/bookings?status=failed"); // Redirect to frontend with failure
+                }
+                catch (Exception ex)
+                {
+                    return Redirect("http://localhost:3000/bookings?status=error");
+                }
+            }
+
+            return Redirect("http://localhost:3000/bookings?status=notfound");
+        }
 
     }
 }

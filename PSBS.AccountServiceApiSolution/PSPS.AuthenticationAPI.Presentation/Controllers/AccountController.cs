@@ -144,5 +144,16 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("by-phone/{phone}")]
+        public async Task<ActionResult<GetAccountDTO>> GetAccountByPhone(string phone)
+        {
+            var result = await account.GetAccountByPhone(phone);
+            if (result == null)
+                return NotFound(new Response( false, "Account not found with this phone number"));
+
+            return Ok(new Response(true, "Account with this phone number") { Data = result});
+        }
+
     }
 }
