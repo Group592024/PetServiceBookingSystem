@@ -1,0 +1,5 @@
+.Datatable .cellWithTable {
+    display: flex;
+    align-items: center;
+  }
+  

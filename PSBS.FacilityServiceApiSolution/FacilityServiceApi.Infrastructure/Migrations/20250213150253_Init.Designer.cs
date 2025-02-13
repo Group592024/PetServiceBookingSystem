@@ -4,16 +4,19 @@ using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace FacilityServiceApi.Infrastructure.Data.Migrations
+namespace FacilityServiceApi.Infrastructure.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    partial class FacilityServiceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250213150253_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -144,19 +147,31 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("roomHistory_id");
 
+                    b.Property<bool>("BookingCamera")
+                        .HasColumnType("bit")
+                        .HasColumnName("booking_camera");
+
+                    b.Property<DateTime>("BookingEndDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("booking_end_date");
+
                     b.Property<Guid>("BookingId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("booking_Id");
 
-                    b.Property<Guid>("CameraId")
+                    b.Property<DateTime>("BookingStartDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("booking_start_date");
+
+                    b.Property<Guid?>("CameraId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("camera_id");
 
-                    b.Property<DateTime>("CheckInDate")
+                    b.Property<DateTime?>("CheckInDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("checkin_date");
 
-                    b.Property<DateTime>("CheckOutDate")
+                    b.Property<DateTime?>("CheckOutDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("checkout_date");
 
@@ -320,20 +335,20 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(816),
+                            createAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4542),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(832)
+                            updateAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4568)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834),
+                            createAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834)
+                            updateAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573)
                         });
                 });
 
@@ -402,9 +417,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 {
                     b.HasOne("FacilityServiceApi.Domain.Entities.Camera", "Camera")
                         .WithMany("RoomHistories")
-                        .HasForeignKey("CameraId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CameraId");
 
                     b.HasOne("FacilityServiceApi.Domain.Entities.Room", "Room")
                         .WithMany("RoomHistories")
@@ -420,7 +433,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.Service", b =>
                 {
                     b.HasOne("FacilityServiceApi.Domain.Entities.ServiceType", "ServiceType")
-                        .WithMany()
+                        .WithMany("Services")
                         .HasForeignKey("serviceTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -452,6 +465,11 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.RoomType", b =>
                 {
                     b.Navigation("Rooms");
+                });
+
+            modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceType", b =>
+                {
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("FacilityServiceApi.Domain.Entities.ServiceVariant", b =>

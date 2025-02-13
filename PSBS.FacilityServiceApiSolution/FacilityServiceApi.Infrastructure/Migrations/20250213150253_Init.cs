@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace FacilityServiceApi.Infrastructure.Data.Migrations
+namespace FacilityServiceApi.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Migration01 : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -115,10 +115,13 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                     pet_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     room_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     booking_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    camera_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    camera_id = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    checkin_date = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    checkout_date = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    checkin_date = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    checkout_date = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    booking_start_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    booking_end_date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    booking_camera = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,8 +130,7 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         name: "FK_RoomHistories_Camera_camera_id",
                         column: x => x.camera_id,
                         principalTable: "Camera",
-                        principalColumn: "camera_id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "camera_id");
                     table.ForeignKey(
                         name: "FK_RoomHistories_Room_room_id",
                         column: x => x.room_id,
@@ -198,8 +200,8 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(816), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(832) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4542), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4568) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573) }
                 });
 
             migrationBuilder.CreateIndex(

@@ -56,11 +56,26 @@ import RoomCreate from "./pages/admins/rooms/RoomCreate";
 import RoomEdit from "./pages/admins/rooms/RoomEdit";
 import CustomerRoomList from "./pages/customers/Room/RoomList";
 import CustomerRoomDetail from "./pages/customers/Room/RoomDetail";
+import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
+import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
 import ChangePasswordCustomer from "./pages/customers/profile-Customer/ChangePasswordCustomer";
 import ProfileCustomer from "./pages/customers/profile-Customer/ProfileCustomer";
 import EditProfileCustomer from "./pages/customers/profile-Customer/EditProfileCustomer";
-import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
-import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import ServiceCardList from "./pages/customers/services/ServiceListPage";
+import ServiceListPage from "./pages/customers/services/ServiceListPage";
+import ServiceCard from "./components/ServiceCustomer/ServiceCard";
+import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+import Booking from "./pages/customers/bookings/AddBooking";
+import AdminBookingList from "./pages/admins/bookings/list-pages/AdminBookingList";
+import ServiceBookingDetailPage from "./pages/admins/bookings/detail-form/ServiceBookingDetailPage";
+import RoomBookingDetailPage from "./pages/admins/bookings/detail-form/RoomBookingDetailPage";
+import CustomerBookingList from "./pages/customers/bookings/list-pages/CustomerBookingList";
+import { BookingProvider } from "./components/Booking/add-form/BookingContext";
+import AddBooking from "./pages/customers/bookings/AddBooking";
+import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Booking";
+import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
+import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
+
 import CustomerPetList from "./pages/customers/pets/PetList";
 import CustomerPetDetail from "./pages/customers/pets/PetDetail";
 import CustomerPetCreate from "./pages/customers/pets/PetCreate";
@@ -69,18 +84,16 @@ import AdminPetList from "./pages/admins/Pets/Pet/PetList";
 import AdminPetDetail from "./pages/admins/Pets/Pet/PetDetail";
 import AdminPetCreate from "./pages/admins/Pets/Pet/PetCreate";
 import AdminPetEdit from "./pages/admins/Pets/Pet/PetEdit";
-import ServiceCardList from "./pages/customers/services/ServiceListPage";
-import ServiceListPage from "./pages/customers/services/ServiceListPage";
-import ServiceCard from "./components/ServiceCustomer/ServiceCard";
-import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+
 import PetDiaryListPage from "./pages/customers/Diary/PetDiaryListPage";
 import AddPetDiaryPage from "./pages/customers/Diary/AddPetDiaryPage";
 import EditPetDiaryPage from "./pages/customers/Diary/EditPetDiaryPage";
-import PetHealthBookList from './pages/admins/pethealthbook/PetHealthBookList';
-import PetHealthBookDetail from './pages/admins/pethealthbook/PetHealthBookDetail';
-import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreate';
 
-import PetHealthBookEdit from './pages/admins/pethealthbook/PetHealthBookEdit';
+import PetHealthBookList from "./pages/admins/pethealthbook/PetHealthBookList";
+import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetail";
+import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
+
+import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 function App() {
   return (
     <div className="App">
@@ -207,6 +220,48 @@ function App() {
             <Route path="new" element={<MedicineAddForm />} />
             <Route path="update/:medicineId" element={<MedicineUpdateForm />} />
             <Route path="detail/:medicineId" element={<MedicineDetailForm />} />
+          </Route>
+
+          <Route path="/bookings">
+            <Route index element={<CustomerBookingList />} />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <AddBooking />{" "}
+                </BookingProvider>
+              }
+            />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<CustomerServiceBookingDetail />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<CustomerRoomBookingDetail />}
+            />
+          </Route>
+
+          <Route path="/admin/bookings">
+            <Route index element={<AdminBookingList />} />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<ServiceBookingDetailPage />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<RoomBookingDetailPage />}
+            />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <Admin_Add_Booking />{" "}
+                </BookingProvider>
+              }
+            />
           </Route>
 
           <Route path="/gifts">

@@ -10,6 +10,9 @@ namespace ReservationApi.Domain.Entities
         [Column("booking_Id")]
         [Key]
         public Guid BookingId { get; set; }
+        [Column("booking_Code")]
+        public String? BookingCode { get; set; }
+
         [Column("account_Id")]
         public Guid AccountId { get; set; }
         [Column("bookingStatus_Id")]
@@ -17,21 +20,21 @@ namespace ReservationApi.Domain.Entities
         [Column("paymentType_Id")]
         public Guid PaymentTypeId { get; set; }
         [Column("voucher_Id")]
-        public Guid VoucherId { get; set; }
+        public Guid? VoucherId { get; set; }
         [Column("bookingType_Id")]
         public Guid BookingTypeId { get; set; }
         [Column("pointRule_Id")]
-        public Guid PointRuleId { get; set; }
+        public Guid? PointRuleId { get; set; }
         [Column("totalAmount")]
         public  decimal TotalAmount { get; set; }
         [Column("bookingDate")]
         public DateTime BookingDate { get; set; }
         [Column("notes")]
-        public string Notes { get; set; } = null!;
+        public string? Notes { get; set; } = null!;
         [Column("createAt")]
-        public DateTime CreateAt { get; set; }
+        public DateTime? CreateAt { get; set; }
         [Column("updatedAt")]
-        public DateTime UpdateAt { get; set; }
+        public DateTime? UpdateAt { get; set; }
         [Column("isPaid")]
         public bool isPaid { get; set; }
 

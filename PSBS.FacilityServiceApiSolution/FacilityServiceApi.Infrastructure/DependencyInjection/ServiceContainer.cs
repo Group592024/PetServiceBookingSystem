@@ -27,6 +27,7 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
 
             services.AddScoped<IRoomType, RoomTypeRepository>();
             services.AddScoped<IServiceType, ServiceTypeRepository>();
+            services.AddScoped<IRoomHistory, RoomHistoryRepository>();
 
             services.AddQuartz(q =>
             {
