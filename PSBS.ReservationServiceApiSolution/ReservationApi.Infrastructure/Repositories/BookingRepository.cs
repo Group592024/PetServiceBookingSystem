@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
+using ReservationApi.Application.DTOs;
 using ReservationApi.Application.Intefaces;
 using ReservationApi.Domain.Entities;
 using ReservationApi.Infrastructure.Data;
@@ -16,85 +16,113 @@ namespace ReservationApi.Infrastructure.Repositories
 {
     public class BookingRepository(ReservationServiceDBContext context) : IBooking
     {
-        public async Task<Response> CreateAsync(Booking entity)
+        public async Task<Response> CancelBookingAsync(Guid bookingId)
         {
+            var existingBooking = await GetByIdAsync(bookingId);
             try
             {
-                if (entity is null || entity.BookingId == Guid.Empty)
-                    return new Response(false, "Invalid booking data");
-
-                var getBooking = await GetByAsync(p => p.BookingId == entity.BookingId);
-                if (getBooking is not null)
-                    return new Response(false, $"{entity.BookingId} already added");
-
-                var currentEntity = context.Bookings.Add(entity).Entity;
+                
+                if(existingBooking == null)
+                {
+                    return new Response(false, "No detected any booking.");
+                }
+                var currentBookingStatus = await context.BookingStatuses.Where(bs => bs.BookingStatusId == existingBooking.BookingStatusId).FirstOrDefaultAsync();
+                if (currentBookingStatus == null)
+                {
+                    return new Response(false, "The booking can't be canceled. No currentBookingStatus");
+                }
+                if (!currentBookingStatus.BookingStatusName.Contains("Pending")  && !currentBookingStatus.BookingStatusName.Contains("Confirmed"))
+                {
+                    return new Response(false, "The booking can't be canceled.");
+                }
+                var cancelBookingStatus = await context.BookingStatuses.Where(bs => bs.BookingStatusName.Contains("Cancelled")).FirstOrDefaultAsync();
+                if (cancelBookingStatus == null)
+                {
+                    return new Response(false, "The booking can't be canceled. No cancelBookingStatus");
+                }
+                existingBooking.BookingStatusId = cancelBookingStatus.BookingStatusId;
+                context.Bookings.Update(existingBooking);
                 await context.SaveChangesAsync();
-
-                return new Response(true, $"{entity.BookingId} added to database successfully") { Data = currentEntity };
+                return new Response(true, "Cancel booking successfully!");
             }
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-                return new Response(false, "Error occurred while adding new booking");
+                return new Response(false, "Error occured adding new booking");
+            }
+        }
+
+        public async Task<Response> CreateAsync(Booking entity)
+        {
+            try
+            {
+                var currentEntity = context.Bookings.Add(entity).Entity;
+                await context.SaveChangesAsync();
+                if (currentEntity is not null && currentEntity.BookingId != Guid.Empty)
+                {
+
+                    return new Response(true, "Create Booking successfully")
+                    {
+                        Data = new BookingResponseDTO { BookingId = currentEntity.BookingId }
+                    };
+                }
+                else
+                {
+                    return new Response(false, "Cannot create Booking due to errors");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occured adding new booking");
             }
         }
 
         public async Task<Response> DeleteAsync(Booking entity)
         {
-            try
-            {
-                var booking = await GetByIdAsync(entity.BookingId);
-                if (booking is null)
-                {
-                    return new Response(false, $"{entity.BookingId} not found");
-                }
-
-                if (!booking.isPaid)
-                {
-                    // First deletion attempt: mark as deleted
-                    booking.isPaid = true;
-                    context.Bookings.Update(booking);
-                    await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingId} marked as deleted.") { Data = booking };
-                }
-                else
-                {
-                    // Check if BookingStatusId is still referenced in Bookings table
-                    bool isReferencedInBookings = await context.Bookings
-                        .AnyAsync(b => b.BookingId == entity.BookingId);
-
-                    if (isReferencedInBookings)
-                    {
-                        return new Response(false, $"Cannot permanently delete {entity.BookingId} because it is referenced in existing bookings.");
-                    }
-
-                    // Permanently delete from the database
-                    context.Bookings.Remove(booking);
-                    await context.SaveChangesAsync();
-                    return new Response(true, $"{entity.BookingId} permanently deleted.");
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the original exception
-                LogExceptions.LogException(ex);
-                // Display a user-friendly message to the client
-                return new Response(false, "An error occurred while deleting the booking.");
-            }
+            throw new NotImplementedException();
         }
 
         public async Task<IEnumerable<Booking>> GetAllAsync()
         {
             try
             {
-                var booking = await context.Bookings.ToListAsync();
-                return booking;
+                var bookings = await context.Bookings.ToListAsync();
+                return bookings;
             }
             catch (Exception ex)
             {
-                // Log the original exception
                 LogExceptions.LogException(ex);
-                // Display a client-friendly error message
+                throw new Exception("Error occurred while retrieving booking.");
+            }
+        }
+
+        public async Task<IEnumerable<Booking>> GetAllBookingForUserAsync(Guid id)
+        {
+            try
+            {
+                var bookings = await context.Bookings.Where(b => b.AccountId == id).ToListAsync();
+                return bookings;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred while retrieving booking.");
+            }
+        }
+
+        public async Task<Booking> GetBookingByBookingCodeAsync(String code)
+        {
+            try
+            {
+                var booking = await context.Bookings
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(b => b.BookingCode == code);
+                return booking!;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
                 throw new Exception("Error occurred while retrieving booking.");
             }
         }
@@ -108,10 +136,8 @@ namespace ReservationApi.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // log the orginal exception
                 LogExceptions.LogException(ex);
-                // display scary-free message to the client
-                throw new Exception("Error occurred retrieving booking.");
+                throw new Exception("Error occurred retrieving booking");
             }
         }
 
@@ -121,57 +147,25 @@ namespace ReservationApi.Infrastructure.Repositories
             {
                 var booking = await context.Bookings
                     .AsNoTracking()
-                    .SingleOrDefaultAsync(v => v.BookingId == id);
+                    .SingleOrDefaultAsync(b => b.BookingId == id);
                 return booking!;
             }
             catch (Exception ex)
             {
-                // Log the original exception
                 LogExceptions.LogException(ex);
-                // Display a client-friendly error message
                 throw new Exception("Error occurred booking.");
             }
         }
 
-        public async Task<Response> UpdateAsync(Booking entity)
+        public Task<Response> UpdateAsync(Booking entity)
         {
-           
-            try
-            {
-                var booking = await GetByIdAsync(entity.BookingId);
+            throw new NotImplementedException();
+        }
 
-                if (booking == null)
-                {
-                    return new Response(false, $"{entity.BookingId} not found");
-                }
 
-                booking.AccountId = entity.AccountId == Guid.Empty ? booking.AccountId : entity.AccountId;
-                booking.BookingStatusId = entity.BookingStatusId == Guid.Empty ? booking.BookingStatusId : entity.BookingStatusId;
-                booking.PaymentTypeId = entity.PaymentTypeId == Guid.Empty ? booking.PaymentTypeId : entity.PaymentTypeId;
-                booking.VoucherId = entity.VoucherId == Guid.Empty ? booking.VoucherId : entity.VoucherId;
-                booking.BookingTypeId = entity.BookingTypeId == Guid.Empty ? booking.BookingTypeId : entity.BookingTypeId;
-                booking.PointRuleId = entity.PointRuleId == Guid.Empty ? booking.PointRuleId : entity.PointRuleId;
-                booking.TotalAmount = (entity.TotalAmount != 0) ? entity.TotalAmount : booking.TotalAmount;
-                booking.BookingDate = entity.BookingDate == default ? booking.BookingDate : entity.BookingDate;
-                booking.Notes = entity.Notes == string.Empty ? booking.Notes : entity.Notes;
-                booking.CreateAt = entity.CreateAt == default ? booking.CreateAt : entity.CreateAt;
-                booking.UpdateAt = entity.UpdateAt == default ? booking.UpdateAt : entity.UpdateAt;
-                booking.isPaid= entity.isPaid;
-                booking.BookingId = entity.BookingId;
-                context.Entry(booking).State = EntityState.Modified;
-
-                await context.SaveChangesAsync();
-
-                return new Response(true, $"{entity.BookingId} successfully updated") { Data = booking };
-            }
-            catch (Exception ex)
-            {
-                LogExceptions.LogException(ex);
-
-                return new Response(false, "Error occurred updating the existing booking status");
-            }
-        
-    }
-
+        private string GenerateBookingCode()
+        {
+            return $"ORD-{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}";
+        }
     }
 }

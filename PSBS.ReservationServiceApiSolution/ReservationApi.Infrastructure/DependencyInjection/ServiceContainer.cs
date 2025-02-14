@@ -24,6 +24,7 @@ namespace ReservationApi.Infrastructure.DependencyInjection
             services.AddScoped<IBookingType, BookingTypeRepository>();
             services.AddScoped<IPointRule, PointRuleRepository>();
             services.AddScoped<IPaymentType, PaymentTypeRepository>();
+            services.AddScoped<IBooking, BookingRepository>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)

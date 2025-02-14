@@ -18,7 +18,6 @@ const RoomEdit = () => {
     const [roomImage, setRoomImage] = useState(null);
     const [roomDescription, setRoomDescription] = useState('');
     const [roomStatus, setRoomStatus] = useState('');
-    const [hasCamera, setHasCamera] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
     const [tmpImage, setTmpImage] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -51,7 +50,6 @@ const RoomEdit = () => {
                     setTmpImage(roomData.data.roomImage ? `http://localhost:5023${roomData.data.roomImage}` : 'default-room-image.jpg');
                     setRoomDescription(roomData.data.description);
                     setRoomStatus(roomData.data.status);
-                    setHasCamera(roomData.data.hasCamera);
                     setIsDeleted(roomData.data.isDeleted);
                     setRoomTypeName(typeData.data.name);
                     setRoomTypePrice(typeData.data.price);
@@ -120,7 +118,6 @@ const RoomEdit = () => {
             formData.append('roomTypeId', roomType);
             formData.append('description', roomDescription);
             formData.append('status', roomStatus);
-            formData.append('hasCamera', hasCamera);
             formData.append('isDeleted', isDeleted);
 
             if (selectedImage) {
@@ -225,14 +222,6 @@ const RoomEdit = () => {
                                             InputProps={{
                                                 readOnly: true,
                                             }}
-                                        />
-                                    </div>
-
-                                    {/* Has Camera */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-3">Has Camera:</label>
-                                        <FormControlLabel
-                                            control={<Checkbox checked={hasCamera} onChange={(e) => setHasCamera(e.target.checked)} />}
                                         />
                                     </div>
 

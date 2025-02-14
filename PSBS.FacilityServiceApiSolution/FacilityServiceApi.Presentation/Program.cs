@@ -28,6 +28,10 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true; // T?t t? ??ng x? lý l?i 400
 });
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5023); // Any IP with 5023
+});
 
 var app = builder.Build();
 

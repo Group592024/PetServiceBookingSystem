@@ -178,7 +178,6 @@ const AdminPetEdit = () => {
         formData.append('imageFile', pet.petImage);
         formData.append('accountId', pet.accountId);
         formData.append('isDelete', pet.isDelete);
-        formData.append('healthNumber', pet.healthNumber ? pet.healthNumber : 'default-health-number');
 
         try {
             const response = await fetch(`http://localhost:5010/api/pet`, {

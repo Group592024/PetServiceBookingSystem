@@ -4,41 +4,43 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Azure.Core.HttpHeader;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace ReservationApi.Application.DTOs.Conversions
 {
     public class BookingConversion
     {
-        public static Booking ToEntity(BookingDTO bokingDTO) => new()
+        public static Booking ToEntityForCreate(AddBookingDTO addBookingDTO) => new()
         {
-            BookingId = bokingDTO.BookingId,
-            AccountId = bokingDTO.AccountId,
-            BookingStatusId = bokingDTO.BookingStatusId,
-            PaymentTypeId = bokingDTO.PaymentTypeId,
-            VoucherId = bokingDTO.VoucherId,
-            BookingTypeId = bokingDTO.BookingTypeId,
-            PointRuleId = bokingDTO.PointRuleId,
-            TotalAmount = bokingDTO.TotalAmount,
-            BookingDate = bokingDTO.BookingDate,
-            Notes = bokingDTO.Notes,
-            CreateAt = bokingDTO.CreateAt,
-            UpdateAt = bokingDTO.UpdateAt,
-            isPaid = bokingDTO.isPaid,
-
+            BookingId = Guid.Empty,
+            BookingCode = $"ORD-{Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper()}",
+            AccountId = addBookingDTO.AccountId,
+            PaymentTypeId = addBookingDTO.PaymentTypeId,
+            VoucherId = addBookingDTO.VoucherId,
+            BookingTypeId = addBookingDTO.BookingTypeId,
+            PointRuleId = null,
+            TotalAmount = addBookingDTO.TotalAmount,
+            Notes = addBookingDTO.Notes,
+            BookingDate = DateTime.Now,
+            CreateAt = DateTime.Now,
+            UpdateAt = DateTime.Now,
+            isPaid = false,
+            BookingStatusId = addBookingDTO.BookingStatusId,
         };
-
         public static (BookingDTO?, IEnumerable<BookingDTO>?) FromEntity(Booking booking, IEnumerable<Booking> bookings)
         {
             if (booking is not null || bookings is null)
             {
                 var singleBooking = new BookingDTO(
-                    booking!.BookingId,
-                    booking!.AccountId,
-                    booking!.BookingStatusId,
-                    booking!.PaymentTypeId,
-                    booking!.VoucherId,
-                    booking!.BookingTypeId,
-                    booking!.PointRuleId,
+                    booking.BookingId,
+                    booking.BookingCode,
+                    booking.AccountId,
+                    booking.BookingStatusId,
+                    booking.PaymentTypeId,
+                    booking.VoucherId,
+                    booking.BookingTypeId,
+                    booking.PointRuleId,
                     booking.TotalAmount,
                     booking.BookingDate,
                     booking.Notes,
@@ -50,20 +52,21 @@ namespace ReservationApi.Application.DTOs.Conversions
             }
             if (booking is null || bookings is not null)
             {
-                var list = bookings!.Select(p => new BookingDTO(
-                    p.BookingId,
-                    p.AccountId,
-                    p.BookingStatusId,
-                    p.PaymentTypeId,
-                    p.VoucherId,
-                    p.BookingTypeId,
-                    p.PointRuleId,
-                    p.TotalAmount,
-                    p.BookingDate,
-                    p.Notes,
-                    p.CreateAt,
-                    p.UpdateAt,
-                    p.isPaid
+                var list = bookings!.Select(b => new BookingDTO(
+                    b.BookingId,
+                    b.BookingCode,
+                    b.AccountId,
+                    b.BookingStatusId,
+                    b.PaymentTypeId,
+                    b.VoucherId,
+                    b.BookingTypeId,
+                    b.PointRuleId,
+                    b.TotalAmount,
+                    b.BookingDate,
+                    b.Notes,
+                    b.CreateAt,
+                    b.UpdateAt,
+                    b.isPaid
                     )).ToList();
                 return (null, list);
             }

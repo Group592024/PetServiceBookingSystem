@@ -162,7 +162,6 @@ namespace PetApi.Infrastructure.Repositories
                 petToUpdate.Pet_FurType = entity.Pet_FurType;
                 petToUpdate.Pet_FurColor = entity.Pet_FurColor;
                 petToUpdate.Account_ID = entity.Account_ID;
-                petToUpdate.Health_Number = entity.Health_Number;
                 petToUpdate.IsDelete = entity.IsDelete;
                 petToUpdate.PetBreed_ID = entity.PetBreed_ID;
 

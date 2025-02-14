@@ -2,14 +2,14 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/pages/Account/login_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
-
-import 'package:psbs_app_flutter/pages/home_page.dart';
-import 'package:psbs_app_flutter/pages/pet_page.dart';
+import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/profile_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
+import 'package:psbs_app_flutter/pages/room/room_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/editprofile_page.dart';
 import 'pages/Account/forgotpassword_page.dart';
 import 'pages/Account/profile_page.dart';
@@ -22,18 +22,16 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'PetEase App',
       theme: ThemeData(
-        
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      initialRoute: '/login', // Trang khởi động
+      initialRoute: '/login', // Default startup page
       onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
@@ -41,29 +39,39 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   final String accountId;
-  
-  final dynamic title;
-  const MyHomePage({super.key, required this.title, required this.accountId});
+  final int initialIndex;
+  final String title;
+
+  const MyHomePage({
+    super.key,
+    required this.title,
+    required this.accountId,
+    this.initialIndex = 0,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+
 class _MyHomePageState extends State<MyHomePage> {
   late String accountId;
-  int index = 0;
+  late int index;
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
+
   final screens = [
-    HomePage(),
+    RoomPage(),
     PetPage(),
     BookingPage(),
     VoucherPage(),
-    ProfilePage(accountId: '', title: '',),
-    EditProfilePage(accountId: '', title: '',),
+    ProfilePage(accountId: '', title: ''),
+    EditProfilePage(accountId: '', title: ''),
   ];
+
   @override
   void initState() {
     super.initState();
-    _loadAccountId(); 
+    index = widget.initialIndex;
+    _loadAccountId();
   }
 
   Future<void> _loadAccountId() async {
@@ -71,9 +79,10 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       accountId = widget.accountId.isNotEmpty
           ? widget.accountId
-          : (prefs.getString('accountId') ?? ''); 
+          : (prefs.getString('accountId') ?? '');
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final items = <Widget>[
@@ -83,20 +92,15 @@ class _MyHomePageState extends State<MyHomePage> {
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Row(
           children: [
-            // Add an icon
-            Icon(
-              Icons.pets,
-              color: Colors.white,
-              size: 30,
-            ),
-            const SizedBox(width: 1), // Spacing between icon and text
-            // Create styled text
+            Icon(Icons.pets, color: Colors.white, size: 30),
+            const SizedBox(width: 1),
             RichText(
               text: TextSpan(
                 children: [
@@ -122,50 +126,38 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: <Widget>[
-          // Chat action
           IconButton(
-            onPressed: () {
-              // Add your onPressed logic here
-            },
-            icon: const Icon(
-              Icons.messenger,
-              color: Colors.white,
-              size: 28,
-            ),
+            onPressed: () {},
+            icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
-          // Menu action
           IconButton(
-            onPressed: () {
-              // Add your onPressed logic here
-            },
-            icon: const Icon(
-              Icons.menu,
-              color: Colors.white,
-              size: 28,
-            ),
+            onPressed: () {},
+            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
             tooltip: 'Menu',
           ),
         ],
       ),
       bottomNavigationBar: Theme(
-          data: Theme.of(context)
-              .copyWith(iconTheme: IconThemeData(color: Colors.white)),
-          child: CurvedNavigationBar(
-            key: navigationKey,
-            color: Colors.blue,
-            buttonBackgroundColor: Colors.blue,
-            items: items,
-            index: index,
-            onTap: (selectedIndex) {
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            height: 70,
-            animationCurve: Curves.easeIn,
-            backgroundColor: Colors.transparent,
-          )),
+        data: Theme.of(context).copyWith(
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        child: CurvedNavigationBar(
+          key: navigationKey,
+          color: Colors.blue,
+          buttonBackgroundColor: Colors.blue,
+          items: items,
+          index: index,
+          onTap: (selectedIndex) {
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          height: 70,
+          animationCurve: Curves.easeInOut,
+          backgroundColor: Colors.transparent,
+        ),
+      ),
       body: screens[index],
     );
   }
