@@ -1,12 +1,19 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/Account/login_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
-
-// import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/profile_page.dart';
+import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
 import 'package:psbs_app_flutter/pages/room/room_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Additional pages from Tuan/AccountManagementFlutter
+import 'pages/Account/editprofile_page.dart';
+import 'pages/Account/forgotpassword_page.dart';
+import 'pages/Account/profile_page.dart';
+import 'pages/Account/register_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -18,28 +25,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute: '/',
-      routes: {
-        '/booking': (context) => BookingPage(),
-      },
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'PetEase App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      initialRoute: '/login', // Default startup page
+      onGenerateRoute: RouteGenerator.generateRoute,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
+  final String accountId;
   final int initialIndex;
   final String title;
 
-  MyHomePage({
+  const MyHomePage({
     super.key,
     required this.title,
+    required this.accountId,
     this.initialIndex = 0,
   });
 
@@ -48,22 +54,34 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  late String accountId;
   late int index;
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
-
-  @override
-  void initState() {
-    super.initState();
-    index = widget.initialIndex;
-  }
 
   final screens = [
     RoomPage(),
     PetPage(),
     BookingPage(),
     VoucherPage(),
-    ProfilePage(),
+    ProfilePage(accountId: '', title: ''),
+    EditProfilePage(accountId: '', title: ''),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    index = widget.initialIndex;
+    _loadAccountId();
+  }
+
+  Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      accountId = widget.accountId.isNotEmpty
+          ? widget.accountId
+          : (prefs.getString('accountId') ?? '');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,11 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Colors.blue,
         title: Row(
           children: [
-            Icon(
-              Icons.pets,
-              color: Colors.white,
-              size: 30,
-            ),
+            Icon(Icons.pets, color: Colors.white, size: 30),
             const SizedBox(width: 1),
             RichText(
               text: TextSpan(
@@ -114,27 +128,19 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Icons.messenger,
-              color: Colors.white,
-              size: 28,
-            ),
+            icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
           IconButton(
             onPressed: () {},
-            icon: const Icon(
-              Icons.menu,
-              color: Colors.white,
-              size: 28,
-            ),
+            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
             tooltip: 'Menu',
           ),
         ],
       ),
       bottomNavigationBar: Theme(
         data: Theme.of(context).copyWith(
-          iconTheme: IconThemeData(color: Colors.white)
+          iconTheme: IconThemeData(color: Colors.white),
         ),
         child: CurvedNavigationBar(
           key: navigationKey,

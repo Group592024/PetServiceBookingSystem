@@ -172,7 +172,7 @@ const EditProfileCustomer = () => {
       method: "PUT",
       body: formData,
     });
-
+    console.log("Server Response:", response);
     if (!response.ok) {
       const errorData = await response.json();
       console.error("Error from server:", errorData);
@@ -293,21 +293,6 @@ const EditProfileCustomer = () => {
                     value={account.accountEmail || ""}
                     disabled
                   />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="role" className="block text-sm font-medium mb-1 font-bold">
-                    Role
-                  </label>
-                  <select
-                    id="role"
-                    className="w-full p-3 border rounded-md"
-                    value={account.roleId}
-                    onChange={(e) => setAccount({ ...account, roleId: e.target.value })}
-                  >
-                    <option value="user">User</option>
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
-                  </select>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="birthday" className="block text-sm font-medium mb-1 font-bold">

@@ -26,7 +26,6 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
                 isDeleted = petHealthBookDTO.isDeleted
             };
         }
-
         public static (PetHealthBookDTO?, IEnumerable<PetHealthBookDTO>?) FromEntity(PetHealthBook? petHealthBook, IEnumerable<PetHealthBook>? petHealthBooks)
         {
             if (petHealthBook is not null && petHealthBooks is null)

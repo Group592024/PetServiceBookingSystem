@@ -47,18 +47,37 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                 : NotFound(new Response(false, "PetHealthBooks requested not found"));
         }
 
-        // POST api/<BookingStatusController>
         [HttpPost]
-        public async Task<ActionResult<Response>> CreatePetHealthBooks([FromBody] PetHealthBookDTO petHealthBook)
+        public async Task<ActionResult<Response>> CreatePetHealthBooks([FromBody] PetHealthBookConvertDTO petHealthBook)
         {
-            // CHECK model state is all data annotations are passed
+            // Kiểm tra tính hợp lệ của ModelState
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            // convert to entity to DT
-            var getEntity = PetHealthBookConversion.ToEntity(petHealthBook);
-            var response = await petHealthBookInterface.CreateAsync(getEntity);
-            return response.Flag is true ? Ok(response) : BadRequest(response);
+            {
+                return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
+            }
+
+            try
+            {
+                // Gọi phương thức tạo mới PetHealthBook từ interface
+                var response = await petHealthBookInterface.CreatePetHealthBookAsync(petHealthBook);
+
+                // Trả về kết quả nếu flag của response là true, ngược lại trả về lỗi
+                return response.Flag ? Ok(response) : BadRequest(response);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception occurred: " + ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine("Inner Exception: " + ex.InnerException.Message);
+                    Console.WriteLine("Inner Exception Stack Trace: " + ex.InnerException.StackTrace);
+                }
+
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+
         }
+
 
 
         // PUT api/<BookingStatusController>/5
@@ -67,8 +86,8 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         {
 
 
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+          //  if (!ModelState.IsValid)
+          //      return BadRequest(ModelState);
             // convert to entity to DT         
             var getEntity = PetHealthBookConversion.ToEntity(petHealthBook);
             var response = await petHealthBookInterface.UpdateAsync(getEntity);
