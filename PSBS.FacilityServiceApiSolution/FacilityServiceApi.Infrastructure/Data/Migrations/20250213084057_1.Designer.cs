@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20250123152229_Migration01")]
-    partial class Migration01
+    [Migration("20250213084057_1")]
+    partial class _1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -105,10 +105,6 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("description");
-
-                    b.Property<bool>("hasCamera")
-                        .HasColumnType("bit")
-                        .HasColumnName("has_camera");
 
                     b.Property<bool>("isDeleted")
                         .HasColumnType("bit")
@@ -323,20 +319,20 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(816),
+                            createAt = new DateTime(2025, 2, 13, 15, 40, 57, 449, DateTimeKind.Local).AddTicks(253),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(832)
+                            updateAt = new DateTime(2025, 2, 13, 15, 40, 57, 449, DateTimeKind.Local).AddTicks(268)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834),
+                            createAt = new DateTime(2025, 2, 13, 15, 40, 57, 449, DateTimeKind.Local).AddTicks(272),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 1, 23, 22, 22, 28, 714, DateTimeKind.Local).AddTicks(834)
+                            updateAt = new DateTime(2025, 2, 13, 15, 40, 57, 449, DateTimeKind.Local).AddTicks(273)
                         });
                 });
 

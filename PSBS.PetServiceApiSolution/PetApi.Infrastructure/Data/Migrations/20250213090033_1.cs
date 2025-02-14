@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class _1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,7 +61,6 @@ namespace PetApi.Infrastructure.Data.Migrations
                     Pet_Weight = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Pet_FurType = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Pet_FurColor = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Health_Number = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsDelete = table.Column<bool>(type: "bit", nullable: false),
                     PetBreed_ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Account_ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)

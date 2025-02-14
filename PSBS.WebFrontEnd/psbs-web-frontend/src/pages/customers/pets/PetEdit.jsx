@@ -171,7 +171,6 @@ const CustomerPetEdit = () => {
         formData.append('petFurType', pet.petFurType);
         formData.append('petFurColor', pet.petFurColor);
         formData.append('petNote', pet.petNote);
-        formData.append('healthNumber', pet.healthNumber ? pet.healthNumber : 'default-health-number');
 
         if (pet.petImage) {
             formData.append('imageFile', pet.petImage);

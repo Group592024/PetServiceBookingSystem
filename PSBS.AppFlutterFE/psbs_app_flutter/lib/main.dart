@@ -2,10 +2,11 @@ import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 
-import 'package:psbs_app_flutter/pages/home_page.dart';
-import 'package:psbs_app_flutter/pages/pet_page.dart';
+// import 'package:psbs_app_flutter/pages/home_page.dart';
+import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/profile_page.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
+import 'package:psbs_app_flutter/pages/room/room_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,65 +15,56 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
+      routes: {
+        '/booking': (context) => BookingPage(),
+      },
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
+  final int initialIndex;
   final String title;
+
+  MyHomePage({
+    super.key,
+    required this.title,
+    this.initialIndex = 0,
+  });
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int index = 0;
+  late int index;
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
 
+  @override
+  void initState() {
+    super.initState();
+    index = widget.initialIndex;
+  }
+
   final screens = [
-    HomePage(),
+    RoomPage(),
     PetPage(),
     BookingPage(),
     VoucherPage(),
     ProfilePage(),
   ];
+
   @override
   Widget build(BuildContext context) {
     final items = <Widget>[
@@ -82,20 +74,19 @@ class _MyHomePageState extends State<MyHomePage> {
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Row(
           children: [
-            // Add an icon
             Icon(
               Icons.pets,
               color: Colors.white,
               size: 30,
             ),
-            const SizedBox(width: 1), // Spacing between icon and text
-            // Create styled text
+            const SizedBox(width: 1),
             RichText(
               text: TextSpan(
                 children: [
@@ -121,11 +112,8 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: <Widget>[
-          // Chat action
           IconButton(
-            onPressed: () {
-              // Add your onPressed logic here
-            },
+            onPressed: () {},
             icon: const Icon(
               Icons.messenger,
               color: Colors.white,
@@ -133,11 +121,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             tooltip: 'Chat',
           ),
-          // Menu action
           IconButton(
-            onPressed: () {
-              // Add your onPressed logic here
-            },
+            onPressed: () {},
             icon: const Icon(
               Icons.menu,
               color: Colors.white,
@@ -148,23 +133,25 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: Theme(
-          data: Theme.of(context)
-              .copyWith(iconTheme: IconThemeData(color: Colors.white)),
-          child: CurvedNavigationBar(
-            key: navigationKey,
-            color: Colors.blue,
-            buttonBackgroundColor: Colors.blue,
-            items: items,
-            index: index,
-            onTap: (selectedIndex) {
-              setState(() {
-                index = selectedIndex;
-              });
-            },
-            height: 70,
-            animationCurve: Curves.easeIn,
-            backgroundColor: Colors.transparent,
-          )),
+        data: Theme.of(context).copyWith(
+          iconTheme: IconThemeData(color: Colors.white)
+        ),
+        child: CurvedNavigationBar(
+          key: navigationKey,
+          color: Colors.blue,
+          buttonBackgroundColor: Colors.blue,
+          items: items,
+          index: index,
+          onTap: (selectedIndex) {
+            setState(() {
+              index = selectedIndex;
+            });
+          },
+          height: 70,
+          animationCurve: Curves.easeInOut,
+          backgroundColor: Colors.transparent,
+        ),
+      ),
       body: screens[index],
     );
   }

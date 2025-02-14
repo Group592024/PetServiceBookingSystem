@@ -45,7 +45,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                         roomTypeId = currentEntity.roomTypeId,
                         description = currentEntity.description,
                         roomImage = currentEntity.roomImage,
-                        hasCamera = currentEntity.hasCamera,
                         isDeleted  = currentEntity.isDeleted,
                     };
 
@@ -90,7 +89,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                         roomTypeId = room.roomTypeId,
                         description = room.description,
                         roomImage = room.roomImage,
-                        hasCamera = room.hasCamera,
                         isDeleted = room.isDeleted,
                     };
 
@@ -194,7 +192,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 room.roomName = entity.roomName;
                 room.description = entity.description;
                 room.roomImage = entity.roomImage;
-                room.hasCamera = entity.hasCamera;
                 room.status = entity.status;
                 room.isDeleted = entity.isDeleted;
 

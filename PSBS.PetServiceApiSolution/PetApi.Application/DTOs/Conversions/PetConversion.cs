@@ -20,7 +20,6 @@ namespace PetApi.Application.DTOs.Conversions
                 Pet_Weight = petDTO.petWeight,
                 Pet_FurType = petDTO.petFurType,
                 Pet_FurColor = petDTO.petFurColor,
-                Health_Number = petDTO.healthNumber,
                 IsDelete = petDTO.isDelete ?? false,
                 PetBreed_ID = petDTO.petBreedId,
                 Account_ID = petDTO.accountId
@@ -45,7 +44,6 @@ namespace PetApi.Application.DTOs.Conversions
                     petWeight = pet.Pet_Weight,
                     petFurType = pet.Pet_FurType,
                     petFurColor = pet.Pet_FurColor,
-                    healthNumber = pet.Health_Number,
                     isDelete = pet.IsDelete,
                     petBreedId = pet.PetBreed_ID,
                     accountId = pet.Account_ID,
@@ -68,7 +66,6 @@ namespace PetApi.Application.DTOs.Conversions
                     petWeight = p.Pet_Weight,
                     petFurType = p.Pet_FurType,
                     petFurColor = p.Pet_FurColor,
-                    healthNumber = p.Health_Number,
                     isDelete = p.IsDelete,
                     petBreedId = p.PetBreed_ID,
                     accountId = p.Account_ID,

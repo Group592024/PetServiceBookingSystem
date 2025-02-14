@@ -20,8 +20,6 @@ namespace FacilityServiceApi.Domain.Entities
         public bool isDeleted { get; set; }
         [Column("room_image")]
         public string roomImage { get; set; }
-        [Column("has_camera")]
-        public bool hasCamera { get; set; }
         public virtual RoomType? RoomType { get; set; }
         public virtual ICollection<RoomHistory>? RoomHistories { get; set; }
     }

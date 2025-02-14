@@ -34,10 +34,6 @@ namespace PetApi.Infrastructure.Data.Migrations
                     b.Property<DateTime>("Date_Of_Birth")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Health_Number")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDelete")
                         .HasColumnType("bit");
 

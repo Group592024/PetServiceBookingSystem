@@ -15,7 +15,6 @@ const RoomCreate = () => {
     const [roomTypePrice, setRoomTypePrice] = useState('');
     const [description, setDescription] = useState('');
     const [tmpImage, setTmpImage] = useState(sampleImage);
-    const [hasCamera, setHasCamera] = useState(false);
     const [roomTypes, setRoomTypes] = useState([]);
     const [error, setError] = useState({
         roomName: false,
@@ -82,7 +81,6 @@ const RoomCreate = () => {
         formData.append('roomName', roomName);
         formData.append('roomTypeId', roomType);
         formData.append('description', description);
-        formData.append('hasCamera', hasCamera);
         formData.append('imageFile', selectedImage);
 
         try {
@@ -182,14 +180,6 @@ const RoomCreate = () => {
                                             InputProps={{
                                                 readOnly: true,
                                             }}
-                                        />
-                                    </div>
-
-                                    {/* Has Camera */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-3">Has Camera:</label>
-                                        <FormControlLabel
-                                            control={<Checkbox checked={hasCamera} onChange={(e) => setHasCamera(e.target.checked)} />}
                                         />
                                     </div>
 

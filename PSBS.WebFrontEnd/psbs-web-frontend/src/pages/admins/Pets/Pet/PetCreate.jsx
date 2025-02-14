@@ -132,9 +132,6 @@ const AdminPetCreate = () => {
         formData.append('petNote', pet.petNote);
         formData.append('imageFile', pet.petImage);
         formData.append('accountId', pet.accountId);
-        //Heath number
-        formData.append('healthNumber', pet.healthNumber ? pet.healthNumber : 'default-health-number');
-
 
         try {
             const response = await fetch('http://localhost:5010/api/pet', {
