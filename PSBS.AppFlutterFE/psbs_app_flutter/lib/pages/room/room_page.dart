@@ -199,10 +199,10 @@ class _RoomPageState extends State<RoomPage> {
                                     );
                                   },
                                   style: ButtonStyle(
-                                    backgroundColor: MaterialStateProperty.all(
+                                    backgroundColor: WidgetStateProperty.all(
                                         Colors.yellow),
                                     foregroundColor:
-                                        MaterialStateProperty.all(Colors.black),
+                                        WidgetStateProperty.all(Colors.black),
                                   ),
                                   child: Text(
                                     'See More',

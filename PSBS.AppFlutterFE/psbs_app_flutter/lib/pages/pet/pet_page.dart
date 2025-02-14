@@ -9,6 +9,8 @@ import 'package:psbs_app_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PetPage extends StatefulWidget {
+  const PetPage({super.key});
+
   @override
   _CustomerPetListState createState() => _CustomerPetListState();
 }
@@ -17,13 +19,19 @@ class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
   final String apiUrl = 'http://192.168.1.17:5010/api/pet/available/';
   final String deleteUrl = 'http://192.168.1.17:5010/api/pet/';
-
+ late String userId;
   @override
   void initState() {
     super.initState();
     pets = fetchPets();
+      _loadAccountId();
   }
-
+ Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
+    });
+  }
   Future<List<Pet>> fetchPets() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -123,6 +131,7 @@ class _CustomerPetListState extends State<PetPage> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => MyHomePage(
+                              accountId: userId,
                               title: 'Flutter Demo Home Page',
                               initialIndex: 1,
                             ),
@@ -476,13 +485,13 @@ class _CustomerPetListState extends State<PetPage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          "${pet.gender == 'Male' ? 'Male' : 'Female'}",
+                          pet.gender == 'Male' ? 'Male' : 'Female',
                           style:
                               TextStyle(fontSize: 18, color: Colors.grey[700]),
                         ),
                         SizedBox(height: 10),
                         Text(
-                          "${DateFormat('dd/MM/yyyy').format(DateTime.parse(pet.dateOfBirth))}",
+                          DateFormat('dd/MM/yyyy').format(DateTime.parse(pet.dateOfBirth)),
                           style:
                               TextStyle(fontSize: 18, color: Colors.grey[700]),
                         ),

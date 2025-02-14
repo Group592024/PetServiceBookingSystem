@@ -8,8 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage(
-      {Key? key, required String title, required String accountId})
-      : super(key: key);
+      {super.key, required String title, required String accountId});
 
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
@@ -325,11 +324,11 @@ class ProfileField extends StatelessWidget {
   final bool enabled;
 
   const ProfileField({
-    Key? key,
+    super.key,
     required this.label,
     required this.controller,
     this.enabled = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

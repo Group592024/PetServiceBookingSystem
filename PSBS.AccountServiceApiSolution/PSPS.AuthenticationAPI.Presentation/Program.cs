@@ -24,6 +24,10 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
+    builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // Any IP with 5023
+});
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();

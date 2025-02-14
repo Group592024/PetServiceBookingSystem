@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 class ChangePasswordPage extends StatefulWidget {
   final String accountId;
-  ChangePasswordPage({required this.accountId, required String title});
+  const ChangePasswordPage({super.key, required this.accountId, required String title});
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
@@ -14,9 +14,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
   String accountId = '';
-  TextEditingController _currentPasswordController = TextEditingController();
-  TextEditingController _newPasswordController = TextEditingController();
-  TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   Future<void>? _fetchDataFuture;
   String? imagePreview;
   String? accountName;

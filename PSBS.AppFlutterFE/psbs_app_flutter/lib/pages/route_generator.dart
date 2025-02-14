@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
-import 'package:psbs_app_flutter/pages/pet_page.dart';
+import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
 import 'package:psbs_app_flutter/pages/Account/profile_page.dart';
