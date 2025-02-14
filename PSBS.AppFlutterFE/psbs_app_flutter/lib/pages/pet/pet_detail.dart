@@ -5,11 +5,12 @@ import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_create.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_edit.dart';
 import 'package:psbs_app_flutter/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerPetDetail extends StatefulWidget {
   final String petId;
 
-  const CustomerPetDetail({Key? key, required this.petId}) : super(key: key);
+  const CustomerPetDetail({super.key, required this.petId});
 
   @override
   _CustomerPetDetailState createState() => _CustomerPetDetailState();
@@ -20,13 +21,19 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
   Map<String, dynamic>? petBreed;
   bool isLoading = true;
   bool showFullNotes = false;
-
+ late String userId;
   @override
   void initState() {
     super.initState();
     fetchPetDetails();
+    _loadAccountId();
   }
-
+ Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
+    });
+  }
   Future<void> fetchPetDetails() async {
     try {
       final petResponse = await http
@@ -528,6 +535,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => MyHomePage(
+                                accountId: userId,
                                 title: 'Flutter Demo Home Page',
                                 initialIndex: 1,
                               ),

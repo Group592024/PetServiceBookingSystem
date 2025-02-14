@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PetEdit extends StatefulWidget {
   final String petId;
 
-  PetEdit({required this.petId});
+  const PetEdit({super.key, required this.petId});
 
   @override
   _PetEditState createState() => _PetEditState();
@@ -24,7 +24,7 @@ class _PetEditState extends State<PetEdit> {
   List<PetType> _petTypes = [];
   List<PetBreed> _breeds = [];
   bool _isLoading = false;
-  Map<String, String> _errors = {};
+  final Map<String, String> _errors = {};
   bool _hasInteractedWithImage = false;
 
   final TextEditingController _nameController = TextEditingController();
@@ -38,14 +38,20 @@ class _PetEditState extends State<PetEdit> {
   bool _petGender = true;
   DateTime? _dateOfBirth;
   String? _accountId;
-
+ late String userId;
   @override
   void initState() {
     super.initState();
     _fetchPetData();
     _fetchPetTypes();
+    _loadAccountId();
   }
-
+ Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
+    });
+  }
   Future<void> _fetchPetData() async {
     setState(() => _isLoading = true);
     try {
@@ -396,6 +402,7 @@ class _PetEditState extends State<PetEdit> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => MyHomePage(
+                          accountId: userId,
                           title: 'Flutter Demo Home Page',
                           initialIndex: 1,
                         ),
@@ -635,8 +642,9 @@ class _PetEditState extends State<PetEdit> {
                       ),
                       keyboardType: TextInputType.number,
                       validator: (value) {
-                        if (value?.isEmpty ?? true)
+                        if (value?.isEmpty ?? true) {
                           return 'Please enter weight';
+                        }
                         if (double.tryParse(value!) == null ||
                             double.parse(value) <= 0) {
                           return 'Please enter a valid weight';
@@ -715,6 +723,7 @@ class _PetEditState extends State<PetEdit> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => MyHomePage(
+                                  accountId: userId,
                                   title: 'Flutter Demo Home Page',
                                   initialIndex: 1,
                                 ),

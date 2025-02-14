@@ -5,7 +5,7 @@ import 'dart:convert';
 class CustomerRoomDetail extends StatefulWidget {
   final String roomId;
 
-  CustomerRoomDetail({required this.roomId});
+  const CustomerRoomDetail({super.key, required this.roomId});
 
   @override
   _CustomerRoomDetailState createState() => _CustomerRoomDetailState();
@@ -149,23 +149,23 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                           SizedBox(height: 20),
                           // Book Now Button in a separate row
                           Center(
-                            child: Container(
+                            child: SizedBox(
                               width: 300, 
                               child: ElevatedButton(
                                 onPressed: () {
                                   Navigator.pushNamed(
                                       context, '/booking');
                                 },
+                                style: ButtonStyle(
+                                  backgroundColor: WidgetStateProperty.all(
+                                      Colors.yellow[600]),
+                                ),
                                 child: Text(
                                   'Book Now',
                                   style: TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                      Colors.yellow[600]),
                                 ),
                               ),
                             ),

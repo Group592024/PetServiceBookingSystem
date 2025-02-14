@@ -8,6 +8,8 @@ import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PetCreate extends StatefulWidget {
+  const PetCreate({super.key});
+
   @override
   _PetCreateState createState() => _PetCreateState();
 }

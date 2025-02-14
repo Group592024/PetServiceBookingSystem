@@ -1,9 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:psbs_app_flutter/pages/Account/login_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
-import 'package:psbs_app_flutter/pages/profile_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/voucher_page.dart';
 import 'package:psbs_app_flutter/pages/room/room_page.dart';
@@ -11,9 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/editprofile_page.dart';
-import 'pages/Account/forgotpassword_page.dart';
 import 'pages/Account/profile_page.dart';
-import 'pages/Account/register_page.dart';
 
 void main() {
   runApp(const MyApp());

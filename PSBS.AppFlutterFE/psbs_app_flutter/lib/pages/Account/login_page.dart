@@ -7,9 +7,12 @@ import 'package:psbs_app_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
   _LoginPageState createState() => _LoginPageState();
 }
+
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -20,6 +23,7 @@ class _LoginPageState extends State<LoginPage> {
       gravity: ToastGravity.BOTTOM,
     );
   }
+
   bool _validateForm() {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
@@ -38,52 +42,60 @@ class _LoginPageState extends State<LoginPage> {
     }
     return true;
   }
+
   Future<void> _handleLogin() async {
-  if (!_validateForm()) return;
-  String email = _emailController.text.trim();
-  String password = _passwordController.text.trim();
-  try {
-    final response = await http.post(
+    if (!_validateForm()) return;
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    try {
+      final response = await http.post(
       Uri.parse('http://localhost:5000/api/Account/Login'), 
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
-    );
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result['flag'] == true) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('token', result['data']);
-        Map<String, dynamic> decodedToken = _parseJwt(result['data']);
-        String accountId = decodedToken['AccountId'].toString();
-        prefs.setString('accountId', accountId); 
-        if (decodedToken['AccountIsDeleted'].toString().toLowerCase() == 'true') {
-          _showToast('Your account has been deleted. Please contact support.');
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
+      );
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result['flag'] == true) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString('token', result['data']);
+          Map<String, dynamic> decodedToken = _parseJwt(result['data']);
+          String accountId = decodedToken['AccountId'].toString();
+          prefs.setString('accountId', accountId);
+          if (decodedToken['AccountIsDeleted'].toString().toLowerCase() ==
+              'true') {
+            _showToast(
+                'Your account has been deleted. Please contact support.');
+          } else {
+            String role = decodedToken[
+                'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            prefs.setString('role', role);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      MyHomePage(title: 'PetEase Home', accountId: accountId)),
+            );
+          }
         } else {
-          String role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-          prefs.setString('role', role);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => MyHomePage(title: 'PetEase Home', accountId: accountId)),
-          );
+          _showToast(result['message'] ?? 'Login failed. Please try again.');
         }
       } else {
-        _showToast(result['message'] ?? 'Login failed. Please try again.');
+        _showToast('Error: ${response.statusCode} - ${response.body}');
       }
-    } else {
-      _showToast('Error: ${response.statusCode} - ${response.body}');
+    } catch (e) {
+      _showToast('An error occurred. Please try again.');
     }
-  } catch (e) {
-    _showToast('An error occurred. Please try again.');
   }
-}
+
   Map<String, dynamic> _parseJwt(String token) {
     try {
       final parts = token.split('.');
       if (parts.length != 3) {
         throw Exception('Invalid token format');
       }
-      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
-      print('Decoded JWT: $payload'); 
+      final payload =
+          utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      print('Decoded JWT: $payload');
       return jsonDecode(payload);
     } catch (e) {
       print('Error decoding token: $e');
@@ -91,6 +103,7 @@ class _LoginPageState extends State<LoginPage> {
       return {};
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -146,12 +159,12 @@ class _LoginPageState extends State<LoginPage> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _handleLogin,
-                child: Text('LOGIN'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(double.infinity, 48),
                   backgroundColor: Colors.grey[500],
                   foregroundColor: Colors.white,
                 ),
+                child: Text('LOGIN'),
               ),
               SizedBox(height: 16),
               RichText(
@@ -163,7 +176,8 @@ class _LoginPageState extends State<LoginPage> {
                       text: "Register Now",
                       style: TextStyle(color: Colors.cyan),
                       recognizer: TapGestureRecognizer()
-                        ..onTap = () => Navigator.pushNamed(context, '/register'),
+                        ..onTap =
+                            () => Navigator.pushNamed(context, '/register'),
                     ),
                   ],
                 ),

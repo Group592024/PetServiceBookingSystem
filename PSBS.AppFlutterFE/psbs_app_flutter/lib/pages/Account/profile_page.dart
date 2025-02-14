@@ -7,8 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   final String accountId;
-  const ProfilePage({Key? key, required this.accountId, required String title})
-      : super(key: key);
+  const ProfilePage({super.key, required this.accountId, required String title});
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -204,8 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
 class ProfileField extends StatelessWidget {
   final String label;
   final String value;
-  const ProfileField({Key? key, required this.label, required this.value})
-      : super(key: key);
+  const ProfileField({super.key, required this.label, required this.value});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -236,7 +234,7 @@ class ProfileField extends StatelessWidget {
 class GenderField extends StatelessWidget {
   final String selectedGender;
 
-  const GenderField({Key? key, required this.selectedGender}) : super(key: key);
+  const GenderField({super.key, required this.selectedGender});
 
   @override
   Widget build(BuildContext context) {

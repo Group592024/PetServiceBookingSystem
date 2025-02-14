@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
+
   @override
   _ForgotPasswordPageState createState() => _ForgotPasswordPageState();
 }
@@ -44,7 +46,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
           textColor: Colors.white,
         );
       }
-    } on DioError catch (error) {
+    } on DioException catch (error) {
       String errorMessage = error.response?.data['message'] ??
           'An error occurred. Please try again later.';
       Fluttertoast.showToast(

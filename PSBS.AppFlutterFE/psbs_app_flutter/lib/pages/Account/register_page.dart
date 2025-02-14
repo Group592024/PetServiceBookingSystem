@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
+
   @override
   _RegisterPageState createState() => _RegisterPageState();
 }
@@ -93,16 +95,16 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Padding(
               padding: EdgeInsets.all(16),
               child: Form(
-                key: _formKey, 
+                key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
                       padding: EdgeInsets.symmetric(
                           vertical: 32.0, horizontal: 48.0),
-                      color: Colors.grey[300], 
+                      color: Colors.grey[300],
                       child: Text(
-                        'Logo', 
+                        'Logo',
                         style: TextStyle(
                           fontSize: 48,
                           fontWeight: FontWeight.bold,
@@ -145,7 +147,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Email',
-                          border: InputBorder.none, 
+                          border: InputBorder.none,
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
@@ -169,7 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Phone Number',
-                          border: InputBorder.none, 
+                          border: InputBorder.none,
                         ),
                         keyboardType: TextInputType.phone,
                         validator: (value) {
@@ -192,7 +194,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Password',
-                          border: InputBorder.none, 
+                          border: InputBorder.none,
                         ),
                         obscureText: true,
                         validator: (value) => value!.length < 6
@@ -211,10 +213,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
                           labelText: 'Gender',
-                          labelStyle:
-                              TextStyle(color: Colors.black), 
-                          border:
-                              InputBorder.none, 
+                          labelStyle: TextStyle(color: Colors.black),
+                          border: InputBorder.none,
                         ),
                         items: [
                           DropdownMenuItem(
@@ -229,10 +229,8 @@ class _RegisterPageState extends State<RegisterPage> {
                         onChanged: (value) => gender = value!,
                         validator: (value) =>
                             value == null ? 'Gender is required' : null,
-                        style: TextStyle(
-                            color: Colors.black),
-                        dropdownColor:
-                            Colors.white, 
+                        style: TextStyle(color: Colors.black),
+                        dropdownColor: Colors.white,
                       ),
                     ),
                     SizedBox(height: 16),
@@ -245,7 +243,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       child: TextFormField(
                         decoration: InputDecoration(
                           labelText: 'Date of Birth',
-                          border: InputBorder.none, 
+                          border: InputBorder.none,
                         ),
                         readOnly: true,
                         onTap: () async {
@@ -288,27 +286,23 @@ class _RegisterPageState extends State<RegisterPage> {
                     SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _register,
-                      child: Text('REGISTER'),
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(double.infinity, 48),
-                        backgroundColor:
-                            Colors.grey[500], 
-                        foregroundColor:
-                            Colors.white, 
+                        backgroundColor: Colors.grey[500],
+                        foregroundColor: Colors.white,
                       ),
+                      child: Text('REGISTER'),
                     ),
                     SizedBox(height: 16),
                     Center(
                       child: RichText(
-                        textAlign: TextAlign.center, 
+                        textAlign: TextAlign.center,
                         text: TextSpan(
                           style: TextStyle(color: Colors.black, fontSize: 14),
                           children: [
+                            TextSpan(text: "Already have an account? "),
                             TextSpan(
-                                text:
-                                    "Already have an account? "), 
-                            TextSpan(
-                              text: "Login here", 
+                              text: "Login here",
                               style: TextStyle(color: Colors.cyan),
                               recognizer: TapGestureRecognizer()
                                 ..onTap = () =>
