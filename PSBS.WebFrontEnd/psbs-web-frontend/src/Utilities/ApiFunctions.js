@@ -1,20 +1,22 @@
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import axios from "axios";
+import Swal from "sweetalert2";
 
-const API_BASE_URL = 'http://localhost:5022'; // Replace with your actual API URL
+
+const API_BASE_URL = 'http://localhost:5000'; // Replace with your actual API URL
+ // Replace with your actual API URL
+
 
 // Helper function to handle the response
 const handleResponse = (response) => {
   if (response.data.flag) {
     return response.data; // Return data if flag is true
   } else {
-     Swal.fire({
-            title: 'Error!',
-            text: response.data.message,
-            icon: 'error',
-            confirmButtonText: 'OK'
-          });
-    
+    Swal.fire({
+      title: "Error!",
+      text: response.data.message,
+      icon: "error",
+      confirmButtonText: "OK",
+    });
   }
 };
 
@@ -24,7 +26,7 @@ export const getData = async (endpoint) => {
     const response = await axios.get(`${API_BASE_URL}/${endpoint}`);
     return handleResponse(response);
   } catch (error) {
-    console.error('GET request error:', error);
+    console.error("GET request error:", error);
     throw error;
   }
 };
@@ -32,81 +34,87 @@ export const getData = async (endpoint) => {
 // POST request
 export const postData = async (endpoint, payload) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/${endpoint}`, payload);    
+    const response = await axios.post(`${API_BASE_URL}/${endpoint}`, payload);
     if (!response.data.flag) {
       Swal.fire({
-        title: 'Error!',
-        text: response.data.message || 'An error occurred while creating the data.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          response.data.message || "An error occurred while creating the data.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
-      return response.data; 
+      return response.data;
     }
-    return response.data;   
+    return response.data;
   } catch (error) {
-    console.error('POST request error:', error);
+    console.error("POST request error:", error);
     if (error.response) {
       Swal.fire({
-        title: 'Error!',
-        text: error.response.data.message || 'An error occurred while making the request.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          error.response.data.message ||
+          "An error occurred while making the request.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else if (error.request) {
       Swal.fire({
-        title: 'Error!',
-        text: 'No response received from the server. Please check your network connection.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text: "No response received from the server. Please check your network connection.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else {
       Swal.fire({
-        title: 'Error!',
+        title: "Error!",
         text: `Unexpected error: ${error.message}`,
-        icon: 'error',
-        confirmButtonText: 'OK'
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
-    throw error; 
+    throw error;
   }
 };
 
 // PUT request
 export const updateData = async (endpoint, payload) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/${endpoint}`, payload);   
+    const response = await axios.put(`${API_BASE_URL}/${endpoint}`, payload);
     if (!response.data.flag) {
       Swal.fire({
-        title: 'Error!',
-        text: response.data.message || 'An error occurred while updating the data.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          response.data.message || "An error occurred while updating the data.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
       return response.data;
     }
-    return response.data;  
+    return response.data;
   } catch (error) {
-    console.error('PUT request error:', error);
+    console.error("PUT request error:", error);
     if (error.response) {
       Swal.fire({
-        title: 'Error!',
-        text: error.response.data.message || 'An error occurred while making the request.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          error.response.data.message ||
+          "An error occurred while making the request.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else if (error.request) {
       Swal.fire({
-        title: 'Error!',
-        text: 'No response received from the server. Please check your network connection.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text: "No response received from the server. Please check your network connection.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else {
       Swal.fire({
-        title: 'Error!',
+        title: "Error!",
         text: `Unexpected error: ${error.message}`,
-        icon: 'error',
-        confirmButtonText: 'OK'
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
     throw error;
@@ -119,39 +127,41 @@ export const deleteData = async (endpoint) => {
     const response = await axios.delete(`${API_BASE_URL}/${endpoint}`);
     if (!response.data.flag) {
       Swal.fire({
-        title: 'Error!',
-        text: response.data.message || 'An error occurred while deleting the data.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          response.data.message || "An error occurred while deleting the data.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
       return response.data;
     }
-    return response.data;    
+    return response.data;
   } catch (error) {
-    console.error('DELETE request error:', error);
+    console.error("DELETE request error:", error);
     if (error.response) {
       Swal.fire({
-        title: 'Error!',
-        text: error.response.data.message || 'An error occurred while making the request.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text:
+          error.response.data.message ||
+          "An error occurred while making the request.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else if (error.request) {
       Swal.fire({
-        title: 'Error!',
-        text: 'No response received from the server. Please check your network connection.',
-        icon: 'error',
-        confirmButtonText: 'OK'
+        title: "Error!",
+        text: "No response received from the server. Please check your network connection.",
+        icon: "error",
+        confirmButtonText: "OK",
       });
     } else {
       Swal.fire({
-        title: 'Error!',
+        title: "Error!",
         text: `Unexpected error: ${error.message}`,
-        icon: 'error',
-        confirmButtonText: 'OK'
+        icon: "error",
+        confirmButtonText: "OK",
       });
     }
     throw error;
   }
 };
-

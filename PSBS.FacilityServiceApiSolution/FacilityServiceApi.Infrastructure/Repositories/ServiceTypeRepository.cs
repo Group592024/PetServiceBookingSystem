@@ -74,13 +74,13 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                     serviceType.isDeleted = true;
                     context.ServiceType.Update(serviceType);
 
-                    serviceType.updateAt = DateTime.Now; 
+                    serviceType.updateAt = DateTime.Now;
 
                     foreach (var service in relatedServices)
                     {
                         service.isDeleted = true;
                         context.Service.Update(service);
-                        service.updateAt = DateTime.Now;  
+                        service.updateAt = DateTime.Now;
                     }
 
                     await context.SaveChangesAsync();
@@ -99,7 +99,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             try
             {
                 var serviceTypes = await context.ServiceType
-                                                .ToListAsync();
+                                                .Include(p => p.Services).ToListAsync();
                 return serviceTypes ?? new List<ServiceType>();
             }
             catch (Exception ex)

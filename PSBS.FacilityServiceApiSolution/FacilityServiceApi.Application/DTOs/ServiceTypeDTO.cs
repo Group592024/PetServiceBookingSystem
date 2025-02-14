@@ -1,4 +1,6 @@
 ﻿
+using FacilityServiceApi.Domain.Entities;
+
 namespace FacilityServiceApi.Application.DTOs
 {
     public record ServiceTypeDTO
@@ -9,6 +11,8 @@ namespace FacilityServiceApi.Application.DTOs
         public DateTime? createAt { get; set; }
         public DateTime updateAt { get; set; }
         public bool? isDeleted { get; set; }
+
+        public virtual ICollection<Service> Services { get; set; }
 
     }
 }

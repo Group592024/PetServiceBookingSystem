@@ -33,6 +33,10 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("account_Id");
 
+                    b.Property<string>("BookingCode")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("booking_Code");
+
                     b.Property<DateTime>("BookingDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("bookingDate");
@@ -45,12 +49,11 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("bookingType_Id");
 
-                    b.Property<DateTime>("CreateAt")
+                    b.Property<DateTime?>("CreateAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("createAt");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("notes");
 
@@ -58,7 +61,7 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("paymentType_Id");
 
-                    b.Property<Guid>("PointRuleId")
+                    b.Property<Guid?>("PointRuleId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("pointRule_Id");
 
@@ -66,11 +69,11 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("totalAmount");
 
-                    b.Property<DateTime>("UpdateAt")
+                    b.Property<DateTime?>("UpdateAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("updatedAt");
 
-                    b.Property<Guid>("VoucherId")
+                    b.Property<Guid?>("VoucherId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("voucher_Id");
 
@@ -109,6 +112,62 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasKey("BookingStatusId");
 
                     b.ToTable("BookingStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            BookingStatusId = new Guid("050d53c5-c35b-4823-8bc9-a4e70bbdef19"),
+                            BookingStatusName = "Pending",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("bdbecd97-9f44-45ed-9dcc-b60e50ff8141"),
+                            BookingStatusName = "Processing",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("83b1f3fb-0426-4854-b5c3-f7f1b5d046a4"),
+                            BookingStatusName = "Cancelled",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("9133e99e-978a-43f1-a37c-1b0e9e15d369"),
+                            BookingStatusName = "Confirmed",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("ac1c0ebd-0226-4b58-aaa0-244431097a48"),
+                            BookingStatusName = "Checked in",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("6994dbd9-afd9-4a25-9075-9704dc6e7690"),
+                            BookingStatusName = "Checked out",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("20fc00cc-31ad-42bc-a919-45743533f221"),
+                            BookingStatusName = "Completed",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("e669fb8d-ff35-4978-a756-d8ad546ebc84"),
+                            BookingStatusName = "Refunded",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingStatusId = new Guid("82126732-4938-41de-ae43-91f6bb013e41"),
+                            BookingStatusName = "Rejected",
+                            isDeleted = false
+                        });
                 });
 
             modelBuilder.Entity("ReservationApi.Domain.Entities.BookingType", b =>
@@ -129,6 +188,20 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasKey("BookingTypeId");
 
                     b.ToTable("BookingTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            BookingTypeId = new Guid("fbc2bb15-77f2-4216-a25e-070992b3ea56"),
+                            BookingTypeName = "Service",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            BookingTypeId = new Guid("c778bfec-6790-41d7-8cb4-fe5c61afe4b0"),
+                            BookingTypeName = "Hotel",
+                            isDeleted = false
+                        });
                 });
 
             modelBuilder.Entity("ReservationApi.Domain.Entities.PaymentType", b =>
@@ -149,6 +222,20 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasKey("PaymentTypeId");
 
                     b.ToTable("PaymentTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentTypeId = new Guid("dd2346de-20e4-4f95-a130-4dd3cac618f1"),
+                            PaymentTypeName = "VNPay",
+                            isDeleted = false
+                        },
+                        new
+                        {
+                            PaymentTypeId = new Guid("01b6b105-480a-46d3-bdf5-78a6078b33a7"),
+                            PaymentTypeName = "COD",
+                            isDeleted = false
+                        });
                 });
 
             modelBuilder.Entity("ReservationApi.Domain.Entities.PointRule", b =>
@@ -192,9 +279,7 @@ namespace ReservationApi.Infrastructure.Data.Migrations
 
                     b.HasOne("ReservationApi.Domain.Entities.PointRule", "PointRule")
                         .WithMany("Bookings")
-                        .HasForeignKey("PointRuleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PointRuleId");
 
                     b.Navigation("BookingStatus");
 

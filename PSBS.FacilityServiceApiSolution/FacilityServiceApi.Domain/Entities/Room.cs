@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace FacilityServiceApi.Domain.Entities
 {
@@ -20,7 +21,10 @@ namespace FacilityServiceApi.Domain.Entities
         public bool isDeleted { get; set; }
         [Column("room_image")]
         public string roomImage { get; set; }
+        [Column("has_camera")]
+        public bool hasCamera { get; set; }
         public virtual RoomType? RoomType { get; set; }
+        [JsonIgnore]
         public virtual ICollection<RoomHistory>? RoomHistories { get; set; }
     }
 }
