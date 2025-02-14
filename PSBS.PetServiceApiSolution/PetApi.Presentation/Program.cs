@@ -10,6 +10,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructureService(builder.Configuration);
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5010); 
+});
 
 var app = builder.Build();
 

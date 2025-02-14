@@ -200,8 +200,8 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4542), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4568) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6862), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6876) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6879), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6880) }
                 });
 
             migrationBuilder.CreateIndex(

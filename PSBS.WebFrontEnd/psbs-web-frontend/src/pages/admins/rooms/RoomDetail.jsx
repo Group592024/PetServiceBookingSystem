@@ -100,16 +100,6 @@ const RoomDetail = () => {
                                     />
                                 </div>
 
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Has Camera:</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={detail.hasCamera}
-                                        disabled
-                                        className="w-6 h-6 bg-gray-200"
-                                    />
-                                </div>
-
                                 <div className="mb-3 space-y-2">
                                     <label className="font-bold text-lg text-gray-500">Description:</label>
                                     <textarea

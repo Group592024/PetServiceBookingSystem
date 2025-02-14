@@ -112,12 +112,6 @@ const RoomList = () => {
                                 'success'
                             );
                             fetchDataFunction();
-                            setData((prevData) => {
-                                if (prevData.length === 1) {
-                                    return []; 
-                                }
-                               
-                            });
                         } else {
                             Swal.fire(
                                 'Error!',

@@ -12,8 +12,8 @@ using PetApi.Infrastructure.Data;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PetDbContext))]
-    [Migration("20250124062018_init")]
-    partial class init
+    [Migration("20250213090033_1")]
+    partial class _1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,10 +36,6 @@ namespace PetApi.Infrastructure.Data.Migrations
 
                     b.Property<DateTime>("Date_Of_Birth")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Health_Number")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDelete")
                         .HasColumnType("bit");

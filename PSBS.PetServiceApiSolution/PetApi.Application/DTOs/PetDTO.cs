@@ -24,7 +24,6 @@ namespace PetApi.Application.DTOs
         public string petFurType { get; set; }
         public string petFurColor { get; set; }
 
-        public string? healthNumber { get; set; }
         public bool? isDelete { get; set; }
 
         [Required]

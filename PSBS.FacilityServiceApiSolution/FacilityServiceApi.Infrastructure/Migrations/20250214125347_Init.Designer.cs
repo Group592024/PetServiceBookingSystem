@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FacilityServiceApi.Infrastructure.Migrations
 {
     [DbContext(typeof(FacilityServiceDbContext))]
-    [Migration("20250213150253_Init")]
+    [Migration("20250214125347_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -335,20 +335,20 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4542),
+                            createAt = new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6862),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4568)
+                            updateAt = new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6876)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573),
+                            createAt = new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6879),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 2, 13, 22, 2, 50, 751, DateTimeKind.Local).AddTicks(4573)
+                            updateAt = new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6880)
                         });
                 });
 
