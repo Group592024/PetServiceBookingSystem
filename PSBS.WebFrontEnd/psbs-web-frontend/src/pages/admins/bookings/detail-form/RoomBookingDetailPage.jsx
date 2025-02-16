@@ -103,11 +103,19 @@ const RoomBookingDetailPage = () => {
             });
           }
         } catch (error) {
-          Swal.fire({
-            title: "Error!",
-            text: "An error occurred while cancelling the booking.",
-            icon: "error",
-          });
+          if (error.response) {
+            Swal.fire(
+              "Failed!",
+              error.response.data.message || "Could not update status.",
+              "error"
+            );
+          } else {
+            Swal.fire(
+              "Error!",
+              "An error occurred while updating the status.",
+              "error"
+            );
+          }
         }
       }
     });
@@ -137,16 +145,16 @@ const RoomBookingDetailPage = () => {
       } else {
         Swal.fire(
           "Failed!",
-          response.data.message || "Could not update status.",
+          "Could not update status.",
           "error"
         );
       }
     } catch (error) {
-      Swal.fire(
-        "Error!",
-        "An error occurred while updating the status.",
-        "error"
-      );
+      if (error.response) {
+        Swal.fire("Failed!", error.response.data.message || "Could not update status.", "error");
+      } else {
+        Swal.fire("Error!", "An error occurred while updating the status.", "error");
+      }
     }
   };
 

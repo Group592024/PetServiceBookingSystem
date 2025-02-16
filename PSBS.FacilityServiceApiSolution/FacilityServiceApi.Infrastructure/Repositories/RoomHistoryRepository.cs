@@ -53,5 +53,25 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             var bookingRoomHistories = await context.RoomHistories.Where(i => i.BookingId == id).ToListAsync();
             return bookingRoomHistories;
         }
+
+        public async Task<Response> UpdateAsync(RoomHistory entity)
+        {
+            try
+            {
+                var existingEntity = await context.RoomHistories.FirstOrDefaultAsync(h => h.RoomHistoryId ==  entity.RoomHistoryId);
+                if(existingEntity == null)
+                {
+                    return new Response(false, "Cannot update room history due to errors");
+                }
+                var currentEntity = context.RoomHistories.Update(entity).Entity;
+                await context.SaveChangesAsync();
+                    return new Response(true, "Update room history successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occured update new room history");
+            }
+        }
     }
 }

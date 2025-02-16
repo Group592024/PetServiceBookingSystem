@@ -1,13 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2"; // Import SweetAlert2
-import Sidebar from "../../../../components/sidebar/Sidebar";
-import Navbar from "../../../../components/navbar/Navbar";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
+import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 
 const CustomerRoomBookingDetail = () => {
-  const sidebarRef = useRef(null);
   const { bookingId } = useParams();
   const [booking, setBooking] = useState(null);
   const [roomHistory, setRoomHistory] = useState([]);
@@ -118,9 +116,8 @@ const CustomerRoomBookingDetail = () => {
 
   return (
     <div>
-      <Sidebar ref={sidebarRef} />
-      <div className="content">
-        <Navbar sidebarRef={sidebarRef} />
+      <div>
+        <NavbarCustomer />
         <div className="container mx-auto p-4">
           <h2 className="text-2xl font-bold mb-4 text-center">
             Room Booking Details
