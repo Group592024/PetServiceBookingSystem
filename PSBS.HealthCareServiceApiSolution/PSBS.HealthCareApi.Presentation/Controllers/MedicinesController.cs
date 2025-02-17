@@ -68,7 +68,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             }
 
             var treatment = await _context.Treatments.FirstOrDefaultAsync(t => t.treatmentId == medicine.treatmentId && !t.isDeleted);
-            MedicineDetailDTO detailDTO = new MedicineDetailDTO(medicine.medicineId, treatment.treatmentName, medicine.medicineName,medicine.medicineImage);
+            MedicineDetailDTO detailDTO = new MedicineDetailDTO(medicine.medicineId, treatment.treatmentName, medicine.medicineName, medicine.medicineImage);
             return Ok(new Response(true, "The medicine retrieved successfully")
             {
                 Data = detailDTO
@@ -83,7 +83,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The medicine requested not found"));
             }
-            var (medicine,_) = MedicineConversion.FromEntity(existingMedicine, null!);
+            var (medicine, _) = MedicineConversion.FromEntity(existingMedicine, null!);
             return Ok(new Response(true, "The medicine retrieved successfully")
             {
                 Data = medicine
@@ -97,12 +97,13 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             ModelState.Remove(nameof(MedicineDTO.medicineId));
             if (creattingMedicine.imageFile == null)
             {
-                ModelState.AddModelError("imageFile", "Please upload a image for medicine");
+                ModelState.AddModelError("imageFile", "Please upload an image for medicine");
             }
             if (creattingMedicine.treatmentId == null)
             {
                 ModelState.AddModelError("treatmentId", "Please enter a treatment for medicine");
             }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(new Response(false, "Fail input") { Data = ModelState });
@@ -127,10 +128,14 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
                 imagePath = $"/ImageMedicines/{fileName}";
             }
+
             var medicine = MedicineConversion.ToEntity(creattingMedicine, imagePath);
+
             var response = await _medicineInterface.CreateAsync(medicine);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
+
+
 
         // PUT <MedicinesController>/5
         [HttpPut]
@@ -185,14 +190,14 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         public async Task<ActionResult<Response>> DeleteMedicine(Guid id)
         {
             var existingMedicine = await _medicineInterface.GetByIdAsync(id);
-            if(existingMedicine == null)
+            if (existingMedicine == null)
             {
                 return NotFound(new Response(false, "The medicine is not found!"));
             }
             var medicineDeleteState = existingMedicine.isDeleted;
             var medicineImagePath = existingMedicine.medicineImage;
             var response = await _medicineInterface.DeleteAsync(existingMedicine);
-            if(medicineDeleteState &&  response.Flag)
+            if (medicineDeleteState && response.Flag)
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), medicineImagePath.TrimStart('/'));
 

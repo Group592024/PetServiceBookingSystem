@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 namespace PSBS.HealthCareApi.Application.DTOs
 {
     public record PetHealthBookDTO(
-     Guid healthBookId,
-     [Required] Guid bookingId ,
-     Guid medicineId ,
-     DateTime visitDate,
-     DateTime? nextVisitDate,
-     [Required] string performBy,
-     DateTime createdAt,
-     DateTime? updatedAt,
-     bool isDeleted
-     );
+      Guid? healthBookId,
+      [Required] Guid bookingId,
+      DateTime visitDate,
+      DateTime? nextVisitDate,
+      [Required] string performBy,
+      DateTime createdAt,
+      DateTime? updatedAt,
+      bool isDeleted,
+      List<Guid> medicineIds
+      );
 }

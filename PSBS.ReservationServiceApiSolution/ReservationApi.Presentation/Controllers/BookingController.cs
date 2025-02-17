@@ -48,27 +48,27 @@ namespace ReservationApi.Presentation.Controllers
 
         // POST api/<BookingStatusController>
         [HttpPost]
-        public async Task<ActionResult<Response>> CreateBooking([FromBody] BookingDTO booking)
+        public async Task<ActionResult<Response>> CreateBooking([FromBody] AddBookingDTO addBookingDTO)
         {
             // CHECK model state is all data annotations are passed
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             // convert to entity to DT
-            var getEntity = BookingConversion.ToEntity(booking);
+            var getEntity = BookingConversion.ToEntityForCreate(addBookingDTO);
             var response = await bookingInterface.CreateAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
 
         // PUT api/<BookingStatusController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Response>> UpdateBooking([FromBody] BookingDTO booking)
+        public async Task<ActionResult<Response>> UpdateBooking([FromBody] AddBookingDTO addBookingDTO)
         {
 
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             // convert to entity to DT         
-            var getEntity = BookingConversion.ToEntity(booking);
+            var getEntity = BookingConversion.ToEntityForCreate(addBookingDTO);
             var response = await bookingInterface.UpdateAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }

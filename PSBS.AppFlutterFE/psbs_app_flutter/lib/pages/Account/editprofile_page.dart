@@ -26,7 +26,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   DateTime? dob;
   File? profileImage;
   String? imagePreview;
-  
+  Map<String, dynamic>? account;
   get filename => null;
 
   @override
@@ -49,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (accountId.isEmpty) return;
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://192.168.1.17:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -64,9 +64,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
           dob = data['accountDob'] != null
               ? DateTime.parse(data['accountDob'])
               : null;
-          imagePreview = data['accountImage'] != null
-              ? 'http://localhost:5000/api/Account/loadImage?filename=$filename'
-              : null;
+
+          // Sử dụng NetworkImage như trên trang ProfilePage
+          if (response.statusCode == 200) {
+            final data = jsonDecode(response.body);
+            setState(() {
+              account = data;
+              if (account?['accountImage'] != null) {
+                fetchImage(account?['accountImage']);
+              }
+            });
+          } else {
+            print("Lỗi khi lấy dữ liệu tài khoản: ${response.statusCode}");
+          }
         });
       } else {
         _showErrorDialog('Failed to load account data.');
@@ -76,15 +86,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<void> fetchImage(String filename) async {
+    if (filename.isEmpty) {
+      print("Lỗi: Filename rỗng.");
+      return;
+    }
+
+    try {
+      final imageResponse = await http.get(
+        Uri.parse(
+            'http://192.168.1.17:5000/api/Account/loadImage?filename=$filename'),
+      );
+
+      if (imageResponse.statusCode == 200) {
+        final imageData = jsonDecode(imageResponse.body);
+        if (imageData['flag']) {
+          setState(() {
+            imagePreview =
+                "data:image/png;base64,${imageData['data']['fileContents']}";
+          });
+        }
+      }
+    } catch (error) {
+      print("Lỗi khi lấy ảnh: $error");
+    }
+  }
+
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
     try {
       final request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://localhost:5000/api/Account'),
+        Uri.parse('http://192.168.1.17:5000/api/Account'),
       );
 
+      // Adding other fields
       request.fields['AccountTempDTO.AccountId'] = accountId;
       request.fields['AccountTempDTO.AccountName'] = nameController.text;
       request.fields['AccountTempDTO.AccountEmail'] = email ?? '';
@@ -96,12 +133,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
       request.fields['AccountTempDTO.AccountAddress'] = addressController.text;
       request.fields['AccountTempDTO.roleId'] = role;
 
-      // Send the profile image if a new image is picked
-      if (profileImage != null) {
+      // Upload the image if picked
+      if (profileImage != null && profileImage is File) {
+        // Kiểm tra file hình ảnh có hợp lệ không
+        print("Uploading image: ${profileImage!.path}");
         request.files.add(await http.MultipartFile.fromPath(
-          'UploadModel.ImageFile',
+          'UploadModel.ImageFile', // Kiểm tra trường này có đúng với phía server không
           profileImage!.path,
         ));
+      } else {
+        print("No valid image selected.");
       }
 
       final response = await request.send();
@@ -127,8 +168,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (pickedFile != null) {
       setState(() {
         profileImage = File(pickedFile.path);
-        imagePreview = null; // Reset image preview when selecting a new image
+        imagePreview = null;
       });
+      print("Selected image: ${pickedFile.path}");
+    } else {
+      print("No image selected.");
     }
   }
 
@@ -156,7 +200,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              Navigator.of(context).pop(
+                  true); // Quay về trang Profile và truyền kết quả thành công
+            },
             child: const Text('OK'),
           ),
         ],
@@ -169,10 +217,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Edit Profile'),
+        title: Text('Profile',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black),
+        iconTheme: IconThemeData(color: Colors.black),
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -195,10 +246,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       child: CircleAvatar(
                         radius: 80,
                         backgroundImage: imagePreview != null
-                            ? NetworkImage(imagePreview!)
+                            ? NetworkImage(
+                                imagePreview!) // Nếu có URL ảnh, dùng NetworkImage
                             : null,
                         child: imagePreview == null
-                            ? Icon(Icons.person, size: 80, color: Colors.grey)
+                            ? Icon(Icons.person,
+                                size: 80,
+                                color: Colors
+                                    .grey) // Nếu không có ảnh, hiển thị icon mặc định
                             : null,
                       ),
                     ),

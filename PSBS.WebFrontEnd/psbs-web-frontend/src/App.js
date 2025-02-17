@@ -153,6 +153,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+           <Route
+            path="/detailcus/:healthBookId"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookDetailCus />
+              </ProtectedRoute>
+            }
+          />
+            <Route
+            path="/list"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookListCus />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/account"
             element={

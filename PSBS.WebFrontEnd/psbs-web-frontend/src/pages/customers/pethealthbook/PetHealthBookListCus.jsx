@@ -10,74 +10,82 @@ const PetHealthBookListCus = () => {
   const [pets, setPets] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
   const fetchPetHealthBooks = useCallback(async () => {
     try {
-      const [petsRes, medicinesRes, treatmentsRes, bookingsRes] = await Promise.all([
+      const accountId = sessionStorage.getItem("accountId");
+      if (!accountId) {
+        throw new Error("No accountId found in sessionStorage");
+      }
+      const [petHealthRes, medicinesRes, bookingsRes, petsRes] = await Promise.all([
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
-        fetch("http://localhost:5003/api/Treatment"),
-        fetch("http://localhost:5115/api/Booking"),
+        fetch("https://localhost:5201/api/Booking"),
+        fetch("http://localhost:5010/api/pet"),
       ]);
-
-      const [petsData, medicinesData, bookingsData] = await Promise.all([
-        petsRes.json(),
-        medicinesRes.json(),
-        bookingsRes.json(),
-      ]);
-      console.log(petsData);
-      const petsWithDetails = await Promise.all(petsData.data.map(async (pet) => {
-        const booking = bookingsData.data.find((b) => b.bookingId === pet.bookingId);
-        const medicine = medicinesData.data.find((m) => m.medicineId === pet.medicineId);
-        const performBy = pet ? pet.performBy : "Unknown";
-        const createdAt = pet ? pet.createdAt : "Unknown";
-        const medicineName = medicine ? medicine.medicineName : "No Medicine";
-
+      if (!petHealthRes.ok) throw new Error(`Failed to fetch PetHealthBook: ${petHealthRes.status}`);
+      if (!medicinesRes.ok) throw new Error(`Failed to fetch Medicines: ${medicinesRes.status}`);
+      if (!bookingsRes.ok) throw new Error(`Failed to fetch Booking: ${bookingsRes.status}`);
+      if (!petsRes.ok) throw new Error(`Failed to fetch Pet: ${petsRes.status}`);
+      const petHealthData = await petHealthRes.json();
+      const medicinesData = await medicinesRes.json();
+      const bookingsData = await bookingsRes.json();
+      const petsData = await petsRes.json();
+      const petHealthArray = Array.isArray(petHealthData.data) ? petHealthData.data : [];
+      const medicinesArray = Array.isArray(medicinesData.data) ? medicinesData.data : [];
+      const petsArray = Array.isArray(petsData.data) ? petsData.data : [];
+      const bookingsArray = Array.isArray(bookingsData.data) ? bookingsData.data : [];
+      const bookingIdToAccountIdMap = {};
+      bookingsArray.forEach((booking) => {
+        if (booking.bookingId && booking.accountId) {
+          bookingIdToAccountIdMap[booking.bookingId] = booking.accountId;
+        }
+      });
+      const petHealthFiltered = petHealthArray.filter(
+        (health) => bookingIdToAccountIdMap[health.bookingId] === accountId
+      );
+      const userPets = petsArray.filter((pet) => pet.accountId === accountId);
+      const petsWithDetails = petHealthFiltered.map((petHealth) => {
+        const booking = bookingsArray.find((b) => b.bookingId === petHealth.bookingId);
+        const petInfo = petsArray.find((p) => p.accountId === booking?.accountId);
+        const medicineIds = Array.isArray(petHealth.medicineIds) ? petHealth.medicineIds : [];
+        const medicines = medicinesArray.filter((m) => medicineIds.includes(m.medicineId));
         return {
-          ...pet,
-          createdAt,
-          medicineName,
-          performBy,
+          ...petHealth,
+          petName: petInfo?.petName || "Unknown",
+          dateOfBirth: petInfo?.dateOfBirth ? moment(petInfo.dateOfBirth).format("DD/MM/YYYY") : "Unknown",
+          petImage: petInfo?.petImage || "",
+          medicineNames: medicines.length > 0 ? medicines.map(m => m.medicineName).join(", ") : "No Medicine",
         };
-      }));
-
+      });
       setPets(petsWithDetails);
-
-
-
-      setPets(petsWithDetails);
-      setMedicines(medicinesData.data || []);
-
+      setMedicines(medicinesArray);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      Swal.fire("Error", "Failed to load data. Please try again later.", "error");
+      Swal.fire("Error", error.message, "error");
     }
   }, []);
 
   useEffect(() => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
-
   const filteredPets = pets.filter((pet) => {
     const query = searchQuery.toLowerCase();
     const isValidDate = moment(searchQuery, "DD/MM/YYYY", true).isValid();
-    const petDate = moment(pet.createdAt).format("DD/MM/YYYY").toLowerCase(); 
-  
+    const dateOfBirth = pet.createdAt ? moment(pet.createdAt).format("DD/MM/YYYY").toLowerCase() : "";
     return (
       !searchQuery ||
       (pet.performBy && pet.performBy.toLowerCase().includes(query)) ||
-      (pet.medicineName && pet.medicineName.toLowerCase().includes(query)) ||
-      (isValidDate && petDate.includes(query)) 
+      (pet.medicineNames && pet.medicineNames.toLowerCase().includes(query)) ||
+      (isValidDate && dateOfBirth.includes(query))
     );
   });
-  
-
-
   const formatDate = (dateString) => {
-    if (!dateString) return "";
-    return moment(dateString).format("DD-MM-YYYY");
+    if (!dateString) return "Unknown";
+    const date = moment(dateString, "DD/MM/YYYY", true);
+    if (!date.isValid()) {
+      return "Invalid Date";
+    }
+    return date.format("DD/MM/YYYY");
   };
-
   return (
     <div className="flex h-screen bg-dark-grey-100">
       <div className="w-full">
@@ -91,23 +99,26 @@ const PetHealthBookListCus = () => {
                 <div className="w-[600px] h-[600px] bg-white shadow-md rounded-md p-6">
                   <div className="flex flex-col items-center">
                     <div className="w-[300px] h-[300px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mb-4">
-                      {filteredPets[0].petImage ? (
-                        <img src={filteredPets[0].petImage} alt={filteredPets[0].petName} className="w-full h-full object-cover" />
+                      {filteredPets[0]?.petImage ? (
+                        <img
+                          src={`http://localhost:5010${filteredPets[0].petImage}`}
+                          alt={filteredPets[0].petName || "Pet Image"}
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <span className="text-gray-500">No Image</span>
                       )}
                     </div>
+
                     <div className="text-center">
-                      <h3 className="text-xl font-semibold">Bull {filteredPets[0].petName}</h3>
-                      <p className="text-md text-gray-600">17/02/2024 {formatDate(filteredPets[0].petDob)}</p>
+                      <h3 className="text-xl font-semibold">{filteredPets[0].petName}</h3>
+                      <p className="text-md text-gray-600">{formatDate(filteredPets[0].dateOfBirth)}</p>
                     </div>
                   </div>
                 </div>
 
               )}
             </div>
-
-
             {/* Right Column - Pet Health Book List */}
             <form className="w-full sm:w-2/3 bg-white shadow-md rounded-md p-6">
               {/* Search Form */}
@@ -149,7 +160,7 @@ const PetHealthBookListCus = () => {
               <div className="w-full space-y-6">
                 {filteredPets.map((pet) => (
                   <div key={pet.healthBookId} className="flex justify-between items-center bg-gray-600 shadow-md rounded-md p-4">
-                    <div className="text-sm text-white truncate w-1/4">{pet.medicineName}</div>
+                    <div className="text-sm text-white truncate w-1/4">{pet.medicineNames}</div>
                     <div className="text-sm text-white truncate w-1/4">{pet.performBy}</div>
                     <div className="text-sm text-white truncate w-1/4">
                       {moment(pet.createdAt).format("DD/MM/YYYY")}

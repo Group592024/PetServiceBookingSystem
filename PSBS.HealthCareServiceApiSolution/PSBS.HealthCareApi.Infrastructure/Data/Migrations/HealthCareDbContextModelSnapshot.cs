@@ -73,9 +73,10 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                         .HasColumnType("bit")
                         .HasColumnName("isDeleted");
 
-                    b.Property<Guid>("medicineId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("medicine_id");
+                    b.Property<string>("medicineIds")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("medicine_Ids");
 
                     b.Property<DateTime?>("nextVisitDate")
                         .HasColumnType("datetime2")
@@ -95,9 +96,6 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                         .HasColumnName("visit_Date");
 
                     b.HasKey("healthBookId");
-
-                    b.HasIndex("medicineId")
-                        .IsUnique();
 
                     b.ToTable("PetHealthBook");
                 });
@@ -123,6 +121,21 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                     b.ToTable("Treatment");
                 });
 
+            modelBuilder.Entity("PetHealthBookMedicine", b =>
+                {
+                    b.Property<Guid>("healthBookId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("medicineId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("healthBookId", "medicineId");
+
+                    b.HasIndex("medicineId");
+
+                    b.ToTable("PetHealthBookMedicine");
+                });
+
             modelBuilder.Entity("PSBS.HealthCareApi.Domain.Medicine", b =>
                 {
                     b.HasOne("PSBS.HealthCareApi.Domain.Treatment", "Treatment")
@@ -134,20 +147,19 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                     b.Navigation("Treatment");
                 });
 
-            modelBuilder.Entity("PSBS.HealthCareApi.Domain.PetHealthBook", b =>
+            modelBuilder.Entity("PetHealthBookMedicine", b =>
                 {
-                    b.HasOne("PSBS.HealthCareApi.Domain.Medicine", "Medicine")
-                        .WithOne("PetHealthBook")
-                        .HasForeignKey("PSBS.HealthCareApi.Domain.PetHealthBook", "medicineId")
+                    b.HasOne("PSBS.HealthCareApi.Domain.PetHealthBook", null)
+                        .WithMany()
+                        .HasForeignKey("healthBookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Medicine");
-                });
-
-            modelBuilder.Entity("PSBS.HealthCareApi.Domain.Medicine", b =>
-                {
-                    b.Navigation("PetHealthBook");
+                    b.HasOne("PSBS.HealthCareApi.Domain.Medicine", null)
+                        .WithMany()
+                        .HasForeignKey("medicineId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PSBS.HealthCareApi.Domain.Treatment", b =>

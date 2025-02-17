@@ -28,44 +28,64 @@ const PetHealthBookList = () => {
 
   const fetchPetHealthBooks = useCallback(async () => {
     try {
-      const [petsRes, medicinesRes, treatmentsRes, bookingsRes] = await Promise.all([
+      const [petsRes, medicinesRes, treatmentsRes, bookingsRes, petDataRes, petBreedRes] = await Promise.all([
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
         fetch("http://localhost:5003/api/Treatment"),
         fetch("http://localhost:5115/api/Booking"),
+        fetch("http://localhost:5010/api/pet"),
+        fetch("http://localhost:5010/api/petBreed"),
       ]);
 
-      const [petsData, medicinesData, treatmentsData, bookingsData] = await Promise.all([
+      const [petHealthBooksData, medicinesData, treatmentsData, bookingsData, petsData, petBreedsData] = await Promise.all([
         petsRes.json(),
         medicinesRes.json(),
         treatmentsRes.json(),
         bookingsRes.json(),
+        petDataRes.json(),
+        petBreedRes.json(),
       ]);
-
-      // Log the fetched data
-      console.log("Fetched Pet Data:", petsData);
+      console.log("Fetched PetHealthBooks Data:", petHealthBooksData);
+      console.log("Fetched Pets Data:", petsData);
+      console.log("Fetched PetBreeds Data:", petBreedsData);
       console.log("Fetched Medicines Data:", medicinesData);
       console.log("Fetched Treatments Data:", treatmentsData);
       console.log("Fetched Bookings Data:", bookingsData);
 
-      const petsWithDetails = await Promise.all(petsData.data.map(async (pet) => {
+      const petsWithDetails = await Promise.all(petHealthBooksData.data.map(async (pet) => {
         const booking = bookingsData.data.find((b) => b.bookingId === pet.bookingId);
         const accountId = booking ? booking.accountId : null;
-
         const accountPhoneNumber = accountId ? await fetchAccountPhoneNumber(accountId) : "No Phone Number";
-        const medicine = medicinesData.data.find((m) => m.medicineId === pet.medicineId);
-        const treatment = treatmentsData.data.find((t) => t.treatmentId === medicine?.treatmentId);
-        const treatmentName = treatment ? treatment.treatmentName : "No Treatment Assigned";
-        const petName = pet.petName || "Temporary Pet Name";  // Gán tạm
-        const breed = pet.breed || "Temporary Breed";
+        console.log("Current PetHealthBook entry:", pet);
+        console.log("Extracted Account ID:", accountId);
+        // Lấy danh sách thuốc dựa trên danh sách medicineIds
+        const medicines = medicinesData.data.filter((m) => pet.medicineIds.includes(m.medicineId));
+        const medicineNames = medicines.length > 0 ? medicines.map(m => m.medicineName).join(", ") : "No Medicines Assigned";
+
+        // Lấy thông tin treatment từ thuốc (có thể có nhiều treatment)
+        const treatmentNames = [...new Set(medicines.map(m => {
+          const treatment = treatmentsData.data.find((t) => t.treatmentId === m.treatmentId);
+          return treatment ? treatment.treatmentName : null;
+        }).filter(Boolean))].join(", ") || "No Treatments Assigned";
+        const matchedPet = petsData.data.find((p) => p.accountId === accountId);
+        console.log("Matched Pet:", matchedPet);
+
+        const breed = matchedPet && matchedPet.petBreedId
+          ? petBreedsData.data.find(b => b.petBreedId === matchedPet.petBreedId)?.petBreedName || "Unknown Breed"
+          : "Unknown Breed";
+          console.log("Pet Breed ID:", matchedPet ? matchedPet.petBreedId : "No Pet Breed ID");
+          console.log("Fetched PetBreeds Data:", petBreedsData.data);
+
         return {
           ...pet,
           accountPhoneNumber,
-          treatmentName,
-          petName,  // Đảm bảo có giá trị petName tạm thời
-          breed,  // Đảm bảo có giá trị breed tạm thời
+          medicineNames,
+          treatmentNames,
+          petName: matchedPet ? matchedPet.petName : "Unknown Pet",
+          breed,
         };
       }));
+
 
       setPets(petsWithDetails);
       setMedicines(medicinesData.data || []);
@@ -186,7 +206,7 @@ const PetHealthBookList = () => {
     { field: "petName", headerName: "Pet Name", flex: 1 },
     { field: "accountPhoneNumber", headerName: "Owner's Phone", flex: 1 },
     { field: "breed", headerName: "Breed", flex: 1 },
-    { field: "treatmentName", headerName: "Treatment", flex: 1 },
+    { field: "treatmentNames", headerName: "Treatment", flex: 1 },
     {
       field: "createAt",
       headerName: "Date",
@@ -254,27 +274,27 @@ const PetHealthBookList = () => {
                   </svg>
                 </button>
               </form>
-                <button
-                  type="button"
-                  onClick={() => navigate("/add")}
-                  className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
+              <button
+                type="button"
+                onClick={() => navigate("/add")}
+                className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
+              >
+                <svg
+                  className="w-5 h-5 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  <svg
-                    className="w-5 h-5 mr-2"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  New
-                </button>
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                New
+              </button>
             </div>
 
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>

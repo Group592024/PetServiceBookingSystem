@@ -24,14 +24,15 @@ const PetHealthBookCreate = () => {
 
   const [bookings, setBookings] = useState([]);
   const [medicines, setMedicines] = useState([]);
-  const [notes, setNotes] = useState([]);
+  const [bookingCode, setbookingCode] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [bookingsResponse, medicinesResponse] = await Promise.all([
-          fetch("http://localhost:5115/api/Booking"),
-          fetch("http://localhost:5003/Medicines")
+          fetch("https://localhost:5201/api/Booking"),
+          fetch("http://localhost:5003/Medicines"),
+          fetch("http://localhost:5003/Pet")
         ]);
 
         if (!bookingsResponse.ok || !medicinesResponse.ok) {
@@ -44,9 +45,9 @@ const PetHealthBookCreate = () => {
         ]);
 
         if (bookingsData && bookingsData.data && Array.isArray(bookingsData.data)) {
-          const notesData = bookingsData.data.map((booking) => booking.notes);
+          const bookingCodeData = bookingsData.data.map((booking) => booking.bookingCode);
           
-          setNotes(notesData);
+          setbookingCode(bookingCodeData);
           setBookings(bookingsData.data);
           console.log("Bookings data:", bookingsData.data);
         } else {
@@ -80,7 +81,7 @@ const PetHealthBookCreate = () => {
   
     const newVisitDetails = {
       bookingId: visitDetails.bookingId,
-      medicineId: visitDetails.medicineId,
+      medicineIds: visitDetails.medicineId,
       visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
       nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
       performBy: visitDetails.performBy,
@@ -151,7 +152,7 @@ const PetHealthBookCreate = () => {
           <h2 className="mb-4 text-xl font-bold">Create Pet Health Book</h2>
 
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Booking</label>
+            <label className="block text-sm font-medium mb-1">Booking Code</label>
             <select
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
@@ -160,7 +161,7 @@ const PetHealthBookCreate = () => {
               <option value="">Select a Booking</option>
               {bookings.map((item, index) => (
                 <option key={index} value={item.bookingId}>
-                  {item.notes}
+                  {item.bookingCode}
                 </option>
               ))}
             </select>

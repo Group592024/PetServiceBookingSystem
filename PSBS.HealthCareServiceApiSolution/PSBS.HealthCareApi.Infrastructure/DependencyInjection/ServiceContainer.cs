@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSBS.HealthCareApi.Application.Interfaces;
@@ -25,6 +26,8 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             services.AddScoped<IMedicine, MedicineRepository>();
             services.AddScoped<ITreatment, TreatmentRepository>();
             services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
+            services.AddDbContext<HealthCareDbContext>(options =>
+        options.UseSqlServer(config.GetConnectionString("Default")));
             return services;
         }
 

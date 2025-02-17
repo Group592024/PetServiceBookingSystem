@@ -10,13 +10,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-{
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.WriteIndented = true;
-});
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.WriteIndented = true;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddDbContext<HealthCareDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
@@ -41,7 +43,6 @@ builder.Services.AddInfrastructureService(builder.Configuration);
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -54,7 +55,6 @@ app.UseStaticFiles(new StaticFileOptions
 });
 app.UseCors("AllowAllOrigins");
 app.UseAuthorization();
-
 
 app.MapControllers();
 
