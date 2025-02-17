@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace ReservationApi.Application.DTOs
 {
     public record RoomHistoryDTO
-    (
-     Guid roomHistoryId,
-     Guid petId,
-     Guid roomId,
-     Guid bookingId,
-     Guid? cameraId,
-     string status,
-     DateTime? checkInDate,
-     DateTime? checkOutDate,
-     DateTime bookingStartDate,
-     DateTime bookingEndDate,
-     bool bookingCamera
-    );
+    {
+        public Guid roomHistoryId { get; set; }
+        public Guid petId { get; set; }
+        public Guid roomId { get; set; }
+        public Guid bookingId { get; set; }
+        public Guid? cameraId { get; set; }
+        public string status { get; set; }
+        public DateTime? checkInDate { get; set; }
+        public DateTime? checkOutDate { get; set; }
+        public DateTime bookingStartDate { get; set; }
+        public DateTime bookingEndDate { get; set; }
+        public bool bookingCamera { get; set; }
+    }
 }

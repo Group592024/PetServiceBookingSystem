@@ -63,7 +63,10 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 {
                     return new Response(false, "Cannot update room history due to errors");
                 }
-                var currentEntity = context.RoomHistories.Update(entity).Entity;
+                existingEntity.Status = entity.Status;
+                existingEntity.CheckInDate = entity.CheckInDate;
+                existingEntity.CheckOutDate = entity.CheckOutDate;
+                var currentEntity = context.RoomHistories.Update(existingEntity).Entity;
                 await context.SaveChangesAsync();
                     return new Response(true, "Update room history successfully");
             }

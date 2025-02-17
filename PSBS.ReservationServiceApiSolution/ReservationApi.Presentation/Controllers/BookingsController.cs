@@ -515,6 +515,21 @@ namespace ReservationApi.Presentation.Controllers
                             LogExceptions.LogToConsole(errorResponse);
                         }
                     }
+                    room.checkInDate= DateTime.Now;
+                    LogExceptions.LogToConsole(room.ToString());
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(jsonResponse);
+                            return BadRequest(new Response(false, "Update room history check out date not success."));
+                        }
+                    }
                 }
             }
 
@@ -603,7 +618,24 @@ namespace ReservationApi.Presentation.Controllers
                             LogExceptions.LogToConsole(errorResponse);
                         }
                     }
+                    room.checkOutDate = DateTime.Now;
+                    LogExceptions.LogToConsole(room.ToString());
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories",room);
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(jsonResponse);
+                            return BadRequest(new Response(false, "Update room history check out date not success."));
+                        }
+                        
+                    }
                 }
+
 
                 //Point rule
                 //HttpClient _httpClient = new HttpClient();
