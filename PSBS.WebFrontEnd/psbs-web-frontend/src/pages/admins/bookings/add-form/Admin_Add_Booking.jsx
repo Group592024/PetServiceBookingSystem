@@ -9,6 +9,7 @@ import BookingRoomForm from "../../../../components/Booking/add-form/BookingRoom
 import BookingServiceForm from "../../../../components/Booking/add-form/BookingServiceForm";
 import BookingStyleStep from "../../../../components/Booking/add-form/BookingStyleStep";
 import { BookingContext } from "../../../../components/Booking/add-form/BookingContext";
+import Swal from "sweetalert2";
 
 const steps = [
   "Booking Type",
@@ -63,7 +64,7 @@ const Admin_Add_Booking = () => {
             name: "",
             address: "",
             phone: "",
-            note: "",
+            note: " ",
             paymentMethod: "",
           }));
         }
@@ -117,13 +118,21 @@ const Admin_Add_Booking = () => {
 
         // Check if start date is at least 1 hour from now
         if (selectedStartDateTime < fiveMinutesLater) {
-          alert("Booking start time must be at least 5 minutes from now.");
+          Swal.fire(
+                    "Failed!",
+                    `Booking start time must be at least 5 minutes from now.`,
+                    "error"
+                  );
           return;
         }
 
         // Check if end time is after the start time
         if (selectedStartDateTime >= selectedEndDateTime) {
-          alert("Booking end time must be after the start time.");
+          Swal.fire(
+            "Failed!",
+            `Booking end time must be after the start time.`,
+            "error"
+          );
           return;
         }
       }
@@ -131,7 +140,11 @@ const Admin_Add_Booking = () => {
 
     if (activeStep === 2 && selectedOption === "Service") {
       if (bookingServices.length === 0) {
-        alert("Please add at least one booking service.");
+        Swal.fire(
+          "Failed!",
+          `Please add at least one booking service`,
+          "error"
+        );
         return;
       }
 
@@ -143,14 +156,22 @@ const Admin_Add_Booking = () => {
           serviceData.price <= 0 ||
           !serviceData.serviceVariant
         ) {
-          alert("Please fill in all fields for each booking service.");
+          Swal.fire(
+            "Failed!",
+            `Please fill in all fields for each booking service`,
+            "error"
+          );
           return;
         }
       }
 
       // Check if booking date is selected and valid
       if (!bookingServicesDate) {
-        alert("Please select a booking date and time.");
+        Swal.fire(
+          "Failed!",
+          `Please select a booking date and time`,
+          "error"
+        );
         return;
       }
     }
@@ -192,7 +213,11 @@ const Admin_Add_Booking = () => {
           bookingServicesDate,
         };
       } else {
-        alert("Invalid booking type selected.");
+        Swal.fire(
+          "Failed!",
+          `Invalid booking type selected`,
+          "error"
+        );
         return;
       }
 
@@ -235,19 +260,18 @@ const Admin_Add_Booking = () => {
             console.log("VNPay API Response:", vnpayResult);
             
             if (vnpayResult.startsWith("http")) {
-              window.location.href = vnpayResult; // Redirect to VNPay
+              window.location.href = vnpayResult;
               return;
             } else {
               alert("VNPay payment failed!");
             }
           }
           window.location.href = "/admin/bookings";
-        } else {
-          throw new Error(result.message || "Failed to submit booking");
+        } else{
+          Swal.fire("Failed!", result.message || "Could not create booking.", "error");
         }
       } catch (error) {
-        console.error("Error submitting booking:", error);
-        alert("Failed to confirm booking.");
+          Swal.fire("Error!", "Failed to confirm booking", "error");
       }
     } else {
       setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));

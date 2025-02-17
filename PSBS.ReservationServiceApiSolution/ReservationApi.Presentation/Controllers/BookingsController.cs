@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PSPS.SharedLibrary.PSBSLogs;
@@ -10,6 +11,8 @@ using ReservationApi.Application.DTOs.Conversions;
 using ReservationApi.Application.Intefaces;
 using ReservationApi.Domain.Entities;
 using ReservationApi.Infrastructure.Data;
+using System.Drawing;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -32,12 +35,14 @@ namespace ReservationApi.Presentation.Controllers
         private readonly IBooking bookingInterface;
         private readonly ReservationServiceDBContext context;
         private readonly IConfiguration configuration;
-        public BookingsController(IBooking _bookingInterface, ReservationServiceDBContext _context, IVnpay vnPayservice, IConfiguration _configuration)
+        private readonly IPointRule pointRuleInterface;
+        public BookingsController(IBooking _bookingInterface, ReservationServiceDBContext _context, IVnpay vnPayservice, IConfiguration _configuration, IPointRule _pointRuleInterface)
         {
             vnpay = vnPayservice;
             configuration = _configuration;
             context = _context;
             bookingInterface = _bookingInterface;
+            pointRuleInterface = _pointRuleInterface;
             var tmnCode = configuration["Vnpay:TmnCode"];
             var hashSecret = configuration["Vnpay:HashSecret"];
             var baseUrl = configuration["Vnpay:BaseUrl"];
@@ -154,12 +159,62 @@ namespace ReservationApi.Presentation.Controllers
                     Console.WriteLine($"Camera: {room.Camera}");
                     Console.WriteLine("----------------------------");
                 }
+
+                //check booking confirmed
+                var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
+                var bookingConfirmedList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusConfirmed.BookingStatusId);
+                foreach (var room in bookingRequest.BookingRooms)
+                {
+                    foreach (var bookingroom in bookingConfirmedList)
+                    {
+                        List<RoomHistoryDTO> bookingroomDetail;
+                        using (HttpClient client = new HttpClient())
+                        {
+                            client.BaseAddress = new Uri("http://localhost:5023/api/");
+                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
+                            if (!roomHistoryResponse.IsSuccessStatusCode)
+                            {
+                                return BadRequest(new Response(false, "Invalid status transition."));
+                            }
+                            var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                            var responseObject = JObject.Parse(jsonResponse);
+
+                            bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                            string message = responseObject["message"]?.Value<string>() ?? "No message";
+
+                            var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+
+                            if (roomHistoryData == null || !roomHistoryData.Any())
+                            {
+                                return BadRequest(new { flag = false, message = "Invalid status transition." });
+                            }
+                            bookingroomDetail = roomHistoryData;
+                        }
+                        foreach (var roomHistory in bookingroomDetail)
+                        {
+                            if (room.Start >= roomHistory.bookingStartDate && room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                            if (room.Start >= roomHistory.bookingStartDate && room.Start <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                            if ( room.End >= roomHistory.bookingStartDate &&  room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                        }
+                    }
+                }
+
+                //create booking 
                 var bookingTypeRequest = await context.BookingTypes.Where(bt => bt.BookingTypeName.Contains("Hotel")).FirstOrDefaultAsync();
                 Console.WriteLine("BookingType Id" + bookingTypeRequest.BookingTypeId);
 
                 var bookingStatusRequest = await context.BookingStatuses.Where(bt => bt.BookingStatusName.Contains("Pending")).FirstOrDefaultAsync();
                 Console.WriteLine("BookingStatus Id" + bookingTypeRequest.BookingTypeId);
-
                 var createBookingDetail = new AddBookingDTO(bookingRequest.Customer.CusId, new Guid(bookingRequest.Customer.PaymentMethod), bookingRequest.VoucherId, bookingTypeRequest.BookingTypeId, bookingStatusRequest.BookingStatusId, Guid.Empty, bookingRequest.DiscountedPrice, bookingRequest.Customer.Note);
                 var createEntity = BookingConversion.ToEntityForCreate(createBookingDetail);
                 Console.WriteLine(createEntity.ToString());
@@ -364,10 +419,181 @@ namespace ReservationApi.Presentation.Controllers
             if (!statusOrder.Contains(request.Status) || booking.BookingStatusId == bookingCancel.BookingStatusId)
                 return BadRequest(new { flag = false, message = "Invalid status transition." });
 
+            if (request.Status.Contains("Confirmed"))
+            {
+                var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
+                var bookingConfirmedList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusConfirmed.BookingStatusId);
+                List<RoomHistoryDTO> roomHistoryDTOs;
+                using (HttpClient client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
+                    if (!roomHistoryResponse.IsSuccessStatusCode)
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(jsonResponse);
+
+                    bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                    string message = responseObject["message"]?.Value<string>() ?? "No message";
+
+                    var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+
+                    if (roomHistoryData == null || !roomHistoryData.Any())
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    roomHistoryDTOs = roomHistoryData;
+                }
+                foreach (var room in roomHistoryDTOs)
+                {
+                    foreach (var bookingroom in bookingConfirmedList)
+                    {
+                        List<RoomHistoryDTO> bookingroomDetail;
+                        using (HttpClient client = new HttpClient())
+                        {
+                            client.BaseAddress = new Uri("http://localhost:5023/api/");
+                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                            HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
+                            if (!roomHistoryResponse.IsSuccessStatusCode)
+                            {
+                                return BadRequest(new Response(false, "Invalid status transition."));
+                            }
+                            var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                            var responseObject = JObject.Parse(jsonResponse);
+
+                            bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                            string message = responseObject["message"]?.Value<string>() ?? "No message";
+
+                            var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+
+                            if (roomHistoryData == null || !roomHistoryData.Any())
+                            {
+                                return BadRequest(new { flag = false, message = "Invalid status transition." });
+                            }
+                            bookingroomDetail = roomHistoryData;
+                        }
+                        foreach (var roomHistory in bookingroomDetail)
+                        {
+                            if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                            if (room.bookingEndDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                            if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingStartDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
+                            {
+                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (request.Status == "Checked in")
+            {
+                List<RoomHistoryDTO> roomBookingHistory;
+                using (HttpClient client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
+                    if (!roomHistoryResponse.IsSuccessStatusCode)
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(jsonResponse);
+
+                    bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                    string message = responseObject["message"]?.Value<string>() ?? "No message";
+
+                    var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+
+                    if (roomHistoryData == null || !roomHistoryData.Any())
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    roomBookingHistory = roomHistoryData;
+                }
+
+                foreach (var room in roomBookingHistory)
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            return BadRequest(new Response(false, "Failed to retrieve room details."));
+                        }
+
+                        var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                        var responseObject = JObject.Parse(jsonResponse);
+
+                        bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                        if (!flag)
+                        {
+                            return BadRequest(new Response(false, responseObject["message"]?.Value<string>() ?? "Room not found."));
+                        }
+
+                        var roomDetail = responseObject["data"]?.ToObject<RoomDTO>();
+                        if (roomDetail == null)
+                        {
+                            return BadRequest(new Response(false, "Invalid room data."));
+                        }
+                        roomDetail.status = "In use";
+
+                        LogExceptions.LogToConsole(roomDetail.ToString());
+                        var formData = new MultipartFormDataContent();
+                        formData.Add(new StringContent(roomDetail.roomId.ToString()), "roomId");
+                        formData.Add(new StringContent(roomDetail.roomTypeId.ToString()), "roomTypeId");
+                        formData.Add(new StringContent(roomDetail.roomName), "roomName");
+                        formData.Add(new StringContent(roomDetail.description ?? ""), "description");
+                        formData.Add(new StringContent(roomDetail.status), "status");
+                        formData.Add(new StringContent(roomDetail.hasCamera.ToString()), "hasCamera");
+                        formData.Add(new StringContent(roomDetail.isDeleted.ToString()), "isDeleted");
+                        HttpResponseMessage response = await client.PutAsync("Room", formData);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            string errorResponse = await response.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(errorResponse);
+                        }
+                    }
+                    room.checkInDate = DateTime.Now;
+                    LogExceptions.LogToConsole(room.ToString());
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(jsonResponse);
+                            return BadRequest(new Response(false, "Update room history check out date not success."));
+                        }
+                    }
+                }
+            }
+
             var updatedBookingStatus = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains(request.Status));
             if (updatedBookingStatus == null) return BadRequest(new { flag = false, message = "Invalid status transition." });
             if (request.Status == "Checked out")
             {
+                var existPointRule = await pointRuleInterface.GetPointRuleActiveAsync();
+                if (existPointRule == null)
+                {
+                    return BadRequest(new { flag = false, message = "Set one point rule for booking" });
+                }
                 var bookingPaymentType = await context.PaymentTypes.FirstOrDefaultAsync(p => p.PaymentTypeId == booking.PaymentTypeId);
                 if (bookingPaymentType == null)
                 {
@@ -376,6 +602,113 @@ namespace ReservationApi.Presentation.Controllers
                 if (bookingPaymentType.PaymentTypeName.Contains("COD"))
                 {
                     booking.isPaid = true;
+                }
+                //check room status 
+                List<RoomHistoryDTO> roomBookingHistory;
+                using (HttpClient client = new HttpClient())
+                {
+                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                    HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
+                    if (!roomHistoryResponse.IsSuccessStatusCode)
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                    var responseObject = JObject.Parse(jsonResponse);
+
+                    bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                    string message = responseObject["message"]?.Value<string>() ?? "No message";
+
+                    var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+
+                    if (roomHistoryData == null || !roomHistoryData.Any())
+                    {
+                        return BadRequest(new Response(false, "Invalid status transition."));
+                    }
+                    roomBookingHistory = roomHistoryData;
+                }
+
+                foreach (var room in roomBookingHistory)
+                {
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            return BadRequest(new Response(false, "Failed to retrieve room details."));
+                        }
+
+                        var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                        var responseObject = JObject.Parse(jsonResponse);
+
+                        bool flag = responseObject["flag"]?.Value<bool>() ?? false;
+                        if (!flag)
+                        {
+                            return BadRequest(new Response(false, responseObject["message"]?.Value<string>() ?? "Room not found."));
+                        }
+
+                        var roomDetail = responseObject["data"]?.ToObject<RoomDTO>();
+                        if (roomDetail == null)
+                        {
+                            return BadRequest(new Response(false, "Invalid room data."));
+                        }
+                        roomDetail.status = "Free";
+
+                        LogExceptions.LogToConsole(roomDetail.ToString());
+                        var formData = new MultipartFormDataContent();
+                        formData.Add(new StringContent(roomDetail.roomId.ToString()), "roomId");
+                        formData.Add(new StringContent(roomDetail.roomTypeId.ToString()), "roomTypeId");
+                        formData.Add(new StringContent(roomDetail.roomName), "roomName");
+                        formData.Add(new StringContent(roomDetail.description ?? ""), "description");
+                        formData.Add(new StringContent(roomDetail.status), "status");
+                        formData.Add(new StringContent(roomDetail.hasCamera.ToString()), "hasCamera");
+                        formData.Add(new StringContent(roomDetail.isDeleted.ToString()), "isDeleted");
+                        HttpResponseMessage response = await client.PutAsync("Room", formData);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            string errorResponse = await response.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(errorResponse);
+                        }
+                    }
+                    room.checkOutDate = DateTime.Now;
+                    LogExceptions.LogToConsole(room.ToString());
+                    using (HttpClient client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                        HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
+                        if (!roomResponse.IsSuccessStatusCode)
+                        {
+                            var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
+                            LogExceptions.LogToConsole(jsonResponse);
+                            return BadRequest(new Response(false, "Update room history check out date not success."));
+                        }
+
+                    }
+                }
+
+                //Point rule
+                using (HttpClient client = new HttpClient())
+                {
+                    var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
+
+                    var requestUrl = $"http://localhost:5000/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+
+                    // Sending request to update user points
+                    var pointUpdateResponse = await client.PutAsync(requestUrl, null);
+
+                    if (!pointUpdateResponse.IsSuccessStatusCode)
+                    {
+                        var errorMessage = await pointUpdateResponse.Content.ReadAsStringAsync();
+                        LogExceptions.LogToConsole(errorMessage);
+                        return new BadRequestObjectResult(new Response(false, "Failed to update user points."));
+                    }
                 }
             }
             booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
@@ -401,6 +734,12 @@ namespace ReservationApi.Presentation.Controllers
 
             if (request.Status == "Completed")
             {
+                var existPointRule = await pointRuleInterface.GetPointRuleActiveAsync();
+                if (existPointRule == null)
+                {
+                    return BadRequest(new { flag = false, message = "Set one point rule for booking" });
+                }
+
                 var bookingPaymentType = await context.PaymentTypes.FirstOrDefaultAsync(p => p.PaymentTypeId == booking.PaymentTypeId);
                 if (bookingPaymentType == null)
                 {
@@ -409,6 +748,23 @@ namespace ReservationApi.Presentation.Controllers
                 if (bookingPaymentType.PaymentTypeName.Contains("COD"))
                 {
                     booking.isPaid = true;
+                }
+                //Point rule
+                using (HttpClient client = new HttpClient())
+                {
+                    var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
+
+                    var requestUrl = $"http://localhost:5000/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+
+                    // Sending request to update user points
+                    var pointUpdateResponse = await client.PutAsync(requestUrl, null);
+
+                    if (!pointUpdateResponse.IsSuccessStatusCode)
+                    {
+                        var errorMessage = await pointUpdateResponse.Content.ReadAsStringAsync();
+                        LogExceptions.LogToConsole(errorMessage);
+                        return new BadRequestObjectResult(new Response(false, "Failed to update user points."));
+                    }
                 }
             }
             booking.BookingStatusId = updatedBookingStatus.BookingStatusId;
@@ -504,7 +860,7 @@ namespace ReservationApi.Presentation.Controllers
                         return Redirect("http://localhost:3000/bookings?status=success");
                     }
 
-                    return Redirect("http://localhost:3000/bookings?status=failed"); 
+                    return Redirect("http://localhost:3000/bookings?status=failed");
                 }
                 catch (Exception ex)
                 {

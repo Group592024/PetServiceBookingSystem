@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
@@ -142,11 +142,11 @@ const RoomBookingDetailPage = () => {
         );
       }
     } catch (error) {
-      Swal.fire(
-        "Error!",
-        "An error occurred while updating the status.",
-        "error"
-      );
+      if (error.response) {
+        Swal.fire("Failed!", error.response.data.message || "Could not update status.", "error");
+      } else {
+        Swal.fire("Error!", "An error occurred while updating the status.", "error");
+      }
     }
   };
 
@@ -229,11 +229,11 @@ const RoomBookingDetailPage = () => {
                     <strong>Pet ID:</strong> {history.petId}
                   </p>
                   <p>
-                    <strong>Check-in Date:</strong>{" "}
+                    <strong>Booking Start Date:</strong>{" "}
                     {new Date(history.bookingStartDate).toLocaleDateString()}
                   </p>
                   <p>
-                    <strong>Check-out Date:</strong>{" "}
+                    <strong>Booking End Date:</strong>{" "}
                     {new Date(history.bookingEndDate).toLocaleDateString()}
                   </p>
                   <p>

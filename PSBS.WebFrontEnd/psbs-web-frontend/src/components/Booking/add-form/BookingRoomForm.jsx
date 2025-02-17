@@ -6,6 +6,8 @@ import axios from "axios";
 
 const BookingRoomForm = () => {
   const {
+    formData, 
+    setFormData,
     bookingRooms,
     setBookingRooms,
     voucherId,
@@ -94,6 +96,7 @@ const BookingRoomForm = () => {
         <div key={index} className="relative">
           <BookingRoomChoose
             bookingData={roomData}
+            data = {formData}
             onBookingDataChange={(newData) => {
               const updatedRooms = [...bookingRooms];
               updatedRooms[index] = newData;

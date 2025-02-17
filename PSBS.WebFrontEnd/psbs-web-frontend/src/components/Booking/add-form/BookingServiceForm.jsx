@@ -4,14 +4,10 @@ import { useBookingContext } from "./BookingContext";
 import axios from "axios";
 import { TextField, MenuItem } from "@mui/material";
 
-const fakePetsData = [
-  { petId: "1BFCD3F7-27AD-4415-9B1A-56F0248564E5", petName: "Max" },
-  { petId: "6AE2F8F6-5502-4CB2-A6CC-86B1A3142BF3", petName: "Buddy" },
-  { petId: "1EA82E00-00E8-4E28-AD68-C858B4D44888", petName: "Bella" },
-];
-
-const BookingServiceForm = ({ pets = fakePetsData }) => {
+const BookingServiceForm = () => {
   const {
+    formData, 
+    setFormData,
     bookingServices,
     setbookingServices,
     bookingServicesDate,
@@ -123,6 +119,7 @@ const BookingServiceForm = ({ pets = fakePetsData }) => {
       {bookingServices.map((serviceData, index) => (
         <div key={index} className="relative mb-6">
           <BookingServiceChoice
+          data = {formData}
             formData={serviceData}
             handleChange={(e) => {
               const { name, value } = e.target;
@@ -131,7 +128,6 @@ const BookingServiceForm = ({ pets = fakePetsData }) => {
               setbookingServices(updatedServices);
             }}
             services={services}
-            pets={pets}
           />
           <button onClick={() => setbookingServices(bookingServices.filter((_, i) => i !== index))} className="absolute top-0 right-0 mt-2 mr-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600">
             ✕

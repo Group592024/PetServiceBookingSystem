@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const BookingRoomChoose = ({ bookingData, onBookingDataChange }) => {
+const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
   const [rooms, setRooms] = useState([]);
   const [pets, setPets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,35 +16,66 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange }) => {
   });
 
   // Fetch available rooms and pets
+  // useEffect(() => {
+  //   const fetchRooms = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5023/api/Room/available");
+  //       const data = await response.json();
+  //       if (data.flag) {
+  //         setRooms(data.data);
+  //       } else {
+  //         setError("Failed to fetch rooms.");
+  //       }
+  //     } catch (err) {
+  //       setError("Error fetching rooms.");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+
+  //   const fetchPets = async () => {
+  //     const fakePetsData = [
+  //       { petId: "1BFCD3F7-27AD-4415-9B1A-56F0248564E5", petName: "Max" },
+  //       { petId: "6AE2F8F6-5502-4CB2-A6CC-86B1A3142BF3", petName: "Buddy" },
+  //       { petId: "1EA82E00-00E8-4E28-AD68-C858B4D44888", petName: "Bella" },
+  //     ];
+  //     setPets(fakePetsData);
+  //   };
+  //   fetchRooms();
+  //   fetchPets();
+  // }, []);
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchRoomsAndPets = async () => {
       try {
-        const response = await fetch("http://localhost:5023/api/Room/available");
-        const data = await response.json();
-        if (data.flag) {
-          setRooms(data.data);
+        // Fetch rooms
+        const roomResponse = await fetch("http://localhost:5023/api/Room/available");
+        const roomData = await roomResponse.json();
+        if (roomData.flag) {
+          setRooms(roomData.data);
         } else {
           setError("Failed to fetch rooms.");
         }
+
+        // Fetch pets (only if cusId exists)
+        if (data.cusId) {
+          const petResponse = await fetch(`http://localhost:5010/api/pet/available/${data.cusId}`);
+          const petData = await petResponse.json();
+          if (petData.flag && Array.isArray(petData.data)) {
+            setPets(petData.data);
+          } else {
+            setError("Failed to fetch pets.");
+          }
+        }
       } catch (err) {
-        setError("Error fetching rooms.");
+        setError("Error fetching data.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    const fetchPets = async () => {
-      const fakePetsData = [
-        { petId: "1BFCD3F7-27AD-4415-9B1A-56F0248564E5", petName: "Max" },
-        { petId: "6AE2F8F6-5502-4CB2-A6CC-86B1A3142BF3", petName: "Buddy" },
-        { petId: "1EA82E00-00E8-4E28-AD68-C858B4D44888", petName: "Bella" },
-      ];
-      setPets(fakePetsData);
-    };
+    fetchRoomsAndPets();
+  }, [formData.cusId]);
 
-    fetchRooms();
-    fetchPets();
-  }, []);
 
   // Fetch room type details when a room is selected
   useEffect(() => {
