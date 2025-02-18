@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-const BookingServiceChoice = ({ formData, handleChange, services, pets }) => {
+const BookingServiceChoice = ({ formData, handleChange, services ,data}) => {
   const [serviceVariants, setServiceVariants] = useState([]);
+    const [pets, setPets] = useState([]); 
+    const [error, setError] = useState(""); 
 
   // Fetch service variants when a service is selected
   useEffect(() => {
@@ -26,6 +28,28 @@ const BookingServiceChoice = ({ formData, handleChange, services, pets }) => {
       fetchServiceVariants();
     }
   }, [formData.service]);
+
+  useEffect(() => {
+    const fetchPets = async () => {
+      if (data.cusId) {
+        try {
+          const petResponse = await fetch(`http://localhost:5010/api/pet/available/${data.cusId}`);
+          const petData = await petResponse.json();
+          if (petData.flag && Array.isArray(petData.data)) {
+            setPets(petData.data);
+          } else {
+            console.error("Failed to fetch pets.");
+            setError("Failed to fetch pets.");
+          }
+        } catch (error) {
+          console.error("Error fetching pets:", error);
+          setError("Error fetching pets.");
+        }
+      }
+    };
+
+    fetchPets();
+  }, [data.cusId, formData.service]);
 
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">

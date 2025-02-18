@@ -29,5 +29,7 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<Response> GetAllStaffAccount();
         Task<Response> GetAllCustomerAccount();
 
+        Task<Response> UpdateAccountPoint(Guid id, int point);
+
     }
 }

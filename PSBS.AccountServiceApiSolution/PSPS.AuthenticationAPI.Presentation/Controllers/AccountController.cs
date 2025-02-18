@@ -167,5 +167,12 @@ namespace PSPS.Presentation.Controllers
 
             return Ok(new Response(true, "Account with this phone number") { Data = result });
         }
+
+        [HttpPut("UpdateUserPoint")]
+        public async Task<ActionResult<Response>> UpdateUserPoint(Guid accountId,int point)
+        {
+            var result = await account.UpdateAccountPoint(accountId, point);
+            return result.Flag ? Ok(result) : BadRequest(result);
+        }
     }
 }

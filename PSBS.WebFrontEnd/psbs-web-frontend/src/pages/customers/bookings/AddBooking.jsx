@@ -279,9 +279,9 @@ const AddBooking = () => {
         );
       case 1:
         return selectedOption === "Room" ? (
-          <BookingRoomForm />
+          <BookingRoomForm formData={formData}/>
         ) : (
-          <BookingServiceForm />
+          <BookingServiceForm formData={formData}/>
         );
       case 2:
         return (

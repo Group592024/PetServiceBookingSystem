@@ -12,6 +12,7 @@ namespace FacilityServiceApi.Application.Interfaces
     public interface IRoomHistory
     {
         Task<Response> CreateAsync(RoomHistory entity);
+        Task<Response> UpdateAsync(RoomHistory entity);
         Task<IEnumerable<RoomHistory>> GetAllAsync();
         Task<IEnumerable<RoomHistory>> GetRoomHistoryByBookingId(Guid id);
         Task<RoomHistory> GetByIdAsync(Guid id);

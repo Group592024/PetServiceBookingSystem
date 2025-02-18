@@ -1,13 +1,13 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import BookingServiceStatus from "../../../../components/Booking/booking-status/BookingServiceStatus";
+import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 
 const CustomerServiceBookingDetail = () => {
-  const sidebarRef = useRef(null);
   const { bookingId } = useParams();
   const [booking, setBooking] = useState(null);
   const [serviceItems, setServiceItems] = useState([]);
@@ -135,9 +135,8 @@ const CustomerServiceBookingDetail = () => {
 
   return (
     <div>
-      <Sidebar ref={sidebarRef} />
-      <div className="content">
-        <Navbar sidebarRef={sidebarRef} />
+      <div>
+      <NavbarCustomer/>
         <div className="container mx-auto p-4">
           <h2 className="text-2xl font-bold mb-4 text-center">
             Service Booking Details

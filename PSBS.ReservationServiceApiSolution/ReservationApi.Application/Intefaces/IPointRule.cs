@@ -7,5 +7,6 @@ namespace ReservationApi.Application.Intefaces
 {
     public interface IPointRule : IGenericInterface<PointRule>
     {
+        Task<PointRule> GetPointRuleActiveAsync();
     }
 }

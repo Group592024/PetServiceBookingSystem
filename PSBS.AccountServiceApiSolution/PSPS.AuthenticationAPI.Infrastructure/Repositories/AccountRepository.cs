@@ -7,6 +7,7 @@ using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
 using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
+using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
@@ -801,6 +802,29 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 account.AccountIsDeleted,
                 account.RoleId
             );
+        }
+
+        public async Task<Response> UpdateAccountPoint(Guid id, int point)
+        {
+            try
+            {
+                var existingAccount = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == id);
+                if(existingAccount == null)
+                {
+                    return new Response(false, "Error occurred while updating the existing Point of user.");
+                }
+                existingAccount.AccountLoyaltyPoint = point;
+                context.Accounts.Update(existingAccount);
+                await context.SaveChangesAsync();
+                return new Response(true, "Point of user successfully updated");
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a user-friendly message to the client
+                return new Response(false, "Error occurred while updating the existing Point.");
+            }
         }
     }
 }

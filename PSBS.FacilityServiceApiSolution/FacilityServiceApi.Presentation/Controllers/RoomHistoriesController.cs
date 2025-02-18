@@ -53,9 +53,12 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         // PUT api/<RoomHistoriesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut]
+        public async Task<ActionResult<Response>> UpdateRoomHistory([FromBody] RoomHistoryDTO roomHistoryDTO)
         {
+            var updateEntity = RoomHistoryConversion.ToEntity(roomHistoryDTO);
+            var response = await roomHistoryInterface.UpdateAsync(updateEntity);
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         // DELETE api/<RoomHistoriesController>/5

@@ -127,6 +127,20 @@ namespace ReservationApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<IEnumerable<Booking>> GetBookingByBookingStatusAsync(Guid id)
+        {
+            try
+            {
+                var bookings = await context.Bookings.Where(b => b.BookingStatusId == id).ToListAsync();
+                return bookings;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred while retrieving booking.");
+            }
+        }
+
         public async Task<Booking> GetByAsync(Expression<Func<Booking, bool>> predicate)
         {
             try
