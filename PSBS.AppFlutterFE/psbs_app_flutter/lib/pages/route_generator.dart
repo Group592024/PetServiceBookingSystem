@@ -53,9 +53,3 @@ class RouteGenerator {
     );
   }
 }
-Future<void> logout(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('accountId'); 
-  await prefs.remove('token'); 
-  Navigator.pushReplacementNamed(context, "/login"); 
-}

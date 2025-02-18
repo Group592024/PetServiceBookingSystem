@@ -81,7 +81,7 @@ namespace ReservationApi.Presentation.Controllers
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
 
-        [HttpGet]
+        [HttpGet("/active")]
         public async Task<ActionResult<PointRuleDTO>> GetPointRuleActive()
         {
             // get all pointRules from repo

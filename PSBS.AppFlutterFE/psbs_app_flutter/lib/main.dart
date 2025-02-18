@@ -90,13 +90,12 @@ class _MyHomePageState extends State<MyHomePage> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.blue,
         title: Row(
           children: [
             Icon(Icons.pets, color: Colors.white, size: 30),
-            const SizedBox(width: 1),
+            const SizedBox(width: 5),
             RichText(
               text: TextSpan(
                 children: [
@@ -127,10 +126,22 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
-          IconButton(
-            onPressed: () {},
+          PopupMenuButton<String>(
             icon: const Icon(Icons.menu, color: Colors.white, size: 28),
-            tooltip: 'Menu',
+            onSelected: (value) {
+              if (value == 'logout') {
+                logout(context); // Sửa lỗi: truyền context vào
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'logout',
+                child: ListTile(
+                  leading: Icon(Icons.logout, color: Colors.red),
+                  title: Text('Logout', style: TextStyle(color: Colors.red)),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -157,4 +168,12 @@ class _MyHomePageState extends State<MyHomePage> {
       body: screens[index],
     );
   }
+
+
+  Future<void> logout(BuildContext context) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.remove('accountId'); 
+  await prefs.remove('token'); 
+  Navigator.pushReplacementNamed(context, "/login"); 
+}
 }

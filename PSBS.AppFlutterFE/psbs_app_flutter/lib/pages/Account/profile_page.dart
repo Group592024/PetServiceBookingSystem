@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfilePage extends StatefulWidget {
   final String accountId;
-  const ProfilePage({super.key, required this.accountId, required String title});
+  const ProfilePage(
+      {super.key, required this.accountId, required String title});
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
+
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? account;
   String? imagePreview;
   String accountId = '';
-  Future<void>? _fetchDataFuture; 
+  Future<void>? _fetchDataFuture;
   @override
   void initState() {
     super.initState();
     _loadAccountId();
   }
- String formatDate(String date) {
+
+  String formatDate(String date) {
     try {
       DateTime parsedDate = DateTime.parse(date);
       return DateFormat('dd/MM/yyyy').format(parsedDate);
@@ -29,6 +31,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return date;
     }
   }
+
   Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -37,7 +40,7 @@ class _ProfilePageState extends State<ProfilePage> {
     print("Loaded Account ID: $accountId");
     if (accountId.isNotEmpty) {
       setState(() {
-        _fetchDataFuture = fetchAccountData(); 
+        _fetchDataFuture = fetchAccountData();
       });
     }
   }
@@ -49,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://192.168.1.17:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -67,6 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
       print("Lỗi khi gọi API: $error");
     }
   }
+
   Future<void> fetchImage(String filename) async {
     if (filename.isEmpty) {
       print("Lỗi: Filename rỗng.");
@@ -75,14 +79,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
     try {
       final imageResponse = await http.get(
-        Uri.parse('http://localhost:5000/api/Account/loadImage?filename=$filename'),
+        Uri.parse(
+            'http://192.168.1.17:5000/api/Account/loadImage?filename=$filename'),
       );
 
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
         if (imageData['flag']) {
           setState(() {
-            imagePreview = "data:image/png;base64,${imageData['data']['fileContents']}";
+            imagePreview =
+                "data:image/png;base64,${imageData['data']['fileContents']}";
           });
         }
       }
@@ -90,6 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
       print("Lỗi khi lấy ảnh: $error");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: _fetchDataFuture == null
           ? Center(child: CircularProgressIndicator())
           : FutureBuilder<void>(
-              future: _fetchDataFuture, 
+              future: _fetchDataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -125,7 +132,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 5)
+                            ],
                           ),
                           child: Column(
                             children: [
@@ -135,13 +144,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ? NetworkImage(imagePreview!)
                                     : null,
                                 child: imagePreview == null
-                                    ? Icon(Icons.person, size: 80, color: Colors.grey)
+                                    ? Icon(Icons.person,
+                                        size: 80, color: Colors.grey)
                                     : null,
                               ),
                               SizedBox(height: 10),
                               Text(
                                 account?['accountName'] ?? 'N/A',
-                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
                               ),
                             ],
                           ),
@@ -152,16 +163,32 @@ class _ProfilePageState extends State<ProfilePage> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(12),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                            boxShadow: [
+                              BoxShadow(color: Colors.black12, blurRadius: 5)
+                            ],
                           ),
                           child: Column(
                             children: [
-                              ProfileField(label: "Name", value: account?['accountName'] ?? 'N/A'),
-                              ProfileField(label: "Email", value: account?['accountEmail'] ?? 'N/A'),
-                              ProfileField(label: "Birthday", value: formatDate(account?['accountDob'] ?? '')),
-                              GenderField(selectedGender: account?['accountGender'] ?? 'N/A'),
-                              ProfileField(label: "Phone Number", value: account?['accountPhoneNumber'] ?? 'N/A'),
-                              ProfileField(label: "Address", value: account?['accountAddress'] ?? 'N/A'),
+                              ProfileField(
+                                  label: "Name",
+                                  value: account?['accountName'] ?? 'N/A'),
+                              ProfileField(
+                                  label: "Email",
+                                  value: account?['accountEmail'] ?? 'N/A'),
+                              ProfileField(
+                                  label: "Birthday",
+                                  value:
+                                      formatDate(account?['accountDob'] ?? '')),
+                              GenderField(
+                                  selectedGender:
+                                      account?['accountGender'] ?? 'N/A'),
+                              ProfileField(
+                                  label: "Phone Number",
+                                  value:
+                                      account?['accountPhoneNumber'] ?? 'N/A'),
+                              ProfileField(
+                                  label: "Address",
+                                  value: account?['accountAddress'] ?? 'N/A'),
                             ],
                           ),
                         ),
@@ -171,13 +198,24 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             ElevatedButton(
                               onPressed: () {
-                                Navigator.pushNamed(context, "/editprofile");
+                                Navigator.pushNamed(context, "/editprofile")
+                                    .then((result) {
+                                  if (result == true) {
+                                    setState(() {
+                                      _fetchDataFuture =
+                                          fetchAccountData(); 
+                                    });
+                                  }
+                                });
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.teal,
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
                               ),
-                              child: Text("Edit", style: TextStyle(color: Colors.white, fontSize: 16)),
+                              child: Text("Edit",
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16)),
                             ),
                             ElevatedButton(
                               onPressed: () {
@@ -185,9 +223,12 @@ class _ProfilePageState extends State<ProfilePage> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.grey[400],
-                                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 12),
                               ),
-                              child: Text("Change Password", style: TextStyle(color: Colors.black, fontSize: 16)),
+                              child: Text("Change Password",
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 16)),
                             ),
                           ],
                         ),
@@ -200,6 +241,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 }
+
 class ProfileField extends StatelessWidget {
   final String label;
   final String value;
@@ -231,6 +273,7 @@ class ProfileField extends StatelessWidget {
     );
   }
 }
+
 class GenderField extends StatelessWidget {
   final String selectedGender;
 
@@ -253,7 +296,7 @@ class GenderField extends StatelessWidget {
                 title: Text("Male"),
                 value: "male",
                 groupValue: selectedGender,
-                onChanged: null, 
+                onChanged: null,
               ),
             ),
             Expanded(
@@ -261,7 +304,7 @@ class GenderField extends StatelessWidget {
                 title: Text("Female"),
                 value: "female",
                 groupValue: selectedGender,
-                onChanged: null, 
+                onChanged: null,
               ),
             ),
           ],

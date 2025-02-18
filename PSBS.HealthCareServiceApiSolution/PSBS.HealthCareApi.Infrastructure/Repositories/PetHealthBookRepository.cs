@@ -13,210 +13,53 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using PSBS.HealthCareApi.Application.DTOs;
 
 namespace PSBS.HealthCareApi.Infrastructure.Repositories
 {
     public class PetHealthBookRepository(HealthCareDbContext context) : IPetHealthBook
     {
- 
 
-public async Task<Response> CreateAsync(PetHealthBook entity)
-    {
-        try
+        public async Task<Response> CreateAsync(PetHealthBook entity)
         {
-            // 1. Kiểm tra nếu medicineId là rỗng
-            if (entity.medicineId == Guid.Empty)
+            try
             {
-                return new Response(false, "MedicineId cannot be empty");
-            }
+                if (entity.medicineIds == null || !entity.medicineIds.Any())
+                    return new Response(false, "Medicines collection cannot be empty");
 
-            // 2. Kiểm tra xem medicineId có tồn tại trong bảng Medicine hay không
-            var existingMedicine = await context.Medicines
-                                                 .FirstOrDefaultAsync(m => m.medicineId == entity.medicineId);
+                var medicines = await context.Medicines
+                    .Where(m => entity.medicineIds.Contains(m.medicineId))
+                    .ToListAsync();
 
-            if (existingMedicine == null)
-            {
-                return new Response(false, "MedicineId does not exist in the database");
-            }
+                if (medicines.Count != entity.medicineIds.Count)
+                    return new Response(false, "Some medicines not found.");
 
-            // 3. Kiểm tra xem treatmentId liên kết với Medicine có tồn tại trong bảng Treatment không
-            var existingTreatment = await context.Treatments
-                                                 .FirstOrDefaultAsync(t => t.treatmentId == existingMedicine.treatmentId);
-
-            if (existingTreatment == null)
-            {
-                return new Response(false, "The specified treatmentId does not exist in the Treatment table");
-            }
-
-            // 4. Kiểm tra nếu medicineId đã tồn tại trong bảng PetHealthBook
-            var existingEntity = await context.PetHealthBooks
-                                              .FirstOrDefaultAsync(p => p.medicineId == entity.medicineId);
-
-            if (existingEntity != null)
-            {
-                // Nếu medicineId đã tồn tại, cập nhật các trường cần thiết
-                existingEntity.bookingId = entity.bookingId;
-                existingEntity.visitDate = entity.visitDate;
-                existingEntity.nextVisitDate = entity.nextVisitDate;
-                existingEntity.performBy = entity.performBy;
-                existingEntity.updatedAt = DateTime.UtcNow;
-
-                // Lưu thay đổi vào cơ sở dữ liệu
-                context.PetHealthBooks.Update(existingEntity);
+                var addedEntity = context.PetHealthBooks.Add(entity).Entity;
                 await context.SaveChangesAsync();
 
-                // Xử lý circular reference
-                var options = new JsonSerializerOptions
-                {
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    WriteIndented = true
-                };
+                if (addedEntity.healthBookId == Guid.Empty)
+                    return new Response(false, "healthBookId is null after SaveChanges.");
 
-                return new Response(true, $"PetHealthBook with MedicineId {entity.medicineId} updated successfully")
-                {
-                    Data = JsonSerializer.Serialize(existingEntity, options)
-                };
+                return new Response(true, "PetHealthBook with Medicines added successfully");
             }
-
-            // 5. Nếu medicineId không tồn tại, thêm mới bản ghi vào PetHealthBook
-            var currentEntity = context.PetHealthBooks.Add(entity).Entity;
-            await context.SaveChangesAsync();
-
-            // Xử lý circular reference
-            var jsonOptions = new JsonSerializerOptions
+            catch (Exception ex)
             {
-                ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                WriteIndented = true
-            };
-
-            return new Response(true, $"PetHealthBook with HealthBookId {entity.healthBookId} added successfully")
-            {
-                Data = JsonSerializer.Serialize(currentEntity, jsonOptions)
-            };
-        }
-        catch (Exception ex)
-        {
-            LogExceptions.LogException(ex); // Log lỗi chi tiết
-            return new Response(false, $"An error occurred: {ex.Message}");
-        }
-    }
-
-
-        public async Task<Response> CreatePetHealthBookAsync(PetHealthBookConvertDTO entity)
-{
-    try
-    {
-        // 1. Kiểm tra nếu medicineId là rỗng
-        if (entity.medicineId == null || !entity.medicineId.Any())
-        {
-            return new Response(false, "MedicineIds cannot be empty");
-        }
-
-        var responses = new List<Response>();
-
-        // 2. Kiểm tra và xử lý từng medicineId
-        foreach (var medicineId in entity.medicineId)
-        {
-            // Kiểm tra xem medicineId có tồn tại trong bảng Medicine hay không
-            var existingMedicine = await context.Medicines
-                                                 .FirstOrDefaultAsync(m => m.medicineId == medicineId);
-
-            if (existingMedicine == null)
-            {
-                responses.Add(new Response(false, $"MedicineId {medicineId} does not exist in the database"));
-                continue;
-            }
-
-            // 3. Kiểm tra xem treatmentId liên kết với Medicine có tồn tại trong bảng Treatment không
-            var existingTreatment = await context.Treatments
-                                                 .FirstOrDefaultAsync(t => t.treatmentId == existingMedicine.treatmentId);
-
-            if (existingTreatment == null)
-            {
-                responses.Add(new Response(false, $"The specified treatmentId for MedicineId {medicineId} does not exist in the Treatment table"));
-                continue;
-            }
-
-            // 4. Kiểm tra nếu medicineId đã tồn tại trong bảng PetHealthBook
-            var existingEntity = await context.PetHealthBooks
-                                              .FirstOrDefaultAsync(p => p.medicineId == medicineId);
-
-            if (existingEntity != null)
-            {
-                // Cập nhật các trường cần thiết nếu đã tồn tại
-                existingEntity.bookingId = entity.bookingId;
-                existingEntity.visitDate = entity.visitDate;
-                existingEntity.nextVisitDate = entity.nextVisitDate;
-                existingEntity.performBy = entity.performBy;
-                existingEntity.updatedAt = DateTime.UtcNow;
-
-                context.PetHealthBooks.Update(existingEntity);
-                await context.SaveChangesAsync();
-
-                var jsonOptions = new JsonSerializerOptions
-                {
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    WriteIndented = true
-                };
-
-                responses.Add(new Response(true, $"PetHealthBook with MedicineId {medicineId} updated successfully")
-                {
-                    Data = JsonSerializer.Serialize(existingEntity, jsonOptions)
-                });
-            }
-            else
-            {
-                // Nếu không tồn tại, thêm mới
-                var newEntity = new PetHealthBook
-                {
-                    healthBookId = entity.healthBookId,
-                    bookingId = entity.bookingId,
-                    medicineId = medicineId,
-                    visitDate = entity.visitDate,
-                    nextVisitDate = entity.nextVisitDate,
-                    performBy = entity.performBy
-                };
-
-                context.PetHealthBooks.Add(newEntity);
-                await context.SaveChangesAsync();
-
-                var jsonOptions = new JsonSerializerOptions
-                {
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                    WriteIndented = true
-                };
-
-                responses.Add(new Response(true, $"PetHealthBook with HealthBookId {newEntity.healthBookId} added successfully")
-                {
-                    Data = JsonSerializer.Serialize(newEntity, jsonOptions)
-                });
+                LogExceptions.LogException(ex);
+                return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
-
-        return new Response(true, "PetHealthBooks processed successfully") { Data = responses };
-    }
-    catch (Exception ex)
-    {
-        LogExceptions.LogException(ex); // Log chi tiết lỗi
-        return new Response(false, $"An error occurred: {ex.Message}"); // Trả về thông báo lỗi chi tiết
-    }
-}
-
         public async Task<Response> DeleteAsync(PetHealthBook entity)
         {
             try
             {
                 var petHealthBooks = await GetByIdAsync(entity.healthBookId);
-                if (petHealthBooks is null)
+                if (petHealthBooks == null)
                 {
                     return new Response(false, $"{entity.healthBookId} not found");
                 }
 
                 if (!petHealthBooks.isDeleted)
                 {
-                    // First deletion attempt: mark as deleted
                     petHealthBooks.isDeleted = true;
                     context.PetHealthBooks.Update(petHealthBooks);
                     await context.SaveChangesAsync();
@@ -224,16 +67,14 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
                 }
                 else
                 {
-                    // Check if BookingStatusId is still referenced in Bookings table
                     bool isReferencedInBookings = await context.PetHealthBooks
-                        .AnyAsync(b => b.healthBookId == entity.healthBookId);
+                        .AnyAsync(b => b.healthBookId == entity.healthBookId && !b.isDeleted);
 
                     if (isReferencedInBookings)
                     {
                         return new Response(false, $"Cannot permanently delete {entity.healthBookId} because it is referenced in existing bookings.");
                     }
 
-                    // Permanently delete from the database
                     context.PetHealthBooks.Remove(petHealthBooks);
                     await context.SaveChangesAsync();
                     return new Response(true, $"{entity.healthBookId} permanently deleted.");
@@ -241,9 +82,7 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
             }
             catch (Exception ex)
             {
-                // Log the original exception
                 LogExceptions.LogException(ex);
-                // Display a user-friendly message to the client
                 return new Response(false, "An error occurred while deleting the booking status.");
             }
         }
@@ -252,8 +91,7 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
         {
             try
             {
-                var petHealthBooks = await context.PetHealthBooks.ToListAsync();
-                return petHealthBooks;
+                return await context.PetHealthBooks.Include(p => p.Medicines).AsNoTracking().ToListAsync();
             }
             catch (Exception ex)
             {
@@ -266,8 +104,7 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
         {
             try
             {
-                var petHealthBooks = await context.PetHealthBooks.Where(predicate).FirstOrDefaultAsync()!;
-                return petHealthBooks is not null ? petHealthBooks : null!;
+                return await context.PetHealthBooks.Include(p => p.Medicines).AsNoTracking().FirstOrDefaultAsync(predicate);
             }
             catch (Exception ex)
             {
@@ -280,8 +117,7 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
         {
             try
             {
-                var petHealthBooks = await context.PetHealthBooks.AsNoTracking().SingleOrDefaultAsync(v => v.healthBookId == id);
-                return petHealthBooks!;
+                return await context.PetHealthBooks.Include(p => p.Medicines).AsNoTracking().SingleOrDefaultAsync(v => v.healthBookId == id);
             }
             catch (Exception ex)
             {
@@ -301,18 +137,25 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
                     return new Response(false, $"{entity.healthBookId} not found");
                 }
 
-                petHealthBooks.healthBookId = entity.healthBookId == Guid.Empty ? petHealthBooks.healthBookId : entity.healthBookId;
-                petHealthBooks.bookingId = entity.bookingId == Guid.Empty ? petHealthBooks.bookingId : entity.bookingId;
-                petHealthBooks.medicineId = entity.medicineId == Guid.Empty ? petHealthBooks.medicineId : entity.medicineId;
-                petHealthBooks.visitDate = entity.visitDate == default ? petHealthBooks.visitDate : entity.visitDate;
-                petHealthBooks.nextVisitDate = entity.nextVisitDate == default ? petHealthBooks.nextVisitDate : entity.nextVisitDate;
-                petHealthBooks.performBy = entity.performBy == string.Empty ? petHealthBooks.performBy : entity.performBy;
-                petHealthBooks.createdAt = entity.createdAt == default ? petHealthBooks.createdAt : entity.createdAt;
-                petHealthBooks.updatedAt = entity.updatedAt == default ? petHealthBooks.updatedAt : entity.updatedAt;
-                petHealthBooks.isDeleted = entity.isDeleted;
+                petHealthBooks.bookingId = entity.bookingId;
+                petHealthBooks.visitDate = entity.visitDate;
+                petHealthBooks.nextVisitDate = entity.nextVisitDate;
+                petHealthBooks.performBy = entity.performBy;
+                petHealthBooks.updatedAt = DateTime.UtcNow;
 
-                context.Entry(petHealthBooks).State = EntityState.Modified;
+                if (entity.medicineIds != null && entity.medicineIds.Any())
+                {
+                    var medicines = await context.Medicines
+                        .Where(m => entity.medicineIds.Contains(m.medicineId))
+                        .ToListAsync();
 
+                    if (medicines.Count != entity.medicineIds.Count)
+                        return new Response(false, "Some medicines not found.");
+
+                    petHealthBooks.medicineIds = entity.medicineIds;
+                }
+
+                context.PetHealthBooks.Update(petHealthBooks);
                 await context.SaveChangesAsync();
 
                 return new Response(true, $"{entity.healthBookId} successfully updated") { Data = petHealthBooks };
@@ -320,7 +163,6 @@ public async Task<Response> CreateAsync(PetHealthBook entity)
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-
                 return new Response(false, "Error occurred updating the existing booking status");
             }
         }

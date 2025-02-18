@@ -42,7 +42,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void> fetchAccountData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://192.168.1.17:5000/api/Account?AccountId=$accountId'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -61,7 +61,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     try {
       final imageResponse = await http.get(
         Uri.parse(
-            'http://localhost:5000/api/Account/loadImage?filename=$filename'),
+            'http://192.168.1.17:5000/api/Account/loadImage?filename=$filename'),
       );
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
@@ -77,42 +77,54 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
   Future<void> _changePassword() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-    final String apiUrl =
-        'http://localhost:5000/api/Account/ChangePassword$accountId';
-    final response = await http.put(
-      Uri.parse(apiUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'currentPassword': _currentPasswordController.text,
-        'newPassword': _newPasswordController.text,
-        'confirmPassword': _confirmPasswordController.text,
-      }),
-    );
-    if (response.statusCode == 200) {
-      _showAlert('Success', 'Password changed successfully!');
-    } else {
-      final errorData = jsonDecode(response.body);
-      _showAlert('Error', errorData['message'] ?? 'Failed to change password');
-    }
+  if (!_formKey.currentState!.validate()) {
+    return;
   }
-  void _showAlert(String title, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
+  final String apiUrl =
+      'http://192.168.1.17:5000/api/Account/ChangePassword$accountId';
+  final response = await http.put(
+    Uri.parse(apiUrl),
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({
+      'currentPassword': _currentPasswordController.text,
+      'newPassword': _newPasswordController.text,
+      'confirmPassword': _confirmPasswordController.text,
+    }),
+  );
+  if (response.statusCode == 200) {
+    _showAlert('Success', 'Password changed successfully!', () {
+      //Navigator.popUntil(context, ModalRoute.withName('/home')); 
+      // Hoặc nếu chưa có route tên '/profile', bạn có thể dùng:
+       Navigator.pushReplacementNamed(context, '/home');
+    });
+  } else {
+    final errorData = jsonDecode(response.body);
+    _showAlert('Error', errorData['message'] ?? 'Failed to change password', null);
   }
+}
+
+void _showAlert(String title, String message, VoidCallback? onConfirm) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(title),
+      content: Text(message),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+            if (onConfirm != null) {
+              onConfirm();
+            }
+          },
+          child: Text('OK'),
+        ),
+      ],
+    ),
+  );
+}
+
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

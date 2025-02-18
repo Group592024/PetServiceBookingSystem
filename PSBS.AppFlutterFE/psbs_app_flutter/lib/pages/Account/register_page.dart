@@ -28,7 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       try {
         final response = await http.post(
-          Uri.parse('http://localhost:5000/api/Account/register'),
+          Uri.parse('http://192.168.1.17:5000/api/Account/register'),
           headers: {'accept': 'text/plain'},
           body: {
             'RegisterTempDTO.AccountName': name,
