@@ -16,6 +16,7 @@ namespace ReservationApi.Application.Intefaces
 
         Task<IEnumerable<Booking>> GetAllBookingForUserAsync(Guid id);
         Task<Booking> GetBookingByBookingCodeAsync(String code);
+        Task<IEnumerable<Booking>> GetBookingByBookingStatusAsync(Guid id);
         Task<Response> CancelBookingAsync(Guid bookingId);
 
     }

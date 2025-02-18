@@ -56,10 +56,8 @@ const AdminBookingDatatable = () => {
       );
   
       setBookings(updatedBookings);
-      toast.success("Booking data fetched successfully!");
     } catch (err) {
       setError("Error fetching data: " + err.message);
-      toast.error("Error fetching data: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -71,6 +69,7 @@ const AdminBookingDatatable = () => {
 
   const columns = [
     { field: "id", headerName: "ID", flex: 1, headerAlign: "center", align: "center" },
+    { field: "bookingCode", headerName: "Booking Code", flex: 2, headerAlign: "center", align: "center" },
     { field: "customerName", headerName: "Customer Name", flex: 2, headerAlign: "center", align: "center" },
     { field: "totalAmount", headerName: "Total Amount", flex: 1, headerAlign: "center", align: "center" },
     { field: "bookingTypeName", headerName: "Booking Type", flex: 1, headerAlign: "center", align: "center" },
@@ -110,6 +109,7 @@ const AdminBookingDatatable = () => {
   const bookingsRows = bookings.map((booking, index) => ({
     id: index + 1,
     bookingId: booking.bookingId,
+    bookingCode: booking.bookingCode,
     customerName: booking.customerName,
     totalAmount: booking.totalAmount,
     bookingTypeName: booking.bookingTypeName,
@@ -162,6 +162,10 @@ const AdminBookingDatatable = () => {
             pagination: {
               paginationModel: {
                 pageSize: 5,
+              },
+            },filter: {
+              filterModel: {
+                items: [{ field: 'bookingStatusName', operator: 'contains', value: 'Pending' }],
               },
             },
           }}

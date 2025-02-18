@@ -80,5 +80,21 @@ namespace ReservationApi.Presentation.Controllers
             var response = await pointRuleInterface.DeleteAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
+
+        [HttpGet("/active")]
+        public async Task<ActionResult<PointRuleDTO>> GetPointRuleActive()
+        {
+            // get all pointRules from repo
+            var pointRule = await pointRuleInterface.GetPointRuleActiveAsync();
+            if (pointRule == null)
+                return NotFound(new Response(false, "No Point Rule detected"));
+            // convert data from entity to DTO and return
+            var (_pointRule, _) = PointRuleConversion.FromEntity(pointRule, null!);
+            return pointRule is not null ? Ok(new Response(true, "Point Rule retrieved successfully!")
+            {
+                Data = _pointRule
+            }) : NotFound(new Response(false, "No Point Rule detected"));
+
+        }
     }
 }
