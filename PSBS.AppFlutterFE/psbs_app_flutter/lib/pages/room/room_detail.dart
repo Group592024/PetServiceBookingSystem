@@ -27,7 +27,7 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
   Future<void> fetchDetail() async {
     try {
       final roomResponse = await http.get(
-          Uri.parse('http://192.168.1.17:5023/api/Room/${widget.roomId}'));
+          Uri.parse('http://10.0.2.2:5023/api/Room/${widget.roomId}'));
       final roomData = json.decode(roomResponse.body);
 
       setState(() {
@@ -36,7 +36,7 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
 
       if (detail.isNotEmpty && detail['roomTypeId'] != null) {
         final roomTypeResponse = await http.get(Uri.parse(
-            'http://192.168.1.17:5023/api/RoomType/${detail['roomTypeId']}'));
+            'http://10.0.2.2:5023/api/RoomType/${detail['roomTypeId']}'));
         final roomTypeData = json.decode(roomTypeResponse.body);
 
         setState(() {
@@ -87,7 +87,7 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                         children: [
                           // Room Image
                           Image.network(
-                            'http://192.168.1.17:5023${detail['roomImage']}',
+                            'http://10.0.2.2:5023${detail['roomImage']}',
                             width: double.infinity,
                             height: 300,
                             fit: BoxFit.cover,

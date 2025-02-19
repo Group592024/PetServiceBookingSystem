@@ -17,21 +17,23 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://192.168.1.17:5010/api/pet/available/';
-  final String deleteUrl = 'http://192.168.1.17:5010/api/pet/';
- late String userId;
+  final String apiUrl = 'http://10.0.2.2:5010/api/pet/available/';
+  final String deleteUrl = 'http://10.0.2.2:5010/api/pet/';
+  late String userId;
   @override
   void initState() {
     super.initState();
     pets = fetchPets();
-      _loadAccountId();
+    _loadAccountId();
   }
- Future<void> _loadAccountId() async {
+
+  Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
     });
   }
+
   Future<List<Pet>> fetchPets() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,8 +54,10 @@ class _CustomerPetListState extends State<PetPage> {
               .where((pet) => !pet.isDelete)
               .toList();
         } else {
-          throw Exception(responseData['message'] ?? "Failed to fetch pets.");
+          return [];
         }
+      } else if (response.statusCode == 404) {
+        return [];
       } else {
         throw Exception(
             "Failed to fetch data. Status Code: ${response.statusCode}");
@@ -447,9 +451,47 @@ class _CustomerPetListState extends State<PetPage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text(snapshot.error.toString()));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.error_outline, size: 60, color: Colors.red),
+                  SizedBox(height: 16),
+                  Text(
+                    "Something went wrong",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    snapshot.error.toString(),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text("No pets found."));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.pets, size: 64, color: Colors.teal),
+                  SizedBox(height: 16),
+                  Text(
+                    "No pets found",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    "Add your first pet using the + button below",
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            );
           } else {
             return ListView.builder(
               padding: EdgeInsets.all(10),
@@ -469,7 +511,7 @@ class _CustomerPetListState extends State<PetPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://192.168.1.17:5010${pet.petImage}',
+                            'http://10.0.2.2:5010${pet.petImage}',
                             width: 400,
                             height: 350,
                             fit: BoxFit.cover,
@@ -491,7 +533,8 @@ class _CustomerPetListState extends State<PetPage> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          DateFormat('dd/MM/yyyy').format(DateTime.parse(pet.dateOfBirth)),
+                          DateFormat('dd/MM/yyyy')
+                              .format(DateTime.parse(pet.dateOfBirth)),
                           style:
                               TextStyle(fontSize: 18, color: Colors.grey[700]),
                         ),

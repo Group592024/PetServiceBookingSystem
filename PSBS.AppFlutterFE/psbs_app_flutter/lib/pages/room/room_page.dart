@@ -18,10 +18,10 @@ class _RoomPageState extends State<RoomPage> {
   // Fetch rooms and room types data
   Future<void> fetchRooms() async {
     try {
-      final responseRooms = await http
-          .get(Uri.parse('http://192.168.1.17:5023/api/Room/available'));
+      final responseRooms =
+          await http.get(Uri.parse('http://10.0.2.2:5023/api/Room/available'));
       final responseTypes =
-          await http.get(Uri.parse('http://192.168.1.17:5023/api/RoomType'));
+          await http.get(Uri.parse('http://10.0.2.2:5023/api/RoomType'));
 
       if (responseRooms.statusCode == 200 && responseTypes.statusCode == 200) {
         final dataRooms = json.decode(responseRooms.body);
@@ -99,7 +99,7 @@ class _RoomPageState extends State<RoomPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Image.network(
-                                'http://192.168.1.17:5023${room['roomImage']}',
+                                'http://10.0.2.2:5023${room['roomImage']}',
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.cover,
@@ -119,9 +119,8 @@ class _RoomPageState extends State<RoomPage> {
                                           Text(
                                             room['roomName'],
                                             style: TextStyle(
-                                              fontSize: 25, 
-                                              fontWeight:
-                                                  FontWeight.bold, 
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                           ),
                                           SizedBox(height: 8),
@@ -172,8 +171,7 @@ class _RoomPageState extends State<RoomPage> {
                                                 room['roomTypeId']),
                                             style: TextStyle(
                                               fontSize: 20,
-                                              fontWeight:
-                                                  FontWeight.bold, 
+                                              fontWeight: FontWeight.bold,
                                               color: Colors.green,
                                             ),
                                           ),
@@ -192,15 +190,17 @@ class _RoomPageState extends State<RoomPage> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => CustomerRoomDetail(
-                                          roomId: room['roomId'], // Pass the correct room ID
+                                        builder: (context) =>
+                                            CustomerRoomDetail(
+                                          roomId: room[
+                                              'roomId'], // Pass the correct room ID
                                         ),
                                       ),
                                     );
                                   },
                                   style: ButtonStyle(
-                                    backgroundColor: WidgetStateProperty.all(
-                                        Colors.yellow),
+                                    backgroundColor:
+                                        WidgetStateProperty.all(Colors.yellow),
                                     foregroundColor:
                                         WidgetStateProperty.all(Colors.black),
                                   ),
