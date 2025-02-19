@@ -25,7 +25,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     try {
       final dio = Dio();
       final response = await dio.post(
-        'http://192.168.1.17:5000/api/Account/ForgotPassword',
+        'http://10.0.2.2:5000/api/Account/ForgotPassword',
         queryParameters: {'email': emailController.text.trim()},
       );
 

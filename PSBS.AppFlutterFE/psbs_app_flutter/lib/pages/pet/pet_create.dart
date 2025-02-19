@@ -41,7 +41,7 @@ class _PetCreateState extends State<PetCreate> {
   Future<void> _fetchPetTypes() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.1.17:5010/api/petType'));
+          await http.get(Uri.parse('http://10.0.2.2:5010/api/petType'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -59,8 +59,7 @@ class _PetCreateState extends State<PetCreate> {
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
       final response = await http.get(
-        Uri.parse(
-            'http://192.168.1.17:5010/api/petBreed/byPetType/$petTypeId'),
+        Uri.parse('http://10.0.2.2:5010/api/petBreed/byPetType/$petTypeId'),
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -145,62 +144,61 @@ class _PetCreateState extends State<PetCreate> {
   }
 
   Future<void> _submitForm() async {
-  if (!_formKey.currentState!.validate() || _image == null) {
-    if (_image == null) {
-      _showErrorDialog('Please select a pet image');
-    }
-    return;
-  }
-
-  setState(() => _isLoading = true);
-
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String accountId = prefs.getString('accountId') ?? '';
-
-    if (accountId.isEmpty) {
-      _showErrorDialog('User not logged in.');
+    if (!_formKey.currentState!.validate() || _image == null) {
+      if (_image == null) {
+        _showErrorDialog('Please select a pet image');
+      }
       return;
     }
 
-    var request = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://192.168.1.17:5010/api/pet'),
-    );
+    setState(() => _isLoading = true);
 
-    request.fields.addAll({
-      'petName': _nameController.text,
-      'petGender': _petGender.toString(),
-      'dateOfBirth': DateFormat('yyyy-MM-dd').format(_dateOfBirth!),
-      'petBreedId': _selectedBreedId!,
-      'petWeight': _weightController.text,
-      'petFurType': _furTypeController.text,
-      'petFurColor': _furColorController.text,
-      'petNote': _noteController.text,
-      'accountId': accountId,
-    });
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String accountId = prefs.getString('accountId') ?? '';
 
-    request.files.add(await http.MultipartFile.fromPath(
-      'imageFile',
-      _image!.path,
-    ));
+      if (accountId.isEmpty) {
+        _showErrorDialog('User not logged in.');
+        return;
+      }
 
-    final response = await request.send();
-    final responseData = await response.stream.bytesToString();
-    final jsonResponse = json.decode(responseData);
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://10.0.2.2:5010/api/pet'),
+      );
 
-    if (jsonResponse['flag'] == true) {
-      _showSuccessDialog();
-    } else {
-      _showErrorDialog(jsonResponse['message'] ?? 'Failed to create pet');
+      request.fields.addAll({
+        'petName': _nameController.text,
+        'petGender': _petGender.toString(),
+        'dateOfBirth': DateFormat('yyyy-MM-dd').format(_dateOfBirth!),
+        'petBreedId': _selectedBreedId!,
+        'petWeight': _weightController.text,
+        'petFurType': _furTypeController.text,
+        'petFurColor': _furColorController.text,
+        'petNote': _noteController.text,
+        'accountId': accountId,
+      });
+
+      request.files.add(await http.MultipartFile.fromPath(
+        'imageFile',
+        _image!.path,
+      ));
+
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseData);
+
+      if (jsonResponse['flag'] == true) {
+        _showSuccessDialog();
+      } else {
+        _showErrorDialog(jsonResponse['message'] ?? 'Failed to create pet');
+      }
+    } catch (e) {
+      _showErrorDialog('Failed to create pet: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
-  } catch (e) {
-    _showErrorDialog('Failed to create pet: $e');
-  } finally {
-    setState(() => _isLoading = false);
   }
-}
-
 
   void _showSuccessDialog() {
     showDialog(

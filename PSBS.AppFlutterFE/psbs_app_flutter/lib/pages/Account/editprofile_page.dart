@@ -49,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (accountId.isEmpty) return;
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.17:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -95,7 +95,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     try {
       final imageResponse = await http.get(
         Uri.parse(
-            'http://192.168.1.17:5000/api/Account/loadImage?filename=$filename'),
+            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
       );
 
       if (imageResponse.statusCode == 200) {
@@ -118,7 +118,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     try {
       final request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://192.168.1.17:5000/api/Account'),
+        Uri.parse('http://10.0.2.2:5000/api/Account'),
       );
 
       // Adding other fields
