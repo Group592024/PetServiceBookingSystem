@@ -29,7 +29,6 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     createAt = serviceType.createAt,
                     updateAt = serviceType.updateAt,
                     isDeleted = serviceType.isDeleted,
-                    Services = new List<Service>()
                 };
                 return (singleServiceType, null);
             }
@@ -44,17 +43,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     updateAt = st.updateAt,
                     description = st.description,
                     isDeleted = st.isDeleted,
-                    Services = st.Services.Select(s => new Service
-                    {
-                        serviceId = s.serviceId,
-                        serviceTypeId = s.serviceTypeId,
-                        serviceName = s.serviceName,
-                        serviceImage = s.serviceImage,
-                        serviceDescription = s.serviceDescription,
-                        createAt = s.createAt,
-                        updateAt = s.updateAt,
-                        isDeleted = s.isDeleted
-                    }).ToList()
+                    
                 }).ToList();
 
                 return (null, _serviceTypes);

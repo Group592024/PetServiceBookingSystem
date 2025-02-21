@@ -12,7 +12,6 @@ namespace FacilityServiceApi.Application.DTOs
         public DateTime updateAt { get; set; }
         public bool? isDeleted { get; set; }
 
-        public virtual ICollection<Service> Services { get; set; }
 
     }
 }

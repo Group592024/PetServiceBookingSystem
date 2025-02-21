@@ -14,14 +14,14 @@ const AdminRedeemHistory = () => {
   const fetchAllHistory = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('http://localhost:5022/redeemhistory/All');
+      const response = await axios.get('http://localhost:5050/redeemhistory/All');
       if (response.data.flag) {
         const historyWithDetails = await Promise.all(
           response.data.data.map(async (item) => {
             try {
               const [accountResponse, giftResponse] = await Promise.all([
-                axios.get(`http://localhost:5000/api/Account?AccountId=${item.accountId}`),
-                axios.get(`http://localhost:5022/Gifts/${item.giftId}`)
+                axios.get(`http://localhost:5050/api/Account?AccountId=${item.accountId}`),
+                axios.get(`http://localhost:5050/Gifts/${item.giftId}`)
               ]);
               
               return {

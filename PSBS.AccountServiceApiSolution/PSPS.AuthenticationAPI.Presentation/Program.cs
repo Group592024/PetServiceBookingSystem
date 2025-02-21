@@ -28,6 +28,10 @@ builder.Services.AddControllers()
 {
     options.ListenAnyIP(5000); // Any IP with 5023
 });
+builder.Services.AddHttpClient("ApiGateway", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5050/");
+});
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();

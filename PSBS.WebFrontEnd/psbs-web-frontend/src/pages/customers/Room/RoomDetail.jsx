@@ -17,11 +17,11 @@ const CustomerRoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5023/api/Room/${id}`);
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
                 const data = await response.json();
                 setDetail(data.data);
                 if (data.data && data.data.roomTypeId) {
-                    const roomTypeResponse = await fetch(`http://localhost:5023/api/RoomType/${data.data.roomTypeId}`);
+                    const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
                     const roomTypeData = await roomTypeResponse.json();
                     if (roomTypeData.data) {
                         setRoomTypeName(roomTypeData.data.name);
@@ -68,7 +68,7 @@ const CustomerRoomDetail = () => {
                                     <div className="relative group">
                                         <div className="absolute inset-0 rounded-xl bg-gradient-to-b from-transparent to-black/20"></div>
                                         <img
-                                            src={`http://localhost:5023${detail.roomImage}`}
+                                            src={`http://localhost:5050/facility-service${detail.roomImage}`}
                                             alt={detail.roomName}
                                             className="w-full h-[600px] object-cover rounded-xl ring-1 ring-gray-200 transform transition-transform duration-300 group-hover:scale-105"
                                         />

@@ -2,7 +2,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 
 
-const API_BASE_URL = 'http://localhost:5000'; // Replace with your actual API URL
+const API_BASE_URL = 'http://localhost:5050'; // Replace with your actual API URL
  // Replace with your actual API URL
 
 

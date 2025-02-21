@@ -25,7 +25,7 @@ const RoomCreate = () => {
     useEffect(() => {
         const fetchRoomTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5023/api/RoomType/available');
+                const response = await fetch('http://localhost:5050/api/RoomType/available');
                 const data = await response.json();
                 setRoomTypes(data.data);
             } catch (error) {
@@ -84,7 +84,7 @@ const RoomCreate = () => {
         formData.append('imageFile', selectedImage);
 
         try {
-            const response = await fetch('http://localhost:5023/api/Room', {
+            const response = await fetch('http://localhost:5050/api/Room', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json'

@@ -1,0 +1,6 @@
+@PSBS.ApiGatewaySolution_HostAddress = http://localhost:5145
+
+GET {{PSBS.ApiGatewaySolution_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

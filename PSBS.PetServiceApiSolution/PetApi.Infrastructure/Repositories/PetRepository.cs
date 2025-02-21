@@ -5,6 +5,7 @@ using PetApi.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.Linq.Expressions;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace PetApi.Infrastructure.Repositories
@@ -12,9 +13,10 @@ namespace PetApi.Infrastructure.Repositories
     public class PetRepository : IPet
     {
         private readonly PetDbContext context;
-
-        public PetRepository(PetDbContext context)
+        private readonly IHttpClientFactory _httpClientFactory;
+        public PetRepository(IHttpClientFactory httpClientFactory, PetDbContext context)
         {
+            _httpClientFactory = httpClientFactory;
             this.context = context;
         }
 
@@ -56,29 +58,27 @@ namespace PetApi.Infrastructure.Repositories
                     return new Response(false, $"Pet with ID {entity.Pet_ID} not found.");
                 }
 
-                using (var httpClient = new HttpClient())
+                var httpClient = _httpClientFactory.CreateClient("ApiGateway");
+                var response = await httpClient.GetAsync($"api/bookingServiceItem/check/{pet.Pet_ID}");
+
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await httpClient.GetAsync($"http://localhost:5023/api/bookingServiceItem/check/{pet.Pet_ID}");
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var jsonString = await response.Content.ReadAsStringAsync();
+                    var jsonString = await response.Content.ReadAsStringAsync();
+                    var hasBookings = JsonSerializer.Deserialize<bool>(jsonString);
 
-                        var hasBookings = JsonSerializer.Deserialize<bool>(jsonString); 
-
-                        if (hasBookings)
-                        {
-                            return new Response(false, $"Pet {entity.Pet_Name} cannot be deleted because it has associated bookings.");
-                        }
-                    }
-                    else
+                    if (hasBookings)
                     {
-                        return new Response(false, "Failed to check bookings for the pet.");
+                        return new Response(false, $"Pet {entity.Pet_Name} cannot be deleted because it has associated bookings.");
                     }
+                }
+                else
+                {
+                    return new Response(false, "Failed to check bookings for the pet.");
                 }
 
                 if (!pet.IsDelete)
                 {
-                    pet.IsDelete = true; 
+                    pet.IsDelete = true;
                     context.Pets.Update(pet);
                     await context.SaveChangesAsync();
                     return new Response(true, $"Pet {entity.Pet_Name} has been soft deleted successfully.");
@@ -86,7 +86,6 @@ namespace PetApi.Infrastructure.Repositories
 
                 context.Pets.Remove(pet);
                 await context.SaveChangesAsync();
-
                 return new Response(true, $"Pet {entity.Pet_Name} has been permanently deleted.");
             }
             catch (Exception ex)
@@ -95,7 +94,6 @@ namespace PetApi.Infrastructure.Repositories
                 return new Response(false, "An error occurred while deleting the Pet.");
             }
         }
-
         public async Task<Pet?> GetByIdAsync(Guid id)
         {
             try
