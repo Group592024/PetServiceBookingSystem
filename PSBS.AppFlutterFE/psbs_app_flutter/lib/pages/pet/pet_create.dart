@@ -41,7 +41,7 @@ class _PetCreateState extends State<PetCreate> {
   Future<void> _fetchPetTypes() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:5010/api/petType'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/petType'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -59,7 +59,7 @@ class _PetCreateState extends State<PetCreate> {
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5010/api/petBreed/byPetType/$petTypeId'),
+        Uri.parse('http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'),
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -164,7 +164,7 @@ class _PetCreateState extends State<PetCreate> {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse('http://10.0.2.2:5010/api/pet'),
+        Uri.parse('http://10.0.2.2:5050/api/pet'),
       );
 
       request.fields.addAll({

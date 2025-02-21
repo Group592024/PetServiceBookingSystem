@@ -33,12 +33,12 @@ const AdminPetEdit = () => {
     useEffect(() => {
         const fetchPet = async () => {
             try {
-                const response = await fetch(`http://localhost:5010/api/pet/${id}`);
+                const response = await fetch(`http://localhost:5050/api/pet/${id}`);
                 const data = await response.json();
                 if (data.flag) {
                     setPet(data.data);
                     const imagePath = data.data.petImage.startsWith("/")
-                        ? `http://localhost:5010${data.data.petImage}`
+                        ? `http://localhost:5050/pet-service${data.data.petImage}`
                         : data.data.petImage;
                     setImagePreview(imagePath);
                     setSearch(data.data.accountId);
@@ -58,7 +58,7 @@ const AdminPetEdit = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5010/api/petType');
+                const response = await fetch('http://localhost:5050/api/petType');
                 const data = await response.json();
                 setPetTypes(data.filter(type => !type.isDelete));
             } catch (error) {
@@ -71,7 +71,7 @@ const AdminPetEdit = () => {
     useEffect(() => {
         const fetchAccounts = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/account/all');
+                const response = await fetch('http://localhost:5050/api/account/all');
                 const data = await response.json();
                 setAccounts(data.data || []);
             } catch (error) {
@@ -98,7 +98,7 @@ const AdminPetEdit = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5010/api/petBreed/byPetType/${pet.petTypeId}`);
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
                     const data = await response.json();
                     setBreeds(data.data || []);
                 } catch (error) {
@@ -180,7 +180,7 @@ const AdminPetEdit = () => {
         formData.append('isDelete', pet.isDelete);
 
         try {
-            const response = await fetch(`http://localhost:5010/api/pet`, {
+            const response = await fetch(`http://localhost:5050/api/pet`, {
                 method: 'PUT',
                 body: formData,
             });

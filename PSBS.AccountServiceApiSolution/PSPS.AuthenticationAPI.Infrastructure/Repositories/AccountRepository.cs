@@ -93,9 +93,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     RedeemDate = DateTime.UtcNow
                 };
 
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = "http://localhost:5022/redeemhistory";
-                var response = await client.PostAsJsonAsync(apiUrl, redeemHistoryRequest);
+                var client = _httpClientFactory.CreateClient("ApiGateway");
+                var response = await client.PostAsJsonAsync("redeemhistory", redeemHistoryRequest);
 
                 if (response.IsSuccessStatusCode)
                 {

@@ -29,20 +29,20 @@ const PetBreedEdit = () => {
         const fetchData = async () => {
             try {
                 const [breedResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5010/api/PetBreed/${id}`),
-                    fetch('http://localhost:5010/api/PetType/available')
+                    fetch(`http://localhost:5050/api/PetBreed/${id}`),
+                    fetch('http://localhost:5050/api/PetType/available')
                 ]);
 
                 const breedData = await breedResponse.json();
                 const typesData = await typesResponse.json();
                 setPetTypes(typesData.data || []);
                 if (breedData.flag && breedData.data) {
-                    const typeResponse = await fetch(`http://localhost:5010/api/PetType/${breedData.data.petTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/PetType/${breedData.data.petTypeId}`);
                     const typeData = await typeResponse.json();
                     const currentType = typesData.data.find(t => t.petType_ID === breedData.data.petTypeId);
                     setName(breedData.data.petBreedName);
                     setDescription(breedData.data.petBreedDescription);
-                    setTmpImage(breedData.data.petBreedImage ? `http://localhost:5010${breedData.data.petBreedImage}` : sampleImage);
+                    setTmpImage(breedData.data.petBreedImage ? `http://localhost:5050/pet-service${breedData.data.petBreedImage}` : sampleImage);
                     setTypeName(breedData.data.petTypeId);
                     setIsDelete(breedData.data.isDelete);
                     setCurrentTypeName(typeData.petType_Name);
@@ -132,7 +132,7 @@ const PetBreedEdit = () => {
             formData.append('isDelete', isDelete);
     
             try {
-                const response = await fetch(`http://localhost:5010/api/PetBreed`, {
+                const response = await fetch(`http://localhost:5050/api/PetBreed`, {
                     method: 'PUT',
                     body: formData,
                 });

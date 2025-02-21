@@ -16,13 +16,13 @@ const AdminPetDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const petResponse = await fetch(`http://localhost:5010/api/Pet/${id}`);
+                const petResponse = await fetch(`http://localhost:5050/api/Pet/${id}`);
                 const petData = await petResponse.json();
                 console.log(petData);
 
                 const [accountResponse, breedResponse] = await Promise.all([
-                    fetch('http://localhost:5000/api/Account/all'),
-                    fetch('http://localhost:5010/api/PetBreed'),
+                    fetch('http://localhost:5050/api/Account/all'),
+                    fetch('http://localhost:5050/api/PetBreed'),
                 ]);
 
                 const accountData = await accountResponse.json();
@@ -77,7 +77,7 @@ const AdminPetDetail = () => {
     
         if (confirmDelete.isConfirmed) {
             try {
-                const response = await fetch(`http://localhost:5010/api/Pet/${petId}`, {
+                const response = await fetch(`http://localhost:5050/api/Pet/${petId}`, {
                     method: 'DELETE',
                 });
     
@@ -116,7 +116,7 @@ const AdminPetDetail = () => {
                             <div className="flex-1">
                                 <div className="mb-3 flex justify-center">
                                     <img
-                                        src={`http://localhost:5010${pet.petImage || '/Images/default-image.png'}`}
+                                        src={`http://localhost:5050/pet-service${pet.petImage || '/Images/default-image.png'}`}
                                         alt="Pet"
                                         className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"
                                     />

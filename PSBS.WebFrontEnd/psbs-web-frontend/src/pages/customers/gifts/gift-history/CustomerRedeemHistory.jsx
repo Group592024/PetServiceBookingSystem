@@ -12,10 +12,10 @@ const CustomerRedeemHistory = () => {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get(`http://localhost:5022/redeemhistory/${accountId}`);
+        const response = await axios.get(`http://localhost:5050/redeemhistory/${accountId}`);
         if (response.data.flag) {
           const formattedData = await Promise.all(response.data.data.map(async (item) => {
-            const giftResponse = await axios.get(`http://localhost:5022/Gifts/detail/${item.giftId}`);
+            const giftResponse = await axios.get(`http://localhost:5050/Gifts/detail/${item.giftId}`);
             return {
               id: item.redeemHistoryId,
               ...item,
