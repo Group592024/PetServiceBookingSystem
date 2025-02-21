@@ -80,11 +80,41 @@ import PetHealthBookList from './pages/admins/pethealthbook/PetHealthBookList';
 import PetHealthBookDetail from './pages/admins/pethealthbook/PetHealthBookDetail';
 import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreate';
 
-import PetHealthBookEdit from './pages/admins/pethealthbook/PetHealthBookEdit';
+import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
+
 import ReportSquareCard from './components/report/ReportSquareCard';
 import ReportIncome from './components/report/ReportIncome';
 import ReportBookingPage from './pages/admins/reports/ReportBookingPage';
+
+import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
+import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
+import ServiceCardList from "./pages/customers/services/ServiceListPage";
+import ServiceListPage from "./pages/customers/services/ServiceListPage";
+import ServiceCard from "./components/ServiceCustomer/ServiceCard";
+import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+import Chat from "./pages/admins/chat/Chat";
+import signalRService from "./lib/ChatService";
+import { useEffect } from "react";
+import CustomerChatPage from "./pages/customers/chat/CustomerChatPage";
+import Booking from "./pages/customers/bookings/AddBooking";
+import AdminBookingList from "./pages/admins/bookings/list-pages/AdminBookingList";
+import ServiceBookingDetailPage from "./pages/admins/bookings/detail-form/ServiceBookingDetailPage";
+import RoomBookingDetailPage from "./pages/admins/bookings/detail-form/RoomBookingDetailPage";
+import CustomerBookingList from "./pages/customers/bookings/list-pages/CustomerBookingList";
+import { BookingProvider } from "./components/Booking/add-form/BookingContext";
+import AddBooking from "./pages/customers/bookings/AddBooking";
+import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Booking";
+import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
+import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
 function App() {
+ const userId = sessionStorage.getItem('accountId');
+  useEffect(() => {
+    signalRService.startConnection("http://localhost:5159/chatHub", userId );
+
+    return () => {
+      signalRService.stopConnection(); // Cleanup
+    };
+  }, []);
   return (
     <div className='App'>
       <BrowserRouter>
@@ -122,16 +152,26 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path='/detailcus/:healthBookId'
+          
+           
+           <Route
+            path="/detailcus/:healthBookId"
             element={
               <ProtectedRoute>
                 <PetHealthBookDetailCus />
               </ProtectedRoute>
             }
           />
+            <Route
+            path="/list"
+            element={
+              <ProtectedRoute>
+                <PetHealthBookListCus />
+              </ProtectedRoute>
+            }
+          />
           <Route
-            path='/account'
+            path="/account"
             element={
               <ProtectedRoute>
                 <AccountList />
@@ -211,6 +251,48 @@ function App() {
             <Route path='update/:medicineId' element={<MedicineUpdateForm />} />
             <Route path='detail/:medicineId' element={<MedicineDetailForm />} />
           </Route>
+          <Route path="/bookings">
+            <Route index element={<CustomerBookingList />} />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <AddBooking />{" "}
+                </BookingProvider>
+              }
+            />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<CustomerServiceBookingDetail />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<CustomerRoomBookingDetail />}
+            />
+          </Route>
+
+          <Route path="/admin/bookings">
+            <Route index element={<AdminBookingList />} />
+            <Route
+              path="detail/ServiceBookingDetailPage/:bookingId"
+              element={<ServiceBookingDetailPage />}
+            />
+            <Route
+              path="detail/RoomBookingDetailPage/:bookingId"
+              element={<RoomBookingDetailPage />}
+            />
+            <Route
+              path="new"
+              element={
+                <BookingProvider>
+                  {" "}
+                  <Admin_Add_Booking />{" "}
+                </BookingProvider>
+              }
+            />
+          </Route>
+          
 
           <Route path='/gifts'>
             <Route index element={<GiftsList />} />
@@ -299,7 +381,8 @@ function App() {
           </Route>
           <Route path='/customer/services'>
             <Route index element={<ServiceListPage />} />
-            <Route path=':id' element={<ServiceDetailPage />} />
+            <Route path=":id" element={<ServiceDetailPage />} />
+
           </Route>
           <Route path='/customer/pet-diaries/:petId'>
             <Route index element={<PetDiaryListPage />} />
@@ -312,9 +395,10 @@ function App() {
           </Route>
           <Route path='/customer/pet'>
             <Route index element={<CustomerPetList />} />
-            <Route path=':id' element={<CustomerPetDetail />} />
-            <Route path='add' element={<CustomerPetCreate />} />
-            <Route path='edit/:id' element={<CustomerPetEdit />} />
+            <Route path=":id" element={<CustomerPetDetail />} />
+            <Route path="add" element={<CustomerPetCreate />} />
+            <Route path="edit/:id" element={<CustomerPetEdit />} />
+
           </Route>
           <Route path='/register'>
             <Route index element={<Register />} />
@@ -337,6 +421,10 @@ function App() {
           <Route path='/account'>
             <Route index element={<AccountList />} />
           </Route>
+          <Route path="/chat">
+            <Route index element={<Chat />} />
+            <Route path="customer" element={<CustomerChatPage />} />
+          </Route>
 
           <Route path='/report'>
             <Route index element={<ReportBookingPage />} />
@@ -349,5 +437,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

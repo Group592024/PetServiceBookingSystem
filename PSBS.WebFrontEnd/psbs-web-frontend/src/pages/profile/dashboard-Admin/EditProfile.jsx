@@ -165,21 +165,25 @@ const EditProfile = () => {
       formData.append("AccountTempDTO.isPickImage", false);
       formData.append("AccountTempDTO.AccountImage", account.accountImage || "");
     }
-
+    console.log("Form Data:", formData);
     const response = await fetch(`http://localhost:5000/api/Account`, {
       method: "PUT",
       body: formData,
     });
-
+    console.log("Response:", response);
     if (!response.ok) {
       const errorData = await response.json();
+
       console.error("Error from server:", errorData);
       Swal.fire("Error", errorData.message || "Something went wrong", "error");
       return;
     }
 
     const result = await response.json();
+    console.log("Result:", result);
+
     if (result.flag) {
+      console.log("Profile updated successfully:", result);
       Swal.fire("Success", "Profile updated successfully!", "success");
       navigate(-1);
     } else {

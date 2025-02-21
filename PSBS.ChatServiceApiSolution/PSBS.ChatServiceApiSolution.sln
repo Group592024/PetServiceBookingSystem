@@ -5,6 +5,14 @@ VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{6E86C36E-6490-41BA-9F52-39B29B70DB15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServiceApi.Application", "ChatServiceApi.Application\ChatServiceApi.Application.csproj", "{BD817856-24E0-486F-BB4D-73A0962D1CB9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServiceApi.Domain", "ChatServiceApi.Domain\ChatServiceApi.Domain.csproj", "{7C9BF9CC-3343-4B81-87A7-BDDB6D778B7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServiceApi.Infrastructure", "ChatServiceApi.Infrastructure\ChatServiceApi.Infrastructure.csproj", "{EE3AB0C5-90B5-4A9F-8822-2880F1A20E5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChatServiceApi.Presentation", "ChatServiceApi.Presentation\ChatServiceApi.Presentation.csproj", "{3419B40F-8346-4621-BE0C-81D2343C1E4B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +23,22 @@ Global
 		{6E86C36E-6490-41BA-9F52-39B29B70DB15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E86C36E-6490-41BA-9F52-39B29B70DB15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E86C36E-6490-41BA-9F52-39B29B70DB15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD817856-24E0-486F-BB4D-73A0962D1CB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD817856-24E0-486F-BB4D-73A0962D1CB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD817856-24E0-486F-BB4D-73A0962D1CB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD817856-24E0-486F-BB4D-73A0962D1CB9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C9BF9CC-3343-4B81-87A7-BDDB6D778B7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C9BF9CC-3343-4B81-87A7-BDDB6D778B7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C9BF9CC-3343-4B81-87A7-BDDB6D778B7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C9BF9CC-3343-4B81-87A7-BDDB6D778B7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE3AB0C5-90B5-4A9F-8822-2880F1A20E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE3AB0C5-90B5-4A9F-8822-2880F1A20E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE3AB0C5-90B5-4A9F-8822-2880F1A20E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE3AB0C5-90B5-4A9F-8822-2880F1A20E5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3419B40F-8346-4621-BE0C-81D2343C1E4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3419B40F-8346-4621-BE0C-81D2343C1E4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3419B40F-8346-4621-BE0C-81D2343C1E4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3419B40F-8346-4621-BE0C-81D2343C1E4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

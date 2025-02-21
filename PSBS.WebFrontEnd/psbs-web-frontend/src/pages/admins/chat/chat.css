@@ -1,0 +1,22 @@
+.chatBody{
+    background-image: url("https://i.pinimg.com/736x/ed/22/2b/ed222b6077d34b183054c4dd956e206e.jpg");
+    background-size: cover; /* Ensures the image covers the entire container */
+    background-position: center; /* Centers the image */
+    background-repeat: no-repeat; /* Prevents the image from repeating */
+    max-width: 1600px; 
+    width: 100%;
+    height: 85vh;
+    border-radius: 12px;
+}
+
+.chatContainer {
+    max-width: 1600px; 
+    width: 100%;
+    height: 85vh;
+    background-color: rgba(36, 57, 96, 0.75);
+    backdrop-filter: blur(19px) saturate(180%);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.125);
+    display: flex;
+    color: white;
+}

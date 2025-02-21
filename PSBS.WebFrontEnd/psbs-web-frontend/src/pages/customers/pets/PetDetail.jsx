@@ -16,7 +16,7 @@ const CustomerPetDetail = () => {
    
     const fetchData = async () => {
       try {
-        const petResponse = await fetch(`http://localhost:5010/api/pet/${id}`);
+        const petResponse = await fetch(`http://localhost:5050/api/pet/${id}`);
         const petData = await petResponse.json();
 
         if (petData.flag) {
@@ -31,7 +31,7 @@ const CustomerPetDetail = () => {
             })
           );
           const breedResponse = await fetch(
-            `http://localhost:5010/api/petBreed/${petData.data.petBreedId}`
+            `http://localhost:5050/api/petBreed/${petData.data.petBreedId}`
           );
           const breedData = await breedResponse.json();
           if (breedData.flag) {
@@ -63,7 +63,7 @@ const CustomerPetDetail = () => {
         const fetchDelete = async () => {
           try {
             const deleteResponse = await fetch(
-              `http://localhost:5010/api/pet/${petId}`,
+              `http://localhost:5050/api/pet/${petId}`,
               {
                 method: 'DELETE',
               }
@@ -159,7 +159,7 @@ const CustomerPetDetail = () => {
                 <div className='md:w-5/12 flex flex-col items-center'>
                   <div className='bg-gray-100 p-4 rounded-xl shadow-md w-full'>
                     <img
-                      src={`http://localhost:5010${pet.petImage}`}
+                      src={`http://localhost:5050/pet-service${pet.petImage}`}
                       alt={pet.petName}
                       className='w-full h-80 object-cover rounded-lg'
                     />

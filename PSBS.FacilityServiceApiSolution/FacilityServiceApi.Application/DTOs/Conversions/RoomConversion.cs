@@ -16,7 +16,6 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                 status = room.status,
                 isDeleted = room.isDeleted ?? false,
                 roomImage = room.roomImage,
-                hasCamera = room.hasCamera
             };
         }
 
@@ -33,7 +32,6 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     description = room.description,
                     status = room.status,
                     roomImage = room.roomImage,
-                    hasCamera = room.hasCamera,
                     isDeleted = room.isDeleted
                 };
                 return (singleRoom, null);
@@ -50,7 +48,6 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     description = p.description,
                     status = p.status,
                     roomImage = p.roomImage,
-                    hasCamera = p.hasCamera,
                     isDeleted = p.isDeleted
                 }).ToList();
 

@@ -25,7 +25,7 @@ const CustomerPetCreate = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5010/api/petType');
+                const response = await fetch('http://localhost:5050/api/petType');
                 const data = await response.json();
                 setPetTypes(data.filter(type => !type.isDelete));
             } catch (error) {
@@ -39,7 +39,7 @@ const CustomerPetCreate = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5010/api/petBreed/byPetType/${pet.petTypeId}`);
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
                     const data = await response.json();
 
                     if (!data.flag) {
@@ -112,12 +112,9 @@ const CustomerPetCreate = () => {
         formData.append('petNote', pet.petNote);
         formData.append('imageFile', pet.petImage);
         formData.append('accountId', sessionStorage.getItem('accountId'));
-        //Heath number
-        formData.append('healthNumber', pet.healthNumber ? pet.healthNumber : 'default-health-number');
-
 
         try {
-            const response = await fetch('http://localhost:5010/api/pet', {
+            const response = await fetch('http://localhost:5050/api/pet', {
                 method: 'POST',
                 body: formData
             });

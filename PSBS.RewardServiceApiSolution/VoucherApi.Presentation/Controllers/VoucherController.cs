@@ -48,6 +48,24 @@ namespace VoucherApi.Presentation.Controllers
 
         }
 
+        // GET: api/<VoucherController>
+        [HttpGet("valid-voucher")]
+        public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetValidVouchersForCustomer()
+        {
+            // get all vouchers from repo
+            var vouchers = await voucherInteface.GetValidVoucherForCustomer();
+            if (!vouchers.Any())
+                return NotFound("No vouchers detected in the database");
+            // convert data from entity to DTO and return
+            var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
+            return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
+            {
+                Data = list
+            }) : NotFound(new Response(false, "No Voucher detected"));
+
+
+        }
+
         // GET api/<VoucherController>/5
         [HttpGet("{id}")]
         public async Task<ActionResult<VoucherDTO>> GetVoucherById(Guid id)
@@ -88,6 +106,14 @@ namespace VoucherApi.Presentation.Controllers
             // convert to entity to DT         
             var getEntity = VoucherConversion.UpdateToEntity(voucher);
             var response = await voucherInteface.UpdateAsync(getEntity);
+            return response.Flag is true ? Ok(response) : BadRequest(response);
+        }
+
+        // PUT api/<VoucherController>/5
+        [HttpPut("update-quantity/{id}")]
+        public async Task<ActionResult<Response>> UpdateVoucherQuantity(Guid id)
+        {
+            var response = await voucherInteface.MinusVoucherQuanitty(id);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
         // DELETE api/<VoucherController>/5

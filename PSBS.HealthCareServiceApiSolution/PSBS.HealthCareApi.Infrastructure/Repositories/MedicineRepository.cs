@@ -33,7 +33,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                return new Response(false, "Error occured creating the medicine");
+                return new Response(false, $"Error occurred creating the medicine: {ex.Message} - Inner Exception: {ex.InnerException?.Message}");
             }
         }
 
@@ -46,25 +46,31 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                     var medicine = await GetByIdAsync(entity.medicineId);
                     if (medicine == null)
                     {
-                        return new Response(false, "Medicine can't not found");
+                        return new Response(false, "Medicine không tồn tại");
                     }
                     medicine.isDeleted = true;
                     context.Medicines.Update(medicine);
-                    context.SaveChanges();
-                    return new Response(true, "Medicine is inactive successfully");
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Medicine đã được vô hiệu hóa thành công");
                 }
-                var existUsingMedicine = context.PetHealthBooks.FirstOrDefault(hb => hb.medicineId == entity.medicineId);
-                if(existUsingMedicine != null)
+
+                var existUsingMedicine = await context.PetHealthBooks
+                                                      .Where(hb => hb.Medicines.Any(m => m.medicineId == entity.medicineId))
+                                                      .FirstOrDefaultAsync();
+
+                if (existUsingMedicine != null)
                 {
-                    return new Response(false, "The medicine is used in Health Book.");
+                    return new Response(false, "Medicine đang được sử dụng trong một Health Book.");
                 }
+
+                // Nếu không còn sử dụng, tiến hành xóa Medicine
                 context.Medicines.Remove(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, "Medicine is deleted successfully.");
+                return new Response(true, "Medicine đã được xóa thành công.");
             }
             catch (Exception ex)
             {
-                return new Response(false, "Error occured removing the medication");
+                return new Response(false, $"Lỗi xảy ra khi xóa Medicine: {ex.Message}");
             }
         }
 

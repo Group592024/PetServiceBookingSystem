@@ -141,6 +141,22 @@ namespace ReservationApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<PointRule> GetPointRuleActiveAsync()
+        {
+            try
+            {
+                var pointRule = await context.PointRules.FirstOrDefaultAsync(p => !p.isDeleted);
+                return pointRule!;
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a client-friendly error message
+                throw new Exception("Error occurred while retrieving point rule");
+            }
+        }
+
         public async Task<Response> UpdateAsync(PointRule entity)
         {
             try

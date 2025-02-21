@@ -17,18 +17,30 @@ namespace PSBS.HealthCareApi.Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<PetHealthBook>().HasKey(phb => phb.healthBookId);
-            modelBuilder.Entity<PetHealthBook>()
-                .HasOne(phb => phb.Medicine)
-                .WithOne(m => m.PetHealthBook)
-                .HasForeignKey<PetHealthBook>(phb => phb.medicineId);
-
             modelBuilder.Entity<Medicine>().HasKey(m => m.medicineId);
+
+            modelBuilder.Entity<PetHealthBook>()
+                .HasMany(phb => phb.Medicines)
+                .WithMany(m => m.PetHealthBooks)
+                .UsingEntity<Dictionary<string, object>>(
+                    "PetHealthBookMedicine",
+                    j => j.HasOne<Medicine>().WithMany().HasForeignKey("medicineId"),
+                    j => j.HasOne<PetHealthBook>().WithMany().HasForeignKey("healthBookId"));
+
             modelBuilder.Entity<Medicine>()
                 .HasOne(m => m.Treatment)
                 .WithMany(t => t.Medicines)
                 .HasForeignKey(m => m.treatmentId);
 
             modelBuilder.Entity<Treatment>().HasKey(t => t.treatmentId);
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                optionsBuilder.UseSqlServer("Server=(local); Database=PSBSHealthCare; Trusted_Connection=true; TrustServerCertificate=true");
+            }
         }
     }
 }

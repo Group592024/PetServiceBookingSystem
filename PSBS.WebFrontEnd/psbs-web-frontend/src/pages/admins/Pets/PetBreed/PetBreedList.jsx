@@ -17,7 +17,7 @@ const PetBreedList = () => {
 
     const fetchPetTypes = async () => {
         try {
-            const fetchPetTypesData = await fetch('http://localhost:5010/api/PetType');
+            const fetchPetTypesData = await fetch('http://localhost:5050/api/PetType');
             const response = await fetchPetTypesData.json();
             if (Array.isArray(response)) {
                 setPetTypes(response);  
@@ -31,7 +31,7 @@ const PetBreedList = () => {
 
     const fetchDataFunction = async () => {
         try {
-            const fetchData = await fetch('http://localhost:5010/api/PetBreed');
+            const fetchData = await fetch('http://localhost:5050/api/PetBreed');
             const response = await fetchData.json();
 
             if (response.data && Array.isArray(response.data)) {
@@ -69,7 +69,7 @@ const PetBreedList = () => {
                 const fetchDelete = async () => {
                     try {
                         const deleteResponse = await fetch(
-                            `http://localhost:5010/api/PetBreed/${id}`,
+                            `http://localhost:5050/api/PetBreed/${id}`,
                             {
                                 method: 'DELETE',
                             }
@@ -82,6 +82,12 @@ const PetBreedList = () => {
                                 'success'
                             );
                             fetchDataFunction();
+                            setData((prevData) => {
+                                if (prevData.length === 1) {
+                                    return []; 
+                                }
+                               //Còn lại 1 cái để xóa
+                            });
                         } else {
                             const errorData = await deleteResponse.json(); // Đọc dữ liệu lỗi từ phản hồi
                             Swal.fire(

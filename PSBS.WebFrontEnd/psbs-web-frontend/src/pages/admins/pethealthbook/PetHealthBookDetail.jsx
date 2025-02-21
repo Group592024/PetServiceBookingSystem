@@ -15,9 +15,16 @@ const PetHealthBookDetail = () => {
   const [treatments, setTreatments] = useState([]);
   const [accounts, setAccounts] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [pets, setPets] = useState([]);
   const [accountDetails, setAccountDetails] = useState({});
   const [accountName, setAccountName] = useState("");
   const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
+  const [petImage, setPetImage] = useState(null);
+  const [petName, setPetName] = useState("");
+  const [dateOfBirth, setdateOfBirth] = useState("");
+  //  const [petGender, setPetGender] = useState("");
+
+
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -31,70 +38,44 @@ const PetHealthBookDetail = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch pet health book data
         console.log("Fetching Pet Health Book Data...");
-        const response = await fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`);
-        if (!response.ok) throw new Error("Failed to fetch pet health book data.");
-        const data = await response.json();
-        console.log("Pet Health Book Data:", data);
-        setPetHealthBook(data.data || {});
+        const [healthBookRes, medicinesRes, treatmentsRes, bookingsRes, petsRes] = await Promise.all([
+          fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
+          fetch(`http://localhost:5003/Medicines`),
+          fetch(`http://localhost:5003/api/Treatment`),
+          fetch(`https://localhost:5201/api/Booking`),
+          fetch(`http://localhost:5010/api/pet`),
+        ]);
 
-        // Fetch medicines data
-        console.log("Fetching Medicines Data...");
-        const medicinesResponse = await fetch(`http://localhost:5003/Medicines`);
-        if (!medicinesResponse.ok) throw new Error("Failed to fetch medicines data.");
-        const medicinesData = await medicinesResponse.json();
-        console.log("Medicines Data:", medicinesData);
+        if (!healthBookRes.ok || !medicinesRes.ok || !treatmentsRes.ok || !bookingsRes.ok || !petsRes.ok) {
+          throw new Error("Failed to fetch some data.");
+        }
+
+        const [healthBookData, medicinesData, treatmentsData, bookingsData, petsData] = await Promise.all([
+          healthBookRes.json(),
+          medicinesRes.json(),
+          treatmentsRes.json(),
+          bookingsRes.json(),
+          petsRes.json(),
+        ]);
+
+        console.log("Pet Health Book Data:", healthBookData);
+
+        setPetHealthBook(healthBookData.data || {});
         setMedicines(medicinesData.data || []);
-
-        // Fetch treatments data
-        console.log("Fetching Treatments Data...");
-        const treatmentsResponse = await fetch(`http://localhost:5003/api/Treatment`);
-        if (!treatmentsResponse.ok) throw new Error("Failed to fetch treatments data.");
-        const treatmentsData = await treatmentsResponse.json();
-        console.log("Treatments Data:", treatmentsData);
         setTreatments(treatmentsData.data || []);
-
-        if (!data.data || !data.data.bookingId) {
-          console.log("Pet health book data is not loaded yet.");
-          return; // Chưa có bookingId, dừng lại
-        }
-
-        // Fetch bookings data
-        console.log("Fetching Bookings Data...");
-        const bookingsResponse = await fetch(`http://localhost:5115/api/Booking`);
-        if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings data.");
-        const bookingsData = await bookingsResponse.json();
-        console.log("Bookings Data:", bookingsData);
         setBookings(bookingsData.data || []);
-
-        // Find the bookingId and check if it matches with the petHealthBook data
-        const booking = bookingsData.data.find((b) => b.bookingId === data.data.bookingId);
-        if (booking) {
-          console.log("Found booking with bookingId:", booking.bookingId);
-
-          // Once bookingId is found, get the accountId
-          const { accountId } = booking;
-
-          // Check if accountId is available
-          if (accountId) {
-            console.log("Found accountId:", accountId);
-
-            // Now call the function to get account data using accountId
-            const accountResponse = await fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`);
-            if (!accountResponse.ok) throw new Error(`Failed to fetch account with ID: ${accountId}`);
-            const accountData = await accountResponse.json();
-            console.log("Account Data:", accountData);
-
-            // Set account name and phone number
-            setAccountName(accountData.accountName);
-            setAccountPhoneNumber(accountData.accountPhoneNumber);
-          } else {
-            console.log("No accountId found in booking.");
-          }
-        } else {
-          console.log("No matching booking found for this bookingId.");
+        setPets(petsData.data || []);
+        if (!healthBookData.data?.bookingId) return;
+        const booking = bookingsData.data.find((b) => b.bookingId === healthBookData.data.bookingId);
+        if (!booking) return;
+        const pet = petsData.data.find((p) => p.accountId === booking.accountId);
+        if (pet) {
+          setPetImage(pet.petImage);
+          setPetName(pet.petName);
+          setdateOfBirth(pet.dateOfBirth);
         }
+
       } catch (error) {
         console.error("Error fetching data:", error);
         Swal.fire("Error", "Failed to load data. Please try again later.", "error");
@@ -103,6 +84,31 @@ const PetHealthBookDetail = () => {
 
     fetchData();
   }, [healthBookId]);
+
+  useEffect(() => {
+    const fetchAccountDetails = async (accountId) => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`);
+        if (!res.ok) throw new Error("Failed to fetch account details");
+
+        const data = await res.json();
+        console.log("Fetched Account Data:", data);
+
+        setAccountName(data.accountName);
+        setAccountPhoneNumber(data.accountPhoneNumber);
+      } catch (error) {
+        console.error("Error fetching account:", error);
+      }
+    };
+
+    if (petHealthBook?.bookingId) {
+      const booking = bookings.find(b => b.bookingId === petHealthBook.bookingId);
+      if (booking) {
+        console.log("Booking Found:", booking);
+        fetchAccountDetails(booking.accountId);
+      }
+    }
+  }, [petHealthBook, bookings]);
 
   const handleBack = () => {
     navigate(-1);
@@ -113,30 +119,30 @@ const PetHealthBookDetail = () => {
     return <div>Loading...</div>;
   }
   const {
-    petImage,
-    petName,
-    petGender,
-    petDob,
-    ownerName,
-    ownerPhoneNumber,
-    treatmentId,
+
+
     performBy,
     visitDate,
     nextVisitDate,
-    medicineId,
     createdAt,
-    createdBy,
     updatedAt,
   } = petHealthBook;
-  const treatmentIdFromMedicine = medicines.find((m) => m.medicineId === medicineId)?.treatmentId;
-  const treatmentName = treatments.find(
-    (t) => t.treatmentId.trim() === treatmentIdFromMedicine.trim()
-  )?.treatmentName || "No Treatment Assigned";
-  const medicineName = medicines.find((m) => m.medicineId === medicineId)?.medicineName || "No Medicine Assigned";
+  const medicineIds = petHealthBook?.medicineIds || [];
+  const selectedMedicines = medicines.filter((m) => medicineIds.includes(m.medicineId));
+  const medicineNames = selectedMedicines.map((m) => m.medicineName).join(", ") || "No Medicines Assigned";
+
+
+  const treatmentIds = [...new Set(selectedMedicines.map((m) => m.treatmentId))]; // Lấy danh sách treatmentId duy nhất
+  const assignedTreatments = treatments.filter((t) => treatmentIds.includes(t.treatmentId));
+  const treatmentNames = assignedTreatments.length > 0
+    ? assignedTreatments.map((t) => t.treatmentName).join(", ")
+    : "No Treatments Assigned";
+
+
+
   const bookingAccount = bookings.find((b) => b.id === healthBookId);
   const ownerAccount = accountDetails[bookingAccount?.accountId] || {};
-  const displayOwnerName = ownerAccount.accountName;
-  const displayOwnerPhone = ownerAccount.accountPhoneNumber
+
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
       <Sidebar ref={sidebarRef} />
@@ -150,33 +156,15 @@ const PetHealthBookDetail = () => {
             {/* Left Column */}
             <div className="w-full sm:w-1/3 bg-white shadow-md rounded-md p-6">
               <div className="flex flex-col items-center">
-                <div className="w-[15rem] h-[15rem] rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                  {petImage ? (
-                    <img
-                      src={petImage}
-                      alt="Pet Preview"
-                      className="rounded-full w-full h-full object-cover"
-                    />
-                  ) : (
-                    <svg
-                      className="w-[15rem] h-[15rem] text-gray-500"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M5.121 17.804A9.003 9.003 0 0112 3v0a9.003 9.003 0 016.879 14.804M12 7v4m0 4h.01"
-                      />
-                    </svg>
-                  )}
-                </div>
+                <img
+                 src={petImage ? `http://localhost:5010${petImage}` : '/Images/default-image.png'}
+                  alt="Pet Health Record"
+                  className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"
+                />
+
                 <div className="mt-4 text-sm font-bold">{petName || "Bull"}</div>
-                <div className="mt-4 text-sm ">{petGender || "Male"}</div>
-                <div className="mt-4 text-sm ">{formatDate(petDob) || "17/02/2023"}</div>
+                {/* <div className="mt-4 text-sm ">{petGender || "Male"}</div> */}
+                <div className="mt-4 text-sm ">{formatDate(dateOfBirth) || "17/02/2023"}</div>
               </div>
               <div className="mt-4 flex items-center">
                 <label className="text-base font-bold mb-2 mt-4 w-[12rem]">Owner:</label>
@@ -207,9 +195,10 @@ const PetHealthBookDetail = () => {
                   <input
                     type="text"
                     className="w-full p-3 border rounded-md"
-                    value={treatmentName}
+                    value={treatmentNames}
                     disabled
                   />
+
                 </div>
                 <div className="mb-3">
                   <label className="block text-sm  mb-1 font-bold">Performed By</label>
@@ -243,7 +232,7 @@ const PetHealthBookDetail = () => {
                   <input
                     type="text"
                     className="w-full p-3 border rounded-md"
-                    value={medicineName}
+                    value={medicineNames}
                     disabled
                   />
                 </div>

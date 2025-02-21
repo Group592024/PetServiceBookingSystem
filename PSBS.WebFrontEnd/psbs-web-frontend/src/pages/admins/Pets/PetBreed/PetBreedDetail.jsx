@@ -13,11 +13,11 @@ const PetBreedDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5010/api/PetBreed/${id}`);
+                const response = await fetch(`http://localhost:5050/api/PetBreed/${id}`);
                 const data = await response.json();
                 setDetail(data.data);
                 if (data.data && data.data.petTypeId) {
-                    const petTypeResponse = await fetch(`http://localhost:5010/api/PetType/${data.data.petTypeId}`);
+                    const petTypeResponse = await fetch(`http://localhost:5050/api/PetType/${data.data.petTypeId}`);
                     const petTypeData = await petTypeResponse.json();
                     if (petTypeData && petTypeData.petType_Name) {
                         setPetTypeName(petTypeData.petType_Name);
@@ -40,7 +40,7 @@ const PetBreedDetail = () => {
         return <div>Loading...</div>;
     }
 
-    const imageURL = `http://localhost:5010${detail.petBreedImage}`;
+    const imageURL = `http://localhost:5050/pet-service${detail.petBreedImage}`;
 
     return (
         <div>

@@ -18,7 +18,7 @@ const RoomList = () => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch('http://localhost:5023/api/RoomType');
+            const response = await fetch('http://localhost:5050/api/RoomType');
             const roomTypesData = await response.json();
     
             if (roomTypesData && Array.isArray(roomTypesData.data)) {
@@ -33,7 +33,7 @@ const RoomList = () => {
 
     const fetchDataFunction = async () => {
         try {
-            const response = await fetch('http://localhost:5023/api/Room');
+            const response = await fetch('http://localhost:5050/api/Room');
             const roomData = await response.json();
             if (roomData.data && Array.isArray(roomData.data)) {
                 //Sort Deleted
@@ -97,7 +97,7 @@ const RoomList = () => {
                 const fetchDelete = async () => {
                     try {
                         const deleteResponse = await fetch(
-                            `http://localhost:5023/api/Room/${id}`,
+                            `http://localhost:5050/api/Room/${id}`,
                             {
                                 method: 'DELETE',
                             }
@@ -116,7 +116,7 @@ const RoomList = () => {
                                 if (prevData.length === 1) {
                                     return []; 
                                 }
-                               
+                               //Còn lại 1 cái để xóa
                             });
                         } else {
                             Swal.fire(

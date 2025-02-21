@@ -16,7 +16,6 @@ namespace PetApi.Domain.Entities
         public string Pet_Weight { get; set; }
         public string Pet_FurType { get; set; }
         public string Pet_FurColor { get; set; }
-        public string Health_Number { get; set; }
         public bool IsDelete { get; set; }
 
 

@@ -26,15 +26,35 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             }
         }
 
+
         public async Task<bool> CheckBookingsForPetAsync(Guid petId)
         {
             return await context.bookingServiceItems
                 .AnyAsync(b => b.PetId == petId);
         }
 
-        public Task<Response> CreateAsync(BookingServiceItem entity)
+        public async Task<Response> CreateAsync(BookingServiceItem entity)
+
         {
-            throw new NotImplementedException();
+            try
+            {
+                var currentEntity = context.bookingServiceItems.Add(entity).Entity;
+                await context.SaveChangesAsync();
+                if (currentEntity is not null && currentEntity.BookingServiceItemId != Guid.Empty)
+                {
+
+                    return new Response(true, "Create service item successfully");
+                }
+                else
+                {
+                    return new Response(false, "Cannot create service item due to errors");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occured adding new service item");
+            }
         }
 
         public Task<Response> DeleteAsync(BookingServiceItem entity)

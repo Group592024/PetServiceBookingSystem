@@ -18,7 +18,6 @@ const RoomEdit = () => {
     const [roomImage, setRoomImage] = useState(null);
     const [roomDescription, setRoomDescription] = useState('');
     const [roomStatus, setRoomStatus] = useState('');
-    const [hasCamera, setHasCamera] = useState(false);
     const [isDeleted, setIsDeleted] = useState(false);
     const [tmpImage, setTmpImage] = useState(null);
     const [selectedImage, setSelectedImage] = useState(null);
@@ -34,8 +33,8 @@ const RoomEdit = () => {
         const fetchData = async () => {
             try {
                 const [roomResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5023/api/Room/${id}`),
-                    fetch('http://localhost:5023/api/RoomType/available')
+                    fetch(`http://localhost:5050/api/Room/${id}`),
+                    fetch('http://localhost:5050/api/RoomType/available')
                 ]);
 
                 const roomData = await roomResponse.json();
@@ -43,15 +42,14 @@ const RoomEdit = () => {
                 setRoomTypes(typesData.data || []);
 
                 if (roomData.flag && roomData.data) {
-                    const typeResponse = await fetch(`http://localhost:5023/api/RoomType/${roomData.data.roomTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`);
                     const typeData = await typeResponse.json();
 
                     setRoomName(roomData.data.roomName);
                     setRoomType(roomData.data.roomTypeId);
-                    setTmpImage(roomData.data.roomImage ? `http://localhost:5023${roomData.data.roomImage}` : 'default-room-image.jpg');
+                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : 'default-room-image.jpg');
                     setRoomDescription(roomData.data.description);
                     setRoomStatus(roomData.data.status);
-                    setHasCamera(roomData.data.hasCamera);
                     setIsDeleted(roomData.data.isDeleted);
                     setRoomTypeName(typeData.data.name);
                     setRoomTypePrice(typeData.data.price);
@@ -120,7 +118,6 @@ const RoomEdit = () => {
             formData.append('roomTypeId', roomType);
             formData.append('description', roomDescription);
             formData.append('status', roomStatus);
-            formData.append('hasCamera', hasCamera);
             formData.append('isDeleted', isDeleted);
 
             if (selectedImage) {
@@ -128,7 +125,7 @@ const RoomEdit = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:5023/api/Room`, {
+                const response = await fetch(`http://localhost:5050/api/Room`, {
                     method: 'PUT',
                     body: formData,
                 });
@@ -225,14 +222,6 @@ const RoomEdit = () => {
                                             InputProps={{
                                                 readOnly: true,
                                             }}
-                                        />
-                                    </div>
-
-                                    {/* Has Camera */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-3">Has Camera:</label>
-                                        <FormControlLabel
-                                            control={<Checkbox checked={hasCamera} onChange={(e) => setHasCamera(e.target.checked)} />}
                                         />
                                     </div>
 

@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PSBS.HealthCareApi.Domain\PSBS.HealthCareApi.Domain.csproj" />
     <ProjectReference Include="..\PSBS.HealthCareApi.Infrastructure\PSBS.HealthCareApi.Infrastructure.csproj" />
   </ItemGroup>
 

@@ -7,6 +7,7 @@ using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
 using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
+using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
@@ -92,9 +93,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     RedeemDate = DateTime.UtcNow
                 };
 
-                var client = _httpClientFactory.CreateClient();
-                var apiUrl = "http://localhost:5022/redeemhistory";
-                var response = await client.PostAsJsonAsync(apiUrl, redeemHistoryRequest);
+                var client = _httpClientFactory.CreateClient("ApiGateway");
+                var response = await client.PostAsJsonAsync("redeemhistory", redeemHistoryRequest);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -779,6 +779,51 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         public Task<Account> GetByIdAsync(Guid id)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
+        {
+            var account = await context.Accounts.Where(a => a.AccountPhoneNumber == phone).FirstOrDefaultAsync();
+            if (account == null)
+                return null;
+
+            return new GetAccountDTO(
+                account.AccountId ?? Guid.Empty,
+                account.AccountName ?? string.Empty,
+                account.AccountEmail ?? string.Empty,
+                account.AccountPhoneNumber ?? string.Empty,
+                account.AccountPassword ?? string.Empty,
+                account.AccountGender ?? string.Empty,
+                account.AccountDob ?? DateTime.MinValue,
+                account.AccountAddress ?? string.Empty,
+                account.AccountImage ?? string.Empty,
+                account.AccountLoyaltyPoint,
+                account.AccountIsDeleted,
+                account.RoleId
+            );
+        }
+
+        public async Task<Response> UpdateAccountPoint(Guid id, int point)
+        {
+            try
+            {
+                var existingAccount = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == id);
+                if(existingAccount == null)
+                {
+                    return new Response(false, "Error occurred while updating the existing Point of user.");
+                }
+                existingAccount.AccountLoyaltyPoint = point;
+                context.Accounts.Update(existingAccount);
+                await context.SaveChangesAsync();
+                return new Response(true, "Point of user successfully updated");
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a user-friendly message to the client
+                return new Response(false, "Error occurred while updating the existing Point.");
+            }
         }
     }
 }

@@ -14,12 +14,12 @@ const RoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5023/api/Room/${id}`);
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
                 const data = await response.json();
                 setDetail(data.data);
                 if (data.data && data.data.roomTypeId) {
                     try {
-                        const roomTypeResponse = await fetch(`http://localhost:5023/api/RoomType/${data.data.roomTypeId}`);
+                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
                         const roomTypeResponseData = await roomTypeResponse.json();
                         if (roomTypeResponseData && roomTypeResponseData.data && roomTypeResponseData.data.name && roomTypeResponseData.data.price) {
                             setRoomTypeName(roomTypeResponseData.data.name);
@@ -50,7 +50,7 @@ const RoomDetail = () => {
         return <div>Loading...</div>;
     }
 
-    const imageURL = `http://localhost:5023${detail.roomImage}`;
+    const imageURL = `http://localhost:5050/facility-service${detail.roomImage}`;
 
     return (
         <div className="bg-gray-200 min-h-screen flex flex-col">
@@ -97,16 +97,6 @@ const RoomDetail = () => {
                                         className="flex-1 p-2 border rounded-lg bg-gray-200"
                                         value={`${roomTypePrice}`}
                                         readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Has Camera:</label>
-                                    <input
-                                        type="checkbox"
-                                        checked={detail.hasCamera}
-                                        disabled
-                                        className="w-6 h-6 bg-gray-200"
                                     />
                                 </div>
 
