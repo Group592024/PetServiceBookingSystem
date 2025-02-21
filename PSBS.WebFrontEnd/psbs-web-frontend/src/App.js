@@ -69,34 +69,21 @@ import AdminPetList from './pages/admins/Pets/Pet/PetList';
 import AdminPetDetail from './pages/admins/Pets/Pet/PetDetail';
 import AdminPetCreate from './pages/admins/Pets/Pet/PetCreate';
 import AdminPetEdit from './pages/admins/Pets/Pet/PetEdit';
-import ServiceCardList from './pages/customers/services/ServiceListPage';
 import ServiceListPage from './pages/customers/services/ServiceListPage';
-import ServiceCard from './components/ServiceCustomer/ServiceCard';
 import ServiceDetailPage from './pages/customers/services/ServiceDetailPage';
 import PetDiaryListPage from './pages/customers/Diary/PetDiaryListPage';
-import AddPetDiaryPage from './pages/customers/Diary/AddPetDiaryPage';
-import EditPetDiaryPage from './pages/customers/Diary/EditPetDiaryPage';
 import PetHealthBookList from './pages/admins/pethealthbook/PetHealthBookList';
 import PetHealthBookDetail from './pages/admins/pethealthbook/PetHealthBookDetail';
 import PetHealthBookCreate from './pages/admins/pethealthbook/PetHealthBookCreate';
 
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
-
-import ReportSquareCard from './components/report/ReportSquareCard';
-import ReportIncome from './components/report/ReportIncome';
 import ReportBookingPage from './pages/admins/reports/ReportBookingPage';
 
-import CustomerRedeemHistory from "./pages/customers/gifts/gift-history/CustomerRedeemHistory";
-import AdminRedeemHistory from "./pages/admins/gifts/gift-history/AdminRedeemHistory";
-import ServiceCardList from "./pages/customers/services/ServiceListPage";
-import ServiceListPage from "./pages/customers/services/ServiceListPage";
-import ServiceCard from "./components/ServiceCustomer/ServiceCard";
-import ServiceDetailPage from "./pages/customers/services/ServiceDetailPage";
+
 import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
 import CustomerChatPage from "./pages/customers/chat/CustomerChatPage";
-import Booking from "./pages/customers/bookings/AddBooking";
 import AdminBookingList from "./pages/admins/bookings/list-pages/AdminBookingList";
 import ServiceBookingDetailPage from "./pages/admins/bookings/detail-form/ServiceBookingDetailPage";
 import RoomBookingDetailPage from "./pages/admins/bookings/detail-form/RoomBookingDetailPage";
@@ -428,9 +415,6 @@ function App() {
 
           <Route path='/report'>
             <Route index element={<ReportBookingPage />} />
-            {/* <Route path='new' element={<MedicineAddForm />} />
-            <Route path='update/:medicineId' element={<MedicineUpdateForm />} />
-            <Route path='detail/:medicineId' element={<MedicineDetailForm />} /> */}
           </Route>
         </Routes>
       </BrowserRouter>
