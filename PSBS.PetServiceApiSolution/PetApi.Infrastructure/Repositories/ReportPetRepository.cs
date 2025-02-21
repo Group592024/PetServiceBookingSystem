@@ -10,7 +10,7 @@ namespace PetApi.Infrastructure.Repositories
         public async Task<Dictionary<string, int>>
             GetPetBreedByPetCoutDTO(IEnumerable<PetCountDTO> dtos)
         {
-            var petDictionary = await context.Pets.Include(p => p.PetBreed)
+            var petDictionary = await context.Pets.Where(p => !p.IsDelete).Include(p => p.PetBreed)
                 .ToDictionaryAsync(s => s.Pet_ID, s => s.PetBreed.PetBreed_Name);
 
             var petBreedDictionary = new Dictionary<string, int>();

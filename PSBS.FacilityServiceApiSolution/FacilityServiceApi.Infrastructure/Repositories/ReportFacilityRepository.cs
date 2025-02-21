@@ -1,5 +1,6 @@
 ﻿using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.PSBSLogs;
@@ -10,7 +11,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
     {
         public async Task<IEnumerable<RoomStatusDTO>> GetRoomStatusList()
         {
-            var rooms = await context.Room.ToListAsync();
+            var rooms = await context.Room.Where(p => !p.isDeleted).ToListAsync();
 
             var response = rooms.GroupBy(p => p.status)
                 .Select(s => new RoomStatusDTO(s.Key, s.Count()));
@@ -87,7 +88,8 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
-                var serviceVariants = await context.ServiceVariant.Where(p => p.serviceId == id).ToListAsync();
+                var serviceVariants = await context.ServiceVariant.Where(p => p.serviceId == id
+                && !p.isDeleted).ToListAsync();
 
                 List<BookingPetDTO> result = new List<BookingPetDTO>();
 
@@ -111,6 +113,54 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 throw new Exception("Error occurred retrieving bookings by oet");
             }
         }
+
+        public async Task<IEnumerable<Room>> ListActiveRoomsAsync()
+        {
+            try
+            {
+                var rooms = await context.Room
+                                         .Where(r => !r.isDeleted)
+                                         .ToListAsync();
+                return rooms ?? new List<Room>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new InvalidOperationException("Error occurred retrieving non-deleted rooms");
+            }
+        }
+        public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetActiveRoomTypeList()
+        {
+            var roomTypes = await context.RoomType.Include(p => p.Rooms).ToListAsync();
+
+            List<RoomHistoryQuantityDTO> result = new List<RoomHistoryQuantityDTO>();
+
+            foreach (var roomType in roomTypes)
+            {
+                var quantity = roomType.Rooms.Where(p => !p.isDeleted)?.Count() ?? 0;
+                Console.WriteLine("Day la quantity" + quantity.ToString());
+                result.Add(new RoomHistoryQuantityDTO(roomType.name, quantity));
+            }
+
+            return result;
+        }
+
+        public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetActiveServiceTypeList()
+        {
+            var roomTypes = await context.ServiceType.Include(p => p.Services).ToListAsync();
+
+            List<RoomHistoryQuantityDTO> result = new List<RoomHistoryQuantityDTO>();
+
+            foreach (var roomType in roomTypes)
+            {
+                var quantity = roomType.Services.Where(p => !p.isDeleted)?.Count() ?? 0;
+                Console.WriteLine("Day la quantity" + quantity.ToString());
+                result.Add(new RoomHistoryQuantityDTO(roomType.typeName, quantity));
+            }
+
+            return result;
+        }
+
     }
 }
 

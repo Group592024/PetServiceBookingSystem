@@ -5,7 +5,7 @@ const ReportSquareCard = ({ name, quantity, color }) => {
   console.log(name);
 
   return (
-    <div className='p-5 w-full'>
+    <div className='p-5 w-[30%]'>
       <div
         className='p-3 rounded-3xl shadow-[0_20px_30px]'
         style={{

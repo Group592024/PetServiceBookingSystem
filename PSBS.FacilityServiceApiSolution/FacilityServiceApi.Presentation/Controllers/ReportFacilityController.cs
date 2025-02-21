@@ -1,4 +1,6 @@
-﻿using FacilityServiceApi.Application.DTOs;
+﻿using FacilityServiceApi.Application.DTO;
+using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
@@ -14,6 +16,22 @@ namespace FacilityServiceApi.Presentation.Controllers
         public ReportFacilityController(IReport report)
         {
             _report = report;
+        }
+
+        [HttpGet("availableRoom")]
+        public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms()
+        {
+            var rooms = await _report.ListActiveRoomsAsync();
+            if (!rooms.Any())
+            {
+                return NotFound(new Response(false, "No available rooms found"));
+            }
+
+            var (_, roomDtos) = RoomConversion.FromEntity(null!, rooms);
+            return Ok(new Response(true, "Available rooms retrieved successfully")
+            {
+                Data = roomDtos
+            });
         }
 
         [HttpGet("roomStatus")]
@@ -65,6 +83,31 @@ namespace FacilityServiceApi.Presentation.Controllers
             return Ok(petCountDTOs);
         }
 
+        [HttpGet("activeRoomType")]
+        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetActiveRoomTypes()
+        {
+            var roomStatus = await _report.GetActiveRoomTypeList();
+            if (!roomStatus.Any())
+                return NotFound(new Response(false, "No room type found in the database"));
+
+            return Ok(new Response(true, "Room type retrieved successfully")
+            {
+                Data = roomStatus
+            });
+        }
+
+        [HttpGet("activeServiceType")]
+        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetActiveServiceTypes()
+        {
+            var roomStatus = await _report.GetActiveServiceTypeList();
+            if (!roomStatus.Any())
+                return NotFound(new Response(false, "No service type found in the database"));
+
+            return Ok(new Response(true, "Service type retrieved successfully")
+            {
+                Data = roomStatus
+            });
+        }
 
     }
 }

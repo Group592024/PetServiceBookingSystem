@@ -18,6 +18,11 @@ const ReportIncome = () => {
   const [month, setMonth] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [total, setTotal] = useState({
+    roomTotal: 0,
+    serviceTotal: 0,
+    total: 0,
+  });
 
   const fetchDataIncome = async () => {
     try {
@@ -42,6 +47,20 @@ const ReportIncome = () => {
               ?.amountDTOs[index]?.amount || 0,
         })
       );
+
+      let roomTotalAmount = 0;
+      let serviceTotalAmount = 0;
+
+      transformedData.map((item) => {
+        roomTotalAmount += item.roomAmount;
+        serviceTotalAmount += item.serviceAmount;
+      });
+
+      setTotal({
+        roomTotal: roomTotalAmount,
+        serviceTotal: serviceTotalAmount,
+        total: roomTotalAmount + serviceTotalAmount,
+      });
 
       console.log(transformedData);
 
@@ -139,6 +158,20 @@ const ReportIncome = () => {
         {console.log(endDate)}
       </div>
       <div>
+        <div className='p-3'>
+          <p className='text-white'>
+            Total income in this time is:{' '}
+            <span className='font-bold text-red-600'>{total.total}</span>
+          </p>
+          <p className='text-white'>
+            Total income of room is:{' '}
+            <span className='font-bold text-red-600'>{total.roomTotal}</span>
+          </p>
+          <p className='text-white'>
+            Total income of service is:{' '}
+            <span className='font-bold text-red-600'>{total.serviceTotal}</span>
+          </p>
+        </div>
         <ResponsiveContainer width='100%' height={400}>
           <LineChart
             data={data}
@@ -153,7 +186,7 @@ const ReportIncome = () => {
             <Line
               type='monotone'
               dataKey='serviceAmount'
-              stroke='#990000'
+              stroke='#7FFF00'
               strokeWidth={2}
               name={`Total income of Service`}
             />
@@ -161,7 +194,7 @@ const ReportIncome = () => {
             <Line
               type='monotone'
               dataKey='roomAmount'
-              stroke='#006600'
+              stroke='#FF3300'
               strokeWidth={2}
               name={`Total income of Room`}
             />

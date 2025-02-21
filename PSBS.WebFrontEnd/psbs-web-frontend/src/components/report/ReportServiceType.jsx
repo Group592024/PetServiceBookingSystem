@@ -7,12 +7,14 @@ const ReportServiceType = () => {
 
   const fetchDataFunction = async () => {
     try {
-      const fetchData = await fetch('http://localhost:5023/api/ServiceType');
+      const fetchData = await fetch(
+        'http://localhost:5023/api/ReportFacility/activeServiceType'
+      );
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({
-        name: item.typeName,
-        quantity: item.services.length,
+        name: item.roomTypeName,
+        quantity: item.quantity,
         ...item,
       }));
 

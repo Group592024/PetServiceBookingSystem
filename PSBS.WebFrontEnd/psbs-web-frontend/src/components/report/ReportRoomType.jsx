@@ -7,12 +7,14 @@ const ReportRoomType = () => {
 
   const fetchDataFunction = async () => {
     try {
-      const fetchData = await fetch('http://localhost:5023/api/RoomType');
+      const fetchData = await fetch(
+        'http://localhost:5023/api/ReportFacility/activeRoomType'
+      );
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({
-        name: item.name,
-        quantity: item.rooms.length,
+        name: item.roomTypeName,
+        quantity: item.quantity,
         ...item,
       }));
 

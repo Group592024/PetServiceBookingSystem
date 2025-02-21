@@ -10,13 +10,14 @@ import ReportRoomStatusList from '../../../components/report/ReportRoomStatusLis
 import ReportRoomType from '../../../components/report/ReportRoomType';
 import ReportPet from '../../../components/report/ReportPet';
 import ReportAccountList from '../../../components/report/ReportAccountList';
+import ReportGeneral from '../../../components/report/ReportGeneral';
 
 const ReportBookingPage = () => {
   const sidebarRef = useRef(null);
 
-  const [type, setType] = useState('Booking');
+  const [type, setType] = useState('General');
 
-  const selectedTypes = ['Booking', 'Service', 'Room', 'Pet','User'];
+  const selectedTypes = ['General','Booking', 'Service', 'Room', 'Pet'];
 
   return (
     <div className=''>
@@ -42,6 +43,20 @@ const ReportBookingPage = () => {
               </h1>
             </div>
           </div>
+
+          {type === 'General' && (
+            <div className='p-3 rounded-3xl bg-neutral-200'>
+              <div className='mb-5'>
+                <div className='flex justify-center'>
+                  <p className='text-2xl font-bold rounded-lg  p-3'>
+                    General key metrics
+                  </p>
+                </div>
+                <ReportGeneral />
+              </div>
+            </div>
+          )}
+
           {type === 'Booking' && (
             <div className='p-3 rounded-3xl bg-neutral-200'>
               <div className='mb-5'>
@@ -73,12 +88,14 @@ const ReportBookingPage = () => {
                 </div>
               </div>
               <div className='mb-3'>
-                <div className='flex justify-center'>
-                  <p className='text-2xl font-bold rounded-lg  p-3'>
-                    Total revenue of bookings
-                  </p>
+                <div className='p-3 bg-neutral-900 rounded-3xl'>
+                  <div className='flex justify-center'>
+                    <p className='text-2xl font-bold rounded-lg text-white p-3'>
+                      Total revenue of bookings
+                    </p>
+                  </div>
+                  <ReportIncome />
                 </div>
-                <ReportIncome />
               </div>
             </div>
           )}
@@ -139,19 +156,6 @@ const ReportBookingPage = () => {
             </div>
           )}
 
-          {type === 'User' && (
-            <div className='p-3 rounded-3xl bg-neutral-200'>
-              <div className='mb-5'>
-                <div className='flex justify-center'>
-                  <p className='text-2xl font-bold rounded-lg  p-3'>
-                    Number of user
-                  </p>
-                </div>
-                <ReportAccountList />
-              </div>
-              
-            </div>
-          )}
         </main>
       </div>
     </div>
