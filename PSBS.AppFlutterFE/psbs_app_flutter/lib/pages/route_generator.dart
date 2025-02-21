@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
+import 'package:psbs_app_flutter/models/voucher.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
-import 'package:psbs_app_flutter/pages/voucher_page.dart';
 import 'package:psbs_app_flutter/pages/Account/profile_page.dart';
 import 'package:psbs_app_flutter/pages/Account/login_page.dart';
 import 'package:psbs_app_flutter/pages/Account/register_page.dart';
 import 'package:psbs_app_flutter/pages/Account/forgotpassword_page.dart';
 import 'package:psbs_app_flutter/pages/Account/editprofile_page.dart';
+import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
+import 'package:psbs_app_flutter/pages/vouchers/voucher_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RouteGenerator {
@@ -20,25 +22,48 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => const HomePage());
       case '/home':
-        return MaterialPageRoute(builder: (_) => const MyHomePage(title: '', accountId: '',));
+        return MaterialPageRoute(
+            builder: (_) => const MyHomePage(
+                  title: '',
+                  accountId: '',
+                ));
       case '/pet':
         return MaterialPageRoute(builder: (_) => const PetPage());
       case '/booking':
         return MaterialPageRoute(builder: (_) => const BookingPage());
       case '/voucher':
-        return MaterialPageRoute(builder: (_) => const VoucherPage());
+        return MaterialPageRoute(builder: (_) => CustomerVoucherList());
       case '/profile':
-        return MaterialPageRoute(builder: (_) => const ProfilePage(accountId: '', title: '',));
+        return MaterialPageRoute(
+            builder: (_) => const ProfilePage(
+                  accountId: '',
+                  title: '',
+                ));
       case '/login':
         return MaterialPageRoute(builder: (_) => LoginPage());
       case '/register':
-        return MaterialPageRoute(builder: (_) =>  RegisterPage());
+        return MaterialPageRoute(builder: (_) => RegisterPage());
       case '/forgotpassword':
-        return MaterialPageRoute(builder: (_) =>  ForgotPasswordPage());
+        return MaterialPageRoute(builder: (_) => ForgotPasswordPage());
       case '/editprofile':
-        return MaterialPageRoute(builder: (_) => const EditProfilePage(accountId: '', title: '',));
-       case '/changepassword':
-         return MaterialPageRoute(builder: (_) => ChangePasswordPage(title: '',accountId: '',));
+        return MaterialPageRoute(
+            builder: (_) => const EditProfilePage(
+                  accountId: '',
+                  title: '',
+                ));
+      case '/changepassword':
+        return MaterialPageRoute(
+            builder: (_) => ChangePasswordPage(
+                  title: '',
+                  accountId: '',
+                ));
+      case '/customer/vouchers/detail':
+        if (args is Voucher) {
+          return MaterialPageRoute(
+            builder: (_) => VoucherDetailScreen(voucher: args),
+          );
+        }
+        return _errorRoute();
       default:
         return _errorRoute();
     }
