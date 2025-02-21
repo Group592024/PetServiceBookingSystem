@@ -17,9 +17,9 @@ const AdminPetList = () => {
     const fetchData = async () => {
         try {
             const [petResponse, accountResponse, breedResponse] = await Promise.all([
-                fetch('http://localhost:5010/api/Pet'),
-                fetch('http://localhost:5000/api/Account/all'),
-                fetch('http://localhost:5010/api/PetBreed'),
+                fetch('http://localhost:5050/api/Pet'),
+                fetch('http://localhost:5050/api/Account/all'),
+                fetch('http://localhost:5050/api/PetBreed'),
             ]);
 
             const petData = await petResponse.json();
@@ -43,7 +43,7 @@ const AdminPetList = () => {
                         id: item.petId,
                         no: index + 1,
                         petName: item.petName,
-                        imageUrl: `http://localhost:5010${item.petImage}`,
+                        imageUrl: `http://localhost:5050/pet-service${item.petImage}`,
                         owner: accountMap[item.accountId] || 'Unknown',
                         breed: breedMap[item.petBreedId] || 'Unknown',
                         dateOfBirth: new Intl.DateTimeFormat('vi-VN').format(new Date(item.dateOfBirth)),
@@ -87,7 +87,7 @@ const AdminPetList = () => {
                 const fetchDelete = async () => {
                     try {
                         const deleteResponse = await fetch(
-                            `http://localhost:5010/api/pet/${id}`,
+                            `http://localhost:5050/api/pet/${id}`,
                             {
                                 method: 'DELETE',
                             }

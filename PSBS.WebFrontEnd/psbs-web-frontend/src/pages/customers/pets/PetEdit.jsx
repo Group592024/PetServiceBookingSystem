@@ -28,7 +28,7 @@ const CustomerPetEdit = () => {
     useEffect(() => {
         const fetchPetData = async () => {
             try {
-                const response = await fetch(`http://localhost:5010/api/pet/${id}`);
+                const response = await fetch(`http://localhost:5050/api/pet/${id}`);
                 const data = await response.json();
                 if (data.flag) {
                     const petData = data.data;
@@ -38,7 +38,7 @@ const CustomerPetEdit = () => {
                         petTypeId: petData.petTypeId,
                         petImage: null
                     });
-                    setImagePreview(petData.petImage ? `http://localhost:5010${petData.petImage}` : null);
+                    setImagePreview(petData.petImage ? `http://localhost:5050/pet-service${petData.petImage}` : null);
                     setOldPetImage(petData.petImage);
                     console.log('Pet Type ID:', petData.petTypeId);
                     console.log('Pet Breed ID:', petData.petBreedId);
@@ -61,7 +61,7 @@ const CustomerPetEdit = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5010/api/petType');
+                const response = await fetch('http://localhost:5050/api/petType');
                 const data = await response.json();
                 console.log('Fetched Pet Types:', data);
                 setPetTypes(data.filter(type => !type.isDelete));
@@ -76,7 +76,7 @@ const CustomerPetEdit = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5010/api/petBreed/byPetType/${pet.petTypeId}`);
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
                     const data = await response.json();
 
                     if (!data.flag) {
@@ -190,7 +190,7 @@ const CustomerPetEdit = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:5010/api/pet`, {
+            const response = await fetch(`http://localhost:5050/api/pet`, {
                 method: 'PUT',
                 body: formData,
             });

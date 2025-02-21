@@ -28,17 +28,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     price = roomType.price,
                     description = roomType.description,
                     isDeleted = roomType.isDeleted,
-                    Rooms = roomType.Rooms.Select(p => new Room
-                    {
-                        roomTypeId = p.roomTypeId,
-                        roomName = p.roomName,
-                        description = p.description,
-                        isDeleted = p.isDeleted,
-                        hasCamera = p.hasCamera,
-                        roomImage = p.roomImage,
-                        status = p.status,
-                        roomId = p.roomId
-                    }).ToList()
+                    
                 };
                 return (singleRoomType, null);
             }
@@ -52,17 +42,7 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     price = rt.price,
                     description = rt.description,
                     isDeleted = rt.isDeleted,
-                    Rooms = rt.Rooms.Select(p => new Room
-                    {
-                        roomTypeId = p.roomTypeId,
-                        roomName = p.roomName,
-                        description = p.description,
-                        isDeleted = p.isDeleted,
-                        hasCamera = p.hasCamera,
-                        roomImage = p.roomImage,
-                        status = p.status,
-                        roomId = p.roomId
-                    }).ToList(),
+                    
                 }).ToList();
 
                 return (null, _roomTypes);

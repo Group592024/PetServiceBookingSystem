@@ -33,8 +33,8 @@ const RoomEdit = () => {
         const fetchData = async () => {
             try {
                 const [roomResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5023/api/Room/${id}`),
-                    fetch('http://localhost:5023/api/RoomType/available')
+                    fetch(`http://localhost:5050/api/Room/${id}`),
+                    fetch('http://localhost:5050/api/RoomType/available')
                 ]);
 
                 const roomData = await roomResponse.json();
@@ -42,12 +42,12 @@ const RoomEdit = () => {
                 setRoomTypes(typesData.data || []);
 
                 if (roomData.flag && roomData.data) {
-                    const typeResponse = await fetch(`http://localhost:5023/api/RoomType/${roomData.data.roomTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`);
                     const typeData = await typeResponse.json();
 
                     setRoomName(roomData.data.roomName);
                     setRoomType(roomData.data.roomTypeId);
-                    setTmpImage(roomData.data.roomImage ? `http://localhost:5023${roomData.data.roomImage}` : 'default-room-image.jpg');
+                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : 'default-room-image.jpg');
                     setRoomDescription(roomData.data.description);
                     setRoomStatus(roomData.data.status);
                     setIsDeleted(roomData.data.isDeleted);
@@ -125,7 +125,7 @@ const RoomEdit = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:5023/api/Room`, {
+                const response = await fetch(`http://localhost:5050/api/Room`, {
                     method: 'PUT',
                     body: formData,
                 });

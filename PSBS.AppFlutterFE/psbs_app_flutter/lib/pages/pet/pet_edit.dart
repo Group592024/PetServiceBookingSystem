@@ -56,7 +56,7 @@ class _PetEditState extends State<PetEdit> {
     setState(() => _isLoading = true);
     try {
       final response = await http
-          .get(Uri.parse('http://10.0.2.2:5010/api/pet/${widget.petId}'));
+          .get(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -74,7 +74,7 @@ class _PetEditState extends State<PetEdit> {
             _selectedBreedId = petData['petBreedId'];
             _accountId = petData['accountId'];
             _imagePreview = petData['petImage'] != null
-                ? 'http://10.0.2.2:5010${petData['petImage']}'
+                ? 'http://10.0.2.2:5050/pet-service${petData['petImage']}'
                 : null;
             _oldPetImage = petData['petImage'];
           });
@@ -94,7 +94,7 @@ class _PetEditState extends State<PetEdit> {
   Future<void> _fetchPetTypes() async {
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:5010/api/petType'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/petType'));
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -112,7 +112,7 @@ class _PetEditState extends State<PetEdit> {
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
       final response = await http.get(Uri.parse(
-          'http://10.0.2.2:5010/api/petBreed/byPetType/$petTypeId'));
+          'http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'));
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag'] && data['data'] != null) {
@@ -314,7 +314,7 @@ class _PetEditState extends State<PetEdit> {
     try {
       var request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://10.0.2.2:5010/api/pet'),
+        Uri.parse('http://10.0.2.2:5050/api/pet'),
       );
 
       request.fields.addAll({

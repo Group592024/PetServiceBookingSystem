@@ -14,12 +14,12 @@ const RoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5023/api/Room/${id}`);
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
                 const data = await response.json();
                 setDetail(data.data);
                 if (data.data && data.data.roomTypeId) {
                     try {
-                        const roomTypeResponse = await fetch(`http://localhost:5023/api/RoomType/${data.data.roomTypeId}`);
+                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
                         const roomTypeResponseData = await roomTypeResponse.json();
                         if (roomTypeResponseData && roomTypeResponseData.data && roomTypeResponseData.data.name && roomTypeResponseData.data.price) {
                             setRoomTypeName(roomTypeResponseData.data.name);
@@ -50,7 +50,7 @@ const RoomDetail = () => {
         return <div>Loading...</div>;
     }
 
-    const imageURL = `http://localhost:5023${detail.roomImage}`;
+    const imageURL = `http://localhost:5050/facility-service${detail.roomImage}`;
 
     return (
         <div className="bg-gray-200 min-h-screen flex flex-col">

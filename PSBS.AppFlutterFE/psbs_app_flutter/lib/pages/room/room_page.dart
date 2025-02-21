@@ -19,9 +19,9 @@ class _RoomPageState extends State<RoomPage> {
   Future<void> fetchRooms() async {
     try {
       final responseRooms =
-          await http.get(Uri.parse('http://10.0.2.2:5023/api/Room/available'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/Room/available'));
       final responseTypes =
-          await http.get(Uri.parse('http://10.0.2.2:5023/api/RoomType'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/RoomType'));
 
       if (responseRooms.statusCode == 200 && responseTypes.statusCode == 200) {
         final dataRooms = json.decode(responseRooms.body);
@@ -99,7 +99,7 @@ class _RoomPageState extends State<RoomPage> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               Image.network(
-                                'http://10.0.2.2:5023${room['roomImage']}',
+                                'http://10.0.2.2:5050/facility-service${room['roomImage']}',
                                 height: 200,
                                 width: double.infinity,
                                 fit: BoxFit.cover,

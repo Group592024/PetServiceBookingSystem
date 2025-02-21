@@ -12,7 +12,7 @@ const CustomerPetList = () => {
     const fetchPets = async () => {
         try {
             const accountId = sessionStorage.getItem('accountId');
-            const response = await fetch(`http://localhost:5010/api/pet/available/${accountId}`);
+            const response = await fetch(`http://localhost:5050/api/pet/available/${accountId}`);
             const data = await response.json();
             if (data.flag) {
                 setPets(data.data.filter(pet => !pet.isDelete));
@@ -45,7 +45,7 @@ const CustomerPetList = () => {
                 const fetchDelete = async () => {
                     try {
                         const deleteResponse = await fetch(
-                            `http://localhost:5010/api/pet/${petId}`,
+                            `http://localhost:5050/api/pet/${petId}`,
                             {
                                 method: 'DELETE',
                             }
@@ -118,7 +118,7 @@ const CustomerPetList = () => {
                             className="bg-gray-300 border border-gray-300 rounded-xl shadow-sm p-6 hover:shadow-xl transition-shadow"
                         >
                             <img
-                                src={`http://localhost:5010${pet.petImage}`}
+                                src={`http://localhost:5050/pet-service${pet.petImage}`}
                                 alt={pet.petName}
                                 className="w-full h-64 object-cover rounded-lg mb-6"
                             />

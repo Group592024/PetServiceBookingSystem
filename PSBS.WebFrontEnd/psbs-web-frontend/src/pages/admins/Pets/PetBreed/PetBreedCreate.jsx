@@ -24,7 +24,7 @@ const PetBreedCreate = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5010/api/PetType/available');
+                const response = await fetch('http://localhost:5050/api/PetType/available');
                 const data = await response.json();
                 setPetTypes(data.data || []);
             } catch (error) {
@@ -95,7 +95,7 @@ const PetBreedCreate = () => {
         console.log('Selected Image:', selectedImage);
     
         try {
-            const response = await fetch('http://localhost:5010/api/PetBreed', {
+            const response = await fetch('http://localhost:5050/api/PetBreed', {
                 method: 'POST',
                 body: formData,
             });

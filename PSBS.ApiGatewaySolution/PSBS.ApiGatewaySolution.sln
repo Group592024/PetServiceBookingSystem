@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34728.123
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSBS.ApiGatewaySolution", "PSBS.ApiGatewaySolution\PSBS.ApiGatewaySolution.csproj", "{67CF96DA-21B9-4572-96EF-DC87E74800ED}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{A9D6A422-C1C9-48C3-BF89-4505F2868B15}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{67CF96DA-21B9-4572-96EF-DC87E74800ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67CF96DA-21B9-4572-96EF-DC87E74800ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67CF96DA-21B9-4572-96EF-DC87E74800ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67CF96DA-21B9-4572-96EF-DC87E74800ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9D6A422-C1C9-48C3-BF89-4505F2868B15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9D6A422-C1C9-48C3-BF89-4505F2868B15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9D6A422-C1C9-48C3-BF89-4505F2868B15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9D6A422-C1C9-48C3-BF89-4505F2868B15}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {03268F86-E721-4E28-9129-4647E4F00EE3}
+	EndGlobalSection
+EndGlobal

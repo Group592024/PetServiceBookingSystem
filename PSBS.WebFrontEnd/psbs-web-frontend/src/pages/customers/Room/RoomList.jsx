@@ -14,8 +14,8 @@ const CustomerRoomList = () => {
         const fetchData = async () => {
             try {
                 const [roomsResponse, typesResponse] = await Promise.all([
-                    fetch('http://localhost:5023/api/Room/available'),
-                    fetch('http://localhost:5023/api/RoomType')
+                    fetch('http://localhost:5050/api/Room/available'),
+                    fetch('http://localhost:5050/api/RoomType')
                 ]);
 
                 const roomsData = await roomsResponse.json();
@@ -79,7 +79,7 @@ const CustomerRoomList = () => {
                                         <div className="relative group">
                                             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300 z-10"></div>
                                             <img
-                                                src={`http://localhost:5023${room.roomImage}`}
+                                                src={`http://localhost:5050/facility-service${room.roomImage}`}
                                                 alt={room.roomName}
                                                 className="w-full h-96 object-cover"
                                             />
