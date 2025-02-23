@@ -91,7 +91,7 @@ const PetHealthBookListCus = () => {
       <div className="w-full">
         <NavbarCustomer />
         <main className="flex-1 p-4">
-          <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
+          <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
           <div className="flex gap-8">
             {/* Left Column - Pet Information */}
             <div className="w-1/3 items-center justify-center flex rounded-md p-6">

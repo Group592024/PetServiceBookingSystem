@@ -239,7 +239,7 @@ const PetHealthBookList = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="flex-1">
           <div className="p-4 bg-white shadow-md rounded-md h-full">
-            <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
+            <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
             <div className="flex justify-end mb-4">
               <form className="relative flex items-center mr-4">
                 <input

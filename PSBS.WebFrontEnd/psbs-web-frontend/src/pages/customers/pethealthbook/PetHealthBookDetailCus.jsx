@@ -103,7 +103,7 @@ const PetHealthBookDetailCus = () => {
             <div className="overflow-y-auto w-full">
                 <NavbarCustomer />
                 <div className="p-6 bg-white shadow-md rounded-md w-full">
-                    <h2 className="mb-4 text-xl font-bold text-left">Pet Health Book Detail</h2>
+                    <h2 className="mb-4 text-xl font-bold text-left">Health Book Detail</h2>
                     <div className="flex justify-center
  flex-wrap gap-8 w-full">
                         {/* Left Column */}
