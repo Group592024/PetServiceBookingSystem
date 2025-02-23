@@ -10,6 +10,7 @@ class ChangePasswordPage extends StatefulWidget {
 }
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
+  Map<String, dynamic>? account;
   bool _showCurrentPassword = false;
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
@@ -40,29 +41,42 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
   Future<void> fetchAccountData() async {
+    if (accountId.isEmpty) {
+      print("Lỗi: Account ID rỗng.");
+      return;
+    }
     try {
       final response = await http.get(
         Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
       );
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          accountName = data['accountName'] ?? 'N/A';
-          if (data['accountImage'] != null) {
-            fetchImage(data['accountImage']);
+          account = data;
+          if (account?['accountImage'] != null) {
+            fetchImage(account?['accountImage']);
           }
         });
+      } else {
+        print("Error account: ${response.statusCode}");
       }
     } catch (error) {
-      print("Lỗi khi gọi API: $error");
+      print("Error call API: $error");
     }
   }
-  Future<void> fetchImage(String filename) async {
+   Future<void> fetchImage(String filename) async {
+    if (filename.isEmpty) {
+      print("Error: Filename null.");
+      return;
+    }
+
     try {
       final imageResponse = await http.get(
         Uri.parse(
             'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
       );
+
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
         if (imageData['flag']) {
@@ -73,7 +87,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         }
       }
     } catch (error) {
-      print("Lỗi khi lấy ảnh: $error");
+      print("Error Image: $error");
     }
   }
   Future<void> _changePassword() async {
@@ -170,9 +184,10 @@ void _showAlert(String title, String message, VoidCallback? onConfirm) {
                           children: [
                             CircleAvatar(
                               radius: 60,
-                              backgroundImage: imagePreview != null
-                                  ? NetworkImage(imagePreview!)
-                                  : null,
+                               backgroundImage: imagePreview != null
+                                    ? MemoryImage(base64Decode(
+                                        imagePreview!.split(",")[1]))
+                                    : null,
                               child: imagePreview == null
                                   ? Icon(Icons.person,
                                       size: 60, color: Colors.grey)

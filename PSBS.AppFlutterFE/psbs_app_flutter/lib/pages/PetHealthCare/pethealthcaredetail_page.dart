@@ -1,111 +1,206 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'dart:convert';
 
-class PetHealthBookDetailScreen extends StatefulWidget {
+class PetHealthBookDetail extends StatefulWidget {
+  final String healthBookId;
+  const PetHealthBookDetail(
+      {Key? key, required this.healthBookId, required pet})
+      : super(key: key);
+
   @override
-  _PetHealthBookDetailScreenState createState() => _PetHealthBookDetailScreenState();
+  _PetHealthBookDetailState createState() => _PetHealthBookDetailState();
 }
 
-class _PetHealthBookDetailScreenState extends State<PetHealthBookDetailScreen> {
-  String petImage = "";
-  String petName = "Unknown";
-  String dateOfBirth = "";
-  String treatmentNames = "No Treatments Assigned";
-  String performBy = "";
-  String visitDate = "";
-  String nextVisitDate = "";
-  String medicineNames = "No Medicines Assigned";
-
+class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
+  Map<String, dynamic>? petHealthBook;
+  List<dynamic> medicines = [];
+  List<dynamic> treatments = [];
+  String petImage = '';
+  String petName = '';
+  String dateOfBirth = '';
   @override
   void initState() {
     super.initState();
-    fetchPetHealthData();
+    fetchData();
   }
 
-  Future<void> fetchPetHealthData() async {
-    // Đây là nơi bạn sẽ gọi API để lấy dữ liệu, ở đây chỉ demo dữ liệu giả lập
-    setState(() {
-      petImage = "https://via.placeholder.com/300";
-      petName = "Buddy";
-      dateOfBirth = "01/01/2020";
-      treatmentNames = "Vaccination, Deworming";
-      performBy = "Dr. John Doe";
-      visitDate = "12/02/2024";
-      nextVisitDate = "12/05/2024";
-      medicineNames = "Antibiotics, Vitamin C";
-    });
+  Future<void> fetchData() async {
+    try {
+      final healthBookRes = await http.get(Uri.parse(
+          'http://localhost:5003/api/PetHealthBook/${widget.healthBookId}'));
+      final medicinesRes =
+          await http.get(Uri.parse('http://localhost:5003/Medicines'));
+      final treatmentsRes =
+          await http.get(Uri.parse('http://localhost:5003/api/Treatment'));
+      final bookingsRes =
+          await http.get(Uri.parse('http://localhost:5201/Bookings'));
+      final petsRes =
+          await http.get(Uri.parse('http://localhost:5010/api/pet'));
+      if (!mounted) return;
+      if (healthBookRes.statusCode != 200 ||
+          medicinesRes.statusCode != 200 ||
+          treatmentsRes.statusCode != 200 ||
+          bookingsRes.statusCode != 200 ||
+          petsRes.statusCode != 200) {
+        print("Error fetching data from API");
+        return;
+      }
+      var healthBookData = jsonDecode(healthBookRes.body)['data'];
+      if (healthBookData is List && healthBookData.isNotEmpty) {
+        healthBookData = healthBookData.first;
+      } else if (healthBookData is! Map) {
+        healthBookData = {};
+      }
+      var medicinesData = jsonDecode(medicinesRes.body)['data'] ?? [];
+      var treatmentsData = jsonDecode(treatmentsRes.body)['data'] ?? [];
+      var bookingsData = jsonDecode(bookingsRes.body)['data'] ?? [];
+      var petsData = jsonDecode(petsRes.body)['data'] ?? [];
+      setState(() {
+        petHealthBook = healthBookData;
+        List<dynamic> medicineIds = petHealthBook?['medicineIds'] ?? [];
+        medicines = medicinesData
+            .where((m) => medicineIds.contains(m['medicineId']))
+            .toList();
+        List<dynamic> treatmentIds = medicines
+            .map((medicine) => medicine['treatmentId'])
+            .where((treatmentId) => treatmentId != null)
+            .toList();
+        treatments = treatmentsData
+            .where(
+                (treatment) => treatmentIds.contains(treatment['treatmentId']))
+            .toList();
+        if (healthBookData['bookingId'] != null) {
+          var booking = bookingsData.firstWhere(
+            (b) => b['bookingId'] == healthBookData['bookingId'],
+            orElse: () => {},
+          );
+          if (booking.isNotEmpty) {
+            var pet = petsData.firstWhere(
+              (p) => p['accountId'] == booking['accountId'],
+              orElse: () => {},
+            );
+            if (pet.isNotEmpty) {
+              petImage = pet['petImage'] ?? '';
+              petName = pet['petName'] ?? '';
+              dateOfBirth = pet['dateOfBirth'] ?? '';
+            }
+          }
+        }
+      });
+    } catch (error) {
+      print("Error fetching data: $error");
+    }
+  }
+
+  String formatDate(String? date) {
+    if (date == null || date.isEmpty) return "Unknown";
+    try {
+      DateTime parsedDate = DateTime.parse(date);
+      return DateFormat('dd/MM/yyyy').format(parsedDate);
+    } catch (e) {
+      return "Invalid Date";
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (petHealthBook == null) {
+      return Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
     return Scaffold(
-      appBar: AppBar(title: Text("Pet Health Book Detail")),
-      body: SingleChildScrollView(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text("Pet Health Book Detail"),
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+      ),
+      body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
+              child: CircleAvatar(
+                radius: 80,
+                backgroundImage: petImage.isNotEmpty
+                    ? NetworkImage('http://localhost:5010$petImage')
+                    : AssetImage('assets/default-image.png') as ImageProvider,
+              ),
+            ),
+            SizedBox(height: 10),
+            Center(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
-                    child: Image.network(
-                      petImage,
-                      width: 300,
-                      height: 300,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: 10),
                   Text(
-                    petName,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    "$petName",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  Text(dateOfBirth, style: TextStyle(fontSize: 16)),
+                  Text(
+                    formatDate(dateOfBirth),
+                    style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500),
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            _buildDetailItem("Treatment", treatmentNames),
-            _buildDetailItem("Performed By", performBy),
-            _buildDetailItem("Visit Date", visitDate),
-            _buildDetailItem("Next Visit Date", nextVisitDate),
-            _buildDetailItem("Medicine", medicineNames),
-            SizedBox(height: 20),
-            Center(
+            Divider(),
+            _buildRowText('Treatment',
+                '${treatments.isNotEmpty ? treatments.map((t) => t['treatmentName']).join(", ") : 'No Treatments Found'}'),
+            Divider(),
+            _buildRowText(
+                'Performed By', '${petHealthBook!['performBy'] ?? ''}'),
+            Divider(),
+            _buildRowText('Visit Date', formatDate(petHealthBook!['visitDate'])),
+
+            Divider(),
+            _buildRowText('Next Visit Date', formatDate(petHealthBook!['nextVisitDate'])),
+
+            Divider(),
+            _buildRowText('Medicine',
+                '${medicines.isNotEmpty ? medicines.map((m) => m['medicineName']).join(", ") : 'No Medicines Assigned'}'),
+            Divider(),
+            SizedBox(height: 10),
+            Align(
+              alignment: Alignment.center,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: Text("Back"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                ),
+                child: Text("Back",
+                    style: TextStyle(color: Colors.black, fontSize: 16)),
               ),
-            ),
+            )
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailItem(String title, String value) {
+  Widget _buildRowText(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          SizedBox(height: 5),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(12.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
-              borderRadius: BorderRadius.circular(8.0),
+        padding: EdgeInsets.all(10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 100,
+              child: Text(title,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
             ),
-            child: Text(value, style: TextStyle(fontSize: 14)),
-          ),
-        ],
-      ),
-    );
+            SizedBox(width: 30),
+            Expanded(
+                child: Text(
+              value,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+              maxLines: null,
+            )),
+          ],
+        ));
   }
 }

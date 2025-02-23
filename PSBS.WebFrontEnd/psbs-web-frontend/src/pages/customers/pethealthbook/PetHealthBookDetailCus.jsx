@@ -33,7 +33,7 @@ const PetHealthBookDetailCus = () => {
                   fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
                   fetch(`http://localhost:5003/Medicines`),
                   fetch(`http://localhost:5003/api/Treatment`),
-                  fetch(`https://localhost:5201/api/Booking`),
+                  fetch(`http://localhost:5201/Bookings`),
                   fetch(`http://localhost:5010/api/pet`),
                 ]);
         

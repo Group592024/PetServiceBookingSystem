@@ -1,10 +1,18 @@
+import 'dart:io';
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcaredetail_page.dart'
+    as detail;
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
+    as list;
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcaredetail_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
+import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
+import 'package:psbs_app_flutter/pages/voucher_page.dart';
 import 'package:psbs_app_flutter/pages/room/room_page.dart';
-import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Additional pages from Tuan/AccountManagementFlutter
@@ -55,12 +63,11 @@ class _MyHomePageState extends State<MyHomePage> {
   final navigationKey = GlobalKey<CurvedNavigationBarState>();
 
   final screens = [
-    RoomPage(),
+    HomePage(),
     PetPage(),
     BookingPage(),
-    CustomerVoucherList(),
+    VoucherPage(),
     ProfilePage(accountId: '', title: ''),
-    EditProfilePage(accountId: '', title: ''),
   ];
 
   @override
@@ -130,10 +137,23 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.menu, color: Colors.white, size: 28),
             onSelected: (value) {
               if (value == 'logout') {
-                logout(context); // Sửa lỗi: truyền context vào
+                logout(context); // Gọi hàm logout
+              } else if (value == 'healthcarebook') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => list.PetHealthBookList()),
+                );
               }
             },
             itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'healthcarebook',
+                child: ListTile(
+                  leading: Icon(Icons.menu_book, color: Colors.blue),
+                  title: Text('HealthCareBook', style: TextStyle(color: Colors.black)),
+                ),
+              ),
               PopupMenuItem(
                 value: 'logout',
                 child: ListTile(
@@ -169,11 +189,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
   Future<void> logout(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('accountId'); 
-  await prefs.remove('token'); 
-  Navigator.pushReplacementNamed(context, "/login"); 
-}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accountId');
+    await prefs.remove('token');
+    Navigator.pushReplacementNamed(context, "/login");
+  }
 }

@@ -31,7 +31,7 @@ const PetHealthBookEdit = () => {
       try {
         const [healthBookResponse, bookingsResponse, medicinesResponse] = await Promise.all([
           fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
-          fetch("https://localhost:5201/api/Booking"),
+          fetch("http://localhost:5201/Bookings"),
           fetch("http://localhost:5003/Medicines"),
         ]);
     

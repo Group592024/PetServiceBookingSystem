@@ -32,7 +32,7 @@ const PetHealthBookList = () => {
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
         fetch("http://localhost:5003/api/Treatment"),
-        fetch("http://localhost:5115/api/Booking"),
+        fetch("http://localhost:5201/Bookings"),
         fetch("http://localhost:5010/api/pet"),
         fetch("http://localhost:5010/api/petBreed"),
       ]);
