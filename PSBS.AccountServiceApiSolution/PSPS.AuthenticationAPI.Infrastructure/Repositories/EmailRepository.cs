@@ -30,33 +30,30 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             email.To.Add(MailboxAddress.Parse(mailContent.To));
             email.Subject = mailContent.Subject;
 
-
-            var builder = new BodyBuilder();
-            builder.HtmlBody = mailContent.Body;
+            var builder = new BodyBuilder { HtmlBody = mailContent.Body };
             email.Body = builder.ToMessageBody();
 
-            // dùng SmtpClient của MailKit
             using var smtp = new MailKit.Net.Smtp.SmtpClient();
             try
             {
-                smtp.Connect(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
-                smtp.Authenticate(mailSettings.Mail, mailSettings.Password);
+                await smtp.ConnectAsync(mailSettings.Host, mailSettings.Port, SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(mailSettings.Mail, mailSettings.Password);
                 await smtp.SendAsync(email);
+
+                logger.LogInformation($"Email sent successfully to {mailContent.To}");
             }
             catch (Exception ex)
             {
-                // Gửi mail thất bại, nội dung email sẽ lưu vào thư mục mailssave
+                var emailsavefile = $"mailssave/{Guid.NewGuid()}.eml";
                 System.IO.Directory.CreateDirectory("mailssave");
-                var emailsavefile = string.Format(@"mailssave/{0}.eml", Guid.NewGuid());
                 await email.WriteToAsync(emailsavefile);
 
-                logger.LogInformation("Lỗi gửi mail, lưu tại - " + emailsavefile);
-                logger.LogError(ex.Message);
+                logger.LogError($"Lỗi gửi mail: {ex.Message}\nStackTrace: {ex.StackTrace}");
             }
-            smtp.Disconnect(true);
-
-            logger.LogInformation("send mail to " + mailContent.To);
-
+            finally
+            {
+                await smtp.DisconnectAsync(true);
+            }
         }
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
