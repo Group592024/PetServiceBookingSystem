@@ -65,7 +65,15 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     serviceImage = service.serviceImage,
                     createAt = service.createAt,
                     updateAt = service.updateAt,
-                    ServiceType = service.ServiceType,
+                    ServiceType = new ServiceType
+                    {
+                        serviceTypeId = service.serviceTypeId,
+                        typeName = service.ServiceType?.typeName,
+                        description = service.ServiceType?.description,
+                        createAt = service.ServiceType.createAt,
+                        updateAt = service.ServiceType.updateAt,
+                        isDeleted = service.ServiceType.isDeleted
+                    },
                     isDeleted = service.isDeleted
                 };
                 return (singleservice, null);
@@ -83,7 +91,15 @@ namespace FacilityServiceApi.Application.DTOs.Conversions
                     serviceImage = p.serviceImage,
                     createAt = p.createAt,
                     updateAt = p.updateAt,
-                    ServiceType = p.ServiceType,
+                    ServiceType = new ServiceType
+                    {
+                        serviceTypeId = p.serviceTypeId,
+                        typeName = p.ServiceType.typeName,
+                        description = p.ServiceType.description,
+                        createAt = p.ServiceType.createAt,
+                        updateAt = p.ServiceType.updateAt,
+                        isDeleted = p.ServiceType.isDeleted
+                    },
                     isDeleted = p.isDeleted
                 }).ToList();
 

@@ -12,7 +12,7 @@ namespace PSPS.AccountAPI.Presentation.Controllers
     {
 
         [HttpGet("countStaff")]
-        public async Task<ActionResult<List<GetAccountDTO>>> GetAllStaffs()
+        public async Task<ActionResult<List<GetAccountDTO>>> GetAllStaff()
         {
             var result = await account.GetAllStaffAccount();
             if (result == null)

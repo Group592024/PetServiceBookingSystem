@@ -1,5 +1,6 @@
 using Microsoft.Extensions.FileProviders;
 using PetApi.Infrastructure.DependencyInjection;
+using PetApi.Presentation.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -17,6 +18,10 @@ builder.WebHost.ConfigureKestrel(options =>
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5050/");
+});
+builder.Services.AddHttpClient<FacilityApiClient>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5023/api/ReportFacility/");
 });
 
 var app = builder.Build();
