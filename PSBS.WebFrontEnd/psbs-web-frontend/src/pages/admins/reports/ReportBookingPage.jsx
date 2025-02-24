@@ -65,7 +65,11 @@ const ReportBookingPage = () => {
                     Number of bookings by status
                   </p>
                 </div>
+                
                 <ReportBookingStatusList />
+          
+                
+                
               </div>
               <div className='mb-5'>
                 <div className='flex justify-start items-center'>

@@ -5,13 +5,13 @@
    Guid AccountId,
    Guid BookingStatusId,
     Guid PaymentTypeId,
-    Guid VoucherId,
+    Guid? VoucherId,
     Guid BookingTypeId,
-    Guid PointRuleId,
+    Guid? PointRuleId,
     decimal TotalAmount,
    DateTime BookingDate,
     string Notes,
-    DateTime CreateAt,
-   DateTime UpdateAt,
+    DateTime? CreateAt,
+   DateTime? UpdateAt,
     bool isPaid);
 }

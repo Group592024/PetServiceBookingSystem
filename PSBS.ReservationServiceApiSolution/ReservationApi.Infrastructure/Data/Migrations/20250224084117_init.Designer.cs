@@ -12,8 +12,8 @@ using ReservationApi.Infrastructure.Data;
 namespace ReservationApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ReservationServiceDBContext))]
-    [Migration("20250213035219_update data")]
-    partial class updatedata
+    [Migration("20250224084117_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -119,55 +119,55 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasData(
                         new
                         {
-                            BookingStatusId = new Guid("050d53c5-c35b-4823-8bc9-a4e70bbdef19"),
+                            BookingStatusId = new Guid("b4e31140-5821-4cb5-91e4-e7e37447c149"),
                             BookingStatusName = "Pending",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("bdbecd97-9f44-45ed-9dcc-b60e50ff8141"),
+                            BookingStatusId = new Guid("43bd1908-269d-4c36-9331-2f5bd3f122e6"),
                             BookingStatusName = "Processing",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("83b1f3fb-0426-4854-b5c3-f7f1b5d046a4"),
+                            BookingStatusId = new Guid("dd58afa1-9a28-48d7-8e0a-f8f57673e414"),
                             BookingStatusName = "Cancelled",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("9133e99e-978a-43f1-a37c-1b0e9e15d369"),
+                            BookingStatusId = new Guid("8aa86749-70e9-450d-a07d-cddf99a6b907"),
                             BookingStatusName = "Confirmed",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("ac1c0ebd-0226-4b58-aaa0-244431097a48"),
+                            BookingStatusId = new Guid("d61d1d84-677c-44d9-a3ca-27f12b4700ab"),
                             BookingStatusName = "Checked in",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("6994dbd9-afd9-4a25-9075-9704dc6e7690"),
+                            BookingStatusId = new Guid("7715b1e9-db4d-4c94-a473-244d80ce3967"),
                             BookingStatusName = "Checked out",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("20fc00cc-31ad-42bc-a919-45743533f221"),
+                            BookingStatusId = new Guid("869e1f2b-720b-4918-af38-0774bc5dd801"),
                             BookingStatusName = "Completed",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("e669fb8d-ff35-4978-a756-d8ad546ebc84"),
+                            BookingStatusId = new Guid("c4810046-d3cd-4605-b6e4-7a19467289aa"),
                             BookingStatusName = "Refunded",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingStatusId = new Guid("82126732-4938-41de-ae43-91f6bb013e41"),
+                            BookingStatusId = new Guid("7a4d1ad4-93d5-4bb6-86d7-c9f144b3c483"),
                             BookingStatusName = "Rejected",
                             isDeleted = false
                         });
@@ -195,13 +195,13 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasData(
                         new
                         {
-                            BookingTypeId = new Guid("fbc2bb15-77f2-4216-a25e-070992b3ea56"),
+                            BookingTypeId = new Guid("bcbff413-9722-47f2-8f89-3f57e4b966fd"),
                             BookingTypeName = "Service",
                             isDeleted = false
                         },
                         new
                         {
-                            BookingTypeId = new Guid("c778bfec-6790-41d7-8cb4-fe5c61afe4b0"),
+                            BookingTypeId = new Guid("4d6bda18-8229-4696-9783-9c1f6563da77"),
                             BookingTypeName = "Hotel",
                             isDeleted = false
                         });
@@ -229,13 +229,13 @@ namespace ReservationApi.Infrastructure.Data.Migrations
                     b.HasData(
                         new
                         {
-                            PaymentTypeId = new Guid("dd2346de-20e4-4f95-a130-4dd3cac618f1"),
+                            PaymentTypeId = new Guid("d822f0fb-a4a5-42b3-a26a-5df67754f782"),
                             PaymentTypeName = "VNPay",
                             isDeleted = false
                         },
                         new
                         {
-                            PaymentTypeId = new Guid("01b6b105-480a-46d3-bdf5-78a6078b33a7"),
+                            PaymentTypeId = new Guid("7780685e-084f-481d-8aa2-11e1cb73b1fa"),
                             PaymentTypeName = "COD",
                             isDeleted = false
                         });

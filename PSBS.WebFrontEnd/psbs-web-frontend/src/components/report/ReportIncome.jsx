@@ -40,10 +40,10 @@ const ReportIncome = () => {
         (item, index) => ({
           label: item.label,
           roomAmount:
-            response.data.find((type) => type.bookingTypeName === 'room')
+            response.data.find((type) => type.bookingTypeName === 'Hotel')
               ?.amountDTOs[index]?.amount || 0,
           serviceAmount:
-            response.data.find((type) => type.bookingTypeName === 'service')
+            response.data.find((type) => type.bookingTypeName === 'Service')
               ?.amountDTOs[index]?.amount || 0,
         })
       );
@@ -53,8 +53,7 @@ const ReportIncome = () => {
 
       transformedData.map((item) => {
         roomTotalAmount += item.roomAmount;
-        serviceTotalAmount += item.serviceAmount;
-      });
+        serviceTotalAmount += item.serviceAmount; });
 
       setTotal({
         roomTotal: roomTotalAmount,

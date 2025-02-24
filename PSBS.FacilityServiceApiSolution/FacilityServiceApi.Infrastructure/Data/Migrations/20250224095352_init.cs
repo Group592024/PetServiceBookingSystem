@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace FacilityServiceApi.Infrastructure.Migrations
+namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -200,8 +200,8 @@ namespace FacilityServiceApi.Infrastructure.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6862), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6876) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6879), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 14, 19, 53, 46, 381, DateTimeKind.Local).AddTicks(6880) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4912), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4923) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4927), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4928) }
                 });
 
             migrationBuilder.CreateIndex(

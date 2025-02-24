@@ -47,6 +47,8 @@ namespace ReservationApi.Infrastructure.Repositories
                         finalBookings = bookings.Where(p => p.BookingDate >= startDate
                         && p.BookingDate <= endDate).ToList();
 
+                        Console.WriteLine("So booking"+finalBookings.Count);
+
                     }
                     else if (month.HasValue)
                     {

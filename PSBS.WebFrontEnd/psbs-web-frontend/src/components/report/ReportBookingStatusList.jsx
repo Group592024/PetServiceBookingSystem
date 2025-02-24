@@ -51,14 +51,13 @@ const ReportBookingStatusList = () => {
   }, []);
 
   return (
-    <div className='flex w-full'>
+    <div className='flex w-full flex-wrap'> 
       {data.map((item) => (
         <ReportSquareCard
-          key={item.bookingStatusName}
+          key={item.bookingStatusName}                                               
           name={item.bookingStatusName}
           quantity={item.quantity}
           color={item.color}
-          sx={{ width: '17%' }}
         />
       ))}
     </div>
