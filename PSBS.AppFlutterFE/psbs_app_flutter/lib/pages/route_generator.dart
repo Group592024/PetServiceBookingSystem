@@ -7,6 +7,7 @@ import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 import 'package:psbs_app_flutter/pages/Account/profile_page.dart';
 import 'package:psbs_app_flutter/pages/Account/login_page.dart';
+import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 import 'package:psbs_app_flutter/pages/Account/register_page.dart';
 import 'package:psbs_app_flutter/pages/Account/forgotpassword_page.dart';
 import 'package:psbs_app_flutter/pages/Account/editprofile_page.dart';
@@ -40,7 +41,7 @@ class RouteGenerator {
                   title: '',
                 ));
       case '/login':
-        return MaterialPageRoute(builder: (_) => LoginPage());
+        return MaterialPageRoute(builder: (_) => ServicePage());
       case '/register':
         return MaterialPageRoute(builder: (_) => RegisterPage());
       case '/forgotpassword':
