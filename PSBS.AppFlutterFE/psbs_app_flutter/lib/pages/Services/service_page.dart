@@ -18,7 +18,7 @@ class _ServicePageState extends State<ServicePage> {
   Future<void> fetchServices() async {
     try {
       final responseServices = await http
-          .get(Uri.parse('http://192.168.1.3:5023/api/Service?showAll=false'));
+          .get(Uri.parse('http://10.64.197.68:5023/api/Service?showAll=false'));
       if (responseServices.statusCode == 200) {
         final dataServices = json.decode(responseServices.body);
 
@@ -48,7 +48,7 @@ print(dataServices);
   Widget buildServiceCard(Map<String, dynamic> service) {
     return Card(
       elevation: 5,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(1)),
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       child: InkWell(
         onTap: () {
@@ -69,7 +69,7 @@ print(dataServices);
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
-                        'http://192.168.1.3:5023${service['serviceImage']}',
+                        'http://10.64.197.68:5023${service['serviceImage']}',
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -87,13 +87,13 @@ print(dataServices);
               SizedBox(height: 8),
               Text(
                 'Type: ${service['serviceType'] != null ? service['serviceType']['typeName'] : 'Unknown'}',
-                style: TextStyle(fontSize: 18),
+                style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: Colors.grey),
               ),
               SizedBox(height: 20),
 
                                 Center(
                                   child: SizedBox(
-                                    width: 300,
+                                    width: 350,
                                     child: ElevatedButton(
                                       onPressed: null,
                                       style: ButtonStyle(

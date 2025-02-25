@@ -18,7 +18,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   bool showFullDescription = false;
 
   String get imageURL =>
-      'http://192.168.1.3:5023${detail['serviceImage'] ?? ''}';
+      'http://10.64.197.68:5023${detail['serviceImage'] ?? ''}';
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   Future<void> fetchDetail() async {
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.3:5023/api/Service/${widget.serviceId}'),
+        Uri.parse('http://10.64.197.68:5023/api/Service/${widget.serviceId}'),
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -53,7 +53,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.3:5023/service/${widget.serviceId}?showAll=false'),
+            'http://10.64.197.68:5023/service/${widget.serviceId}?showAll=false'),
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -72,7 +72,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
     return ListTile(
       leading: Text('${index + 1}.'),
       title: Text(variant['serviceContent'] ?? 'No content'),
-      subtitle: Text('Price: ${variant['servicePrice']} VND'),
+      subtitle: Text('Price: ${variant['servicePrice']} VND', style: TextStyle(color: Colors.red)),
     );
   }
 
@@ -132,6 +132,8 @@ class _ServiceDetailState extends State<ServiceDetail> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w600,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey
                         ),
                       )
                     ],
@@ -140,7 +142,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
                   // Button "Book Now"
                   Center(
                     child: SizedBox(
-                      width: 300,
+                      width: 400,
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.pushNamed(context, '/booking');
@@ -164,20 +166,26 @@ class _ServiceDetailState extends State<ServiceDetail> {
                   SizedBox(height: 30),
                   // Hiển thị danh sách Variant (nếu có)
                   Text(
-                    'Variants of this service',
+                    'List of variants you can book: ',
                     style: TextStyle(
                         fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
                   dataVariant.isEmpty
                       ? Center(child: Text('No variants available'))
-                      : ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: dataVariant.length,
-                          itemBuilder: (context, index) =>
-                              buildVariantItem(dataVariant[index], index),
-                        ),
+                      : Container(margin: EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.blue, width: 2),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          physics: NeverScrollableScrollPhysics(),
+                                          itemCount: dataVariant.length,
+                                          itemBuilder: (context, index) =>
+                                              buildVariantItem(dataVariant[index], index),
+                                        ),
+                      ),
                         SizedBox(height: 20),
                                           Text(
                                             'Description',
@@ -200,8 +208,11 @@ class _ServiceDetailState extends State<ServiceDetail> {
                                               });
                                             },
                                             child: Text(
-                                              showFullDescription ? 'Show Less' : 'See More',
-                                              style: TextStyle(color: Colors.blue),
+                                              showFullDescription ? 'Show Less' : 'Show More',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic,
+                                              decoration: TextDecoration.underline),
+
                                             ),
                                           ),
                 ],
