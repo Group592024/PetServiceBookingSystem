@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class ChangePasswordPage extends StatefulWidget {
   final String accountId;
-  const ChangePasswordPage({super.key, required this.accountId, required String title});
+  const ChangePasswordPage(
+      {super.key, required this.accountId, required String title});
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
+
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   Map<String, dynamic>? account;
@@ -15,9 +18,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   bool _showNewPassword = false;
   bool _showConfirmPassword = false;
   String accountId = '';
-  final TextEditingController _currentPasswordController = TextEditingController();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   Future<void>? _fetchDataFuture;
   String? imagePreview;
   String? accountName;
@@ -27,6 +32,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     fetchAccountData();
     _loadAccountId();
   }
+
   Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -35,11 +41,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     print("Loaded Account ID: $accountId");
     if (accountId.isNotEmpty) {
       setState(() {
-        _fetchDataFuture =
-            fetchAccountData(); 
+        _fetchDataFuture = fetchAccountData();
       });
     }
   }
+
   Future<void> fetchAccountData() async {
     if (accountId.isEmpty) {
       print("Lỗi: Account ID rỗng.");
@@ -65,7 +71,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       print("Error call API: $error");
     }
   }
-   Future<void> fetchImage(String filename) async {
+
+  Future<void> fetchImage(String filename) async {
     if (filename.isEmpty) {
       print("Error: Filename null.");
       return;
@@ -90,55 +97,56 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       print("Error Image: $error");
     }
   }
+
   Future<void> _changePassword() async {
-  if (!_formKey.currentState!.validate()) {
-    return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    final String apiUrl =
+        'http://10.0.2.2:5000/api/Account/ChangePassword$accountId';
+    final response = await http.put(
+      Uri.parse(apiUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'currentPassword': _currentPasswordController.text,
+        'newPassword': _newPasswordController.text,
+        'confirmPassword': _confirmPasswordController.text,
+      }),
+    );
+    if (response.statusCode == 200) {
+      _showAlert('Success', 'Password changed successfully!', () {
+        //Navigator.popUntil(context, ModalRoute.withName('/home'));
+        // Hoặc nếu chưa có route tên '/profile', bạn có thể dùng:
+        Navigator.pushReplacementNamed(context, '/home');
+      });
+    } else {
+      final errorData = jsonDecode(response.body);
+      _showAlert(
+          'Error', errorData['message'] ?? 'Failed to change password', null);
+    }
   }
-  final String apiUrl =
-      'http://10.0.2.2:5000/api/Account/ChangePassword$accountId';
-  final response = await http.put(
-    Uri.parse(apiUrl),
-    headers: {'Content-Type': 'application/json'},
-    body: jsonEncode({
-      'currentPassword': _currentPasswordController.text,
-      'newPassword': _newPasswordController.text,
-      'confirmPassword': _confirmPasswordController.text,
-    }),
-  );
-  if (response.statusCode == 200) {
-    _showAlert('Success', 'Password changed successfully!', () {
-      //Navigator.popUntil(context, ModalRoute.withName('/home')); 
-      // Hoặc nếu chưa có route tên '/profile', bạn có thể dùng:
-       Navigator.pushReplacementNamed(context, '/home');
-    });
-  } else {
-    final errorData = jsonDecode(response.body);
-    _showAlert('Error', errorData['message'] ?? 'Failed to change password', null);
+
+  void _showAlert(String title, String message, VoidCallback? onConfirm) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              if (onConfirm != null) {
+                onConfirm();
+              }
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
-}
 
-void _showAlert(String title, String message, VoidCallback? onConfirm) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: Text(title),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-            if (onConfirm != null) {
-              onConfirm();
-            }
-          },
-          child: Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
-
- 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,12 +161,9 @@ void _showAlert(String title, String message, VoidCallback? onConfirm) {
         automaticallyImplyLeading: false,
       ),
       body: _fetchDataFuture == null
-          ? Center(
-              child:
-                  CircularProgressIndicator()) 
+          ? Center(child: CircularProgressIndicator())
           : FutureBuilder<void>(
-              future:
-                  _fetchDataFuture, 
+              future: _fetchDataFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -184,10 +189,10 @@ void _showAlert(String title, String message, VoidCallback? onConfirm) {
                           children: [
                             CircleAvatar(
                               radius: 60,
-                               backgroundImage: imagePreview != null
-                                    ? MemoryImage(base64Decode(
-                                        imagePreview!.split(",")[1]))
-                                    : null,
+                              backgroundImage: imagePreview != null
+                                  ? MemoryImage(
+                                      base64Decode(imagePreview!.split(",")[1]))
+                                  : null,
                               child: imagePreview == null
                                   ? Icon(Icons.person,
                                       size: 60, color: Colors.grey)
@@ -295,6 +300,7 @@ void _showAlert(String title, String message, VoidCallback? onConfirm) {
     );
   }
 }
+
 Widget buildPasswordField(String label, TextEditingController controller,
     bool obscureText, VoidCallback toggleVisibility) {
   return TextFormField(
@@ -307,7 +313,7 @@ Widget buildPasswordField(String label, TextEditingController controller,
         onPressed: toggleVisibility,
       ),
       enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.transparent), 
+        borderSide: BorderSide(color: Colors.transparent),
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: Colors.transparent),

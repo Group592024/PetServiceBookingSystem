@@ -29,15 +29,14 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
   Future<void> fetchData() async {
     try {
       final healthBookRes = await http.get(Uri.parse(
-          'http://localhost:5003/api/PetHealthBook/${widget.healthBookId}'));
+          'http://10.0.2.2:5003/api/PetHealthBook/${widget.healthBookId}'));
       final medicinesRes =
-          await http.get(Uri.parse('http://localhost:5003/Medicines'));
+          await http.get(Uri.parse('http://10.0.2.2:5003/Medicines'));
       final treatmentsRes =
-          await http.get(Uri.parse('http://localhost:5003/api/Treatment'));
+          await http.get(Uri.parse('http://10.0.2.2:5003/api/Treatment'));
       final bookingsRes =
-          await http.get(Uri.parse('http://localhost:5201/Bookings'));
-      final petsRes =
-          await http.get(Uri.parse('http://localhost:5010/api/pet'));
+          await http.get(Uri.parse('http://10.0.2.2:5201/Bookings'));
+      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5010/api/pet'));
       if (!mounted) return;
       if (healthBookRes.statusCode != 200 ||
           medicinesRes.statusCode != 200 ||
@@ -125,7 +124,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
               child: CircleAvatar(
                 radius: 80,
                 backgroundImage: petImage.isNotEmpty
-                    ? NetworkImage('http://localhost:5010$petImage')
+                    ? NetworkImage('http://10.0.2.2:5010$petImage')
                     : AssetImage('assets/default-image.png') as ImageProvider,
               ),
             ),
@@ -157,11 +156,11 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             _buildRowText(
                 'Performed By', '${petHealthBook!['performBy'] ?? ''}'),
             Divider(),
-            _buildRowText('Visit Date', formatDate(petHealthBook!['visitDate'])),
-
+            _buildRowText(
+                'Visit Date', formatDate(petHealthBook!['visitDate'])),
             Divider(),
-            _buildRowText('Next Visit Date', formatDate(petHealthBook!['nextVisitDate'])),
-
+            _buildRowText(
+                'Next Visit Date', formatDate(petHealthBook!['nextVisitDate'])),
             Divider(),
             _buildRowText('Medicine',
                 '${medicines.isNotEmpty ? medicines.map((m) => m['medicineName']).join(", ") : 'No Medicines Assigned'}'),

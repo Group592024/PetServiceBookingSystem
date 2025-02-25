@@ -46,13 +46,13 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     print("Account ID: $accountId");
     try {
       final petHealthResponse =
-          await http.get(Uri.parse("http://localhost:5003/api/PetHealthBook"));
+          await http.get(Uri.parse("http://10.0.2.2:5003/api/PetHealthBook"));
       final medicinesResponse =
-          await http.get(Uri.parse("http://localhost:5003/Medicines"));
+          await http.get(Uri.parse("http://10.0.2.2:5003/Medicines"));
       final bookingsResponse =
-          await http.get(Uri.parse("http://localhost:5201/Bookings"));
+          await http.get(Uri.parse("http://10.0.2.2:5201/Bookings"));
       final petsResponse =
-          await http.get(Uri.parse("http://localhost:5010/api/pet"));
+          await http.get(Uri.parse("http://10.0.2.2:5010/api/pet"));
       if (!mounted) return;
       if (petHealthResponse.statusCode != 200 ||
           medicinesResponse.statusCode != 200 ||
@@ -168,7 +168,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                           image: DecorationImage(
                             image: pets.first['petImage'].isNotEmpty
                                 ? NetworkImage(
-                                    "http://localhost:5010${pets.first['petImage']}")
+                                    "http://10.0.2.2:5010${pets.first['petImage']}")
                                 : AssetImage('assets/default-image.png')
                                     as ImageProvider,
                             fit: BoxFit.cover,
@@ -331,7 +331,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
 Widget buildPetImage(String? imagePath) {
   if (imagePath != null && imagePath.isNotEmpty) {
-    String imageUrl = "http://localhost:5010$imagePath";
+    String imageUrl = "http://10.0.2.2:5010$imagePath";
     return Image.network(
       imageUrl,
       width: 50,

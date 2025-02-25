@@ -51,7 +51,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (accountId.isEmpty) return;
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -142,68 +142,68 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> _saveProfile() async {
-  if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) return;
 
-  try {
-    final request = http.MultipartRequest(
-      'PUT',
-      Uri.parse('http://10.0.2.2:5000/api/Account'),
-    );
-
-    // Gửi dữ liệu văn bản
-    request.fields['accountTempDTO.accountId'] = accountId;
-    request.fields['accountTempDTO.accountName'] = nameController.text;
-    request.fields['accountTempDTO.accountEmail'] = email ?? '';
-    request.fields['accountTempDTO.accountPhoneNumber'] = phoneController.text;
-    request.fields['accountTempDTO.accountGender'] = gender;
-    request.fields['accountTempDTO.accountDob'] =
-        dob != null ? DateFormat('yyyy-MM-dd').format(dob!) : '';
-    request.fields['accountTempDTO.accountAddress'] = addressController.text;
-    request.fields['accountTempDTO.isPickImage'] = isImagePicked.toString();
-    request.fields['accountTempDTO.roleId'] = role;
-
-    print("Sending request with fields: ${request.fields}");
-
-    // Nếu có ảnh, gửi ảnh lên
-    if (isImagePicked && profileImage != null && profileImage!.existsSync()) {
-      print("Adding image file: ${profileImage!.path}");
-
-      var file = await http.MultipartFile.fromPath(
-        'uploadModel.imageFile', // Đúng với format API yêu cầu
-        profileImage!.path,
-        filename: profileImage!.path.split('/').last,
-        contentType: MediaType('image', 'jpeg'),
+    try {
+      final request = http.MultipartRequest(
+        'PUT',
+        Uri.parse('http://10.0.2.2:5000/api/Account'),
       );
 
-      request.files.add(file);
-    } else {
-      // Nếu không chọn ảnh, gửi ảnh cũ (nếu có)
-      request.fields['accountTempDTO.accountImage'] =
-          account?['accountImage'] ?? '';
-    }
+      // Gửi dữ liệu văn bản
+      request.fields['accountTempDTO.accountId'] = accountId;
+      request.fields['accountTempDTO.accountName'] = nameController.text;
+      request.fields['accountTempDTO.accountEmail'] = email ?? '';
+      request.fields['accountTempDTO.accountPhoneNumber'] =
+          phoneController.text;
+      request.fields['accountTempDTO.accountGender'] = gender;
+      request.fields['accountTempDTO.accountDob'] =
+          dob != null ? DateFormat('yyyy-MM-dd').format(dob!) : '';
+      request.fields['accountTempDTO.accountAddress'] = addressController.text;
+      request.fields['accountTempDTO.isPickImage'] = isImagePicked.toString();
+      request.fields['accountTempDTO.roleId'] = role;
 
-    // Gửi request lên server
-    final response = await request.send();
-    final responseCompleted = await http.Response.fromStream(response);
-    print("Server response status: ${responseCompleted.statusCode}");
-    print("Response body: ${responseCompleted.body}");
+      print("Sending request with fields: ${request.fields}");
 
-    final result = json.decode(responseCompleted.body);
+      // Nếu có ảnh, gửi ảnh lên
+      if (isImagePicked && profileImage != null && profileImage!.existsSync()) {
+        print("Adding image file: ${profileImage!.path}");
 
-    if (response.statusCode == 200) {
-      if (result['flag']) {
-        _showSuccessDialog('Profile updated successfully!');
+        var file = await http.MultipartFile.fromPath(
+          'uploadModel.imageFile', // Đúng với format API yêu cầu
+          profileImage!.path,
+          filename: profileImage!.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        );
+
+        request.files.add(file);
       } else {
-        _showErrorDialog(result['message'] ?? 'Something went wrong.');
+        // Nếu không chọn ảnh, gửi ảnh cũ (nếu có)
+        request.fields['accountTempDTO.accountImage'] =
+            account?['accountImage'] ?? '';
       }
-    } else {
-      _showErrorDialog('Error saving profile.');
-    }
-  } catch (error) {
-    _showErrorDialog('Error: $error');
-  }
-}
 
+      // Gửi request lên server
+      final response = await request.send();
+      final responseCompleted = await http.Response.fromStream(response);
+      print("Server response status: ${responseCompleted.statusCode}");
+      print("Response body: ${responseCompleted.body}");
+
+      final result = json.decode(responseCompleted.body);
+
+      if (response.statusCode == 200) {
+        if (result['flag']) {
+          _showSuccessDialog('Profile updated successfully!');
+        } else {
+          _showErrorDialog(result['message'] ?? 'Something went wrong.');
+        }
+      } else {
+        _showErrorDialog('Error saving profile.');
+      }
+    } catch (error) {
+      _showErrorDialog('Error: $error');
+    }
+  }
 
   void _showErrorDialog(String message) {
     showDialog(
