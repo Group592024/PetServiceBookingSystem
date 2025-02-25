@@ -5,6 +5,7 @@ import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/room/room_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
+import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Additional pages from Tuan/AccountManagementFlutter
@@ -57,7 +58,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final screens = [
     RoomPage(),
     PetPage(),
-    BookingPage(),
+    GiftListScreen(),
     CustomerVoucherList(),
     ProfilePage(accountId: '', title: ''),
     EditProfilePage(accountId: '', title: ''),
@@ -84,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final items = <Widget>[
       Icon(Icons.home, size: 30),
       Icon(Icons.pets_rounded, size: 30),
-      Icon(Icons.add, size: 30),
+      Icon(Icons.card_giftcard, size: 30),
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
