@@ -18,9 +18,9 @@ const GiftDatatable = () => {
       );
 
       if (giftResponse.data.flag) {
-        toast.success(
-          giftResponse.data.message || "Gifts data fetched successfully!"
-        );
+        // toast.success(
+        //   giftResponse.data.message || "Gifts data fetched successfully!"
+        // );
         setGifts(giftResponse.data.data);
       } else {
         setError(giftResponse.data.message || "No gifts found");

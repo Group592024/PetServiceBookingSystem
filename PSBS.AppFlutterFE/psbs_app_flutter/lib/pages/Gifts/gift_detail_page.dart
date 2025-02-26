@@ -80,22 +80,24 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
         child: isLoading
             ? const CircularProgressIndicator()
             : error != null
-                ? Text(
-                    error!,
-                    style: const TextStyle(color: Colors.red, fontSize: 16),
-                    textAlign: TextAlign.center,
+                ? Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      error!,
+                      style: const TextStyle(color: Colors.red, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
                   )
                 : Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
                             'http://127.0.0.1:5022${gift!['giftImage']}',
-                            width: 200,
+                            width: double.infinity,
                             height: 200,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
@@ -112,37 +114,66 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 10),
-                        Text(
-                          "Points: ${gift!['giftPoint']}",
-                          style: const TextStyle(fontSize: 18),
-                          textAlign: TextAlign.center,
+
+                        // Points with icon
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.stars, color: Colors.orange, size: 24),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Points: ${gift!['giftPoint']}",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
+
                         const SizedBox(height: 10),
-                        Text(
-                          "Gift Code: ${gift!['giftCode'] ?? "N/A"}",
-                          style: const TextStyle(fontSize: 18),
-                          textAlign: TextAlign.center,
+
+                        // Divider
+                        const Divider(thickness: 1.2),
+
+                        // Description with icon
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.description, color: Colors.green, size: 24),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                "${gift!['giftDescription'] ?? "No description available"}",
+                                style: const TextStyle(fontSize: 16),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Description: ${gift!['giftDescription'] ?? "No description available"}",
-                          style: const TextStyle(fontSize: 16),
-                          textAlign: TextAlign.center,
-                        ),
+
                         const SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: handleRedeem,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 30, vertical: 12),
-                            textStyle: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+
+                        // Animated Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: ElevatedButton.icon(
+                            onPressed: handleRedeem,
+                            icon: const Icon(Icons.card_giftcard, size: 24),
+                            label: const Text(
+                              'Redeem Gift',
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blueAccent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              elevation: 5,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
-                          child: const Text('Redeem Gift'),
                         ),
                       ],
                     ),

@@ -164,6 +164,27 @@ function GiftDetailPage() {
                   sx={{ mb: 3 }}
                 />
 
+                <TextField
+                  label="Gift Quantity"
+                  variant="outlined"
+                  fullWidth
+                  value={gift.quantity}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ mb: 3 }}
+                />
+                <TextField
+                  label="Gift Status"
+                  variant="outlined"
+                  fullWidth
+                  value={gift.giftStatus ? "Inactive" : "Active"}
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  sx={{ mb: 3 }}
+                />
+
                 {/* Gift Description */}
                 <TextField
                   label="Gift Description"

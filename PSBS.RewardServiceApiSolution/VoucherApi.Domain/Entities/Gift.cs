@@ -26,6 +26,9 @@ namespace VoucherApi.Domain.Entities
 
         [Column("gift_status")]
         public bool GiftStatus { get; set; }
+
+        [Column("gift_quantity")]
+        public int GiftQuantity { get; set; }
         public virtual ICollection<RedeemGiftHistory>? RedeemGiftHistories { get; set; }
     }
 }
