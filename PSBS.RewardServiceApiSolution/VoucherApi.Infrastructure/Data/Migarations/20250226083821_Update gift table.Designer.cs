@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VoucherApi.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using VoucherApi.Infrastructure.Data;
 namespace VoucherApi.Infrastructure.Data.Migarations
 {
     [DbContext(typeof(RewardServiceDBContext))]
-    partial class RewardServiceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250226083821_Update gift table")]
+    partial class Updategifttable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace VoucherApi.Application.DTOs.GiftDTOs
 {
-    public record GiftDTO
+    public record UpdateGiftDTO
     (
     Guid giftId,
     [Required] string giftName,
@@ -17,6 +17,7 @@ namespace VoucherApi.Application.DTOs.GiftDTOs
     IFormFile? imageFile,
     [Required] int giftPoint,
     string? giftCode,
-    int quantity
+    int quantity,
+    bool giftStatus
     );
 }
