@@ -6,13 +6,13 @@ import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/room/room_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/editprofile_page.dart';
 import 'pages/Account/profile_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const StoreScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -122,7 +122,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // Navigate to chat list
+              Navigator.pushNamed(context, '/chat'); // Navigate to ChatPage
+            },
             icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
@@ -169,11 +172,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
   Future<void> logout(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('accountId'); 
-  await prefs.remove('token'); 
-  Navigator.pushReplacementNamed(context, "/login"); 
-}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accountId');
+    await prefs.remove('token');
+    Navigator.pushReplacementNamed(context, "/login");
+  }
 }

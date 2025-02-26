@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:psbs_app_flutter/models/voucher.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
+import 'package:psbs_app_flutter/pages/chat/chat_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
@@ -12,7 +13,6 @@ import 'package:psbs_app_flutter/pages/Account/forgotpassword_page.dart';
 import 'package:psbs_app_flutter/pages/Account/editprofile_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/vouchers/voucher_detail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -64,6 +64,8 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+      case '/chat':
+        return MaterialPageRoute(builder: (_) => const ChatPage());
       default:
         return _errorRoute();
     }
