@@ -149,7 +149,7 @@ class _AddUserWidgetState extends State<AddUserWidget> {
                               children: [
                                 CircleAvatar(
                                   backgroundImage:
-                                      AssetImage("assets/avatar.png"),
+                                      AssetImage("assets/default-avatar.png"),
                                   radius: 25,
                                 ),
                                 SizedBox(width: 20),

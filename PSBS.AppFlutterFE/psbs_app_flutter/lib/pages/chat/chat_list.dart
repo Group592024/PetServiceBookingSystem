@@ -4,6 +4,7 @@ import 'package:psbs_app_flutter/models/user.dart';
 import 'package:psbs_app_flutter/pages/chat/add_user_widget.dart';
 import 'package:psbs_app_flutter/pages/chat/chat_box.dart';
 import 'package:psbs_app_flutter/services/signal_r_service.dart';
+import 'package:psbs_app_flutter/services/user_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:psbs_app_flutter/utils/dialog_utils.dart';
 import 'package:psbs_app_flutter/services/user_service.dart';
@@ -28,7 +29,8 @@ class _ChatListWidgetState extends State<ChatListWidget> {
     _startSignalR();
   }
 
-void _navigateToChat(BuildContext context, String chatId, User currentUser, User? chatUser, bool isSupportChat) {
+  void _navigateToChat(BuildContext context, String chatId, User currentUser,
+      User? chatUser, bool isSupportChat) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -41,11 +43,11 @@ void _navigateToChat(BuildContext context, String chatId, User currentUser, User
       ),
     );
   }
+
   Future<void> _startSignalR() async {
     final hubUrl = 'http://192.168.2.28:5159/chatHub';
 
     signalRService.setHubUrl(hubUrl);
-
     await signalRService.startConnection(hubUrl, widget.currentUser.accountId);
 
     signalRService.on('getList', (arguments) {
@@ -71,7 +73,6 @@ void _navigateToChat(BuildContext context, String chatId, User currentUser, User
     signalRService.on('staffremoved', (arguments) {
       print('SignalR: Received staffremoved event');
       showSuccessDialog(context, "Leave room successfully");
-      _changeChat(null, null, false);
     });
 
     try {
@@ -110,17 +111,6 @@ void _navigateToChat(BuildContext context, String chatId, User currentUser, User
     } else {
       print("ChatListWidget is not mounted, skipping setState.");
     }
-  }
-
-  void _changeChat(String? chatId, User? user, bool isSupport) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (chatId != null) {
-      prefs.setString('chatId', chatId);
-    } else {
-      prefs.remove('chatId');
-    }
-    print(
-        'Changed chat: chatId=$chatId, user=${user?.accountName}, isSupport=$isSupport');
   }
 
   @override
@@ -224,88 +214,100 @@ void _navigateToChat(BuildContext context, String chatId, User currentUser, User
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _chats.length,
-              itemBuilder: (context, index) {
-                final chatRoom = _chats[index];
-                return GestureDetector(
-                   onTap: () {
-            // _navigateToChat(context, chatRoom.chatRoomId, currentUser, chatUser, chatRoom.isSupportRoom);
-          },
-                  child: Container(
-                    padding: EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border:
-                          Border(bottom: BorderSide(color: Color(0xDDDDDD35))),
-                      color: chatRoom.isSupportRoom
-                          ? Color.fromRGBO(0, 123, 255, 0.1)
-                          : null,
-                    ),
-                    child: Stack(
-                      children: [
-                        Row(
-                          children: [
-                            CircleAvatar(
-                              radius: 25,
-                              backgroundImage: AssetImage(
-                                  chatRoom.user?.avatar ?? 'assets/avatar.png'),
-                            ),
-                            SizedBox(width: 20),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+            child: useUserStore().currentUser == null
+                ? Center(
+                    child: CircularProgressIndicator()) // Show loading spinner
+                : ListView.builder(
+                    itemCount: _chats.length,
+                    itemBuilder: (context, index) {
+                      final chatRoom = _chats[index];
+                      return GestureDetector(
+                        onTap: () {
+                          _navigateToChat(
+                            context,
+                            chatRoom.chatRoomId,
+                            useUserStore().currentUser!,
+                            chatRoom.user,
+                            chatRoom.isSupportRoom,
+                          );
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            border: Border(
+                                bottom: BorderSide(color: Color(0xDDDDDD35))),
+                            color: chatRoom.isSupportRoom
+                                ? Color.fromRGBO(0, 123, 255, 0.1)
+                                : null,
+                          ),
+                          child: Stack(
+                            children: [
+                              Row(
                                 children: [
-                                  Text(
-                                    chatRoom.isSupportRoom &&
-                                            widget.currentUser.roleId == 'user'
-                                        ? 'Support Agent'
-                                        : chatRoom.user?.accountName ??
-                                            'Unknown',
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.w500),
+                                  CircleAvatar(
+                                    radius: 25,
+                                    backgroundImage: AssetImage(
+                                        chatRoom.user?.avatar ??
+                                            'assets/avatar.png'),
                                   ),
-                                  SizedBox(height: 10),
-                                  Text(
-                                    chatRoom.lastMessage ?? 'null',
-                                    style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w300),
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 1,
+                                  SizedBox(width: 20),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          chatRoom.isSupportRoom &&
+                                                  widget.currentUser.roleId ==
+                                                      'user'
+                                              ? 'Support Agent'
+                                              : chatRoom.user?.accountName ??
+                                                  'Unknown',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          chatRoom.lastMessage ?? 'null',
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ],
+                              if (chatRoom.isSeen != true)
+                                Positioned(
+                                  top: 10,
+                                  right: 10,
+                                  child: Container(
+                                    width: 12,
+                                    height: 12,
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                ),
+                              if (chatRoom.isSupportRoom)
+                                Positioned(
+                                  right: 10,
+                                  top: 0,
+                                  bottom: 0,
+                                  child: Icon(Icons.support_agent,
+                                      size: 40,
+                                      color: Color.fromRGBO(0, 123, 255, 0.4)),
+                                ),
+                            ],
+                          ),
                         ),
-                        if (chatRoom.isSeen != true)
-                          Positioned(
-                            top: 10,
-                            right: 10,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        if (chatRoom.isSupportRoom)
-                          Positioned(
-                            right: 10,
-                            top: 0,
-                            bottom: 0,
-                            child: Icon(Icons.support_agent,
-                                size: 40,
-                                color: Color.fromRGBO(0, 123, 255, 0.4)),
-                          ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

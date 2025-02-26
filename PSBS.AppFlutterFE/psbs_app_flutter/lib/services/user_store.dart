@@ -7,9 +7,13 @@ class UseUserStore extends Store {
   User? currentUser;
   bool isLoading = true;
   UseUserStore() : super(0);
-  Future<void> loadUserDetails(accountId) async {
+  Future<void> loadUserDetails(String accountId) async {
+    print("Debug: Running loadUserDetails in store with accountId $accountId");
     final user = await UserService.fetchUser(accountId);
-    set({currentUser: user, isLoading: false});
+    if (user != null) {
+      currentUser = user;
+      isLoading = false;
+    }
   }
 }
 

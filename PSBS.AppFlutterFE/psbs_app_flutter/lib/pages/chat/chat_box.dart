@@ -33,11 +33,16 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
   Map<String, User> _userMap = {};
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
+  final FocusNode _focusNode = FocusNode();
   @override
   void initState() {
     super.initState();
     _startSignalR();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_openEmoji) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   Future<void> _startSignalR() async {
@@ -85,23 +90,29 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
   }
 
   Future<void> _updateChat(List<ChatMessage> messages) async {
-    setState(() {
-      _chat = messages;
-    });
+    if (mounted) {
+      // Check if the widget is mounted
+      setState(() {
+        _chat = messages;
+      });
+    }
     final senderIds = messages.map((msg) => msg.senderId).toSet().toList();
     await _fetchUserDetails(senderIds);
     _scrollToBottom();
   }
 
   void _receiveMessage(String senderId, String messageText, String updatedAt) {
-    setState(() {
-      _chat.add(ChatMessage(
-        name: widget.currentUser.accountName,
-        createdAt: updatedAt,
-        senderId: senderId,
-        text: messageText,
-      ));
-    });
+    if (mounted) {
+      // Check if the widget is mounted
+      setState(() {
+        _chat.add(ChatMessage(
+          name: widget.currentUser.accountName,
+          createdAt: updatedAt,
+          senderId: senderId,
+          text: messageText,
+        ));
+      });
+    }
     _fetchUserDetails([senderId]);
     _scrollToBottom();
   }
@@ -110,7 +121,8 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     for (var id in senderIds) {
       if (!_userMap.containsKey(id)) {
         final user = await UserService.fetchUser(id);
-        if (user != null) {
+        if (user != null && mounted) {
+          // Check if mounted
           setState(() {
             _userMap[id] = user;
           });
@@ -129,18 +141,7 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     });
   }
 
-  void _handleEmoji(Category category, Emoji emoji) {
-    setState(() {
-      _text += emoji.emoji;
-      _textController.value = TextEditingValue(
-        text: _text,
-        selection: TextSelection.fromPosition(
-          TextPosition(offset: _text.length),
-        ),
-      );
-    });
-    _openEmoji = false;
-  }
+  void _handleEmoji(Category category, Emoji emoji) {}
 
   Future<void> _handleSend() async {
     if (_text.trim().isEmpty) return;
@@ -180,6 +181,13 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
   @override
   void dispose() {
     signalRService.invoke("LeaveChatRoom", [widget.chatId]);
+
+    signalRService.off("UpdateChatMessages");
+    signalRService.off("ReceiveMessage");
+    signalRService.off("removestafffailed");
+    signalRService.off("NewSupporterRequested");
+    signalRService.off("RequestNewSupporterFailed");
+
     super.dispose();
   }
 
@@ -190,7 +198,7 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage("assets/avatar.png"),
+              backgroundImage: AssetImage("default-avatar.png"),
             ),
             SizedBox(width: 10),
             Text(widget.isSupportChat && widget.currentUser.roleId == "user"
@@ -260,21 +268,21 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
             child: Row(
               children: [
                 Expanded(
-                  child: TextField(
-                    controller: _textController,
-                    decoration: InputDecoration(
-                      hintText: 'Type a message...',
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _text = value;
-                      });
-                    },
-                    onSubmitted: _handleKeyPress,
-                    maxLines: null,
-                    keyboardType: TextInputType.multiline,
+                    child: TextField(
+                  controller: _textController,
+                  focusNode: _focusNode, // Add this
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
                   ),
-                ),
+                  onChanged: (value) {
+                    setState(() {
+                      _text = value;
+                    });
+                  },
+                  onSubmitted: _handleKeyPress,
+                  maxLines: null,
+                  keyboardType: TextInputType.multiline,
+                )),
                 IconButton(
                   icon:
                       Icon(_openEmoji ? Icons.keyboard : Icons.emoji_emotions),
@@ -282,6 +290,14 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                     setState(() {
                       _openEmoji = !_openEmoji;
                     });
+                    if (_openEmoji) {
+                      _focusNode.unfocus();
+                    } else {
+                      // Add a small delay to ensure emoji picker is closed
+                      Future.delayed(Duration(milliseconds: 100), () {
+                        _focusNode.requestFocus();
+                      });
+                    }
                   },
                 ),
                 IconButton(
@@ -295,7 +311,19 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
             SizedBox(
               height: 250,
               child: EmojiPicker(
-                onEmojiSelected: (category, emoji) {},
+                onEmojiSelected: (category, emoji) {
+                  setState(() {
+                    _textController.text += emoji.emoji;
+                    _textController.selection = TextSelection.fromPosition(
+                      TextPosition(offset: _textController.text.length),
+                    );
+                  });
+
+                  // Close emoji picker and request keyboard focus
+                  Future.delayed(Duration(milliseconds: 100), () {
+                    _focusNode.requestFocus();
+                  });
+                },
                 config: Config(
                   height: 256,
                   checkPlatformCompatibility: true,
@@ -308,12 +336,9 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                   viewOrderConfig: const ViewOrderConfig(
                     top: EmojiPickerItem.categoryBar,
                     middle: EmojiPickerItem.emojiView,
-                    bottom: EmojiPickerItem.searchBar,
                   ),
                   skinToneConfig: const SkinToneConfig(),
                   categoryViewConfig: const CategoryViewConfig(),
-                  bottomActionBarConfig: const BottomActionBarConfig(),
-                  searchViewConfig: const SearchViewConfig(),
                 ),
               ),
             ),
