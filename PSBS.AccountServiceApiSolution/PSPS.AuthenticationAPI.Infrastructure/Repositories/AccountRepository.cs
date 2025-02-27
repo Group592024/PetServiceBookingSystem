@@ -651,22 +651,27 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
-        public async Task<Response> ForgotPassword(string AccountEmail) // Forgotpassword with Email
+        public async Task<Response> ForgotPassword(string AccountEmail)
         {
             try
             {
-
                 var account = await GetAccountByAccountEmail(AccountEmail);
+
                 if (account == null)
                 {
+                    Console.WriteLine("Account not found");
                     return new Response(false, "If the account exists, a password reset email has been sent.");
                 }
+
                 string newPassword = GenerateRandomPassword();
+
                 var emailSent = await SendPasswordResetEmail(AccountEmail, newPassword);
+
                 if (!emailSent)
                 {
                     return new Response(false, "Failed to send password reset email. Please try again.");
                 }
+
                 account.AccountPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
@@ -675,10 +680,11 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ForgotPassword Error: {ex.Message}");
+                Console.WriteLine($"ForgotPassword Error: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 return new Response(false, "An error occurred. Please try again later.");
             }
         }
+
 
         private string GenerateRandomPassword() //Random new password
         {

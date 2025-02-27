@@ -19,7 +19,7 @@ const PetHealthBookListCus = () => {
       const [petHealthRes, medicinesRes, bookingsRes, petsRes] = await Promise.all([
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
-        fetch("https://localhost:5201/api/Booking"),
+        fetch("http://localhost:5201/Bookings"),
         fetch("http://localhost:5010/api/pet"),
       ]);
       if (!petHealthRes.ok) throw new Error(`Failed to fetch PetHealthBook: ${petHealthRes.status}`);
@@ -91,7 +91,7 @@ const PetHealthBookListCus = () => {
       <div className="w-full">
         <NavbarCustomer />
         <main className="flex-1 p-4">
-          <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
+          <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
           <div className="flex gap-8">
             {/* Left Column - Pet Information */}
             <div className="w-1/3 items-center justify-center flex rounded-md p-6">
