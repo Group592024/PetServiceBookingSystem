@@ -18,7 +18,7 @@ const Services = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
         >
-          Our Services
+          Our Top Services
         </motion.h2>
         <motion.p
           className="text-lg text-gray-600 text-center max-w-3xl mb-8"
