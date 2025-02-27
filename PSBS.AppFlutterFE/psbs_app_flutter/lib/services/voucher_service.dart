@@ -4,8 +4,8 @@ import '../models/voucher.dart';
 
 class VoucherService {
   static Future<List<Voucher>> fetchVouchers() async {
-    final response = await http
-        .get(Uri.parse('http://192.168.2.28:5022/api/Voucher/customer'));
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:5022/api/Voucher/customer'));
 
     if (response.statusCode == 200) {
       List jsonResponse = json.decode(response.body)['data'];

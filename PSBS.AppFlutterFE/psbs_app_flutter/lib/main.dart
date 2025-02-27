@@ -1,9 +1,6 @@
-import 'dart:io';
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcaredetail_page.dart'
-    as detail;
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
     as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';

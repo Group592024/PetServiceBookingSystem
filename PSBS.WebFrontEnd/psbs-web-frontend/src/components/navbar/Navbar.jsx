@@ -39,9 +39,11 @@ const Navbar = ({ sidebarRef }) => {
 
   const handleMenuClick = () => {
     if (sidebarRef.current) {
-      sidebarRef.current.classList.toggle("close");
+      const isClosed = sidebarRef.current.classList.toggle("close");
+      localStorage.setItem("sidebarClosed", isClosed);
     }
   };
+  
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -98,7 +100,7 @@ const Navbar = ({ sidebarRef }) => {
         {imagePreview ? (
           <img src={imagePreview} alt="Profile Avatar" className="profile-avatar" />
         ) : (
-          <div className="default-profile-pic"></div>
+          <img src="/avatar.png" alt="Profile Avatar" className="profile-avatar" />
         )}
         {dropdownVisible && (
           <div className="dropdown-menu">
