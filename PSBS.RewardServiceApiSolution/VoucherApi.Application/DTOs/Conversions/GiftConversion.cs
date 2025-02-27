@@ -17,7 +17,20 @@ namespace VoucherApi.Application.DTOs.Conversions
             GiftDescription = giftDTO.giftDescription,
             GiftImage = imagePath ?? giftDTO.giftImage,
             GiftPoint = giftDTO.giftPoint,
-            GiftCode = giftDTO.giftCode
+            GiftCode = giftDTO.giftCode,
+            GiftQuantity = giftDTO.quantity
+        };
+
+        public static Gift ToEntityForUpdate(UpdateGiftDTO dto, string? imagePath = null) => new()
+        {
+            GiftId = dto.giftId,
+            GiftName = dto.giftName,
+            GiftDescription = dto.giftDescription,
+            GiftImage = imagePath ?? dto.giftImage,
+            GiftPoint = dto.giftPoint,
+            GiftCode = dto.giftCode,
+            GiftQuantity = dto.quantity,
+            GiftStatus = dto.giftStatus
         };
 
         public static (GiftDTO?, IEnumerable<GiftDTO>?) FromEntity(Gift gift, IEnumerable<Gift>? gifts)
@@ -33,7 +46,8 @@ namespace VoucherApi.Application.DTOs.Conversions
                         gift.GiftImage,
                         null,
                         gift.GiftPoint,
-                        gift.GiftCode
+                        gift.GiftCode,
+                        gift.GiftQuantity
                     );
                 return (singleGift, null);
             }
@@ -42,7 +56,38 @@ namespace VoucherApi.Application.DTOs.Conversions
             if (gifts != null || gift == null)
             {
                 var listGifts = gifts!.Select(g =>
-                    new GiftDTO(g.GiftId, g.GiftName, g.GiftDescription, g.GiftImage, null,g.GiftPoint,g.GiftCode)).ToList();
+                    new GiftDTO(g.GiftId, g.GiftName, g.GiftDescription, g.GiftImage, null,g.GiftPoint,g.GiftCode,g.GiftQuantity)).ToList();
+                return (null, listGifts);
+            }
+
+            return (null, null);
+        }
+
+        public static (UpdateGiftDTO?, IEnumerable<UpdateGiftDTO>?) FromEntityWithStatus(Gift gift, IEnumerable<Gift>? gifts)
+        {
+            //return single
+            if (gift != null || gifts == null)
+            {
+                var singleGift = new UpdateGiftDTO
+                    (
+                        gift!.GiftId,
+                        gift.GiftName,
+                        gift.GiftDescription,
+                        gift.GiftImage,
+                        null,
+                        gift.GiftPoint,
+                        gift.GiftCode,
+                        gift.GiftQuantity,
+                        gift.GiftStatus
+                    );
+                return (singleGift, null);
+            }
+
+            //return list
+            if (gifts != null || gift == null)
+            {
+                var listGifts = gifts!.Select(g =>
+                    new UpdateGiftDTO(g.GiftId, g.GiftName, g.GiftDescription, g.GiftImage, null, g.GiftPoint, g.GiftCode, g.GiftQuantity,g.GiftStatus)).ToList();
                 return (null, listGifts);
             }
 

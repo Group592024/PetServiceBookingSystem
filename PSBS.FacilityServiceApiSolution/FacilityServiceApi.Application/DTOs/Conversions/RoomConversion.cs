@@ -1,7 +1,5 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Domain.Entities;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace FacilityServiceApi.Application.DTOs.Conversions
 {

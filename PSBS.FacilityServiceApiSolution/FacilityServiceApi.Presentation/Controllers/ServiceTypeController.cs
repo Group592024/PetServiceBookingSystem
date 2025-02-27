@@ -112,24 +112,15 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> GetAvailableServiceTypes()
         {
             var serviceTypes = await _serviceType.ListAvailableServiceTypeAsync();
-            if (!serviceTypes.Any())
-            {
-                return NotFound(new Response(false, "No available service types found"));
-            }
 
-            var serviceTypeDtos = serviceTypes.Select(serviceType => new ServiceTypeDTO
-            {
-                serviceTypeId = serviceType.serviceTypeId,
-                typeName = serviceType.typeName,
-                createAt = serviceType.createAt,
-                updateAt = serviceType.updateAt,
-                description = serviceType.description,
-                isDeleted = serviceType.isDeleted
-            });
+            if (!serviceTypes.Any())
+                return NotFound(new Response(false, "No available service types found in the database"));
+
+            var (_, responseData) = ServiceTypeConversion.FromEntity(null, serviceTypes);
 
             return Ok(new Response(true, "Available service types retrieved successfully")
             {
-                Data = serviceTypeDtos
+                Data = responseData
             });
         }
     }

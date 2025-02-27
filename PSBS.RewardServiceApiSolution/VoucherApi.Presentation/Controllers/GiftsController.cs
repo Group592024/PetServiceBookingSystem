@@ -54,7 +54,7 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The gift requested not found"));
             }
-            var (findingGift, _) = GiftConversion.FromEntity(gift, null!);
+            var (findingGift, _) = GiftConversion.FromEntityWithStatus(gift, null!);
             return Ok(new Response(true, "The gift retrieved successfully")
             {
                 Data = findingGift
@@ -121,7 +121,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // PUT api/<GiftsController>/5
         [HttpPut]
-        public async Task<ActionResult<Response>> UpdateGift([FromForm] GiftDTO updateGift)
+        public async Task<ActionResult<Response>> UpdateGift([FromForm] UpdateGiftDTO updateGift)
         {
             if(updateGift.giftId == Guid.Empty)
             {
@@ -140,7 +140,7 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The gift is not found!"));
             }
-            var getEntity = GiftConversion.ToEntity(updateGift);
+            var getEntity = GiftConversion.ToEntityForUpdate(updateGift);
             if (updateGift.imageFile != null && updateGift.imageFile.Length > 0)
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existingGift.GiftImage.TrimStart('/'));

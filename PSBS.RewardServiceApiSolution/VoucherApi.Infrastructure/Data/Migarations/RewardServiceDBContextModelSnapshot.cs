@@ -50,6 +50,10 @@ namespace VoucherApi.Infrastructure.Data.Migarations
                         .HasColumnType("int")
                         .HasColumnName("gift_point");
 
+                    b.Property<int>("GiftQuantity")
+                        .HasColumnType("int")
+                        .HasColumnName("gift_quantity");
+
                     b.Property<bool>("GiftStatus")
                         .HasColumnType("bit")
                         .HasColumnName("gift_status");

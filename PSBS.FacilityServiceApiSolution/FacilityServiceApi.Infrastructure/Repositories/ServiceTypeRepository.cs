@@ -1,4 +1,5 @@
 ﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
@@ -82,9 +83,10 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                         context.Service.Update(service);
                         service.updateAt = DateTime.Now;
                     }
+                    var result = ServiceTypeConversion.FromEntity(serviceType, null);
 
                     await context.SaveChangesAsync();
-                    return new Response(true, "ServiceType and related services soft deleted successfully.") { Data = serviceType };
+                    return new Response(true, "ServiceType and related services soft deleted successfully.") { Data = result };
                 }
             }
             catch (Exception ex)
@@ -192,6 +194,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var serviceTypes = await context.ServiceType
                                                 .Where(st => !st.isDeleted)
+                                                .Include(p => p.Services)
                                                 .ToListAsync();
                 return serviceTypes ?? new List<ServiceType>();
             }

@@ -7,12 +7,14 @@ import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
 import 'package:psbs_app_flutter/pages/Account/profile_page.dart';
 import 'package:psbs_app_flutter/pages/Account/login_page.dart';
+import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 import 'package:psbs_app_flutter/pages/Account/register_page.dart';
 import 'package:psbs_app_flutter/pages/Account/forgotpassword_page.dart';
 import 'package:psbs_app_flutter/pages/Account/editprofile_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/vouchers/voucher_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -40,7 +42,7 @@ class RouteGenerator {
                   title: '',
                 ));
       case '/login':
-        return MaterialPageRoute(builder: (_) => LoginPage());
+        return MaterialPageRoute(builder: (_) => ServicePage());
       case '/register':
         return MaterialPageRoute(builder: (_) => RegisterPage());
       case '/forgotpassword':
@@ -64,6 +66,9 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+
+        case '/gifts':
+  return MaterialPageRoute(builder: (_) => GiftListScreen());
       default:
         return _errorRoute();
     }
