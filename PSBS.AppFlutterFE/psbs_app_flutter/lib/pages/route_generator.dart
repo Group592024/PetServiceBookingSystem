@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:psbs_app_flutter/models/voucher.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
+import 'package:psbs_app_flutter/pages/chat/chat_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
@@ -42,7 +43,7 @@ class RouteGenerator {
                   title: '',
                 ));
       case '/login':
-        return MaterialPageRoute(builder: (_) => ServicePage());
+        return MaterialPageRoute(builder: (_) => LoginPage());
       case '/register':
         return MaterialPageRoute(builder: (_) => RegisterPage());
       case '/forgotpassword':
@@ -66,9 +67,11 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+      case '/chat':
+        return MaterialPageRoute(builder: (_) => const ChatPage());
 
-        case '/gifts':
-  return MaterialPageRoute(builder: (_) => GiftListScreen());
+      case '/gifts':
+        return MaterialPageRoute(builder: (_) => GiftListScreen());
       default:
         return _errorRoute();
     }

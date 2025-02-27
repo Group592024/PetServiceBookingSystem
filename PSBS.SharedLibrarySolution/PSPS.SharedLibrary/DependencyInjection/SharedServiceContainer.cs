@@ -37,7 +37,7 @@ namespace PSPS.SharedLibrary.DependencyInjection
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
-                    builder => builder.WithOrigins("http://localhost:3000") // Update this with your frontend URL
+                    builder => builder.WithOrigins("http://localhost:3000", "http://localhost:63129") // Update this with your frontend URL
                                       .AllowAnyMethod()
                                       .AllowAnyHeader().AllowCredentials());
             });

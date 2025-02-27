@@ -13,12 +13,12 @@ import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const StoreScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -65,7 +65,6 @@ class _MyHomePageState extends State<MyHomePage> {
     PetPage(),
     GiftListScreen(),
     ServicePage(),
-    CustomerVoucherList(),
     ProfilePage(accountId: '', title: ''),
   ];
 
@@ -128,7 +127,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // Navigate to chat list
+              Navigator.pushNamed(context, '/chat'); // Navigate to ChatPage
+            },
             icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
@@ -143,6 +145,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => list.PetHealthBookList()),
                 );
+              } else if (value == 'voucher') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CustomerVoucherList()),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -152,6 +160,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: Icon(Icons.menu_book, color: Colors.blue),
                   title: Text('HealthCareBook',
                       style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'voucher',
+                child: ListTile(
+                  leading: Icon(Icons.discount, color: Colors.blue),
+                  title: Text('Voucher', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(
