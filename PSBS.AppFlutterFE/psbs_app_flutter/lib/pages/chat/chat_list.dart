@@ -264,7 +264,8 @@ class _ChatListWidgetState extends State<ChatListWidget> {
                                               : chatRoom.user?.accountName ??
                                                   'Unknown',
                                           style: TextStyle(
-                                              fontWeight: FontWeight.w500),
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18),
                                         ),
                                         SizedBox(height: 10),
                                         Text(

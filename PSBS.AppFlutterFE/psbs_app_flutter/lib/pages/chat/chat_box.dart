@@ -1,17 +1,15 @@
-// chat_box_widget.dart
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/models/chat_message.dart';
 import 'package:psbs_app_flutter/models/user.dart';
 import 'package:psbs_app_flutter/services/signal_r_service.dart';
-import 'package:psbs_app_flutter/services/user_service.dart';
 import 'package:psbs_app_flutter/utils/dialog_utils.dart';
-import 'package:intl/intl.dart'; // For formatting date
+import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart' as foundation;
 
 class ChatBoxWidget extends StatefulWidget {
   final User currentUser;
-  final User? chatUser; // The user you're chatting with, can be null
+  final User? chatUser;
   final String chatId;
   final bool isSupportChat;
 
@@ -30,10 +28,10 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
   bool _openEmoji = false;
   List<ChatMessage> _chat = [];
   String _text = "";
-  Map<String, User> _userMap = {};
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -75,7 +73,7 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     signalRService.on("NewSupporterRequested", (arguments) {
       if (arguments != null && arguments.isNotEmpty) {
         showSuccessDialog(context, arguments[0].toString());
-        Navigator.pop(context); // Go back to chat list
+        Navigator.pop(context);
       }
     });
 
@@ -91,44 +89,24 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
 
   Future<void> _updateChat(List<ChatMessage> messages) async {
     if (mounted) {
-      // Check if the widget is mounted
       setState(() {
         _chat = messages;
       });
     }
-    final senderIds = messages.map((msg) => msg.senderId).toSet().toList();
-    await _fetchUserDetails(senderIds);
     _scrollToBottom();
   }
 
   void _receiveMessage(String senderId, String messageText, String updatedAt) {
     if (mounted) {
-      // Check if the widget is mounted
       setState(() {
         _chat.add(ChatMessage(
-          name: widget.currentUser.accountName,
           createdAt: updatedAt,
           senderId: senderId,
           text: messageText,
         ));
       });
     }
-    _fetchUserDetails([senderId]);
     _scrollToBottom();
-  }
-
-  Future<void> _fetchUserDetails(List<String> senderIds) async {
-    for (var id in senderIds) {
-      if (!_userMap.containsKey(id)) {
-        final user = await UserService.fetchUser(id);
-        if (user != null && mounted) {
-          // Check if mounted
-          setState(() {
-            _userMap[id] = user;
-          });
-        }
-      }
-    }
   }
 
   void _scrollToBottom() {
@@ -141,24 +119,20 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     });
   }
 
-  void _handleEmoji(Category category, Emoji emoji) {}
+  void _handleSend() {
+    String trimmedText = _textController.text.trim();
 
-  Future<void> _handleSend() async {
-    if (_text.trim().isEmpty) return;
-    try {
-      await signalRService.invoke(
-          "SendMessage", [widget.chatId, widget.currentUser.accountId, _text]);
-      setState(() {
-        _text = "";
-        _textController.clear();
-      });
-    } catch (err) {
-      print("Error sending message: $err");
+    if (trimmedText.isNotEmpty) {
+      _textController.clear();
+      _text = '';
+      signalRService.invoke("SendMessage",
+          [widget.chatId, widget.currentUser.accountId, trimmedText]);
     }
   }
 
   void _handleKeyPress(String value) {
-    if (value.endsWith('\n')) {
+    String trimmedText = _text.trim(); // Trim leading/trailing whitespace
+    if (trimmedText.isNotEmpty) {
       _handleSend();
     }
   }
@@ -195,21 +169,25 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.blue,
         title: Row(
           children: [
             CircleAvatar(
               backgroundImage: AssetImage("default-avatar.png"),
             ),
             SizedBox(width: 10),
-            Text(widget.isSupportChat && widget.currentUser.roleId == "user"
-                ? "Support Agent"
-                : widget.chatUser?.accountName ?? "Unknown"),
+            Text(
+              widget.isSupportChat && widget.currentUser.roleId == "user"
+                  ? "Support Agent"
+                  : widget.chatUser?.accountName ?? "Unknown",
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         ),
         actions: [
           if (widget.isSupportChat)
             IconButton(
-              icon: Icon(Icons.exit_to_app),
+              icon: Icon(Icons.exit_to_app, color: Colors.white),
               onPressed: _handleExitRoom,
             ),
         ],
@@ -217,75 +195,96 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: _chat.length,
-              itemBuilder: (context, index) {
-                final message = _chat[index];
-                final isOwnMessage = widget.currentUser.roleId == "user"
-                    ? message.senderId == widget.currentUser.accountId
-                    : (widget.isSupportChat &&
-                            widget.currentUser.accountId !=
-                                widget.chatUser?.accountId &&
-                            message.senderId != widget.chatUser?.accountId) ||
-                        (!widget.isSupportChat &&
-                            message.senderId == widget.currentUser.accountId);
+            child: Container(
+              color: Color.fromARGB(
+                  255, 230, 244, 255), // Changed chat body background color
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: _chat.length,
+                itemBuilder: (context, index) {
+                  final message = _chat[index];
+                  final isOwnMessage = widget.currentUser.roleId == "user"
+                      ? message.senderId == widget.currentUser.accountId
+                      : (widget.isSupportChat &&
+                              widget.currentUser.accountId !=
+                                  widget.chatUser?.accountId &&
+                              message.senderId != widget.chatUser?.accountId) ||
+                          (!widget.isSupportChat &&
+                              message.senderId == widget.currentUser.accountId);
 
-                return Align(
-                  alignment: isOwnMessage
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    decoration: BoxDecoration(
-                      color: isOwnMessage ? Colors.blue[100] : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
+                  return Align(
+                    alignment: isOwnMessage
+                        ? Alignment.centerRight
+                        : Alignment.centerLeft,
+                    child: Container(
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                      decoration: BoxDecoration(
+                        color: isOwnMessage
+                            ? const Color.fromARGB(255, 193, 227, 255)
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                            color: Colors.grey[400]!,
+                            width: 0.5), // Added thin border
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            message.text,
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          Text(
+                            DateFormat('yyyy-MM-dd HH:mm')
+                                .format(DateTime.parse(message.createdAt)),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _userMap[message.senderId]?.accountName ??
-                              message.name,
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(message.text),
-                        Text(
-                          DateFormat('yyyy-MM-dd HH:mm')
-                              .format(DateTime.parse(message.createdAt)),
-                          style: TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
+          Container(
+            color: Colors.white,
+            padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
                 Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(25.0),
+                    ),
                     child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode, // Add this
-                  decoration: InputDecoration(
-                    hintText: 'Type a message...',
+                      controller: _textController,
+                      focusNode: _focusNode,
+                      decoration: InputDecoration(
+                        hintText: 'Type a message...',
+                        border: InputBorder.none,
+                        focusedBorder: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 20.0, vertical: 10.0),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _text = value;
+                        });
+                      },
+                      onSubmitted: _handleKeyPress,
+                      maxLines: null,
+                      keyboardType: TextInputType.multiline,
+                    ),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _text = value;
-                    });
-                  },
-                  onSubmitted: _handleKeyPress,
-                  maxLines: null,
-                  keyboardType: TextInputType.multiline,
-                )),
+                ),
                 IconButton(
-                  icon:
-                      Icon(_openEmoji ? Icons.keyboard : Icons.emoji_emotions),
+                  icon: Icon(
+                    _openEmoji ? Icons.keyboard : Icons.emoji_emotions,
+                    color: Colors.blue,
+                  ),
                   onPressed: () {
                     setState(() {
                       _openEmoji = !_openEmoji;
@@ -293,7 +292,6 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                     if (_openEmoji) {
                       _focusNode.unfocus();
                     } else {
-                      // Add a small delay to ensure emoji picker is closed
                       Future.delayed(Duration(milliseconds: 100), () {
                         _focusNode.requestFocus();
                       });
@@ -301,7 +299,10 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                   },
                 ),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: Icon(
+                    Icons.send,
+                    color: Colors.blue,
+                  ),
                   onPressed: _handleSend,
                 ),
               ],
@@ -313,19 +314,21 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
               child: EmojiPicker(
                 onEmojiSelected: (category, emoji) {
                   setState(() {
-                    _textController.text += emoji.emoji;
-                    _textController.selection = TextSelection.fromPosition(
-                      TextPosition(offset: _textController.text.length),
-                    );
-                  });
-
-                  // Close emoji picker and request keyboard focus
-                  Future.delayed(Duration(milliseconds: 100), () {
-                    _focusNode.requestFocus();
+                    _textController.text = _textController.text + emoji.emoji;
                   });
                 },
+                onBackspacePressed: () {
+                  if (_textController.selection.baseOffset > 0) {
+                    _textController.text = _textController.text.substring(
+                            0, _textController.selection.baseOffset - 1) +
+                        _textController.text
+                            .substring(_textController.selection.baseOffset);
+                    _textController.selection = TextSelection.fromPosition(
+                        TextPosition(
+                            offset: _textController.selection.baseOffset - 1));
+                  }
+                },
                 config: Config(
-                  height: 256,
                   checkPlatformCompatibility: true,
                   emojiViewConfig: EmojiViewConfig(
                     emojiSizeMax: 28 *
@@ -336,9 +339,12 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                   viewOrderConfig: const ViewOrderConfig(
                     top: EmojiPickerItem.categoryBar,
                     middle: EmojiPickerItem.emojiView,
+                    bottom: EmojiPickerItem.searchBar,
                   ),
                   skinToneConfig: const SkinToneConfig(),
                   categoryViewConfig: const CategoryViewConfig(),
+                  bottomActionBarConfig: const BottomActionBarConfig(),
+                  searchViewConfig: const SearchViewConfig(),
                 ),
               ),
             ),
