@@ -77,7 +77,7 @@ class _GiftListScreenState extends State<GiftListScreen> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: Image.network(
-                                "http://127.0.0.1:5022${gift.giftImage}",
+                                "http://10.0.2.2:5022${gift.giftImage}",
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,

@@ -6,7 +6,7 @@ class UserService {
   static Future<User?> fetchUser(String accountId) async {
     try {
       final response = await http
-          .get(Uri.parse('http://192.168.2.28:5000/api/Account/$accountId'));
+          .get(Uri.parse('http://10.0.2.2:5000/api/Account/$accountId'));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse =
@@ -25,7 +25,7 @@ class UserService {
    static Future<List<User>> fetchAllUsers() async {
     try {
       final response =
-          await http.get(Uri.parse('http://192.168.2.28:5000/api/Account/all'));
+          await http.get(Uri.parse('http://10.0.2.2:5000/api/Account/all'));
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonResponse = json.decode(response.body)['data'];

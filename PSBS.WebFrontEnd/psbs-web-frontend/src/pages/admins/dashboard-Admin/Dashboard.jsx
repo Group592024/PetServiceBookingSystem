@@ -111,6 +111,33 @@ const Dashboard = () => {
               </span>
             </li>
             </Link>
+            <Link to="/petType">
+             <li className="third">
+            <i className="bx bx-calendar-check"></i>
+              <span className="info">
+                <h3>Setting</h3>
+                <p>Pet Type</p>
+              </span>
+            </li>
+            </Link>
+            <Link to="/petBreed">
+             <li className="third">
+            <i className="bx bx-calendar-check"></i>
+              <span className="info">
+                <h3>Setting</h3>
+                <p>Pet Breed</p>
+              </span>
+            </li>
+            </Link>
+            <Link to="/medicines">
+             <li className="third">
+            <i className="bx bx-calendar-check"></i>
+              <span className="info">
+                <h3>Setting</h3>
+                <p>Medicine</p>
+              </span>
+            </li>
+            </Link>
           </ul>
         </main>
       </div>

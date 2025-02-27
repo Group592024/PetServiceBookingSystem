@@ -23,7 +23,7 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
   }
 
   Future<void> fetchGiftDetail() async {
-    final String apiUrl = 'http://127.0.0.1:5022/Gifts/detail/${widget.giftId}';
+    final String apiUrl = 'http://10.0.2.2:5022/Gifts/detail/${widget.giftId}';
     try {
       final response = await http.get(Uri.parse(apiUrl));
       final data = json.decode(response.body);
@@ -49,7 +49,7 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
 
   void handleRedeem() async {
     final String redeemUrl =
-        'http://127.0.0.1:5022/Gifts/redeem/${widget.giftId}';
+        'http://10.0.2.2:5022/Gifts/redeem/${widget.giftId}';
 
     try {
       final response = await http.post(Uri.parse(redeemUrl));
@@ -96,7 +96,7 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://127.0.0.1:5022${gift!['giftImage']}',
+                            'http://10.0.2.2:5022${gift!['giftImage']}',
                             width: double.infinity,
                             height: 200,
                             fit: BoxFit.cover,

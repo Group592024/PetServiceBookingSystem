@@ -1,4 +1,4 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import "./index.js";
@@ -6,6 +6,12 @@ import "./index.js";
 const Sidebar = forwardRef((_, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
+  useEffect(() => {
+    const isClosed = localStorage.getItem("sidebarClosed") === "true";
+    if (isClosed && ref.current) {
+      ref.current.classList.add("close");
+    }
+  }, []);
 
   const handleLogout = () => {
     Swal.fire({
@@ -55,6 +61,16 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
         <li
+          className={
+            location.pathname.startsWith("/admin/bookings/") ? "active" : ""
+          }
+        >
+          <Link to="/admin/bookings/">
+            <i className="bx bxs-cat"></i>
+            Booking
+          </Link>
+        </li>
+        <li
           className={location.pathname.startsWith("/service") ? "active" : ""}
         >
           <Link to="/service">
@@ -62,14 +78,10 @@ const Sidebar = forwardRef((_, ref) => {
             Service
           </Link>
         </li>
-        <li
-          className={
-            location.pathname.startsWith("/pethealthbook") ? "active" : ""
-          }
-        >
-          <Link to="/pethealthbook">
-            <i className="bx bxs-capsule"></i>
-            PetHealthBook
+        <li className={/^\/pet(\/|$)/.test(location.pathname) ? "active" : ""}>
+          <Link to="/pet">
+            <i className="bx bxs-dog"></i>
+            Pet
           </Link>
         </li>
         <li
@@ -86,14 +98,18 @@ const Sidebar = forwardRef((_, ref) => {
             Room
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/pet") ? "active" : ""}>
-          <Link to="/pet">
-            <i className="bx bxs-dog"></i>
-            Pet
+        <li
+          className={
+            /^\/pethealthbook(\/|$)/.test(location.pathname) ? "active" : ""
+          }
+        >
+          <Link to="/pethealthbook">
+            <i className="bx bxs-capsule"></i>
+            PetHealthBook
           </Link>
         </li>
-        <li className={location.pathname.startsWith("/gift") ? "active" : ""}>
-          <Link to="/gift">
+        <li className={location.pathname.startsWith("/gifts") ? "active" : ""}>
+          <Link to="/gifts">
             <i className="bx bx-gift"></i>
             Gift
           </Link>
@@ -104,14 +120,6 @@ const Sidebar = forwardRef((_, ref) => {
           <Link to="/vouchers">
             <i className="bx bxs-coupon"></i>
             Voucher
-          </Link>
-        </li>
-        <li
-          className={location.pathname.startsWith("/petType") ? "active" : ""}
-        >
-          <Link to="/petType">
-            <i className="bx bxs-cat"></i>
-            Pet Type
           </Link>
         </li>
       </ul>
