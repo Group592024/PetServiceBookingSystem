@@ -159,6 +159,8 @@ namespace VoucherApi.Infrastructure.Repositories
                 existingGift.GiftImage = entity.GiftImage;
                 existingGift.GiftPoint = entity.GiftPoint;
                 existingGift.GiftCode = entity.GiftCode;
+                existingGift.GiftQuantity = entity.GiftQuantity;
+                existingGift.GiftStatus = entity.GiftStatus;
                 
                 context.Entry(existingGift).State = EntityState.Modified;
                 await context.SaveChangesAsync();

@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
           Map<String, dynamic> decodedToken = _parseJwt(result['data']);
           String accountId = decodedToken['AccountId'].toString();
           prefs.setString('accountId', accountId);
-           useUserStore().loadUserDetails(accountId);
+          useUserStore().loadUserDetails(accountId);
           print("Debug message: Current user is ${useUserStore().currentUser}");
           if (decodedToken['AccountIsDeleted'].toString().toLowerCase() ==
               'true') {

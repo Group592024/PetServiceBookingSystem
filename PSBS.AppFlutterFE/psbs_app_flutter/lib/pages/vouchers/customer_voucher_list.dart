@@ -37,11 +37,14 @@ class _CustomerVoucherListState extends State<CustomerVoucherList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Vouchers'),
+        backgroundColor: Colors.blue,
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : vouchers.isEmpty // Check if the list is empty
+          : vouchers.isEmpty
               ? Center(
-                  // Display message if list is empty
                   child: Text(
                     "No vouchers available at the moment.",
                     style: TextStyle(fontSize: 16),

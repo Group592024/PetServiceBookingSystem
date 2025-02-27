@@ -16,6 +16,7 @@ namespace VoucherApi.Application.DTOs.GiftDTOs
     string? giftImage,
     IFormFile? imageFile,
     [Required] int giftPoint,
-    string? giftCode
+    string? giftCode,
+    int quantity
     );
 }
