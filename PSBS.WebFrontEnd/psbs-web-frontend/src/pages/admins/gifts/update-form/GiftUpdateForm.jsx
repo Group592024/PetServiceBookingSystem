@@ -15,6 +15,8 @@ function GiftUpdatePage() {
     giftCode: "",
     giftDescription: "",
     giftImage: "",
+    quantity: 0,
+    // giftStatus: false,
   });
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({});
@@ -29,8 +31,14 @@ function GiftUpdatePage() {
         );
 
         if (response.data.flag) {
-          setGift(response.data.data);
-          setImagePreview(`http://localhost:5022${response.data.data.giftImage}`); // Set the image preview URL
+          // setGift(response.data.data);
+          setGift({
+            ...response.data.data,
+            giftStatus: response.data.data.giftStatus, // Ensure giftStatus is correctly assigned
+          });
+          setImagePreview(
+            `http://localhost:5022${response.data.data.giftImage}`
+          ); // Set the image preview URL
           toast.success(
             response.data.message || "Gift data fetched successfully!"
           );
@@ -93,6 +101,10 @@ function GiftUpdatePage() {
       newErrors.giftDescription = "Gift description is required.";
     }
 
+    if (gift.quantity <= 0) {
+      newErrors.quantity = "Quantity should be greater than 0.";
+    }
+
     // Validate image size
     if (gift.giftImage && gift.giftImage.size > 5000000) {
       newErrors.image = "Image size should be less than 5MB";
@@ -116,7 +128,8 @@ function GiftUpdatePage() {
       formData.append("giftPoint", gift.giftPoint);
       formData.append("giftCode", gift.giftCode);
       formData.append("giftDescription", gift.giftDescription);
-
+      formData.append("quantity", gift.quantity);
+      formData.append("giftStatus", gift.giftStatus);
       // Check if the giftImage is a valid file before appending to FormData
       // if (gift.giftImage && typeof gift.giftImage === 'string') {
       //   formData.append("giftImage", gift.giftImage);
@@ -131,9 +144,9 @@ function GiftUpdatePage() {
       }
 
       const fileInput = document.getElementById("fileInput");
-    if (fileInput.files[0]) {
-      formData.append("imageFile", fileInput.files[0]);
-    }
+      if (fileInput.files[0]) {
+        formData.append("imageFile", fileInput.files[0]);
+      }
 
       const response = await axios.put(
         `http://localhost:5022/Gifts`,
@@ -241,6 +254,37 @@ function GiftUpdatePage() {
                   helperText={errors.giftPoint}
                   sx={{ mb: 2 }}
                 />
+
+                <TextField
+                  fullWidth
+                  label="Quantity"
+                  name="quantity"
+                  type="number"
+                  value={gift.quantity}
+                  onChange={handleInputChange}
+                  error={!!errors.quantity}
+                  helperText={errors.quantity}
+                  sx={{ mb: 2 }}
+                />
+
+<TextField
+  fullWidth
+  select
+  label="Gift Status"
+  name="giftStatus"
+  value={gift.giftStatus} 
+  onChange={(e) => setGift({ ...gift, giftStatus: e.target.value === "true" })} 
+  error={!!errors.giftStatus}
+  helperText={errors.giftStatus}
+  sx={{ mb: 2 }}
+  SelectProps={{
+    native: true, 
+  }}
+>
+  <option value={false}>Active</option>
+  <option value={true}>Inactive</option>
+</TextField>
+
 
                 <TextField
                   fullWidth

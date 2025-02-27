@@ -1,19 +1,25 @@
+import 'dart:io';
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:psbs_app_flutter/pages/booking_page.dart';
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcaredetail_page.dart'
+    as detail;
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
+    as list;
+import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
-import 'package:psbs_app_flutter/pages/room/room_page.dart';
-import 'package:psbs_app_flutter/pages/home_page.dart';
-import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 
+import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
+import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
-import 'pages/Account/editprofile_page.dart';
 import 'pages/Account/profile_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const StoreScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -58,10 +64,9 @@ class _MyHomePageState extends State<MyHomePage> {
   final screens = [
     HomePage(),
     PetPage(),
-    BookingPage(),
-    CustomerVoucherList(),
+    GiftListScreen(),
+    ServicePage(),
     ProfilePage(accountId: '', title: ''),
-    EditProfilePage(accountId: '', title: ''),
   ];
 
   @override
@@ -85,7 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final items = <Widget>[
       Icon(Icons.home, size: 30),
       Icon(Icons.pets_rounded, size: 30),
-      Icon(Icons.add, size: 30),
+      Icon(Icons.card_giftcard, size: 30),
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
@@ -123,7 +128,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         actions: <Widget>[
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              // Navigate to chat list
+              Navigator.pushNamed(context, '/chat'); // Navigate to ChatPage
+            },
             icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
             tooltip: 'Chat',
           ),
@@ -131,10 +139,37 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: const Icon(Icons.menu, color: Colors.white, size: 28),
             onSelected: (value) {
               if (value == 'logout') {
-                logout(context); // Sửa lỗi: truyền context vào
+                logout(context); // Gọi hàm logout
+              } else if (value == 'healthcarebook') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => list.PetHealthBookList()),
+                );
+              } else if (value == 'voucher') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CustomerVoucherList()),
+                );
               }
             },
             itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'healthcarebook',
+                child: ListTile(
+                  leading: Icon(Icons.menu_book, color: Colors.blue),
+                  title: Text('HealthCareBook',
+                      style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'voucher',
+                child: ListTile(
+                  leading: Icon(Icons.discount, color: Colors.blue),
+                  title: Text('Voucher', style: TextStyle(color: Colors.black)),
+                ),
+              ),
               PopupMenuItem(
                 value: 'logout',
                 child: ListTile(
@@ -170,11 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-
   Future<void> logout(BuildContext context) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.remove('accountId'); 
-  await prefs.remove('token'); 
-  Navigator.pushReplacementNamed(context, "/login"); 
-}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('accountId');
+    await prefs.remove('token');
+    Navigator.pushReplacementNamed(context, "/login");
+  }
 }

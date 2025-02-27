@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
@@ -24,6 +25,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String role = "user";
   String gender = "male";
   DateTime? dob;
+  bool isImagePicked = false;
   File? profileImage;
   String? imagePreview;
   Map<String, dynamic>? account;
@@ -100,15 +102,42 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
-        if (imageData['flag']) {
+        print(imageData); // Debug: print the fetched image data
+        if (imageData['flag'] && imageData['data']?['fileContents'] != null) {
+          String base64String = imageData['data']['fileContents'];
+          if (base64String.contains(",")) {
+            base64String = base64String.split(",")[1];
+          }
           setState(() {
-            imagePreview =
-                "data:image/png;base64,${imageData['data']['fileContents']}";
+            imagePreview = base64String;
           });
         }
       }
     } catch (error) {
       print("Lỗi khi lấy ảnh: $error");
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      // Manually extract the filename from the path
+      String fileName = pickedFile.path.split('/').last;
+
+      setState(() {
+        profileImage =
+            File(pickedFile.path); // Keep the full path for uploading the image
+        imagePreview = null;
+        isImagePicked = true;
+      });
+
+      print("Selected image file name: $fileName"); // Print the file name
+    } else {
+      setState(() {
+        isImagePicked = false;
+      });
+      print("No image selected.");
     }
   }
 
@@ -121,34 +150,48 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Uri.parse('http://10.0.2.2:5000/api/Account'),
       );
 
-      // Adding other fields
-      request.fields['AccountTempDTO.AccountId'] = accountId;
-      request.fields['AccountTempDTO.AccountName'] = nameController.text;
-      request.fields['AccountTempDTO.AccountEmail'] = email ?? '';
-      request.fields['AccountTempDTO.AccountPhoneNumber'] =
+      // Gửi dữ liệu văn bản
+      request.fields['accountTempDTO.accountId'] = accountId;
+      request.fields['accountTempDTO.accountName'] = nameController.text;
+      request.fields['accountTempDTO.accountEmail'] = email ?? '';
+      request.fields['accountTempDTO.accountPhoneNumber'] =
           phoneController.text;
-      request.fields['AccountTempDTO.AccountGender'] = gender;
-      request.fields['AccountTempDTO.AccountDob'] =
+      request.fields['accountTempDTO.accountGender'] = gender;
+      request.fields['accountTempDTO.accountDob'] =
           dob != null ? DateFormat('yyyy-MM-dd').format(dob!) : '';
-      request.fields['AccountTempDTO.AccountAddress'] = addressController.text;
-      request.fields['AccountTempDTO.roleId'] = role;
+      request.fields['accountTempDTO.accountAddress'] = addressController.text;
+      request.fields['accountTempDTO.isPickImage'] = isImagePicked.toString();
+      request.fields['accountTempDTO.roleId'] = role;
 
-      // Upload the image if picked
-      if (profileImage != null && profileImage is File) {
-        // Kiểm tra file hình ảnh có hợp lệ không
-        print("Uploading image: ${profileImage!.path}");
-        request.files.add(await http.MultipartFile.fromPath(
-          'UploadModel.ImageFile', // Kiểm tra trường này có đúng với phía server không
+      print("Sending request with fields: ${request.fields}");
+
+      // Nếu có ảnh, gửi ảnh lên
+      if (isImagePicked && profileImage != null && profileImage!.existsSync()) {
+        print("Adding image file: ${profileImage!.path}");
+
+        var file = await http.MultipartFile.fromPath(
+          'uploadModel.imageFile', // Đúng với format API yêu cầu
           profileImage!.path,
-        ));
+          filename: profileImage!.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'),
+        );
+
+        request.files.add(file);
       } else {
-        print("No valid image selected.");
+        // Nếu không chọn ảnh, gửi ảnh cũ (nếu có)
+        request.fields['accountTempDTO.accountImage'] =
+            account?['accountImage'] ?? '';
       }
 
+      // Gửi request lên server
       final response = await request.send();
+      final responseCompleted = await http.Response.fromStream(response);
+      print("Server response status: ${responseCompleted.statusCode}");
+      print("Response body: ${responseCompleted.body}");
+
+      final result = json.decode(responseCompleted.body);
 
       if (response.statusCode == 200) {
-        final result = json.decode(await response.stream.bytesToString());
         if (result['flag']) {
           _showSuccessDialog('Profile updated successfully!');
         } else {
@@ -159,20 +202,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (error) {
       _showErrorDialog('Error: $error');
-    }
-  }
-
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        profileImage = File(pickedFile.path);
-        imagePreview = null;
-      });
-      print("Selected image: ${pickedFile.path}");
-    } else {
-      print("No image selected.");
     }
   }
 
@@ -245,11 +274,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onTap: _pickImage,
                       child: CircleAvatar(
                         radius: 80,
-                        backgroundImage: imagePreview != null
-                            ? NetworkImage(
-                                imagePreview!) // Nếu có URL ảnh, dùng NetworkImage
-                            : null,
-                        child: imagePreview == null
+                        backgroundImage: (profileImage != null)
+                            ? FileImage(
+                                profileImage!) // Sử dụng FileImage khi có profileImage
+                            : (imagePreview != null && imagePreview!.isNotEmpty)
+                                ? MemoryImage(base64Decode(
+                                    imagePreview!)) // Sử dụng base64 cho ảnh tải từ server
+                                : null,
+                        child: profileImage == null && imagePreview == null
                             ? Icon(Icons.person,
                                 size: 80,
                                 color: Colors

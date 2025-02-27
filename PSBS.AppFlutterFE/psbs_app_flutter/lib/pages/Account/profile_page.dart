@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://192.168.2.28:5000/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -64,23 +64,23 @@ class _ProfilePageState extends State<ProfilePage> {
           }
         });
       } else {
-        print("Lỗi khi lấy dữ liệu tài khoản: ${response.statusCode}");
+        print("Error account: ${response.statusCode}");
       }
     } catch (error) {
-      print("Lỗi khi gọi API: $error");
+      print("Error call API: $error");
     }
   }
 
   Future<void> fetchImage(String filename) async {
     if (filename.isEmpty) {
-      print("Lỗi: Filename rỗng.");
+      print("Error: Filename null.");
       return;
     }
 
     try {
       final imageResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
+            'http://192.168.2.28:5000/api/Account/loadImage?filename=$filename'),
       );
 
       if (imageResponse.statusCode == 200) {
@@ -93,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     } catch (error) {
-      print("Lỗi khi lấy ảnh: $error");
+      print("Error Image: $error");
     }
   }
 
@@ -120,7 +120,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
 
                 if (snapshot.hasError) {
-                  return Center(child: Text('Lỗi khi tải dữ liệu'));
+                  return Center(child: Text('Error load image'));
                 }
                 return SingleChildScrollView(
                   child: Padding(
@@ -141,7 +141,8 @@ class _ProfilePageState extends State<ProfilePage> {
                               CircleAvatar(
                                 radius: 80,
                                 backgroundImage: imagePreview != null
-                                    ? NetworkImage(imagePreview!)
+                                    ? MemoryImage(base64Decode(
+                                        imagePreview!.split(",")[1]))
                                     : null,
                                 child: imagePreview == null
                                     ? Icon(Icons.person,
@@ -202,8 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     .then((result) {
                                   if (result == true) {
                                     setState(() {
-                                      _fetchDataFuture =
-                                          fetchAccountData(); 
+                                      _fetchDataFuture = fetchAccountData();
                                     });
                                   }
                                 });

@@ -24,6 +24,9 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_svg: ^2.0.17
 
+  signalr_netcore: ^1.4.1
+  emoji_picker_flutter: ^4.3.0
+  flutter_zustand: ^0.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -118,9 +118,15 @@ const NavbarCustomer = () => {
             </a>
           </li>
           <li>
-            <a href="/list">
+            <a href="#">
               <i className="bx bxs-dog"></i>
               Pet
+            </a>
+          </li>
+          <li>
+            <a href="/list">
+              <i className="bx bxs-capsule"></i>
+              HealthBook
             </a>
           </li>
           <li>

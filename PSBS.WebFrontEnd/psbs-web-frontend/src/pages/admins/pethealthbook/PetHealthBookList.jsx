@@ -32,7 +32,7 @@ const PetHealthBookList = () => {
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
         fetch("http://localhost:5003/api/Treatment"),
-        fetch("http://localhost:5115/api/Booking"),
+        fetch("http://localhost:5201/Bookings"),
         fetch("http://localhost:5010/api/pet"),
         fetch("http://localhost:5010/api/petBreed"),
       ]);
@@ -239,7 +239,7 @@ const PetHealthBookList = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="flex-1">
           <div className="p-4 bg-white shadow-md rounded-md h-full">
-            <h2 className="mb-4 text-xl font-bold">Pet Health Book List</h2>
+            <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
             <div className="flex justify-end mb-4">
               <form className="relative flex items-center mr-4">
                 <input

@@ -62,6 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       });
     }
   }
+
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Email is required';
@@ -72,10 +73,11 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     }
     return null;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, 
+      backgroundColor: Colors.white,
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
@@ -86,13 +88,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 Container(
                   padding:
                       EdgeInsets.symmetric(vertical: 32.0, horizontal: 48.0),
-                  color: Colors.grey[300], 
+                  color: Colors.grey[300],
                   child: Text(
                     'Logo',
                     style: TextStyle(
-                      fontSize: 48, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.black, 
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -101,14 +103,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   color: Colors.white,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0)), 
+                      borderRadius: BorderRadius.circular(16.0)),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Form(
                       key: _formKey,
                       child: Column(
-                        crossAxisAlignment:
-                            CrossAxisAlignment.center, 
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             "Forgot Password",
@@ -141,28 +142,24 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                             controller: emailController,
                             decoration: InputDecoration(
                               labelText: "Email address",
-                              labelStyle:
-                                  TextStyle(color: Colors.black), 
+                              labelStyle: TextStyle(color: Colors.black),
                               filled: true,
-                              fillColor: Colors.grey[100], 
+                              fillColor: Colors.grey[100],
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(
-                                    12.0), 
+                                borderRadius: BorderRadius.circular(12.0),
                               ),
                             ),
                             validator: validateEmail,
                             keyboardType: TextInputType.emailAddress,
                           ),
                           SizedBox(height: 16),
-                         
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: isLoading ? null : handleSubmit,
                               style: ElevatedButton.styleFrom(
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      12.0), 
+                                  borderRadius: BorderRadius.circular(12.0),
                                 ),
                                 backgroundColor: Colors.cyan,
                               ),

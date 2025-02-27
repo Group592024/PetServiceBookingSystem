@@ -4,6 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:psbs_app_flutter/main.dart';
+import 'package:psbs_app_flutter/services/user_store.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text.trim();
     try {
       final response = await http.post(
-      Uri.parse('http://10.0.2.2:5000/api/Account/Login'), 
+        Uri.parse('http://192.168.2.28:5000/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
@@ -61,6 +62,8 @@ class _LoginPageState extends State<LoginPage> {
           Map<String, dynamic> decodedToken = _parseJwt(result['data']);
           String accountId = decodedToken['AccountId'].toString();
           prefs.setString('accountId', accountId);
+          useUserStore().loadUserDetails(accountId);
+          print("Debug message: Current user is ${useUserStore().currentUser}");
           if (decodedToken['AccountIsDeleted'].toString().toLowerCase() ==
               'true') {
             _showToast(
