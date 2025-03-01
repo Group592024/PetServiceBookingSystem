@@ -37,7 +37,7 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             return await _context.RedeemGiftHistories
                 .Where(h => h.AccountId == accountId)
-                .ToListAsync();
+              .Include(r => r.RedeemStatus).ToListAsync();
         }
 
         public async Task<List<RedeemGiftHistory>> GetAllRedeemHistories()
@@ -90,6 +90,13 @@ namespace VoucherApi.Infrastructure.Repositories
             {
                 return new Response(false, "Failed to update redeem status: " + ex.Message);
             }
+        }
+
+        public async Task<Response> CustomerCancelRedeem(Guid redeemId)
+        {
+            Response response =  await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
+            return response;
+
         }
     }
 }

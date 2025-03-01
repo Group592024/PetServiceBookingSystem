@@ -10,5 +10,7 @@ namespace VoucherApi.Application.Interfaces
         Task<List<RedeemGiftHistory>> GetAllRedeemHistories();
         Task<IEnumerable<RedeemStatus>> GetRedeemStatuses();
         Task<Response> UpdateRedeemStatus(Guid redeemId, Guid statusId);
+        Task<Response> CustomerCancelRedeem(Guid redeemId);
+
     }
 }

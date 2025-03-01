@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, CircularProgress } from "@mui/material";
+import { Box, CircularProgress, Button } from "@mui/material";
+import Swal from "sweetalert2";
 
 const CustomerRedeemHistory = () => {
   const [history, setHistory] = useState([]);
@@ -25,7 +26,6 @@ const CustomerRedeemHistory = () => {
                 id: item.redeemHistoryId,
                 ...item,
                 gift: giftResponse.data.data,
-                statusName: statusResponse.data.data.statusName, // Add statusName
               };
             })
           );
@@ -39,6 +39,59 @@ const CustomerRedeemHistory = () => {
     };
     fetchHistory();
   }, [accountId]);
+
+  const handleCancelRedeem = (redeemHistoryId, point) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, cancel it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const responseCancel = await axios.put(
+            `http://localhost:5050/api/Account/refundPoint?accountId=${accountId}`,
+            {
+              giftId: redeemHistoryId,
+              requiredPoints: point,
+            }
+          );
+          if (responseCancel.data.flag) {
+            Swal.fire(
+              "Cancelled!",
+              "Your redemption has been cancelled.",
+              "success"
+            );
+          }
+          // Refresh the history after cancellation
+          const response = await axios.get(
+            `http://localhost:5050/redeemhistory/${accountId}`
+          );
+          if (response.data.flag) {
+            const formattedData = await Promise.all(
+              response.data.data.map(async (item) => {
+                const giftResponse = await axios.get(
+                  `http://localhost:5050/Gifts/detail/${item.giftId}`
+                );
+                return {
+                  id: item.redeemHistoryId,
+                  ...item,
+                  gift: giftResponse.data.data,
+                };
+              })
+            );
+            setHistory(formattedData);
+          }
+        } catch (error) {
+          console.error("Error cancelling redeem:", error);
+          Swal.fire("Error!", "Failed to cancel redemption.", "error");
+        }
+      }
+    });
+  };
 
   const columns = [
     {
@@ -112,7 +165,7 @@ const CustomerRedeemHistory = () => {
       },
     },
     {
-      field: "statusName",
+      field: "redeemStatusName",
       headerName: "Status",
       flex: 1,
       headerAlign: "center",
@@ -120,7 +173,31 @@ const CustomerRedeemHistory = () => {
       renderHeader: () => (
         <div style={{ fontWeight: "bold", textAlign: "center" }}>Status</div>
       ),
-      renderCell: (params) => params.row.statusName || "N/A",
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      renderHeader: () => (
+        <div style={{ fontWeight: "bold", textAlign: "center" }}>Actions</div>
+      ),
+      renderCell: (params) => (
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          onClick={() =>
+            handleCancelRedeem(
+              params.row.redeemHistoryId,
+              params.row.redeemPoint
+            )
+          }
+        >
+          Cancel
+        </Button>
+      ),
     },
   ];
 

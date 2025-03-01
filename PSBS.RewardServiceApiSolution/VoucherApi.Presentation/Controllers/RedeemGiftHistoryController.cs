@@ -30,12 +30,11 @@ namespace VoucherApi.Presentation.Controllers
                 return NotFound(new Response(false, "No redeem history found for this account"));
             }
 
-            return Ok(new Response
+            var (_, list) = RedeemGiftHistoryConversion.FromEntity(null!, history);
+            return list!.Any() ? Ok(new Response(true, "Redeem retrieved successfully!")
             {
-                Flag = true,
-                Message = "Redeem history retrieved successfully",
-                Data = history
-            });
+                Data = list
+            }) : NotFound(new Response(false, "No Redeem detected"));
         }
 
         [HttpGet("redeemhistory/All")]
@@ -63,6 +62,19 @@ namespace VoucherApi.Presentation.Controllers
           
 
             return Ok(response);
+        }
+
+        [HttpPut("redeemhistory/customer/canceL/{redeemId}")]
+        public async Task<IActionResult> CustomerCancel(Guid redeemId)
+        {
+            var response = await _redeemGiftHistory.CustomerCancelRedeem(redeemId);
+
+
+            if (response.Flag)
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
         }
 
         [HttpGet("redeemhistory/statuses")]
