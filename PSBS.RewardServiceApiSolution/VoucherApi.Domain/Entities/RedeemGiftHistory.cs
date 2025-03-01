@@ -9,7 +9,9 @@ namespace VoucherApi.Domain.Entities
         public Guid RedeemHistoryId { get; set; }
 
         [Column("gift_id")]
-        public Guid GiftId { get; set; } 
+        public Guid GiftId { get; set; }
+        [Column("gift_status_id")]
+        public Guid ReddeemStautsId { get; set; }
 
         [Column("account_id")]
         public Guid AccountId { get; set; }
@@ -20,5 +22,6 @@ namespace VoucherApi.Domain.Entities
         [Column("redeem_date")]
         public DateTime RedeemDate { get; set; }
         public virtual Gift Gift { get; set; } = null!;
+        public virtual RedeemStatus RedeemStatus { get; set; } = null!;
     }
 }

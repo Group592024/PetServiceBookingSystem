@@ -9,11 +9,11 @@ using VoucherApi.Infrastructure.Data;
 
 #nullable disable
 
-namespace VoucherApi.Infrastructure.Data.Migarations
+namespace VoucherApi.Infrastructure.Migrations
 {
     [DbContext(typeof(RewardServiceDBContext))]
-    [Migration("20250226083402_Add gift quantity column")]
-    partial class Addgiftquantitycolumn
+    [Migration("20250301072734_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,8 +53,8 @@ namespace VoucherApi.Infrastructure.Data.Migarations
                         .HasColumnType("int")
                         .HasColumnName("gift_point");
 
-                    b.Property<bool>("GiftQuantity")
-                        .HasColumnType("bit")
+                    b.Property<int>("GiftQuantity")
+                        .HasColumnType("int")
                         .HasColumnName("gift_quantity");
 
                     b.Property<bool>("GiftStatus")
@@ -81,6 +81,10 @@ namespace VoucherApi.Infrastructure.Data.Migarations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("gift_id");
 
+                    b.Property<Guid>("ReddeemStautsId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("gift_status_id");
+
                     b.Property<DateTime>("RedeemDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("redeem_date");
@@ -93,7 +97,43 @@ namespace VoucherApi.Infrastructure.Data.Migarations
 
                     b.HasIndex("GiftId");
 
+                    b.HasIndex("ReddeemStautsId");
+
                     b.ToTable("RedeemGiftHistories");
+                });
+
+            modelBuilder.Entity("VoucherApi.Domain.Entities.RedeemStatus", b =>
+                {
+                    b.Property<Guid>("ReddeemStautsId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("redeem_status_id");
+
+                    b.Property<string>("RedeemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("redeem_status_name");
+
+                    b.HasKey("ReddeemStautsId");
+
+                    b.ToTable("RedeemStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            ReddeemStautsId = new Guid("1509e4e6-e1ec-42a4-9301-05131dd498e4"),
+                            RedeemName = "Just Redeemed"
+                        },
+                        new
+                        {
+                            ReddeemStautsId = new Guid("33b84495-c2a6-4b3e-98ca-f13d9c150946"),
+                            RedeemName = "Picked up at Store"
+                        },
+                        new
+                        {
+                            ReddeemStautsId = new Guid("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"),
+                            RedeemName = "Canceled Redeem"
+                        });
                 });
 
             modelBuilder.Entity("VoucherApi.Domain.Entities.Voucher", b =>
@@ -162,10 +202,23 @@ namespace VoucherApi.Infrastructure.Data.Migarations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("VoucherApi.Domain.Entities.RedeemStatus", "RedeemStatus")
+                        .WithMany("RedeemGiftHistories")
+                        .HasForeignKey("ReddeemStautsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Gift");
+
+                    b.Navigation("RedeemStatus");
                 });
 
             modelBuilder.Entity("VoucherApi.Domain.Entities.Gift", b =>
+                {
+                    b.Navigation("RedeemGiftHistories");
+                });
+
+            modelBuilder.Entity("VoucherApi.Domain.Entities.RedeemStatus", b =>
                 {
                     b.Navigation("RedeemGiftHistories");
                 });

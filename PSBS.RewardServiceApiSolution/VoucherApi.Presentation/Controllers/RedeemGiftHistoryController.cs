@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
+using VoucherApi.Application.DTOs.Conversions;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
 
@@ -46,11 +47,38 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "No redeem histories available"));
             }
+  
+
+            var (_, list) = RedeemGiftHistoryConversion.FromEntity(null!, history);
+            return list!.Any() ? Ok(new Response(true, "Redeem retrieved successfully!")
+            {
+                Data = list
+            }) : NotFound(new Response(false, "No Redeem detected"));
+        }
+
+        [HttpPut("redeemhistory/{redeemId}/status/{statusId}")]
+        public async Task<IActionResult> UpdateRedeemStatus(Guid redeemId, Guid statusId)
+        {
+            var response = await _redeemGiftHistory.UpdateRedeemStatus(redeemId, statusId);
+          
+
+            return Ok(response);
+        }
+
+        [HttpGet("redeemhistory/statuses")]
+        public async Task<IActionResult> GetAllStatuses()
+        {
+            var history = await _redeemGiftHistory.GetRedeemStatuses();
+
+            if (history == null || !history.Any())
+            {
+                return NotFound(new Response(false, "No redeem status available"));
+            }
 
             return Ok(new Response
             {
                 Flag = true,
-                Message = "Redeem history retrieved successfully",
+                Message = "Redeem status retrieved successfully",
                 Data = history
             });
         }

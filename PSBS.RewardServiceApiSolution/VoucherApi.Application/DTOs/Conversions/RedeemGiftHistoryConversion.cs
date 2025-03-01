@@ -12,7 +12,8 @@ namespace VoucherApi.Application.DTOs.Conversions
                 GiftId = redeemGiftHistoryDTO.GiftId,
                 AccountId = redeemGiftHistoryDTO.AccountId,
                 RedeemPoint = redeemGiftHistoryDTO.RedeemPoint,
-                RedeemDate = redeemGiftHistoryDTO.RedeemDate
+                RedeemDate = redeemGiftHistoryDTO.RedeemDate,
+                ReddeemStautsId= redeemGiftHistoryDTO.RedeemStatusId
             };
         }
 
@@ -29,7 +30,9 @@ namespace VoucherApi.Application.DTOs.Conversions
                     GiftId = redeemGiftHistory.GiftId,
                     AccountId = redeemGiftHistory.AccountId,
                     RedeemPoint = redeemGiftHistory.RedeemPoint,
-                    RedeemDate = redeemGiftHistory.RedeemDate
+                    RedeemDate = redeemGiftHistory.RedeemDate,
+                    RedeemStatusName = redeemGiftHistory.RedeemStatus.RedeemName,
+                    RedeemStatusId = redeemGiftHistory.ReddeemStautsId
                 };
                 return (singleRedeemGiftHistoryDTO, null);
             }
@@ -43,7 +46,9 @@ namespace VoucherApi.Application.DTOs.Conversions
                     GiftId = r.GiftId,
                     AccountId = r.AccountId,
                     RedeemPoint = r.RedeemPoint,
-                    RedeemDate = r.RedeemDate
+                    RedeemDate = r.RedeemDate,
+                    RedeemStatusName = r.RedeemStatus.RedeemName,
+                    RedeemStatusId = r.ReddeemStautsId
                 }).ToList();
 
                 return (null, redeemGiftHistoryDTOs);
