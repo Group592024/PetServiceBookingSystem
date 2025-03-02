@@ -174,5 +174,13 @@ namespace PSPS.Presentation.Controllers
             var result = await account.UpdateAccountPoint(accountId, point);
             return result.Flag ? Ok(result) : BadRequest(result);
         }
+
+
+        [HttpPut("refundPoint")]
+        public async Task<ActionResult<Response>> RefundUserPoint(Guid accountId, [FromBody] RedeemRequest model)
+        {
+            var result = await account.RefundAccountPoint(accountId, model);
+            return result.Flag ? Ok(result) : BadRequest(result);
+        }
     }
 }

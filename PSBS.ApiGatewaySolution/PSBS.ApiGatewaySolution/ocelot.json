@@ -595,7 +595,7 @@
         }
       ],
       "UpstreamPathTemplate": "/redeemhistory/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
