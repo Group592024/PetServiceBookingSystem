@@ -42,7 +42,7 @@ class RouteGenerator {
                   title: '',
                 ));
       case '/login':
-        return MaterialPageRoute(builder: (_) => ServicePage());
+        return MaterialPageRoute(builder: (_) => LoginPage());
       case '/register':
         return MaterialPageRoute(builder: (_) => RegisterPage());
       case '/forgotpassword':
@@ -69,6 +69,8 @@ class RouteGenerator {
 
         case '/gifts':
   return MaterialPageRoute(builder: (_) => GiftListScreen());
+   case '/services':
+          return MaterialPageRoute(builder: (_) => const ServicePage());
       default:
         return _errorRoute();
     }

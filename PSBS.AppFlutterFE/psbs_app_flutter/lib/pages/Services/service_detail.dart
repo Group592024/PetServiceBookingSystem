@@ -18,7 +18,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   bool showFullDescription = false;
 
   String get imageURL =>
-      'http://10.64.197.68:5023${detail['serviceImage'] ?? ''}';
+      'http://192.168.1.7:5023${detail['serviceImage'] ?? ''}';
 
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   Future<void> fetchDetail() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.64.197.68:5023/api/Service/${widget.serviceId}'),
+        Uri.parse('http://192.168.1.7:5023/api/Service/${widget.serviceId}'),
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -53,7 +53,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.64.197.68:5023/service/${widget.serviceId}?showAll=false'),
+            'http://192.168.1.7:5023/service/${widget.serviceId}?showAll=false'),
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
