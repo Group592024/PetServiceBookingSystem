@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 class GiftDetailPage extends StatefulWidget {
   final String giftId;
 
@@ -15,11 +17,21 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
   Map<String, dynamic>? gift;
   bool isLoading = true;
   String? error;
-
+  late String userId;
   @override
   void initState() {
     super.initState();
-    fetchGiftDetail();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _loadAccountId(); // Ensure userId is set first
+    fetchGiftDetail(); // Then fetch gift details
+  }
+
+  Future<void> _loadAccountId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    userId = prefs.getString('accountId') ?? "";
   }
 
   Future<void> fetchGiftDetail() async {
@@ -49,10 +61,19 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
 
   void handleRedeem() async {
     final String redeemUrl =
-        'http://10.0.2.2:5022/Gifts/redeem/${widget.giftId}';
-
+        'http://10.0.2.2:5050/api/Account/redeem-points/${userId}';
+    print(redeemUrl);
     try {
-      final response = await http.post(Uri.parse(redeemUrl));
+      final response = await http.post(
+        Uri.parse(redeemUrl),
+        headers: {"Content-Type": "application/json"}, // Set headers
+        body: json.encode({
+          "giftId": widget.giftId, // Sending gift ID
+          "requiredPoints": gift!['giftPoint'], // Sending required points
+        }),
+      );
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
       final data = json.decode(response.body);
 
       if (data['flag']) {
@@ -101,7 +122,8 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                             height: 200,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image_not_supported, size: 100),
+                                const Icon(Icons.image_not_supported,
+                                    size: 100),
                           ),
                         ),
                         const SizedBox(height: 20),
@@ -119,7 +141,8 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.stars, color: Colors.orange, size: 24),
+                            const Icon(Icons.stars,
+                                color: Colors.orange, size: 24),
                             const SizedBox(width: 8),
                             Text(
                               "Points: ${gift!['giftPoint']}",
@@ -140,7 +163,8 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.description, color: Colors.green, size: 24),
+                            const Icon(Icons.description,
+                                color: Colors.green, size: 24),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
@@ -163,7 +187,8 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                             icon: const Icon(Icons.card_giftcard, size: 24),
                             label: const Text(
                               'Redeem Gift',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blueAccent,

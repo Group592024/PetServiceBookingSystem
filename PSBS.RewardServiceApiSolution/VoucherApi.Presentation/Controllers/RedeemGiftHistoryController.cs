@@ -15,9 +15,10 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return BadRequest(new Response(false, "Invalid redeem history data"));
             }
+            
 
-            await _redeemGiftHistory.AddRedeemGiftHistory(redeemGiftHistory);
-            return Ok(new Response(true, "Gift redemption completed successfully"));
+          var res =  await _redeemGiftHistory.AddRedeemGiftHistory(redeemGiftHistory);
+            return Ok(res);
         }
 
         [HttpGet("redeemhistory/{accountId}")]
@@ -27,16 +28,31 @@ namespace VoucherApi.Presentation.Controllers
 
             if (history == null || !history.Any())
             {
-                return NotFound(new Response(false, "No redeem history found for this account"));
+                return Ok(new Response(false, "No redeem history found for this account"));
             }
 
             var (_, list) = RedeemGiftHistoryConversion.FromEntity(null!, history);
             return list!.Any() ? Ok(new Response(true, "Redeem retrieved successfully!")
             {
                 Data = list
-            }) : NotFound(new Response(false, "No Redeem detected"));
+            }) : Ok(new Response(false, "No Redeem detected"));
         }
+        [HttpGet("redeemhistory/app/{accountId}")]
+        public async Task<IActionResult> GetCustomerRedeemList(Guid accountId)
+        {
+            var history = await _redeemGiftHistory.GetCustomerRedeemHistory(accountId);
 
+            if (history == null || !history.Any())
+            {
+                return Ok(new Response(false, "No redeem history found for this account"));
+            }
+
+            var (_, list) = RedeemGiftHistoryConversion.FromEntityToRedeemDetailDTO(null!, history);
+            return list!.Any() ? Ok(new Response(true, "Redeem retrieved successfully!")
+            {
+                Data = list
+            }) : Ok(new Response(false, "No Redeem detected"));
+        }
         [HttpGet("redeemhistory/All")]
         public async Task<IActionResult> GetAllRedeemHistories()
         {
@@ -64,7 +80,7 @@ namespace VoucherApi.Presentation.Controllers
             return Ok(response);
         }
 
-        [HttpPut("redeemhistory/customer/canceL/{redeemId}")]
+        [HttpPut("redeemhistory/customer/cancel/{redeemId}")]
         public async Task<IActionResult> CustomerCancel(Guid redeemId)
         {
             var response = await _redeemGiftHistory.CustomerCancelRedeem(redeemId);

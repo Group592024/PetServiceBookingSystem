@@ -10,40 +10,60 @@ namespace VoucherApi.Infrastructure.Repositories
     {
         private readonly RewardServiceDBContext _context = context;
 
-        public async Task AddRedeemGiftHistory(RedeemGiftHistory redeemGiftHistory)
+        public async Task<Response> AddRedeemGiftHistory(RedeemGiftHistory redeemGiftHistory)
         {
             var existingRecord = await _context.RedeemGiftHistories
                 .Where(x =>
-                    x.AccountId == redeemGiftHistory.AccountId &&
-                    x.GiftId == redeemGiftHistory.GiftId &&
                     x.AccountId == redeemGiftHistory.AccountId &&
                     x.GiftId == redeemGiftHistory.GiftId &&
                     x.RedeemDate.Date == redeemGiftHistory.RedeemDate.Date &&
                     x.RedeemDate.Hour == redeemGiftHistory.RedeemDate.Hour &&
                     x.RedeemDate.Minute == redeemGiftHistory.RedeemDate.Minute &&
                     Math.Abs((x.RedeemDate.Second - redeemGiftHistory.RedeemDate.Second)) <= 15)
-
                 .FirstOrDefaultAsync();
+
+            var gift = await _context.Gifts.FirstOrDefaultAsync(g => g.GiftId == redeemGiftHistory.GiftId);
+            if (gift == null)
+            {
+                return new Response(false, "The gift does not exist to redeem");
+            }
+            if (gift.GiftQuantity == 0)
+            {
+                return new Response(false, "The gift is out of stock");
+            }
 
             if (existingRecord == null)
             {
-                redeemGiftHistory.ReddeemStautsId =Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4");
+              
+                gift.GiftQuantity--; // Decrease gift quantity by 1
+                redeemGiftHistory.ReddeemStautsId = Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4");
+
+                // Add new redeem history and save changes
                 _context.RedeemGiftHistories.Add(redeemGiftHistory);
                 await _context.SaveChangesAsync();
+
+                return new Response(true, "Gift redemption completed successfully");
             }
+
+            return new Response(false, "Cannot redeem this gift");
         }
+
 
         public async Task<List<RedeemGiftHistory>> GetCustomerRedeemHistory(Guid accountId)
         {
             return await _context.RedeemGiftHistories
                 .Where(h => h.AccountId == accountId)
-              .Include(r => r.RedeemStatus).ToListAsync();
+              .Include(r => r.RedeemStatus)
+              .Include(s => s.Gift)
+              .ToListAsync();
         }
 
         public async Task<List<RedeemGiftHistory>> GetAllRedeemHistories()
         {
             return await _context.RedeemGiftHistories
-                 .Include(r => r.RedeemStatus).ToListAsync();
+                 .Include(r => r.RedeemStatus)
+                 .Include(s=> s.Gift)
+                 .ToListAsync();
         }
 
         public async Task<IEnumerable<RedeemStatus>> GetRedeemStatuses()
@@ -80,6 +100,11 @@ namespace VoucherApi.Infrastructure.Repositories
 
             try
             {
+                if(statusId == Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"))
+                {
+                    var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == redeemHistory.GiftId);
+                    gift.GiftQuantity += 1;
+                }
                 await _context.SaveChangesAsync();
                 return new Response(true, "Redeem status updated successfully.")
                 {
@@ -93,6 +118,7 @@ namespace VoucherApi.Infrastructure.Repositories
         }
 
         public async Task<Response> CustomerCancelRedeem(Guid redeemId)
+
         {
             Response response =  await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
             return response;

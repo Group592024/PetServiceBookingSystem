@@ -100,12 +100,16 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await transaction.CommitAsync();
-                    return new Response(true, "Gift redeemed successfully");
+                    var responseContent = await response.Content.ReadFromJsonAsync<Response>(); // Deserialize the response
+                    if (responseContent != null)
+                    {
+                        await transaction.CommitAsync();
+                        return responseContent;
+                    }
                 }
 
                 await transaction.RollbackAsync();
-                return new Response(false, "Failed to redeem gift");
+                return new Response(false, "Errors occur while redeeming your gift!");
             }
             catch (Exception ex)
             {
