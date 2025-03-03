@@ -12,7 +12,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
             return new PetHealthBook()
             {
                 healthBookId = petHealthBookDTO.healthBookId ?? Guid.NewGuid(),
-                bookingId = petHealthBookDTO.bookingId,
+                BookingServiceItemId = petHealthBookDTO.BookingServiceItemId,
                 visitDate = petHealthBookDTO.visitDate,
                 nextVisitDate = petHealthBookDTO.nextVisitDate,
                 performBy = petHealthBookDTO.performBy,
@@ -30,7 +30,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
                 var singlePetHealthBook = new PetHealthBookDTO
                 (
                     petHealthBook.healthBookId,
-                    petHealthBook.bookingId,
+                    petHealthBook.BookingServiceItemId,
                     petHealthBook.visitDate,
                     petHealthBook.nextVisitDate,
                     petHealthBook.performBy,
@@ -47,7 +47,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.Conversions
                 var list = petHealthBooks.Select(t => new PetHealthBookDTO
                 (
                     t.healthBookId,
-                    t.bookingId,
+                    t.BookingServiceItemId,
                     t.visitDate,
                     t.nextVisitDate,
                     t.performBy,

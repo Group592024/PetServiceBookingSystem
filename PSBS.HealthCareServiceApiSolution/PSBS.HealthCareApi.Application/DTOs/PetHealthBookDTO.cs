@@ -11,7 +11,7 @@ namespace PSBS.HealthCareApi.Application.DTOs
 {
     public record PetHealthBookDTO(
       Guid? healthBookId,
-      [Required] Guid bookingId,
+      [Required] Guid BookingServiceItemId,
       DateTime visitDate,
       DateTime? nextVisitDate,
       [Required] string performBy,
