@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:image_picker/image_picker.dart';
 
 class PetDiaryCreatePage extends StatefulWidget {
   final String petId;
+
+
+
+
 
   const PetDiaryCreatePage({Key? key, required this.petId}) : super(key: key);
 
@@ -13,10 +18,19 @@ class PetDiaryCreatePage extends StatefulWidget {
 }
 
 class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
+  final ImagePicker _picker = ImagePicker();
+  List<XFile>? _mediaFileList;
+
+  void _setImageFileListFromFile(XFile? value) {
+    _mediaFileList = value == null ? null : <XFile>[value];
+  }
+
 QuillController _controller = QuillController.basic();
   bool isLoading = false;
 
   Future<void> _saveDiaryEntry() async {
+    print(_mediaFileList);
+
     if (_controller.document.isEmpty()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('The content cannot be empty!')),
@@ -61,7 +75,60 @@ QuillController _controller = QuillController.basic();
     }
   }
 
-  @override
+
+  Future<void> _displayPickImageDialog(
+      BuildContext context, bool isMulti, OnPickImageCallback onPick) async {
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Add optional parameters'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('CANCEL'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              TextButton(
+                  child: const Text('PICK'),
+                  onPressed: () {
+                    onPick();
+                    Navigator.of(context).pop();
+                  }),
+            ],
+          );
+        });
+  }
+
+  Future<void> _onImageButtonPressed(
+      ImageSource source, {
+        required BuildContext context,
+        bool isMultiImage = false,
+      }) async {
+    if (context.mounted) {
+      await _displayPickImageDialog(context, true, () async {
+        try {
+          final List<XFile> pickedFileList = await _picker.pickMultiImage();
+
+          setState(() {
+            _mediaFileList = pickedFileList;
+          });
+        } catch (e) {
+          setState(() {
+            _pickImageError = e;
+          });
+        }
+      });
+    }
+  }
+}
+
+
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Create Pet Diary')),
@@ -71,7 +138,12 @@ QuillController _controller = QuillController.basic();
           children: [
             QuillSimpleToolbar(
               controller: _controller,
-              config: const QuillSimpleToolbarConfig(),
+              config: const QuillSimpleToolbarConfig(
+                embedButtons: FlutterQuillEmbeds.buttons(
+                  onImagePickCallback: _onImageButtonPressed,
+                ),
+              ),
+
             ),
             Expanded(
               child: QuillEditor.basic(
@@ -90,6 +162,8 @@ QuillController _controller = QuillController.basic();
         ),
       ),
     );
+
+    typedef OnPickImageCallback = void Function();
 
     @override
       void dispose() {
