@@ -17,8 +17,8 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://10.10.11.54:5010/api/pet/available/';
-  final String deleteUrl = 'http://10.10.11.54:5010/api/pet/';
+  final String apiUrl = 'http://192.168.1.2:5010/api/pet/available/';
+  final String deleteUrl = 'http://192.168.1.2:5010/api/pet/';
   late String userId;
   @override
   void initState() {
@@ -513,7 +513,7 @@ class _CustomerPetListState extends State<PetPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://10.10.11.54:5010/pet-service${pet.petImage}',
+                            'http://192.168.1.2:5010/pet-service${pet.petImage}',
                             width: 400,
                             height: 350,
                             fit: BoxFit.cover,

@@ -42,7 +42,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://10.10.11.54:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+            'http://192.168.1.2:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
       );
 
       if (response.statusCode == 200) {
@@ -102,7 +102,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
     try {
       final response = await http.delete(
-        Uri.parse('http://10.10.11.54:5010/api/PetDiary/$diaryId'),
+        Uri.parse('http://192.168.1.2:5010/api/PetDiary/$diaryId'),
       );
 
       if (response.statusCode == 200) {
@@ -176,7 +176,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://10.10.11.54:5010${widget.petImage}')
+                              'http://192.168.1.2:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),

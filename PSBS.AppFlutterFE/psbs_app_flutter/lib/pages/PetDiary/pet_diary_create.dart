@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -6,6 +8,7 @@ import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 class PetDiaryCreatePage extends StatefulWidget {
   final String petId;
@@ -45,7 +48,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       String diaryContent = await convertDeltaToHtml(deltaJson);
 
       final response = await http.post(
-        Uri.parse('http://10.10.11.54:5010/api/PetDiary'),
+        Uri.parse('http://192.168.1.2:5010/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -126,6 +129,19 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
     }
   }
 
+  // Hàm nén ảnh trước khi encode base64
+  Future<String> compressAndEncodeBase64(List<int> imageBytes) async {
+    img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
+
+    // Resize ảnh nhỏ hơn (ví dụ: chiều rộng 800px)
+    img.Image resizedImage = img.copyResize(image, width: 600);
+
+    // Giảm chất lượng ảnh (ví dụ: 75%)
+    List<int> compressedBytes = img.encodeJpg(resizedImage, quality: 60);
+
+    return base64Encode(compressedBytes);
+  }
+
   Future<String> convertDeltaToHtml(String deltaJsonString) async {
     List<dynamic> deltaJson = jsonDecode(deltaJsonString);
     List<Map<String, dynamic>> deltaList =
@@ -143,7 +159,10 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
             File imageFile = File(imagePath);
             if (await imageFile.exists()) {
               List<int> imageBytes = await imageFile.readAsBytes();
-              String base64Image = base64Encode(imageBytes);
+
+              // Nén ảnh trước khi encode base64
+              String base64Image = await compressAndEncodeBase64(imageBytes);
+
               insert["image"] =
                   "data:image/jpeg;base64,$base64Image"; // Base64 format
             }

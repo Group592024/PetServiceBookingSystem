@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
@@ -8,6 +10,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:html/parser.dart' as htmlParser;
 import 'package:html/dom.dart' as dom;
+import 'package:image/image.dart' as img;
 
 class PetDiaryUpdatePage extends StatefulWidget {
   final Map<String, dynamic> diary;
@@ -90,6 +93,19 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     return deltaOps;
   }
 
+  // Hàm nén ảnh trước khi encode base64
+  Future<String> compressAndEncodeBase64(List<int> imageBytes) async {
+    img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
+
+    // Resize ảnh nhỏ hơn (ví dụ: chiều rộng 800px)
+    img.Image resizedImage = img.copyResize(image, width: 600);
+
+    // Giảm chất lượng ảnh (ví dụ: 75%)
+    List<int> compressedBytes = img.encodeJpg(resizedImage, quality: 60);
+
+    return base64Encode(compressedBytes);
+  }
+
   /// 🔹 **Chuyển đổi Delta JSON -> HTML**
   Future<String> convertDeltaToHtml(String deltaJsonString) async {
     List<dynamic> deltaJson = jsonDecode(deltaJsonString);
@@ -101,13 +117,19 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
         var insert = op["insert"];
         if (insert.containsKey("image")) {
           String imagePath = insert["image"];
+
+          // Chuyển ảnh sang base64 nếu là đường dẫn cục bộ
           if (imagePath.startsWith("/data/") ||
               imagePath.startsWith("file://")) {
             File imageFile = File(imagePath);
             if (await imageFile.exists()) {
               List<int> imageBytes = await imageFile.readAsBytes();
-              String base64Image = base64Encode(imageBytes);
-              insert["image"] = "data:image/jpeg;base64,$base64Image";
+
+              // Nén ảnh trước khi encode base64
+              String base64Image = await compressAndEncodeBase64(imageBytes);
+
+              insert["image"] =
+                  "data:image/jpeg;base64,$base64Image"; // Base64 format
             }
           }
         }
@@ -136,7 +158,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
 
       final response = await http.put(
         Uri.parse(
-            'http://10.10.11.54:5010/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://192.168.1.2:5010/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'

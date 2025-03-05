@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text.trim();
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.11.54:5000/api/Account/Login'),
+        Uri.parse('http://192.168.1.2:5000/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
