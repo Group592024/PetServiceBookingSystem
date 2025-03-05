@@ -62,10 +62,21 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<BookingServiceItem>> GetAllAsync()
+        public async Task<IEnumerable<BookingServiceItem>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var currentEntity = await context.bookingServiceItems.ToListAsync();
+                return currentEntity ?? new List<BookingServiceItem>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new List<BookingServiceItem>();
+            }
         }
+
+
 
         public Task<BookingServiceItem> GetByAsync(Expression<Func<BookingServiceItem, bool>> predicate)
         {

@@ -11,17 +11,9 @@ class PetHealthBookList extends StatefulWidget {
 }
 
 class _PetHealthBookListState extends State<PetHealthBookList> {
-  List pets = [];
-  List medicines = [];
+  List mergedPets = [];
   String searchQuery = "";
   String? accountId;
-  bool _isDisposed = false;
-  @override
-  void dispose() {
-    _isDisposed = true;
-    super.dispose();
-  }
-
   @override
   void initState() {
     super.initState();
@@ -35,86 +27,82 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
       setState(() {
         accountId = storedAccountId;
       });
-      await fetchPetHealthBooks();
+      await fetchData();
     } else {
       print("No accountId found in SharedPreferences");
     }
   }
 
-  Future<void> fetchPetHealthBooks() async {
+  Future<void> fetchData() async {
     if (accountId == null) return;
-    print("Account ID: $accountId");
     try {
-      final petHealthResponse =
+      final petHealthRes =
           await http.get(Uri.parse("http://10.0.2.2:5003/api/PetHealthBook"));
-      final medicinesResponse =
+      final medicinesRes =
           await http.get(Uri.parse("http://10.0.2.2:5003/Medicines"));
-      final bookingsResponse =
-          await http.get(Uri.parse("http://10.0.2.2:5201/Bookings"));
-      final petsResponse =
-          await http.get(Uri.parse("http://10.0.2.2:5010/api/pet"));
-      if (!mounted) return;
-      if (petHealthResponse.statusCode != 200 ||
-          medicinesResponse.statusCode != 200 ||
-          bookingsResponse.statusCode != 200 ||
-          petsResponse.statusCode != 200) {
-        print("Error fetching data from API");
+      final petsRes = await http.get(Uri.parse("http://10.0.2.2:5010/api/pet"));
+      final bookingServiceItemsRes = await http.get(Uri.parse(
+          "http://10.0.2.2:5023/api/BookingServiceItems/GetBookingServiceList"));
+
+      if (petHealthRes.statusCode != 200 ||
+          medicinesRes.statusCode != 200 ||
+          petsRes.statusCode != 200 ||
+          bookingServiceItemsRes.statusCode != 200) {
         return;
       }
-      var petHealthData = jsonDecode(petHealthResponse.body);
-      if (petHealthData is List) {
-        petHealthData = petHealthData;
-      } else if (petHealthData is Map) {
+      var petHealthData = jsonDecode(petHealthRes.body);
+      if (petHealthData is Map) {
         petHealthData = petHealthData['data'] ?? [];
-      } else {
-        petHealthData = [];
       }
-      List medicinesData = jsonDecode(medicinesResponse.body) is List
-          ? jsonDecode(medicinesResponse.body)
-          : jsonDecode(medicinesResponse.body)['data'] ?? [];
-      List bookingsData = jsonDecode(bookingsResponse.body) is List
-          ? jsonDecode(bookingsResponse.body)
-          : jsonDecode(bookingsResponse.body)['data'] ?? [];
-      List petsData = jsonDecode(petsResponse.body) is List
-          ? jsonDecode(petsResponse.body)
-          : jsonDecode(petsResponse.body)['data'] ?? [];
-      Map<String, String> bookingIdToAccountIdMap = {
-        for (var booking in bookingsData)
-          if (booking['bookingId'] != null && booking['accountId'] != null)
-            booking['bookingId']: booking['accountId']
-      };
-      List filteredPetHealth = petHealthData.where((health) {
-        String? bookingId = health['bookingId'];
-        return bookingIdToAccountIdMap[bookingId] == accountId;
-      }).toList();
-      List petsWithDetails = filteredPetHealth.map((petHealth) {
-        var booking = bookingsData.firstWhere(
-          (b) => b['bookingId'] == petHealth['bookingId'],
-          orElse: () => {},
-        );
-        var petInfo = petsData.firstWhere(
-          (p) => p['accountId'] == accountId,
-          orElse: () => {},
-        );
-        var medicineIds = petHealth['medicineIds'] ?? [];
-        var medicineNames = medicinesData
-            .where((m) => medicineIds.contains(m['medicineId']))
-            .map((m) => m['medicineName'])
-            .join(", ");
+      var medicinesData = jsonDecode(medicinesRes.body);
+      if (medicinesData is Map) {
+        medicinesData = medicinesData['data'] ?? [];
+      }
+      var petsData = jsonDecode(petsRes.body);
+      if (petsData is Map) {
+        petsData = petsData['data'] ?? [];
+      }
+      var bookingServiceItemsData = jsonDecode(bookingServiceItemsRes.body);
+      if (bookingServiceItemsData is Map) {
+        bookingServiceItemsData = bookingServiceItemsData['data'] ?? [];
+      }
+      List accountPets =
+          petsData.where((p) => p['accountId'] == accountId).toList();
+      List result = accountPets.map((pet) {
+        List healthForThisPet = (petHealthData as List).where((health) {
+          var bsi = bookingServiceItemsData.firstWhere(
+            (item) =>
+                item['bookingServiceItemId'] == health['bookingServiceItemId'],
+            orElse: () => null,
+          );
+          if (bsi == null) return false;
+          return bsi['petId'] == pet['petId'];
+        }).toList();
+        List healthRecords = healthForThisPet.map((health) {
+          List medIds = health['medicineIds'] ?? [];
+          List medNames = (medicinesData as List)
+              .where((m) => medIds.contains(m['medicineId']))
+              .map((m) => m['medicineName'])
+              .toList();
+          String medicineNames = medNames.isNotEmpty
+              ? medNames.join(", ")
+              : "No Medicines Assigned";
+          return {
+            'healthBookId': health['healthBookId'] ?? "",
+            'medicineNames': medicineNames,
+            'performBy': health['performBy'] ?? "Unknown",
+            'createdAt': health['createdAt'] ?? "",
+          };
+        }).toList();
         return {
-          'healthBookId': petHealth['healthBookId'] ?? "",
-          'petName': petInfo?['petName'] ?? "Unknown",
-          'dateOfBirth': petInfo?['dateOfBirth'] ?? "Unknown",
-          'petImage': petInfo?['petImage'] ?? "",
-          'medicineNames':
-              medicineNames.isNotEmpty ? medicineNames : "No Medicine",
-          'performBy': petHealth['performBy'] ?? "Unknown",
-          'createdAt': petHealth['createdAt'] ?? "Unknown",
+          'petName': pet['petName'] ?? "Unknown",
+          'dateOfBirth': pet['dateOfBirth'] ?? "",
+          'petImage': pet['petImage'] ?? "",
+          'healthBooks': healthRecords,
         };
       }).toList();
       setState(() {
-        pets = petsWithDetails;
-        medicines = medicinesData;
+        mergedPets = result;
       });
     } catch (e) {
       print("Error fetching data: $e");
@@ -132,199 +120,142 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
   @override
   Widget build(BuildContext context) {
+    List filteredPets = mergedPets.where((record) {
+      String petName = record['petName'].toString().toLowerCase();
+      String healthInfo = "";
+      if (record['healthBooks'] is List) {
+        healthInfo = (record['healthBooks'] as List)
+            .map((h) => "${h['medicineNames']} ${h['performBy']}")
+            .join(" ")
+            .toLowerCase();
+      }
+      return petName.contains(searchQuery) || healthInfo.contains(searchQuery);
+    }).toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Pet Health Book List"),
         backgroundColor: Colors.white,
       ),
-      body: accountId == null
-          ? Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                // Ô tìm kiếm
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      labelText: "Search...",
-                      border: OutlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        searchQuery = value.toLowerCase();
-                      });
-                    },
-                  ),
-                ),
-                if (pets.isNotEmpty)
-                  Column(
-                    children: [
-                      Container(
-                        width: 200,
-                        height: 200,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          image: DecorationImage(
-                            image: pets.first['petImage'].isNotEmpty
-                                ? NetworkImage(
-                                    "http://10.0.2.2:5010${pets.first['petImage']}")
-                                : AssetImage('assets/default-image.png')
-                                    as ImageProvider,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        pets.first['petName'],
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        formatDate(pets.first['dateOfBirth']),
-                        style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500),
-                        textAlign: TextAlign.center,
-                      ),
-                      Divider(),
-                    ],
-                  ),
-
-                Expanded(
-                  child: pets.isEmpty
-                      ? Center(child: Text("No pets found"))
-                      : ListView.builder(
-                          itemCount: pets.where((pet) {
-                            return pet['medicineNames']
-                                    .toLowerCase()
-                                    .contains(searchQuery) ||
-                                formatDate(pet['createdAt'])
-                                    .toLowerCase()
-                                    .contains(searchQuery) ||
-                                pet['performBy']
-                                    .toLowerCase()
-                                    .contains(searchQuery);
-                          }).length,
-                          itemBuilder: (context, index) {
-                            var filteredPets = pets.where((pet) {
-                              return pet['medicineNames']
-                                      .toLowerCase()
-                                      .contains(searchQuery) ||
-                                  formatDate(pet['createdAt'])
-                                      .toLowerCase()
-                                      .contains(searchQuery) ||
-                                  pet['performBy']
-                                      .toLowerCase()
-                                      .contains(searchQuery);
-                            }).toList();
-
-                            var pet = filteredPets[index];
-                            return Card(
-                              color: Colors.white,
-                              elevation: 3,
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 12.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "Medicine: ",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              SizedBox(
-                                                  width:
-                                                      8), // Khoảng cách giữa tiêu đề và giá trị
-                                              Expanded(
-                                                child:
-                                                    Text(pet['medicineNames']),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "Performed By: ",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(pet['performBy']),
-                                              ),
-                                            ],
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                "Created At: ",
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(formatDate(
-                                                    pet['createdAt'])),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
+      body: Column(
+        children: [
+          Expanded(
+            child: filteredPets.isEmpty
+                ? Center(child: Text("No Health Books Found"))
+                : ListView.builder(
+                    itemCount: filteredPets.length,
+                    itemBuilder: (context, index) {
+                      var petRecord = filteredPets[index];
+                      return Card(
+                        color: Colors.white,
+                        elevation: 3,
+                        margin:
+                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        child: Padding(
+                          padding: EdgeInsets.all(12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 80,
+                                    height: 80,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                        image: petRecord['petImage'].isNotEmpty
+                                            ? NetworkImage(
+                                                "http://10.0.2.2:5010${petRecord['petImage']}")
+                                            : AssetImage(
+                                                    'assets/default-image.png')
+                                                as ImageProvider,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: Colors.grey, width: 1),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        petRecord['petName'],
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
                                       ),
-                                      child: IconButton(
-                                        icon: Icon(Icons.info,
-                                            color: Colors.grey),
-                                        onPressed: () {
-                                          if (pet['healthBookId'] == null ||
-                                              pet['healthBookId'].isEmpty) {
-                                            print(
-                                                "Error: healthBookId is null or empty");
-                                            return;
-                                          }
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) =>
-                                                  PetHealthBookDetail(
-                                                healthBookId:
-                                                    pet['healthBookId'],
-                                                pet: pet,
-                                              ),
+                                      Text(
+                                        formatDate(petRecord['dateOfBirth']),
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Divider(),
+                              petRecord['healthBooks'].isEmpty
+                                  ? Text("No Health Book Records")
+                                  : Column(
+                                      children: List.generate(
+                                        petRecord['healthBooks'].length,
+                                        (i) {
+                                          var health =
+                                              petRecord['healthBooks'][i];
+                                          return ListTile(
+                                            title: Text(
+                                              "Medicine: ${health['medicineNames']}",
+                                            ),
+                                            subtitle: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                    "Performed By: ${health['performBy']}"),
+                                                Text(
+                                                    "Created At: ${formatDate(health['createdAt'])}"),
+                                              ],
+                                            ),
+                                            trailing: IconButton(
+                                              icon: Icon(Icons.info,
+                                                  color: Colors.grey),
+                                              onPressed: () {
+                                                if (health['healthBookId'] ==
+                                                        null ||
+                                                    health['healthBookId']
+                                                        .isEmpty) {
+                                                  print(
+                                                      "Error: healthBookId is null or empty");
+                                                  return;
+                                                }
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PetHealthBookDetail(
+                                                      healthBookId: health[
+                                                          'healthBookId'],
+                                                      pet: petRecord,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           );
                                         },
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
+                            ],
+                          ),
                         ),
-                )
-              ],
-            ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

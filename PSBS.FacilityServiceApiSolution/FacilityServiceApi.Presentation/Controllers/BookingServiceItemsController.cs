@@ -1,10 +1,12 @@
-﻿using FacilityServiceApi.Application.DTOs;
+﻿using FacilityServiceApi.Application.DTO;
+using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using PSPS.SharedLibrary.Responses;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,11 +25,13 @@ namespace FacilityServiceApi.Presentation.Controllers
             bookingServiceItemInterface = _bookingServiceItemInterface;
         }
         // GET: api/<BookingServiceItemsController>
+       
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+           return new string[] { "value1", "value2" };
         }
+
 
         // GET api/<BookingServiceItemsController>/5
         [HttpGet("{id}")]
@@ -54,7 +58,22 @@ namespace FacilityServiceApi.Presentation.Controllers
             var response = await bookingServiceItemInterface.CreateAsync(createEntity);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
+        [HttpGet("GetBookingServiceList")]
+        public async Task<ActionResult<IEnumerable<BookingServiceItem>>> GetAll()
+        {
+            var bookingItems = await _context.bookingServiceItems.ToListAsync();
 
+
+            if (!bookingItems.Any())
+                return NotFound(new Response(false, "No BookingItems found in the database"));
+
+            var (_, responseData) = BookingServiceGetItemConversion.FromEntity(null, bookingItems);
+
+            return Ok(new Response(true, "BookingItems retrieved successfully")
+            {
+                Data = responseData
+            });
+        }
         // PUT api/<BookingServiceItemsController>/5
         [HttpPut("{id}")]
         public void Put(int id, [FromBody] string value)

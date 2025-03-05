@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
+    as list;
 import 'dart:convert';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_create.dart';
@@ -21,19 +23,21 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
   Map<String, dynamic>? petBreed;
   bool isLoading = true;
   bool showFullNotes = false;
- late String userId;
+  late String userId;
   @override
   void initState() {
     super.initState();
     fetchPetDetails();
     _loadAccountId();
   }
- Future<void> _loadAccountId() async {
+
+  Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
     });
   }
+
   Future<void> fetchPetDetails() async {
     try {
       final petResponse = await http
@@ -300,18 +304,19 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                   SizedBox(width: 16),
                   Expanded(
                     child: _buildNavigationButton(
-                      'Medical History',
-                      Image.asset(
-                        'assets/health-checkicon.png',
-                        width: 50,
-                        height: 50,
-                      ),
-                      Colors.purple[100]!,
-                      () => Navigator.pushNamed(
-                        context,
-                        '/customer/pet/medical-history/${pet!['petId']}',
-                      ),
-                    ),
+                        'Medical History',
+                        Image.asset(
+                          'assets/health-checkicon.png',
+                          width: 50,
+                          height: 50,
+                        ),
+                        Colors.purple[100]!,
+                        () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      list.PetHealthBookList()),
+                            )),
                   ),
                 ],
               ),
@@ -473,8 +478,8 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
     if (confirm == true) {
       try {
-        final response = await http.delete(
-            Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
+        final response = await http
+            .delete(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

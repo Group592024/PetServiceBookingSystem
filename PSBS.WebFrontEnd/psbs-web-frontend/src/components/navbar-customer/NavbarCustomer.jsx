@@ -119,12 +119,7 @@ const NavbarCustomer = () => {
               Pet
             </Link>
           </li>
-          <li>
-            <a href="/list">
-              <i className="bx bxs-capsule"></i>
-              HealthBook
-            </a>
-          </li>
+          
           <li>
             <Link to="/customer/gifts">
               <i className="bx bx-gift"></i>

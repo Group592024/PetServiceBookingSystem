@@ -12,7 +12,7 @@ using PSBS.HealthCareApi.Infrastructure.Data;
 namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20250303094816_First")]
+    [Migration("20250304153005_First")]
     partial class First
     {
         /// <inheritdoc />

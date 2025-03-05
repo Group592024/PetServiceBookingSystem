@@ -1,4 +1,3 @@
-
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
@@ -137,12 +136,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onSelected: (value) {
               if (value == 'logout') {
                 logout(context); // Gọi hàm logout
-              } else if (value == 'healthcarebook') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => list.PetHealthBookList()),
-                );
               } else if (value == 'voucher') {
                 Navigator.push(
                   context,
@@ -152,14 +145,6 @@ class _MyHomePageState extends State<MyHomePage> {
               }
             },
             itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'healthcarebook',
-                child: ListTile(
-                  leading: Icon(Icons.menu_book, color: Colors.blue),
-                  title: Text('HealthCareBook',
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ),
               PopupMenuItem(
                 value: 'voucher',
                 child: ListTile(
