@@ -3,11 +3,13 @@ using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.DTOs;
 using PetApi.Application.Interfaces;
 using PSPS.SharedLibrary.Responses;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PetApi.Presentation.Controllers
 {
     [Route("api/pet")]
     [ApiController]
+    [Authorize]
     public class PetController : ControllerBase
     {
         private readonly IPetBreed _petBreed;
@@ -19,6 +21,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetDTO>>> GetPetsList()
         {
             var pets = (await _pet.GetAllAsync())
@@ -36,6 +39,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<PetDTO>> GetPetById(Guid id)
         {
             var pet = await _pet.GetByIdAsync(id);
@@ -52,6 +56,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreatePet([FromForm] PetDTO creatingPet, IFormFile? imageFile)
         {
             ModelState.Remove(nameof(PetDTO.petId));
@@ -73,6 +78,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> UpdatePet([FromForm] PetDTO updatingPet, IFormFile? imageFile = null)
         {
             ModelState.Remove(nameof(PetDTO.petId));
@@ -97,6 +103,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> DeletePet(Guid id)
         {
             var existingPet = await _pet.GetByIdAsync(id);
@@ -143,6 +150,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("available/{accountId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetDTO>>> GetAvailablePets(Guid accountId)
         {
             var pets = await _pet.ListAvailablePetAsync(accountId);

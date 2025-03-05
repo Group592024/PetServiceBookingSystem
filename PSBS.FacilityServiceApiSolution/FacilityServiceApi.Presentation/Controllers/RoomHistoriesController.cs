@@ -3,6 +3,7 @@ using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.Responses;
@@ -13,6 +14,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RoomHistoriesController (IRoomHistory roomHistoryInterface) : ControllerBase
     {
         //private readonly FacilityServiceDbContext _context;
@@ -22,6 +24,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         //}
         // GET: api/<RoomHistoriesController>
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaff")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
@@ -29,6 +32,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // GET api/<RoomHistoriesController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<RoomHistoryDTO>> GetRoomHistoryByBookingId(Guid id)
         {
             var bookingRoomItems = await roomHistoryInterface.GetRoomHistoryByBookingId(id);
@@ -45,6 +49,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<RoomHistoriesController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateRoomHistory([FromBody] CreateRoomHistoryDTO roomHistoryDTO)
         {
             var createEntity = RoomHistoryConversion.ToEntityForCreate(roomHistoryDTO);
@@ -54,6 +59,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // PUT api/<RoomHistoriesController>/5
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateRoomHistory([FromBody] RoomHistoryDTO roomHistoryDTO)
         {
             var updateEntity = RoomHistoryConversion.ToEntity(roomHistoryDTO);
@@ -63,6 +69,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // DELETE api/<RoomHistoriesController>/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public void Delete(int id)
         {
         }
