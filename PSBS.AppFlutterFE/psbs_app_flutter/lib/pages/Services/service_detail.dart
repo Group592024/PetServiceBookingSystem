@@ -72,7 +72,8 @@ class _ServiceDetailState extends State<ServiceDetail> {
     return ListTile(
       leading: Text('${index + 1}.'),
       title: Text(variant['serviceContent'] ?? 'No content'),
-      subtitle: Text('Price: ${variant['servicePrice']} VND', style: TextStyle(color: Colors.red)),
+      subtitle: Text('Price: ${variant['servicePrice']} VND',
+          style: TextStyle(color: Colors.red)),
     );
   }
 
@@ -128,13 +129,12 @@ class _ServiceDetailState extends State<ServiceDetail> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Type: ${detail['serviceType']   != null ? detail['serviceType']['typeName'] : ''}',
+                        'Type: ${detail['serviceType'] != null ? detail['serviceType']['typeName'] : ''}',
                         style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          fontStyle: FontStyle.italic,
-                          color: Colors.grey
-                        ),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w600,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey),
                       )
                     ],
                   ),
@@ -148,16 +148,15 @@ class _ServiceDetailState extends State<ServiceDetail> {
                           Navigator.pushNamed(context, '/booking');
                         },
                         style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(
-                              Colors.red[600]),
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.red[600]),
                         ),
                         child: Text(
                           'Book Now',
                           style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white
-                          ),
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
                         ),
                       ),
                     ),
@@ -167,54 +166,54 @@ class _ServiceDetailState extends State<ServiceDetail> {
                   // Hiển thị danh sách Variant (nếu có)
                   Text(
                     'List of variants you can book: ',
-                    style: TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
                   dataVariant.isEmpty
                       ? Center(child: Text('No variants available'))
-                      : Container(margin: EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          border: Border.all(color: Colors.blue, width: 2),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          physics: NeverScrollableScrollPhysics(),
-                                          itemCount: dataVariant.length,
-                                          itemBuilder: (context, index) =>
-                                              buildVariantItem(dataVariant[index], index),
-                                        ),
-                      ),
-                        SizedBox(height: 20),
-                                          Text(
-                                            'Description',
-                                            style: TextStyle(
-                                                fontSize: 20, fontWeight: FontWeight.bold),
-                                          ),
-                                          SizedBox(height: 8),
-                                          Text(
-                                            detail['serviceDescription'] ?? '',
-                                            maxLines: showFullDescription ? null : 7,
-                                            overflow: showFullDescription
-                                                ? TextOverflow.visible
-                                                : TextOverflow.ellipsis,
-                                            style: TextStyle(color: Colors.grey[700]),
-                                          ),
-                                          TextButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                showFullDescription = !showFullDescription;
-                                              });
-                                            },
-                                            child: Text(
-                                              showFullDescription ? 'Show Less' : 'Show More',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic,
-                                              decoration: TextDecoration.underline),
-
-                                            ),
-                                          ),
+                      : Container(
+                          margin: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blue, width: 2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: dataVariant.length,
+                            itemBuilder: (context, index) =>
+                                buildVariantItem(dataVariant[index], index),
+                          ),
+                        ),
+                  SizedBox(height: 20),
+                  Text(
+                    'Description',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    detail['serviceDescription'] ?? '',
+                    maxLines: showFullDescription ? null : 7,
+                    overflow: showFullDescription
+                        ? TextOverflow.visible
+                        : TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        showFullDescription = !showFullDescription;
+                      });
+                    },
+                    child: Text(
+                      showFullDescription ? 'Show Less' : 'Show More',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic,
+                          decoration: TextDecoration.underline),
+                    ),
+                  ),
                 ],
               ),
             ),

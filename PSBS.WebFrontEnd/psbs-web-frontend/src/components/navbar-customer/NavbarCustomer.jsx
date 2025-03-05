@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import "./style.css";
@@ -24,7 +24,9 @@ const NavbarCustomer = () => {
       setAccountId(AccountId);
 
       if (AccountImage) {
-        fetch(`http://localhost:5000/api/Account/loadImage?filename=${AccountImage}`)
+        fetch(
+          `http://localhost:5000/api/Account/loadImage?filename=${AccountImage}`
+        )
           .then((response) => response.json())
           .then((imageData) => {
             if (imageData.flag) {
@@ -81,7 +83,7 @@ const NavbarCustomer = () => {
 
   return (
     <div className="navbarCustomer">
-      <a href="#" className="logo">
+      <a href="/" className="logo">
         <i className="bx bxs-cat"></i>
         <div className="logo-name">
           <span>Pet</span>Ease
@@ -100,45 +102,48 @@ const NavbarCustomer = () => {
 
         <ul className="navbar-links">
           <li>
-            <a href="#">
+            <Link to="/customer/services">
               <i className="bx bx-store-alt"></i>
               Service
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#">
+            <Link to="/bookings">
               <i className="bx bx-home-heart"></i>
-              Room
-            </a>
+              Booking
+            </Link>
           </li>
           <li>
-            <a href="#">
-              <i className="bx bxs-webcam"></i>
-              Camera
-            </a>
+            <Link to="/customer/pet">
+              <i className="bx bxs-dog"></i>
+              Pet
+            </Link>
           </li>
           <li>
             <a href="/list">
-              <i className="bx bxs-dog"></i>
-              Pet
+              <i className="bx bxs-capsule"></i>
+              HealthBook
             </a>
           </li>
           <li>
-            <a href="#">
+            <Link to="/customer/gifts">
               <i className="bx bx-gift"></i>
               Gift
-            </a>
+            </Link>
           </li>
           <li>
-            <a href="#">
+            <Link to="/customer/vouchers">
               <i className="bx bx-wallet"></i>
               Voucher
-            </a>
+            </Link>
           </li>
-          
         </ul>
       </div>
-      <div><li><a>{accountName}</a></li></div>
+      <div>
+        <li>
+          <a>{accountName}</a>
+        </li>
+      </div>
       <div className="navbar-profile" onClick={toggleDropdown}>
         <img
           src={accountImage}
@@ -149,7 +154,6 @@ const NavbarCustomer = () => {
         {dropdownVisible && (
           <div className="dropdown-menu">
             <ul>
-              
               <li onClick={handleViewProfile}>View Profile</li>
               <li onClick={handleLogout}>Logout</li>
             </ul>

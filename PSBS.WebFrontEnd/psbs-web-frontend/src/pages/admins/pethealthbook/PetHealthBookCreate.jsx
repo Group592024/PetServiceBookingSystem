@@ -25,37 +25,40 @@ const PetHealthBookCreate = () => {
   const [bookings, setBookings] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const [bookingCode, setbookingCode] = useState([]);
+  const [treatments, setTreatments] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bookingsResponse, medicinesResponse] = await Promise.all([
-          fetch("https://localhost:5201/api/Booking"),
+        const [bookingsResponse, medicinesResponse, treatmentsResponse] = await Promise.all([
+          fetch("http://localhost:5201/Bookings"),
           fetch("http://localhost:5003/Medicines"),
-          fetch("http://localhost:5003/Pet")
+          fetch("http://localhost:5003/api/Treatment"),
         ]);
 
-        if (!bookingsResponse.ok || !medicinesResponse.ok) {
-          throw new Error("Failed to fetch data from server.");
-        }
+        if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
+        if (!medicinesResponse.ok) throw new Error("Failed to fetch medicines.");
+        if (!treatmentsResponse.ok) throw new Error("Failed to fetch treatments.");
 
-        const [bookingsData, medicinesData] = await Promise.all([
+        const [bookingsData, medicinesData, treatmentsData] = await Promise.all([
           bookingsResponse.json(),
-          medicinesResponse.json()
+          medicinesResponse.json(),
+          treatmentsResponse.json(),
         ]);
 
-        if (bookingsData && bookingsData.data && Array.isArray(bookingsData.data)) {
-          const bookingCodeData = bookingsData.data.map((booking) => booking.bookingCode);
-          
-          setbookingCode(bookingCodeData);
-          setBookings(bookingsData.data);
-          console.log("Bookings data:", bookingsData.data);
-        } else {
-          console.error("Bookings data is not in the expected format:", bookingsData);
+        console.log("Treatments API response:", treatmentsData);
 
-          Swal.fire("Error", "Invalid data format for bookings.", "error");
+        // Kiểm tra dữ liệu từ API Treatment
+        if (treatmentsData && Array.isArray(treatmentsData)) {
+          setTreatments(treatmentsData);
+        } else if (treatmentsData && treatmentsData.data && Array.isArray(treatmentsData.data)) {
+          setTreatments(treatmentsData.data);
+        } else {
+          console.error("Invalid format for treatments data:", treatmentsData);
+          Swal.fire("Error", "Invalid treatment data format.", "error");
         }
 
+        setBookings(bookingsData.data || bookingsData);
         setMedicines(medicinesData.data || medicinesData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -66,6 +69,7 @@ const PetHealthBookCreate = () => {
     fetchData();
   }, []);
 
+
   const generateGuid = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -74,25 +78,34 @@ const PetHealthBookCreate = () => {
   };
   const currentDate = new Date().toISOString();
   const handleCreate = async () => {
-    if (!visitDetails.bookingId || !visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
+    // Tìm bookingId dựa trên bookingCode mà người dùng nhập
+    const selectedBooking = bookings.find(
+      (booking) => booking.bookingCode === visitDetails.bookingId
+    );
+
+    if (!selectedBooking) {
+      Swal.fire("Error", "Invalid Booking Code. Please check again.", "error");
+      return;
+    }
+
+    if (!visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
       Swal.fire("Error", "Please fill all required fields", "error");
       return;
     }
-  
+
     const newVisitDetails = {
-      bookingId: visitDetails.bookingId,
+      bookingId: selectedBooking.bookingId, // Lấy bookingId từ bookingCode
       medicineIds: visitDetails.medicineId,
       visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
       nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
       performBy: visitDetails.performBy,
-      createdAt: currentDate, 
+      createdAt: currentDate,
       updatedAt: currentDate,
       isDeleted: visitDetails.isDeleted || false,
     };
-  
-    // Log dữ liệu trước khi gửi lên API
+
     console.log("Data sent to API:", newVisitDetails);
-  
+
     try {
       const response = await fetch("http://localhost:5003/api/PetHealthBook", {
         method: "POST",
@@ -101,17 +114,15 @@ const PetHealthBookCreate = () => {
         },
         body: JSON.stringify(newVisitDetails),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error response from API:", errorData);
         Swal.fire("Error", errorData.message || "Failed to create data", "error");
       } else {
         const result = await response.json();
-        
-        // Log dữ liệu nhận từ API sau khi tạo thành công
         console.log("Response from API:", result);
-  
+
         Swal.fire({
           title: "Success",
           text: "Pet health book created successfully!",
@@ -126,8 +137,21 @@ const PetHealthBookCreate = () => {
       Swal.fire("Error", "Failed to create data. Please try again later.", "error");
     }
   };
-  
-  
+
+
+  const [filteredMedicines, setFilteredMedicines] = useState([]);
+
+  useEffect(() => {
+    if (visitDetails.treatmentId) {
+      // Lọc danh sách thuốc theo treatmentId
+      const relatedMedicines = medicines.filter(medicine =>
+        medicine.treatmentId === visitDetails.treatmentId
+      );
+      setFilteredMedicines(relatedMedicines);
+    } else {
+      setFilteredMedicines([]);
+    }
+  }, [visitDetails.treatmentId, medicines]);
 
   const handleBack = () => {
     navigate(-1);
@@ -149,22 +173,17 @@ const PetHealthBookCreate = () => {
       <div className="content h-full">
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-4 bg-white shadow-md rounded-md h-full">
-          <h2 className="mb-4 text-xl font-bold">Create Pet Health Book</h2>
+          <h2 className="mb-4 text-xl font-bold">Create Health Book</h2>
 
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Booking Code</label>
-            <select
+            <input
+              type="text"
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
               onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
-            >
-              <option value="">Select a Booking</option>
-              {bookings.map((item, index) => (
-                <option key={index} value={item.bookingId}>
-                  {item.bookingCode}
-                </option>
-              ))}
-            </select>
+              placeholder="Enter Booking Code"
+            />
           </div>
 
           <div className="mb-3">
@@ -196,24 +215,45 @@ const PetHealthBookCreate = () => {
               className="w-full p-3 border rounded-md"
             />
           </div>
-
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Medicine</label>
-            <div className="space-y-2">
-              {medicines.map((medicine) => (
-                <div key={medicine.medicineId} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    value={medicine.medicineId}
-                    checked={visitDetails.medicineId.includes(medicine.medicineId)}
-                    onChange={handleMedicineChange}
-                    className="mr-2"
-                  />
-                  <label>{medicine.medicineName}</label>
-                </div>
+            <label className="block text-sm font-medium mb-1">Treatment</label>
+            <select
+              className="w-full p-3 border rounded-md"
+              value={visitDetails.treatmentId}
+              onChange={(e) => setVisitDetails({ ...visitDetails, treatmentId: e.target.value })}
+            >
+              <option value="">Select Treatment</option>
+              {treatments.map((treatment) => (
+                <option key={treatment.treatmentId} value={treatment.treatmentId}>
+                  {treatment.treatmentName || treatment.name}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
+
+          {visitDetails.treatmentId && (
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">Medicine</label>
+              <div className="space-y-2">
+                {filteredMedicines.length > 0 ? (
+                  filteredMedicines.map((medicine) => (
+                    <div key={medicine.medicineId} className="flex items-center">
+                      <input
+                        type="checkbox"
+                        value={medicine.medicineId}
+                        checked={visitDetails.medicineId.includes(medicine.medicineId)}
+                        onChange={handleMedicineChange}
+                        className="mr-2"
+                      />
+                      <label>{medicine.medicineName}</label>
+                    </div>
+                  ))
+                ) : (
+                  <p>No medicines available for the selected treatment.</p>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-between">
             <button
@@ -237,4 +277,4 @@ const PetHealthBookCreate = () => {
   );
 };
 
-export default PetHealthBookCreate;
+export default PetHealthBookCreate; 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:psbs_app_flutter/models/voucher.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
+import 'package:psbs_app_flutter/pages/Gifts/redeem_history_page.dart';
+import 'package:psbs_app_flutter/pages/chat/chat_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/booking_page.dart';
@@ -66,11 +68,15 @@ class RouteGenerator {
           );
         }
         return _errorRoute();
+      case '/chat':
+        return MaterialPageRoute(builder: (_) => const ChatPage());
 
-        case '/gifts':
-  return MaterialPageRoute(builder: (_) => GiftListScreen());
-   case '/services':
-          return MaterialPageRoute(builder: (_) => const ServicePage());
+      case '/gifts':
+        return MaterialPageRoute(builder: (_) => GiftListScreen());
+      case '/services':
+        return MaterialPageRoute(builder: (_) => const ServicePage());
+      case '/redeem':
+        return MaterialPageRoute(builder: (_) => RedeemHistoryPage());
       default:
         return _errorRoute();
     }

@@ -10,7 +10,7 @@ const GiftDetailPage = () => {
   const [gift, setGift] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const accountId = sessionStorage.getItem('accountId');
+  const accountId = sessionStorage.getItem("accountId");
 
   useEffect(() => {
     const fetchGift = async () => {
@@ -35,14 +35,14 @@ const GiftDetailPage = () => {
 
   const handleRedeem = async () => {
     const confirmResult = await Swal.fire({
-      title: 'Confirm Redemption',
+      title: "Confirm Redemption",
       text: `Are you sure you want to use ${gift.giftPoint} points to redeem this gift?`,
-      icon: 'question',
+      icon: "question",
       showCancelButton: true,
-      confirmButtonText: 'Yes, Redeem',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33'
+      confirmButtonText: "Yes, Redeem",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
     });
 
     if (confirmResult.isConfirmed) {
@@ -51,51 +51,39 @@ const GiftDetailPage = () => {
           `http://localhost:5000/api/Account/redeem-points/${accountId}`,
           {
             giftId: giftId,
-            requiredPoints: gift.giftPoint
+            requiredPoints: gift.giftPoint,
           }
         );
 
         if (redeemPointsResponse.data.flag) {
-          const redeemHistoryPayload = {
-            redeemHistoryId: crypto.randomUUID(),
-            giftId: giftId,
-            accountId: accountId,
-            redeemPoint: gift.giftPoint,
-            redeemDate: new Date().toISOString()
-          };
-
-          const redeemHistoryResponse = await axios.post(
-            'http://localhost:5022/redeemhistory',
-            redeemHistoryPayload
-          );
-
-          if (redeemHistoryResponse.data.flag) {
-            Swal.fire({
-              title: 'Success',
-              text: redeemHistoryResponse.data.message,
-              icon: 'success'
-            }).then(() => {
-              navigate('/customer/gifts');
-            });
-          }
+          Swal.fire({
+            title: "Success",
+            text: redeemPointsResponse.data.message,
+            icon: "success",
+          }).then(() => {
+            navigate("/customer/gifts");
+          });
         } else {
           Swal.fire({
-            title: 'Points Check Failed',
+            title: "Points Check Failed",
             text: redeemPointsResponse.data.message,
-            icon: 'warning'
+            icon: "warning",
           });
         }
       } catch (error) {
         Swal.fire({
-          title: error.response?.data?.title || 'Error',
-          text: error.response?.data?.message || 'Request failed',
-          icon: 'error'
+          title: error.response?.data?.title || "Error",
+          text: error.response?.data?.message || "Request failed",
+          icon: "error",
         });
       }
     }
-};
+  };
 
-  if (loading) return <div className="text-center text-gray-600">Loading gift details...</div>;
+  if (loading)
+    return (
+      <div className="text-center text-gray-600">Loading gift details...</div>
+    );
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
@@ -122,11 +110,15 @@ const GiftDetailPage = () => {
             </div>
             <div className="mb-4">
               <h2 className="text-lg font-bold mb-2">Gift Code</h2>
-              <p className="p-2 bg-gray-300 rounded">{gift.giftCode || "N/A"}</p>
+              <p className="p-2 bg-gray-300 rounded">
+                {gift.giftCode || "N/A"}
+              </p>
             </div>
             <div className="mb-4">
               <h2 className="text-lg font-bold mb-2">Gift Description</h2>
-              <p className="p-2 bg-gray-300 rounded">{gift.giftDescription || "N/A"}</p>
+              <p className="p-2 bg-gray-300 rounded">
+                {gift.giftDescription || "N/A"}
+              </p>
             </div>
 
             <div className="flex justify-end space-x-4 mt-4">

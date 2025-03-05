@@ -59,7 +59,7 @@ const ChatList = ({ signalRService, currentUser }) => {
         }
 
         await signalRService.startConnection(
-          "http://localhost:5159/chatHub",
+          "http://192.168.2.28:5159/chatHub",
           currentUser.accountId
         );
         console.log("✅ SignalR Connected");

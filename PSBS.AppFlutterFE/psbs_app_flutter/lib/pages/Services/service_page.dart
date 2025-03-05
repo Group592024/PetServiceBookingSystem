@@ -22,7 +22,7 @@ class _ServicePageState extends State<ServicePage> {
       if (responseServices.statusCode == 200) {
         final dataServices = json.decode(responseServices.body);
 
-print(dataServices);
+        print(dataServices);
 
         setState(() {
           services = dataServices['data'];
@@ -87,34 +87,34 @@ print(dataServices);
               SizedBox(height: 8),
               Text(
                 'Type: ${service['serviceType'] != null ? service['serviceType']['typeName'] : 'Unknown'}',
-                style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey),
               ),
               SizedBox(height: 20),
-
-                                Center(
-                                  child: SizedBox(
-                                    width: 350,
-                                    child: ElevatedButton(
-                                      onPressed: null,
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all(
-                                            Colors.green[400]),
-                                      ),
-                                      child: Text(
-                                        'See more',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  )
-
+              Center(
+                child: SizedBox(
+                  width: 350,
+                  child: ElevatedButton(
+                    onPressed: null,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.green[400]),
+                    ),
+                    child: Text(
+                      'See more',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
-
         ),
       ),
     );
