@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:psbs_app_flutter/pages/PetDiary/pet_diary_create.dart';
-
+import 'package:psbs_app_flutter/pages/PetDiary/pet_diary_update.dart';
 
 class PetDiaryPage extends StatefulWidget {
   final String petId;
@@ -41,7 +41,8 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
     try {
       final response = await http.get(
-        Uri.parse('http://192.168.1.4:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+        Uri.parse(
+            'http://10.10.11.54:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
       );
 
       if (response.statusCode == 200) {
@@ -60,6 +61,21 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       );
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  void _onEditPressed(Map<String, dynamic> diary) async {
+    print("Diary being edited: $diary");
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDiaryUpdatePage(diary: diary),
+      ),
+    );
+
+    if (result == true) {
+      // Nếu cập nhật thành công, load lại dữ liệu
+      fetchPetDiary(widget.petId, pageIndex);
     }
   }
 
@@ -82,11 +98,11 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       ),
     );
 
-    if (confirmDelete!=true) return;
+    if (confirmDelete != true) return;
 
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.1.4:5010/api/PetDiary/$diaryId'),
+        Uri.parse('http://10.10.11.54:5010/api/PetDiary/$diaryId'),
       );
 
       if (response.statusCode == 200) {
@@ -137,7 +153,6 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -151,7 +166,8 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
               background: Container(
                 decoration: BoxDecoration(
                   color: Colors.blueAccent,
-                  borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+                  borderRadius:
+                      BorderRadius.vertical(bottom: Radius.circular(16)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -159,13 +175,18 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                     CircleAvatar(
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
-                          ? NetworkImage('http://192.168.1.4:5010${widget.petImage}')
-                          : AssetImage('assets/sampleUploadImage.jpg') as ImageProvider,
+                          ? NetworkImage(
+                              'http://10.10.11.54:5010${widget.petImage}')
+                          : AssetImage('assets/sampleUploadImage.jpg')
+                              as ImageProvider,
                     ),
                     SizedBox(height: 10),
                     Text(
                       widget.petName,
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                     Text(
                       'Date of Birth: ${_formatPetDob(widget.petDob)}',
@@ -190,47 +211,75 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       delegate: SliverChildBuilderDelegate(
                         (context, index) {
                           final entry = diaryEntries[index];
-                          String diaryContent = entry['diary_Content'] ?? "No Content";
+                          String diaryContent =
+                              entry['diary_Content'] ?? "No Content";
                           String diaryDate = "Unknown Date";
                           if (entry['diary_Date'] != null) {
-                            DateTime parsedDate = DateTime.parse(entry['diary_Date']);
-                            diaryDate = DateFormat('HH:mm MM/dd/yyyy').format(parsedDate); // Định dạng tháng/ngày/năm
+                            DateTime parsedDate =
+                                DateTime.parse(entry['diary_Date']);
+                            diaryDate = DateFormat('HH:mm MM/dd/yyyy')
+                                .format(parsedDate); // Định dạng tháng/ngày/năm
                           }
                           bool isExpanded = false;
 
                           return StatefulBuilder(
                             builder: (context, setState) {
                               return Card(
-                                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
                                 child: Padding(
                                   padding: const EdgeInsets.all(12.0),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    diaryDate,
-                                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey),
-                                                  ),
-                                                  IconButton(
-                                                    icon: Icon(Icons.delete, color: Colors.red),
-                                                    onPressed: () => _confirmDelete(entry['diary_ID']),
-                                                  ),
-                                                ],
-                                              ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            diaryDate,
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.edit,
+                                                color: Colors.blue),
+                                            onPressed: () =>
+                                                _onEditPressed(entry),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete,
+                                                color: Colors.red),
+                                            onPressed: () => _confirmDelete(
+                                                entry['diary_ID']),
+                                          ),
+                                        ],
+                                      ),
                                       SizedBox(height: 5),
 
                                       // Nội dung được giới hạn theo chiều cao
                                       AnimatedContainer(
                                         duration: Duration(milliseconds: 300),
-                                        constraints: BoxConstraints(maxHeight: isExpanded ? MediaQuery.of(context).size.height * 0.6 : 150,
+                                        constraints: BoxConstraints(
+                                          maxHeight: isExpanded
+                                              ? MediaQuery.of(context)
+                                                      .size
+                                                      .height *
+                                                  0.6
+                                              : 150,
                                         ), // Giới hạn chiều cao khi thu gọn
                                         child: SingleChildScrollView(
-                                          physics: isExpanded ? null : NeverScrollableScrollPhysics(),
+                                          physics: isExpanded
+                                              ? null
+                                              : NeverScrollableScrollPhysics(),
                                           child: Html(
                                             data: diaryContent,
-                                            style: {"p": Style(fontSize: FontSize(16))},
+                                            style: {
+                                              "p": Style(fontSize: FontSize(16))
+                                            },
                                           ),
                                         ),
                                       ),
@@ -244,7 +293,9 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                                               isExpanded = !isExpanded;
                                             });
                                           },
-                                          child: Text(isExpanded ? "Show less" : "Show more"),
+                                          child: Text(isExpanded
+                                              ? "Show less"
+                                              : "Show more"),
                                         ),
                                       ),
                                     ],
@@ -289,13 +340,13 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
           );
 
           if (result == true) {
-            fetchPetDiary(widget.petId, pageIndex); // Refresh danh sách sau khi tạo nhật ký
+            fetchPetDiary(widget.petId,
+                pageIndex); // Refresh danh sách sau khi tạo nhật ký
           }
         },
         backgroundColor: Colors.blueAccent,
         child: Icon(Icons.add, color: Colors.white),
       ),
-
     );
   }
 }

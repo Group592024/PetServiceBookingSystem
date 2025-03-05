@@ -22,29 +22,31 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
   Map<String, dynamic>? petBreed;
   bool isLoading = true;
   bool showFullNotes = false;
- late String userId;
+  late String userId;
   @override
   void initState() {
     super.initState();
     fetchPetDetails();
     _loadAccountId();
   }
- Future<void> _loadAccountId() async {
+
+  Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
     });
   }
+
   Future<void> fetchPetDetails() async {
     try {
       final petResponse = await http
-          .get(Uri.parse('http://192.168.1.4:5010/api/pet/${widget.petId}'));
+          .get(Uri.parse('http://10.10.11.54:5010/api/pet/${widget.petId}'));
 
       final petData = json.decode(petResponse.body);
 
       if (petData['flag']) {
         final breedResponse = await http.get(Uri.parse(
-            'http://192.168.1.4:5010/api/petBreed/${petData['data']['petBreedId']}'));
+            'http://10.10.11.54:5010/api/petBreed/${petData['data']['petBreedId']}'));
         final breedData = json.decode(breedResponse.body);
 
         setState(() {
@@ -112,7 +114,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.network(
-                    'http://192.168.1.4:5010/pet-service${pet!['petImage']}',
+                    'http://10.10.11.54:5010/pet-service${pet!['petImage']}',
                     height: 300,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -293,12 +295,14 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                       ),
                       Colors.yellow[100]!,
                       () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PetDiaryPage(petId: pet!['petId'],   petName: pet!['petName'],
-                                    petImage: pet!['petImage'], petDob: pet!['dateOfBirth']
-                                    ),
-                                  ),
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PetDiaryPage(
+                              petId: pet!['petId'],
+                              petName: pet!['petName'],
+                              petImage: pet!['petImage'],
+                              petDob: pet!['dateOfBirth']),
+                        ),
                       ),
                     ),
                   ),
@@ -479,7 +483,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
     if (confirm == true) {
       try {
         final response = await http.delete(
-            Uri.parse('http://192.168.1.4:5010/api/pet/${widget.petId}'));
+            Uri.parse('http://10.10.11.54:5010/api/pet/${widget.petId}'));
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {
