@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FacilityServiceApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,6 +21,8 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                     camera_type = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     camera_code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     camera_status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    rtspurl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    camera_address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     isDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -200,8 +202,8 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                 columns: new[] { "serviceType_id", "createAt", "description", "isDeleted", "type_name", "updateAt" },
                 values: new object[,]
                 {
-                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4912), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4923) },
-                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4927), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4928) }
+                    { new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"), new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6450), "Medical services like vaccinations,...", false, "Medical", new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6461) },
+                    { new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"), new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6464), "Spa services like grooming,...", false, "Spa", new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6464) }
                 });
 
             migrationBuilder.CreateIndex(

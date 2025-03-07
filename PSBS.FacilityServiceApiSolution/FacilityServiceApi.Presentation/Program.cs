@@ -21,28 +21,41 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
-
+builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    options.SuppressModelStateInvalidFilter = true; // T?t t? ??ng x? lý l?i 400
+    options.SuppressModelStateInvalidFilter = true; 
 });
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5023); // Any IP with 5023
+    options.ListenAnyIP(5023); 
 });
 
 var app = builder.Build();
-
+var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+var ffmpegProcess = ffmpegService.StartFfmpegConversion();
+var hlsFileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/hls"));
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
-
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = hlsFileProvider,
+    RequestPath = "/hls",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/vnd.apple.mpegurl",
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+    }
+});
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -51,11 +64,13 @@ else
 {
     app.UseExceptionHandler("/error");
 }
-
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowAllOrigins");
-app.UseHttpsRedirection();
+app.UseCors(policy => policy
+    .AllowAnyOrigin()  
+    .AllowAnyMethod()
+    .AllowAnyHeader()); app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

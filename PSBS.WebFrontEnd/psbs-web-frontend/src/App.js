@@ -75,7 +75,7 @@ import PetDiaryListPage from "./pages/customers/Diary/PetDiaryListPage";
 import PetHealthBookList from "./pages/admins/pethealthbook/PetHealthBookList";
 import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetail";
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
-
+import Camera from "./pages/customers/camera/Camera";
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
 
@@ -229,6 +229,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/camera">
+            <Route index element={<Camera />} /> 
+          </Route>
           {/* Các route khác */}
           <Route path="/medicines">
             <Route index element={<List />} />
