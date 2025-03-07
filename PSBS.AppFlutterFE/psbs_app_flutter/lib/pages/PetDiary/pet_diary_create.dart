@@ -179,40 +179,43 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Create Pet Diary')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            QuillSimpleToolbar(
-              controller: _controller,
-              config: QuillSimpleToolbarConfig(
-                embedButtons: FlutterQuillEmbeds.toolbarButtons(
-                    cameraButtonOptions: QuillToolbarCameraButtonOptions(
-                        afterButtonPressed: () async {
-                  await _onImageButtonPressed(ImageSource.gallery,
-                      context: context);
-                })),
-              ),
+        appBar: AppBar(title: Text('Create Pet Diary')),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                QuillSimpleToolbar(
+                  controller: _controller,
+                  config: QuillSimpleToolbarConfig(
+                    embedButtons: FlutterQuillEmbeds.toolbarButtons(
+                        cameraButtonOptions: QuillToolbarCameraButtonOptions(
+                            afterButtonPressed: () async {
+                      await _onImageButtonPressed(ImageSource.gallery,
+                          context: context);
+                    })),
+                  ),
+                ),
+                Container(
+                  height: 400,
+                  child: QuillEditor.basic(
+                    controller: _controller,
+                    config: QuillEditorConfig(
+                        embedBuilders: FlutterQuillEmbeds.editorBuilders()),
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: isLoading ? null : _saveDiaryEntry,
+                  child: isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text('Save'),
+                ),
+              ],
             ),
-            Expanded(
-              child: QuillEditor.basic(
-                controller: _controller,
-                config: QuillEditorConfig(
-                    embedBuilders: FlutterQuillEmbeds.editorBuilders()),
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isLoading ? null : _saveDiaryEntry,
-              child: isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text('Save'),
-            ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 
   @override

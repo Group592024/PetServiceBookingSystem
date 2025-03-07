@@ -24,6 +24,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   if (userRole === null) {
     return <Navigate to="/login" replace />;
   } else if (!userRole || !allowedRoles.includes(userRole)) {
+    localStorage.setItem("currentRole", userRole);
     return <Navigate to="/unauthorized" replace />;
   }
 

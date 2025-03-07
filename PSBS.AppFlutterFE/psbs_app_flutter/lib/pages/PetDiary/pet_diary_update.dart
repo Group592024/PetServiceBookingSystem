@@ -27,31 +27,37 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
   quill.QuillController _controller = quill.QuillController.basic();
   bool isLoading = false;
   bool isFetching = true;
+  FocusNode _editorFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     print("Received diary: ${widget.diary}");
     _loadDiaryEntryFromData();
+
+    _controller.document.changes.listen((event) {
+      if (mounted) {
+        // Không gọi setState() trừ khi thực sự cần thiết
+        setState(() {}); // Chỉ cập nhật phần văn bản, không re-render ảnh
+        _editorFocusNode.requestFocus();
+      }
+    });
   }
 
   void _loadDiaryEntryFromData() async {
     String htmlContent = widget.diary['diary_Content'] ?? '';
 
+    final cursorPosition = _controller.selection;
+
     // Chuyển đổi HTML -> Delta JSON
     List<dynamic> deltaJson = await convertHtmlToDelta(htmlContent);
-    quill.QuillController newController = quill.QuillController(
-      document: quill.Document.fromJson(deltaJson),
-      selection: const TextSelection.collapsed(offset: 0),
-    );
-
     setState(() {
-      _controller = newController;
+      _controller.document = quill.Document.fromJson(deltaJson);
+      _controller.updateSelection(cursorPosition, quill.ChangeSource.local);
       isFetching = false;
     });
   }
 
-  /// 🔹 **Chuyển đổi HTML -> Delta JSON**
   Future<List<dynamic>> convertHtmlToDelta(String html) async {
     dom.Document document = htmlParser.parse(html);
     List<dynamic> deltaOps = [];
@@ -59,31 +65,18 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     for (var element in document.body!.nodes) {
       if (element is dom.Element) {
         if (element.localName == "p") {
-          if (element.children.any((child) => child.localName == "img")) {
-            for (var child in element.children) {
-              if (child.localName == "img") {
-                String? imageUrl = child.attributes['src'];
-                if (imageUrl != null && imageUrl.startsWith("data:image")) {
-                  deltaOps.add({
-                    "insert": {"image": imageUrl}
-                  }); // ✅ Embed ảnh đúng cách
-                  deltaOps.add({"insert": "\n"}); // ✅ Xuống dòng sau ảnh
-                }
+          for (var child in element.nodes) {
+            if (child is dom.Text) {
+              String text = child.text.trim();
+              if (text.isNotEmpty) {
+                deltaOps.add({"insert": "$text\n"});
               }
+            } else if (child is dom.Element) {
+              deltaOps.addAll(_parseElement(child));
             }
-          } else {
-            deltaOps.add({"insert": "${element.text}\n"});
-          }
-        } else if (element.localName == "img") {
-          String? imageUrl = element.attributes['src'];
-          if (imageUrl != null && imageUrl.startsWith("data:image")) {
-            deltaOps.add({
-              "insert": {"image": imageUrl}
-            }); // ✅ Chèn ảnh đúng cách
-            deltaOps.add({"insert": "\n"});
           }
         } else {
-          deltaOps.add({"insert": element.text});
+          deltaOps.addAll(_parseElement(element));
         }
       } else if (element is dom.Text) {
         deltaOps.add({"insert": element.text});
@@ -93,20 +86,115 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     return deltaOps;
   }
 
-  // Hàm nén ảnh trước khi encode base64
+// Hàm xử lý từng thẻ HTML để bảo toàn format
+  List<Map<String, dynamic>> _parseElement(dom.Element element) {
+    List<Map<String, dynamic>> ops = [];
+    String text = element.text.trim();
+
+    if (text.isNotEmpty) {
+      Map<String, dynamic> attributes = {};
+
+      // Kiểm tra kiểu định dạng
+      if (element.localName == "b" || element.localName == "strong") {
+        attributes["bold"] = true;
+      }
+      if (element.localName == "i" || element.localName == "em") {
+        attributes["italic"] = true;
+      }
+      if (element.localName == "u") {
+        attributes["underline"] = true;
+      }
+      if (element.localName == "s" || element.localName == "del") {
+        attributes["strike"] = true;
+      }
+      if (element.localName == "sup") {
+        attributes["script"] = "super";
+      }
+      if (element.localName == "sub") {
+        attributes["script"] = "sub";
+      }
+
+      // Kiểm tra heading
+      if (element.localName == "h1") {
+        attributes["header"] = 1;
+      } else if (element.localName == "h2") {
+        attributes["header"] = 2;
+      } else if (element.localName == "h3") {
+        attributes["header"] = 3;
+      }
+
+      // Kiểm tra blockquote
+      if (element.localName == "blockquote") {
+        attributes["blockquote"] = true;
+      }
+
+      // Kiểm tra code block
+      if (element.localName == "code") {
+        attributes["code"] = true;
+      }
+
+      // Kiểm tra danh sách (ul/ol)
+      if (element.localName == "li") {
+        dom.Element? parent = element.parent;
+        if (parent != null) {
+          if (parent.localName == "ul") {
+            attributes["list"] = "bullet";
+          } else if (parent.localName == "ol") {
+            attributes["list"] = "ordered";
+          }
+        }
+      }
+
+      // Kiểm tra link
+      if (element.localName == "a") {
+        String? href = element.attributes['href'];
+        if (href != null && href.isNotEmpty) {
+          attributes["link"] = href;
+        }
+      }
+
+      // Kiểm tra căn chỉnh (text-align)
+      String? style = element.attributes['style'];
+      if (style != null) {
+        if (style.contains("text-align: center")) {
+          attributes["align"] = "center";
+        } else if (style.contains("text-align: right")) {
+          attributes["align"] = "right";
+        }
+      }
+
+      // Nếu có định dạng, thêm vào Delta JSON
+      if (attributes.isNotEmpty) {
+        ops.add({"insert": text, "attributes": attributes});
+      } else {
+        ops.add({"insert": text});
+      }
+    }
+
+    // Xử lý hình ảnh
+    if (element.localName == "img") {
+      String? imageUrl = element.attributes['src'];
+      if (imageUrl != null && imageUrl.startsWith("data:image")) {
+        ops.add({
+          "insert": {"image": imageUrl}
+        });
+        ops.add({"insert": "\n"});
+      }
+    }
+
+    return ops;
+  }
+
   Future<String> compressAndEncodeBase64(List<int> imageBytes) async {
     img.Image image = img.decodeImage(Uint8List.fromList(imageBytes))!;
 
-    // Resize ảnh nhỏ hơn (ví dụ: chiều rộng 800px)
     img.Image resizedImage = img.copyResize(image, width: 600);
 
-    // Giảm chất lượng ảnh (ví dụ: 75%)
     List<int> compressedBytes = img.encodeJpg(resizedImage, quality: 60);
 
     return base64Encode(compressedBytes);
   }
 
-  /// 🔹 **Chuyển đổi Delta JSON -> HTML**
   Future<String> convertDeltaToHtml(String deltaJsonString) async {
     List<dynamic> deltaJson = jsonDecode(deltaJsonString);
     List<Map<String, dynamic>> deltaList =
@@ -118,27 +206,38 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
         if (insert.containsKey("image")) {
           String imagePath = insert["image"];
 
-          // Chuyển ảnh sang base64 nếu là đường dẫn cục bộ
+          // 🔹 Nếu là ảnh cục bộ thì chuyển sang base64
           if (imagePath.startsWith("/data/") ||
               imagePath.startsWith("file://")) {
             File imageFile = File(imagePath);
             if (await imageFile.exists()) {
               List<int> imageBytes = await imageFile.readAsBytes();
 
-              // Nén ảnh trước khi encode base64
+              // 🔹 Nén ảnh trước khi encode base64
               String base64Image = await compressAndEncodeBase64(imageBytes);
 
-              insert["image"] =
-                  "data:image/jpeg;base64,$base64Image"; // Base64 format
+              insert["image"] = "data:image/jpeg;base64,$base64Image";
             }
           }
         }
       }
     }
 
-    final converter =
-        QuillDeltaToHtmlConverter(deltaList, ConverterOptions.forEmail());
-    return converter.convert();
+    // 🔹 Chuyển đổi Delta sang HTML
+    final converter = QuillDeltaToHtmlConverter(
+      deltaList,
+      ConverterOptions(), // ✅ Sửa lỗi tham số
+    );
+
+    String html = converter.convert();
+
+    // 🔹 Đảm bảo ảnh luôn xuống dòng đúng cách
+    html = html.replaceAllMapped(
+      RegExp(r'(<img[^>]+>)'),
+      (match) => '${match.group(1)}<br>',
+    );
+
+    return html;
   }
 
   /// 🔹 **Hàm cập nhật nhật ký thú cưng**
@@ -170,7 +269,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pet Diary Updated Successfully!')),
         );
-        Navigator.pop(context, true);
+        Navigator.of(context).pop(true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -239,48 +338,56 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Update Pet Diary')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: isFetching
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                children: [
-                  quill.QuillSimpleToolbar(
-                    controller: _controller,
-                    config: quill.QuillSimpleToolbarConfig(
-                      embedButtons: FlutterQuillEmbeds.toolbarButtons(
-                        cameraButtonOptions: QuillToolbarCameraButtonOptions(
-                          afterButtonPressed: () async {
-                            await _onImageButtonPressed(ImageSource.gallery,
-                                context: context);
-                          },
+        appBar: AppBar(title: const Text('Update Pet Diary')),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: isFetching
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    children: [
+                      quill.QuillSimpleToolbar(
+                        controller: _controller,
+                        config: quill.QuillSimpleToolbarConfig(
+                          embedButtons: FlutterQuillEmbeds.toolbarButtons(
+                            cameraButtonOptions:
+                                QuillToolbarCameraButtonOptions(
+                              afterButtonPressed: () async {
+                                await _onImageButtonPressed(ImageSource.gallery,
+                                    context: context);
+                              },
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+                      Container(
+                        height: 400,
+                        child: quill.QuillEditor.basic(
+                          controller: _controller,
+                          config: quill.QuillEditorConfig(
+                            embedBuilders: FlutterQuillEmbeds
+                                .editorBuilders(), // Giữ nguyên ảnh
+                          ),
+                          focusNode: _editorFocusNode,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      ElevatedButton(
+                        onPressed: isLoading ? null : _updateDiaryEntry,
+                        child: isLoading
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text('Update'),
+                      ),
+                    ],
                   ),
-                  Expanded(
-                    child: quill.QuillEditor.basic(
-                      controller: _controller,
-                      config: quill.QuillEditorConfig(
-                          embedBuilders: FlutterQuillEmbeds.editorBuilders()),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: isLoading ? null : _updateDiaryEntry,
-                    child: isLoading
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Update'),
-                  ),
-                ],
-              ),
-      ),
-    );
+          ),
+        ));
   }
 
   @override
   void dispose() {
+    _editorFocusNode.dispose();
     _controller.dispose();
     super.dispose();
   }
