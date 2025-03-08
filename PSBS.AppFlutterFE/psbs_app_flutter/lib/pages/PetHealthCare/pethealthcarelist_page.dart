@@ -6,6 +6,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'pethealthcaredetail_page.dart';
 
 class PetHealthBookList extends StatefulWidget {
+  // Nếu petId được truyền từ trang petdetails, chỉ hiển thị pet đó
+  final String? petId;
+  PetHealthBookList({this.petId});
+
   @override
   _PetHealthBookListState createState() => _PetHealthBookListState();
 }
@@ -14,6 +18,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
   List mergedPets = [];
   String searchQuery = "";
   String? accountId;
+
   @override
   void initState() {
     super.initState();
@@ -67,7 +72,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
         bookingServiceItemsData = bookingServiceItemsData['data'] ?? [];
       }
       List accountPets =
-          petsData.where((p) => p['accountId'] == accountId).toList();
+          (petsData as List).where((p) => p['accountId'] == accountId).toList();
       List result = accountPets.map((pet) {
         List healthForThisPet = (petHealthData as List).where((health) {
           var bsi = bookingServiceItemsData.firstWhere(
@@ -95,6 +100,8 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
           };
         }).toList();
         return {
+          // Thêm petId để sau này kiểm tra
+          'petId': pet['petId'],
           'petName': pet['petName'] ?? "Unknown",
           'dateOfBirth': pet['dateOfBirth'] ?? "",
           'petImage': pet['petImage'] ?? "",
@@ -120,17 +127,24 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
   @override
   Widget build(BuildContext context) {
-    List filteredPets = mergedPets.where((record) {
-      String petName = record['petName'].toString().toLowerCase();
-      String healthInfo = "";
-      if (record['healthBooks'] is List) {
-        healthInfo = (record['healthBooks'] as List)
-            .map((h) => "${h['medicineNames']} ${h['performBy']}")
-            .join(" ")
-            .toLowerCase();
-      }
-      return petName.contains(searchQuery) || healthInfo.contains(searchQuery);
-    }).toList();
+    // Nếu có petId truyền vào, chỉ lọc pet đó
+    List filteredPets = widget.petId != null && widget.petId!.isNotEmpty
+        ? mergedPets
+            .where((record) =>
+                record['petId'].toString() == widget.petId.toString())
+            .toList()
+        : mergedPets.where((record) {
+            String petName = record['petName'].toString().toLowerCase();
+            String healthInfo = "";
+            if (record['healthBooks'] is List) {
+              healthInfo = (record['healthBooks'] as List)
+                  .map((h) => "${h['medicineNames']} ${h['performBy']}")
+                  .join(" ")
+                  .toLowerCase();
+            }
+            return petName.contains(searchQuery) ||
+                healthInfo.contains(searchQuery);
+          }).toList();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -140,6 +154,22 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
       ),
       body: Column(
         children: [
+          // Nếu không có petId truyền vào, hiển thị ô tìm kiếm
+          if (widget.petId == null || widget.petId!.isEmpty)
+            Padding(
+              padding: EdgeInsets.all(8.0),
+              child: TextField(
+                decoration: InputDecoration(
+                  labelText: "Search Pets...",
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
+              ),
+            ),
           Expanded(
             child: filteredPets.isEmpty
                 ? Center(child: Text("No Health Books Found"))

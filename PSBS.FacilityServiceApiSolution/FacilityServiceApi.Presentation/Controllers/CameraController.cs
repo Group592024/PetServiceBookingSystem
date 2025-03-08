@@ -23,22 +23,19 @@ namespace FacilityServiceApi.Presentation.Controllers
             if (camera == null)
                 return NotFound(new { message = "Camera not found" });
 
-            Console.WriteLine($"🟢 Camera Found: {camera.cameraCode}, Type: {camera.cameraType}, Address: {camera.cameraAddress}");
+            Console.WriteLine($"Camera Found: {camera.cameraCode}, Type: {camera.cameraType}, Address: {camera.cameraAddress}");
 
             if (camera.cameraType == "IP")
             {
                 if (string.IsNullOrEmpty(camera.cameraAddress))
                 {
-                    Console.WriteLine("❌ Camera address is null or empty");
                     return BadRequest(new { message = "Camera address not found" });
                 }
 
                 var hlsUrl = "http://localhost:5023/hls/output.m3u8";
-                Console.WriteLine($"✅ Returning HLS URL: {hlsUrl}");
                 return Ok(new { streamUrl = hlsUrl });
             }
 
-            Console.WriteLine($"🔄 Returning RTSP URL: {camera.rtspUrl}");
             return Ok(new { streamUrl = camera.rtspUrl });
         }
 

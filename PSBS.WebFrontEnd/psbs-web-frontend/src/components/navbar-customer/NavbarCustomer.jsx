@@ -114,6 +114,12 @@ const NavbarCustomer = () => {
             </Link>
           </li>
           <li>
+            <Link to="/camera">
+              <i className="bx bx-camera"></i>
+              Camera
+            </Link>
+          </li>
+          <li>
             <Link to="/customer/pet">
               <i className="bx bxs-dog"></i>
               Pet

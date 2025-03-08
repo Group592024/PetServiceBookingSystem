@@ -21,7 +21,11 @@ const HLSPlayer = ({ src }) => {
   }, [src]);
 
   return (
-    <video ref={videoRef} controls style={{ width: "100%", height: "auto" }} />
+    <video
+    ref={videoRef}
+    style={{ width: "100%", height: "auto" }}
+    controls={false}
+  />
   );
 };
 

@@ -314,8 +314,10 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                         () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      list.PetHealthBookList()),
+                                builder: (context) => list.PetHealthBookList(
+                                  petId: pet!['petId'],
+                                ),
+                              ),
                             )),
                   ),
                 ],

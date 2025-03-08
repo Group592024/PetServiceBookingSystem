@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { IconButton, TextField } from "@mui/material";
+import { IconButton } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import Swal from "sweetalert2";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import moment from "moment";
 
 const PetHealthBookListCus = () => {
+  const { petId: routePetId } = useParams(); // Lấy petId từ URL (ví dụ: /pethealthbooklist/123)
   const [userPets, setUserPets] = useState([]); 
   const [petHealthBooks, setPetHealthBooks] = useState([]); 
   const [bookingServiceItemToPetMap, setBookingServiceItemToPetMap] = useState({}); 
   const [medicines, setMedicines] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+
   const fetchPetHealthBooks = useCallback(async () => {
     try {
       const accountId = sessionStorage.getItem("accountId");
@@ -37,10 +39,14 @@ const PetHealthBookListCus = () => {
       const bookingServiceItemsArray = Array.isArray(bookingServiceItemsData.data)
         ? bookingServiceItemsData.data
         : [];
+      
+      // Lọc pet theo accountId
       const filteredUserPets = petsArray.filter((pet) => pet.accountId === accountId);
       setUserPets(filteredUserPets);
       setPetHealthBooks(petHealthArray);
       setMedicines(medicinesArray);
+      
+      // Tạo mapping: bookingServiceItemId -> petId
       const mapping = {};
       bookingServiceItemsArray.forEach((item) => {
         if (item.bookingServiceItemId && item.petId) {
@@ -48,17 +54,20 @@ const PetHealthBookListCus = () => {
         }
       });
       setBookingServiceItemToPetMap(mapping);
-
     } catch (error) {
       Swal.fire("Error", error.message, "error");
     }
   }, []);
-  useEffect(() => {
-  }, [bookingServiceItemToPetMap]);
+
   useEffect(() => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
+
+  // Nếu có petId từ route thì chỉ hiển thị pet đó, nếu không thì lọc theo search query
   const filteredUserPets = userPets.filter((pet) => {
+    if (routePetId) {
+      return pet.petId.toString() === routePetId;
+    }
     const query = searchQuery.toLowerCase();
     return !searchQuery || pet.petName.toLowerCase().includes(query);
   });
@@ -73,28 +82,31 @@ const PetHealthBookListCus = () => {
     const altDate = moment(dateString, "YYYY-MM-DD", true);
     return altDate.isValid() ? altDate.format("DD/MM/YYYY") : "Invalid Date";
   };
+
   return (
     <div className="flex h-screen bg-white">
       <div className="w-full">
         <NavbarCustomer />
         <main className="flex-1 p-4">
           <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
-          {/* Search input */}
-          {/* <div className="mb-4">
-            <input
-              type="search"
-              placeholder="Search Pets..."
-              className="p-2 border border-gray-300 rounded"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div> */}
+          {/* Nếu không truyền petId, có thể hiển thị search input */}
+          {!routePetId && (
+            <div className="mb-4">
+              <input
+                type="search"
+                placeholder="Search Pets..."
+                className="p-2 border border-gray-300 rounded"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+          )}
 
           {/* Danh sách Pet, mỗi pet + Health Book trong 1 row */}
           <div className="flex flex-col gap-6">
             {filteredUserPets.length > 0 ? (
               filteredUserPets.map((pet) => {
-                // Tìm Health Book của pet
+                // Lọc Health Book theo petId
                 const petHealthRecords = petHealthBooks.filter(
                   (health) => bookingServiceItemToPetMap[health.bookingServiceItemId] === pet.petId
                 );
@@ -142,7 +154,7 @@ const PetHealthBookListCus = () => {
                               </div>
                               <div className="flex items-center">
                                 <Link to={`/detailcus/${health.healthBookId}`}>
-                                  <IconButton
+                                <IconButton
                                     sx={{
                                       width: 24,
                                       height: 24,
