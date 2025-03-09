@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace VoucherApi.Infrastructure.Migrations
+namespace VoucherApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class _01 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -98,9 +98,9 @@ namespace VoucherApi.Infrastructure.Migrations
                 columns: new[] { "redeem_status_id", "redeem_status_name" },
                 values: new object[,]
                 {
-                    { new Guid("1509e4e6-e1ec-42a4-9301-05131dd498e4"), "Just Redeemed" },
-                    { new Guid("33b84495-c2a6-4b3e-98ca-f13d9c150946"), "Picked up at Store" },
-                    { new Guid("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"), "Canceled Redeem" }
+                    { new Guid("0766fa35-99e0-47fc-8bfa-484d9da03d32"), "Picked up at Store" },
+                    { new Guid("27333902-7c5d-4c13-99eb-440424eea22a"), "Canceled Redeem" },
+                    { new Guid("81fc509c-9788-4775-a3aa-51abbb7a6f7b"), "Just Redeemed" }
                 });
 
             migrationBuilder.CreateIndex(

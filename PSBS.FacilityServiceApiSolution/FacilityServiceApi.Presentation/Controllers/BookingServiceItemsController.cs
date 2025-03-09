@@ -3,6 +3,7 @@ using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.Responses;
@@ -13,6 +14,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class BookingServiceItemsController : ControllerBase
     {
         private readonly FacilityServiceDbContext _context;
@@ -24,6 +26,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
         // GET: api/<BookingServiceItemsController>
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaff")]
         public IEnumerable<string> Get()
         {
             return new string[] { "value1", "value2" };
@@ -31,6 +34,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // GET api/<BookingServiceItemsController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<BookingServiceItem>> GetBookingItemByBookingId(Guid id)
         {
             var bookingItems = await _context.bookingServiceItems.Where(i => i.BookingId == id).ToListAsync();
@@ -47,6 +51,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<BookingServiceItemsController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateServiceItem([FromBody] CreateBookingServiceItemDTO createBookingServiceItem)
         {
 
@@ -57,12 +62,14 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // PUT api/<BookingServiceItemsController>/5
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public void Put(int id, [FromBody] string value)
         {
         }
 
         // DELETE api/<BookingServiceItemsController>/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public void Delete(int id)
         {
         }

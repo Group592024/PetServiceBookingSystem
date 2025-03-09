@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.Interfaces;
 using PetApi.Presentation.Service;
 using PSPS.SharedLibrary.Responses;
@@ -8,6 +9,7 @@ namespace PetApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportPetController : ControllerBase
     {
 
@@ -21,6 +23,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Dictionary<string, int>>> getPetCount(Guid id)
         {
             var response = await _facilityApiClient.GetPetCount(id);

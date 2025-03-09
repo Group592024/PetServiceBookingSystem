@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
@@ -12,6 +13,7 @@ namespace PSPS.AccountAPI.Presentation.Controllers
     {
 
         [HttpGet("countStaff")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetAllStaff()
         {
             var result = await account.GetAllStaffAccount();
@@ -22,6 +24,7 @@ namespace PSPS.AccountAPI.Presentation.Controllers
         }
 
         [HttpGet("countCustomer")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetAllCustomers()
         {
             var result = await account.GetAllCustomerAccount();

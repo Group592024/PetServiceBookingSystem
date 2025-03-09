@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
@@ -8,6 +9,7 @@ namespace PetApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PetDiaryController : ControllerBase
     {
         private readonly IPetDiary _diary;
@@ -20,6 +22,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("diaries/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId(Guid id, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 4)
         {
             var pet = await _pet.GetByIdAsync(id);
@@ -54,6 +57,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreatePetDiary([FromBody] CreatePetDiaryDTO pet)
         {
             if (!ModelState.IsValid)
@@ -66,6 +70,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> UpdatePetDiary([FromRoute] Guid id, [FromBody] UpdatePetDiaryDTO pet)
         {
             Console.WriteLine("pet " + pet);
@@ -101,6 +106,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> DeletePetDiary(Guid id)
         {
             var existingPetDiary = await _diary.GetByIdAsync(id);

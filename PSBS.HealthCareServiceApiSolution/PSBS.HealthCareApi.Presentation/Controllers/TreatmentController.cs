@@ -8,11 +8,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PSBS.HealthCareApi.Application.DTOs.Conversions.PSBS.HealthCareApi.Application.DTOs.Conversions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PSBS.HealthCareApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TreatmentController : ControllerBase
     {
         private readonly ITreatment _treatmentService;
@@ -23,6 +25,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<TreatmentDTO>>> GetTreatments()
         {
             var treatments = await _treatmentService.GetAllAsync();
@@ -43,6 +46,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<TreatmentDTO>> GetTreatmentById(Guid id)
         {
             var treatment = await _treatmentService.GetByIdAsync(id);
@@ -65,6 +69,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateTreatment([FromBody] TreatmentDTO creatingTreatment)
         {
             if (!ModelState.IsValid)
@@ -79,6 +84,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateTreatment([FromBody] TreatmentDTO updatingTreatment)
         {
             if (!ModelState.IsValid)
@@ -93,6 +99,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteTreatment(Guid id)
         {
             var existingTreatment = await _treatmentService.GetByIdAsync(id);
@@ -107,6 +114,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpGet("available")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<TreatmentDTO>>> GetAvailableTreatments()
         {
             var treatments = await _treatmentService.ListAvailableTreatmentAsync();
