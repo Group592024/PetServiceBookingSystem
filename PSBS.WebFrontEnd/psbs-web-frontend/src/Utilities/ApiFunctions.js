@@ -1,15 +1,44 @@
 import axios from "axios";
 import Swal from "sweetalert2";
 
+const API_BASE_URL = 'http://localhost:5050';
 
-const API_BASE_URL = 'http://localhost:5050'; // Replace with your actual API URL
- // Replace with your actual API URL
+// Helper function to get token from sessionStorage
+const getToken = () => {
+  return sessionStorage.getItem('token');
+};
 
+// Helper function to handle common error cases
+const handleCommonErrors = (error) => {
+  if (error.response) {
+    Swal.fire({
+      title: "Error!",
+      text: error.response.data.message || "An error occurred while making the request.",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  } else if (error.request) {
+    Swal.fire({
+      title: "Error!",
+      text: "No response received from the server. Please check your network connection.",
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  } else {
+    Swal.fire({
+      title: "Error!",
+      text: `Unexpected error: ${error.message}`,
+      icon: "error",
+      confirmButtonText: "OK",
+    });
+  }
+  throw error;
+};
 
-// Helper function to handle the response
-const handleResponse = (response) => {
+// Common function to handle response with token
+const handleResponseWithToken = (response) => {
   if (response.data.flag) {
-    return response.data; // Return data if flag is true
+    return response.data;
   } else {
     Swal.fire({
       title: "Error!",
@@ -20,148 +49,62 @@ const handleResponse = (response) => {
   }
 };
 
-// GET request
+// GET request with token
 export const getData = async (endpoint) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/${endpoint}`);
-    return handleResponse(response);
+    const response = await axios.get(`${API_BASE_URL}/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    return handleResponseWithToken(response);
   } catch (error) {
     console.error("GET request error:", error);
-    throw error;
+    handleCommonErrors(error);
   }
 };
 
-// POST request
+// POST request with token
 export const postData = async (endpoint, payload) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/${endpoint}`, payload);
-    if (!response.data.flag) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          response.data.message || "An error occurred while creating the data.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return response.data;
-    }
-    return response.data;
+    const response = await axios.post(`${API_BASE_URL}/${endpoint}`, payload, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    return handleResponseWithToken(response);
   } catch (error) {
     console.error("POST request error:", error);
-    if (error.response) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          error.response.data.message ||
-          "An error occurred while making the request.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else if (error.request) {
-      Swal.fire({
-        title: "Error!",
-        text: "No response received from the server. Please check your network connection.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else {
-      Swal.fire({
-        title: "Error!",
-        text: `Unexpected error: ${error.message}`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-    throw error;
+    handleCommonErrors(error);
   }
 };
 
-// PUT request
+// PUT request with token
 export const updateData = async (endpoint, payload) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/${endpoint}`, payload);
-    if (!response.data.flag) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          response.data.message || "An error occurred while updating the data.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return response.data;
-    }
-    return response.data;
+    const response = await axios.put(`${API_BASE_URL}/${endpoint}`, payload, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    return handleResponseWithToken(response);
   } catch (error) {
     console.error("PUT request error:", error);
-    if (error.response) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          error.response.data.message ||
-          "An error occurred while making the request.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else if (error.request) {
-      Swal.fire({
-        title: "Error!",
-        text: "No response received from the server. Please check your network connection.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else {
-      Swal.fire({
-        title: "Error!",
-        text: `Unexpected error: ${error.message}`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-    throw error;
+    handleCommonErrors(error);
   }
 };
 
-// DELETE request
+// DELETE request with token
 export const deleteData = async (endpoint) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/${endpoint}`);
-    if (!response.data.flag) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          response.data.message || "An error occurred while deleting the data.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return response.data;
-    }
-    return response.data;
+    const response = await axios.delete(`${API_BASE_URL}/${endpoint}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    return handleResponseWithToken(response);
   } catch (error) {
     console.error("DELETE request error:", error);
-    if (error.response) {
-      Swal.fire({
-        title: "Error!",
-        text:
-          error.response.data.message ||
-          "An error occurred while making the request.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else if (error.request) {
-      Swal.fire({
-        title: "Error!",
-        text: "No response received from the server. Please check your network connection.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    } else {
-      Swal.fire({
-        title: "Error!",
-        text: `Unexpected error: ${error.message}`,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    }
-    throw error;
+    handleCommonErrors(error);
   }
 };
