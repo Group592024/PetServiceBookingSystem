@@ -9,11 +9,11 @@ using VoucherApi.Infrastructure.Data;
 
 #nullable disable
 
-namespace VoucherApi.Infrastructure.Migrations
+namespace VoucherApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(RewardServiceDBContext))]
-    [Migration("20250301072734_Init")]
-    partial class Init
+    [Migration("20250305094858_01")]
+    partial class _01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,17 +121,17 @@ namespace VoucherApi.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            ReddeemStautsId = new Guid("1509e4e6-e1ec-42a4-9301-05131dd498e4"),
+                            ReddeemStautsId = new Guid("81fc509c-9788-4775-a3aa-51abbb7a6f7b"),
                             RedeemName = "Just Redeemed"
                         },
                         new
                         {
-                            ReddeemStautsId = new Guid("33b84495-c2a6-4b3e-98ca-f13d9c150946"),
+                            ReddeemStautsId = new Guid("0766fa35-99e0-47fc-8bfa-484d9da03d32"),
                             RedeemName = "Picked up at Store"
                         },
                         new
                         {
-                            ReddeemStautsId = new Guid("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"),
+                            ReddeemStautsId = new Guid("27333902-7c5d-4c13-99eb-440424eea22a"),
                             RedeemName = "Canceled Redeem"
                         });
                 });

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PSBS.HealthCareApi.Application.DTOs;
 using PSBS.HealthCareApi.Application.DTOs.Conversions;
@@ -16,6 +17,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PetHealthBookController : ControllerBase
     {
         private readonly IPetHealthBook petHealthBookInterface;
@@ -27,6 +29,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // GET api/petHealthBooks
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetHealthBookDTO>>> GetPetHealthBooks()
         {
             try
@@ -49,6 +52,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // GET api/petHealthBooks/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<PetHealthBookDTO>> GetPetHealthBooksById(Guid id)
         {
             try
@@ -71,6 +75,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // POST api/petHealthBooks
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreatePetHealthBooks([FromBody] PetHealthBookDTO petHealthBookDTO)
         {
             try
@@ -105,6 +110,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // PUT api/petHealthBooks/5
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdatePetHealthBooks(Guid id, [FromBody] PetHealthBookDTO petHealthBook)
         {
             try
@@ -125,6 +131,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // DELETE api/petHealthBooks/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeletePetHealthBooks(Guid id)
         {
             try

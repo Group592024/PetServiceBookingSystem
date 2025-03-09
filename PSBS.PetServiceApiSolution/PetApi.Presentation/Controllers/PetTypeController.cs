@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace PetApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PetTypeController : ControllerBase
     {
         private readonly IPetType petInterface;
@@ -21,6 +23,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy ="AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPetTypes()
         {
             var pets = await petInterface.GetAllAsync();
@@ -32,6 +35,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<PetTypeDTO>> GetPetType(Guid id)
         {
 
@@ -47,6 +51,7 @@ namespace PetApi.Presentation.Controllers
 
 
         [HttpPost("upload-image/{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UploadImage(Guid id, IFormFile imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -69,6 +74,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreatePetType([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
@@ -88,6 +94,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdatePetType([FromRoute] Guid id, [FromForm] UpdatePetTypeDTO pet, IFormFile? imageFile = null)
         {
             Console.WriteLine("pet " + pet);
@@ -185,6 +192,7 @@ namespace PetApi.Presentation.Controllers
 
 
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeletePetType(Guid id)
         {
             var existingPetType = await petInterface.GetByIdAsync(id);
@@ -214,6 +222,7 @@ namespace PetApi.Presentation.Controllers
             }
         }
         [HttpGet("available")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetAvailablePetTypes()
         {
             var pettypes = await petInterface.ListAvailablePetTypeAsync();
