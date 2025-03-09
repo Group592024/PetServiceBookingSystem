@@ -36,8 +36,11 @@ namespace VoucherApi.Infrastructure.Repositories
             {
               
                 gift.GiftQuantity--; // Decrease gift quantity by 1
+               if(gift.GiftCode != null)
+                {
+                    redeemGiftHistory.ReddeemStautsId = Guid.Parse("33b84495-c2a6-4b3e-98ca-f13d9c150946");
+                }
                 redeemGiftHistory.ReddeemStautsId = Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4");
-
                 // Add new redeem history and save changes
                 _context.RedeemGiftHistories.Add(redeemGiftHistory);
                 await _context.SaveChangesAsync();
@@ -55,6 +58,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 .Where(h => h.AccountId == accountId)
               .Include(r => r.RedeemStatus)
               .Include(s => s.Gift)
+                 .OrderByDescending(h => h.RedeemDate)
               .ToListAsync();
         }
 
@@ -63,6 +67,7 @@ namespace VoucherApi.Infrastructure.Repositories
             return await _context.RedeemGiftHistories
                  .Include(r => r.RedeemStatus)
                  .Include(s=> s.Gift)
+                    .OrderByDescending(h => h.RedeemDate)
                  .ToListAsync();
         }
 
