@@ -73,6 +73,8 @@ class RouteGenerator {
 
       case '/gifts':
         return MaterialPageRoute(builder: (_) => GiftListScreen());
+      case '/services':
+        return MaterialPageRoute(builder: (_) => const ServicePage());
       case '/redeem':
         return MaterialPageRoute(builder: (_) => RedeemHistoryPage());
       default:

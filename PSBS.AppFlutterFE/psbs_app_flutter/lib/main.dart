@@ -11,6 +11,9 @@ import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
@@ -33,6 +36,12 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/login', // Default startup page
       onGenerateRoute: RouteGenerator.generateRoute,
+      localizationsDelegates: [
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              FlutterQuillLocalizations.delegate,
+            ],
     );
   }
 }
