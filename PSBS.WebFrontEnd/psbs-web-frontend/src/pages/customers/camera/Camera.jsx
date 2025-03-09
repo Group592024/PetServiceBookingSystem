@@ -18,18 +18,25 @@ const Camera = () => {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:5023/api/Camera/stream/${cameraCode}`)
-      .then((res) => res.json())
+    fetch(`http://localhost:5023/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const error = await res.text();
+          throw new Error(error || 'Lỗi không xác định');
+        }
+        return res.json();
+      })
       .then((data) => {
         if (data.streamUrl) {
           setStreamUrl(data.streamUrl);
           setError(null);
         } else {
-          setError("Không tìm thấy luồng video");
+          throw new Error("Không tìm thấy luồng video");
         }
       })
-      .catch(() => setError("Lỗi khi lấy dữ liệu camera"))
+      .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+
   };
 
   return (
@@ -66,9 +73,10 @@ const Camera = () => {
             )}
             {!error && !loading && streamUrl && (
               <div className="relative border rounded-lg overflow-hidden shadow-md">
-                <HLSPlayer src={streamUrl} />
+                <HLSPlayer src={`${streamUrl}?t=${new Date().getTime()}`} />
               </div>
             )}
+
           </div>
         </div>
       </div>

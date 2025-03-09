@@ -36,7 +36,10 @@ builder.WebHost.ConfigureKestrel(options =>
 var app = builder.Build();
 var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 var ffmpegProcess = ffmpegService.StartFfmpegConversion();
-var hlsFileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/hls"));
+var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+
+
 
 app.UseStaticFiles(new StaticFileOptions
 {
@@ -51,11 +54,15 @@ app.UseStaticFiles(new StaticFileOptions
     DefaultContentType = "application/vnd.apple.mpegurl",
     OnPrepareResponse = ctx =>
     {
-        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-        ctx.Context.Response.Headers.Append("Access-Control-Allow-Methods", "GET, OPTIONS");
-        ctx.Context.Response.Headers.Append("Access-Control-Allow-Headers", "*");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*"); 
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+        ctx.Context.Response.Headers.Append("Expires", "0");
     }
 });
+
+
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();

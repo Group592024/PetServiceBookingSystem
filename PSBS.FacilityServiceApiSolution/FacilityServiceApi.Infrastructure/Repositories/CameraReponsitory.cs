@@ -37,26 +37,64 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         }
 
 
+        public async Task<Response> UpdateAsync(Camera entity)
+        {
+            try
+            {
+                var existingCamera = await context.Camera.FindAsync(entity.cameraId);
+                if (existingCamera == null)
+                    return new Response(false, "Camera not found");
 
+                existingCamera.cameraType = entity.cameraType;
+                existingCamera.cameraCode = entity.cameraCode;
+                existingCamera.cameraStatus = entity.cameraStatus;
+                existingCamera.rtspUrl = entity.rtspUrl;
+                existingCamera.cameraAddress = entity.cameraAddress;
+                existingCamera.isDeleted = entity.isDeleted;
+
+                context.Camera.Update(existingCamera);
+                await context.SaveChangesAsync();
+
+                return new Response(true, "Camera updated successfully") { Data = existingCamera };
+            }
+            catch (DbUpdateException dbEx)
+            {
+                return new Response(false, $"Database Error: {dbEx.InnerException?.Message}");
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"General Error: {ex.Message}");
+            }
+        }
 
         public async Task<Response> DeleteAsync(Camera entity)
         {
             try
             {
                 var camera = await context.Camera.FindAsync(entity.cameraId);
-                if (camera == null) return new Response(false, "Camera not found");
+                if (camera == null)
+                    return new Response(false, "Camera not found");
 
-                camera.isDeleted = true;
-                context.Update(camera);
-                await context.SaveChangesAsync();
-
-                return new Response(true, "Camera deleted successfully") { Data = camera };
+                if (!camera.isDeleted)
+                {
+                    camera.isDeleted = true;
+                    context.Camera.Update(camera);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Camera soft-deleted successfully") { Data = camera };
+                }
+                else
+                {
+                    context.Camera.Remove(camera);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Camera hard-deleted successfully") { Data = camera };
+                }
             }
             catch (Exception ex)
             {
                 return new Response(false, $"Error deleting camera: {ex.Message}");
             }
         }
+
 
 
 
@@ -78,9 +116,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             return await context.Camera.FirstOrDefaultAsync(c => c.cameraId == id);
         }
 
-        public Task<Response> UpdateAsync(Camera entity)
-        {
-            throw new NotImplementedException();
-        }
+        
     }
 }

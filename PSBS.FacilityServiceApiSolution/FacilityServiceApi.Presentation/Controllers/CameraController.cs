@@ -1,7 +1,9 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
+using FacilityServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PSPS.SharedLibrary.Responses;
 
 namespace FacilityServiceApi.Presentation.Controllers
 {
@@ -32,12 +34,14 @@ namespace FacilityServiceApi.Presentation.Controllers
                     return BadRequest(new { message = "Camera address not found" });
                 }
 
-                var hlsUrl = "http://localhost:5023/hls/output.m3u8";
+                // Tạm thời sử dụng file tạm nếu stream đang chạy live
+                var hlsUrl = $"http://localhost:5023/hls/output.m3u8?t={DateTime.UtcNow.Ticks}";
                 return Ok(new { streamUrl = hlsUrl });
             }
 
             return Ok(new { streamUrl = camera.rtspUrl });
         }
+
 
 
 
@@ -48,11 +52,25 @@ namespace FacilityServiceApi.Presentation.Controllers
             return response.Flag ? Ok(response) : BadRequest(response);
         }
 
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCamera(Guid id, [FromBody] Camera camera)
+        {
+            if (id != camera.cameraId)
+            {
+                return BadRequest(new Response(false, "Camera ID mismatch"));
+            }
+
+            var response = await _camera.UpdateAsync(camera);
+            return response.Flag ? Ok(response) : BadRequest(response);
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCamera(Guid id)
         {
             var camera = await _camera.GetByIdAsync(id);
-            if (camera == null) return NotFound(new { message = "Camera not found" });
+            if (camera == null)
+            {
+                return NotFound(new Response(false, "Camera not found"));
+            }
 
             var response = await _camera.DeleteAsync(camera);
             return response.Flag ? Ok(response) : BadRequest(response);

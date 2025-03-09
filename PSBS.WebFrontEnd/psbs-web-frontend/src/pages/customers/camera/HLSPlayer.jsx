@@ -1,31 +1,37 @@
-import React, { useRef, useEffect } from "react";
-import Hls from "hls.js";
+import React, { useEffect, useRef } from 'react';
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
 
 const HLSPlayer = ({ src }) => {
   const videoRef = useRef(null);
+  let player = useRef(null);
 
   useEffect(() => {
-    let hls;
-    if (Hls.isSupported()) {
-      hls = new Hls();
-      hls.loadSource(src);
-      hls.attachMedia(videoRef.current);
-    } else if (videoRef.current && videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = src;
+    if (videoRef.current) {
+      if (player.current) {
+        player.current.dispose(); // Xóa player cũ
+      }
+
+      player.current = videojs(videoRef.current, {
+        autoplay: true,
+        controls: true,
+        responsive: true,
+        fluid: true,
+        sources: [{ src, type: 'application/x-mpegURL' }],
+      });
     }
+
     return () => {
-      if (hls) {
-        hls.destroy();
+      if (player.current) {
+        player.current.dispose();
       }
     };
   }, [src]);
 
   return (
-    <video
-    ref={videoRef}
-    style={{ width: "100%", height: "auto" }}
-    controls={false}
-  />
+    <div>
+      <video ref={videoRef} className="video-js vjs-default-skin w-full h-full" />
+    </div>
   );
 };
 
