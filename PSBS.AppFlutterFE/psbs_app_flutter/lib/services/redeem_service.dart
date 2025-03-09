@@ -28,4 +28,27 @@ class RedeemService {
       throw Exception("Error fetching gifts: $e");
     }
   }
+  static Future<bool> cancelRedemption(
+      String accountId, String giftId, int requiredPoints) async {
+    try {
+      final response = await http.put(
+        Uri.parse("$_baseUrl/api/Account/refundPoint?accountId=$accountId"),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'giftId': giftId,
+          'requiredPoints': requiredPoints,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        return jsonResponse['flag'] == true;
+      } else {
+        throw Exception(
+            "Failed to cancel redemption: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error cancelling redemption: $e");
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:psbs_app_flutter/models/redeem_history.dart';
 import 'package:psbs_app_flutter/services/redeem_service.dart';
 import 'package:psbs_app_flutter/services/user_store.dart';
+import 'package:psbs_app_flutter/utils/dialog_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'gift_detail_page.dart';
 
@@ -55,6 +56,22 @@ class _RedeemHistoryState extends State<RedeemHistoryPage> {
       return "Canceled";
     } else {
       return "Unknown";
+    }
+  }
+
+  Future<void> _cancelRedemption(String redeemHistoryId, int point) async {
+    try {
+      final responseCancel =
+          await RedeemService.cancelRedemption(userId, redeemHistoryId, point);
+
+      if (responseCancel) {
+        showSuccessDialog(context, "Your redemption has been cancelled.");
+        _initData();
+      } else {
+        showErrorDialog(context, "Failed to cancel redemption.");
+      }
+    } catch (e) {
+      showErrorDialog(context, "An error occurred: $e");
     }
   }
 
@@ -166,7 +183,8 @@ class _RedeemHistoryState extends State<RedeemHistoryPage> {
                                     Flexible(
                                       child: Text(
                                         gift.giftCode != null &&
-                                                gift.giftCode!.isNotEmpty
+                                                    gift.giftCode!.isNotEmpty ||
+                                                gift.giftCode == "null"
                                             ? gift.giftCode!
                                             : "No Code",
                                         maxLines: 2,
@@ -176,7 +194,8 @@ class _RedeemHistoryState extends State<RedeemHistoryPage> {
                                       ),
                                     ),
                                     if (gift.giftCode != null &&
-                                        gift.giftCode!.isNotEmpty)
+                                            gift.giftCode!.isNotEmpty ||
+                                        gift.giftCode == "null")
                                       IconButton(
                                         icon: const Icon(Icons.copy, size: 16),
                                         onPressed: () {
@@ -198,6 +217,36 @@ class _RedeemHistoryState extends State<RedeemHistoryPage> {
                           ),
                           Column(
                             children: [
+                              if (gift.redeemStatusId ==
+                                  "1509e4e6-e1ec-42a4-9301-05131dd498e4")
+                                IconButton(
+                                  icon: const Icon(Icons.cancel,
+                                      color: Colors.red),
+                                  onPressed: () {
+                                    if (gift.redeemHistoryId != null &&
+                                        gift.giftPoint != null) {
+                                      showConfirmationDialog(
+                                        context,
+                                        "Confirm Cancellation",
+                                        "Are you sure you want to cancel this redemption?",
+                                        () {
+                                          _cancelRedemption(
+                                              gift.redeemHistoryId!,
+                                              gift.giftPoint!);
+                                        },
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              "Cannot cancel: Missing redeem history ID or points."),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              const SizedBox(width: 12),
                               Text(
                                 "⭐ ${gift.giftPoint}",
                                 style: const TextStyle(

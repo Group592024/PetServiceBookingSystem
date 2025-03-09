@@ -8,6 +8,7 @@ using PSBS.HealthCareApi.Domain;
 using PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs;
 using PSBS.HealthCareApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -15,6 +16,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class MedicinesController : ControllerBase
     {
         private readonly IMedicine _medicineInterface;
@@ -26,6 +28,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
         // GET: <MedicinesController>
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<MedicineDTO>>> GetMedicinesList()
         {
             var medicines = await _medicineInterface.GetAllAsync();
@@ -42,6 +45,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpGet("all")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<MedicineDTO>>> GetMedicinesListAllAttribute()
         {
             var medicines = await _medicineInterface.GetAllAttributeAsync();
@@ -59,6 +63,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // GET <MedicinesController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<MedicineDetailDTO>> GetMedicineDetailById(Guid id)
         {
             var medicine = await _medicineInterface.GetByIdAsync(id);
@@ -76,6 +81,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         }
 
         [HttpGet("all-data/{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<MedicineDTO>> GetMedicineDTOFormById(Guid id)
         {
             var existingMedicine = await _medicineInterface.GetByIdAsync(id);
@@ -92,6 +98,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // POST <MedicinesController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateMedicine([FromForm] MedicineDTO creattingMedicine)
         {
             ModelState.Remove(nameof(MedicineDTO.medicineId));
@@ -139,6 +146,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // PUT <MedicinesController>/5
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateMedicine([FromForm] MedicineDTO updateMedicine)
         {
             ModelState.Remove(nameof(MedicineDTO.medicineId));
@@ -187,6 +195,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
 
         // DELETE <MedicinesController>/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteMedicine(Guid id)
         {
             var existingMedicine = await _medicineInterface.GetByIdAsync(id);

@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -8,6 +9,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServiceVariantController : ControllerBase
     {
         private readonly IServiceVariant _serviceVariant;
@@ -22,6 +24,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<ServiceVariantDTO>> GetServiceVariantById(Guid id)
         {
             var serviceVariant = await _serviceVariant.GetByIdAsync(id);
@@ -38,6 +41,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("/service/{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid id, [FromQuery] bool showAll)
         {
             if (showAll)
@@ -87,6 +91,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateServiceVariant([FromForm] CreateServiceVariantDTO serviceVariant)
         {
             if (!ModelState.IsValid)
@@ -120,6 +125,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateServiceVariant([FromRoute] Guid id, [FromForm] UpdateServiceVariantDTO dto)
         {
             if (!ModelState.IsValid)
@@ -171,6 +177,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteServiceVariant(Guid id)
         {
             var existingVariant = await _serviceVariant.GetByIdAsync(id);

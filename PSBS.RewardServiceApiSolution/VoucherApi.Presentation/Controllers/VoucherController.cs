@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 using VoucherApi.Application.DTOs;
 using VoucherApi.Application.DTOs.Conversions;
@@ -10,10 +11,12 @@ namespace VoucherApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class VoucherController(IVoucher voucherInteface) : ControllerBase
     {
         // GET: api/<VoucherController>
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchers()
         {
             // get all vouchers from repo
@@ -32,6 +35,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // GET: api/<VoucherController>
         [HttpGet("customer")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchersForCustomer()
         {
             // get all vouchers from repo
@@ -50,6 +54,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // GET: api/<VoucherController>
         [HttpGet("valid-voucher")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetValidVouchersForCustomer()
         {
             // get all vouchers from repo
@@ -68,6 +73,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // GET api/<VoucherController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<VoucherDTO>> GetVoucherById(Guid id)
         {
             // get single voucher from the repo
@@ -84,6 +90,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // POST api/<VoucherController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateVoucher([FromBody] VoucherDTO voucher)
         {
             // CHECK model state is all data annotations are passed
@@ -97,6 +104,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // PUT api/<VoucherController>/5
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateVoucher( [FromBody] UpdateVoucherDTO voucher)
         {
         
@@ -111,6 +119,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // PUT api/<VoucherController>/5
         [HttpPut("update-quantity/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> UpdateVoucherQuantity(Guid id)
         {
             var response = await voucherInteface.MinusVoucherQuanitty(id);
@@ -118,6 +127,7 @@ namespace VoucherApi.Presentation.Controllers
         }
         // DELETE api/<VoucherController>/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteVoucher(Guid id)
         {
             // convert to entity to DT

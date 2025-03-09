@@ -1,6 +1,7 @@
 ﻿
 
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace VoucherApi.Domain.Entities
 {
@@ -29,6 +30,7 @@ namespace VoucherApi.Domain.Entities
 
         [Column("gift_quantity")]
         public int GiftQuantity { get; set; }
+        [JsonIgnore]
         public virtual ICollection<RedeemGiftHistory>? RedeemGiftHistories { get; set; }
     }
 }

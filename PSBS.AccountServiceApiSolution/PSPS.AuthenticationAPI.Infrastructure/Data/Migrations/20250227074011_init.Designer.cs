@@ -12,7 +12,7 @@ using PSPS.AccountAPI.Infrastructure.Data;
 namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
-    [Migration("20250116071043_init")]
+    [Migration("20250227074011_init")]
     partial class init
     {
         /// <inheritdoc />

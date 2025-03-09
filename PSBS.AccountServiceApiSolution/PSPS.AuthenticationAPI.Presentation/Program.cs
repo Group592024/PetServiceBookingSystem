@@ -24,7 +24,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
     });
-    builder.WebHost.ConfigureKestrel(options =>
+builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(5000); // Any IP with 5023
 });
@@ -32,12 +32,23 @@ builder.Services.AddHttpClient("ApiGateway", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5050/");
 });
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("OnlyAdmin", policy => policy.RequireRole("admin"));
+    options.AddPolicy("OnlyStaff", policy => policy.RequireRole("staff"));
+    options.AddPolicy("OnlyUser", policy => policy.RequireRole("user"));
+    options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("admin", "staff"));
+    options.AddPolicy("AdminOrStaffOrUser", policy => policy.RequireRole("admin", "staff", "user"));
+    options.AddPolicy("StaffOrUser", policy => policy.RequireRole("staff", "user"));
+});
+
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 app.UseCors("AllowAllOrigins");
 app.UserInfrastructurePolicy();
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
