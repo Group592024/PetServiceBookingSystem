@@ -21,6 +21,10 @@ class _GiftListScreenState extends State<GiftListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Gift List"),
+        backgroundColor: Colors.blue,
+      ),
       body: Stack( // Use Stack to overlay the button
         children: [
           Container(

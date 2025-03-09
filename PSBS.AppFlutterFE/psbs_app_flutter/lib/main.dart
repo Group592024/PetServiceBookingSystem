@@ -1,6 +1,7 @@
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
     as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';
@@ -61,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final screens = [
     HomePage(),
     PetPage(),
-    GiftListScreen(),
+    BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
   ];
@@ -87,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final items = <Widget>[
       Icon(Icons.home, size: 30),
       Icon(Icons.pets_rounded, size: 30),
-      Icon(Icons.card_giftcard, size: 30),
+      Icon(Icons.add, size: 30),
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
@@ -149,6 +150,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
+              }else if (value == 'gift') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => GiftListScreen()),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -165,6 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListTile(
                   leading: Icon(Icons.discount, color: Colors.blue),
                   title: Text('Voucher', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'gift',
+                child: ListTile(
+                  leading: Icon(Icons.card_giftcard, color: Colors.blue),
+                  title: Text('Gift', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(
