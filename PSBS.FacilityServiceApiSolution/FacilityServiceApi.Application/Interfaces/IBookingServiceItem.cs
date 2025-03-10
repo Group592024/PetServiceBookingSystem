@@ -7,5 +7,6 @@ namespace FacilityServiceApi.Application.Interfaces
     {
         Task<bool> CheckIfVariantHasBooking(Guid serviceVariantId);
         Task<bool> CheckBookingsForPetAsync(Guid petId);
+        Task<IEnumerable<BookingServiceItem>> GetAllAsync();
     }
 }

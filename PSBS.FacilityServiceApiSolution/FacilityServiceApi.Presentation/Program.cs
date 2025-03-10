@@ -21,16 +21,16 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
-
+builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
-    options.SuppressModelStateInvalidFilter = true; // T?t t? ??ng x? l� l?i 400
+    options.SuppressModelStateInvalidFilter = true; 
 });
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5023); // Any IP with 5023
+    options.ListenAnyIP(5023); 
 });
 
 builder.Services.AddAuthorization(options =>
@@ -44,14 +44,34 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+var ffmpegProcess = ffmpegService.StartFfmpegConversion();
+var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+
 
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = hlsFileProvider,
+    RequestPath = "/hls",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/vnd.apple.mpegurl",
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*"); 
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+        ctx.Context.Response.Headers.Append("Expires", "0");
+    }
+});
+
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -61,10 +81,14 @@ else
 {
     app.UseExceptionHandler("/error");
 }
-
+app.UseStaticFiles();
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowAllOrigins");
+app.UseCors(policy => policy
+    .AllowAnyOrigin()  
+    .AllowAnyMethod()
+    .AllowAnyHeader()); app.UseHttpsRedirection();
+//app.UseCors("AllowAllOrigins");
 app.UseInfrastructurePolicy();
 app.UseHttpsRedirection();
 app.UseAuthentication();

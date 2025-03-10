@@ -18,6 +18,14 @@ namespace FacilityServiceApi.Infrastructure.Data
         public DbSet<RoomHistory> RoomHistories { get; set; }
         public DbSet<BookingServiceItem> bookingServiceItems { get; set; }
 
+        public async Task<IEnumerable<BookingServiceItem>?> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
         // Seed data method
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

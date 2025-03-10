@@ -61,9 +61,9 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("healthBook_Id");
 
-                    b.Property<Guid>("bookingId")
+                    b.Property<Guid>("BookingServiceItemId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("booking_Id");
+                        .HasColumnName("BookingServiceItem_Id");
 
                     b.Property<DateTime>("createdAt")
                         .HasColumnType("datetime2")

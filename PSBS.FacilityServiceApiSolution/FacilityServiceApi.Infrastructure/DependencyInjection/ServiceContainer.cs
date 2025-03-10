@@ -19,6 +19,7 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
             SharedServiceContainer.AddSharedServices<FacilityServiceDbContext>(services, config, config["MySerilog:FineName"]!);
 
             //Create Dependency Injection
+            services.AddScoped<ICamera, CameraReponsitory>();
             services.AddScoped<IRoom, RoomRepository>();
             services.AddScoped<IService, ServiceRepository>();
             services.AddScoped<IServiceType, ServiceTypeRepository>();

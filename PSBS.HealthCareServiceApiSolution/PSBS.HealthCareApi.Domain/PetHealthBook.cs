@@ -15,8 +15,8 @@ namespace PSBS.HealthCareApi.Domain
         [Key, Column("healthBook_Id")]
         public Guid healthBookId { get; set; }
 
-        [Column("booking_Id")]
-        public Guid bookingId { get; set; }
+        [Column("BookingServiceItem_Id")]
+        public Guid BookingServiceItemId { get; set; }
 
         [Column("medicine_Ids")]
         public List<Guid> medicineIds { get; set; } = new List<Guid>();

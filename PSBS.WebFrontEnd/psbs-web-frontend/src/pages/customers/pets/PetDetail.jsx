@@ -250,7 +250,7 @@ const CustomerPetDetail = () => {
             </button>
             <button
               onClick={() =>
-                navigate(`/customer/pet/medical-history/${pet.petId}`)
+                navigate(`/list/${pet.petId}`)
               }
               className='bg-[#d1c4e9] text-black text-lg font-semibold px-12 py-16 rounded-lg hover:bg-[#b39ddb] shadow-lg transition flex items-center gap-6'
             >
