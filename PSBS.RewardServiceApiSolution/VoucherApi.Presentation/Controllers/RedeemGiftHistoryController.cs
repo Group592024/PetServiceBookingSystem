@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 using VoucherApi.Application.DTOs.Conversions;
 using VoucherApi.Application.Interfaces;
@@ -6,9 +7,11 @@ using VoucherApi.Domain.Entities;
 
 namespace VoucherApi.Presentation.Controllers
 {
+    [Authorize]
     public class RedeemGiftHistoryController( IRedeemGiftHistory _redeemGiftHistory) : Controller
     {
         [HttpPost("redeemhistory")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> CreateRedeemHistory([FromBody] RedeemGiftHistory redeemGiftHistory)
         {
             if (redeemGiftHistory == null)
@@ -22,6 +25,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpGet("redeemhistory/{accountId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> GetCustomerRedeemHistory(Guid accountId)
         {
             var history = await _redeemGiftHistory.GetCustomerRedeemHistory(accountId);
@@ -38,6 +42,7 @@ namespace VoucherApi.Presentation.Controllers
             }) : Ok(new Response(false, "No Redeem detected"));
         }
         [HttpGet("redeemhistory/app/{accountId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> GetCustomerRedeemList(Guid accountId)
         {
             var history = await _redeemGiftHistory.GetCustomerRedeemHistory(accountId);
@@ -54,6 +59,7 @@ namespace VoucherApi.Presentation.Controllers
             }) : Ok(new Response(false, "No Redeem detected"));
         }
         [HttpGet("redeemhistory/All")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> GetAllRedeemHistories()
         {
             var history = await _redeemGiftHistory.GetAllRedeemHistories();
@@ -72,6 +78,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpPut("redeemhistory/{redeemId}/status/{statusId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> UpdateRedeemStatus(Guid redeemId, Guid statusId)
         {
             var response = await _redeemGiftHistory.UpdateRedeemStatus(redeemId, statusId);
@@ -81,6 +88,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpPut("redeemhistory/customer/cancel/{redeemId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> CustomerCancel(Guid redeemId)
         {
             var response = await _redeemGiftHistory.CustomerCancelRedeem(redeemId);
@@ -94,6 +102,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpGet("redeemhistory/statuses")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> GetAllStatuses()
         {
             var history = await _redeemGiftHistory.GetRedeemStatuses();

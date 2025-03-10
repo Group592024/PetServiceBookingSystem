@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
@@ -8,6 +9,7 @@ namespace PetApi.Presentation.Controllers
 {
     [Route("api/petBreed")]
     [ApiController]
+    [Authorize]
     public class PetBreedController : ControllerBase
     {
         private readonly IPetBreed _petBreed;
@@ -20,6 +22,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("PetTypes")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPetTypes()
         {
             var petTypes = await _petType.GetAllAsync();
@@ -38,6 +41,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetPetBreedsList()
         {
             var petBreeds = (await _petBreed.GetAllAsync())
@@ -56,6 +60,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<PetBreedDTO>> GetPetBreedById(Guid id)
         {
             var petBreed = await _petBreed.GetByIdAsync(id);
@@ -72,6 +77,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreatePetBreed([FromForm] PetBreedDTO creatingPetBreed, IFormFile? imageFile)
         {
             ModelState.Remove(nameof(PetBreedDTO.petBreedId));
@@ -93,6 +99,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdatePetBreed([FromForm] PetBreedDTO updatingPetBreed, IFormFile? imageFile = null)
         {
             ModelState.Remove(nameof(PetBreedDTO.petBreedId));
@@ -117,6 +124,7 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeletePetBreed(Guid id)
         {
             var existingPetBreed = await _petBreed.GetByIdAsync(id);
@@ -162,6 +170,7 @@ namespace PetApi.Presentation.Controllers
             return $"/Images/{fileName}";
         }
         [HttpGet("byPetType/{petTypeId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetBreedsByPetTypeId(Guid petTypeId)
         {
             var petBreeds = await _petBreed.GetBreedsByPetTypeIdAsync(petTypeId);
@@ -178,6 +187,7 @@ namespace PetApi.Presentation.Controllers
         }
         
         [HttpGet("available")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<PetBreedDTO>>> GetAvailablePetBreeds()
         {
             var petbreeds = await _petBreed.ListAvailablePetBreedAsync();

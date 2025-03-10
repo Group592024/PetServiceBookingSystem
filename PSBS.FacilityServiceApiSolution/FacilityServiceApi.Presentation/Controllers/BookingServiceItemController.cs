@@ -1,4 +1,5 @@
 ﻿using FacilityServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,6 +7,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/bookingServiceItem")]
+    [Authorize]
     public class BookingServiceItemController : Controller
     {
         private readonly FacilityServiceDbContext context;
@@ -16,6 +18,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
        [HttpGet("check/{petId}")]
+       [Authorize(Policy = "AdminOrStaff")]
        public async Task<ActionResult<bool>> CheckBookingsForPet(Guid petId)
        {
            var hasBookings = await context.bookingServiceItems

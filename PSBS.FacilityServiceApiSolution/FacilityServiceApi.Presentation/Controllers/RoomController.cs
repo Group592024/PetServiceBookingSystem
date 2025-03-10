@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -9,6 +10,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RoomController : ControllerBase
     {
         private readonly IRoom _room;
@@ -21,6 +23,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetRoomsList()
         {
             var rooms = (await _room.GetAllAsync())
@@ -38,6 +41,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<RoomDTO>> GetRoomById(Guid id)
         {
             var room = await _room.GetByIdAsync(id);
@@ -54,6 +58,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateRoom([FromForm] RoomDTO creatingRoom, IFormFile? imageFile)
         {
             ModelState.Remove(nameof(RoomDTO.roomId));
@@ -75,6 +80,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateRoom([FromForm] RoomDTO updatingRoom, IFormFile? imageFile = null)
         {
             ModelState.Remove(nameof(RoomDTO.roomId));
@@ -99,6 +105,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteRoom(Guid id)
         {
             var existingRoom = await _room.GetByIdAsync(id);
@@ -146,6 +153,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("available")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms()
         {
             var rooms = await _room.ListAvailableRoomsAsync();
@@ -162,6 +170,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("details/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<RoomDTO>> GetRoomDetailsById(Guid id)
         {
             try

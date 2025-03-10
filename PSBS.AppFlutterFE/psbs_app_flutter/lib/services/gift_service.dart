@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/gift.dart';
 
 class GiftService {
-  static const String _baseUrl = "http://10.0.2.2:5022"; 
+  static const String _baseUrl = "http://127.0.0.1:5022"; 
 
   static Future<List<Gift>> fetchGifts() async {
     try {

@@ -23,20 +23,33 @@ const AccountList = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/Account/all");
+      const token = sessionStorage.getItem("token"); // Retrieve token from sessionStorage
+      const response = await fetch("http://localhost:5050/api/Account/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` // Attach token
+        }
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
       const data = await response.json();
       if (data && data.data) {
         console.log("Filtered accounts:", filteredAccounts);
         console.log(accounts);
         console.log("RoleId:", userRole);
         console.log(localStorage.getItem("role"));
-
+  
         setAccounts(data.data);
       }
     } catch (error) {
       console.error("Error fetching accounts:", error);
     }
   };
+  
 
   useEffect(() => {
     fetchAccounts();
@@ -55,8 +68,8 @@ const AccountList = () => {
       if (result.isConfirmed) {
         try {
           const apiUrl = isDeleted
-            ? `http://localhost:5000/api/Account/delete/${accountId}`
-            : `http://localhost:5000/api/Account/delete/${accountId}`;
+            ? `http://localhost:5050/api/Account/delete/${accountId}`
+            : `http://localhost:5050/api/Account/delete/${accountId}`;
           const response = await fetch(apiUrl, {
             method: "DELETE",
           });
@@ -165,7 +178,7 @@ const AccountList = () => {
     formData.append("RegisterTempDTO.AccountPhoneNumber", accountPhoneNumber);
   
     try {
-      const response = await fetch("http://localhost:5000/api/Account/addaccount", {
+      const response = await fetch("http://localhost:5050/api/Account/addaccount", {
         method: "POST",
         body: formData,
       });

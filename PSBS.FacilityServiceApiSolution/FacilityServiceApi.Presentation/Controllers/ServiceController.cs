@@ -2,6 +2,7 @@
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Application.Jobs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 using Quartz;
@@ -10,6 +11,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServiceController : ControllerBase
     {
         private readonly IService _service;
@@ -27,6 +29,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("serviceTypes")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> GetServiceTypes()
         {
             var serviceTypes = await _serviceType.GetAllAsync();
@@ -49,6 +52,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceDTO>>> GetServicesList([FromQuery] bool showAll)
         {
             if (showAll)
@@ -85,6 +89,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<ServiceDTO>> GetServiceById(Guid id)
         {
             var service = await _service.GetByIdAsync(id);
@@ -101,6 +106,8 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost("upload-image/{id:Guid}")]
+        [AllowAnonymous]
+
         public async Task<ActionResult<Response>> UploadImage(Guid id, IFormFile imageFile)
         {
             if (imageFile == null || imageFile.Length == 0)
@@ -123,6 +130,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateService([FromForm] CreateServiceDTO service, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
@@ -170,6 +178,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateService([FromRoute] Guid id, [FromForm] UpdateServiceDTO pet, IFormFile? imageFile = null)
         {
             if (!ModelState.IsValid)
@@ -256,6 +265,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
 
         [HttpDelete("{id:Guid}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteService(Guid id)
         {
             var existingService = await _service.GetByIdAsync(id);

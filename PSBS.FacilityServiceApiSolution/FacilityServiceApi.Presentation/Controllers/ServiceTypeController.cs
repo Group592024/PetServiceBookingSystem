@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -8,6 +9,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServiceTypeController : ControllerBase
     {
         private readonly IServiceType _serviceType;
@@ -18,6 +20,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> GetServiceTypes()
         {
             var serviceTypes = await _serviceType.GetAllAsync();
@@ -34,6 +37,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<ServiceTypeDTO>> GetServiceTypeById(Guid id)
         {
             var serviceType = await _serviceType.GetByIdAsync(id);
@@ -59,6 +63,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateServiceType([FromBody] ServiceTypeDTO creatingServiceType)
         {
             if (!ModelState.IsValid)
@@ -73,6 +78,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateServiceType([FromBody] ServiceTypeDTO updatingServiceType)
         {
             if (!ModelState.IsValid)
@@ -93,6 +99,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteServiceType(Guid id)
         {
             var existingServiceType = await _serviceType.GetByIdAsync(id);
@@ -109,6 +116,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("available")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> GetAvailableServiceTypes()
         {
             var serviceTypes = await _serviceType.ListAvailableServiceTypeAsync();

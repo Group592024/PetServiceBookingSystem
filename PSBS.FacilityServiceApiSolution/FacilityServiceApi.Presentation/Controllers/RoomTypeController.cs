@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.DTO;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -8,6 +9,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class RoomTypeController : ControllerBase
     {
         private readonly IRoomType _roomType;
@@ -18,6 +20,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<RoomTypeDTO>>> GetRoomTypes()
         {
             var roomTypes = await _roomType.GetAllAsync();
@@ -42,6 +45,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<RoomTypeDTO>> GetRoomTypeById(Guid id)
         {
             var roomType = await _roomType.GetByIdAsync(id);
@@ -66,6 +70,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateRoomType([FromBody] RoomTypeDTO creatingRoomType)
         {
             if (!ModelState.IsValid)
@@ -80,6 +85,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateRoomType([FromBody] RoomTypeDTO updatingRoomType)
         {
             if (!ModelState.IsValid)
@@ -100,6 +106,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteRoomType(Guid id)
         {
             var existingRoomType = await _roomType.GetByIdAsync(id);
@@ -116,6 +123,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("available")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomTypeDTO>>> GetAvailableRoomTypes()
         {
             var roomtypes = await _roomType.ListAvailableRoomTypeAsync();

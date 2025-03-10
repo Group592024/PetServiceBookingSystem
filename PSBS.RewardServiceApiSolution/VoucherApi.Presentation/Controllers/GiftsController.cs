@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 using VoucherApi.Application.DTOs.Conversions;
 using VoucherApi.Application.DTOs.GiftDTOs;
@@ -10,10 +11,12 @@ namespace VoucherApi.Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class GiftsController(IGift giftInterface) : ControllerBase
     {
         // GET: api/<GiftsController>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<GiftDTO>>> GetGiftsListForCustomer()
         {
             var gifts = await giftInterface.GetGiftListForCustomerAsync();
@@ -30,6 +33,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpGet("admin-gift-list")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<AdminGiftListDTO>>> GetGiftsListWithAdminFormat()
         {
             var gifts = await giftInterface.GetAllAsync();
@@ -47,6 +51,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // GET api/<GiftsController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<GiftDTO>> GetGiftById(Guid id)
         {
             var gift = await giftInterface.GetByIdAsync(id);
@@ -62,6 +67,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpGet("detail/{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<CustomerGiftDTOs>> GetGiftByIdForCustomer(Guid id)
         {
             var gift = await giftInterface.GetGiftDetailForCustomerAsync(id);
@@ -78,6 +84,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // POST api/<GiftsController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> CreateGift([FromForm] GiftDTO creattingGift)
         {
             ModelState.Remove(nameof(GiftDTO.giftId));
@@ -121,6 +128,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // PUT api/<GiftsController>/5
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateGift([FromForm] UpdateGiftDTO updateGift)
         {
             if(updateGift.giftId == Guid.Empty)
@@ -174,6 +182,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // DELETE api/<GiftsController>/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> DeleteGift(Guid id)
         {
             var existingGift = await giftInterface.GetByIdAsync(id);
