@@ -1,5 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/Camera/camera.dart';
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
     as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';
@@ -142,6 +143,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
+              } else if (value == 'camera') {
+                // 👉 Điều hướng sang trang xem camera
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -150,6 +157,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListTile(
                   leading: Icon(Icons.discount, color: Colors.blue),
                   title: Text('Voucher', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'camera',
+                child: ListTile(
+                  leading: const Icon(Icons.videocam, color: Colors.green),
+                  title: const Text('Xem Camera',
+                      style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(
