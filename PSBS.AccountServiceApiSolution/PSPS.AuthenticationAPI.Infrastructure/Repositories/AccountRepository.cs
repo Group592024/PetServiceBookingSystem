@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
@@ -9,6 +10,7 @@ using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
+using System.Drawing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Net.Http.Json;
@@ -21,7 +23,7 @@ using System.Text.RegularExpressions;
 namespace PSPS.AccountAPI.Infrastructure.Repositories
 {
 
-    internal class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository, IHttpClientFactory _httpClientFactory) : IAccount
+    public class AccountRepository(PSPSDbContext context, IConfiguration config, IWebHostEnvironment _hostingEnvironment, IEmail _emailRepository, IHttpClientFactory _httpClientFactory) : PSPS.AccountAPI.Application.Interfaces.IAccount
     {
         private const string ImageUploadPath = "images";
 
@@ -98,12 +100,16 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                 if (response.IsSuccessStatusCode)
                 {
-                    await transaction.CommitAsync();
-                    return new Response(true, "Gift redeemed successfully");
+                    var responseContent = await response.Content.ReadFromJsonAsync<Response>(); // Deserialize the response
+                    if (responseContent != null)
+                    {
+                        await transaction.CommitAsync();
+                        return responseContent;
+                    }
                 }
 
                 await transaction.RollbackAsync();
-                return new Response(false, "Failed to redeem gift");
+                return new Response(false, "Errors occur while redeeming your gift!");
             }
             catch (Exception ex)
             {
@@ -822,6 +828,51 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 context.Accounts.Update(existingAccount);
                 await context.SaveChangesAsync();
                 return new Response(true, "Point of user successfully updated");
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a user-friendly message to the client
+                return new Response(false, "Error occurred while updating the existing Point.");
+            }
+        }
+
+        public async Task<Response> RefundAccountPoint(Guid id, RedeemRequest model )
+        {
+            try
+            {
+                var existingAccount = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == id);
+                if (existingAccount == null)
+                {
+                    return new Response(false, "The account does not exist!");
+                }
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
+                {
+                   
+
+                    var client = _httpClientFactory.CreateClient("ApiGateway");
+                    var response = await client.PutAsync($"redeemhistory/customer/cancel/{model.GiftId}", null);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        existingAccount.AccountLoyaltyPoint = existingAccount.AccountLoyaltyPoint + model.RequiredPoints;
+                        context.Accounts.Update(existingAccount);
+                        await context.SaveChangesAsync();
+                       
+                        await transaction.CommitAsync();
+                        return new Response(true, "Point of user successfully updated");
+                    }
+
+                    await transaction.RollbackAsync();
+                    return new Response(false, "Failed to refund gift");
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new Response(false, $"Error: {ex.Message}");
+                }           
             }
             catch (Exception ex)
             {

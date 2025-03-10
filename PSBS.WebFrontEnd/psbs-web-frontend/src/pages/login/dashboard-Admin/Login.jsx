@@ -57,7 +57,7 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/Account/Login', {
+      const response = await fetch('http://localhost:5050/api/Account/Login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

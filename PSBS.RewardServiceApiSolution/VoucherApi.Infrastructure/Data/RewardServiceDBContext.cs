@@ -10,6 +10,7 @@ namespace VoucherApi.Infrastructure.Data
         public DbSet<Voucher> Vouchers {  get; set; }
         public DbSet<Gift> Gifts { get; set; }
         public DbSet<RedeemGiftHistory> RedeemGiftHistories { get; set; }
+        public DbSet<RedeemStatus> RedeemStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -19,6 +20,17 @@ namespace VoucherApi.Infrastructure.Data
                 .WithMany(c => c.RedeemGiftHistories)
                 .HasForeignKey(r => r.GiftId);
 
+            modelBuilder.Entity<RedeemGiftHistory>()
+                  .HasOne(p => p.RedeemStatus)
+                  .WithMany(c => c.RedeemGiftHistories)
+                  .HasForeignKey(r => r.ReddeemStautsId);
+
+            // Seed RedeemStatus data
+            modelBuilder.Entity<RedeemStatus>().HasData(
+                new RedeemStatus { ReddeemStautsId = Guid.NewGuid(), RedeemName = "Just Redeemed" },
+                new RedeemStatus { ReddeemStautsId = Guid.NewGuid(), RedeemName = "Picked up at Store" },
+                new RedeemStatus { ReddeemStautsId = Guid.NewGuid(), RedeemName = "Canceled Redeem" }
+            );
 
         }
     }

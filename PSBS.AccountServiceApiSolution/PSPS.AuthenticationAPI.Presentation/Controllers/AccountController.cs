@@ -12,9 +12,11 @@ namespace PSPS.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class AccountController(IAccount account) : ControllerBase
     {
         [HttpPost("redeem-points/{accountId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<IActionResult> RedeemPoints(Guid accountId, [FromBody] RedeemRequest model)
         {
             if (!ModelState.IsValid)
@@ -32,6 +34,7 @@ namespace PSPS.Presentation.Controllers
         }
 
         [HttpPost("register")]// Register new account
+        [AllowAnonymous]
         public async Task<ActionResult<Response>> Register([FromForm] RegisterAccountDTO model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -39,6 +42,7 @@ namespace PSPS.Presentation.Controllers
             return result.Flag ? Ok(result) : BadRequest(Request);
         }
         [HttpPost("addaccount")]// Add new account
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> AddAccount([FromForm] RegisterAccountDTO model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -46,6 +50,7 @@ namespace PSPS.Presentation.Controllers
             return result.Flag ? Ok(result) : BadRequest(Request);
         }
         [HttpPost("Login")]// Login account
+        [AllowAnonymous]
         public async Task<ActionResult<Response>> Login(LoginDTO loginDTO)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -53,6 +58,7 @@ namespace PSPS.Presentation.Controllers
             return result.Flag ? Ok(result) : BadRequest(result);
         }
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<GetAccountDTO>> GetAccount(Guid AccountId)// Get account by AccountId
         {
             if (!ModelState.IsValid)
@@ -64,6 +70,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpGet("all")]
+        [Authorize(Policy ="AdminOrStaff")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetAllAccount()// Get all account
         {
             var result = await account.GetAllAccount();
@@ -73,6 +80,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpGet("deleted")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetDeletedAccounts() // Get account by AccountIsDeleted = true
         {
             var result = await account.GetDeletedAccounts();
@@ -85,6 +93,7 @@ namespace PSPS.Presentation.Controllers
         }
 
         [HttpGet("active")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetActiveAccounts() // Get account by AccountIsDeleted = false
         {
             var result = await account.GetActiveAccounts();
@@ -96,6 +105,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpGet("loadImage")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<List<GetAccountDTO>>> LoadImage(string filename)// Upload image
         {
             var result = await account.LoadImage(filename);
@@ -108,6 +118,7 @@ namespace PSPS.Presentation.Controllers
         }
 
         [HttpPut]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<AddAccount>> UpdateAccount([FromForm] AddAccount model, Guid accountId)// Update account
         {
             var result = await account.UpdateAccount(model);
@@ -117,6 +128,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpDelete("delete/{accountId}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<IActionResult> DeleteAccount(Guid accountId)// Delete account
         {
             var result = await account.DeleteAccount(accountId);
@@ -127,6 +139,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpPut("ChangePassword{accountId}")] // Changepassword
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> ChangePassword(Guid accountId, [FromBody] ChangePasswordDTO changePasswordDTO)
         {
             if (!ModelState.IsValid)
@@ -145,6 +158,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<GetAccountDTO>> GetAccountChat(Guid id)// Get account by AccountId for chat
         {
             if (!ModelState.IsValid)
@@ -159,6 +173,7 @@ namespace PSPS.Presentation.Controllers
 
         }
         [HttpGet("by-phone/{phone}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<GetAccountDTO>> GetAccountByPhone(string phone)
         {
             var result = await account.GetAccountByPhone(phone);
@@ -169,9 +184,19 @@ namespace PSPS.Presentation.Controllers
         }
 
         [HttpPut("UpdateUserPoint")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> UpdateUserPoint(Guid accountId,int point)
         {
             var result = await account.UpdateAccountPoint(accountId, point);
+            return result.Flag ? Ok(result) : BadRequest(result);
+        }
+
+
+        [HttpPut("refundPoint")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<Response>> RefundUserPoint(Guid accountId, [FromBody] RedeemRequest model)
+        {
+            var result = await account.RefundAccountPoint(accountId, model);
             return result.Flag ? Ok(result) : BadRequest(result);
         }
     }

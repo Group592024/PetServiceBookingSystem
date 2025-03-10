@@ -44,7 +44,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -68,7 +68,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -93,7 +93,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -115,7 +115,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -137,7 +137,29 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Report Facility API
+      "DownstreamPathTemplate": "/api/ReportFacility/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5023
+        }
+      ],
+      "UpstreamPathTemplate": "/api/ReportFacility/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -159,7 +181,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -181,7 +203,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -203,7 +225,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -225,7 +247,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -247,7 +269,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -269,7 +291,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -291,7 +313,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -313,7 +335,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -335,7 +357,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -357,7 +379,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -379,7 +401,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -401,7 +423,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -423,7 +445,29 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Report Pet API
+      "DownstreamPathTemplate": "/api/ReportPet/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5010
+        }
+      ],
+      "UpstreamPathTemplate": "/api/ReportPet/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -445,7 +489,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -467,7 +511,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -489,7 +533,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -511,7 +555,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -533,7 +577,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -555,7 +599,29 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Report Booking API
+      "DownstreamPathTemplate": "/api/ReportBooking/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5115
+        }
+      ],
+      "UpstreamPathTemplate": "/api/ReportBooking/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -577,7 +643,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -595,11 +661,11 @@
         }
       ],
       "UpstreamPathTemplate": "/redeemhistory/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",
@@ -621,7 +687,7 @@
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
-      //   "Header": "PABS-Caching-Control"
+      //   "Header": "PSBS-Caching-Control"
       // },
       // "AuthenticationOptions": {
       //   "AuthenticationProviderKey": "Bearer",

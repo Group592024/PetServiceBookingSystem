@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import PetDiaryCard from './PetDiaryCard';
+import PetDiaryCard from './PetDiaryCard'
 import { Stack } from '@mui/material';
 import Swal from 'sweetalert2';
 import EditDiaryModal from './EditDiaryModal';
+import { useState } from 'react';
 
 const PetDiaryCardList = ({ data }) => {
   const [diaries, setDiaries] = useState(data);

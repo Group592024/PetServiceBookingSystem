@@ -1,16 +1,18 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/pages/Camera/camera.dart';
+import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
     as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/Services/service_page.dart';
-
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
@@ -33,6 +35,12 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/login', // Default startup page
       onGenerateRoute: RouteGenerator.generateRoute,
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
     );
   }
 }
@@ -61,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final screens = [
     HomePage(),
     PetPage(),
-    GiftListScreen(),
+    BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
   ];
@@ -87,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final items = <Widget>[
       Icon(Icons.home, size: 30),
       Icon(Icons.pets_rounded, size: 30),
-      Icon(Icons.card_giftcard, size: 30),
+      Icon(Icons.add, size: 30),
       Icon(Icons.local_offer, size: 30),
       Icon(Icons.person, size: 30),
     ];
@@ -149,6 +157,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   context,
                   MaterialPageRoute(builder: (context) => CameraScreen()),
                 );
+              } else if (value == 'gift') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GiftListScreen()),
+                );
               }
             },
             itemBuilder: (context) => [
@@ -165,6 +178,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   leading: const Icon(Icons.videocam, color: Colors.green),
                   title: const Text('Xem Camera',
                       style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'gift',
+                child: ListTile(
+                  leading: Icon(Icons.card_giftcard, color: Colors.blue),
+                  title: Text('Gift', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(

@@ -18,11 +18,11 @@ class _ServicePageState extends State<ServicePage> {
   Future<void> fetchServices() async {
     try {
       final responseServices = await http
-          .get(Uri.parse('http://10.0.2.2:5023/api/Service?showAll=false'));
+          .get(Uri.parse('http://192.168.1.7:5023/api/Service?showAll=false'));
       if (responseServices.statusCode == 200) {
         final dataServices = json.decode(responseServices.body);
 
-print(dataServices);
+        print(dataServices);
 
         setState(() {
           services = dataServices['data'];
@@ -69,7 +69,7 @@ print(dataServices);
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
-                        'http://10.0.2.2:5023${service['serviceImage']}',
+                        'http://192.168.1.7:5023${service['serviceImage']}',
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -87,34 +87,34 @@ print(dataServices);
               SizedBox(height: 8),
               Text(
                 'Type: ${service['serviceType'] != null ? service['serviceType']['typeName'] : 'Unknown'}',
-                style: TextStyle(fontSize: 15,fontStyle: FontStyle.italic, fontWeight: FontWeight.bold, color: Colors.grey),
+                style: TextStyle(
+                    fontSize: 15,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey),
               ),
               SizedBox(height: 20),
-
-                                Center(
-                                  child: SizedBox(
-                                    width: 350,
-                                    child: ElevatedButton(
-                                      onPressed: null,
-                                      style: ButtonStyle(
-                                        backgroundColor: MaterialStateProperty.all(
-                                            Colors.green[400]),
-                                      ),
-                                      child: Text(
-                                        'See more',
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  )
-
+              Center(
+                child: SizedBox(
+                  width: 350,
+                  child: ElevatedButton(
+                    onPressed: null,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all(Colors.green[400]),
+                    ),
+                    child: Text(
+                      'See more',
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
-
         ),
       ),
     );

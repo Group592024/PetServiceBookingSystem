@@ -5,7 +5,8 @@ import Swal from "sweetalert2"; // Import SweetAlert2
 import "./style.css";
 
 const NavbarCustomer = () => {
-  const [accountName, setAccountName] = useState("Admin");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [accountName, setAccountName] = useState("Guest");
   const [accountImage, setAccountImage] = useState(
     "https://i.pinimg.com/736x/48/4c/c6/484cc69755c6b5daa6b31e720d848629.jpg"
   );
@@ -17,10 +18,11 @@ const NavbarCustomer = () => {
     const token = sessionStorage.getItem("token");
 
     if (token) {
+      setIsLoggedIn(true);
       const decodedToken = jwt_decode(token);
       const { AccountName, AccountImage, AccountId } = decodedToken;
 
-      setAccountName(AccountName || "Admin");
+      setAccountName(AccountName || "User");
       setAccountId(AccountId);
 
       if (AccountImage) {
@@ -39,6 +41,8 @@ const NavbarCustomer = () => {
           })
           .catch((error) => console.error("Error fetching image:", error));
       }
+    } else {
+      setIsLoggedIn(false);
     }
   }, []);
 
@@ -75,6 +79,7 @@ const NavbarCustomer = () => {
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
+          setIsLoggedIn(false); // Update state
           navigate("/login", { replace: true });
         });
       }
@@ -140,27 +145,35 @@ const NavbarCustomer = () => {
           </li>
         </ul>
       </div>
-      <div>
-        <li>
-          <a>{accountName}</a>
-        </li>
-      </div>
-      <div className="navbar-profile" onClick={toggleDropdown}>
-        <img
-          src={accountImage}
-          alt="Profile Avatar"
-          className="profile-avatar"
-        />
 
-        {dropdownVisible && (
-          <div className="dropdown-menu">
-            <ul>
-              <li onClick={handleViewProfile}>View Profile</li>
-              <li onClick={handleLogout}>Logout</li>
-            </ul>
-          </div>
-        )}
+      {/* Show Login button if not logged in, otherwise show profile */}
+      {!isLoggedIn ? (
+        <div>
+        <Link
+          to="/login"
+          className="login-button bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition duration-300 hover:opacity-80"
+        >
+          <i className="bx bx-log-in text-xl"></i> Login
+        </Link>
       </div>
+      ) : (
+        <div className="navbar-profile" onClick={toggleDropdown}>
+          <img
+            src={accountImage}
+            alt="Profile Avatar"
+            className="profile-avatar"
+          />
+
+          {dropdownVisible && (
+            <div className="dropdown-menu">
+              <ul>
+                <li onClick={handleViewProfile}>View Profile</li>
+                <li onClick={handleLogout}>Logout</li>
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

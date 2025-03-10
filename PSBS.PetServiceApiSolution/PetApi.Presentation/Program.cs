@@ -31,7 +31,15 @@ builder.Services.AddHttpClient<FacilityApiClient>(client =>
 {
     client.BaseAddress = new Uri("http://localhost:5023/api/ReportFacility/");
 });
-
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("OnlyAdmin", policy => policy.RequireRole("admin"));
+    options.AddPolicy("OnlyStaff", policy => policy.RequireRole("staff"));
+    options.AddPolicy("OnlyUser", policy => policy.RequireRole("user"));
+    options.AddPolicy("AdminOrStaff", policy => policy.RequireRole("admin", "staff"));
+    options.AddPolicy("AdminOrStaffOrUser", policy => policy.RequireRole("admin", "staff", "user"));
+    options.AddPolicy("StaffOrUser", policy => policy.RequireRole("staff", "user"));
+});
 var app = builder.Build();
 app.UseCors("AllowAllOrigins");
 
@@ -50,7 +58,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseInfrastructurePolicy();
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

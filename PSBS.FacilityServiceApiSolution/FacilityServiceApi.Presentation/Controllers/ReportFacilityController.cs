@@ -2,6 +2,7 @@
 using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
 
@@ -9,6 +10,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReportFacilityController : ControllerBase
     {
         private readonly IReport _report;
@@ -19,6 +21,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("availableRoom")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomDTO>>> GetAvailableRooms()
         {
             var rooms = await _report.ListActiveRoomsAsync();
@@ -35,6 +38,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("roomStatus")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomStatusDTO>>> GetRoomStatusList()
         {
             var roomStatus = await _report.GetRoomStatusList();
@@ -48,6 +52,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("roomHistory")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetRoomHistory()
         {
             var roomHistory = await _report.GetRoomTypeQuantity();
@@ -61,6 +66,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("bookingServiceItem")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetBookingServiceItem()
         {
             var roomHistory = await _report.GetServiceQuantity();
@@ -74,6 +80,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("petCount/{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<PetCountDTO>>> GetPetCount([FromRoute] Guid id)
         {
             var petCountDTOs = await _report.GetAllBookingByPet(id);
@@ -84,6 +91,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("activeRoomType")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetActiveRoomTypes()
         {
             var roomStatus = await _report.GetActiveRoomTypeList();
@@ -97,6 +105,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("activeServiceType")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetActiveServiceTypes()
         {
             var roomStatus = await _report.GetActiveServiceTypeList();
