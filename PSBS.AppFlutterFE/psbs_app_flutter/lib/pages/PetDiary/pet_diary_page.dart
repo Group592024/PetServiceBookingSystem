@@ -42,7 +42,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.2:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+            'http://192.168.1.7:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
       );
 
       if (response.statusCode == 200) {
@@ -54,6 +54,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
             totalPages = data['data']?['meta']?['totalPages'] ?? 1;
           });
         }
+        print(entries[0]['diary_Content']);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -102,7 +103,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
     try {
       final response = await http.delete(
-        Uri.parse('http://192.168.1.2:5010/api/PetDiary/$diaryId'),
+        Uri.parse('http://192.168.1.7:5010/api/PetDiary/$diaryId'),
       );
 
       if (response.statusCode == 200) {
@@ -176,7 +177,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://192.168.1.2:5010${widget.petImage}')
+                              'http://192.168.1.7:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),

@@ -48,7 +48,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       String diaryContent = await convertDeltaToHtml(deltaJson);
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.2:5010/api/PetDiary'),
+        Uri.parse('http://192.168.1.7:5010/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -173,7 +173,17 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
 
     final converter =
         QuillDeltaToHtmlConverter(deltaList, ConverterOptions.forEmail());
-    return converter.convert();
+
+    String html = converter.convert();
+
+    // Sua cho nay cach them khoang trang
+    html = html.replaceAllMapped(
+      RegExp(r'(<img)([^>]*)(>)'),
+      (match) =>
+          '${match.group(1)}${match.group(2)} style="display: block; margin-bottom: 10px;"${match.group(3)}',
+    );
+
+    return html;
   }
 
   @override

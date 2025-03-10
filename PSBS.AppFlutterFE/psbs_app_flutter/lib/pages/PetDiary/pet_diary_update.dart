@@ -226,15 +226,16 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     // 🔹 Chuyển đổi Delta sang HTML
     final converter = QuillDeltaToHtmlConverter(
       deltaList,
-      ConverterOptions(), // ✅ Sửa lỗi tham số
+      ConverterOptions.forEmail(),
     );
 
     String html = converter.convert();
 
-    // 🔹 Đảm bảo ảnh luôn xuống dòng đúng cách
+// sua nhe
     html = html.replaceAllMapped(
-      RegExp(r'(<img[^>]+>)'),
-      (match) => '${match.group(1)}<br>',
+      RegExp(r'(<img)([^>]*)(>)'),
+      (match) =>
+          '${match.group(1)}${match.group(2)} style="display: block; margin-bottom: 10px;"${match.group(3)}',
     );
 
     return html;
@@ -255,9 +256,11 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       String deltaJson = jsonEncode(_controller.document.toDelta().toJson());
       String diaryContent = await convertDeltaToHtml(deltaJson);
 
+      print("Updated diary content: $diaryContent");
+
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.2:5010/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://192.168.1.7:5010/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'
