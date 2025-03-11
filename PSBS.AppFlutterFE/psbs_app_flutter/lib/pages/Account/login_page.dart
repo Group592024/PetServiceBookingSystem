@@ -48,10 +48,14 @@ class _LoginPageState extends State<LoginPage> {
     if (!_validateForm()) return;
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
+    print("email: " + email);
+    print("password: " + password);
     try {
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:5000/api/Account/Login'),
-        headers: {'Content-Type': 'application/json'},
+        Uri.parse('http://10.66.187.111:5050/api/Account/Login'),
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
       if (response.statusCode == 200) {

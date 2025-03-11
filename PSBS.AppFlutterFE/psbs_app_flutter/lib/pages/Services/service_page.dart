@@ -17,8 +17,8 @@ class _ServicePageState extends State<ServicePage> {
   // Fetch services data
   Future<void> fetchServices() async {
     try {
-      final responseServices = await http
-          .get(Uri.parse('http://192.168.1.7:5023/api/Service?showAll=false'));
+      final responseServices = await http.get(
+          Uri.parse('http://10.66.187.111:5023/api/Service?showAll=false'));
       if (responseServices.statusCode == 200) {
         final dataServices = json.decode(responseServices.body);
 
@@ -69,7 +69,7 @@ class _ServicePageState extends State<ServicePage> {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
-                        'http://192.168.1.7:5023${service['serviceImage']}',
+                        'http://10.66.187.111:5023${service['serviceImage']}',
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,

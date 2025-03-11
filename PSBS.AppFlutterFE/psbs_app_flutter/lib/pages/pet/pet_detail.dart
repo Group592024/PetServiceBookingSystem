@@ -41,14 +41,21 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
   Future<void> fetchPetDetails() async {
     try {
-      final petResponse = await http
-          .get(Uri.parse('http://192.168.1.7:5010/api/pet/${widget.petId}'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      final petResponse = await http.get(
+        Uri.parse('http://10.66.187.111:5050/api/pet/${widget.petId}'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
       final petData = json.decode(petResponse.body);
 
       if (petData['flag']) {
         final breedResponse = await http.get(Uri.parse(
-            'http://192.168.1.7:5010/api/petBreed/${petData['data']['petBreedId']}'));
+            'http://10.66.187.111:5010/api/petBreed/${petData['data']['petBreedId']}'));
         final breedData = json.decode(breedResponse.body);
 
         setState(() {
@@ -116,7 +123,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.network(
-                    'http://192.168.1.7:5010/pet-service${pet!['petImage']}',
+                    'http://10.66.187.111:5010/pet-service${pet!['petImage']}',
                     height: 300,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -488,7 +495,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
     if (confirm == true) {
       try {
         final response = await http.delete(
-            Uri.parse('http://192.168.1.7:5010/api/pet/${widget.petId}'));
+            Uri.parse('http://10.66.187.111:5010/api/pet/${widget.petId}'));
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

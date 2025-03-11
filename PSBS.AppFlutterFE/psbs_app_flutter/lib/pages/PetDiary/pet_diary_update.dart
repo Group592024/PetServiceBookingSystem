@@ -260,7 +260,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
 
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.7:5010/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://10.66.187.111:5010/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json'

@@ -17,8 +17,8 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://192.168.1.7:5010/api/pet/available/';
-  final String deleteUrl = 'http://192.168.1.7:5010/api/pet/';
+  final String apiUrl = 'http://10.66.187.111:5050/api/pet/available/';
+  final String deleteUrl = 'http://10.66.187.111:5010/api/pet/';
   late String userId;
   @override
   void initState() {
@@ -43,7 +43,15 @@ class _CustomerPetListState extends State<PetPage> {
         throw Exception("Account ID not found. Please log in.");
       }
 
-      final response = await http.get(Uri.parse('$apiUrl$accountId'));
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse('$apiUrl$accountId'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
 
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -513,7 +521,7 @@ class _CustomerPetListState extends State<PetPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://192.168.1.7:5010/pet-service${pet.petImage}',
+                            'http://10.66.187.111:5010/pet-service${pet.petImage}',
                             width: 400,
                             height: 350,
                             fit: BoxFit.cover,
