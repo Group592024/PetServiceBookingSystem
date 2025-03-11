@@ -28,8 +28,16 @@ const AddService = () => {
 
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service/serviceTypes'
+        'http://localhost:5050/api/Service/serviceTypes',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -154,9 +162,13 @@ const AddService = () => {
     formData.append('imageFile', service.selectedImage);
 
     try {
-      const response = await fetch('http://localhost:5023/api/Service', {
+      const token = sessionStorage.getItem("token");
+      const response = await fetch('http://localhost:5050/api/Service', {
         method: 'POST',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
       });
 
       if (response.ok) {

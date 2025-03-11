@@ -16,7 +16,16 @@ const CustomerPetDetail = () => {
    
     const fetchData = async () => {
       try {
-        const petResponse = await fetch(`http://localhost:5050/api/pet/${id}`);
+        const token = sessionStorage.getItem("token");
+        const petResponse = await fetch(`http://localhost:5050/api/pet/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         const petData = await petResponse.json();
 
         if (petData.flag) {

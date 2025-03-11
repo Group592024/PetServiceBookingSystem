@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PetApi.Application.Interfaces;
 using PetApi.Infrastructure.Data;
 using PetApi.Infrastructure.Repositories;
+using PetApi.Infrastructure.Service;
 using PSPS.SharedLibrary.DependencyInjection;
 
 namespace PetApi.Infrastructure.DependencyInjection
@@ -23,6 +24,11 @@ namespace PetApi.Infrastructure.DependencyInjection
 
             services.AddScoped<IPetDiary, PetDiaryRepository>();
             services.AddScoped<IReport, ReportPetRepository>();
+
+            services.AddHttpClient<FacilityApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5050/api/ReportFacility/");
+            });
 
             return services;
         }

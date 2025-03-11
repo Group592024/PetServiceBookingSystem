@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.Interfaces;
-using PetApi.Presentation.Service;
+using PetApi.Infrastructure.Service;
 using PSPS.SharedLibrary.Responses;
 
 
@@ -26,7 +26,13 @@ namespace PetApi.Presentation.Controllers
         [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Dictionary<string, int>>> getPetCount(Guid id)
         {
-            var response = await _facilityApiClient.GetPetCount(id);
+
+            var authString = HttpContext.Request.Headers["Authorization"].ToString();
+
+            var auth = authString.Substring(7);
+            Console.WriteLine("token nef: " + auth);
+
+            var response = await _facilityApiClient.GetPetCount(id,auth);
 
             Console.WriteLine("response day nay" + response.Count());
 

@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
-import SampleImage from '../../../assets/sampleUploadImage.jpg';
-import { Button, CircularProgress, Stack } from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import PetDiaryCardList from '../../../components/Diary/PetDiaryCardList';
-import AddDiaryModal from '../../../components/Diary/AddDiaryModal';
-import { ToastContainer } from 'react-toastify';
-import Swal from 'sweetalert2';
-import { formatDateString } from '../../../Utilities/formatDate';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
+import SampleImage from "../../../assets/sampleUploadImage.jpg";
+import { Button, CircularProgress, Stack } from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import PetDiaryCardList from "../../../components/Diary/PetDiaryCardList";
+import AddDiaryModal from "../../../components/Diary/AddDiaryModal";
+import { ToastContainer } from "react-toastify";
+import Swal from "sweetalert2";
+import { formatDateString } from "../../../Utilities/formatDate";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { useParams } from "react-router-dom";
 
 const PetDiaryListPage = () => {
   const { petId } = useParams();
-  const petInfo = JSON.parse(localStorage.getItem('petInfo'));
+  const petInfo = JSON.parse(localStorage.getItem("petInfo"));
 
   const [loading, setLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
@@ -25,11 +25,14 @@ const PetDiaryListPage = () => {
   const fetchPetDiary = async (petId, pageIndex) => {
     try {
       setLoading(true);
+      const token = sessionStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5010/api/PetDiary/diaries/${petId}?pageIndex=${pageIndex}&pageSize=4`,
+        `http://localhost:5050/api/PetDiary/diaries/${petId}?pageIndex=${pageIndex}&pageSize=4`,
         {
+          method: "GET",
           headers: {
-            method: 'GET',
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -46,17 +49,17 @@ const PetDiaryListPage = () => {
 
       if (!data.flag) {
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
+          icon: "error",
+          title: "Error",
           text: `${data.message}`,
         });
       }
     } catch {
       setLoading(false);
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Something went wrong. Please try again!',
+        icon: "error",
+        title: "Error",
+        text: "Something went wrong. Please try again!",
       });
     } finally {
       setLoading(false);
@@ -89,68 +92,68 @@ const PetDiaryListPage = () => {
       <NavbarCustomer />
 
       {loading ? (
-        <div className='flex justify-center items-center py-12'>
+        <div className="flex justify-center items-center py-12">
           <CircularProgress />
         </div>
       ) : (
         <>
-          <div className='flex justify-center items-center gap-8 px-8 py-12'>
+          <div className="flex justify-center items-center gap-8 px-8 py-12">
             <Stack
               spacing={4}
-              className='flex flex-col justify-center items-center w-1/3'
+              className="flex flex-col justify-center items-center w-1/3"
             >
-              <div className='py-8 px-6 bg-customPrimary rounded-xl'>
+              <div className="py-8 px-6 bg-customPrimary rounded-xl">
                 <img
                   src={
                     petInfo
                       ? `http://localhost:5010${petInfo.petImage}`
                       : SampleImage
                   }
-                  alt='sample-image'
-                  className='rounded-[2.6rem]'
+                  alt="sample-image"
+                  className="rounded-[2.6rem]"
                 />
-                <h2 className='text-4xl font-bold text-center mt-4 mb-1 text-white'>
+                <h2 className="text-4xl font-bold text-center mt-4 mb-1 text-white">
                   {petInfo && petInfo.petName}
                 </h2>
-                <p className='text-lg text-center text-white'>
+                <p className="text-lg text-center text-white">
                   {petInfo && formatDateString(petInfo.petDoB)}
                 </p>
               </div>
 
               <button
-                to={'add'}
-                className='m-auto flex justify-center items-center gap-1 text-center rounded-s-full rounded-e-full bg-customPrimary text-white py-2 px-4 w-1/2 hover:opacity-90'
+                to={"add"}
+                className="m-auto flex justify-center items-center gap-1 text-center rounded-s-full rounded-e-full bg-customPrimary text-white py-2 px-4 w-1/2 hover:opacity-90"
                 onClick={() => setAddModalOpen(true)}
               >
                 <AddCircleOutlineIcon /> New Post
               </button>
             </Stack>
 
-            <Stack className='w-2/3'>
+            <Stack className="w-2/3">
               {petDiary?.data?.length !== 0 ? (
                 <>
                   <PetDiaryCardList data={petDiary?.data} />
-                  <div className='flex justify-center items-center gap-4 w-1/3 mx-auto mt-4'>
+                  <div className="flex justify-center items-center gap-4 w-1/3 mx-auto mt-4">
                     <Button
-                      variant='contained'
+                      variant="contained"
                       onClick={handleClickPrevious}
                       disabled={pageIndex <= 1}
-                      className='flex justify-center items-center gap-1'
+                      className="flex justify-center items-center gap-1"
                     >
-                      <ArrowBackIosIcon fontSize='1rem' /> Previous
+                      <ArrowBackIosIcon fontSize="1rem" /> Previous
                     </Button>
                     <Button
-                      variant='contained'
+                      variant="contained"
                       onClick={handleClickNext}
                       disabled={pageIndex >= petDiary?.meta?.totalPages}
-                      className='flex justify-center items-center gap-1'
+                      className="flex justify-center items-center gap-1"
                     >
-                      Next <ArrowForwardIosIcon fontSize='1rem' />
+                      Next <ArrowForwardIosIcon fontSize="1rem" />
                     </Button>
                   </div>
                 </>
               ) : (
-                <p className='text-2xl font-semibold text-center'>
+                <p className="text-2xl font-semibold text-center">
                   No diaries found
                 </p>
               )}

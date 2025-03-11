@@ -1,7 +1,7 @@
 ﻿using PetApi.Application.DTOs;
 using System.Text.Json;
 
-namespace PetApi.Presentation.Service
+namespace PetApi.Infrastructure.Service
 {
     public class FacilityApiClient
     {
@@ -12,8 +12,11 @@ namespace PetApi.Presentation.Service
             _httpClient = httpClient;
         }
 
-        public async Task<IEnumerable<PetCountDTO>> GetPetCount(Guid id)
+        public async Task<IEnumerable<PetCountDTO>> GetPetCount(Guid id, string token)
         {
+            _httpClient.DefaultRequestHeaders.Authorization
+                = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
             var url = $"petCount/{id}";
             Console.WriteLine($"Calling FacilityService: {url}");
 
