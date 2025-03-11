@@ -137,7 +137,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                     return new Response(false, $"{entity.healthBookId} not found");
                 }
 
-                petHealthBooks.bookingId = entity.bookingId;
+                petHealthBooks.BookingServiceItemId = entity.BookingServiceItemId;
                 petHealthBooks.visitDate = entity.visitDate;
                 petHealthBooks.nextVisitDate = entity.nextVisitDate;
                 petHealthBooks.performBy = entity.performBy;

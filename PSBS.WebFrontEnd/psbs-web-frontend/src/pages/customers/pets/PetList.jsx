@@ -11,8 +11,17 @@ const CustomerPetList = () => {
 
     const fetchPets = async () => {
         try {
-            const accountId = sessionStorage.getItem('accountId');
-            const response = await fetch(`http://localhost:5050/api/pet/available/${accountId}`);
+            const accountId = sessionStorage.getItem("accountId");
+            const token = sessionStorage.getItem("token"); 
+    
+            const response = await fetch(`http://localhost:5050/api/pet/available/${accountId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}` 
+                }
+            });
+    
             const data = await response.json();
             if (data.flag) {
                 setPets(data.data.filter(pet => !pet.isDelete));
@@ -24,7 +33,7 @@ const CustomerPetList = () => {
         } finally {
             setLoading(false);
         }
-    };
+    };    
 
     useEffect(() => {
         fetchPets();
@@ -47,9 +56,13 @@ const CustomerPetList = () => {
                         const deleteResponse = await fetch(
                             `http://localhost:5050/api/pet/${petId}`,
                             {
-                                method: 'DELETE',
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${sessionStorage.getItem("token")}` 
+                                }
                             }
-                        );
+                        );                        
                 
                         if (!deleteResponse.ok) {
                             const errorData = await deleteResponse.json(); 

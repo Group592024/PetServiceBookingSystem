@@ -67,6 +67,11 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("camera_id");
 
+                    b.Property<string>("cameraAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("camera_address");
+
                     b.Property<string>("cameraCode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -85,6 +90,11 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                     b.Property<bool>("isDeleted")
                         .HasColumnType("bit")
                         .HasColumnName("isDeleted");
+
+                    b.Property<string>("rtspUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("rtspurl");
 
                     b.HasKey("cameraId");
 
@@ -332,20 +342,20 @@ namespace FacilityServiceApi.Infrastructure.Data.Migrations
                         new
                         {
                             serviceTypeId = new Guid("2e9e9b22-81f8-4cda-900c-5e47d0849b67"),
-                            createAt = new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4912),
+                            createAt = new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6450),
                             description = "Medical services like vaccinations,...",
                             isDeleted = false,
                             typeName = "Medical",
-                            updateAt = new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4923)
+                            updateAt = new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6461)
                         },
                         new
                         {
                             serviceTypeId = new Guid("b94e2e27-fb58-4419-8c4f-69c58b752eab"),
-                            createAt = new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4927),
+                            createAt = new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6464),
                             description = "Spa services like grooming,...",
                             isDeleted = false,
                             typeName = "Spa",
-                            updateAt = new DateTime(2025, 2, 24, 16, 53, 52, 486, DateTimeKind.Local).AddTicks(4928)
+                            updateAt = new DateTime(2025, 3, 7, 22, 23, 50, 371, DateTimeKind.Local).AddTicks(6464)
                         });
                 });
 

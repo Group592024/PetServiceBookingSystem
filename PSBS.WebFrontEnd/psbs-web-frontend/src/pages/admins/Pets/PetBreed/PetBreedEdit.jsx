@@ -28,16 +28,36 @@ const PetBreedEdit = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = sessionStorage.getItem("token");
                 const [breedResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5050/api/PetBreed/${id}`),
-                    fetch('http://localhost:5050/api/PetType/available')
+                    fetch(`http://localhost:5050/api/PetBreed/${id}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }),
+                    fetch('http://localhost:5050/api/PetType/available', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
                 ]);
 
                 const breedData = await breedResponse.json();
                 const typesData = await typesResponse.json();
                 setPetTypes(typesData.data || []);
+
                 if (breedData.flag && breedData.data) {
-                    const typeResponse = await fetch(`http://localhost:5050/api/PetType/${breedData.data.petTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/PetType/${breedData.data.petTypeId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
                     const typeData = await typeResponse.json();
                     const currentType = typesData.data.find(t => t.petType_ID === breedData.data.petTypeId);
                     setName(breedData.data.petBreedName);
@@ -47,6 +67,7 @@ const PetBreedEdit = () => {
                     setIsDelete(breedData.data.isDelete);
                     setCurrentTypeName(typeData.petType_Name);
                 }
+
                 setLoading(false);
             } catch (error) {
                 console.error('Error:', error);
@@ -85,7 +106,7 @@ const PetBreedEdit = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
         // Validate fields first
         const errors = {
             name: name === '',
@@ -96,7 +117,7 @@ const PetBreedEdit = () => {
         if (Object.values(errors).some((fieldError) => fieldError)) {
             return;
         }
-    
+
         if (!selectedImage && tmpImage === sampleImage) {
             Swal.fire({
                 title: 'Pet Breed Image is required!',
@@ -105,7 +126,7 @@ const PetBreedEdit = () => {
             });
             return;
         }
-    
+
         // Add confirmation dialog
         const result = await Swal.fire({
             title: 'Are you sure?',
@@ -114,29 +135,33 @@ const PetBreedEdit = () => {
             showCancelButton: true,
             confirmButtonText: 'Update',
             cancelButtonText: 'Cancel',
-            confirmButtonColor: '#fbbf24', 
-            cancelButtonColor: '#9ca3af', 
+            confirmButtonColor: '#fbbf24',
+            cancelButtonColor: '#9ca3af',
         });
-    
+
         if (result.isConfirmed) {
             const formData = new FormData();
             formData.append('petBreedId', id);
             formData.append('petBreedName', name);
             formData.append('petTypeId', typeName);
             formData.append('petBreedDescription', description);
-    
+
             if (selectedImage) {
                 formData.append('imageFile', selectedImage);
             }
-    
+
             formData.append('isDelete', isDelete);
-    
+
             try {
+                const token = sessionStorage.getItem("token");
                 const response = await fetch(`http://localhost:5050/api/PetBreed`, {
                     method: 'PUT',
                     body: formData,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-    
+
                 if (response.ok) {
                     Swal.fire('Edit Pet Breed', 'Pet Breed Updated Successfully!', 'success');
                     navigate('/petBreed');

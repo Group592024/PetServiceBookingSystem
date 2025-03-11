@@ -9,7 +9,7 @@ namespace PSBS.HealthCareApi.Application.DTOs
 {
     public record PetHealthBookConvertDTO(
      Guid healthBookId,
-     [Required] Guid bookingId,
+     [Required] Guid BookingServiceItemId,
      List<Guid> medicineId,
      DateTime visitDate,
      DateTime? nextVisitDate,

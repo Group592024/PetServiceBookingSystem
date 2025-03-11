@@ -28,7 +28,15 @@ const CustomerPetEdit = () => {
     useEffect(() => {
         const fetchPetData = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/pet/${id}`);
+                const token = sessionStorage.getItem("token");
+                const response = await fetch(`http://localhost:5050/api/pet/${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 if (data.flag) {
                     const petData = data.data;
@@ -42,11 +50,7 @@ const CustomerPetEdit = () => {
                     setOldPetImage(petData.petImage);
                     console.log('Pet Type ID:', petData.petTypeId);
                     console.log('Pet Breed ID:', petData.petBreedId);
-                    console.log('Current Pet State:', {
-                        ...petData,
-                        petImage: null
-                    });
-
+                    console.log('Current Pet State:', { ...petData, petImage: null });
                 } else {
                     Swal.fire('Error', data.message || 'Failed to fetch pet details', 'error');
                 }
@@ -61,7 +65,15 @@ const CustomerPetEdit = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/petType');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch("http://localhost:5050/api/petType", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 console.log('Fetched Pet Types:', data);
                 setPetTypes(data.filter(type => !type.isDelete));
@@ -76,9 +88,16 @@ const CustomerPetEdit = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
-                    const data = await response.json();
+                    const token = sessionStorage.getItem("token");
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
 
+                    const data = await response.json();
                     if (!data.flag) {
                         Swal.fire({
                             title: 'Information',
@@ -191,7 +210,10 @@ const CustomerPetEdit = () => {
 
         try {
             const response = await fetch(`http://localhost:5050/api/pet`, {
-                method: 'PUT',
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                },
                 body: formData,
             });
 

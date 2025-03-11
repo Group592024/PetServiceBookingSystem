@@ -17,8 +17,8 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://192.168.1.7:5010/api/pet/available/';
-  final String deleteUrl = 'http://192.168.1.7:5010/api/pet/';
+  final String apiUrl = 'http://10.0.2.2:5050/api/pet/available/';
+  final String deleteUrl = 'http://10.0.2.2:5050/api/pet/';
   late String userId;
   @override
   void initState() {
@@ -30,7 +30,7 @@ class _CustomerPetListState extends State<PetPage> {
   Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
+      userId = prefs.getString('accountId') ?? "";
     });
   }
 
@@ -38,12 +38,19 @@ class _CustomerPetListState extends State<PetPage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final String accountId = prefs.getString('accountId') ?? '';
+      final String token = prefs.getString('token') ?? '';
 
-      if (accountId.isEmpty) {
-        throw Exception("Account ID not found. Please log in.");
+      if (accountId.isEmpty || token.isEmpty) {
+        throw Exception("Account ID or Token not found. Please log in.");
       }
 
-      final response = await http.get(Uri.parse('$apiUrl$accountId'));
+      final response = await http.get(
+        Uri.parse('$apiUrl$accountId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
       print(response.statusCode);
       if (response.statusCode == 200) {
@@ -73,7 +80,17 @@ class _CustomerPetListState extends State<PetPage> {
 
   Future<void> deletePet(String petId) async {
     try {
-      final response = await http.delete(Uri.parse('$deleteUrl$petId'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, String> headers = {
+        'Content-Type': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      };
+
+      final response = await http.delete(
+        Uri.parse('$deleteUrl$petId'),
+        headers: headers, 
+      );
       final responseData = json.decode(response.body);
 
       if (response.statusCode == 200 && responseData['flag'] == true) {
@@ -513,7 +530,7 @@ class _CustomerPetListState extends State<PetPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://192.168.1.7:5010/pet-service${pet.petImage}',
+                            'http://10.0.2.2:5050/pet-service${pet.petImage}',
                             width: 400,
                             height: 350,
                             fit: BoxFit.cover,

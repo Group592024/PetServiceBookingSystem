@@ -8,8 +8,8 @@ import Navbar from "../../../components/navbar/Navbar";
 
 const PetHealthBookCreate = () => {
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const sidebarRef = useRef(null);
-
   const [visitDetails, setVisitDetails] = useState({
     healthBookId: "",
     bookingId: "",
@@ -21,34 +21,77 @@ const PetHealthBookCreate = () => {
     updatedAt: "",
     isDeleted: false,
   });
-
   const [bookings, setBookings] = useState([]);
+  const [bookingCodeError, setBookingCodeError] = useState("");
   const [medicines, setMedicines] = useState([]);
   const [bookingCode, setbookingCode] = useState([]);
+  const [pets, setPets] = useState([]);
   const [treatments, setTreatments] = useState([]);
-
+  const [selectedPet, setSelectedPet] = useState("");
   useEffect(() => {
     const fetchData = async () => {
+
       try {
-        const [bookingsResponse, medicinesResponse, treatmentsResponse] = await Promise.all([
-          fetch("http://localhost:5201/Bookings"),
-          fetch("http://localhost:5003/Medicines"),
-          fetch("http://localhost:5003/api/Treatment"),
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+          throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        }
+        const [bookingsResponse, medicinesResponse, treatmentsResponse, petsResponse, bookingServiceItemsResponse] = await Promise.all([
+          fetch("http://localhost:5050/Bookings", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/Medicines", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/Treatment", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/pet", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          })
         ]);
 
+        // Kiểm tra phản hồi từ máy chủ
         if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
         if (!medicinesResponse.ok) throw new Error("Failed to fetch medicines.");
         if (!treatmentsResponse.ok) throw new Error("Failed to fetch treatments.");
+        if (!petsResponse.ok) throw new Error("Failed to fetch pets.");
+        if (!bookingServiceItemsResponse.ok) throw new Error("Failed to fetch booking service items.");
 
-        const [bookingsData, medicinesData, treatmentsData] = await Promise.all([
+        // Chuyển đổi phản hồi thành JSON
+        const [bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData] = await Promise.all([
           bookingsResponse.json(),
           medicinesResponse.json(),
           treatmentsResponse.json(),
+          petsResponse.json(),
+          bookingServiceItemsResponse.json()
         ]);
 
+        console.log({ bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData });
         console.log("Treatments API response:", treatmentsData);
-
-        // Kiểm tra dữ liệu từ API Treatment
         if (treatmentsData && Array.isArray(treatmentsData)) {
           setTreatments(treatmentsData);
         } else if (treatmentsData && treatmentsData.data && Array.isArray(treatmentsData.data)) {
@@ -57,7 +100,6 @@ const PetHealthBookCreate = () => {
           console.error("Invalid format for treatments data:", treatmentsData);
           Swal.fire("Error", "Invalid treatment data format.", "error");
         }
-
         setBookings(bookingsData.data || bookingsData);
         setMedicines(medicinesData.data || medicinesData);
       } catch (error) {
@@ -65,64 +107,142 @@ const PetHealthBookCreate = () => {
         Swal.fire("Error", "Failed to load data. Please try again later.", "error");
       }
     };
-
     fetchData();
   }, []);
-
-
+  useEffect(() => {
+    const fetchPetsByBooking = async () => {
+      if (!visitDetails.bookingId) return;
+      const selectedBooking = bookings.find(
+        (booking) => booking.bookingCode === visitDetails.bookingId
+      );
+      if (!selectedBooking) {
+        setPets([]);
+        return;
+      }
+      try {
+        // Thêm token vào headers
+        const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (!response.ok) throw new Error("Failed to fetch booking service items.");
+        const data = await response.json();
+        console.log("Booking Service Items API response:", data);
+        if (!data.data || !Array.isArray(data.data)) {
+          console.error("Invalid data format:", data);
+          return;
+        }
+        const petIds = data.data
+          .filter(item => item.bookingId === selectedBooking.bookingId)
+          .map(item => item.petId);
+        if (petIds.length === 0) {
+          setPets([]);
+          return;
+        }
+        const petResponses = await Promise.all(
+          petIds.map(petId => 
+            fetch(`http://localhost:5050/api/pet/${petId}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              }
+            })
+          )
+        );
+        const petDetails = await Promise.all(petResponses.map(res => res.json()));
+        console.log("Pet details from API:", petDetails);
+        const formattedPets = petDetails.map(pet => ({
+          petId: pet.data.petId,
+          petName: pet.data.petName || "No Name",
+        }));
+        setPets(formattedPets);
+      } catch (error) {
+        console.error("Error fetching pets:", error);
+        setPets([]);
+      }
+    };
+    fetchPetsByBooking();
+  }, [visitDetails.bookingId, bookings]);
   const generateGuid = () => {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
       var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
   };
+  const handleBookingCodeChange = (e) => {
+    const inputCode = e.target.value;
+    setVisitDetails({ ...visitDetails, bookingId: inputCode });
+    const selectedBooking = bookings.find((booking) => booking.bookingCode === inputCode);
+    if (!selectedBooking) {
+      setBookingCodeError("Incorrect Booking Code. Please check again!");
+    } else {
+      setBookingCodeError("");
+    }
+  };
   const currentDate = new Date().toISOString();
   const handleCreate = async () => {
-    // Tìm bookingId dựa trên bookingCode mà người dùng nhập
     const selectedBooking = bookings.find(
       (booking) => booking.bookingCode === visitDetails.bookingId
     );
-
     if (!selectedBooking) {
       Swal.fire("Error", "Invalid Booking Code. Please check again.", "error");
       return;
     }
-
-    if (!visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
-      Swal.fire("Error", "Please fill all required fields", "error");
-      return;
-    }
-
-    const newVisitDetails = {
-      bookingId: selectedBooking.bookingId, // Lấy bookingId từ bookingCode
-      medicineIds: visitDetails.medicineId,
-      visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
-      nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
-      performBy: visitDetails.performBy,
-      createdAt: currentDate,
-      updatedAt: currentDate,
-      isDeleted: visitDetails.isDeleted || false,
-    };
-
-    console.log("Data sent to API:", newVisitDetails);
-
     try {
-      const response = await fetch("http://localhost:5003/api/PetHealthBook", {
+      // Thêm token vào headers
+      const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) throw new Error("Failed to fetch booking service items.");
+      const bookingServiceData = await response.json();
+      console.log("Booking Service Items API response:", bookingServiceData);
+      const matchingServiceItem = bookingServiceData.data.find(
+        item => item.bookingId === selectedBooking.bookingId && item.petId === selectedPet
+      );
+  
+      if (!matchingServiceItem) {
+        Swal.fire("Error", "No matching Booking Service Item found.", "error");
+        return;
+      }
+      if (!visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
+        Swal.fire("Error", "Please fill all required fields", "error");
+        return;
+      }
+      const newVisitDetails = {
+        bookingId: selectedBooking.bookingId,
+        bookingServiceItemId: matchingServiceItem.bookingServiceItemId,
+        medicineIds: visitDetails.medicineId,
+        visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
+        nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
+        performBy: visitDetails.performBy,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        isDeleted: visitDetails.isDeleted || false,
+      };
+      console.log("Data sent to API:", newVisitDetails);
+  
+      // Thêm token vào headers khi tạo mới
+      const createResponse = await fetch("http://localhost:5050/api/PetHealthBook", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(newVisitDetails),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (!createResponse.ok) {
+        const errorData = await createResponse.json();
         console.error("Error response from API:", errorData);
         Swal.fire("Error", errorData.message || "Failed to create data", "error");
       } else {
-        const result = await response.json();
-        console.log("Response from API:", result);
-
         Swal.fire({
           title: "Success",
           text: "Pet health book created successfully!",
@@ -133,17 +253,15 @@ const PetHealthBookCreate = () => {
         });
       }
     } catch (error) {
-      console.error("Error sending data:", error);
+      console.error("Error creating health book:", error);
       Swal.fire("Error", "Failed to create data. Please try again later.", "error");
     }
   };
 
 
   const [filteredMedicines, setFilteredMedicines] = useState([]);
-
   useEffect(() => {
     if (visitDetails.treatmentId) {
-      // Lọc danh sách thuốc theo treatmentId
       const relatedMedicines = medicines.filter(medicine =>
         medicine.treatmentId === visitDetails.treatmentId
       );
@@ -152,11 +270,9 @@ const PetHealthBookCreate = () => {
       setFilteredMedicines([]);
     }
   }, [visitDetails.treatmentId, medicines]);
-
   const handleBack = () => {
     navigate(-1);
   };
-
   const handleMedicineChange = (e) => {
     const { value, checked } = e.target;
     setVisitDetails((prevState) => {
@@ -166,7 +282,6 @@ const PetHealthBookCreate = () => {
       return { ...prevState, medicineId: newMedicineId };
     });
   };
-
   return (
     <div className="flex h-screen bg-dark-grey-100">
       <Sidebar ref={sidebarRef} />
@@ -174,18 +289,35 @@ const PetHealthBookCreate = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-4 bg-white shadow-md rounded-md h-full">
           <h2 className="mb-4 text-xl font-bold">Create Health Book</h2>
-
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Booking Code</label>
             <input
               type="text"
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
-              onChange={(e) => setVisitDetails({ ...visitDetails, bookingId: e.target.value })}
+              onChange={handleBookingCodeChange}
               placeholder="Enter Booking Code"
             />
+            {bookingCodeError && <p className="text-red-500 text-sm mt-1">{bookingCodeError}</p>}
           </div>
 
+          {pets.length > 0 && (
+            <div className="mb-3">
+              <label className="block text-sm font-medium mb-1">Pets</label>
+              <select
+                className="w-full p-3 border rounded-md"
+                value={selectedPet}
+                onChange={(e) => setSelectedPet(e.target.value)}
+              >
+                <option value="">Select Pet</option>
+                {pets.map((pet) => (
+                  <option key={pet.petId} value={pet.petId}>
+                    {pet.petName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Perform by</label>
             <input
@@ -195,7 +327,6 @@ const PetHealthBookCreate = () => {
               onChange={(e) => setVisitDetails({ ...visitDetails, performBy: e.target.value })}
             />
           </div>
-
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Visit Date</label>
             <DatePicker
@@ -205,7 +336,6 @@ const PetHealthBookCreate = () => {
               className="w-full p-3 border rounded-md"
             />
           </div>
-
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Next Visit Date</label>
             <DatePicker
@@ -254,7 +384,6 @@ const PetHealthBookCreate = () => {
               </div>
             </div>
           )}
-
           <div className="flex justify-between">
             <button
               type="button"
@@ -276,5 +405,4 @@ const PetHealthBookCreate = () => {
     </div>
   );
 };
-
 export default PetHealthBookCreate; 

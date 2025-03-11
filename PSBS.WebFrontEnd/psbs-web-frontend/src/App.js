@@ -74,6 +74,10 @@ import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetai
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
+import CameraList from "./pages/admins/camera/CameraList";
+import CreateCamera from "./pages/admins/camera/CreateCamera";
+import CameraDetail from "./pages/admins/camera/CameraDetail";
+import EditCamera from "./pages/admins/camera/EditCamera";
 import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
@@ -87,12 +91,14 @@ import AddBooking from "./pages/customers/bookings/AddBooking";
 import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Booking";
 import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
 import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
+import CameraCreate from "./pages/admins/camera/CreateCamera";
+import CameraCus from "./pages/customers/cameras/CameraCus";
 import Unauthorized from "./pages/authorize/Unauthorized";
 
 function App() {
   const userId = sessionStorage.getItem("accountId");
   useEffect(() => {
-    signalRService.startConnection("http://192.168.2.28:5159/chatHub", userId);
+    signalRService.startConnection("http://localhost:5050/chatHub", userId);
 
     return () => {
       signalRService.stopConnection(); // Cleanup
@@ -103,7 +109,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Route không yêu cầu bảo vệ */}
-
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
@@ -167,7 +172,7 @@ function App() {
             }
           />
           <Route
-            path="/list"
+            path="/list/:petId"
             element={
               <ProtectedRoute allowedRoles={["user"]}>
                 <PetHealthBookListCus />
@@ -250,6 +255,47 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/camera"
+            element={
+              <ProtectedRoute>
+                <CameraCus/>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cameralist"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                <CameraList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addcamera "
+            element={
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                <CreateCamera />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/detailcamera/:cameraId"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                <CameraDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editcamera/:cameraId"
+            element={
+              <ProtectedRoute>
+                <EditCamera />
+              </ProtectedRoute>
+            }
+          />
+          {/* Các route khác */}
           {/* Medicine links*/}
 
           <Route path="/medicines">

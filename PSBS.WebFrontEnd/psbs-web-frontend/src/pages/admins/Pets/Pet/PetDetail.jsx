@@ -16,13 +16,34 @@ const AdminPetDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const petResponse = await fetch(`http://localhost:5050/api/Pet/${id}`);
+                const token = sessionStorage.getItem("token");
+
+                const petResponse = await fetch(`http://localhost:5050/api/Pet/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const petData = await petResponse.json();
                 console.log(petData);
 
                 const [accountResponse, breedResponse] = await Promise.all([
-                    fetch('http://localhost:5050/api/Account/all'),
-                    fetch('http://localhost:5050/api/PetBreed'),
+                    fetch('http://localhost:5050/api/Account/all', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }),
+                    fetch('http://localhost:5050/api/PetBreed', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
                 ]);
 
                 const accountData = await accountResponse.json();
@@ -43,7 +64,6 @@ const AdminPetDetail = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -74,15 +94,19 @@ const AdminPetDetail = () => {
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'No, keep it'
         });
-    
+
         if (confirmDelete.isConfirmed) {
             try {
+                const token = sessionStorage.getItem("token"); 
                 const response = await fetch(`http://localhost:5050/api/Pet/${petId}`, {
                     method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-    
+
                 const data = await response.json();
-    
+
                 if (response.ok) {
                     Swal.fire('Deleted!', 'The pet has been deleted.', 'success');
                     navigate('/pet');
@@ -94,7 +118,7 @@ const AdminPetDetail = () => {
             }
         }
     };
-    
+
     return (
         <div className="bg-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />

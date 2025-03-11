@@ -1,6 +1,6 @@
-
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:psbs_app_flutter/pages/Camera/camera.dart';
 import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
 import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
     as list;
@@ -8,17 +8,15 @@ import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
 import 'package:psbs_app_flutter/pages/Services/service_page.dart';
-
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/Gifts/gift_list_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
-
+import 'pages/room/room_page.dart';
 void main() {
   runApp(const StoreScope(child: MyApp()));
 }
@@ -38,11 +36,11 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login', // Default startup page
       onGenerateRoute: RouteGenerator.generateRoute,
       localizationsDelegates: [
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              FlutterQuillLocalizations.delegate,
-            ],
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        FlutterQuillLocalizations.delegate,
+      ],
     );
   }
 }
@@ -70,7 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final screens = [
     HomePage(),
-    PetPage(),
+    //PetPage(),
+    RoomPage(),
     BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
@@ -147,40 +146,39 @@ class _MyHomePageState extends State<MyHomePage> {
             onSelected: (value) {
               if (value == 'logout') {
                 logout(context); // Gọi hàm logout
-              } else if (value == 'healthcarebook') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => list.PetHealthBookList()),
-                );
               } else if (value == 'voucher') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              }else if (value == 'gift') {
+              } else if (value == 'camera') {
+                // 👉 Điều hướng sang trang xem camera
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => GiftListScreen()),
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                );
+              } else if (value == 'gift') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => GiftListScreen()),
                 );
               }
             },
             itemBuilder: (context) => [
               PopupMenuItem(
-                value: 'healthcarebook',
-                child: ListTile(
-                  leading: Icon(Icons.menu_book, color: Colors.blue),
-                  title: Text('HealthCareBook',
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ),
-              PopupMenuItem(
                 value: 'voucher',
                 child: ListTile(
                   leading: Icon(Icons.discount, color: Colors.blue),
                   title: Text('Voucher', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'camera',
+                child: ListTile(
+                  leading: const Icon(Icons.videocam, color: Colors.green),
+                  title: const Text('Xem Camera',
+                      style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(
