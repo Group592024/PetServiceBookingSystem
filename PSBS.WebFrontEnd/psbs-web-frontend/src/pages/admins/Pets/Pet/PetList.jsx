@@ -16,6 +16,7 @@ const AdminPetList = () => {
 
     const fetchData = async () => {
         try {
+            const token = sessionStorage.getItem("token");
             const [petResponse, accountResponse, breedResponse] = await Promise.all([
                 fetch('http://localhost:5050/api/Pet'),
                 fetch('http://localhost:5050/api/Account/all'),

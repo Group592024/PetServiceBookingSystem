@@ -53,7 +53,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5050/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -81,7 +81,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     try {
       final imageResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
+            'http://10.0.2.2:5050/api/Account/loadImage?filename=$filename'),
       );
 
       if (imageResponse.statusCode == 200) {
@@ -103,7 +103,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
     final String apiUrl =
-        'http://10.0.2.2:5000/api/Account/ChangePassword$accountId';
+        'http://10.0.2.2:5050/api/Account/ChangePassword$accountId';
     final response = await http.put(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},

@@ -37,14 +37,14 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
       final healthBookRes = await http.get(Uri.parse(
           'http://10.0.2.2:5003/api/PetHealthBook/${widget.healthBookId}'));
       final medicinesRes =
-          await http.get(Uri.parse('http://10.0.2.2:5003/Medicines'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/Medicines'));
       final treatmentsRes =
-          await http.get(Uri.parse('http://10.0.2.2:5003/api/Treatment'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/Treatment'));
       final bookingsRes =
-          await http.get(Uri.parse('http://10.0.2.2:5201/Bookings'));
-      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5010/api/pet'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/Bookings'));
+      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5050/api/pet'));
       final bookingServiceItemsRes = await http.get(Uri.parse(
-          'http://10.0.2.2:5023/api/BookingServiceItems/GetBookingServiceList'));
+          'http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList'));
 
       if (!healthBookRes.statusCode.toString().startsWith('2') ||
           !medicinesRes.statusCode.toString().startsWith('2') ||
@@ -142,7 +142,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
               child: CircleAvatar(
                 radius: 80,
                 backgroundImage: petImage.isNotEmpty
-                    ? NetworkImage('http://10.0.2.2:5010$petImage')
+                    ? NetworkImage('http://10.0.2.2:5050$petImage')
                     : AssetImage('assets/default-image.png') as ImageProvider,
               ),
             ),

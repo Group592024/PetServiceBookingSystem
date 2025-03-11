@@ -13,25 +13,37 @@ import { Link, useNavigate } from "react-router-dom";
 const CameraList = () => {
   const [cameras, setCameras] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const token = sessionStorage.getItem("token");
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
 
   const fetchCameras = async () => {
     try {
-      const response = await fetch("http://localhost:5023/api/Camera/all");
-      const data = await response.json();
-      if (Array.isArray(data)) {
-        setCameras(data);
-      } else if (data.data) {
-        setCameras(data.data);
-      } else {
-        setCameras([]);
+      const token = sessionStorage.getItem("token");
+      if (!token) {
+        throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
       }
+
+      const response = await fetch(`http://localhost:5050/api/Camera/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+      },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch camera data");
+      }
+
+      const data = await response.json();
+      setCameras(Array.isArray(data?.data) ? data.data : []);
     } catch (error) {
       console.error("Error fetching cameras:", error);
-      Swal.fire("Error", "Failed to load camera data", "error");
+      Swal.fire("Error", error.message || "Failed to load camera data", "error");
     }
   };
+
 
   useEffect(() => {
     fetchCameras();
@@ -40,12 +52,13 @@ const CameraList = () => {
   const filteredCameras = cameras.filter((camera) => {
     const query = searchQuery.toLowerCase();
     return (
-      camera.cameraCode.toLowerCase().includes(query) ||
-      camera.cameraType.toLowerCase().includes(query) ||
-      camera.cameraStatus.toLowerCase().includes(query) ||
-      camera.cameraAddress.toLowerCase().includes(query)
+      (camera.cameraCode?.toLowerCase() ?? "").includes(query) ||
+      (camera.cameraType?.toLowerCase() ?? "").includes(query) ||
+      (camera.cameraStatus?.toLowerCase() ?? "").includes(query) ||
+      (camera.cameraAddress?.toLowerCase() ?? "").includes(query)
     );
   });
+
 
   const handleDelete = (cameraId, cameraCode) => {
     Swal.fire({
@@ -59,9 +72,19 @@ const CameraList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const response = await fetch(`http://localhost:5023/api/Camera/${cameraId}`, {
-            method: "DELETE"
+          const token = sessionStorage.getItem("token");
+          if (!token) {
+            throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+          }
+
+          const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`, // Thêm token vào header
+            },
           });
+
           const data = await response.json();
           if (response.ok) {
             if (data.message.toLowerCase().includes("soft-deleted")) {
@@ -72,16 +95,8 @@ const CameraList = () => {
               );
               Swal.fire("Deleted!", `${cameraCode} has been soft-deleted.`, "success");
             } else if (data.message.toLowerCase().includes("hard-deleted")) {
-              // Loại bỏ khỏi danh sách
               setCameras((prev) => prev.filter((cam) => cam.cameraId !== cameraId));
               Swal.fire("Deleted!", `${cameraCode} has been permanently deleted.`, "success");
-            } else {
-              setCameras((prev) =>
-                prev.map((cam) =>
-                  cam.cameraId === cameraId ? { ...cam, isDeleted: true } : cam
-                )
-              );
-              Swal.fire("Deleted!", `${cameraCode} has been soft-deleted.`, "success");
             }
           } else {
             Swal.fire("Error", data.message || "Failed to delete camera", "error");
@@ -99,8 +114,7 @@ const CameraList = () => {
       field: "serialNumber",
       headerName: "S.No",
       flex: 0.5,
-      renderCell: (params) => <span>{params.row.id}</span>,
-      sortComparator: (v1, v2) => v1 - v2,
+      renderCell: (params) => <span>{params.row.id ?? ""}</span>,
     },
     { field: "cameraCode", headerName: "Camera Code", flex: 1 },
     { field: "cameraType", headerName: "Type", flex: 1 },
