@@ -26,6 +26,7 @@ var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseCors();
 app.UseMiddleware<AttachSignatureToRequest>();
+app.UseWebSockets();
 app.UseOcelot().Wait();
 
 

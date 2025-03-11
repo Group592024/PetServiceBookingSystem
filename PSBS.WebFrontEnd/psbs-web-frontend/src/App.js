@@ -76,9 +76,9 @@ import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
 import Camera from "./pages/customers/camera/Camera";
 import CameraList from "./pages/admins/camera/CameraList";
-import CreateCamera from "./pages/admins/camera/CreateCamera"
-import CameraDetail from "./pages/admins/camera/CameraDetail"
-import EditCamera from "./pages/admins/camera/EditCamera"
+import CreateCamera from "./pages/admins/camera/CreateCamera";
+import CameraDetail from "./pages/admins/camera/CameraDetail";
+import EditCamera from "./pages/admins/camera/EditCamera";
 import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
@@ -98,7 +98,7 @@ import Unauthorized from "./pages/authorize/Unauthorized";
 function App() {
   const userId = sessionStorage.getItem("accountId");
   useEffect(() => {
-    signalRService.startConnection("http://192.168.2.28:5159/chatHub", userId);
+    signalRService.startConnection("http://localhost:5050/chatHub", userId);
 
     return () => {
       signalRService.stopConnection(); // Cleanup

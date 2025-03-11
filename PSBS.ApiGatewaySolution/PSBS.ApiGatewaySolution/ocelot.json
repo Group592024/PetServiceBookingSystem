@@ -77,15 +77,16 @@
     },
     {
       // Chat Api
-      "DownstreamPathTemplate": "/api/ChatControllers/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamPathTemplate": "/chatHub/{everything}",
+      "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
+          
           "Host": "localhost",
           "Port": 5159
         }
       ],
-      "UpstreamPathTemplate": "/api/ChatControllers/{everything}",
+      "UpstreamPathTemplate": "/chatHub/{everything}",
       "UpstreamHttpMethod": [
         "GET",
         "POST"
