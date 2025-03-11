@@ -18,42 +18,56 @@ const RoomList = () => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch('http://localhost:5050/api/RoomType');
+            const token = sessionStorage.getItem("token");
+
+            const response = await fetch("http://localhost:5050/api/RoomType", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
             const roomTypesData = await response.json();
-    
+
             if (roomTypesData && Array.isArray(roomTypesData.data)) {
                 setRoomTypes(roomTypesData.data);
             } else {
-                console.error('Unexpected response format for roomTypes:', roomTypesData);
+                console.error("Unexpected response format for roomTypes:", roomTypesData);
             }
         } catch (error) {
-            console.error('Error fetching room types:', error);
+            console.error("Error fetching room types:", error);
         }
-    };    
+    };
 
     const fetchDataFunction = async () => {
         try {
-            const response = await fetch('http://localhost:5050/api/Room');
+            const token = sessionStorage.getItem("token");
+            const response = await fetch('http://localhost:5050/api/Room', {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
             const roomData = await response.json();
-            if (roomData.data && Array.isArray(roomData.data)) {
-                //Sort Deleted
-                // const result = roomData.data
-                // .map((item) => ({
-                //     id: item.roomId,
-                //     ...item,
-                // }))
-                // .sort((a, b) => a.isDeleted - b.isDeleted); 
-                // setData(result);
+
+            console.log("API Response:", roomData); 
+
+            if (roomData && roomData.data && Array.isArray(roomData.data)) {
                 const result = roomData.data.map((item) => ({
                     id: item.roomId,
                     ...item,
                 }));
                 setData(result);
             } else {
-                console.error('Unexpected response format:', roomData);
+                console.error("Unexpected response format:", roomData);
+                setData([]);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error("Error fetching data:", error);
+            setData([]);
         } finally {
             setLoading(false);
         }
@@ -69,7 +83,9 @@ const RoomList = () => {
     }, []);
 
     useEffect(() => {
-        console.log('Room Types state:', roomTypes);
+        if (Array.isArray(roomTypes)) {
+            console.log('Room Types state:', roomTypes);
+        }
     }, [roomTypes]);
 
     useEffect(() => {
@@ -77,10 +93,10 @@ const RoomList = () => {
     }, [data]);
 
     useEffect(() => {
-        if (data.length === 0) {
+        if (Array.isArray(data) && data.length === 0) {
             console.log("No rooms available!");
         }
-    }, [data]);    
+    }, [data]);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -96,15 +112,19 @@ const RoomList = () => {
             if (result.isConfirmed) {
                 const fetchDelete = async () => {
                     try {
+                        const token = sessionStorage.getItem("token");
                         const deleteResponse = await fetch(
                             `http://localhost:5050/api/Room/${id}`,
                             {
                                 method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
                             }
                         );
-    
+
                         const data = await deleteResponse.json();
-    
+
                         if (deleteResponse.ok) {
                             Swal.fire(
                                 'Deleted!',
@@ -114,9 +134,9 @@ const RoomList = () => {
                             fetchDataFunction();
                             setData((prevData) => {
                                 if (prevData.length === 1) {
-                                    return []; 
+                                    return [];
                                 }
-                               //Còn lại 1 cái để xóa
+                                //Còn lại 1 cái để xóa
                             });
                         } else {
                             Swal.fire(
@@ -130,7 +150,7 @@ const RoomList = () => {
                         Swal.fire('Error!', 'Failed to delete the room.', 'error');
                     }
                 };
-    
+
                 fetchDelete();
             }
         });
@@ -145,9 +165,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  No.
+                    No.
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const index = data.findIndex(row => row.id === params.row.id);
                 return <div>{index + 1}</div>;
@@ -161,9 +181,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Name
+                    Name
                 </div>
-              ),
+            ),
         },
         {
             field: 'roomTypeId',
@@ -173,9 +193,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Type
+                    Type
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const roomType = roomTypes.find(type => type.roomTypeId === params.value);
                 return roomType ? roomType.name : 'Unknown';
@@ -189,9 +209,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Price
+                    Price
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const roomType = roomTypes.find(type => type.roomTypeId === params.row.roomTypeId);
                 return roomType ? `${roomType.price} VND` : 'N/A';
@@ -205,9 +225,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Status
+                    Status
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 let color;
                 switch (params.row.status) {
@@ -222,14 +242,14 @@ const RoomList = () => {
                         break;
                     default:
                         color = 'gray';
-                }       
+                }
                 return (
                     <div style={{ fontWeight: 'bold', color: color }}>
                         {params.row.status}
                     </div>
                 );
             },
-        },        
+        },
         {
             field: 'isDeleted',
             headerName: 'Available',
@@ -238,9 +258,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Available
+                    Available
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ fontWeight: 'bold', color: params.row.isDeleted ? 'red' : 'green' }}>
                     {params.row.isDeleted ? 'Inactive' : 'Active'}
@@ -256,9 +276,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Actions
+                    Actions
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                     <IconButton
@@ -342,7 +362,7 @@ const RoomList = () => {
                                 }}
                                 pageSizeOptions={[5, 10, 20]}
                                 getRowClassName={(params) => {
-                                    return params.row.isDeleted ? 'opacity-50 bg-gray-200' : ''; 
+                                    return params.row.isDeleted ? 'opacity-50 bg-gray-200' : '';
                                 }}
                             />
                         )}

@@ -7,7 +7,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 {
     [ApiController]
     [Route("api/bookingServiceItem")]
-    [Authorize]
+    [AllowAnonymous]
     public class BookingServiceItemController : Controller
     {
         private readonly FacilityServiceDbContext context;
@@ -17,14 +17,12 @@ namespace FacilityServiceApi.Presentation.Controllers
              this.context = context;
         }
 
-       [HttpGet("check/{petId}")]
-       [Authorize(Policy = "AdminOrStaff")]
-       public async Task<ActionResult<bool>> CheckBookingsForPet(Guid petId)
-       {
-           var hasBookings = await context.bookingServiceItems
-                                            .AnyAsync(b => b.PetId == petId);
-           return Ok(hasBookings);
-       }
-        
+        [HttpGet("check/{petId}")]
+        public async Task<ActionResult<bool>> CheckBookingsForPet(Guid petId)
+        {
+            var hasBookings = await context.bookingServiceItems.AnyAsync(b => b.PetId == petId);
+            return Ok(hasBookings);
+        }
+
     }
 }

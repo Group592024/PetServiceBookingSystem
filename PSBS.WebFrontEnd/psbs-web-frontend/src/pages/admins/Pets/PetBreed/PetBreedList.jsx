@@ -17,37 +17,52 @@ const PetBreedList = () => {
 
     const fetchPetTypes = async () => {
         try {
-            const fetchPetTypesData = await fetch('http://localhost:5050/api/PetType');
-            const response = await fetchPetTypesData.json();
-            if (Array.isArray(response)) {
-                setPetTypes(response);  
+            const token = sessionStorage.getItem("token");
+            const response = await fetch("http://localhost:5050/api/PetType", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            });
+    
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                setPetTypes(data);  
             } else {
-                console.error('Unexpected response format for petTypes:', response);
+                console.error("Unexpected response format for petTypes:", data);
             }
         } catch (error) {
-            console.error('Error fetching pet types:', error);
+            console.error("Error fetching pet types:", error);
         }
     };    
 
     const fetchDataFunction = async () => {
         try {
-            const fetchData = await fetch('http://localhost:5050/api/PetBreed');
-            const response = await fetchData.json();
-
-            if (response.data && Array.isArray(response.data)) {
-                const result = response.data.map((item) => ({
+            const token = sessionStorage.getItem("token");
+            const response = await fetch("http://localhost:5050/api/PetBreed", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                }
+            });
+    
+            const data = await response.json();
+            if (data.data && Array.isArray(data.data)) {
+                const result = data.data.map((item) => ({
                     id: item.petBreedId,
                     ...item,
                 }));
-                console.log('Processed result: ', result);
+                console.log("Processed result: ", result);
                 setData(result);
             } else {
-                console.error('Unexpected response format: ', response);
+                console.error("Unexpected response format: ", data);
             }
         } catch (error) {
-            console.error('Error fetching data: ', error);
+            console.error("Error fetching data: ", error);
         }
-    };
+    };    
 
     useEffect(() => {
         fetchPetTypes();  
@@ -56,56 +71,50 @@ const PetBreedList = () => {
 
     const handleDelete = (id) => {
         Swal.fire({
-            title: 'Are you sure?',
-            text: 'Do you want to delete this item? This action may affect related data in the system.',
-            icon: 'warning',
+            title: "Are you sure?",
+            text: "Do you want to delete this item? This action may affect related data in the system.",
+            icon: "warning",
             showCancelButton: true,
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
+            confirmButtonText: "Delete",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
         }).then((result) => {
             if (result.isConfirmed) {
                 const fetchDelete = async () => {
                     try {
-                        const deleteResponse = await fetch(
-                            `http://localhost:5050/api/PetBreed/${id}`,
-                            {
-                                method: 'DELETE',
-                            }
-                        );
+                        const token = sessionStorage.getItem("token");
+                        const deleteResponse = await fetch(`http://localhost:5050/api/PetBreed/${id}`, {
+                            method: "DELETE",
+                            headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${token}`,
+                            },
+                        });
     
                         if (deleteResponse.ok) {
-                            Swal.fire(
-                                'Deleted!',
-                                'The pet breed has been deleted.',
-                                'success'
-                            );
+                            Swal.fire("Deleted!", "The pet breed has been deleted.", "success");
                             fetchDataFunction();
                             setData((prevData) => {
                                 if (prevData.length === 1) {
                                     return []; 
                                 }
-                               //Còn lại 1 cái để xóa
+                                return prevData.filter((item) => item.id !== id); // Còn lại 1 cái để xóa
                             });
                         } else {
-                            const errorData = await deleteResponse.json(); // Đọc dữ liệu lỗi từ phản hồi
-                            Swal.fire(
-                                'Error!',
-                                errorData.message || 'Failed to delete the pet breed.', // Hiển thị thông báo lỗi
-                                'error'
-                            );
+                            const errorData = await deleteResponse.json();
+                            Swal.fire("Error!", errorData.message || "Failed to delete the pet breed.", "error");
                         }
                     } catch (error) {
                         console.error(error);
-                        Swal.fire('Error!', 'Failed to delete the pet breed.', 'error');
+                        Swal.fire("Error!", "Failed to delete the pet breed.", "error");
                     }
                 };
     
                 fetchDelete();
             }
         });
-    };
+    };    
 
     console.log("petTypes:", petTypes);
     const columns = [

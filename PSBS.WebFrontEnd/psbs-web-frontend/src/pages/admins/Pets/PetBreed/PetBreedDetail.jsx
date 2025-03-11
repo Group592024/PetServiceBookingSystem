@@ -13,33 +13,50 @@ const PetBreedDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/PetBreed/${id}`);
+                const token = sessionStorage.getItem("token");
+    
+                const response = await fetch(`http://localhost:5050/api/PetBreed/${id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+    
                 const data = await response.json();
                 setDetail(data.data);
+    
                 if (data.data && data.data.petTypeId) {
-                    const petTypeResponse = await fetch(`http://localhost:5050/api/PetType/${data.data.petTypeId}`);
+                    const petTypeResponse = await fetch(`http://localhost:5050/api/PetType/${data.data.petTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    });
+    
                     const petTypeData = await petTypeResponse.json();
                     if (petTypeData && petTypeData.petType_Name) {
                         setPetTypeName(petTypeData.petType_Name);
                     } else {
-                        console.log('PetType data not found, setting as Unknown');
-                        setPetTypeName('Unknown');
+                        console.log("PetType data not found, setting as Unknown");
+                        setPetTypeName("Unknown");
                     }
                 } else {
-                    console.log('No petTypeId in PetBreed data');
-                    setPetTypeName('Unknown');
+                    console.log("No petTypeId in PetBreed data");
+                    setPetTypeName("Unknown");
                 }
             } catch (error) {
-                console.error('Failed fetching data: ', error);
+                console.error("Failed fetching data: ", error);
             }
         };
+    
         if (id) fetchDetail();
     }, [id]);
-
+    
     if (!detail) {
         return <div>Loading...</div>;
     }
-
     const imageURL = `http://localhost:5050/pet-service${detail.petBreedImage}`;
 
     return (

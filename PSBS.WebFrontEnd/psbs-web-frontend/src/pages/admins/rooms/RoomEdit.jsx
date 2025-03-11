@@ -32,9 +32,21 @@ const RoomEdit = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = sessionStorage.getItem("token");
+
                 const [roomResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5050/api/Room/${id}`),
-                    fetch('http://localhost:5050/api/RoomType/available')
+                    fetch(`http://localhost:5050/api/Room/${id}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }),
+                    fetch("http://localhost:5050/api/RoomType/available", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    })
                 ]);
 
                 const roomData = await roomResponse.json();
@@ -42,12 +54,18 @@ const RoomEdit = () => {
                 setRoomTypes(typesData.data || []);
 
                 if (roomData.flag && roomData.data) {
-                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
                     const typeData = await typeResponse.json();
 
                     setRoomName(roomData.data.roomName);
                     setRoomType(roomData.data.roomTypeId);
-                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : 'default-room-image.jpg');
+                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : "default-room-image.jpg");
                     setRoomDescription(roomData.data.description);
                     setRoomStatus(roomData.data.status);
                     setIsDeleted(roomData.data.isDeleted);
@@ -55,14 +73,13 @@ const RoomEdit = () => {
                     setRoomTypePrice(typeData.data.price);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                Swal.fire('Error', 'Failed to fetch data!', 'error');
+                console.error("Error:", error);
+                Swal.fire("Error", "Failed to fetch data!", "error");
             }
         };
 
         fetchData();
     }, [id]);
-
 
     const handleImageChange = (event) => {
         const fileImage = event.target.files[0];
@@ -125,11 +142,14 @@ const RoomEdit = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:5050/api/Room`, {
-                    method: 'PUT',
-                    body: formData,
+                const token = sessionStorage.getItem("token");
+                const response = await fetch("http://localhost:5050/api/Room", {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
                 });
-
                 if (response.ok) {
                     Swal.fire('Edit Room', 'Room Updated Successfully!', 'success');
                     navigate('/room');
