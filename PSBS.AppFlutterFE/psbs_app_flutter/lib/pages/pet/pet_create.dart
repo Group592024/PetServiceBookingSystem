@@ -40,8 +40,19 @@ class _PetCreateState extends State<PetCreate> {
 
   Future<void> _fetchPetTypes() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/petType'));
+      setState(() => _isLoading = true);
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/petType'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -50,17 +61,31 @@ class _PetCreateState extends State<PetCreate> {
               .map((json) => PetType.fromJson(json))
               .toList();
         });
+      } else {
+        throw Exception('Failed to fetch pet types');
       }
     } catch (e) {
-      _showErrorDialog('Failed to fetch pet types');
+      _showErrorDialog('Error loading pet types: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
+      setState(() => _isLoading = true);
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.get(
         Uri.parse('http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag'] == true && data['data'] != null) {
@@ -73,9 +98,13 @@ class _PetCreateState extends State<PetCreate> {
           setState(() => _breeds = []);
           _showMessage('No breeds available for this pet type');
         }
+      } else {
+        throw Exception('Failed to fetch breeds');
       }
     } catch (e) {
-      _showErrorDialog('Failed to fetch breeds');
+      _showErrorDialog('Error loading breeds: $e');
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -155,9 +184,10 @@ class _PetCreateState extends State<PetCreate> {
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      String accountId = prefs.getString('accountId') ?? '';
+      String? accountId = prefs.getString('accountId');
+      String? token = prefs.getString('token');
 
-      if (accountId.isEmpty) {
+      if (accountId == null || accountId.isEmpty) {
         _showErrorDialog('User not logged in.');
         return;
       }
@@ -167,11 +197,18 @@ class _PetCreateState extends State<PetCreate> {
         Uri.parse('http://10.0.2.2:5050/api/pet'),
       );
 
+      request.headers.addAll({
+        'Authorization': token != null ? 'Bearer $token' : '',
+        'Content-Type': 'multipart/form-data',
+      });
+
       request.fields.addAll({
         'petName': _nameController.text,
         'petGender': _petGender.toString(),
-        'dateOfBirth': DateFormat('yyyy-MM-dd').format(_dateOfBirth!),
-        'petBreedId': _selectedBreedId!,
+        'dateOfBirth': _dateOfBirth != null
+            ? DateFormat('yyyy-MM-dd').format(_dateOfBirth!)
+            : '',
+        'petBreedId': _selectedBreedId ?? '',
         'petWeight': _weightController.text,
         'petFurType': _furTypeController.text,
         'petFurColor': _furColorController.text,
@@ -179,16 +216,18 @@ class _PetCreateState extends State<PetCreate> {
         'accountId': accountId,
       });
 
-      request.files.add(await http.MultipartFile.fromPath(
-        'imageFile',
-        _image!.path,
-      ));
+      if (_image != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'imageFile',
+          _image!.path,
+        ));
+      }
 
       final response = await request.send();
       final responseData = await response.stream.bytesToString();
       final jsonResponse = json.decode(responseData);
 
-      if (jsonResponse['flag'] == true) {
+      if (response.statusCode == 200 && jsonResponse['flag'] == true) {
         _showSuccessDialog();
       } else {
         _showErrorDialog(jsonResponse['message'] ?? 'Failed to create pet');

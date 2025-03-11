@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
+import Swal from 'sweetalert2';
 
 const CustomerRoomList = () => {
     const sidebarRef = useRef(null);
@@ -13,24 +14,30 @@ const CustomerRoomList = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = sessionStorage.getItem("token");
+
                 const [roomsResponse, typesResponse] = await Promise.all([
-                    fetch('http://localhost:5050/api/Room/available'),
-                    fetch('http://localhost:5050/api/RoomType')
+                    fetch('http://localhost:5050/api/Room/available', {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    }),
+                    fetch('http://localhost:5050/api/RoomType', {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    })
                 ]);
+
+                if (!roomsResponse.ok || !typesResponse.ok) {
+                    throw new Error("Failed to fetch data");
+                }
 
                 const roomsData = await roomsResponse.json();
                 const typesData = await typesResponse.json();
 
-                if (roomsData.data && Array.isArray(roomsData.data)) {
-                    const activeRooms = roomsData.data.filter(room => !room.isDeleted);
-                    setRooms(activeRooms);
-                }
+                setRooms(roomsData.data?.filter(room => !room.isDeleted) || []);
+                setRoomTypes(typesData.data || []);
 
-                if (typesData.data && Array.isArray(typesData.data)) {
-                    setRoomTypes(typesData.data);
-                }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                Swal.fire("Error", "Failed to fetch room data!", "error");
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
@@ -52,7 +59,7 @@ const CustomerRoomList = () => {
     return (
         <div className="bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex flex-col">
             <div className=" flex-1 overflow-hidden">
-                <NavbarCustomer/>
+                <NavbarCustomer />
                 <main className="flex-1 overflow-auto p-8">
                     <div className="flex items-center mb-10 mx-auto w-full">
                         <div className="text-center w-full">

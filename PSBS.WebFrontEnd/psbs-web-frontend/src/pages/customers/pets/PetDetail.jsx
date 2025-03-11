@@ -13,16 +13,24 @@ const CustomerPetDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-   
     const fetchData = async () => {
       try {
-        const petResponse = await fetch(`http://localhost:5050/api/pet/${id}`);
+        const token = sessionStorage.getItem("token");
+
+        const petResponse = await fetch(`http://localhost:5050/api/pet/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          }
+        });
+
         const petData = await petResponse.json();
 
         if (petData.flag) {
           setPet(petData.data);
           localStorage.setItem(
-            'petInfo',
+            "petInfo",
             JSON.stringify({
               petId: id,
               petName: petData.data.petName,
@@ -30,21 +38,30 @@ const CustomerPetDetail = () => {
               petDoB: petData.data.dateOfBirth,
             })
           );
+
           const breedResponse = await fetch(
-            `http://localhost:5050/api/petBreed/${petData.data.petBreedId}`
+            `http://localhost:5050/api/petBreed/${petData.data.petBreedId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${token}`
+            }
+          }
           );
+
           const breedData = await breedResponse.json();
           if (breedData.flag) {
             setPetBreed(breedData.data);
           }
         }
       } catch (error) {
-        console.log("loi nha: ",error);
-        Swal.fire('Error', 'Failed to fetch data', 'error');
+        console.log("Lỗi khi fetch dữ liệu: ", error);
+        Swal.fire("Error", "Failed to fetch data", "error");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [id]);
 
@@ -62,10 +79,15 @@ const CustomerPetDetail = () => {
       if (result.isConfirmed) {
         const fetchDelete = async () => {
           try {
+            const token = sessionStorage.getItem("token"); 
+
             const deleteResponse = await fetch(
               `http://localhost:5050/api/pet/${petId}`,
               {
-                method: 'DELETE',
+                method: "DELETE",
+                headers: {
+                  "Authorization": `Bearer ${token}`
+                }
               }
             );
 

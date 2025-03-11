@@ -24,7 +24,14 @@ const PetBreedCreate = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/PetType/available');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/PetType/available', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 const data = await response.json();
                 setPetTypes(data.data || []);
             } catch (error) {
@@ -32,7 +39,7 @@ const PetBreedCreate = () => {
                 console.error('Failed to fetch pet types', error);
             }
         };
-    
+
         fetchPetTypes();
     }, []);
 
@@ -59,17 +66,17 @@ const PetBreedCreate = () => {
     };
 
     const handleSubmit = async (event) => {
-        event.preventDefault();  
+        event.preventDefault();
         const errors = {
             name: name === '',
             typeName: typeName === '',
             description: description === '',
-        };  
-        setError(errors);   
+        };
+        setError(errors);
         if (Object.values(errors).some((fieldError) => fieldError)) {
             return;
         }
-    
+
         if (selectedImage == null) {
             Swal.fire({
                 title: 'Pet Breed Image is required!',
@@ -78,28 +85,32 @@ const PetBreedCreate = () => {
             });
             return;
         }
-    
+
         const formData = new FormData();
         formData.append('petBreedName', name);
         formData.append('petTypeId', typeName);
         formData.append('petBreedDescription', description);
         formData.append('imageFile', selectedImage);
-    
+
         for (let [key, value] of formData.entries()) {
-            console.log(`${key}:`, value); 
+            console.log(`${key}:`, value);
         }
-    
+
         console.log('Name:', name);
         console.log('TypeName:', typeName);
         console.log('Description:', description);
         console.log('Selected Image:', selectedImage);
-    
+
         try {
+            const token = sessionStorage.getItem("token");
             const response = await fetch('http://localhost:5050/api/PetBreed', {
                 method: 'POST',
                 body: formData,
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
-    
+
             if (response.ok) {
                 console.log('Pet Breed added successfully');
                 setName('');
@@ -107,11 +118,11 @@ const PetBreedCreate = () => {
                 setDescription('');
                 setSelectedImage(null);
                 setTmpImage(sampleImage);
-    
+
                 Swal.fire('Add New Pet Breed', 'Pet Breed Added Successfully!', 'success');
                 navigate('/petBreed');
             } else {
-                const errorData = await response.json();  
+                const errorData = await response.json();
                 console.log('Failed to add Pet Breed', errorData);
                 Swal.fire('Add New Pet Breed', `${errorData.message || 'Unknown error'}`, 'error');
             }
@@ -120,7 +131,7 @@ const PetBreedCreate = () => {
             Swal.fire('Add New Pet Breed', 'Failed To Add Pet Breed!', 'error');
         }
     };
-    
+
     return (
         <div>
             <Sidebar ref={sidebarRef} />
