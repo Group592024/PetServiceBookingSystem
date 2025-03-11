@@ -7,6 +7,7 @@ import Navbar from "../../../components/navbar/Navbar";
 const EditCamera = () => {
   const navigate = useNavigate();
   const { cameraId } = useParams();
+  const token = sessionStorage.getItem("token");
   const sidebarRef = useRef(null);
   const [cameraDetails, setCameraDetails] = useState({
     cameraId: "",
@@ -22,12 +23,18 @@ const EditCamera = () => {
   useEffect(() => {
     const fetchCamera = async () => {
       try {
-        const response = await fetch(`http://localhost:5023/api/Camera/${cameraId}`);
+        const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
+        const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // Thêm token vào header
+          },
+        });
         if (!response.ok) {
           throw new Error("Không thể tải dữ liệu camera");
         }
         const data = await response.json();
-        // Giả sử dữ liệu trả về nằm trong data.data hoặc data trực tiếp
         const camera = data.data || data;
         setCameraDetails(camera);
       } catch (error) {
@@ -66,18 +73,23 @@ const EditCamera = () => {
       ...cameraDetails,
     };
     try {
-      const response = await fetch(`http://localhost:5023/api/Camera/${cameraId}`, {
+      const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
+  
+      const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Thêm token vào header
         },
         body: JSON.stringify(updatedCamera),
       });
+  
       if (!response.ok) {
         const errorData = await response.json();
         Swal.fire("Error", errorData.message || "Cập nhật dữ liệu thất bại", "error");
         return;
       }
+  
       Swal.fire("Success", "Camera cập nhật thành công!", "success").then(() => {
         navigate(-1);
       });

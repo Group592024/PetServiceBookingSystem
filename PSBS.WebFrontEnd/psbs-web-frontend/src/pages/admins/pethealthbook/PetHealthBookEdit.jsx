@@ -8,6 +8,7 @@ import Navbar from "../../../components/navbar/Navbar";
 
 const PetHealthBookEdit = () => {
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const { healthBookId } = useParams();
   const sidebarRef = useRef(null);
   const [visitDetails, setVisitDetails] = useState({
@@ -24,6 +25,7 @@ const PetHealthBookEdit = () => {
   const [bookings, setBookings] = useState([]);
   const [bookingCode, setBookingCode] = useState([]);
   const [medicines, setMedicines] = useState([]);
+  
   const [petName, setPetName] = useState("");
   const [bookingServices, setBookingServices] = useState([]);
   const [pets, setPets] = useState([]);
@@ -31,98 +33,106 @@ const PetHealthBookEdit = () => {
   const [filteredMedicines, setFilteredMedicines] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-        try {
-            const [
-                healthBookResponse,
-                bookingsResponse,
-                medicinesResponse,
-                treatmentsResponse,
-                petsResponse,
-                bookingServiceResponse,
-            ] = await Promise.all([
-                fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
-                fetch("http://localhost:5201/Bookings"),
-                fetch("http://localhost:5003/Medicines"),
-                fetch("http://localhost:5003/api/Treatment"),
-                fetch("http://localhost:5010/api/pet"),
-                fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
-            ]);
+      try {
+        const token = sessionStorage.getItem("token");
+        const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        };
 
-            if (
-                !healthBookResponse.ok ||
-                !bookingsResponse.ok ||
-                !medicinesResponse.ok ||
-                !treatmentsResponse.ok ||
-                !petsResponse.ok ||
-                !bookingServiceResponse.ok
-            ) {
-                throw new Error("Failed to fetch data from server.");
-            }
-            const [
-                healthBookData,
-                bookingsData,
-                medicinesData,
-                treatmentsData,
-                petsData,
-                bookingServiceData,
-            ] = await Promise.all([
-                healthBookResponse.json(),
-                bookingsResponse.json(),
-                medicinesResponse.json(),
-                treatmentsResponse.json(),
-                petsResponse.json(),
-                bookingServiceResponse.json(),
-            ]);
-            setBookingServiceItems(bookingServiceData.data || []);
-            const healthBook = healthBookData.data || {};
-            const selectedBookingService = bookingServiceData.data.find(
-                (item) => item.bookingServiceItemId === healthBookData.data.bookingServiceItemId
-            );
-            if (!selectedBookingService) {
-                console.log("Error bookingServiceItemId!");
-                return;
-            }
-            const bookingId = selectedBookingService.bookingId;
-            const selectedBooking = bookingsData.data.find((booking) => booking.bookingId === bookingId);
-            if (selectedBooking) {
-                setBookingCode(selectedBooking.bookingCode);
-            }
+        const [
+          healthBookResponse,
+          bookingsResponse,
+          medicinesResponse,
+          treatmentsResponse,
+          petsResponse,
+          bookingServiceResponse,
+        ] = await Promise.all([
+          fetch(`http://localhost:5050/api/PetHealthBook/${healthBookId}`, { headers }),
+          fetch("http://localhost:5050/Bookings", { headers }),
+          fetch("http://localhost:5050/Medicines", { headers }),
+          fetch("http://localhost:5050/api/Treatment", { headers }),
+          fetch("http://localhost:5050/api/pet", { headers }),
+          fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", { headers }),
+        ]);
 
-            console.log("Selected Booking:", selectedBooking);
-            const selectedPet = petsData.data.find((pet) => pet.petId === selectedBookingService.petId);
-            if (selectedPet) {
-                setPetName(selectedPet.petName);
-            }
-
-            setVisitDetails((prev) => ({
-                ...prev,
-                healthBookId: healthBook.healthBookId || "",
-                bookingId: healthBook.bookingId || "",
-                performBy: healthBook.performBy || "",
-                visitDate: healthBook.visitDate ? new Date(healthBook.visitDate) : null,
-                nextVisitDate: healthBook.nextVisitDate ? new Date(healthBook.nextVisitDate) : null,
-                medicineIds: healthBook.medicineIds || [],
-                medicineName: healthBook.medicineName || "",
-                isDeleted: healthBook.isDeleted || false,
-                createdAt: healthBook.createdAt || "",
-                bookingServiceItemId: selectedBookingService.bookingServiceItemId || "",
-                bookingCode: selectedBooking ? selectedBooking.bookingCode : "N/A",
-                petId: selectedPet ? selectedPet.petId : "",
-                petName: selectedPet ? selectedPet.petName : "Unknown",
-            }));
-
-            setBookings([selectedBooking]);
-            setTreatments(treatmentsData.data || []);
-            setMedicines(medicinesData.data || []);
-            setPets(petsData.data || []);
-            setBookingServices(bookingServiceData.data || []);
-        } catch (error) {
-            console.error("Error fetching data:", error);
-            Swal.fire("Error", "Failed to load data. Please try again later.", "error");
+        if (
+          !healthBookResponse.ok ||
+          !bookingsResponse.ok ||
+          !medicinesResponse.ok ||
+          !treatmentsResponse.ok ||
+          !petsResponse.ok ||
+          !bookingServiceResponse.ok
+        ) {
+          throw new Error("Failed to fetch data from server.");
         }
+
+        const [
+          healthBookData,
+          bookingsData,
+          medicinesData,
+          treatmentsData,
+          petsData,
+          bookingServiceData,
+        ] = await Promise.all([
+          healthBookResponse.json(),
+          bookingsResponse.json(),
+          medicinesResponse.json(),
+          treatmentsResponse.json(),
+          petsResponse.json(),
+          bookingServiceResponse.json(),
+        ]);
+
+        setBookingServiceItems(bookingServiceData.data || []);
+        const healthBook = healthBookData.data || {};
+        const selectedBookingService = bookingServiceData.data.find(
+          (item) => item.bookingServiceItemId === healthBookData.data.bookingServiceItemId
+        );
+        if (!selectedBookingService) {
+          console.log("Error bookingServiceItemId!");
+          return;
+        }
+        const bookingId = selectedBookingService.bookingId;
+        const selectedBooking = bookingsData.data.find((booking) => booking.bookingId === bookingId);
+        if (selectedBooking) {
+          setBookingCode(selectedBooking.bookingCode);
+        }
+
+        const selectedPet = petsData.data.find((pet) => pet.petId === selectedBookingService.petId);
+        if (selectedPet) {
+          setPetName(selectedPet.petName);
+        }
+
+        setVisitDetails((prev) => ({
+          ...prev,
+          healthBookId: healthBook.healthBookId || "",
+          bookingId: healthBook.bookingId || "",
+          performBy: healthBook.performBy || "",
+          visitDate: healthBook.visitDate ? new Date(healthBook.visitDate) : null,
+          nextVisitDate: healthBook.nextVisitDate ? new Date(healthBook.nextVisitDate) : null,
+          medicineIds: healthBook.medicineIds || [],
+          medicineName: healthBook.medicineName || "",
+          isDeleted: healthBook.isDeleted || false,
+          createdAt: healthBook.createdAt || "",
+          bookingServiceItemId: selectedBookingService.bookingServiceItemId || "",
+          bookingCode: selectedBooking ? selectedBooking.bookingCode : "N/A",
+          petId: selectedPet ? selectedPet.petId : "",
+          petName: selectedPet ? selectedPet.petName : "Unknown",
+        }));
+
+        setBookings([selectedBooking]);
+        setTreatments(treatmentsData.data || []);
+        setMedicines(medicinesData.data || []);
+        setPets(petsData.data || []);
+        setBookingServices(bookingServiceData.data || []);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        Swal.fire("Error", "Failed to load data. Please try again later.", "error");
+      }
     };
+
     fetchData();
-}, [healthBookId]);
+  }, [healthBookId]);
   useEffect(() => {
     if (visitDetails.medicineIds.length > 0 && medicines.length > 0) {
       const firstMedicine = medicines.find(med => med.medicineId === visitDetails.medicineIds[0]);
@@ -158,6 +168,7 @@ const PetHealthBookEdit = () => {
   };
   const handleEdit = async () => {
     if (!validateForm()) return;
+
     const formData = {
       ...visitDetails,
       healthBookId: visitDetails.healthBookId,
@@ -170,27 +181,31 @@ const PetHealthBookEdit = () => {
       createdAt: visitDetails.createdAt,
       updatedAt: new Date().toISOString(),
     };
+
     try {
-      const response = await fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const token = sessionStorage.getItem("token");
+      const response = await fetch(`http://localhost:5050/api/PetHealthBook/${healthBookId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Thêm token vào headers
+        },
+        body: JSON.stringify(formData),
+      });
+
       if (!response.ok) {
         const errorData = await response.json();
         Swal.fire("Error", errorData.message || "Failed to update data", "error");
         return;
       }
+
       Swal.fire("Success", "Pet health book updated successfully!", "success");
       navigate(-1);
     } catch (error) {
       Swal.fire("Error", "Failed to update data. Please try again later.", "error");
     }
   };
+
   const handleBack = () => {
     navigate(-1);
   };

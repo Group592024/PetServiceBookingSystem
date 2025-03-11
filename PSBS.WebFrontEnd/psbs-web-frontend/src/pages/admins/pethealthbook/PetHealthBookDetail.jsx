@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 const PetHealthBookDetail = () => {
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const { healthBookId } = useParams();
   const [petHealthBook, setPetHealthBook] = useState(null);
   const [medicines, setMedicines] = useState([]);
@@ -33,13 +34,55 @@ const PetHealthBookDetail = () => {
     const fetchData = async () => {
       try {
         console.log("Fetching Pet Health Book Data...");
+        const token = sessionStorage.getItem("token");
+        const headers = {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        };
+
         const [healthBookRes, medicinesRes, treatmentsRes, bookingsRes, petsRes, bookingServiceItemsRes] = await Promise.all([
-          fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
-          fetch(`http://localhost:5003/Medicines`),
-          fetch(`http://localhost:5003/api/Treatment`),
-          fetch(`http://localhost:5201/Bookings`),
-          fetch(`http://localhost:5010/api/pet`),
-          fetch(`http://localhost:5023/api/BookingServiceItems/GetBookingServiceList`),
+          fetch(`http://localhost:5050/api/PetHealthBook/${healthBookId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch(`http://localhost:5050/Medicines`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch(`http://localhost:5050/api/Treatment`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch(`http://localhost:5050/Bookings`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch(`http://localhost:5050/api/pet`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch(`http://localhost:5050/api/BookingServiceItems/GetBookingServiceList`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
         ]);
 
         if (!healthBookRes.ok || !medicinesRes.ok || !treatmentsRes.ok || !bookingsRes.ok || !petsRes.ok || !bookingServiceItemsRes.ok) {
@@ -62,7 +105,9 @@ const PetHealthBookDetail = () => {
         setTreatments(treatmentsData.data || []);
         setBookings(bookingsData.data || []);
         setPets(petsData.data || []);
+
         if (!healthBookData.data?.bookingServiceItemId) return;
+
         const bookingServiceItem = bookingServiceItemsData.data.find(
           (bsi) => bsi.bookingServiceItemId === healthBookData.data.bookingServiceItemId
         );
@@ -70,7 +115,9 @@ const PetHealthBookDetail = () => {
         if (!bookingServiceItem) return;
         const booking = bookingsData.data.find((b) => b.bookingId === bookingServiceItem.bookingId);
         if (!booking) return;
-        fetchAccountDetails(booking.accountId);
+
+        fetchAccountDetails(booking.accountId, headers);
+
         const pet = petsData.data.find((p) => p.petId === bookingServiceItem.petId);
         if (pet) {
           setPetImage(pet.petImage);
@@ -84,11 +131,17 @@ const PetHealthBookDetail = () => {
     };
     fetchData();
   }, [healthBookId]);
-
-  const fetchAccountDetails = async (accountId) => {
+  
+  const fetchAccountDetails = async (accountId, headers) => {
     try {
       console.log("Fetching account details for ID:", accountId);
-      const res = await fetch(`http://localhost:5000/api/Account/${accountId}`);
+      const res = await fetch(`http://localhost:5050/api/Account/${accountId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
       if (!res.ok) throw new Error("Failed to fetch account details");
       const data = await res.json();
       console.log("Fetched Account Data:", data);
@@ -142,8 +195,8 @@ const PetHealthBookDetail = () => {
           <div className="flex flex-wrap">
             <div className="w-full sm:w-1/3 bg-white shadow-md rounded-md p-6">
               <div className="flex flex-col items-center">
-                <img
-                  src={petImage ? `http://localhost:5010${petImage}` : '/Images/default-image.png'}
+              <img
+                 src={petImage ? `http://localhost:5050/pet-service${petImage}` : '/Images/default-image.png'}
                   alt="Pet Health Record"
                   className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"
                 />

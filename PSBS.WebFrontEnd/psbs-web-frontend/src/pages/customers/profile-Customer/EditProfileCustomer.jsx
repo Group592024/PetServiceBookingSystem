@@ -10,7 +10,7 @@ import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 const EditProfileCustomer = () => {
   const { accountId } = useParams();
   const sidebarRef = useRef(null);
-
+  const token = sessionStorage.getItem("token");
   const [selectedDate] = useState(null);
   const navigate = useNavigate();
   const [account, setAccount] = useState({
@@ -35,7 +35,14 @@ const EditProfileCustomer = () => {
 
   useEffect(() => {
     if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
+      const token = sessionStorage.getItem('token'); 
+      fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Thêm token vào header
+          'Content-Type': 'application/json'
+        }
+      })
         .then((response) => response.json())
         .then(async (data) => {
           console.log("Dữ liệu nhận được từ API:", data);  
@@ -49,7 +56,11 @@ const EditProfileCustomer = () => {
           }
           if (data.accountImage) {
             try {
-              const response = await fetch(`http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`);
+              const response = await fetch(`http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`, {
+                headers: {
+                  'Authorization': `Bearer ${token}` // Thêm token vào header khi load ảnh
+                }
+              });
               const imageData = await response.json();
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
@@ -146,9 +157,9 @@ const EditProfileCustomer = () => {
 
   const handleEdit = async () => {
     if (!validateForm()) return;
-
+  
     let formattedDob = account.accountDob ? format(account.accountDob, 'yyyy-MM-dd') : '';
-
+  
     const formData = new FormData();
     formData.append("AccountTempDTO.AccountId", accountId);
     formData.append("AccountTempDTO.AccountName", account.accountName);
@@ -158,8 +169,7 @@ const EditProfileCustomer = () => {
     formData.append("AccountTempDTO.AccountDob", formattedDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-
-    // Xử lý ảnh nếu có
+  
     if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
@@ -167,25 +177,35 @@ const EditProfileCustomer = () => {
       formData.append("AccountTempDTO.isPickImage", false);
       formData.append("AccountTempDTO.AccountImage", account.accountImage || "");
     }
-
-    const response = await fetch(`http://localhost:5000/api/Account`, {
-      method: "PUT",
-      body: formData,
-    });
-    console.log("Server Response:", response);
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error("Error from server:", errorData);
-      Swal.fire("Error", errorData.message || "Something went wrong", "error");
-      return;
-    }
-
-    const result = await response.json();
-    if (result.flag) {
-      Swal.fire("Success", "Profile updated successfully!", "success");
-      navigate(-1);
-    } else {
-      Swal.fire("Error", result.message || "Something went wrong", "error");
+  
+    try {
+      const response = await fetch(`http://localhost:5050/api/Account`, {
+        method: "PUT",
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${token}` // Thêm token vào header
+        },
+      });
+  
+      console.log("Server Response:", response);
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error from server:", errorData);
+        Swal.fire("Error", errorData.message || "Something went wrong", "error");
+        return;
+      }
+  
+      const result = await response.json();
+      if (result.flag) {
+        Swal.fire("Success", "Profile updated successfully!", "success");
+        navigate(-1);
+      } else {
+        Swal.fire("Error", result.message || "Something went wrong", "error");
+      }
+    } catch (error) {
+      console.error("Error updating account data:", error);
+      Swal.fire("Error", "Failed to update profile.", "error");
     }
   };
 

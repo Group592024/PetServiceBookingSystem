@@ -74,7 +74,6 @@ import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetai
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
-import Camera from "./pages/customers/camera/Camera";
 import CameraList from "./pages/admins/camera/CameraList";
 import CreateCamera from "./pages/admins/camera/CreateCamera";
 import CameraDetail from "./pages/admins/camera/CameraDetail";
@@ -93,6 +92,7 @@ import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Bookin
 import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
 import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
 import CameraCreate from "./pages/admins/camera/CreateCamera";
+import CameraCus from "./pages/customers/cameras/CameraCus";
 import Unauthorized from "./pages/authorize/Unauthorized";
 
 function App() {
@@ -109,7 +109,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Route không yêu cầu bảo vệ */}
-
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
@@ -260,22 +259,22 @@ function App() {
             path="/camera"
             element={
               <ProtectedRoute>
-                <Camera />
+                <CameraCus/>
               </ProtectedRoute>
             }
           />
           <Route
             path="/cameralist"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
                 <CameraList />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/addcamera"
+            path="/addcamera "
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
                 <CreateCamera />
               </ProtectedRoute>
             }
@@ -283,7 +282,7 @@ function App() {
           <Route
             path="/detailcamera/:cameraId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
                 <CameraDetail />
               </ProtectedRoute>
             }

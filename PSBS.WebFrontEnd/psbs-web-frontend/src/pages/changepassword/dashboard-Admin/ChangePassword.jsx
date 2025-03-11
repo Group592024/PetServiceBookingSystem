@@ -8,6 +8,7 @@ const ChangePassword = () => {
   const sidebarRef = useRef(null);
   const { accountId } = useParams();
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -28,74 +29,127 @@ const ChangePassword = () => {
   }, []);
 
   useEffect(() => {
-    if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
-        .then((response) => response.json())
-        .then(async (data) => {
-          setAccountName(data.accountName || 'Admin');
-          if (data.accountImage) {
-            try {
-              const response = await fetch(
-                `http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`
-              );
-              const imageData = await response.json();
-
-              if (imageData.flag) {
-                const imgContent = imageData.data.fileContents;
-                const imgContentType = imageData.data.contentType;
-                setImagePreview(`data:${imgContentType};base64,${imgContent}`);
-              } else {
-                console.error("Error loading image:", imageData.message);
-              }
-            } catch (error) {
-              console.error("Error fetching image:", error);
-            }
+    const fetchAccountData = async () => {
+      if (!accountId) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Account ID not found in URL',
+        });
+        return;
+      }
+  
+      const token = sessionStorage.getItem('token'); 
+      if (!token) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Unauthorized',
+          text: 'You need to login first.',
+        });
+        return;
+      }
+  
+      try {
+        const response = await fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`, // Thêm token vào header
+            'Content-Type': 'application/json'
           }
-        })
-        .catch((error) => console.error("Error fetching account data:", error));
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Account ID not found in URL',
-      });
-    }
-  }, [accountId]);
-
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to fetch account data');
+        }
+  
+        const data = await response.json();
+        setAccountName(data.accountName || 'Admin');
+  
+        if (data.accountImage) {
+          try {
+            const imageResponse = await fetch(
+              `http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`, 
+              {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${token}` // Thêm token vào header khi tải ảnh
+                }
+              }
+            );
+  
+            const imageData = await imageResponse.json();
+  
+            if (imageData.flag) {
+              const imgContent = imageData.data.fileContents;
+              const imgContentType = imageData.data.contentType;
+              setImagePreview(`data:${imgContentType};base64,${imgContent}`);
+            } else {
+              console.error("Error loading image:", imageData.message);
+            }
+          } catch (error) {
+            console.error("Error fetching image:", error);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching account data:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to load account data.',
+        });
+      }
+    };
+  
+    fetchAccountData();
+  }, [accountId]);  
   const handleChangePassword = async (e) => {
     e.preventDefault();
     
     // Reset errors
     setErrors({});
-
+  
     const newErrors = {};
-
+  
     if (!currentPassword || !newPassword || !confirmPassword) {
       newErrors.general = 'All fields are required.';
     }
-
+  
     if (newPassword.length < 6) {
       newErrors.newPassword = 'New password must be at least 6 characters long.';
     }
-
+  
     if (newPassword !== confirmPassword) {
       newErrors.confirmPassword = 'New password and confirm password do not match.';
     }
-
+  
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);  // Show the validation errors
+      setErrors(newErrors);
       return;
     }
-
+  
+    const token = sessionStorage.getItem('token'); // Lấy token từ sessionStorage
+    if (!token) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Unauthorized',
+        text: 'You need to login first.',
+      });
+      return;
+    }
+  
     const requestData = { currentPassword, newPassword, confirmPassword };
+  
     try {
-      const url = `http://localhost:5000/api/Account/ChangePassword${accountId}`;
+      const url = `http://localhost:5050/api/Account/ChangePassword${accountId}`;
       const response = await fetch(url, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Thêm token vào header
+        },
         body: JSON.stringify(requestData),
       });
-
+  
       if (response.ok) {
         setCurrentPassword('');
         setNewPassword('');
@@ -120,8 +174,7 @@ const ChangePassword = () => {
         text: 'An error occurred. Please try again later.',
       });
     }
-  };
-
+  };  
   const handleBackToPreviousPage = () => {
     navigate(-1);
   };

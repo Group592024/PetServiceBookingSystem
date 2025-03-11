@@ -7,6 +7,7 @@ import Navbar from "../../../components/navbar/Navbar";
 const CreateCamera = () => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+  const token = sessionStorage.getItem("token");
 
   const [cameraDetails, setCameraDetails] = useState({
     cameraType: "",
@@ -44,19 +45,24 @@ const CreateCamera = () => {
       Swal.fire("Error", "Please fill in all required fields", "error");
       return;
     }
+  
     const newCamera = {
       cameraId: generateGuid(),
       ...cameraDetails,
     };
-
+  
     try {
-      const response = await fetch("http://localhost:5023/api/Camera/create", {
+      const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
+  
+      const response = await fetch(`http://localhost:5050/api/Camera/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Thêm token vào header
         },
         body: JSON.stringify(newCamera),
       });
+  
       if (!response.ok) {
         const errorData = await response.json();
         Swal.fire("Error", errorData.message || "Failed to create camera", "error");
@@ -70,6 +76,7 @@ const CreateCamera = () => {
       Swal.fire("Error", "An error occurred while creating the camera", "error");
     }
   };
+  
 
   const handleBack = () => {
     navigate(-1);

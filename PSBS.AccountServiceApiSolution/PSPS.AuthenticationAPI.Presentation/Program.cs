@@ -3,7 +3,6 @@ using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
 using PSPS.AccountAPI.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();

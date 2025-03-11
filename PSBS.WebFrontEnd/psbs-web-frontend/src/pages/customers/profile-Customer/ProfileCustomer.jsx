@@ -6,6 +6,7 @@ const ProfileCustomer = () => {
   const [account, setAccount] = useState(null);
     const sidebarRef = useRef(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const token = sessionStorage.getItem("token");
   const { accountId } = useParams();
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -16,24 +17,36 @@ const ProfileCustomer = () => {
   };
   useEffect(() => {
     if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
+      const token = sessionStorage.getItem('token'); 
+      fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Thêm token vào header
+          'Content-Type': 'application/json'
+        }
+      })
         .then((response) => response.json())
         .then(async (data) => {
           setAccount(data);
-
+  
           if (data.accountImage) {
             try {
               const response = await fetch(
-                `http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`
+                `http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${token}`, // Thêm token vào header
+                    'Content-Type': 'application/json'
+                  }
+                }
               );
               const imageData = await response.json();
-
+  
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
                 const imgContentType = imageData.data.contentType;
-                setImagePreview(
-                  `data:${imgContentType};base64,${imgContent}`
-                );
+                setImagePreview(`data:${imgContentType};base64,${imgContent}`);
               } else {
                 console.error("Error loading image:", imageData.message);
               }
@@ -44,8 +57,7 @@ const ProfileCustomer = () => {
         })
         .catch((error) => console.error("Error fetching account data:", error));
     }
-  }, [accountId]);
-
+  }, [accountId]);  
   if (!account) {
     return <div>Loading...</div>;
   }
