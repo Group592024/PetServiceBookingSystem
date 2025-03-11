@@ -33,7 +33,15 @@ const AdminPetEdit = () => {
     useEffect(() => {
         const fetchPet = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/pet/${id}`);
+                const token = sessionStorage.getItem("token");
+                const response = await fetch(`http://localhost:5050/api/pet/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 if (data.flag) {
                     setPet(data.data);
@@ -58,26 +66,44 @@ const AdminPetEdit = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/petType');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/petType', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 setPetTypes(data.filter(type => !type.isDelete));
             } catch (error) {
                 console.log('Error fetching pet types:', error);
             }
         };
+
         fetchPetTypes();
     }, []);
 
     useEffect(() => {
         const fetchAccounts = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/account/all');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/account/all', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 setAccounts(data.data || []);
             } catch (error) {
                 console.log('Error fetching accounts:', error);
             }
         };
+
         fetchAccounts();
     }, []);
 
@@ -98,17 +124,30 @@ const AdminPetEdit = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
+                    const token = sessionStorage.getItem("token");
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch breeds: ${response.status}`);
+                    }
+
                     const data = await response.json();
                     setBreeds(data.data || []);
                 } catch (error) {
-                    console.log('Error fetching breeds:', error);
+                    console.log("Error fetching breeds:", error);
                     setBreeds([]);
                 }
             } else {
                 setBreeds([]);
             }
         };
+
         fetchBreeds();
     }, [pet.petTypeId]);
 
@@ -151,7 +190,7 @@ const AdminPetEdit = () => {
 
     const handleSubmit = async () => {
         if (!validateForm()) return;
-        console.log("Pet before submit:", pet); 
+        console.log("Pet before submit:", pet);
         const result = await Swal.fire({
             title: 'Are you sure?',
             text: 'This action may affect other data. Do you want to proceed with updating the pet?',
@@ -182,6 +221,9 @@ const AdminPetEdit = () => {
         try {
             const response = await fetch(`http://localhost:5050/api/pet`, {
                 method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${sessionStorage.getItem("token")}`
+                },
                 body: formData,
             });
 
@@ -203,8 +245,8 @@ const AdminPetEdit = () => {
     const filteredAccounts = accounts.filter((account) =>
         account.accountName.toLowerCase().includes(search.toLowerCase()) && account.roleId === "user"
     ); // Filter accounts based on search and roleId
-    
-    console.log("Filtered accounts:", filteredAccounts); 
+
+    console.log("Filtered accounts:", filteredAccounts);
 
     const handleSelect = (accountId, accountName) => {
         console.log("Selected accountId:", accountId);
@@ -349,7 +391,7 @@ const AdminPetEdit = () => {
                                             value={pet.petNote}
                                             onChange={(e) => {
                                                 setPet({ ...pet, petNote: e.target.value });
-                                                setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));  
+                                                setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));
                                             }}
                                         />
                                         {errors.petNote && <span className="text-red-500 text-sm mt-1">{errors.petNote}</span>}

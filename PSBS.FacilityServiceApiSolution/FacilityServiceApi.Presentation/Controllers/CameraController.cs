@@ -9,7 +9,6 @@
 // {
 //     [Route("api/[controller]")]
 //     [ApiController]
-//     [Authorize]
 //     public class CameraController : ControllerBase
 //     {
 //         private readonly ICamera _camera;

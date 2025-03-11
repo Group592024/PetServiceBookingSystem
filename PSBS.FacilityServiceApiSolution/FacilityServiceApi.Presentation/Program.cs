@@ -58,6 +58,12 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+//var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+//var ffmpegProcess = ffmpegService.StartFfmpegConversion();
+// var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+// var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+
+
 // Khởi động FfmpegService (kiểm tra lỗi)
 // try
 // {
@@ -78,6 +84,23 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
+
+// app.UseStaticFiles(new StaticFileOptions
+// {
+//     FileProvider = hlsFileProvider,
+//     RequestPath = "/hls",
+//     ServeUnknownFileTypes = true,
+//     DefaultContentType = "application/vnd.apple.mpegurl",
+//     OnPrepareResponse = ctx =>
+//     {
+//         ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*"); 
+//         ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+//         ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+//         ctx.Context.Response.Headers.Append("Expires", "0");
+//     }
+// });
+
+
 
 // app.UseStaticFiles(new StaticFileOptions
 // {

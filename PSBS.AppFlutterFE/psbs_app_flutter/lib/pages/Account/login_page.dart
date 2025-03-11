@@ -53,15 +53,9 @@ class _LoginPageState extends State<LoginPage> {
       String? token = prefs.getString('token');
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.2:5050/api/Account/Login'),
-        headers: {
-          'Content-Type': 'application/json',
-          if (token != null) 'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({
-          'AccountEmail': email,
-          'AccountPassword': password,
-        }),
+        Uri.parse('http://10.0.2.2:5050/api/Account/Login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
 
       if (response.statusCode == 200) {

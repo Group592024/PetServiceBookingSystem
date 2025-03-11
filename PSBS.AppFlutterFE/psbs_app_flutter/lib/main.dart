@@ -16,7 +16,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
-
+import 'pages/room/room_page.dart';
 void main() {
   runApp(const StoreScope(child: MyApp()));
 }
@@ -68,7 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final screens = [
     HomePage(),
-    PetPage(),
+    //PetPage(),
+    RoomPage(),
     BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
