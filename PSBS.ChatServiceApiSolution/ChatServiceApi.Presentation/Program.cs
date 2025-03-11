@@ -12,10 +12,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.AddSignalR();
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    serverOptions.Listen(IPAddress.Parse("192.168.2.28"), 5159);
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

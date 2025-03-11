@@ -110,8 +110,8 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
                       label={field.label}
                       readOnly={field.disabled || view}
                     >
-                      <MenuItem value={true}>True</MenuItem>
-                      <MenuItem value={false}>False</MenuItem>
+                      <MenuItem value={true}>Yes</MenuItem>
+                      <MenuItem value={false}>No</MenuItem>
                     </Select>
                   </FormControl>
                 ) : field.type === "Date" ? (
