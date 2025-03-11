@@ -12,7 +12,7 @@ using PSBS.HealthCareApi.Infrastructure.Data;
 namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20250214192745_First")]
+    [Migration("20250304153005_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -64,9 +64,9 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("healthBook_Id");
 
-                    b.Property<Guid>("bookingId")
+                    b.Property<Guid>("BookingServiceItemId")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("booking_Id");
+                        .HasColumnName("BookingServiceItem_Id");
 
                     b.Property<DateTime>("createdAt")
                         .HasColumnType("datetime2")

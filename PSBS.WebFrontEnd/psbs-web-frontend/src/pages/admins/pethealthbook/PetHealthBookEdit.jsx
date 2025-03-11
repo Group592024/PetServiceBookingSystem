@@ -10,7 +10,6 @@ const PetHealthBookEdit = () => {
   const navigate = useNavigate();
   const { healthBookId } = useParams();
   const sidebarRef = useRef(null);
-
   const [visitDetails, setVisitDetails] = useState({
     bookingId: "",
     performBy: "",
@@ -21,60 +20,109 @@ const PetHealthBookEdit = () => {
     isDeleted: false,
     createdAt: "",
   });
+  const [bookingServiceItems, setBookingServiceItems] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [bookingCode, setbookingCode] = useState([]);
+  const [bookingCode, setBookingCode] = useState([]);
   const [medicines, setMedicines] = useState([]);
+  const [petName, setPetName] = useState("");
+  const [bookingServices, setBookingServices] = useState([]);
+  const [pets, setPets] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [filteredMedicines, setFilteredMedicines] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [healthBookResponse, bookingsResponse, medicinesResponse, treatmentsResponse] = await Promise.all([
-          fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
-          fetch("http://localhost:5201/Bookings"),
-          fetch("http://localhost:5003/Medicines"),
-          fetch("http://localhost:5003/api/Treatment"),
-        ]);
-        if (!healthBookResponse.ok || !bookingsResponse.ok || !medicinesResponse.ok || !treatmentsResponse.ok) {
-          throw new Error("Failed to fetch data from server.");
+        try {
+            const [
+                healthBookResponse,
+                bookingsResponse,
+                medicinesResponse,
+                treatmentsResponse,
+                petsResponse,
+                bookingServiceResponse,
+            ] = await Promise.all([
+                fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
+                fetch("http://localhost:5201/Bookings"),
+                fetch("http://localhost:5003/Medicines"),
+                fetch("http://localhost:5003/api/Treatment"),
+                fetch("http://localhost:5010/api/pet"),
+                fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
+            ]);
+
+            if (
+                !healthBookResponse.ok ||
+                !bookingsResponse.ok ||
+                !medicinesResponse.ok ||
+                !treatmentsResponse.ok ||
+                !petsResponse.ok ||
+                !bookingServiceResponse.ok
+            ) {
+                throw new Error("Failed to fetch data from server.");
+            }
+            const [
+                healthBookData,
+                bookingsData,
+                medicinesData,
+                treatmentsData,
+                petsData,
+                bookingServiceData,
+            ] = await Promise.all([
+                healthBookResponse.json(),
+                bookingsResponse.json(),
+                medicinesResponse.json(),
+                treatmentsResponse.json(),
+                petsResponse.json(),
+                bookingServiceResponse.json(),
+            ]);
+            setBookingServiceItems(bookingServiceData.data || []);
+            const healthBook = healthBookData.data || {};
+            const selectedBookingService = bookingServiceData.data.find(
+                (item) => item.bookingServiceItemId === healthBookData.data.bookingServiceItemId
+            );
+            if (!selectedBookingService) {
+                console.log("Error bookingServiceItemId!");
+                return;
+            }
+            const bookingId = selectedBookingService.bookingId;
+            const selectedBooking = bookingsData.data.find((booking) => booking.bookingId === bookingId);
+            if (selectedBooking) {
+                setBookingCode(selectedBooking.bookingCode);
+            }
+
+            console.log("Selected Booking:", selectedBooking);
+            const selectedPet = petsData.data.find((pet) => pet.petId === selectedBookingService.petId);
+            if (selectedPet) {
+                setPetName(selectedPet.petName);
+            }
+
+            setVisitDetails((prev) => ({
+                ...prev,
+                healthBookId: healthBook.healthBookId || "",
+                bookingId: healthBook.bookingId || "",
+                performBy: healthBook.performBy || "",
+                visitDate: healthBook.visitDate ? new Date(healthBook.visitDate) : null,
+                nextVisitDate: healthBook.nextVisitDate ? new Date(healthBook.nextVisitDate) : null,
+                medicineIds: healthBook.medicineIds || [],
+                medicineName: healthBook.medicineName || "",
+                isDeleted: healthBook.isDeleted || false,
+                createdAt: healthBook.createdAt || "",
+                bookingServiceItemId: selectedBookingService.bookingServiceItemId || "",
+                bookingCode: selectedBooking ? selectedBooking.bookingCode : "N/A",
+                petId: selectedPet ? selectedPet.petId : "",
+                petName: selectedPet ? selectedPet.petName : "Unknown",
+            }));
+
+            setBookings([selectedBooking]);
+            setTreatments(treatmentsData.data || []);
+            setMedicines(medicinesData.data || []);
+            setPets(petsData.data || []);
+            setBookingServices(bookingServiceData.data || []);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            Swal.fire("Error", "Failed to load data. Please try again later.", "error");
         }
-        const healthBookData = await healthBookResponse.json();
-        const bookingsData = await bookingsResponse.json();
-        const medicinesData = await medicinesResponse.json();
-        const treatmentsData = await treatmentsResponse.json();
-        console.log("Bookings API Response (parsed):", bookingsData);
-        const healthBook = healthBookData.data || {};
-        const selectedBooking = bookingsData.data.find(b => b.bookingId === healthBook.bookingId);
-        setVisitDetails((prev) => ({
-          ...prev,
-          healthBookId: healthBook.healthBookId || "",
-          bookingId: healthBook.bookingId || "",
-          bookingCode: selectedBooking ? selectedBooking.bookingCode : "",
-          treatmentId: healthBook.treatmentId || (treatmentsData.data.length > 0 ? treatmentsData.data[0].treatmentId : ""),
-          performBy: healthBook.performBy || "",
-          visitDate: healthBook.visitDate ? new Date(healthBook.visitDate) : null,
-          nextVisitDate: healthBook.nextVisitDate ? new Date(healthBook.nextVisitDate) : null,
-          medicineIds: healthBook.medicineIds || [],
-          medicineName: healthBook.medicineName || "",
-          isDeleted: healthBook.isDeleted || false,
-          createdAt: healthBook.createdAt || "",
-        }));
-        if (Array.isArray(bookingsData.data)) {
-          setBookings(bookingsData.data);
-          setbookingCode(bookingsData.data.map(b => b.bookingCode));
-        } else {
-          setBookings([]);
-          setbookingCode([]);
-        }
-        setTreatments(treatmentsData.data || []);
-        setMedicines(medicinesData.data || medicinesData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        Swal.fire("Error", "Failed to load data. Please try again later.", "error");
-      }
     };
     fetchData();
-  }, [healthBookId]);
+}, [healthBookId]);
   useEffect(() => {
     if (visitDetails.medicineIds.length > 0 && medicines.length > 0) {
       const firstMedicine = medicines.find(med => med.medicineId === visitDetails.medicineIds[0]);
@@ -102,7 +150,7 @@ const PetHealthBookEdit = () => {
     }
   }, [visitDetails.medicineId, medicines]);
   const validateForm = () => {
-    if (!visitDetails.bookingId || !visitDetails.performBy) {
+    if (!visitDetails.bookingServiceItemId || !visitDetails.performBy) {
       Swal.fire("Error", "Please fill in all required fields.", "error");
       return false;
     }
@@ -113,7 +161,7 @@ const PetHealthBookEdit = () => {
     const formData = {
       ...visitDetails,
       healthBookId: visitDetails.healthBookId,
-      bookingId: visitDetails.bookingId,
+      bookingServiceItemId: visitDetails.bookingServiceItemId,
       medicineId: visitDetails.medicineId,
       visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
       nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
@@ -122,7 +170,6 @@ const PetHealthBookEdit = () => {
       createdAt: visitDetails.createdAt,
       updatedAt: new Date().toISOString(),
     };
-    console.log("Form Data to be sent:", formData);
     try {
       const response = await fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`,
         {
@@ -135,14 +182,12 @@ const PetHealthBookEdit = () => {
       );
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Error response from API:", errorData);
         Swal.fire("Error", errorData.message || "Failed to update data", "error");
         return;
       }
       Swal.fire("Success", "Pet health book updated successfully!", "success");
       navigate(-1);
     } catch (error) {
-      console.error("Error updating data:", error);
       Swal.fire("Error", "Failed to update data. Please try again later.", "error");
     }
   };
@@ -160,18 +205,18 @@ const PetHealthBookEdit = () => {
             <label className="block text-sm font-medium mb-1">Booking Code</label>
             <input
               type="text"
-              className="w-full p-3 border rounded-md"
+              className="w-full p-3 border rounded-md bg-gray-200 cursor-not-allowed"
               value={visitDetails.bookingCode || ""}
-              onChange={(e) => {
-                const inputCode = e.target.value;
-                const selectedBooking = bookings.find((b) => b.bookingCode === inputCode);
-                setVisitDetails((prev) => ({
-                  ...prev,
-                  bookingCode: inputCode,
-                  bookingId: selectedBooking ? selectedBooking.bookingId : "",
-                }));
-              }}
-              placeholder="Enter Booking Code"
+              disabled
+            />
+          </div>
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-1">Pet Name</label>
+            <input
+              type="text"
+              className="w-full p-3 border rounded-md bg-gray-200 cursor-not-allowed"
+              value={visitDetails.petName || ""}
+              disabled
             />
           </div>
           <div className="mb-3">

@@ -23,75 +23,67 @@ const PetHealthBookList = () => {
   const [petName, setPetName] = useState("");
   const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
   const sidebarRef = useRef(null);
-
   const userRole = localStorage.getItem("role");
-
   const fetchPetHealthBooks = useCallback(async () => {
     try {
-      const [petsRes, medicinesRes, treatmentsRes, bookingsRes, petDataRes, petBreedRes] = await Promise.all([
+      const [petHealthBooksRes, medicinesRes, treatmentsRes, bookingsRes, bookingServiceItemsRes, petDataRes, petBreedRes] = await Promise.all([
         fetch("http://localhost:5003/api/PetHealthBook"),
         fetch("http://localhost:5003/Medicines"),
         fetch("http://localhost:5003/api/Treatment"),
         fetch("http://localhost:5201/Bookings"),
+        fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
         fetch("http://localhost:5010/api/pet"),
         fetch("http://localhost:5010/api/petBreed"),
       ]);
-
-      const [petHealthBooksData, medicinesData, treatmentsData, bookingsData, petsData, petBreedsData] = await Promise.all([
-        petsRes.json(),
+      const [petHealthBooksData, medicinesData, treatmentsData, bookingsData, bookingServiceItemsData, petsData, petBreedsData] = await Promise.all([
+        petHealthBooksRes.json(),
         medicinesRes.json(),
         treatmentsRes.json(),
         bookingsRes.json(),
+        bookingServiceItemsRes.json(),
         petDataRes.json(),
         petBreedRes.json(),
       ]);
       console.log("Fetched PetHealthBooks Data:", petHealthBooksData);
-      console.log("Fetched Pets Data:", petsData);
-      console.log("Fetched PetBreeds Data:", petBreedsData);
-      console.log("Fetched Medicines Data:", medicinesData);
-      console.log("Fetched Treatments Data:", treatmentsData);
       console.log("Fetched Bookings Data:", bookingsData);
+      console.log("Fetched BookingServiceItems Data:", bookingServiceItemsData);
+      const petsWithDetails = await Promise.all(
+        petHealthBooksData.data.map(async (pet) => {
+          const bookingServiceItem = bookingServiceItemsData.data.find(
+            (b) => b.bookingServiceItemId === pet.bookingServiceItemId
+          );
+          const booking = bookingServiceItem
+            ? bookingsData.data.find((bk) => bk.bookingId === bookingServiceItem.bookingId)
+            : null;
+          const accountId = booking ? booking.accountId : null;
+          const accountPhoneNumber = accountId ? await fetchAccountPhoneNumber(accountId) : "No Phone Number";
+          const medicines = medicinesData.data.filter((m) => pet.medicineIds.includes(m.medicineId));
+          const medicineNames = medicines.length > 0 ? medicines.map((m) => m.medicineName).join(", ") : "No Medicines Assigned";
+          const treatmentNames = [...new Set(
+            medicines.map((m) => {
+              const treatment = treatmentsData.data.find((t) => t.treatmentId === m.treatmentId);
+              return treatment ? treatment.treatmentName : null;
+            }).filter(Boolean)
+          )].join(", ") || "No Treatments Assigned";
+          const matchedPet = bookingServiceItem ? petsData.data.find((p) => p.petId === bookingServiceItem.petId) : null;
 
-      const petsWithDetails = await Promise.all(petHealthBooksData.data.map(async (pet) => {
-        const booking = bookingsData.data.find((b) => b.bookingId === pet.bookingId);
-        const accountId = booking ? booking.accountId : null;
-        const accountPhoneNumber = accountId ? await fetchAccountPhoneNumber(accountId) : "No Phone Number";
-        console.log("Current PetHealthBook entry:", pet);
-        console.log("Extracted Account ID:", accountId);
-        // Lấy danh sách thuốc dựa trên danh sách medicineIds
-        const medicines = medicinesData.data.filter((m) => pet.medicineIds.includes(m.medicineId));
-        const medicineNames = medicines.length > 0 ? medicines.map(m => m.medicineName).join(", ") : "No Medicines Assigned";
-
-        // Lấy thông tin treatment từ thuốc (có thể có nhiều treatment)
-        const treatmentNames = [...new Set(medicines.map(m => {
-          const treatment = treatmentsData.data.find((t) => t.treatmentId === m.treatmentId);
-          return treatment ? treatment.treatmentName : null;
-        }).filter(Boolean))].join(", ") || "No Treatments Assigned";
-        const matchedPet = petsData.data.find((p) => p.accountId === accountId);
-        console.log("Matched Pet:", matchedPet);
-
-        const breed = matchedPet && matchedPet.petBreedId
-          ? petBreedsData.data.find(b => b.petBreedId === matchedPet.petBreedId)?.petBreedName || "Unknown Breed"
-          : "Unknown Breed";
-          console.log("Pet Breed ID:", matchedPet ? matchedPet.petBreedId : "No Pet Breed ID");
-          console.log("Fetched PetBreeds Data:", petBreedsData.data);
-
-        return {
-          ...pet,
-          accountPhoneNumber,
-          medicineNames,
-          treatmentNames,
-          petName: matchedPet ? matchedPet.petName : "Unknown Pet",
-          breed,
-        };
-      }));
-
-
+          const breed = matchedPet && matchedPet.petBreedId
+            ? petBreedsData.data.find((b) => b.petBreedId === matchedPet.petBreedId)?.petBreedName || "Unknown Breed"
+            : "Unknown Breed";
+          return {
+            ...pet,
+            bookingServiceItemId: pet.bookingServiceItemId,
+            accountPhoneNumber,
+            medicineNames,
+            treatmentNames,
+            petName: matchedPet ? matchedPet.petName : "Unknown Pet",
+            breed,
+          };
+        })
+      );
       setPets(petsWithDetails);
       setMedicines(medicinesData.data || []);
       setTreatments(treatmentsData.data || []);
-      setBookings(bookingsData.data || []);
-
     } catch (error) {
       console.error("Error fetching data:", error);
       Swal.fire("Error", "Failed to load data. Please try again later.", "error");
@@ -103,16 +95,12 @@ const PetHealthBookList = () => {
       const accountResponse = await fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`);
       const accountData = await accountResponse.json();
       console.log("Fetched Account Data:", accountData);
-      return accountData.accountPhoneNumber || "No Phone Number"; // Default if no phone number
+      return accountData.accountPhoneNumber || "No Phone Number";
     } catch (error) {
       console.error("Error fetching account phone number:", error);
-      return "No Phone Number"; // Default value if fetching phone number fails
+      return "No Phone Number";
     }
   };
-
-
-
-
   useEffect(() => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
@@ -148,10 +136,8 @@ const PetHealthBookList = () => {
       }
     });
   };
-
   const filteredPets = pets.filter((pet) => {
     const query = searchQuery.toLowerCase();
-
     return (
       !searchQuery ||
       pet.petName.toLowerCase().includes(query) ||
@@ -162,29 +148,24 @@ const PetHealthBookList = () => {
       (pet.performBy && pet.performBy.toLowerCase().includes(query))
     );
   });
-
   const handleSubmit = async () => {
     if (!petName || !accountPhoneNumber) {
       Swal.fire({ icon: "error", title: "Oops...", text: "Please fill in all required fields." });
       return;
     }
-
     const phoneRegex = /^0\d{9}$/;
     if (!phoneRegex.test(accountPhoneNumber)) {
       Swal.fire({ icon: "error", title: "Invalid Phone", text: "Please enter a valid phone number" });
       return;
     }
-
     const formData = new FormData();
     formData.append("PetHealthBookDTO.petName", petName);
     formData.append("PetHealthBookDTO.accountPhoneNumber", accountPhoneNumber);
-
     try {
       const response = await fetch("http://localhost:5003/api/PetHealthBook/addpet", {
         method: "POST",
         body: formData,
       });
-
       const data = await response.json();
       if (response.ok) {
         Swal.fire("Success", "Pet added successfully!", "success");
@@ -200,7 +181,6 @@ const PetHealthBookList = () => {
       Swal.fire("Error", "An error occurred while adding the pet.", "error");
     }
   };
-
   const columns = [
     { field: "serialNumber", headerName: "S.No", flex: 0.5, sortable: true, renderCell: (params) => <span>{params.row.id}</span>, sortComparator: (v1, v2) => v1 - v2 },
     { field: "petName", headerName: "Pet Name", flex: 1 },
@@ -231,7 +211,6 @@ const PetHealthBookList = () => {
       ),
     },
   ];
-
   return (
     <div className="flex h-screen bg-dark-grey-100">
       <Sidebar ref={sidebarRef} />
@@ -241,7 +220,7 @@ const PetHealthBookList = () => {
           <div className="p-4 bg-white shadow-md rounded-md h-full">
             <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
             <div className="flex justify-end mb-4">
-              <form className="relative flex items-center mr-4">
+              {/* <form className="relative flex items-center mr-4">
                 <input
                   type="search"
                   id="search-dropdown"
@@ -273,7 +252,7 @@ const PetHealthBookList = () => {
                     />
                   </svg>
                 </button>
-              </form>
+              </form> */}
               <button
                 type="button"
                 onClick={() => navigate("/add")}

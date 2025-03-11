@@ -3,11 +3,15 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'dart:convert';
 
+import 'pethealthcaredetail_page.dart';
+
 class PetHealthBookDetail extends StatefulWidget {
   final String healthBookId;
-  const PetHealthBookDetail(
-      {Key? key, required this.healthBookId, required pet})
-      : super(key: key);
+  const PetHealthBookDetail({
+    Key? key,
+    required this.healthBookId,
+    required pet,
+  }) : super(key: key);
 
   @override
   _PetHealthBookDetailState createState() => _PetHealthBookDetailState();
@@ -20,6 +24,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
   String petImage = '';
   String petName = '';
   String dateOfBirth = '';
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +33,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
 
   Future<void> fetchData() async {
     try {
+      // Gọi API Health Book, Medicines, Treatments, Bookings, Pets, BookingServiceItems
       final healthBookRes = await http.get(Uri.parse(
           'http://10.0.2.2:5003/api/PetHealthBook/${widget.healthBookId}'));
       final medicinesRes =
@@ -37,15 +43,20 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
       final bookingsRes =
           await http.get(Uri.parse('http://10.0.2.2:5201/Bookings'));
       final petsRes = await http.get(Uri.parse('http://10.0.2.2:5010/api/pet'));
-      if (!mounted) return;
-      if (healthBookRes.statusCode != 200 ||
-          medicinesRes.statusCode != 200 ||
-          treatmentsRes.statusCode != 200 ||
-          bookingsRes.statusCode != 200 ||
-          petsRes.statusCode != 200) {
+      final bookingServiceItemsRes = await http.get(Uri.parse(
+          'http://10.0.2.2:5023/api/BookingServiceItems/GetBookingServiceList'));
+
+      if (!healthBookRes.statusCode.toString().startsWith('2') ||
+          !medicinesRes.statusCode.toString().startsWith('2') ||
+          !treatmentsRes.statusCode.toString().startsWith('2') ||
+          !bookingsRes.statusCode.toString().startsWith('2') ||
+          !petsRes.statusCode.toString().startsWith('2') ||
+          !bookingServiceItemsRes.statusCode.toString().startsWith('2')) {
         print("Error fetching data from API");
         return;
       }
+
+      // Parse JSON
       var healthBookData = jsonDecode(healthBookRes.body)['data'];
       if (healthBookData is List && healthBookData.isNotEmpty) {
         healthBookData = healthBookData.first;
@@ -56,6 +67,9 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
       var treatmentsData = jsonDecode(treatmentsRes.body)['data'] ?? [];
       var bookingsData = jsonDecode(bookingsRes.body)['data'] ?? [];
       var petsData = jsonDecode(petsRes.body)['data'] ?? [];
+      var bookingServiceItemsData =
+          jsonDecode(bookingServiceItemsRes.body)['data'] ?? [];
+
       setState(() {
         petHealthBook = healthBookData;
         List<dynamic> medicineIds = petHealthBook?['medicineIds'] ?? [];
@@ -70,19 +84,23 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             .where(
                 (treatment) => treatmentIds.contains(treatment['treatmentId']))
             .toList();
-        if (healthBookData['bookingId'] != null) {
-          var booking = bookingsData.firstWhere(
-            (b) => b['bookingId'] == healthBookData['bookingId'],
-            orElse: () => {},
+
+        // Sửa logic: sử dụng bookingServiceItemId để lấy pet thông qua BookingServiceItems
+        if (healthBookData['bookingServiceItemId'] != null) {
+          var bsi = bookingServiceItemsData.firstWhere(
+            (item) =>
+                item['bookingServiceItemId'] ==
+                healthBookData['bookingServiceItemId'],
+            orElse: () => null,
           );
-          if (booking.isNotEmpty) {
+          if (bsi != null && bsi['petId'] != null) {
             var pet = petsData.firstWhere(
-              (p) => p['accountId'] == booking['accountId'],
-              orElse: () => {},
+              (p) => p['petId'] == bsi['petId'],
+              orElse: () => null,
             );
-            if (pet.isNotEmpty) {
+            if (pet != null) {
               petImage = pet['petImage'] ?? '';
-              petName = pet['petName'] ?? '';
+              petName = pet['petName'] ?? 'Unknown';
               dateOfBirth = pet['dateOfBirth'] ?? '';
             }
           }
@@ -134,7 +152,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "$petName",
+                    petName,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.center,
                   ),
@@ -150,11 +168,13 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
               ),
             ),
             Divider(),
-            _buildRowText('Treatment',
-                '${treatments.isNotEmpty ? treatments.map((t) => t['treatmentName']).join(", ") : 'No Treatments Found'}'),
-            Divider(),
             _buildRowText(
-                'Performed By', '${petHealthBook!['performBy'] ?? ''}'),
+                'Treatment',
+                treatments.isNotEmpty
+                    ? treatments.map((t) => t['treatmentName']).join(", ")
+                    : 'No Treatments Found'),
+            Divider(),
+            _buildRowText('Performed By', petHealthBook!['performBy'] ?? ''),
             Divider(),
             _buildRowText(
                 'Visit Date', formatDate(petHealthBook!['visitDate'])),
@@ -162,8 +182,11 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             _buildRowText(
                 'Next Visit Date', formatDate(petHealthBook!['nextVisitDate'])),
             Divider(),
-            _buildRowText('Medicine',
-                '${medicines.isNotEmpty ? medicines.map((m) => m['medicineName']).join(", ") : 'No Medicines Assigned'}'),
+            _buildRowText(
+                'Medicine',
+                medicines.isNotEmpty
+                    ? medicines.map((m) => m['medicineName']).join(", ")
+                    : 'No Medicines Assigned'),
             Divider(),
             SizedBox(height: 10),
             Align(
@@ -182,24 +205,25 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
 
   Widget _buildRowText(String title, String value) {
     return Padding(
-        padding: EdgeInsets.all(10),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 100,
-              child: Text(title,
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-            ),
-            SizedBox(width: 30),
-            Expanded(
-                child: Text(
-              value,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-              maxLines: null,
-            )),
-          ],
-        ));
+      padding: EdgeInsets.all(10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(title,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+          ),
+          SizedBox(width: 30),
+          Expanded(
+              child: Text(
+            value,
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+            maxLines: null,
+          )),
+        ],
+      ),
+    );
   }
 }

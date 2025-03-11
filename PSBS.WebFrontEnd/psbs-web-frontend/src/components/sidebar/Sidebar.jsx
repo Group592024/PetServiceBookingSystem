@@ -100,6 +100,16 @@ const Sidebar = forwardRef((_, ref) => {
         </li>
         <li
           className={
+            /^\/cameralist(\/|$)/.test(location.pathname) ? "active" : ""
+          }
+        >
+          <Link to="/cameralist">
+            <i className="bx bxs-camera"></i>
+            Camera
+          </Link>
+        </li>
+        <li
+          className={
             /^\/pethealthbook(\/|$)/.test(location.pathname) ? "active" : ""
           }
         >

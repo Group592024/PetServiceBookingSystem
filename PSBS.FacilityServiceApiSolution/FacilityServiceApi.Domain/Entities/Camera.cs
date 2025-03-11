@@ -7,7 +7,7 @@ namespace FacilityServiceApi.Domain.Entities
 {
     public class Camera
     {
-        [Key,Column("camera_id")]
+        [Key, Column("camera_id")]
         public Guid cameraId { get; set; }
         [Column("camera_type")]
         public string cameraType { get; set; }
@@ -15,6 +15,10 @@ namespace FacilityServiceApi.Domain.Entities
         public string cameraCode { get; set; }
         [Column("camera_status")]
         public string cameraStatus { get; set; }
+        [Column("rtspurl")]
+        public string rtspUrl { get; set; }
+        [Column("camera_address")]
+        public string cameraAddress { get; set; }
         [Column("isDeleted")]
         public bool isDeleted { get; set; }
         [JsonIgnore]

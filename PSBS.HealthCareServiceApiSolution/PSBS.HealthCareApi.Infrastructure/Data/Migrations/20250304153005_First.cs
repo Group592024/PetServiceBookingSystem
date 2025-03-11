@@ -16,7 +16,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     healthBook_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    booking_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    BookingServiceItem_Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     medicine_Ids = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     visit_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     nextvisit_Date = table.Column<DateTime>(type: "datetime2", nullable: true),

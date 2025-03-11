@@ -17,6 +17,8 @@ dependencies:
   curved_navigation_bar: ^1.0.6
   fluttertoast: ^8.2.11
   dio: ^5.8.0+1
+  video_player: ^2.8.2
+  chewie: ^1.7.0
   flutter_html: ^3.0.0-beta.2
   flutter_quill: ^11.0.0
   flutter_quill_extensions: ^11.0.0
@@ -26,16 +28,15 @@ dependencies:
   html: ^0.15.4
   image: ^4.0.17
   flutter_cache_manager: ^3.3.0
-
   flutter_swiper_plus: ^2.0.4
   animations: ^2.0.11
   carousel_slider: ^5.0.0
   flutter_animate: ^4.5.2
   flutter_svg: ^2.0.17
-
   signalr_netcore: ^1.4.1
   emoji_picker_flutter: ^4.3.0
   flutter_zustand: ^0.0.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

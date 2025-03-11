@@ -74,6 +74,11 @@ import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetai
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
+import Camera from "./pages/customers/camera/Camera";
+import CameraList from "./pages/admins/camera/CameraList";
+import CreateCamera from "./pages/admins/camera/CreateCamera"
+import CameraDetail from "./pages/admins/camera/CameraDetail"
+import EditCamera from "./pages/admins/camera/EditCamera"
 import Chat from "./pages/admins/chat/Chat";
 import signalRService from "./lib/ChatService";
 import { useEffect } from "react";
@@ -87,6 +92,7 @@ import AddBooking from "./pages/customers/bookings/AddBooking";
 import Admin_Add_Booking from "./pages/admins/bookings/add-form/Admin_Add_Booking";
 import CustomerServiceBookingDetail from "./pages/customers/bookings/detail-pages/CustomerServiceBookingDetail";
 import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/CustomerRoomBookingDetail";
+import CameraCreate from "./pages/admins/camera/CreateCamera";
 import Unauthorized from "./pages/authorize/Unauthorized";
 
 function App() {
@@ -167,7 +173,7 @@ function App() {
             }
           />
           <Route
-            path="/list"
+            path="/list/:petId"
             element={
               <ProtectedRoute allowedRoles={["user"]}>
                 <PetHealthBookListCus />
@@ -250,6 +256,47 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/camera"
+            element={
+              <ProtectedRoute>
+                <Camera />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cameralist"
+            element={
+              <ProtectedRoute>
+                <CameraList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/addcamera"
+            element={
+              <ProtectedRoute>
+                <CreateCamera />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/detailcamera/:cameraId"
+            element={
+              <ProtectedRoute>
+                <CameraDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/editcamera/:cameraId"
+            element={
+              <ProtectedRoute>
+                <EditCamera />
+              </ProtectedRoute>
+            }
+          />
+          {/* Các route khác */}
           {/* Medicine links*/}
 
           <Route path="/medicines">

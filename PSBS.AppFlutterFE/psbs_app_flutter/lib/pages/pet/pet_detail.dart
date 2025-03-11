@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
+    as list;
 import 'dart:convert';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_create.dart';
@@ -309,18 +311,21 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                   SizedBox(width: 16),
                   Expanded(
                     child: _buildNavigationButton(
-                      'Medical History',
-                      Image.asset(
-                        'assets/health-checkicon.png',
-                        width: 50,
-                        height: 50,
-                      ),
-                      Colors.purple[100]!,
-                      () => Navigator.pushNamed(
-                        context,
-                        '/customer/pet/medical-history/${pet!['petId']}',
-                      ),
-                    ),
+                        'Medical History',
+                        Image.asset(
+                          'assets/health-checkicon.png',
+                          width: 50,
+                          height: 50,
+                        ),
+                        Colors.purple[100]!,
+                        () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => list.PetHealthBookList(
+                                  petId: pet!['petId'],
+                                ),
+                              ),
+                            )),
                   ),
                 ],
               ),
