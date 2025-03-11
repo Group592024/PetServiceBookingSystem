@@ -133,123 +133,138 @@ const PetBreedCreate = () => {
     };
 
     return (
-        <div>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
-            <div className='content'>
+            <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className="flex justify-between items-center mb-6 mx-auto w-full">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="text-black font-bold text-4xl"
-                        >
-                            ⬅️
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Enhanced Header */}
+                    <div className="flex items-center mb-8 bg-white rounded-xl p-4 shadow-sm">
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
                         </button>
-                        <div className="bg-gray-300 p-4 text-center rounded-lg w-72 mb-6 -mt-6 mx-auto">
-                            <button className="text-black font-bold text-2xl px-4 py-2 rounded-lg shadow bg-yellow-300 border-2 pointer-events-none">
-                                Create Pet Breed
-                            </button>
-                        </div>
+                        <h1 className="text-3xl font-bold text-gray-800 ml-4">Create New Breed</h1>
                     </div>
 
                     <form onSubmit={handleSubmit}>
-                        <div className="p-6 bg-gray-200 rounded-lg flex flex-col lg:flex-row gap-6 -mt-8">
-                            <div className="bg-white p-3 rounded-xl shadow-md flex-1">
-                                {/* Breed Name */}
-                                <div className="mb-3 flex items-center">
-                                    <label className="font-semibold text-base text-gray-500 mr-5">Name:</label>
-                                    <TextField
-                                        fullWidth
-                                        type='text'
-                                        sx={{ borderRadius: '8px', marginBottom: '8px' }}
-                                        onChange={(e) => {
-                                            setName(e.target.value);
-                                            setError((prev) => ({ ...prev, name: false }));
-                                        }}
-                                        error={error.name}
-                                        helperText={error.name ? 'Breed Name is required.' : ''}
-                                    />
-                                </div>
-
-                                {/* Type */}
-                                <div className="mb-3 flex items-center">
-                                    <label className="font-semibold text-base text-gray-500 mr-7">Type:</label>
-                                    <FormControl fullWidth sx={{ borderRadius: '8px', marginBottom: '8px' }}>
-                                        <InputLabel>Choose Type</InputLabel>
-                                        <Select
-                                            value={typeName}
-                                            onChange={(e) => {
-                                                setTypeName(e.target.value);
-                                                setError((prev) => ({ ...prev, typeName: false }));
+                        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                            <div className="p-8 flex flex-col lg:flex-row gap-12">
+                                {/* Left Column - Form Fields */}
+                                <div className="lg:w-1/2 space-y-6">
+                                    {/* Breed Name */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Breed Name</label>
+                                        <TextField
+                                            fullWidth
+                                            placeholder="Enter breed name"
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: '0.75rem',
+                                                    backgroundColor: '#f8fafc',
+                                                }
                                             }}
-                                            label="Choose Type"
-                                            error={error.typeName}
+                                            onChange={(e) => {
+                                                setName(e.target.value);
+                                                setError((prev) => ({ ...prev, name: false }));
+                                            }}
+                                            error={error.name}
+                                            helperText={error.name ? 'Breed Name is required.' : ''}
+                                        />
+                                    </div>
+
+                                    {/* Pet Type */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Pet Type</label>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                value={typeName}
+                                                onChange={(e) => {
+                                                    setTypeName(e.target.value);
+                                                    setError((prev) => ({ ...prev, typeName: false }));
+                                                }}
+                                                error={error.typeName}
+                                                sx={{
+                                                    borderRadius: '0.75rem',
+                                                    backgroundColor: '#f8fafc',
+                                                }}
+                                                displayEmpty
+                                            >
+                                                <MenuItem value="" disabled>Select pet type</MenuItem>
+                                                {petTypes.map((petType) => (
+                                                    <MenuItem key={petType.petType_ID} value={petType.petType_ID}>
+                                                        {petType.petType_Name}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                            {error.typeName && (
+                                                <p className="text-red-500 text-xs mt-1">Type is required.</p>
+                                            )}
+                                        </FormControl>
+                                    </div>
+
+                                    {/* Description */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                        <textarea
+                                            className={`w-full p-4 rounded-xl bg-gray-50 border ${error.description ? 'border-red-300' : 'border-gray-200'
+                                                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[200px]`}
+                                            placeholder="Enter breed description..."
+                                            value={description}
+                                            onChange={(e) => {
+                                                setDescription(e.target.value);
+                                                setError((prev) => ({ ...prev, description: false }));
+                                            }}
+                                        ></textarea>
+                                        {error.description && (
+                                            <p className="text-red-500 text-xs mt-1">Description is required.</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right Column - Image Upload */}
+                                <div className="lg:w-1/2">
+                                    <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
+                                        <div
+                                            className="aspect-square cursor-pointer"
+                                            onClick={() => document.getElementById('inputFile').click()}
                                         >
-                                            {petTypes.map((petType) => (
-                                                <MenuItem key={petType.petType_ID} value={petType.petType_ID}>
-                                                    {petType.petType_Name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                        {error.typeName && <p className="text-red-500 text-xs">Type is required.</p>}
-                                    </FormControl>
-                                </div>
-
-                                {/* Description */}
-                                <div className="mb-3">
-                                    <label className="font-semibold text-base text-gray-500 mb-1">Description:</label>
-                                    <textarea
-                                        className={`w-full p-2 rounded-lg border-2 ${error.description ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-yellow-300`}
-                                        rows="5"
-                                        maxLength="500"
-                                        placeholder="Enter the pet breed description here"
-                                        value={description}
-                                        onChange={(e) => {
-                                            setDescription(e.target.value);
-                                            setError((prev) => ({ ...prev, description: false }));
-                                        }}
-                                    ></textarea>
-                                    {error.description && (
-                                        <p className="text-red-500 text-xs mt-1">Description is required.</p>
-                                    )}
-                                </div>
-
-                                {/* Submit and Cancel Buttons */}
-                                <div className="flex justify-center gap-4">
-                                    <button
-                                        type='submit'
-                                        className="bg-yellow-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-yellow-400"
-                                    >
-                                        Save
-                                    </button>
-
-                                    <button
-                                        className="bg-gray-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-gray-400"
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            navigate('/petBreed');
-                                        }}
-                                    >
-                                        Cancel
-                                    </button>
+                                            <img
+                                                src={tmpImage}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain rounded-lg"
+                                            />
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            id="inputFile"
+                                            onChange={handleImageChange}
+                                            className="hidden"
+                                        />
+                                        <p className="text-center text-sm text-gray-500 mt-2">
+                                            Click to upload or change image
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Image Preview Section */}
-                            <div className="w-full lg:w-1/2 flex justify-center items-center">
-                                <img
-                                    className="w-[400px] h-[400px] object-contain cursor-pointer"
-                                    src={tmpImage}
-                                    alt="sampleImage"
-                                    onClick={() => document.getElementById('inputFile').click()}
-                                />
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    id="inputFile"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                />
+                            {/* Action Buttons */}
+                            <div className="flex justify-center space-x-4 p-6 bg-gray-50 border-t">
+                                <button
+                                    onClick={() => navigate('/petBreed')}
+                                    className="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                    type="button"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                >
+                                    Create Breed
+                                </button>
                             </div>
                         </div>
                     </form>
