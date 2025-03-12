@@ -11,12 +11,18 @@ const GiftDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const accountId = sessionStorage.getItem("accountId");
-
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   useEffect(() => {
     const fetchGift = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5022/Gifts/detail/${giftId}`
+          `http://localhost:5050/Gifts/detail/${giftId}`,
+          config
         );
         if (response.data.flag) {
           setGift(response.data.data);
@@ -48,11 +54,11 @@ const GiftDetailPage = () => {
     if (confirmResult.isConfirmed) {
       try {
         const redeemPointsResponse = await axios.post(
-          `http://localhost:5000/api/Account/redeem-points/${accountId}`,
+          `http://localhost:5050/api/Account/redeem-points/${accountId}`,
           {
             giftId: giftId,
             requiredPoints: gift.giftPoint,
-          }
+          },  config,
         );
 
         if (redeemPointsResponse.data.flag) {

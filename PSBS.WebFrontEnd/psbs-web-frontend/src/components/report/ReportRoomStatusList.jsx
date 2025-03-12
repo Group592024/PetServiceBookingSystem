@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import ReportSquareCard from './ReportSquareCard';
+import React, { useEffect, useState } from "react";
+import ReportSquareCard from "./ReportSquareCard";
 
 const ReportRoomStatusList = () => {
   const pastelColors = [
-    '#B39CD0',
-    '#F48FB1',
-    '#FFB74D',
-    '#90CAF9',
-    '#A5D6A7',
-    '#FFCC80',
-    '#80CBC4',
+    "#B39CD0",
+    "#F48FB1",
+    "#FFB74D",
+    "#90CAF9",
+    "#A5D6A7",
+    "#FFCC80",
+    "#80CBC4",
   ];
 
   // Hàm xáo trộn mảng (Fisher-Yates Shuffle)
@@ -28,8 +28,16 @@ const ReportRoomStatusList = () => {
 
   const fetchDataRoom = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/ReportFacility/roomStatus'
+        "http://localhost:5050/api/ReportFacility/roomStatus",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -42,7 +50,7 @@ const ReportRoomStatusList = () => {
 
       setData(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -51,14 +59,14 @@ const ReportRoomStatusList = () => {
   }, []);
 
   return (
-    <div className='flex w-full'>
+    <div className="flex w-full">
       {data.map((item) => (
         <ReportSquareCard
           key={item.roomStatusName}
           name={item.roomStatusName}
           quantity={item.quantity}
           color={item.color}
-          sx={{ width: '17%' }}
+          sx={{ width: "17%" }}
         />
       ))}
     </div>

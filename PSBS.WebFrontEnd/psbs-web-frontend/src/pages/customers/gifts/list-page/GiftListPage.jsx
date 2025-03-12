@@ -8,10 +8,15 @@ const GiftListPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   const fetchGifts = async () => {
     try {
-      const response = await axios.get("http://localhost:5022/Gifts"); // Replace with your actual API URL
+      const response = await axios.get("http://localhost:5050/Gifts", config); // Replace with your actual API URL
       if (response.data.flag) {
         setGifts(response.data.data);
       } else {
@@ -90,7 +95,7 @@ const GiftListPage = () => {
             >
               {/* Gift image */}
               <img
-                src={`http://localhost:5022${gift.giftImage}`}
+                src={`http://localhost:5050${gift.giftImage}`}
                 alt={gift.giftName}
                 className="w-full h-32 object-cover rounded-md mb-4"
               />

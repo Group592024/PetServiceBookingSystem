@@ -89,7 +89,7 @@ class _CustomerPetListState extends State<PetPage> {
 
       final response = await http.delete(
         Uri.parse('$deleteUrl$petId'),
-        headers: headers, 
+        headers: headers,
       );
       final responseData = json.decode(response.body);
 
@@ -454,165 +454,298 @@ class _CustomerPetListState extends State<PetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Your Pet List",
-          style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.teal.shade50,
+              Colors.white,
+            ],
+          ),
         ),
-        backgroundColor: Colors.teal,
-        elevation: 4,
-        shadowColor: Colors.black54,
-      ),
-      body: FutureBuilder<List<Pet>>(
-        future: pets,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 60, color: Colors.red),
-                  SizedBox(height: 16),
-                  Text(
-                    "Something went wrong",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    snapshot.error.toString(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: FutureBuilder<List<Pet>>(
+                future: pets,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildLoadingState();
+                  } else if (snapshot.hasError) {
+                    return _buildErrorState(snapshot.error.toString());
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return _buildEmptyState();
+                  } else {
+                    return Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: Column(
+                        children: snapshot.data!
+                            .map((pet) => _buildPetCard(pet))
+                            .toList(),
+                      ),
+                    );
+                  }
+                },
               ),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.pets, size: 64, color: Colors.teal),
-                  SizedBox(height: 16),
-                  Text(
-                    "No pets found",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.teal,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    "Add your first pet using the + button below",
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ],
-              ),
-            );
-          } else {
-            return ListView.builder(
-              padding: EdgeInsets.all(10),
-              itemCount: snapshot.data!.length,
-              itemBuilder: (context, index) {
-                final pet = snapshot.data![index];
-                return Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                  elevation: 5,
-                  margin: EdgeInsets.only(bottom: 10),
-                  child: Padding(
-                    padding: EdgeInsets.all(15),
-                    child: Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Image.network(
-                            'http://10.0.2.2:5050/pet-service${pet.petImage}',
-                            width: 400,
-                            height: 350,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(height: 15),
-                        Text(
-                          pet.petName,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          pet.gender == 'Male' ? 'Male' : 'Female',
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey[700]),
-                        ),
-                        SizedBox(height: 10),
-                        Text(
-                          DateFormat('dd/MM/yyyy')
-                              .format(DateTime.parse(pet.dateOfBirth)),
-                          style:
-                              TextStyle(fontSize: 18, color: Colors.grey[700]),
-                        ),
-                        SizedBox(height: 15),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              icon:
-                                  Icon(Icons.info_outline, color: Colors.blue),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CustomerPetDetail(
-                                      petId: pet.petId,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.edit, color: Colors.green),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PetEdit(
-                                      petId: pet.petId,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => confirmDelete(pet.petId),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          }
-        },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => PetCreate(),
-            ),
+            MaterialPageRoute(builder: (context) => PetCreate()),
           );
         },
         child: Icon(Icons.add),
+        backgroundColor: const Color.fromARGB(255, 179, 240, 255),
+      ),
+    );
+  }
+
+  Widget _buildPetCard(Pet pet) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            spreadRadius: 2,
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Image Section
+          ClipRRect(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            child: Image.network(
+              'http://10.0.2.2:5050/pet-service${pet.petImage}',
+              height: 250,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          // Pet Information Section
+          Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        pet.petName,
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal.shade800,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.cake, size: 16, color: Colors.grey),
+                    SizedBox(width: 4),
+                    Text(
+                      DateFormat('dd/MM/yyyy')
+                          .format(DateTime.parse(pet.dateOfBirth)),
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildActionButton(
+                      'Details',
+                      Icons.info_outline,
+                      Colors.blue,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CustomerPetDetail(petId: pet.petId),
+                        ),
+                      ),
+                    ),
+                    _buildActionButton(
+                      'Edit',
+                      Icons.edit,
+                      Colors.green,
+                      () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PetEdit(petId: pet.petId),
+                        ),
+                      ),
+                    ),
+                    _buildActionButton(
+                      'Delete',
+                      Icons.delete,
+                      Colors.red,
+                      () => confirmDelete(pet.petId),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      String label, IconData icon, Color color, VoidCallback onPressed) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            border: Border.all(color: color.withOpacity(0.5)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: color, size: 20),
+              SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Container(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Loading your pets...',
+            style: TextStyle(
+              color: Colors.teal,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Container(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.teal.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.pets,
+              size: 72,
+              color: Colors.teal,
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            "No Pets Yet",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.teal.shade800,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            "Start your journey by adding your first pet!",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(String error) {
+    return Container(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.error_outline,
+              size: 72,
+              color: Colors.red,
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            "Oops! Something went wrong",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.red.shade800,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            error,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }

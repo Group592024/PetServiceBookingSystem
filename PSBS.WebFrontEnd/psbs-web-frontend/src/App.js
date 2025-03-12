@@ -259,7 +259,7 @@ function App() {
             path="/camera"
             element={
               <ProtectedRoute>
-                <CameraCus/>
+                <CameraCus />
               </ProtectedRoute>
             }
           />
@@ -716,7 +716,7 @@ function App() {
             <Route
               index
               element={
-                <ProtectedRoute allowedRoles={["user"]}>
+                <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
                   <PetDiaryListPage />
                 </ProtectedRoute>
               }

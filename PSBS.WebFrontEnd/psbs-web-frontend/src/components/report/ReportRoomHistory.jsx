@@ -7,8 +7,16 @@ const ReportRoomHistory = () => {
 
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/ReportFacility/roomHistory'
+        'http://localhost:5050/api/ReportFacility/roomHistory',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 

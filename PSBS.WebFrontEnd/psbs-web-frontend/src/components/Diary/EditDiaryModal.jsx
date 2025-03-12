@@ -1,62 +1,64 @@
-import { Avatar, Modal, Stack } from '@mui/material';
-import React, { useRef, useState } from 'react';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import sampleImage from '../../assets/sampleUploadImage.jpg';
-import JoditEditor from 'jodit-react';
-import Swal from 'sweetalert2';
+import { Avatar, Modal, Stack } from "@mui/material";
+import React, { useRef, useState } from "react";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import sampleImage from "../../assets/sampleUploadImage.jpg";
+import JoditEditor from "jodit-react";
+import Swal from "sweetalert2";
 
 const EditDiaryModal = ({ open, onClose, diary }) => {
   console.log(diary);
-  const petInfo = JSON.parse(localStorage.getItem('petInfo'));
+  const petInfo = JSON.parse(localStorage.getItem("petInfo"));
 
   const editor = useRef(null);
 
-  const [content, setContent] = useState(diary?.diary_Content || '');
+  const [content, setContent] = useState(diary?.diary_Content || "");
   const [loading, setLoading] = useState(false);
 
   const config = {
     readonly: false,
-    placeholder: 'Start typings...',
+    placeholder: "Start typings...",
     buttons: [
-      'bold',
-      'italic',
-      'underline',
-      'strikethrough',
-      '|',
-      'ul',
-      'ol',
-      '|',
-      'align',
-      '|',
-      'link',
-      'image',
+      "bold",
+      "italic",
+      "underline",
+      "strikethrough",
+      "|",
+      "ul",
+      "ol",
+      "|",
+      "align",
+      "|",
+      "link",
+      "image",
     ],
     uploader: {
       insertImageAsBase64URI: true,
     },
     events: {
-      error: (e) => alert('Upload failed:', e),
+      error: (e) => alert("Upload failed:", e),
     },
   };
 
   // Edit diary processing
   const handleSave = async () => {
-    if (content === '') {
+    if (content === "") {
       return Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'The content can not be empty!',
+        icon: "error",
+        title: "Error",
+        text: "The content can not be empty!",
       });
     }
 
     setLoading(true);
     try {
+      const token = sessionStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5010/api/PetDiary/${diary?.diary_ID}`,
+        `http://localhost:5050/api/PetDiary/${diary?.diary_ID}`,
         {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             pet_ID: petInfo.petId,
@@ -68,27 +70,27 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
       if (!response.ok) {
         const errorMessage = await response.json();
         Swal.fire({
-          icon: 'error',
-          title: 'Error',
+          icon: "error",
+          title: "Error",
           text: `Failed to create pet diary: ${errorMessage?.message}`,
         });
         return;
       }
 
-      localStorage.setItem('diaryContent', content);
+      localStorage.setItem("diaryContent", content);
 
       Swal.fire({
-        icon: 'success',
-        title: 'Success',
+        icon: "success",
+        title: "Success",
         text: `Pet Diary Updated Successfully!`,
       });
-      setContent('');
+      setContent("");
       onClose();
     } catch (error) {
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Failed to save the diary. Please try again.',
+        icon: "error",
+        title: "Error",
+        text: "Failed to save the diary. Please try again.",
       });
     } finally {
       setLoading(false);
@@ -99,29 +101,29 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
     <Modal open={open} onClose={onClose}>
       <Stack
         spacing={4}
-        className='px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[10%] max-h-[500px]'
+        className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[10%] max-h-[500px]"
       >
-        <div className='flex justify-start items-center gap-4 w-full'>
+        <div className="flex justify-start items-center gap-4 w-full">
           <button onClick={onClose}>
             <ArrowBackIosIcon />
           </button>
 
-          <div className='flex justify-center items-center gap-2'>
+          <div className="flex justify-center items-center gap-2">
             <Avatar
               alt={petInfo?.petName}
               src={petInfo?.petImage || sampleImage}
             />
-            <h3 className='font-bold'>{petInfo?.petName}</h3>
+            <h3 className="font-bold">{petInfo?.petName}</h3>
           </div>
         </div>
 
         <div
           style={{
-            borderRadius: '0.5rem',
-            overflowY: 'auto',
-            maxHeight: '300px',
+            borderRadius: "0.5rem",
+            overflowY: "auto",
+            maxHeight: "300px",
           }}
-          className='no-scroll-bar'
+          className="no-scroll-bar"
         >
           <JoditEditor
             ref={editor}
@@ -132,15 +134,15 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
           />
         </div>
 
-        <div className='flex justify-center mt-8'>
+        <div className="flex justify-center mt-8">
           <button
             className={`rounded-full px-8 py-4 bg-customPrimary text-customLight w-1/3 ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
+              loading ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={loading}
             onClick={handleSave}
           >
-            {loading ? 'Saving...' : 'Save'}
+            {loading ? "Saving..." : "Save"}
           </button>
         </div>
       </Stack>

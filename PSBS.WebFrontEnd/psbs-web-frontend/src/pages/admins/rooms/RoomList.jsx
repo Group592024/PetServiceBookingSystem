@@ -53,7 +53,7 @@ const RoomList = () => {
 
             const roomData = await response.json();
 
-            console.log("API Response:", roomData); 
+            console.log("API Response:", roomData);
 
             if (roomData && roomData.data && Array.isArray(roomData.data)) {
                 const result = roomData.data.map((item) => ({
@@ -309,49 +309,41 @@ const RoomList = () => {
             <Sidebar ref={sidebarRef} />
             <div className='content'>
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className='header'>
-                        <div className='left'>
-                            <h1>Room List</h1>
+                <div className="p-8">
+                    <main className="bg-white shadow-lg rounded-lg p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b pb-4 mb-4">
+                            <h1 className="text-2xl font-bold text-gray-800">Room List</h1>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
+                                onClick={() => navigate('/room/add')}
+                            >
+                                <i className="bx bxs-plus-circle text-lg"></i>
+                                <span>NEW</span>
+                            </button>
                         </div>
-                        <button
-                            className='report'
-                            onClick={() => navigate('/room/add')}
+    
+                        {/* Data Grid */}
+                        <Box
+                            sx={{
+                                height: "100%",
+                                maxHeight: "400px",
+                                width: "100%",
+                                "& .MuiDataGrid-root": {
+                                    backgroundColor: "#ffffff",
+                                },
+                                "& .MuiDataGrid-row": {
+                                    backgroundColor: "#f8f9fa",
+                                },
+                                "& .MuiDataGrid-footerContainer": {
+                                    backgroundColor: "#e2e8f0",
+                                },
+                                "& .MuiPaginationItem-root": {
+                                    backgroundColor: "#93c5fd",
+                                    color: "#1e3a8a",
+                                },
+                            }}
                         >
-                            <i className='bx bxs-plus-circle'></i>
-                            <span>NEW</span>
-                        </button>
-                    </div>
-                    <Box
-                        sx={{
-                            height: 400,
-                            width: "100%",
-                            "& .MuiDataGrid-root": {
-                                backgroundColor: "#f9f9f9",
-                            },
-                            "& .MuiDataGrid-row": {
-                                backgroundColor: "#f4f4f4",
-                            },
-                            "& .MuiDataGrid-row.Mui-selected": {
-                                backgroundColor: "#c8f6e9 !important",
-                            },
-                            "& .MuiDataGrid-footerContainer": {
-                                backgroundColor: "#9f9f9f",
-                            },
-                            "& .MuiPaginationItem-root": {
-                                backgroundColor: "#b3f2ed",
-                                color: "#3f3f3f",
-                            },
-                            "& .MuiPaginationItem-root:hover": {
-                                backgroundColor: "#ede4e2",
-                            },
-                        }}
-                    >
-                        {loading ? (
-                            <div style={{ textAlign: 'center' }}>
-                                <CircularProgress />
-                            </div>
-                        ) : (
                             <DataGrid
                                 columns={columns}
                                 rows={data}
@@ -365,9 +357,9 @@ const RoomList = () => {
                                     return params.row.isDeleted ? 'opacity-50 bg-gray-200' : '';
                                 }}
                             />
-                        )}
-                    </Box>
-                </main>
+                        </Box>
+                    </main>
+                </div>
             </div>
         </div>
     );

@@ -33,8 +33,16 @@ const ReportGeneral = () => {
 
   const fetchDataStaff = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5000/api/ReportAccount/countStaff'
+        'http://localhost:5050/api/ReportAccount/countStaff',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -48,8 +56,16 @@ const ReportGeneral = () => {
 
   const fetchDataCustomer = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5000/api/ReportAccount/countCustomer'
+        'http://localhost:5050/api/ReportAccount/countCustomer',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -63,8 +79,16 @@ const ReportGeneral = () => {
 
   const fetchDataPet = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5010/api/Pet'
+        'http://localhost:5050/api/Pet',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -78,8 +102,16 @@ const ReportGeneral = () => {
 
   const fetchDataBooking = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5115/api/ReportBooking/bookingStatus'
+        'http://localhost:5050/api/ReportBooking/bookingStatus',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -102,7 +134,16 @@ const ReportGeneral = () => {
 
   const fetchDataService = async () => {
     try {
-      const fetchData = await fetch('http://localhost:5023/api/Service?showAll=false');
+      const token = sessionStorage.getItem("token");
+      const fetchData = await fetch('http://localhost:5050/api/Service?showAll=false',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const response = await fetchData.json();
 
       const result = response.data.length;
@@ -115,8 +156,16 @@ const ReportGeneral = () => {
 
   const fetchDataRoom = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/ReportFacility/availableRoom'
+        'http://localhost:5050/api/ReportFacility/availableRoom',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 

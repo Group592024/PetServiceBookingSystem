@@ -178,138 +178,164 @@ const PetBreedEdit = () => {
     };
 
     return (
-        <div>
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
-            <div className='content'>
+            <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className="flex justify-between items-center mb-6 mx-auto w-full">
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="text-black font-bold text-4xl"
-                        >
-                            ⬅️
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Enhanced Header */}
+                    <div className="flex items-center mb-8 bg-white rounded-xl p-4 shadow-sm">
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
                         </button>
-                        <div className="bg-gray-300 p-4 text-center rounded-lg w-72 mb-6 -mt-6 mx-auto">
-                            <button className="text-black font-bold text-2xl px-4 py-2 rounded-lg shadow bg-yellow-300 border-2 pointer-events-none">
-                                Edit Pet Breed
-                            </button>
-                        </div>
+                        <h1 className="text-3xl font-bold text-gray-800 ml-4">Edit Pet Breed</h1>
                     </div>
-                    <form onSubmit={handleSubmit}>
-                        <div className="p-6 bg-gray-200 rounded-lg flex flex-col lg:flex-row gap-6 -mt-8">
-                            <div className="bg-white p-3 rounded-xl shadow-md flex-1 h-[75vh]">
-                                {/* Breed Name */}
-                                <div className="mb-3 flex items-center">
-                                    <label className="font-semibold text-base text-gray-500 mr-5">Name:</label>
-                                    <TextField
-                                        fullWidth
-                                        type='text'
-                                        onChange={(e) => setName(e.target.value)}
-                                        value={name}
-                                        error={error.name}
-                                        helperText={error.name ? 'Breed Name is required.' : ''}
-                                    />
-                                </div>
 
-                                {/* Type */}
-                                <div className="mb-3 flex items-center">
-                                    <label className="font-semibold text-base text-gray-500 mr-7">Type:</label>
-                                    <FormControl fullWidth>
-                                        <InputLabel>Choose Type</InputLabel>
-                                        <Select
-                                            value={typeName}
-                                            onChange={(e) => setTypeName(e.target.value)}
-                                            label="Choose Type"
-                                            error={error.typeName}
-                                            renderValue={(selected) => {
-                                                console.log('Selected:', selected);
-                                                console.log('Current Type Name:', currentTypeName);
-                                                const selectedType = petTypes.find(type => type.petType_ID === selected);
-                                                console.log('Selected Type:', selectedType);
-                                                return selectedType?.petType_Name || currentTypeName;
-                                            }}
-                                        >
-                                            {petTypes.map((petType) => (
-                                                <MenuItem key={petType.petType_ID} value={petType.petType_ID}>
-                                                    {petType.petType_Name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                </div>
-
-                                {/* Description */}
-                                <div className="mb-3">
-                                    <label className="font-semibold text-base text-gray-500 mb-1">Description:</label>
-                                    <textarea
-                                        className={`w-full p-2 rounded-lg border-2 ${error.description ? 'border-red-500' : 'border-gray-300'}`}
-                                        rows="5"
-                                        value={description}
-                                        onChange={(e) => setDescription(e.target.value)}
-                                    ></textarea>
-                                    {error.description && <p className="text-red-500 text-xs">Description is required.</p>}
-                                </div>
-
-                                {/* Status */}
-                                <div className="mb-3">
-                                    <FormControl component="fieldset">
-                                        <div className="flex items-center">
-                                            <FormLabel component="legend" className="mr-4 font-semibold text-base">Status:</FormLabel>
-                                            <RadioGroup
-                                                row
-                                                value={isDelete ? 'true' : 'false'}
-                                                onChange={(e) => setIsDelete(e.target.value === 'true')}
-                                                className="flex items-center"
-                                            >
-                                                <FormControlLabel
-                                                    value="false"
-                                                    control={<Radio />}
-                                                    label="Active"
-                                                    className="font-bold text-green-500 text-lg mr-4"
-                                                />
-                                                <FormControlLabel
-                                                    value="true"
-                                                    control={<Radio />}
-                                                    label="Stopping"
-                                                    className="font-bold text-red-500 text-lg"
-                                                />
-                                            </RadioGroup>
+                    <div className="bg-white rounded-xl p-8 shadow-lg">
+                        <form onSubmit={handleSubmit}>
+                            <div className="flex flex-col md:flex-row gap-12">
+                                {/* Left Column */}
+                                <div className="md:w-1/2 space-y-6">
+                                    {/* Image Upload */}
+                                    <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
+                                        <div className="aspect-square mb-4">
+                                            <img
+                                                src={tmpImage}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover rounded-lg shadow-sm"
+                                                onClick={() => document.getElementById('fileInput').click()}
+                                            />
                                         </div>
-                                    </FormControl>
+                                        <input
+                                            type="file"
+                                            id="fileInput"
+                                            accept="image/*"
+                                            className="w-full"
+                                            onChange={handleImageChange}
+                                        />
+                                    </div>
                                 </div>
 
-                                {/* Submit and Cancel Buttons */}
-                                <div className="flex justify-center gap-4">
-                                    <button type="submit" className="bg-yellow-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-yellow-400">
-                                        Save
-                                    </button>
-                                    <button className="bg-gray-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-gray-400" onClick={(e) => {
-                                        e.preventDefault();
-                                        navigate('/petBreed');
-                                    }}>
-                                        Cancel
-                                    </button>
+                                {/* Right Column */}
+                                <div className="md:w-1/2 space-y-6">
+
+                                    {/* Basic Info */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Breed Name</label>
+                                            <TextField
+                                                fullWidth
+                                                value={name}
+                                                onChange={(e) => setName(e.target.value)}
+                                                error={error.name}
+                                                helperText={error.name ? 'Breed Name is required.' : ''}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Pet Type</label>
+                                            <FormControl fullWidth error={error.typeName}>
+                                                <Select
+                                                    value={typeName}
+                                                    onChange={(e) => setTypeName(e.target.value)}
+                                                    sx={{
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }}
+                                                    renderValue={(selected) => {
+                                                        const selectedType = petTypes.find(type => type.petType_ID === selected);
+                                                        return selectedType?.petType_Name || currentTypeName;
+                                                    }}
+                                                >
+                                                    {petTypes.map((petType) => (
+                                                        <MenuItem key={petType.petType_ID} value={petType.petType_ID}>
+                                                            {petType.petType_Name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+                                    </div>
+                                    {/* Description */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                        <textarea
+                                            className={`w-full p-3 rounded-lg bg-gray-50 border ${error.description ? 'border-red-300' : 'border-gray-200'
+                                                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[200px]`}
+                                            value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
+                                            placeholder="Enter breed description..."
+                                        />
+                                        {error.description && (
+                                            <p className="text-red-500 text-xs mt-1">Description is required.</p>
+                                        )}
+                                    </div>
+
+                                    {/* Status */}
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <label className="block text-sm font-medium text-gray-700 mb-3">Status</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="status"
+                                                    value="false"
+                                                    checked={!isDelete}
+                                                    onChange={(e) => setIsDelete(e.target.value === 'true')}
+                                                    className="hidden"
+                                                />
+                                                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${!isDelete ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-gray-100'
+                                                    }`}>
+                                                    <span className="w-2 h-2 rounded-full bg-current"></span>
+                                                    Active
+                                                </div>
+                                            </label>
+                                            <label className="flex items-center cursor-pointer">
+                                                <input
+                                                    type="radio"
+                                                    name="status"
+                                                    value="true"
+                                                    checked={isDelete}
+                                                    onChange={(e) => setIsDelete(e.target.value === 'true')}
+                                                    className="hidden"
+                                                />
+                                                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${isDelete ? 'bg-red-100 text-red-700 ring-2 ring-red-500' : 'bg-gray-100'
+                                                    }`}>
+                                                    <span className="w-2 h-2 rounded-full bg-current"></span>
+                                                    Inactive
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Image Preview Section */}
-                            <div className="w-full lg:w-1/2 flex justify-center items-center">
-                                <img
-                                    src={tmpImage}
-                                    alt="Breed"
-                                    className="w-[400px] h-[400px] object-contain cursor-pointer"
-                                    onClick={() => document.getElementById('fileInput').click()}
-                                />
-                                <input
-                                    type="file"
-                                    id="fileInput"
-                                    style={{ display: 'none' }}
-                                    onChange={handleImageChange}
-                                />
+                            {/* Action Buttons */}
+                            <div className="flex justify-center space-x-4 mt-12 pt-6 border-t">
+                                <button
+                                    onClick={() => navigate('/petBreed')}
+                                    type="button"
+                                    className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                >
+                                    Save Changes
+                                </button>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </main>
             </div>
         </div>

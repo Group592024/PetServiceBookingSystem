@@ -105,7 +105,7 @@ const AdminPetList = () => {
             if (result.isConfirmed) {
                 const fetchDelete = async () => {
                     try {
-                        const token = sessionStorage.getItem("token"); 
+                        const token = sessionStorage.getItem("token");
                         const deleteResponse = await fetch(`http://localhost:5050/api/pet/${id}`, {
                             method: 'DELETE',
                             headers: {
@@ -264,56 +264,60 @@ const AdminPetList = () => {
             <Sidebar ref={sidebarRef} />
             <div className='content'>
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className='header'>
-                        <div className='left'>
-                            <h1 style={{ fontWeight: 'bold' }}>Pet List</h1>
+                <div className="p-8">
+                    <main className="bg-white shadow-lg rounded-lg p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b pb-4 mb-4">
+                            <h1 className="text-2xl font-bold text-gray-800">Pet List</h1>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
+                                onClick={() => navigate('/pet/add')}
+                            >
+                                <i className="bx bxs-plus-circle text-lg"></i>
+                                <span>NEW</span>
+                            </button>
                         </div>
-                        <button
-                            className='report'
-                            onClick={() => navigate('/pet/add')}
+
+                        {/* Data Grid */}
+                        <Box
+                            sx={{
+                                height: "100%",
+                                maxHeight: "400px",
+                                width: "100%",
+                                "& .MuiDataGrid-root": {
+                                    backgroundColor: "#ffffff",
+                                },
+                                "& .MuiDataGrid-row": {
+                                    backgroundColor: "#f8f9fa",
+                                },
+                                "& .MuiDataGrid-footerContainer": {
+                                    backgroundColor: "#e2e8f0",
+                                },
+                                "& .MuiPaginationItem-root": {
+                                    backgroundColor: "#93c5fd",
+                                    color: "#1e3a8a",
+                                },
+                            }}
                         >
-                            <i className='bx bxs-plus-circle'></i>
-                            <span>NEW</span>
-                        </button>
-                    </div>
-                    <Box
-                        sx={{
-                            height: 400,
-                            width: "100%",
-                            "& .MuiDataGrid-root": {
-                                backgroundColor: "#f9f9f9",
-                            },
-                            "& .MuiDataGrid-row": {
-                                backgroundColor: "#f4f4f4",
-                            },
-                            "& .MuiDataGrid-footerContainer": {
-                                backgroundColor: "#9f9f9f",
-                            },
-                            "& .MuiPaginationItem-root": {
-                                backgroundColor: "#b3f2ed",
-                                color: "#3f3f3f",
-                            },
-                        }}
-                    >
-                        {loading ? (
-                            <div style={{ textAlign: 'center' }}>
-                                <CircularProgress />
-                            </div>
-                        ) : (
-                            <DataGrid
-                                columns={columns}
-                                rows={data}
-                                initialState={{
-                                    pagination: {
-                                        paginationModel: { page: 0, pageSize: 5 },
-                                    },
-                                }}
-                                pageSizeOptions={[5, 10, 20]}
-                            />
-                        )}
-                    </Box>
-                </main>
+                            {loading ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <CircularProgress />
+                                </div>
+                            ) : (
+                                <DataGrid
+                                    columns={columns}
+                                    rows={data}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 5 },
+                                        },
+                                    }}
+                                    pageSizeOptions={[5, 10, 20]}
+                                />
+                            )}
+                        </Box>
+                    </main>
+                </div>
             </div>
         </div>
     );

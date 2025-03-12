@@ -1,6 +1,5 @@
 using Microsoft.Extensions.FileProviders;
 using PetApi.Infrastructure.DependencyInjection;
-using PetApi.Presentation.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

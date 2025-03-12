@@ -70,7 +70,6 @@ class _MyHomePageState extends State<MyHomePage> {
   final screens = [
     HomePage(),
     PetPage(),
-    // RoomPage(),
     BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
@@ -153,16 +152,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-                // } else if (value == 'camera') {
-                //   // 👉 Điều hướng sang trang xem camera
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(builder: (context) => CameraScreen()),
-                //   );
+              // } else if (value == 'camera') {
+              //   // 👉 Điều hướng sang trang xem camera
+              //   Navigator.push(
+              //     context,
+              //     // MaterialPageRoute(builder: (context) => CameraScreen()),
+              //   );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => GiftListScreen()),
+                );
+              } else if (value == 'room') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RoomPage()),
                 );
               }
             },
@@ -187,6 +191,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListTile(
                   leading: Icon(Icons.card_giftcard, color: Colors.blue),
                   title: Text('Gift', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'room',
+                child: ListTile(
+                  leading:
+                      Icon(Icons.home, color: Colors.orange), 
+                  title: Text('Rooms', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(

@@ -5,6 +5,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:psbs_app_flutter/pages/PetDiary/pet_diary_create.dart';
 import 'package:psbs_app_flutter/pages/PetDiary/pet_diary_update.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PetDiaryPage extends StatefulWidget {
   final String petId;
@@ -40,9 +41,16 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     setState(() => isLoading = true);
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.2:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+            'http://192.168.1.7:5050/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
       );
 
       if (response.statusCode == 200) {
@@ -54,6 +62,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
             totalPages = data['data']?['meta']?['totalPages'] ?? 1;
           });
         }
+        print(entries[0]['diary_Content']);
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -101,8 +110,14 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     if (confirmDelete != true) return;
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-        Uri.parse('http://192.168.1.2:5010/api/PetDiary/$diaryId'),
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary/$diaryId'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
       );
 
       if (response.statusCode == 200) {
@@ -176,7 +191,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://192.168.1.2:5010${widget.petImage}')
+                              'http://10.66.187.111:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),

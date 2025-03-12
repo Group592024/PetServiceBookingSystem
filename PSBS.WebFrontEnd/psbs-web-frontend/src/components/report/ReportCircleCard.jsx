@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Cell, Pie, PieChart, Tooltip } from 'recharts';
+import React, { useEffect, useState } from "react";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 
 const ReportCircleCard = ({ data }) => {
   const generatePastelColors = (count) => {
@@ -15,40 +15,46 @@ const ReportCircleCard = ({ data }) => {
 
   console.log(total);
 
-  const CustomTip = ({ active, payload }) => {
-    if (active && payload && payload.length) {
-      const { name, quantity } = payload[0].payload;
+  const customLabel = ({ name, value, cx, cy, midAngle, outerRadius }) => {
+    if (value === 0) return null;
+    const radian = Math.PI / 180;
+    const x = cx + (outerRadius + 20) * Math.cos(-midAngle * radian);
+    const y = cy + (outerRadius + 20) * Math.sin(-midAngle * radian);
 
-      const percentage = ((quantity / total) * 100).toFixed(2) + '%';
-
-      return (
-        <div className='p-2 bg-white border rounded shadow-md text-sm'>
-          <p className='font-semibold'>{name}</p>
-          <p>Quantity: {quantity}</p>
-          <p>Percentage: {percentage}</p>
-        </div>
-      );
-    }
-    return null;
+    const percentage = ((value / total) * 100).toFixed(2) + "%";
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="#333"
+        textAnchor={x > cx ? "start" : "end"}
+        dominantBaseline="central"
+        fontSize="14px"
+        fontWeight="bold"
+      >
+        {name} ({percentage})
+      </text>
+    );
   };
 
   return (
     <div>
-      <PieChart width={450} height={450}>
+      <PieChart width={800} height={600}>
         <Pie
           data={data}
-          cx='50%'
-          cy='50%'
+          cx="50%"
+          cy="50%"
           labelLine={false}
-          outerRadius={200}
-          fill='#8884d8'
-          dataKey='quantity'
+          label={customLabel}
+          outerRadius={250}
+          fill="#8884d8"
+          dataKey="quantity"
         >
           {data.map((item, index) => (
             <Cell key={`cell-${index}`} fill={colorList[index]} />
           ))}
         </Pie>
-        <Tooltip content={<CustomTip />} />
+        <Tooltip />
       </PieChart>
     </div>
   );

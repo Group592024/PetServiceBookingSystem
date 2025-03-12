@@ -1,8 +1,8 @@
-import PetDiaryCard from './PetDiaryCard'
-import { Stack } from '@mui/material';
-import Swal from 'sweetalert2';
-import EditDiaryModal from './EditDiaryModal';
-import { useState } from 'react';
+import PetDiaryCard from "./PetDiaryCard";
+import { Stack } from "@mui/material";
+import Swal from "sweetalert2";
+import EditDiaryModal from "./EditDiaryModal";
+import { useState } from "react";
 
 const PetDiaryCardList = ({ data }) => {
   const [diaries, setDiaries] = useState(data);
@@ -13,34 +13,39 @@ const PetDiaryCardList = ({ data }) => {
   // Delete Diary Processing
   const handleDelete = (id) => {
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you want to delete this item?',
-      icon: 'warning',
+      title: "Are you sure?",
+      text: "Do you want to delete this item?",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonText: "Delete",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
     }).then((result) => {
       if (result.isConfirmed) {
         const fetchDelete = async () => {
           try {
+            const token = sessionStorage.getItem("token");
             const deleteResponse = await fetch(
-              `http://localhost:5010/api/PetDiary/${id}`,
+              `http://localhost:5050/api/PetDiary/${id}`,
               {
-                method: 'DELETE',
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                },
               }
             );
 
             if (deleteResponse.ok) {
               setDiaries(diaries?.filter((item) => item?.diary_ID !== id));
-              Swal.fire('Deleted!', 'The service has been deleted.', 'success');
+              Swal.fire("Deleted!", "The service has been deleted.", "success");
             } else {
-              Swal.fire('Error!', 'Failed to delete the service', 'error');
+              Swal.fire("Error!", "Failed to delete the service", "error");
             }
           } catch (error) {
             console.log(error);
-            Swal.fire('Error!', 'Failed to delete the service', 'error');
+            Swal.fire("Error!", "Failed to delete the service", "error");
           }
         };
 
@@ -57,17 +62,17 @@ const PetDiaryCardList = ({ data }) => {
 
     if (diaryIndex !== -1) {
       diaries[diaryIndex].diary_Content =
-        localStorage.getItem('diaryContent') || clickedDiary.diary_Content;
+        localStorage.getItem("diaryContent") || clickedDiary.diary_Content;
     }
 
     setClickedDiary(null);
-    localStorage.removeItem('diaryContent');
+    localStorage.removeItem("diaryContent");
     setOpen(false);
   };
 
   return (
     <Stack>
-      <div className='h-[40rem] overflow-auto pr-2'>
+      <div className="pr-2">
         {diaries?.map((item) => (
           <PetDiaryCard
             key={item?.diary_ID}

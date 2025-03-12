@@ -40,8 +40,8 @@ namespace FacilityServiceApi.Presentation.Controllers
             });
         }
 
-        [HttpGet("/service/{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [HttpGet("service/{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid id, [FromQuery] bool showAll)
         {
             if (showAll)
@@ -152,12 +152,6 @@ namespace FacilityServiceApi.Presentation.Controllers
             if (!hasChanges)
             {
                 return NoContent();
-            }
-
-            var existingVariant = await _serviceVariant.GetByAsync(x => x.serviceId == existingServiceVariant.serviceId && x.serviceContent.ToLower().Trim().Equals(dto.serviceContent.ToLower().Trim()));
-            if (existingVariant != null)
-            {
-                return Conflict(new Response(false, $"Service variant with content {existingVariant.serviceContent} is already existed"));
             }
 
             // Chuyển đổi và cập nhật

@@ -13,8 +13,15 @@ const ServiceList = () => {
 
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service?showAll=true'
+        'http://localhost:5050/api/Service?showAll=true', {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -47,10 +54,15 @@ const ServiceList = () => {
       if (result.isConfirmed) {
         const fetchDelete = async () => {
           try {
+            const token = sessionStorage.getItem("token");
             const deleteResponse = await fetch(
-              `http://localhost:5023/api/Service/${id}`,
+              `http://localhost:5050/api/Service/${id}`,
               {
                 method: 'DELETE',
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${token}`,
+                }
               }
             );
 

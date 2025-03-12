@@ -121,9 +121,16 @@ const AdminRedeemHistory = () => {
   };
 
   const handleUpdateStatus = async () => {
+    const token = sessionStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     try {
       const response = await axios.put(
-        `http://localhost:5050/redeemhistory/${selectedRedeemId}/status/${selectedRedeemStatusId}`
+        `http://localhost:5050/redeemhistory/${selectedRedeemId}/status/${selectedRedeemStatusId}`,  {}, 
+        config
       );
       if (response.data.flag) {
         Swal.fire("Success", response.data.message, "success");
