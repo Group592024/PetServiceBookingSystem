@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/redeem_history.dart';
 
 class RedeemService {
@@ -8,8 +9,16 @@ class RedeemService {
   static Future<List<RedeemHistory>> fetchRedeemHistories(
       String accountId) async {
     try {
-      final response =
-          await http.get(Uri.parse("$_baseUrl/redeemhistory/app/$accountId"));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, String> headers = {};
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
+      final response = await http.get(
+        Uri.parse("$_baseUrl/redeemhistory/app/$accountId"),
+        headers: headers,
+      );
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -28,12 +37,24 @@ class RedeemService {
       throw Exception("Error fetching gifts: $e");
     }
   }
+
   static Future<bool> cancelRedemption(
       String accountId, String giftId, int requiredPoints) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
+
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token'; // ✅ Add token correctly
+    }
+
     try {
       final response = await http.put(
         Uri.parse("$_baseUrl/api/Account/refundPoint?accountId=$accountId"),
-        headers: {'Content-Type': 'application/json'},
+        headers: headers, // ✅ Use headers here
         body: json.encode({
           'giftId': giftId,
           'requiredPoints': requiredPoints,
@@ -44,8 +65,7 @@ class RedeemService {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         return jsonResponse['flag'] == true;
       } else {
-        throw Exception(
-            "Failed to cancel redemption: ${response.statusCode}");
+        throw Exception("Failed to cancel redemption: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Error cancelling redemption: $e");

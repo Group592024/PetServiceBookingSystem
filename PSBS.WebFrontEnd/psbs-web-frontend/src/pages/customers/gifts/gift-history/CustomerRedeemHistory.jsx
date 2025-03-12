@@ -2,25 +2,30 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, CircularProgress, Button } from "@mui/material";
+import { Box, CircularProgress, Button,Chip } from "@mui/material";
 import Swal from "sweetalert2";
 
 const CustomerRedeemHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const accountId = sessionStorage.getItem("accountId");
-
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5050/redeemhistory/${accountId}`
+          `http://localhost:5050/redeemhistory/${accountId}`,config
         );
         if (response.data.flag) {
           const formattedData = await Promise.all(
             response.data.data.map(async (item) => {
               const giftResponse = await axios.get(
-                `http://localhost:5050/Gifts/detail/${item.giftId}`
+                `http://localhost:5050/Gifts/detail/${item.giftId}`,config
               );
               return {
                 id: item.redeemHistoryId,
@@ -55,9 +60,10 @@ const CustomerRedeemHistory = () => {
           const responseCancel = await axios.put(
             `http://localhost:5050/api/Account/refundPoint?accountId=${accountId}`,
             {
+
               giftId: redeemHistoryId,
               requiredPoints: point,
-            }
+            },config
           );
           if (responseCancel.data.flag) {
             Swal.fire(
@@ -68,13 +74,13 @@ const CustomerRedeemHistory = () => {
           }
           // Refresh the history after cancellation
           const response = await axios.get(
-            `http://localhost:5050/redeemhistory/${accountId}`
+            `http://localhost:5050/redeemhistory/${accountId}`,config
           );
           if (response.data.flag) {
             const formattedData = await Promise.all(
               response.data.data.map(async (item) => {
                 const giftResponse = await axios.get(
-                  `http://localhost:5050/Gifts/detail/${item.giftId}`
+                  `http://localhost:5050/Gifts/detail/${item.giftId}`,config
                 );
                 return {
                   id: item.redeemHistoryId,
@@ -92,7 +98,20 @@ const CustomerRedeemHistory = () => {
       }
     });
   };
-
+  const statusMapping = {
+    "1509e4e6-e1ec-42a4-9301-05131dd498e4": {
+      label: "Redeemed",
+      color: "warning", // Yellow
+    },
+    "33b84495-c2a6-4b3e-98ca-f13d9c150946": {
+      label: "Picked up",
+      color: "success", // Green
+    },
+    "6a565faf-d31e-4ec7-ad20-433f34e3d7a9": {
+      label: "Cancelled",
+      color: "error", // Red
+    },
+  };
   const columns = [
     {
       field: "index",
@@ -165,14 +184,21 @@ const CustomerRedeemHistory = () => {
       },
     },
     {
-      field: "redeemStatusName",
+      field: "redeemStatusId",
       headerName: "Status",
       flex: 1,
       headerAlign: "center",
-      align: "center",
-      renderHeader: () => (
+      align: "center", renderHeader: () => (
         <div style={{ fontWeight: "bold", textAlign: "center" }}>Status</div>
       ),
+      renderCell: (params) => {
+        const status = statusMapping[params.row.redeemStatusId] || {
+          label: "Unknown",
+          color: "default",
+        };
+  
+        return <Chip  size="small" color={status.color} label={status.label} />;
+      },
     },
     {
       field: "actions",

@@ -16,6 +16,12 @@ function GiftDetailPage() {
     giftDescription: "",
     giftImage: "",
   });
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -23,7 +29,7 @@ function GiftDetailPage() {
     const fetchGiftDetail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5022/Gifts/${giftId}`
+          `http://localhost:5050/Gifts/${giftId}`,config
         );
 
         if (response.data.flag) {

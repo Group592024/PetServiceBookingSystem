@@ -11,7 +11,7 @@ namespace VoucherApi.Presentation.Controllers
     public class RedeemGiftHistoryController( IRedeemGiftHistory _redeemGiftHistory) : Controller
     {
         [HttpPost("redeemhistory")]
-        [Authorize(Policy = "AdminOrStaffOrUser")]
+         [AllowAnonymous]
         public async Task<IActionResult> CreateRedeemHistory([FromBody] RedeemGiftHistory redeemGiftHistory)
         {
             if (redeemGiftHistory == null)
@@ -88,7 +88,7 @@ namespace VoucherApi.Presentation.Controllers
         }
 
         [HttpPut("redeemhistory/customer/cancel/{redeemId}")]
-        [Authorize(Policy = "AdminOrStaffOrUser")]
+        [AllowAnonymous]
         public async Task<IActionResult> CustomerCancel(Guid redeemId)
         {
             var response = await _redeemGiftHistory.CustomerCancelRedeem(redeemId);
