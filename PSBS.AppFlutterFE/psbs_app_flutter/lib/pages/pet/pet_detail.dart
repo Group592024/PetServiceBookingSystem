@@ -96,300 +96,372 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+        body: Center(
+          child: CircularProgressIndicator(
+            color: Colors.blue,
+          ),
+        ),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Pet Details'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PetCreate(),
+      body: CustomScrollView(
+        slivers: [
+          // Custom App Bar with Pet Image
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Colors.blue,
+            leading: IconButton(
+              icon: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
                 ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
-            children: [
-              // Pet Image Card
-              Card(
-                elevation: 8,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.network(
+                child: Icon(Icons.arrow_back, color: Colors.blue),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(
                     'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
-                    height: 300,
-                    width: double.infinity,
                     fit: BoxFit.cover,
                   ),
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              // Pet Basic Info Card
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(16),
-                  color: Colors.blue.shade50,
-                  child: Column(
-                    children: [
-                      Text(
-                        pet!['petName'],
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        pet!['petGender'] ? 'Male' : 'Female',
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                      Text(
-                        _formatDate(pet!['dateOfBirth']),
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              // Pet Details Card
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Pet Information',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
-                        ),
-                      ),
-                      Divider(thickness: 2),
-                      _buildInfoRow(
-                          'Breed', petBreed?['petBreedName'] ?? 'Loading...'),
-                      _buildInfoRow('Weight', '${pet!['petWeight']} kg'),
-                      _buildInfoRow('Fur Type', pet!['petFurType']),
-                      _buildInfoRow('Fur Color', pet!['petFurColor']),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              // Notes Card
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Notes',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
-                        ),
-                      ),
-                      Divider(thickness: 2),
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          pet!['petNote'] ?? 'No additional notes provided.',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 16),
-
-              // Action Buttons
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.edit),
-                    label: Text('Edit Pet'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PetEdit(
-                            petId: pet!['petId'],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(width: 16),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.delete),
-                    label: Text('Delete Pet'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () => _handleDelete(),
                   ),
                 ],
               ),
+            ),
+          ),
 
-              SizedBox(height: 16),
-
-              // Navigation Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildNavigationButton(
-                      'Pet Diary',
-                      Image.asset(
-                        'assets/diaryicon.png',
-                        width: 50,
-                        height: 50,
-                      ),
-                      Colors.yellow[100]!,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PetDiaryPage(
-                              petId: pet!['petId'],
-                              petName: pet!['petName'],
-                              petImage: pet!['petImage'],
-                              petDob: pet!['dateOfBirth']),
-                        ),
+          SliverToBoxAdapter(
+            child: Transform.translate(
+              offset: Offset(0, -20),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: Column(
+                  children: [
+                    // Pet Basic Info
+                    Container(
+                      padding: EdgeInsets.all(20),
+                      child: Column(
+                        children: [
+                          Text(
+                            pet!['petName'],
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade800,
+                            ),
+                          ),
+                          SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildInfoChip(
+                                pet!['petGender'] ? 'Male' : 'Female',
+                                pet!['petGender'] ? Icons.male : Icons.female,
+                                pet!['petGender'] ? Colors.blue : Colors.pink,
+                              ),
+                              SizedBox(width: 10),
+                              _buildInfoChip(
+                                _formatDate(pet!['dateOfBirth']),
+                                Icons.cake,
+                                Colors.blue,
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: _buildNavigationButton(
-                        'Medical History',
-                        Image.asset(
-                          'assets/health-checkicon.png',
-                          width: 50,
-                          height: 50,
-                        ),
-                        Colors.purple[100]!,
-                        () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => list.PetHealthBookList(
-                                  petId: pet!['petId'],
+
+                    // Pet Details
+                    _buildSection(
+                      'Pet Information',
+                      Column(
+                        children: [
+                          _buildDetailRow('Breed',
+                              petBreed?['petBreedName'] ?? 'Loading...'),
+                          _buildDetailRow('Weight', '${pet!['petWeight']} kg'),
+                          _buildDetailRow('Fur Type', pet!['petFurType']),
+                          _buildDetailRow('Fur Color', pet!['petFurColor']),
+                        ],
+                      ),
+                    ),
+
+// Notes Section
+                    if (pet!['petNote'] != null &&
+                        pet!['petNote'].toString().isNotEmpty)
+                      _buildSection(
+                        'Notes',
+                        Container(
+                          width: double.infinity, // Đảm bảo chiều rộng tối đa
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                pet!['petNote'],
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[700],
+                                  height: 1.5,
                                 ),
                               ),
-                            )),
-                  ),
-                ],
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // Action Buttons
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildActionButton(
+                              'Edit Pet',
+                              Icons.edit,
+                              Colors.blue,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PetEdit(petId: pet!['petId']),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: _buildActionButton(
+                              'Delete',
+                              Icons.delete,
+                              Colors.red,
+                              _handleDelete,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // Navigation Cards
+                    Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildFeatureCard(
+                              'Pet Diary',
+                              'assets/diaryicon.png',
+                              Colors.orange[100]!,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PetDiaryPage(
+                                    petId: pet!['petId'],
+                                    petName: pet!['petName'],
+                                    petImage: pet!['petImage'],
+                                    petDob: pet!['dateOfBirth'],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 15),
+                          Expanded(
+                            child: _buildFeatureCard(
+                              'Medical History',
+                              'assets/health-checkicon.png',
+                              Colors.purple[100]!,
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => list.PetHealthBookList(
+                                    petId: pet!['petId'],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+  Widget _buildInfoChip(String label, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisSize: MainAxisSize.min,
         children: [
+          Icon(icon, size: 16, color: color),
+          SizedBox(width: 6),
           Text(
             label,
             style: TextStyle(
+              color: color,
               fontWeight: FontWeight.bold,
-              fontSize: 18,
             ),
-          ),
-          Text(
-            value,
-            style: TextStyle(fontSize: 16),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNavigationButton(
-      String title, Widget icon, Color color, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color,
+  Widget _buildSection(String title, Widget content) {
+    return Container(
+      margin: EdgeInsets.fromLTRB(20, 0, 20, 20),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(height: 15),
+          content,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Text(
+            '$label:',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      String label, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 15),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon),
+          SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureCard(
+      String title, String iconPath, Color bgColor, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(15),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: Offset(0, 5),
+            ),
+          ],
+        ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            icon,
-            SizedBox(height: 8),
-            Text(title,
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Image.asset(
+              iconPath,
+              width: 40,
+              height: 40,
+            ),
+            SizedBox(height: 10),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
           ],
         ),
       ),

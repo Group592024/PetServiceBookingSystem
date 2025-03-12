@@ -268,140 +268,146 @@ const AdminPetEdit = () => {
     //     setShowDropdown(false); 
     // };
 
+    const formatDateDisplay = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, '0');
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
     return (
-        <div className="bg-gray-200 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main className="flex-1 overflow-auto p-6">
-                    <div className="flex items-center mb-6 mx-auto w-full">
-                        <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
-                        <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
-                                Edit Pet
-                            </button>
-                        </div>
+
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Header Section */}
+                    <div className="flex items-center mb-8 bg-white rounded-xl p-4 shadow-sm">
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <h1 className="text-3xl font-bold text-gray-800 ml-4">Edit Pet Profile</h1>
                     </div>
 
-                    <div className="bg-white rounded-xl p-6 shadow-lg">
-                        <div className="flex flex-col md:flex-row gap-8">
-                            {/* Left side */}
-                            <div className="md:w-1/2">
-                                <div className="bg-gray-500 p-4 rounded-xl mb-4">
-                                    {imagePreview ? (
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="w-full h-48 object-cover rounded-lg"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-48 bg-gray-400 rounded-lg flex items-center justify-center">
-                                            <span className="text-white">Select an image</span>
-                                        </div>
-                                    )}
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="w-full mt-2"
-                                        onChange={handleImageChange}
-                                    />
-                                    {errors.petImage && <span className="text-red-800 text-sm mt-1">{errors.petImage}</span>}
+                    <div className="bg-white rounded-xl p-8 shadow-lg">
+                        <div className="flex flex-col md:flex-row gap-12">
+                            {/* Left Column */}
+                            <div className="md:w-1/2 space-y-6">
+                                {/* Image Upload */}
+                                <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
+                                    <div className="aspect-square mb-4">
+                                        {imagePreview ? (
+                                            <img
+                                                src={imagePreview}
+                                                alt="Preview"
+                                                className="w-full h-full object-contain rounded-lg shadow-sm"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center">
+                                                <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                                <span className="text-gray-500">Click to upload pet photo</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <input type="file" accept="image/*" className="w-full" onChange={handleImageChange} />
+                                    {errors.petImage && <span className="text-red-500 text-sm mt-2 block">{errors.petImage}</span>}
                                 </div>
 
+                                {/* Basic Info */}
                                 <div className="space-y-4">
-                                    <div>
-                                        <input
-                                            type="text"
-                                            placeholder="Pet Name"
-                                            className={`w-full text-xl font-semibold p-2.5 rounded bg-gray-50 border ${errors.petName ? 'border-red-500' : 'border-gray-300'}`}
-                                            value={pet.petName}
-                                            onChange={(e) => {
-                                                setPet({ ...pet, petName: e.target.value });
-                                                setErrors({ ...errors, petName: '' });
-                                            }}
-                                        />
-                                        {errors.petName && <span className="text-red-500 text-sm mt-1">{errors.petName}</span>}
-                                    </div>
+                                    <input
+                                        type="text"
+                                        placeholder="Pet Name"
+                                        className={`w-full text-xl font-semibold p-3 rounded-lg bg-gray-50 border focus:ring-2 focus:ring-blue-200 transition-all ${errors.petName ? 'border-red-500' : 'border-gray-300'}`}
+                                        value={pet.petName}
+                                        onChange={(e) => {
+                                            setPet({ ...pet, petName: e.target.value });
+                                            setErrors({ ...errors, petName: '' });
+                                        }}
+                                    />
+                                    {errors.petName && <span className="text-red-500 text-sm">{errors.petName}</span>}
 
                                     <div className="grid grid-cols-2 gap-4">
+                                        <select
+                                            className="w-full p-3 rounded-lg bg-gray-50 border border-gray-300 focus:ring-2 focus:ring-blue-200"
+                                            value={pet.petGender}
+                                            onChange={(e) => setPet({ ...pet, petGender: e.target.value === 'true' })}
+                                        >
+                                            <option value={true}>♂ Male</option>
+                                            <option value={false}>♀ Female</option>
+                                        </select>
+
                                         <div>
-                                            <select
-                                                className="w-full text-gray-800 p-3 rounded bg-gray-50 border border-gray-300"
-                                                value={pet.petGender}
-                                                onChange={(e) => setPet({ ...pet, petGender: e.target.value === 'true' })}
-                                            >
-                                                <option value={true}>Male</option>
-                                                <option value={false}>Female</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <input
-                                                type="date"
-                                                className={`w-full p-2.5 rounded bg-gray-50 border ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-300'}`}
-                                                value={pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : ''}
-                                                onChange={(e) => {
-                                                    setPet({ ...pet, dateOfBirth: e.target.value });
-                                                    setErrors({ ...errors, dateOfBirth: '' });
-                                                }}
-                                                max={new Date().toISOString().split('T')[0]}
-                                            />
-                                            {errors.dateOfBirth && <span className="text-red-500 text-sm mt-1">{errors.dateOfBirth}</span>}
+                                            <div className="relative">
+                                                <input
+                                                    type="date"
+                                                    className="hidden"
+                                                    value={pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : ''}
+                                                    onChange={(e) => {
+                                                        setPet({ ...pet, dateOfBirth: e.target.value });
+                                                        setErrors({ ...errors, dateOfBirth: '' });
+                                                    }}
+                                                    max={new Date().toISOString().split('T')[0]}
+                                                    id="datePicker"
+                                                />
+                                                <input
+                                                    type="text"
+                                                    className={`w-full p-3 rounded-xl bg-gray-50 border 
+                                                                ${errors.dateOfBirth ? 'border-red-300' : 'border-gray-200'} 
+                                                                focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer`}
+                                                    value={pet.dateOfBirth ? formatDateDisplay(pet.dateOfBirth) : ''}
+                                                    onClick={() => document.getElementById('datePicker').showPicker()}
+                                                    readOnly
+                                                    placeholder="DD/MM/YYYY"
+                                                />
+                                            </div>
+                                            {errors.dateOfBirth &&
+                                                <p className="mt-2 text-red-500 text-sm">{errors.dateOfBirth}</p>
+                                            }
                                         </div>
                                     </div>
-                                    <div>
-                                        <label className="block font-semibold text-gray-800 mb-1">Owner</label>
-                                        <div className="relative w-full">
-                                            <input
-                                                type="text"
-                                                placeholder="Owner"
-                                                value={search}
-                                                onChange={(e) => {
-                                                    setSearch(e.target.value);
-                                                    setShowDropdown(true);
-                                                }}
-                                                onFocus={() => setShowDropdown(true)}
-                                                className="w-full p-2 rounded border border-gray-300"
-                                            />
-                                            {errors.accountId && (
-                                                <p className="text-red-500 text-sm mt-1">{errors.accountId}</p>
-                                            )}
-                                            {showDropdown && (
-                                                <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded shadow-md max-h-40 overflow-y-auto">
-                                                    {filteredAccounts.length > 0 ? (
-                                                        filteredAccounts.map((account) => (
-                                                            <li
-                                                                key={account.accountId}
-                                                                className="p-2 cursor-pointer hover:bg-gray-200"
-                                                                onClick={() => handleSelect(account.accountId, account.accountName)}
-                                                            >
-                                                                {account.accountName}
-                                                            </li>
-                                                        ))
-                                                    ) : (
-                                                        <li className="p-2 text-gray-500">No results found</li>
-                                                    )}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label className="block font-semibold text-gray-800 mb-1">Notes</label>
-                                        <textarea
-                                            className="w-full p-2.5 rounded bg-gray-50 border border-gray-300 min-h-[100px]"
-                                            value={pet.petNote}
+
+                                    {/* Owner Selection */}
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Search Owner"
+                                            value={search}
                                             onChange={(e) => {
-                                                setPet({ ...pet, petNote: e.target.value });
-                                                setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));
+                                                setSearch(e.target.value);
+                                                setShowDropdown(true);
                                             }}
+                                            onFocus={() => setShowDropdown(true)}
+                                            className={`w-full p-3 rounded-lg border focus:ring-2 focus:ring-blue-200 ${errors.accountId ? "border-red-500" : "border-gray-300"}`}
                                         />
-                                        {errors.petNote && <span className="text-red-500 text-sm mt-1">{errors.petNote}</span>}
+                                        {errors.accountId && <p className="text-red-500 text-sm mt-1">{errors.accountId}</p>}
+
+                                        {showDropdown && (
+                                            <ul className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                                                {filteredAccounts.map((account) => (
+                                                    <li
+                                                        key={account.accountId}
+                                                        className="p-3 hover:bg-blue-50 cursor-pointer transition-colors"
+                                                        onClick={() => handleSelect(account.accountId, account.accountName)}
+                                                    >
+                                                        {account.accountName}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Right side */}
+                            {/* Right Column */}
                             <div className="md:w-1/2">
-                                <div className="space-y-4">
+                                <div className="space-y-6">
                                     <FormRow
                                         label="Pet Type"
                                         type="select"
@@ -466,52 +472,75 @@ const AdminPetEdit = () => {
                                         error={errors.petFurColor}
                                     />
 
+                                    {/* Notes Section */}
+                                    <div>
+                                        <label className="block font-semibold text-gray-700 mb-2">Notes</label>
+                                        <textarea
+                                            className={`w-full p-3 rounded-lg bg-gray-50 border focus:ring-2 focus:ring-blue-200 ${errors.petNote ? 'border-red-500' : 'border-gray-300'} min-h-[120px]`}
+                                            value={pet.petNote}
+                                            onChange={(e) => {
+                                                setPet({ ...pet, petNote: e.target.value });
+                                                setErrors({ ...errors, petNote: '' });
+                                            }}
+                                            placeholder="Enter pet notes..."
+                                        />
+                                        {errors.petNote && <span className="text-red-500 text-sm">{errors.petNote}</span>}
+                                    </div>
+
                                     {/* Status Section */}
-                                    <div className="text-gray-700 mt-6">
-                                        <label className="block font-semibold mb-2">Status</label>
-                                        <div className="flex items-center space-x-4 mt-4">
-                                            <label className="flex items-center space-x-2">
+                                    <div className="bg-gray-50 p-4 rounded-lg">
+                                        <label className="block font-semibold text-gray-700 mb-3">Status</label>
+                                        <div className="flex gap-4">
+                                            <label className="flex items-center cursor-pointer">
                                                 <input
                                                     type="radio"
                                                     name="status"
                                                     value="false"
                                                     checked={pet.isDelete === false}
                                                     onChange={() => setPet({ ...pet, isDelete: false })}
-                                                    className="h-4 w-4 text-green-500"
+                                                    className="hidden"
                                                 />
-                                                <span className="text-green-500 font-semibold">Active</span>
+                                                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${!pet.isDelete ? 'bg-green-100 text-green-700 ring-2 ring-green-500' : 'bg-gray-100'
+                                                    }`}>
+                                                    <span className="w-2 h-2 rounded-full bg-current"></span>
+                                                    Active
+                                                </div>
                                             </label>
-                                            <label className="flex items-center space-x-2">
+                                            <label className="flex items-center cursor-pointer">
                                                 <input
                                                     type="radio"
                                                     name="status"
                                                     value="true"
                                                     checked={pet.isDelete === true}
                                                     onChange={() => setPet({ ...pet, isDelete: true })}
-                                                    className="h-4 w-4 text-red-500"
+                                                    className="hidden"
                                                 />
-                                                <span className="text-red-500 font-semibold">Stopping</span>
+                                                <div className={`px-4 py-2 rounded-lg flex items-center gap-2 ${pet.isDelete ? 'bg-red-100 text-red-700 ring-2 ring-red-500' : 'bg-gray-100'
+                                                    }`}>
+                                                    <span className="w-2 h-2 rounded-full bg-current"></span>
+                                                    Inactive
+                                                </div>
                                             </label>
                                         </div>
                                     </div>
-
-                                    {/* Buttons */}
-                                    <div className="flex justify-center space-x-4 -mb-10">
-                                        <button
-                                            onClick={handleSubmit}
-                                            className="px-6 py-2.5 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                                        >
-                                            Save
-                                        </button>
-                                        <button
-                                            onClick={() => navigate('/pet')}
-                                            className="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-center space-x-4 mt-12 pt-6 border-t">
+                            <button
+                                onClick={() => navigate('/pet')}
+                                className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                            >
+                                Save Changes
+                            </button>
                         </div>
                     </div>
                 </main>

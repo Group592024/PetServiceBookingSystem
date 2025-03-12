@@ -20,7 +20,8 @@ function GiftAddForm() {
     giftCode: "",
     image: "",
   });
-
+  const token = sessionStorage.getItem("token");
+ 
   const validateForm = () => {
     const newErrors = {
       giftName: giftName ? "" : "Gift Name is required.",
@@ -47,10 +48,13 @@ function GiftAddForm() {
     formData.append("imageFile", document.getElementById("fileInput").files[0]);
 
     try {
-      const response = await fetch("http://localhost:5022/Gifts", {
+      const response = await fetch("http://localhost:5050/Gifts",{
         method: "POST",
         body: formData,
-      });
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token here
+        },
+      },);
 
       const data = await response.json();
       if (response.ok) {
