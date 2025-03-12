@@ -1,7 +1,3 @@
-﻿//using System;
-//using System.Diagnostics;
-//using System.IO;
-//using Microsoft.Extensions.Configuration;
 
 //namespace FacilityServiceApi.Infrastructure.Services
 //{
@@ -104,4 +100,3 @@
         // }
 //    }
 //}
-

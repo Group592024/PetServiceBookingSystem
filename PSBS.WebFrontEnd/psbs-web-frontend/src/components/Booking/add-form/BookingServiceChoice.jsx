@@ -4,13 +4,21 @@ const BookingServiceChoice = ({ formData, handleChange, services ,data}) => {
   const [serviceVariants, setServiceVariants] = useState([]);
     const [pets, setPets] = useState([]); 
     const [error, setError] = useState(""); 
+    const getToken = () => {
+      return sessionStorage.getItem('token');
+  };
 
   // Fetch service variants when a service is selected
   useEffect(() => {
     if (formData.service) {
       const fetchServiceVariants = async () => {
         try {
-          const response = await fetch(`http://localhost:5023/service/${formData.service}`);
+          const response = await fetch(`http://localhost:5050/service/${formData.service}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
           const result = await response.json();
 
           if (result.flag) {
@@ -33,7 +41,12 @@ const BookingServiceChoice = ({ formData, handleChange, services ,data}) => {
     const fetchPets = async () => {
       if (data.cusId) {
         try {
-          const petResponse = await fetch(`http://localhost:5010/api/pet/available/${data.cusId}`);
+          const petResponse = await fetch(`http://localhost:5050/api/pet/available/${data.cusId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
           const petData = await petResponse.json();
           if (petData.flag && Array.isArray(petData.data)) {
             setPets(petData.data);

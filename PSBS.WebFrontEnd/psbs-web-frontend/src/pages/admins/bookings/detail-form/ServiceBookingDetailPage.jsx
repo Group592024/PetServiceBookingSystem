@@ -18,6 +18,10 @@ const ServiceBookingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getToken = () => {
+    return sessionStorage.getItem("token");
+  };
+
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
@@ -28,7 +32,12 @@ const ServiceBookingDetailPage = () => {
 
         // Fetch payment type name
         const paymentResponse = await axios.get(
-          `http://localhost:5115/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`
+          `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         setPaymentTypeName(
           paymentResponse.data?.data?.paymentTypeName || "Unknown"
@@ -36,13 +45,23 @@ const ServiceBookingDetailPage = () => {
 
         // Fetch account name using accountId
         const accountResponse = await axios.get(
-          `http://localhost:5000/api/Account?AccountId=${bookingResponse.data.data.accountId}`
+          `http://localhost:5050/api/Account?AccountId=${bookingResponse.data.data.accountId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         setAccountName(accountResponse.data?.accountName || "Unknown");
 
         // Fetch booking status name using bookingStatusId
         const statusResponse = await axios.get(
-          `http://localhost:5115/api/BookingStatus/${bookingResponse.data.data.bookingStatusId}`
+          `http://localhost:5050/api/BookingStatus/${bookingResponse.data.data.bookingStatusId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         setBookingStatusName(
           statusResponse.data?.data?.bookingStatusName || "Unknown"
@@ -55,7 +74,12 @@ const ServiceBookingDetailPage = () => {
     const fetchBookingServiceItems = async () => {
       try {
         const itemsResponse = await axios.get(
-          `http://localhost:5023/api/BookingServiceItems/${bookingId}`
+          `http://localhost:5050/api/BookingServiceItems/${bookingId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
 
         if (itemsResponse.data && itemsResponse.data.data.length > 0) {
@@ -67,13 +91,23 @@ const ServiceBookingDetailPage = () => {
             serviceVariantId !== "00000000-0000-0000-0000-000000000000"
           ) {
             const serviceVariantResponse = await axios.get(
-              `http://localhost:5023/api/ServiceVariant/${serviceVariantId}`
+              `http://localhost:5050/api/ServiceVariant/${serviceVariantId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              }
             );
             const serviceId = serviceVariantResponse.data?.data?.serviceId;
 
             if (serviceId) {
               const serviceResponse = await axios.get(
-                `http://localhost:5023/api/Service/${serviceId}`
+                `http://localhost:5050/api/Service/${serviceId}`,
+                {
+                  headers: {
+                    Authorization: `Bearer ${getToken()}`,
+                  },
+                }
               );
               setServiceName(
                 serviceResponse.data?.data?.serviceName || "Unknown"

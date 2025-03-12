@@ -9,12 +9,20 @@ const AdminBookingInformation = () => {
   const [paymentTypes, setPaymentTypes] = useState([]);
   const [searching, setSearching] = useState(false);
   const [notFound, setNotFound] = useState(false); // State to track "Not Found" message
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
 
   // Fetch payment types from API
   useEffect(() => {
     const fetchPaymentTypes = async () => {
       try {
-        const response = await axios.get("http://localhost:5115/api/PaymentType");
+        const response = await axios.get("http://localhost:5050/api/PaymentType",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         if (response.data.flag && response.data.data) {
           setPaymentTypes(response.data.data);
         }
@@ -37,7 +45,12 @@ const AdminBookingInformation = () => {
         setNotFound(false); // Reset "Not Found" state
 
         try {
-          const response = await axios.get(`http://localhost:5000/api/Account/by-phone/${phone}`);
+          const response = await axios.get(`http://localhost:5050/api/Account/by-phone/${phone}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
 
           if (response.data.flag && response.data.data) {
             const user = response.data.data;

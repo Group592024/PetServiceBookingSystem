@@ -19,7 +19,11 @@ const BookingRoomForm = () => {
     discountedPrice,
     setDiscountedPrice ,
   } = useBookingContext();
-  
+
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   const [vouchers, setVouchers] = useState([]);
   const [voucherError, setVoucherError] = useState("");
   // const [discountedPrice, setDiscountedPrice] = useState(totalPrice);
@@ -28,7 +32,12 @@ const BookingRoomForm = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const response = await axios.get("http://localhost:5022/api/Voucher/valid-voucher");
+        const response = await axios.get("http://localhost:5022/api/Voucher/valid-voucher",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         if (response.data.flag && response.data.data) {
           setVouchers(response.data.data);
         }

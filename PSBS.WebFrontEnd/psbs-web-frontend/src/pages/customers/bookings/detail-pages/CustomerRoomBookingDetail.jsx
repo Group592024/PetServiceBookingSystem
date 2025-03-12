@@ -18,6 +18,10 @@ const CustomerRoomBookingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
+
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
@@ -27,33 +31,53 @@ const CustomerRoomBookingDetail = () => {
         setBooking(bookingResponse.data.data);
 
         const paymentResponse = await axios.get(
-          `http://localhost:5115/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`
+          `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
         setPaymentTypeName(
           paymentResponse.data?.data?.paymentTypeName || "Unknown"
         );
 
         const accountResponse = await axios.get(
-          `http://localhost:5000/api/Account?AccountId=${bookingResponse.data.data.accountId}`
+          `http://localhost:5050/api/Account?AccountId=${bookingResponse.data.data.accountId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
         setAccountName(accountResponse.data?.accountName || "Unknown");
 
         const statusResponse = await axios.get(
-          `http://localhost:5115/api/BookingStatus/${bookingResponse.data.data.bookingStatusId}`
+          `http://localhost:5050/api/BookingStatus/${bookingResponse.data.data.bookingStatusId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
         setBookingStatusName(
           statusResponse.data?.data?.bookingStatusName || "Unknown"
         );
 
         const historyResponse = await axios.get(
-          `http://localhost:5023/api/RoomHistories/${bookingId}`
+          `http://localhost:5050/api/RoomHistories/${bookingId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
         setRoomHistory(historyResponse.data.data);
 
         const roomId = historyResponse.data.data[0]?.roomId;
         if (roomId) {
           const roomResponse = await axios.get(
-            `http://localhost:5023/api/Room/${roomId}`
+            `http://localhost:5050/api/Room/${roomId}`, {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            }
           );
           setRoomName(roomResponse.data?.data?.roomName || "Unknown");
         }

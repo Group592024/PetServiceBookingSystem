@@ -15,6 +15,10 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     camera: false,
   });
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   // Fetch available rooms and pets
   // useEffect(() => {
   //   const fetchRooms = async () => {
@@ -48,7 +52,12 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     const fetchRoomsAndPets = async () => {
       try {
         // Fetch rooms
-        const roomResponse = await fetch("http://localhost:5023/api/Room/available");
+        const roomResponse = await fetch("http://localhost:5050/api/Room/available",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         const roomData = await roomResponse.json();
         if (roomData.flag) {
           setRooms(roomData.data);
@@ -58,7 +67,12 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
 
         // Fetch pets (only if cusId exists)
         if (data.cusId) {
-          const petResponse = await fetch(`http://localhost:5010/api/pet/available/${data.cusId}`);
+          const petResponse = await fetch(`http://localhost:5050/api/pet/available/${data.cusId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
           const petData = await petResponse.json();
           if (petData.flag && Array.isArray(petData.data)) {
             setPets(petData.data);
@@ -84,7 +98,12 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
       if (selectedRoom) {
         const fetchRoomType = async () => {
           try {
-            const response = await fetch(`http://localhost:5023/api/RoomType/${selectedRoom.roomTypeId}`);
+            const response = await fetch(`http://localhost:5050/api/RoomType/${selectedRoom.roomTypeId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
             const data = await response.json();
             if (data.flag && data.data) {
               setSelectedRoomType(data.data);

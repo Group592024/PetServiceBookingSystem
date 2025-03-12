@@ -16,10 +16,18 @@ function MedicineUpdateForm() {
   const { medicineId } = useParams();
   console.log("Medicine ID:", medicineId);
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
+
   const fetchData = async () => {
     try {
       const treatmentsResponse = await fetch(
-        "http://localhost:5003/api/Treatment/available"
+        "http://localhost:5050/api/Treatment/available", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
       );
       const treatmentsResult = await treatmentsResponse.json();
 
@@ -33,7 +41,11 @@ function MedicineUpdateForm() {
         );
 
         const medicineResponse = await fetch(
-          `http://localhost:5003/Medicines/all-data/${medicineId}`
+          `http://localhost:5050/Medicines/all-data/${medicineId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
         const medicineResult = await medicineResponse.json();
 
@@ -55,7 +67,11 @@ function MedicineUpdateForm() {
           }
 
           if (medicine.medicineImage) {
-            setImage(`http://localhost:5003${medicine.medicineImage}`);
+            setImage(`http://localhost:5003${medicine.medicineImage}`, {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            });
           }
         } else {
           console.error(
@@ -113,7 +129,10 @@ function MedicineUpdateForm() {
     }
 
     try {
-      const response = await fetch("http://localhost:5003/Medicines", {
+      const response = await fetch("http://localhost:5050/Medicines", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          },
         method: "PUT",
         body: formData,
       });

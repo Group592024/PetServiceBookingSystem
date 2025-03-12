@@ -22,6 +22,10 @@ const BookingServiceForm = () => {
     setVoucherId,
   } = useBookingContext();
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   const [services, setServices] = useState([]);
   const [vouchers, setVouchers] = useState([]);
   const [voucherError, setVoucherError] = useState(null);
@@ -30,7 +34,12 @@ const BookingServiceForm = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch("http://localhost:5023/api/Service");
+        const response = await fetch("http://localhost:5050/api/Service",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         const result = await response.json();
         if (result.flag) {
           setServices(result.data);
@@ -47,7 +56,12 @@ const BookingServiceForm = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const response = await axios.get("http://localhost:5022/api/Voucher/valid-voucher");
+        const response = await axios.get("http://localhost:5050/api/Voucher/valid-voucher",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         if (response.data.flag && response.data.data) {
           setVouchers(response.data.data);
         }

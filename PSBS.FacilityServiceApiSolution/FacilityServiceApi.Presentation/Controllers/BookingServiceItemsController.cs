@@ -38,7 +38,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // GET api/<BookingServiceItemsController>/5
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<BookingServiceItem>> GetBookingItemByBookingId(Guid id)
         {
             var bookingItems = await _context.bookingServiceItems.Where(i => i.BookingId == id).ToListAsync();

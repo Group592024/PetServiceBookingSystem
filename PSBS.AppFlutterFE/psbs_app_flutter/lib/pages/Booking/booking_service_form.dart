@@ -3,8 +3,9 @@ import 'booking_service_choose.dart';
 
 class BookingServiceForm extends StatefulWidget {
   final String? cusId;
+  final Function(List<Map<String, dynamic>>) onBookingServiceDataChange;
 
-   BookingServiceForm({required this.cusId}); 
+   BookingServiceForm({required this.cusId, required this.onBookingServiceDataChange});
 
   @override
   _BookingServiceFormState createState() => _BookingServiceFormState();
@@ -27,6 +28,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
         "pet": null,
         "price": 0.0,
       });
+      _updateBookingServiceData();
     });
   }
 
@@ -34,7 +36,15 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     setState(() {
       _bookingChoices.removeAt(index);
     });
+    _updateBookingServiceData();
   }
+  
+  void _updateBookingServiceData() {
+  setState(() {
+    widget.onBookingServiceDataChange(_bookingChoices);
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +84,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
           cusId: widget.cusId ?? "", 
           bookingChoices: _bookingChoices,
           onRemove: _removeBookingChoice,
+          onUpdate: _updateBookingServiceData, 
         ),
       ],
     );

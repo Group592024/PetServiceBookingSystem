@@ -13,13 +13,25 @@ const Datatable = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
+
   const fetchMedicinesAndTreatments = async () => {
     try {
       const medicinesResponse = await axios.get(
-        "http://localhost:5003/Medicines/all"
+        "http://localhost:5050/Medicines/all", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
       );
       const treatmentsResponse = await axios.get(
-        "http://localhost:5003/api/Treatment/available"
+        "http://localhost:5050/api/Treatment/available", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
       );
 
       if (medicinesResponse.data.flag) {
@@ -206,7 +218,11 @@ const Datatable = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.delete(
-            `http://localhost:5003/Medicines/${medicineId}`
+            `http://localhost:5050/Medicines/${medicineId}` , {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            }
           );
           if (response.data.flag) {
             toast.success(

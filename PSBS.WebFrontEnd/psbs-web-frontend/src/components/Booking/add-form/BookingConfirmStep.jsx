@@ -9,12 +9,21 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
   const [serviceNames, setserviceNames] = useState({});
   const [serviceVariantNames, setServiceVariantNames] = useState({}); 
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   // Fetch voucher details based on selected voucher ID
   useEffect(() => {
     const fetchVoucherDetails = async () => {
       if (voucherId) {
         try {
-          const response = await fetch(`http://localhost:5022/api/Voucher/${voucherId}`);
+          const response = await fetch(`http://localhost:5050/api/Voucher/${voucherId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
           const data = await response.json();
           if (data.flag) {
             setVoucherDetails(data.data);
@@ -33,7 +42,12 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
     const fetchPaymentType = async () => {
       if (formData.paymentMethod) {
         try {
-          const response = await fetch(`http://localhost:5115/api/PaymentType/${formData.paymentMethod}`);
+          const response = await fetch(`http://localhost:5050/api/PaymentType/${formData.paymentMethod}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
           const data = await response.json();
           if (data.flag) {
             setPaymentTypeName(data.data.paymentTypeName);
@@ -54,7 +68,12 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
       for (const room of bookingRooms) {
         if (!roomNames[room.room]) {
           try {
-            const response = await fetch(`http://localhost:5023/api/Room/${room.room}`);
+            const response = await fetch(`http://localhost:5050/api/Room/${room.room}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
             const data = await response.json();
             if (data.flag) {
               updatedRoomNames[room.room] = data.data.roomName;
@@ -79,7 +98,12 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
       for (const service of bookingServices) {
         if (!serviceNames[service.service]) {
           try {
-            const response = await fetch(`http://localhost:5023/api/Service/${service.service}`);
+            const response = await fetch(`http://localhost:5050/api/Service/${service.service}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
             const data = await response.json();
             if (data.flag) {
               updatedServiceNames[service.service] = data.data.serviceName;
@@ -104,7 +128,12 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
       for (const service of bookingServices) {
         if (service.serviceVariant && !serviceVariantNames[service.serviceVariant]) {
           try {
-            const response = await fetch(`http://localhost:5023/api/ServiceVariant/${service.serviceVariant}`);
+            const response = await fetch(`http://localhost:5050/api/ServiceVariant/${service.serviceVariant}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
             const data = await response.json();
             if (data.flag) {
               updatedVariantNames[service.serviceVariant] = data.data.serviceContent;

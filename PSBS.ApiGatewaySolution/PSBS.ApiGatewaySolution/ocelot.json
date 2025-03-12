@@ -279,6 +279,28 @@
     },
     {
       // Service Variant API
+      "DownstreamPathTemplate": "/service/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5023
+        }
+      ],
+      "UpstreamPathTemplate": "/service/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Service Variant API
       "DownstreamPathTemplate": "/api/ServiceVariant/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
