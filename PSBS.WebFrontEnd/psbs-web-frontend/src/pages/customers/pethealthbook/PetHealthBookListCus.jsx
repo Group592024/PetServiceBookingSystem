@@ -155,7 +155,7 @@ const PetHealthBookListCus = () => {
                       <div className="w-[150px] h-[150px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mb-4">
                         {pet.petImage ? (
                           <img
-                            src={`http://localhost:5050${pet.petImage}`}
+                            src={`http://localhost:5050/pet-service${pet.petImage}`}
                             alt={pet.petName || "Pet Image"}
                             className="w-full h-full object-cover"
                           />

@@ -1,12 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   final String accountId;
   const ChangePasswordPage(
       {super.key, required this.accountId, required String title});
+
   @override
   _ChangePasswordPageState createState() => _ChangePasswordPageState();
 }
@@ -26,10 +28,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Future<void>? _fetchDataFuture;
   String? imagePreview;
   String? accountName;
+
   @override
   void initState() {
     super.initState();
-    fetchAccountData();
     _loadAccountId();
   }
 
@@ -52,14 +54,27 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       return;
     }
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.get(
         Uri.parse('http://10.0.2.2:5050/api/Account?AccountId=$accountId'),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'App-Version': '1.0.0',
+          'Device-ID': '12345',
+          'User-Agent': 'PetEaseApp/1.0.0',
+          'Platform': 'Android',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
           account = data;
+          accountName = data['accountName'];
           if (account?['accountImage'] != null) {
             fetchImage(account?['accountImage']);
           }
@@ -79,9 +94,21 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final imageResponse = await http.get(
         Uri.parse(
             'http://10.0.2.2:5050/api/Account/loadImage?filename=$filename'),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'App-Version': '1.0.0',
+          'Device-ID': '12345',
+          'User-Agent': 'PetEaseApp/1.0.0',
+          'Platform': 'Android',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
       );
 
       if (imageResponse.statusCode == 200) {
@@ -94,7 +121,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         }
       }
     } catch (error) {
-      print("Error Image: $error");
+      print("Error fetching image: $error");
     }
   }
 
@@ -102,27 +129,41 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    final String apiUrl =
-        'http://10.0.2.2:5050/api/Account/ChangePassword$accountId';
-    final response = await http.put(
-      Uri.parse(apiUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'currentPassword': _currentPasswordController.text,
-        'newPassword': _newPasswordController.text,
-        'confirmPassword': _confirmPasswordController.text,
-      }),
-    );
-    if (response.statusCode == 200) {
-      _showAlert('Success', 'Password changed successfully!', () {
-        //Navigator.popUntil(context, ModalRoute.withName('/home'));
-        // Hoặc nếu chưa có route tên '/profile', bạn có thể dùng:
-        Navigator.pushReplacementNamed(context, '/home');
-      });
-    } else {
-      final errorData = jsonDecode(response.body);
-      _showAlert(
-          'Error', errorData['message'] ?? 'Failed to change password', null);
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final String apiUrl =
+          'http://10.0.2.2:5050/api/Account/ChangePassword$accountId';
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'App-Version': '1.0.0',
+          'Device-ID': '12345',
+          'User-Agent': 'PetEaseApp/1.0.0',
+          'Platform': 'Android',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'currentPassword': _currentPasswordController.text,
+          'newPassword': _newPasswordController.text,
+          'confirmPassword': _confirmPasswordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        _showAlert('Success', 'Password changed successfully!', () {
+          Navigator.pushReplacementNamed(context, '/home');
+        });
+      } else {
+        final errorData = jsonDecode(response.body);
+        _showAlert(
+            'Error', errorData['message'] ?? 'Failed to change password', null);
+      }
+    } catch (error) {
+      print("Error change password: $error");
     }
   }
 
@@ -147,6 +188,33 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
+  Widget buildPasswordField(String label, TextEditingController controller,
+      bool obscureText, VoidCallback toggleVisibility) {
+    return TextFormField(
+      controller: controller,
+      obscureText: !obscureText,
+      decoration: InputDecoration(
+        labelText: label,
+        suffixIcon: IconButton(
+          icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+          onPressed: toggleVisibility,
+        ),
+        enabledBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+        focusedBorder: UnderlineInputBorder(
+          borderSide: BorderSide(color: Colors.transparent),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter $label';
+        }
+        return null;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -168,7 +236,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return Center(child: Text('Lỗi khi tải dữ liệu'));
                 }
@@ -200,7 +267,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             ),
                             SizedBox(height: 10),
                             Text(
-                              accountName ?? 'Loading...',
+                              account?['accountName'] ?? 'N/A',
                               style: TextStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold),
                             ),
@@ -299,31 +366,4 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
             ),
     );
   }
-}
-
-Widget buildPasswordField(String label, TextEditingController controller,
-    bool obscureText, VoidCallback toggleVisibility) {
-  return TextFormField(
-    controller: controller,
-    obscureText: !obscureText,
-    decoration: InputDecoration(
-      labelText: label,
-      suffixIcon: IconButton(
-        icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
-        onPressed: toggleVisibility,
-      ),
-      enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.transparent),
-      ),
-      focusedBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: Colors.transparent),
-      ),
-    ),
-    validator: (value) {
-      if (value == null || value.isEmpty) {
-        return 'Please enter $label';
-      }
-      return null;
-    },
-  );
 }

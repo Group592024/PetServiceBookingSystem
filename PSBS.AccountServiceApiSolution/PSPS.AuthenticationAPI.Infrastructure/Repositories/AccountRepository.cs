@@ -345,9 +345,18 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         {
             try
             {
-                var getAccount = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
-                if (getAccount != null)
-                    return new Response(false, "Email existed!");
+                var existingAccount = await context.Accounts
+                    .FirstOrDefaultAsync(a => a.AccountEmail == model.RegisterTempDTO.AccountEmail ||
+                                              a.AccountPhoneNumber == model.RegisterTempDTO.AccountPhoneNumber);
+
+                if (existingAccount != null)
+                {
+                    if (existingAccount.AccountEmail == model.RegisterTempDTO.AccountEmail)
+                        return new Response(false, "Email already exists!");
+
+                    if (existingAccount.AccountPhoneNumber == model.RegisterTempDTO.AccountPhoneNumber)
+                        return new Response(false, "Phone number already exists!");
+                }
 
                 string fileName = GetDefaultImage();
 
@@ -382,10 +391,10 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     AccountEmail = model.RegisterTempDTO.AccountEmail,
                     AccountPassword = BCrypt.Net.BCrypt.HashPassword(model.RegisterTempDTO.AccountPassword),
                     AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
-                    AccountGender = model.RegisterTempDTO.AccountGender,
-                    AccountAddress = model.RegisterTempDTO.AccountAddress,
+                    AccountGender = model.RegisterTempDTO.AccountGender ?? "Male",
+                    AccountAddress = model.RegisterTempDTO.AccountAddress ?? "N/A",
                     AccountImage = fileName,
-                    AccountDob = model.RegisterTempDTO.AccountDob,
+                    AccountDob = model.RegisterTempDTO.AccountDob ?? new DateTime(2000, 1, 1),
                     AccountId = Guid.NewGuid(),
                     RoleId = "user"
                 };
@@ -408,7 +417,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         }
 
 
-        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model) // Add account
+
+        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model) 
         {
             try
             {

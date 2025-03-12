@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'pethealthcaredetail_page.dart';
@@ -31,21 +32,38 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     fetchData();
   }
 
+  Future<Map<String, String>> getHeaders() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+  }
+
   Future<void> fetchData() async {
     try {
-      // Gọi API Health Book, Medicines, Treatments, Bookings, Pets, BookingServiceItems
-      final healthBookRes = await http.get(Uri.parse(
-          'http://10.0.2.2:5003/api/PetHealthBook/${widget.healthBookId}'));
-      final medicinesRes =
-          await http.get(Uri.parse('http://10.0.2.2:5050/Medicines'));
-      final treatmentsRes =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/Treatment'));
-      final bookingsRes =
-          await http.get(Uri.parse('http://10.0.2.2:5050/Bookings'));
-      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5050/api/pet'));
-      final bookingServiceItemsRes = await http.get(Uri.parse(
-          'http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList'));
+      final headers = await getHeaders();
+      final healthBookRes = await http.get(
+          Uri.parse(
+              'http://10.0.2.2:5050/api/PetHealthBook/${widget.healthBookId}'),
+          headers: headers);
 
+      final medicinesRes = await http
+          .get(Uri.parse('http://10.0.2.2:5050/Medicines'), headers: headers);
+
+      final treatmentsRes = await http.get(
+          Uri.parse('http://10.0.2.2:5050/api/Treatment'),
+          headers: headers);
+
+      final bookingsRes = await http
+          .get(Uri.parse('http://10.0.2.2:5050/Bookings'), headers: headers);
+      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5050/api/pet'),
+          headers: headers);
+      final bookingServiceItemsRes = await http.get(
+          Uri.parse(
+              'http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList'),
+          headers: headers);
       if (!healthBookRes.statusCode.toString().startsWith('2') ||
           !medicinesRes.statusCode.toString().startsWith('2') ||
           !treatmentsRes.statusCode.toString().startsWith('2') ||
@@ -55,8 +73,6 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
         print("Error fetching data from API");
         return;
       }
-
-      // Parse JSON
       var healthBookData = jsonDecode(healthBookRes.body)['data'];
       if (healthBookData is List && healthBookData.isNotEmpty) {
         healthBookData = healthBookData.first;
@@ -84,8 +100,6 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             .where(
                 (treatment) => treatmentIds.contains(treatment['treatmentId']))
             .toList();
-
-        // Sửa logic: sử dụng bookingServiceItemId để lấy pet thông qua BookingServiceItems
         if (healthBookData['bookingServiceItemId'] != null) {
           var bsi = bookingServiceItemsData.firstWhere(
             (item) =>
@@ -142,7 +156,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
               child: CircleAvatar(
                 radius: 80,
                 backgroundImage: petImage.isNotEmpty
-                    ? NetworkImage('http://10.0.2.2:5050$petImage')
+                    ? NetworkImage('http://10.0.2.2:5050/pet-service$petImage')
                     : AssetImage('assets/default-image.png') as ImageProvider,
               ),
             ),

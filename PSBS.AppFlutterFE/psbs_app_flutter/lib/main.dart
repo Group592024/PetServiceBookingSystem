@@ -17,6 +17,7 @@ import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
 import 'pages/room/room_page.dart';
+
 void main() {
   runApp(const StoreScope(child: MyApp()));
 }
@@ -68,8 +69,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final screens = [
     HomePage(),
-    //PetPage(),
-    RoomPage(),
+    PetPage(),
+    // RoomPage(),
     BookingListScreen(),
     ServicePage(),
     ProfilePage(accountId: '', title: ''),
@@ -152,12 +153,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              } else if (value == 'camera') {
-                // 👉 Điều hướng sang trang xem camera
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CameraScreen()),
-                );
+                // } else if (value == 'camera') {
+                //   // 👉 Điều hướng sang trang xem camera
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(builder: (context) => CameraScreen()),
+                //   );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
