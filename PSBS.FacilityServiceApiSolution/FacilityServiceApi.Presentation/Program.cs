@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddInfrastructureService(builder.Configuration);
+
 // Thêm logging để debug
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -39,7 +39,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Đăng ký FfmpegService
 // builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
- builder.Services.AddInfrastructureService(builder.Configuration);
+builder.Services.AddInfrastructureService(builder.Configuration);
 // builder.Services.Configure<ApiBehaviorOptions>(options =>
 // {
 //     options.SuppressModelStateInvalidFilter = true;
@@ -57,7 +57,6 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
-
 
 //var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 //var ffmpegProcess = ffmpegService.StartFfmpegConversion();
