@@ -18,42 +18,56 @@ const RoomList = () => {
 
     const fetchRoomTypes = async () => {
         try {
-            const response = await fetch('http://localhost:5050/api/RoomType');
+            const token = sessionStorage.getItem("token");
+
+            const response = await fetch("http://localhost:5050/api/RoomType", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
             const roomTypesData = await response.json();
-    
+
             if (roomTypesData && Array.isArray(roomTypesData.data)) {
                 setRoomTypes(roomTypesData.data);
             } else {
-                console.error('Unexpected response format for roomTypes:', roomTypesData);
+                console.error("Unexpected response format for roomTypes:", roomTypesData);
             }
         } catch (error) {
-            console.error('Error fetching room types:', error);
+            console.error("Error fetching room types:", error);
         }
-    };    
+    };
 
     const fetchDataFunction = async () => {
         try {
-            const response = await fetch('http://localhost:5050/api/Room');
+            const token = sessionStorage.getItem("token");
+            const response = await fetch('http://localhost:5050/api/Room', {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
             const roomData = await response.json();
-            if (roomData.data && Array.isArray(roomData.data)) {
-                //Sort Deleted
-                // const result = roomData.data
-                // .map((item) => ({
-                //     id: item.roomId,
-                //     ...item,
-                // }))
-                // .sort((a, b) => a.isDeleted - b.isDeleted); 
-                // setData(result);
+
+            console.log("API Response:", roomData);
+
+            if (roomData && roomData.data && Array.isArray(roomData.data)) {
                 const result = roomData.data.map((item) => ({
                     id: item.roomId,
                     ...item,
                 }));
                 setData(result);
             } else {
-                console.error('Unexpected response format:', roomData);
+                console.error("Unexpected response format:", roomData);
+                setData([]);
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error("Error fetching data:", error);
+            setData([]);
         } finally {
             setLoading(false);
         }
@@ -69,7 +83,9 @@ const RoomList = () => {
     }, []);
 
     useEffect(() => {
-        console.log('Room Types state:', roomTypes);
+        if (Array.isArray(roomTypes)) {
+            console.log('Room Types state:', roomTypes);
+        }
     }, [roomTypes]);
 
     useEffect(() => {
@@ -77,10 +93,10 @@ const RoomList = () => {
     }, [data]);
 
     useEffect(() => {
-        if (data.length === 0) {
+        if (Array.isArray(data) && data.length === 0) {
             console.log("No rooms available!");
         }
-    }, [data]);    
+    }, [data]);
 
     const handleDelete = (id) => {
         Swal.fire({
@@ -96,15 +112,19 @@ const RoomList = () => {
             if (result.isConfirmed) {
                 const fetchDelete = async () => {
                     try {
+                        const token = sessionStorage.getItem("token");
                         const deleteResponse = await fetch(
                             `http://localhost:5050/api/Room/${id}`,
                             {
                                 method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`
+                                }
                             }
                         );
-    
+
                         const data = await deleteResponse.json();
-    
+
                         if (deleteResponse.ok) {
                             Swal.fire(
                                 'Deleted!',
@@ -114,9 +134,9 @@ const RoomList = () => {
                             fetchDataFunction();
                             setData((prevData) => {
                                 if (prevData.length === 1) {
-                                    return []; 
+                                    return [];
                                 }
-                               //Còn lại 1 cái để xóa
+                                //Còn lại 1 cái để xóa
                             });
                         } else {
                             Swal.fire(
@@ -130,7 +150,7 @@ const RoomList = () => {
                         Swal.fire('Error!', 'Failed to delete the room.', 'error');
                     }
                 };
-    
+
                 fetchDelete();
             }
         });
@@ -145,9 +165,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  No.
+                    No.
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const index = data.findIndex(row => row.id === params.row.id);
                 return <div>{index + 1}</div>;
@@ -161,9 +181,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Name
+                    Name
                 </div>
-              ),
+            ),
         },
         {
             field: 'roomTypeId',
@@ -173,9 +193,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Type
+                    Type
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const roomType = roomTypes.find(type => type.roomTypeId === params.value);
                 return roomType ? roomType.name : 'Unknown';
@@ -189,9 +209,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Price
+                    Price
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 const roomType = roomTypes.find(type => type.roomTypeId === params.row.roomTypeId);
                 return roomType ? `${roomType.price} VND` : 'N/A';
@@ -205,9 +225,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Status
+                    Status
                 </div>
-              ),
+            ),
             renderCell: (params) => {
                 let color;
                 switch (params.row.status) {
@@ -222,14 +242,14 @@ const RoomList = () => {
                         break;
                     default:
                         color = 'gray';
-                }       
+                }
                 return (
                     <div style={{ fontWeight: 'bold', color: color }}>
                         {params.row.status}
                     </div>
                 );
             },
-        },        
+        },
         {
             field: 'isDeleted',
             headerName: 'Available',
@@ -238,9 +258,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Available
+                    Available
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ fontWeight: 'bold', color: params.row.isDeleted ? 'red' : 'green' }}>
                     {params.row.isDeleted ? 'Inactive' : 'Active'}
@@ -256,9 +276,9 @@ const RoomList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Actions
+                    Actions
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                     <IconButton
@@ -289,49 +309,41 @@ const RoomList = () => {
             <Sidebar ref={sidebarRef} />
             <div className='content'>
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className='header'>
-                        <div className='left'>
-                            <h1>Room List</h1>
+                <div className="p-8">
+                    <main className="bg-white shadow-lg rounded-lg p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b pb-4 mb-4">
+                            <h1 className="text-2xl font-bold text-gray-800">Room List</h1>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
+                                onClick={() => navigate('/room/add')}
+                            >
+                                <i className="bx bxs-plus-circle text-lg"></i>
+                                <span>NEW</span>
+                            </button>
                         </div>
-                        <button
-                            className='report'
-                            onClick={() => navigate('/room/add')}
+    
+                        {/* Data Grid */}
+                        <Box
+                            sx={{
+                                height: "100%",
+                                maxHeight: "400px",
+                                width: "100%",
+                                "& .MuiDataGrid-root": {
+                                    backgroundColor: "#ffffff",
+                                },
+                                "& .MuiDataGrid-row": {
+                                    backgroundColor: "#f8f9fa",
+                                },
+                                "& .MuiDataGrid-footerContainer": {
+                                    backgroundColor: "#e2e8f0",
+                                },
+                                "& .MuiPaginationItem-root": {
+                                    backgroundColor: "#93c5fd",
+                                    color: "#1e3a8a",
+                                },
+                            }}
                         >
-                            <i className='bx bxs-plus-circle'></i>
-                            <span>NEW</span>
-                        </button>
-                    </div>
-                    <Box
-                        sx={{
-                            height: 400,
-                            width: "100%",
-                            "& .MuiDataGrid-root": {
-                                backgroundColor: "#f9f9f9",
-                            },
-                            "& .MuiDataGrid-row": {
-                                backgroundColor: "#f4f4f4",
-                            },
-                            "& .MuiDataGrid-row.Mui-selected": {
-                                backgroundColor: "#c8f6e9 !important",
-                            },
-                            "& .MuiDataGrid-footerContainer": {
-                                backgroundColor: "#9f9f9f",
-                            },
-                            "& .MuiPaginationItem-root": {
-                                backgroundColor: "#b3f2ed",
-                                color: "#3f3f3f",
-                            },
-                            "& .MuiPaginationItem-root:hover": {
-                                backgroundColor: "#ede4e2",
-                            },
-                        }}
-                    >
-                        {loading ? (
-                            <div style={{ textAlign: 'center' }}>
-                                <CircularProgress />
-                            </div>
-                        ) : (
                             <DataGrid
                                 columns={columns}
                                 rows={data}
@@ -342,12 +354,12 @@ const RoomList = () => {
                                 }}
                                 pageSizeOptions={[5, 10, 20]}
                                 getRowClassName={(params) => {
-                                    return params.row.isDeleted ? 'opacity-50 bg-gray-200' : ''; 
+                                    return params.row.isDeleted ? 'opacity-50 bg-gray-200' : '';
                                 }}
                             />
-                        )}
-                    </Box>
-                </main>
+                        </Box>
+                    </main>
+                </div>
             </div>
         </div>
     );

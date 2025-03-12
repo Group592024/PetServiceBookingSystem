@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
-import VariantCard from '../../admins/services/VariantCard';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
+import VariantCard from "../../admins/services/VariantCard";
 
 const ServiceDetailPage = () => {
   const sidebarRef = useRef(null);
@@ -12,7 +12,7 @@ const ServiceDetailPage = () => {
   const navigate = useNavigate();
 
   const [dataVariant, setDataVariant] = useState([]);
-  const [idVariant, setIdVariant] = useState('');
+  const [idVariant, setIdVariant] = useState("");
 
   const [openDetail, setOpenDetail] = React.useState(false);
   const handleOpenDetail = (id) => {
@@ -24,8 +24,15 @@ const ServiceDetailPage = () => {
   useEffect(() => {
     const fetchDetail = async () => {
       try {
+        const token = sessionStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:5023/api/Service/${id}`
+          `http://localhost:5050/api/Service/${id}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         ).then((response) => response.json());
 
         const newData = {
@@ -35,7 +42,7 @@ const ServiceDetailPage = () => {
 
         setDetail(newData);
       } catch (error) {
-        console.error('Failed fetching data: ', error);
+        console.error("Failed fetching data: ", error);
       }
     };
     if (id) {
@@ -49,8 +56,17 @@ const ServiceDetailPage = () => {
   //api variant
   const fetchDataFunction = async () => {
     try {
-      console.log('id: ', id);
-      const fetchData = await fetch(`http://localhost:5023/service/${id}`);
+      console.log("id: ", id);
+      const token = sessionStorage.getItem("token");
+      const fetchData = await fetch(
+        `http://localhost:5050/api/ServiceVariant/service/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({
@@ -61,7 +77,7 @@ const ServiceDetailPage = () => {
 
       setDataVariant(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -69,37 +85,37 @@ const ServiceDetailPage = () => {
     <div>
       <NavbarCustomer />
       <div>
-        <div className='p-10 mx-20 flex justify-start items-start'>
-          <div className='p-10 w-1/2 flex justify-center'>
+        <div className="p-10 mx-20 flex justify-start items-start">
+          <div className="p-10 w-1/2 flex justify-center">
             <img
-              className='rounded-3xl w-4/5 object-cover'
+              className="rounded-3xl w-4/5 object-cover"
               src={imageURL}
               alt={detail.serviceName}
             />
           </div>
-          <div className='w-1/2 p-10'>
-            <p className='text-5xl font-bold p-5'>{detail.serviceName}</p>
-            <p className='text-3xl font-bold p-5 text-customPrimary italic'>
+          <div className="w-1/2 p-10">
+            <p className="text-5xl font-bold p-5">{detail.serviceName}</p>
+            <p className="text-3xl font-bold p-5 text-customPrimary italic">
               {detail.serviceTypeName} Service
             </p>
-            <div className='flex justify-start items-center'>
+            <div className="flex justify-start items-center">
               {dataVariant.map((item) => (
                 <VariantCard key={item.serviceVariantId} data={item} />
               ))}
             </div>
-            <div className=''>
+            <div className="">
               <button
-                className='mt-5 bg-customDanger p-3 w-2/3 rounded-3xl text-customLight text-xl font-semibold 
-                      hover:bg-customLight hover:text-customDark text-center'
+                className="mt-5 bg-customDanger p-3 w-2/3 rounded-3xl text-customLight text-xl font-semibold 
+                      hover:bg-customLight hover:text-customDark text-center"
               >
                 Booking Now
               </button>
             </div>
           </div>
         </div>
-        <div className='p-5 bg-customDarkGrey rounded-3xl mx-28'>
-          <p className='text-3xl font-bold p-5'>Service Description</p>
-          <div className='p-5 bg-customGrey rounded-3xl text-xl'>
+        <div className="p-5 bg-customDarkGrey rounded-3xl mx-28">
+          <p className="text-3xl font-bold p-5">Service Description</p>
+          <div className="p-5 bg-customGrey rounded-3xl text-xl">
             <p>{detail.serviceDescription}</p>
           </div>
         </div>

@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 
 const CameraDetail = () => {
     const sidebarRef = useRef(null);
+    const token = sessionStorage.getItem("token");
     const navigate = useNavigate();
     const { cameraId } = useParams();
     const [cameraDetail, setCameraDetail] = useState(null);
@@ -13,10 +14,23 @@ const CameraDetail = () => {
     useEffect(() => {
         const fetchCameraDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5023/api/Camera/${cameraId}`);
+                const token = sessionStorage.getItem("token"); 
+                if (!token) {
+                    throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+                }
+    
+                const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`, 
+                    },
+                });
+    
                 if (!response.ok) {
                     throw new Error("Không thể tải dữ liệu camera.");
                 }
+    
                 const data = await response.json();
                 setCameraDetail(data.data || data);
             } catch (error) {
@@ -24,8 +38,10 @@ const CameraDetail = () => {
                 Swal.fire("Error", "Không thể tải dữ liệu camera. Vui lòng thử lại sau.", "error");
             }
         };
+    
         fetchCameraDetail();
     }, [cameraId]);
+    
 
     const handleBack = () => {
         navigate(-1);

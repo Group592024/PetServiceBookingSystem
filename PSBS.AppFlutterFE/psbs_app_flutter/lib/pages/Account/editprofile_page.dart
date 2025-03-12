@@ -39,6 +39,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
     setState(() {
       accountId = prefs.getString('accountId') ?? '';
     });
@@ -50,8 +51,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Future<void> _fetchAccountData() async {
     if (accountId.isEmpty) return;
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5050/api/Account?AccountId=$accountId'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (response.statusCode == 200) {
@@ -67,17 +75,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
               ? DateTime.parse(data['accountDob'])
               : null;
 
-          // Sử dụng NetworkImage như trên trang ProfilePage
-          if (response.statusCode == 200) {
-            final data = jsonDecode(response.body);
-            setState(() {
-              account = data;
-              if (account?['accountImage'] != null) {
-                fetchImage(account?['accountImage']);
-              }
-            });
-          } else {
-            print("Lỗi khi lấy dữ liệu tài khoản: ${response.statusCode}");
+          if (data['accountImage'] != null) {
+            fetchImage(data['accountImage']);
           }
         });
       } else {
@@ -89,20 +88,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> fetchImage(String filename) async {
-    if (filename.isEmpty) {
-      print("Lỗi: Filename rỗng.");
-      return;
-    }
+    if (filename.isEmpty) return;
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final imageResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
+            'http://10.0.2.2:5050/api/Account/loadImage?filename=$filename'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
       );
 
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
-        print(imageData); // Debug: print the fetched image data
         if (imageData['flag'] && imageData['data']?['fileContents'] != null) {
           String base64String = imageData['data']['fileContents'];
           if (base64String.contains(",")) {
@@ -114,7 +116,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         }
       }
     } catch (error) {
-      print("Lỗi khi lấy ảnh: $error");
+      print("Error fetching image: $error");
     }
   }
 
@@ -145,10 +147,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final request = http.MultipartRequest(
         'PUT',
-        Uri.parse('http://10.0.2.2:5000/api/Account'),
+        Uri.parse('http://10.0.2.2:5050/api/Account'),
       );
+
+      // Thêm header vào request
+      request.headers['Authorization'] = 'Bearer $token';
+      request.headers['Content-Type'] = 'application/json';
 
       // Gửi dữ liệu văn bản
       request.fields['accountTempDTO.accountId'] = accountId;
@@ -163,42 +172,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
       request.fields['accountTempDTO.isPickImage'] = isImagePicked.toString();
       request.fields['accountTempDTO.roleId'] = role;
 
-      print("Sending request with fields: ${request.fields}");
-
-      // Nếu có ảnh, gửi ảnh lên
-      if (isImagePicked && profileImage != null && profileImage!.existsSync()) {
-        print("Adding image file: ${profileImage!.path}");
-
+      if (isImagePicked && profileImage != null) {
         var file = await http.MultipartFile.fromPath(
-          'uploadModel.imageFile', // Đúng với format API yêu cầu
+          'uploadModel.imageFile',
           profileImage!.path,
           filename: profileImage!.path.split('/').last,
           contentType: MediaType('image', 'jpeg'),
         );
-
         request.files.add(file);
-      } else {
-        // Nếu không chọn ảnh, gửi ảnh cũ (nếu có)
-        request.fields['accountTempDTO.accountImage'] =
-            account?['accountImage'] ?? '';
       }
 
-      // Gửi request lên server
       final response = await request.send();
       final responseCompleted = await http.Response.fromStream(response);
-      print("Server response status: ${responseCompleted.statusCode}");
-      print("Response body: ${responseCompleted.body}");
-
-      final result = json.decode(responseCompleted.body);
 
       if (response.statusCode == 200) {
+        final result = json.decode(responseCompleted.body);
         if (result['flag']) {
           _showSuccessDialog('Profile updated successfully!');
         } else {
           _showErrorDialog(result['message'] ?? 'Something went wrong.');
         }
       } else {
-        _showErrorDialog('Error saving profile.');
+        _showErrorDialog('Failed to update profile.');
       }
     } catch (error) {
       _showErrorDialog('Error: $error');
@@ -259,7 +254,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Form(
           key: _formKey,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 padding: EdgeInsets.all(16),
@@ -340,8 +335,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   Expanded(
                     child: Row(
                       children: [
-                        Expanded(
+                        Flexible(
                           child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 4), // Giảm padding hai bên
                             title: const Text('Male'),
                             leading: Radio<String>(
                               value: 'male',
@@ -351,8 +348,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                           ),
                         ),
-                        Expanded(
+                        const SizedBox(
+                            width: 8), // Giảm khoảng cách giữa hai ListTile
+                        Flexible(
                           child: ListTile(
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 4),
                             title: const Text('Female'),
                             leading: Radio<String>(
                               value: 'female',

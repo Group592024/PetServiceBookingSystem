@@ -12,6 +12,7 @@ const EditProfile = () => {
   const sidebarRef = useRef(null);
   const [selectedDate] = useState(null);
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const [account, setAccount] = useState({
     accountName: "",
     accountEmail: "",
@@ -34,10 +35,17 @@ const EditProfile = () => {
 
   useEffect(() => {
     if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
+      const token = sessionStorage.getItem("token");
+      fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`, 
+          "Content-Type": "application/json"
+        }
+      })
         .then((response) => response.json())
         .then(async (data) => {
-          console.log("Dữ liệu nhận được từ API:", data);  // Thêm log để kiểm tra
+          console.log("Dữ liệu nhận được từ API:", data);
           setAccount(data);
           if (data.accountDob) {
             const dob = new Date(data.accountDob);
@@ -48,7 +56,13 @@ const EditProfile = () => {
           }
           if (data.accountImage) {
             try {
-              const response = await fetch(`http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`);
+              const response = await fetch(`http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`, {
+                method: "GET",
+                headers: {
+                  "Authorization": `Bearer ${token}`, // Thêm token vào header
+                  "Content-Type": "application/json"
+                }
+              });
               const imageData = await response.json();
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
@@ -66,6 +80,7 @@ const EditProfile = () => {
         });
     }
   }, [accountId]);
+  
 
 
   const handleImageChange = (event) => {
@@ -130,24 +145,24 @@ const EditProfile = () => {
       valid = false;
     }
 
-    const phonePattern = /^(03|05|07|08|09)\d{8}$/;
+    const phonePattern = /^(0)\d{9}$/;
     if (!account.accountPhoneNumber.trim()) {
       errors.accountPhoneNumber = "Phone number is required";
       valid = false;
     } else if (!phonePattern.test(account.accountPhoneNumber)) {
-      errors.accountPhoneNumber = "Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)";
+      errors.accountPhoneNumber = "Phone number must start with 0 and have 10 digits";
       valid = false;
     }
-
+   
     setErrorMessages(errors);
     return valid;
   };
 
   const handleEdit = async () => {
     if (!validateForm()) return;
-
+  
     let formattedDob = account.accountDob ? format(account.accountDob, 'yyyy-MM-dd') : '';
-
+  
     const formData = new FormData();
     formData.append("AccountTempDTO.AccountId", accountId);
     formData.append("AccountTempDTO.AccountName", account.accountName);
@@ -157,7 +172,7 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountDob", formattedDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-
+  
     if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
@@ -165,29 +180,40 @@ const EditProfile = () => {
       formData.append("AccountTempDTO.isPickImage", false);
       formData.append("AccountTempDTO.AccountImage", account.accountImage || "");
     }
+  
     console.log("Form Data:", formData);
-    const response = await fetch(`http://localhost:5000/api/Account`, {
-      method: "PUT",
-      body: formData,
-    });
-    console.log("Response:", response);
-    if (!response.ok) {
-      const errorData = await response.json();
-
-      console.error("Error from server:", errorData);
-      Swal.fire("Error", errorData.message || "Something went wrong", "error");
-      return;
-    }
-
-    const result = await response.json();
-    console.log("Result:", result);
-
-    if (result.flag) {
-      console.log("Profile updated successfully:", result);
-      Swal.fire("Success", "Profile updated successfully!", "success");
-      navigate(-1);
-    } else {
-      Swal.fire("Error", result.message || "Something went wrong", "error");
+    
+    try {
+      const response = await fetch(`http://localhost:5050/api/Account`, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`, // Thêm token vào header
+        },
+        body: formData,
+      });
+  
+      console.log("Response:", response);
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error from server:", errorData);
+        Swal.fire("Error", errorData.message || "Something went wrong", "error");
+        return;
+      }
+  
+      const result = await response.json();
+      console.log("Result:", result);
+  
+      if (result.flag) {
+        console.log("Profile updated successfully:", result);
+        Swal.fire("Success", "Profile updated successfully!", "success");
+        navigate(-1);
+      } else {
+        Swal.fire("Error", result.message || "Something went wrong", "error");
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      Swal.fire("Error", "Failed to update profile.", "error");
     }
   };
 

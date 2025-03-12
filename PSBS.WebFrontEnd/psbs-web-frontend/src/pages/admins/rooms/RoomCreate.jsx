@@ -25,13 +25,22 @@ const RoomCreate = () => {
     useEffect(() => {
         const fetchRoomTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/RoomType/available');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/RoomType/available', {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch room types");
+                }
+
                 const data = await response.json();
-                setRoomTypes(data.data);
+                setRoomTypes(data.data || []);
             } catch (error) {
-                Swal.fire('Error', 'Failed to fetch room types!', 'error');
+                Swal.fire("Error", "Failed to fetch room types!", "error");
             }
         };
+
         fetchRoomTypes();
     }, []);
 
@@ -84,14 +93,16 @@ const RoomCreate = () => {
         formData.append('imageFile', selectedImage);
 
         try {
+            const token = sessionStorage.getItem("token");
+
             const response = await fetch('http://localhost:5050/api/Room', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json'
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json"
                 },
                 body: formData,
             });
-
             const responseData = await response.json();
 
             if (response.ok) {
@@ -109,127 +120,159 @@ const RoomCreate = () => {
     };
 
     return (
-        <div className="bg-gray-200 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main className="flex-1 overflow-auto p-6">
-                    <div className="flex items-center mb-6 mx-auto w-full">
-                        <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
-                        <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
-                                Create Room
-                            </button>
-                        </div>
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Enhanced Header */}
+                    <div className="flex items-center mb-8 bg-white rounded-xl p-4 shadow-sm">
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <h1 className="text-3xl font-bold text-gray-800 ml-4">Create New Room</h1>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="bg-white p-6 rounded-xl shadow-lg">
-                            <div className="flex flex-col lg:flex-row gap-6">
-                                <div className="flex-1">
-                                    {/* Room Name */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-5">Name:</label>
-                                        <TextField
-                                            className="bg-gray-50 rounded-xl"
-                                            fullWidth
-                                            type="text"
-                                            onChange={(e) => setRoomName(e.target.value)}
-                                            value={roomName}
-                                            error={error.roomName}
-                                            helperText={error.roomName ? 'Room Name is required.' : ''}
-                                        />
-                                    </div>
+                    <div className="bg-white rounded-xl p-8 shadow-lg">
+                        <form onSubmit={handleSubmit}>
+                            <div className="flex flex-col md:flex-row gap-12">
+                                <div className="md:w-1/2 space-y-6">
+                                    {/* Basic Info */}
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+                                            <TextField
+                                                fullWidth
+                                                value={roomName}
+                                                onChange={(e) => setRoomName(e.target.value)}
+                                                error={error.roomName}
+                                                helperText={error.roomName ? 'Room Name is required.' : ''}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }
+                                                }}
+                                            />
+                                        </div>
 
-                                    {/* Room Type */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-7">Type:</label>
-                                        <TextField
-                                            className="bg-gray-50 rounded-xl"
-                                            select
-                                            fullWidth
-                                            value={roomType}
-                                            onChange={(e) => {
-                                                const selectedTypeId = e.target.value;
-                                                setRoomType(selectedTypeId);
-                                                const selectedType = roomTypes.find(type => type.roomTypeId === selectedTypeId);
-                                                if (selectedType) {
-                                                    setRoomTypePrice(selectedType.price);
-                                                }
-                                            }}
-                                            label="Choose Type"
-                                            error={error.roomType}
-                                            helperText={error.roomType ? 'Room Type is required.' : ''}
-                                        >
-                                            {roomTypes.map(type => (
-                                                <MenuItem key={type.roomTypeId} value={type.roomTypeId}>
-                                                    {type.name}
-                                                </MenuItem>
-                                            ))}
-                                        </TextField>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                                            <TextField
+                                                select
+                                                fullWidth
+                                                value={roomType}
+                                                onChange={(e) => {
+                                                    const selectedTypeId = e.target.value;
+                                                    setRoomType(selectedTypeId);
+                                                    const selectedType = roomTypes.find(type => type.roomTypeId === selectedTypeId);
+                                                    if (selectedType) {
+                                                        setRoomTypePrice(selectedType.price);
+                                                    }
+                                                }}
+                                                error={error.roomType}
+                                                helperText={error.roomType ? 'Room Type is required.' : ''}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }
+                                                }}
+                                            >
+                                                {roomTypes.map(type => (
+                                                    <MenuItem key={type.roomTypeId} value={type.roomTypeId}>
+                                                        {type.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </TextField>
+                                        </div>
                                     </div>
-
-                                    {/* Room Price */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-6">Price:</label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Room Price</label>
                                         <TextField
-                                            className="bg-gray-50 rounded-xl"
                                             fullWidth
-                                            type="text"
-                                            value={roomTypePrice}
+                                            value={`${roomTypePrice} VND`}
                                             InputProps={{
                                                 readOnly: true,
                                             }}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: '0.75rem',
+                                                    backgroundColor: '#f8fafc',
+                                                }
+                                            }}
                                         />
                                     </div>
 
-                                    {/* Description */}
-                                    <div className="mb-3 flex flex-col">
-                                        <label className="font-semibold text-base text-gray-500 mb-2">Description:</label>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                                         <TextField
-                                            className="bg-gray-50 rounded-xl"
                                             fullWidth
                                             multiline
                                             rows={4}
-                                            onChange={(e) => setDescription(e.target.value)}
                                             value={description}
+                                            onChange={(e) => setDescription(e.target.value)}
                                             error={error.description}
                                             helperText={error.description ? 'Description is required.' : ''}
+                                            sx={{
+                                                '& .MuiOutlinedInput-root': {
+                                                    borderRadius: '0.75rem',
+                                                    backgroundColor: '#f8fafc',
+                                                }
+                                            }}
                                         />
                                     </div>
                                 </div>
-
-                                {/* Image Preview Section */}
-                                <div className="w-full lg:w-1/2 flex justify-center items-center">
-                                    <img
-                                        src={tmpImage}
-                                        alt="Room"
-                                        className="w-[400px] h-[400px] object-contain cursor-pointer"
-                                        onClick={() => document.getElementById('fileInput').click()}
-                                    />
-                                    <input
-                                        type="file"
-                                        id="fileInput"
-                                        style={{ display: 'none' }}
-                                        accept=".jpg,.jpeg,.png,.gif,.webp"
-                                        onChange={handleImageChange}
-                                    />
+                                <div className="md:w-1/2 space-y-6">
+                                    {/* Image Upload */}
+                                    <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
+                                        <div className="aspect-square mb-4">
+                                            {tmpImage ? (
+                                                <img
+                                                    src={tmpImage}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-contain rounded-lg shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center">
+                                                    <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="text-gray-500">Click to upload room photo</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="w-full"
+                                            onChange={handleImageChange}
+                                            id="fileInput"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="flex justify-center gap-10 mt-10 pb-6">
-                                <button type="submit" className="bg-yellow-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-yellow-400">
-                                    Create
-                                </button>
+
+                            {/* Action Buttons */}
+                            <div className="flex justify-center space-x-4 mt-12 pt-6 border-t">
                                 <button
                                     type="button"
-                                    className="bg-gray-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-gray-400"
                                     onClick={() => navigate('/room')}
+                                    className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
                                 >
                                     Cancel
                                 </button>
+                                <button
+                                    type="submit"
+                                    className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                >
+                                    Create Room
+                                </button>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </main>
             </div>
         </div>

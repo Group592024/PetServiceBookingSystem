@@ -5,6 +5,8 @@ import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 
 const PetHealthBookDetailCus = () => {
   const sidebarRef = useRef(null);
+  const token = sessionStorage.getItem("token");
+
   const navigate = useNavigate();
   const { healthBookId } = useParams();
 
@@ -34,7 +36,7 @@ const PetHealthBookDetailCus = () => {
     const fetchData = async () => {
       try {
         console.log("Fetching Pet Health Book Data...");
-        // Gọi API Health Book, Medicines, Treatments, BookingServiceItems, Pet
+        const token = sessionStorage.getItem("token");
         const [
           healthBookRes,
           medicinesRes,
@@ -42,11 +44,41 @@ const PetHealthBookDetailCus = () => {
           bookingServiceItemsRes,
           petsRes,
         ] = await Promise.all([
-          fetch(`http://localhost:5003/api/PetHealthBook/${healthBookId}`),
-          fetch(`http://localhost:5003/Medicines`),
-          fetch(`http://localhost:5003/api/Treatment`),
-          fetch(`http://localhost:5023/api/BookingServiceItems/GetBookingServiceList`),
-          fetch(`http://localhost:5010/api/pet`),
+          fetch(`http://localhost:5050/api/PetHealthBook/${healthBookId}`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`http://localhost:5050/Medicines`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`http://localhost:5050/api/Treatment`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`http://localhost:5050/api/BookingServiceItems/GetBookingServiceList`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
+          fetch(`http://localhost:5050/api/pet`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }),
         ]);
 
         if (
@@ -83,18 +115,17 @@ const PetHealthBookDetailCus = () => {
         setBookingServiceItems(bookingServiceItemsData.data || []);
         setPets(petsData.data || []);
 
-        // Lấy ra bookingServiceItemId từ Health Book
+        // Xử lý dữ liệu Pet từ BookingServiceItemId
         const currentHealthBook = healthBookData.data;
         if (!currentHealthBook?.bookingServiceItemId) return;
 
-        // Tìm trong bookingServiceItems để lấy petId
         const matchedServiceItem = (bookingServiceItemsData.data || []).find(
           (item) =>
             item.bookingServiceItemId === currentHealthBook.bookingServiceItemId
         );
+
         if (!matchedServiceItem?.petId) return;
 
-        // Tìm thông tin pet từ petId
         const matchedPet = (petsData.data || []).find(
           (p) => p.petId === matchedServiceItem.petId
         );
@@ -153,7 +184,7 @@ const PetHealthBookDetailCus = () => {
               <div className="flex flex-col items-center">
                 <img
                   src={
-                    petImage ? `http://localhost:5010${petImage}` : "/Images/default-image.png"
+                    petImage ? `http://localhost:5050/pet-service${petImage}` : "/Images/default-image.png"
                   }
                   alt="Pet Health Record"
                   className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"

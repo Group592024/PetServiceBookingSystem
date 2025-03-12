@@ -16,6 +16,7 @@ import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_zustand/flutter_zustand.dart';
 // Additional pages from Tuan/AccountManagementFlutter
 import 'pages/Account/profile_page.dart';
+import 'pages/room/room_page.dart';
 
 void main() {
   runApp(const StoreScope(child: MyApp()));
@@ -151,16 +152,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              } else if (value == 'camera') {
-                // 👉 Điều hướng sang trang xem camera
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CameraScreen()),
-                );
+              // } else if (value == 'camera') {
+              //   // 👉 Điều hướng sang trang xem camera
+              //   Navigator.push(
+              //     context,
+              //     // MaterialPageRoute(builder: (context) => CameraScreen()),
+              //   );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => GiftListScreen()),
+                );
+              } else if (value == 'room') {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => RoomPage()),
                 );
               }
             },
@@ -185,6 +191,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: ListTile(
                   leading: Icon(Icons.card_giftcard, color: Colors.blue),
                   title: Text('Gift', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
+                value: 'room',
+                child: ListTile(
+                  leading:
+                      Icon(Icons.home, color: Colors.orange), 
+                  title: Text('Rooms', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(

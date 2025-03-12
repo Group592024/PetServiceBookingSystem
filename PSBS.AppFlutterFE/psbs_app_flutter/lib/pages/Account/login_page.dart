@@ -48,22 +48,30 @@ class _LoginPageState extends State<LoginPage> {
     if (!_validateForm()) return;
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
+    print("email: " + email);
+    print("password: " + password);
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.post(
-        Uri.parse('http://10.211.55.7:5000/api/Account/Login'),
+        Uri.parse('http://192.168.1.7:5050/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
+      print("Statuscode ne" + response.statusCode.toString());
+
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         if (result['flag'] == true) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('token', result['data']);
           Map<String, dynamic> decodedToken = _parseJwt(result['data']);
           String accountId = decodedToken['AccountId'].toString();
           prefs.setString('accountId', accountId);
+
           useUserStore().loadUserDetails(accountId);
           print("Debug message: Current user is ${useUserStore().currentUser}");
+
           if (decodedToken['AccountIsDeleted'].toString().toLowerCase() ==
               'true') {
             _showToast(
@@ -86,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
         _showToast('Error: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
+      print("loi ne" + e.toString());
       _showToast('An error occurred. Please try again.');
     }
   }

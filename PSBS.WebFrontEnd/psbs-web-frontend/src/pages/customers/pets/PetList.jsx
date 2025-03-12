@@ -11,8 +11,17 @@ const CustomerPetList = () => {
 
     const fetchPets = async () => {
         try {
-            const accountId = sessionStorage.getItem('accountId');
-            const response = await fetch(`http://localhost:5050/api/pet/available/${accountId}`);
+            const accountId = sessionStorage.getItem("accountId");
+            const token = sessionStorage.getItem("token");
+
+            const response = await fetch(`http://localhost:5050/api/pet/available/${accountId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
             const data = await response.json();
             if (data.flag) {
                 setPets(data.data.filter(pet => !pet.isDelete));
@@ -47,12 +56,16 @@ const CustomerPetList = () => {
                         const deleteResponse = await fetch(
                             `http://localhost:5050/api/pet/${petId}`,
                             {
-                                method: 'DELETE',
+                                method: "DELETE",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${sessionStorage.getItem("token")}`
+                                }
                             }
                         );
-                
+
                         if (!deleteResponse.ok) {
-                            const errorData = await deleteResponse.json(); 
+                            const errorData = await deleteResponse.json();
                             Swal.fire(
                                 'Error!',
                                 errorData.message || 'Failed to delete the pet.',
@@ -68,18 +81,18 @@ const CustomerPetList = () => {
                             );
                             setPets((prevPets) => prevPets.filter(pet => pet.petId !== petId));
                         }
-                
+
                         setPets((prevPets) => prevPets.filter(pet => pet.petId !== petId));
                     } catch (error) {
                         console.error(error);
                         Swal.fire('Error!', 'Failed to delete the pet.', 'error');
                     }
                 };
-    
+
                 fetchDelete();
             }
         });
-    };  
+    };
 
     if (loading) {
         return (
@@ -96,14 +109,24 @@ const CustomerPetList = () => {
     }
 
     return (
-        <div className="bg-white min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
             <NavbarCustomer />
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-5xl font-bold mt-3 mb-3 ml-5 text-gray-800">Your Pet List</h1>
+            <div className="container mx-auto px-6 py-8">
+                {/* Enhanced Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
+                    <div className="mb-4 sm:mb-0">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
+                            Your Pet Collection
+                        </h1>
+                        <p className="mt-2 text-gray-600">
+                            Manage and view all your beloved pets in one place
+                        </p>
+                    </div>
                     <button
                         onClick={() => navigate('add')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2 mr-10"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
+                                 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 
+                                 flex items-center gap-3 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M12 5v14M5 12h14" />
@@ -111,57 +134,101 @@ const CustomerPetList = () => {
                         Add New Pet
                     </button>
                 </div>
+
+                {/* Pet Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                     {pets.map((pet) => (
                         <div
                             key={pet.petId}
-                            className="bg-gray-300 border border-gray-300 rounded-xl shadow-sm p-6 hover:shadow-xl transition-shadow"
+                            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
                         >
-                            <img
-                                src={`http://localhost:5050/pet-service${pet.petImage}`}
-                                alt={pet.petName}
-                                className="w-full h-64 object-cover rounded-lg mb-6"
-                            />
-                            <h2 className="text-2xl font-semibold text-gray-700 text-center mb-4">
-                                {pet.petName}
-                            </h2>
-                            <p className="text-gray-700 text-center mb-6">
-                                {new Date(pet.dateOfBirth).toLocaleDateString('en-GB', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                })}
-                            </p>
-                            <div className="flex justify-center space-x-6 mt-4">
-                                <button onClick={() => navigate(`${pet.petId}`)}
-                                    className="p-3 text-blue-600 hover:bg-blue-100 rounded-full transition-colors duration-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                        <circle cx="12" cy="12" r="3"></circle>
+                            {/* Image Container */}
+                            <div className="relative h-72 overflow-hidden">
+                                <img
+                                    src={`http://localhost:5050/pet-service${pet.petImage}`}
+                                    alt={pet.petName}
+                                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <h2 className="absolute bottom-4 left-6 text-2xl font-bold text-white">
+                                    {pet.petName}
+                                </h2>
+                            </div>
+
+                            {/* Pet Info */}
+                            <div className="p-6">
+                                <div className="flex items-center gap-2 text-gray-600 mb-6">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                     </svg>
-                                </button>
-                                <button onClick={() => navigate(`edit/${pet.petId}`)}
-                                    className="p-3 text-green-600 hover:bg-green-100 rounded-full transition-colors duration-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                    </svg>
-                                </button>
-                                <button onClick={() => handleDelete(pet.petId)}
-                                    className="p-3 text-red-600 hover:bg-red-100 rounded-full transition-colors duration-200">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M3 6h18"></path>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                    </svg>
-                                </button>
+                                    <span>
+                                        Born: {new Date(pet.dateOfBirth).toLocaleDateString('en-GB', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex justify-between items-center border-t pt-4">
+                                    <button
+                                        onClick={() => navigate(`${pet.petId}`)}
+                                        className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                        View
+                                    </button>
+
+                                    <button
+                                        onClick={() => navigate(`edit/${pet.petId}`)}
+                                        className="flex items-center gap-2 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        onClick={() => handleDelete(pet.petId)}
+                                        className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Delete
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
+
+                {/* Empty State */}
+                {pets.length === 0 && (
+                    <div className="text-center py-12">
+                        <div className="bg-white rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+                            <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4M12 4v16" />
+                            </svg>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Pets Added Yet</h3>
+                            <p className="text-gray-600 mb-6">Start building your pet collection by adding your first pet</p>
+                            <button
+                                onClick={() => navigate('add')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+                            >
+                                Add Your First Pet
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
-
 };
 
 export default CustomerPetList;

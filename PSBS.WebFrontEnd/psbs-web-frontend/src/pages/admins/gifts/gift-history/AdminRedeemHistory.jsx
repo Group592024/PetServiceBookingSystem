@@ -13,9 +13,12 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  IconButton,
+  Chip
 } from "@mui/material";
 import Swal from "sweetalert2";
-
+import DatatableNoAction from "../../../../components/datatable/DatatableNoAction";
+import EditIcon from "@mui/icons-material/Edit";
 const AdminRedeemHistory = () => {
   const [allHistory, setAllHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,24 +27,36 @@ const AdminRedeemHistory = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRedeemId, setSelectedRedeemId] = useState(null);
   const [selectedRedeemStatusId, setSelectedRedeemStatusId] = useState(null);
-
+  const basePath = "/vouchers/";
+  const apiPath = "api/Voucher";
   const fetchAllHistory = async () => {
     try {
       setIsLoading(true);
+  
+      const token = sessionStorage.getItem("token");
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+  
       const response = await axios.get(
-        "http://localhost:5050/redeemhistory/All"
+        "http://localhost:5050/redeemhistory/All",
+        config
       );
+  
       if (response.data.flag) {
         const historyWithDetails = await Promise.all(
           response.data.data.map(async (item) => {
             try {
               const [accountResponse, giftResponse] = await Promise.all([
                 axios.get(
-                  `http://localhost:5050/api/Account?AccountId=${item.accountId}`
+                  `http://localhost:5050/api/Account?AccountId=${item.accountId}`,
+                  config
                 ),
-                axios.get(`http://localhost:5050/Gifts/${item.giftId}`),
+                axios.get(`http://localhost:5050/Gifts/${item.giftId}`, config),
               ]);
-
+  
               return {
                 id: item.redeemHistoryId,
                 ...item,
@@ -73,11 +88,17 @@ const AdminRedeemHistory = () => {
       setIsLoading(false);
     }
   };
-
+  
   const fetchRedeemStatuses = async () => {
+    const token = sessionStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     try {
       const response = await axios.get(
-        "http://localhost:5050/redeemhistory/statuses"
+        "http://localhost:5050/redeemhistory/statuses", config
       );
       setRedeemStatuses(response.data.data);
     } catch (error) {
@@ -100,22 +121,44 @@ const AdminRedeemHistory = () => {
   };
 
   const handleUpdateStatus = async () => {
+    const token = sessionStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
     try {
-        const response = await axios.put(
-            `http://localhost:5022/redeemhistory/${selectedRedeemId}/status/${selectedRedeemStatusId}`
-        );
-        if (response.data.flag) {
-            Swal.fire('Success', response.data.message, 'success');
-            setModalOpen(false);
-            fetchAllHistory();
-        } else {
-            Swal.fire('Error', response.data.message, 'error');
-        }
+      const response = await axios.put(
+        `http://localhost:5050/redeemhistory/${selectedRedeemId}/status/${selectedRedeemStatusId}`,  {}, 
+        config
+      );
+      if (response.data.flag) {
+        Swal.fire("Success", response.data.message, "success");
+        setModalOpen(false);
+        fetchAllHistory();
+      } else {
+        Swal.fire("Error", response.data.message, "error");
+      }
     } catch (error) {
-        Swal.fire('Error', 'Failed to update status', 'error');
+      Swal.fire("Error", "Failed to update status", "error");
     }
-};
+  };
 
+  const statusMapping = {
+    "1509e4e6-e1ec-42a4-9301-05131dd498e4": {
+      label: "Redeemed",
+      color: "warning", // Yellow
+    },
+    "33b84495-c2a6-4b3e-98ca-f13d9c150946": {
+      label: "Picked up",
+      color: "success", // Green
+    },
+    "6a565faf-d31e-4ec7-ad20-433f34e3d7a9": {
+      label: "Cancelled",
+      color: "error", // Red
+    },
+  };
+  
   const columns = [
     {
       field: "index",
@@ -123,9 +166,6 @@ const AdminRedeemHistory = () => {
       flex: 0.5,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>No.</div>
-      ),
       renderCell: (params) => {
         const index = allHistory.findIndex((row) => row.id === params.row.id);
         return <div>{index + 1}</div>;
@@ -137,11 +177,6 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>
-          Account Name
-        </div>
-      ),
     },
     {
       field: "giftName",
@@ -149,9 +184,6 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Gift Name</div>
-      ),
     },
     {
       field: "redeemPoint",
@@ -159,11 +191,6 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>
-          Points Used
-        </div>
-      ),
     },
     {
       field: "redeemDate",
@@ -171,11 +198,6 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>
-          Redeem Date
-        </div>
-      ),
       renderCell: (params) => {
         const date = new Date(params.row.redeemDate + "Z");
         return date.toLocaleString("en-GB", {
@@ -188,14 +210,19 @@ const AdminRedeemHistory = () => {
       },
     },
     {
-      field: "redeemStatusName",
+      field: "redeemStatusId",
       headerName: "Status",
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Status</div>
-      ),
+      renderCell: (params) => {
+        const status = statusMapping[params.row.redeemStatusId] || {
+          label: "Unknown",
+          color: "default",
+        };
+  
+        return <Chip variant="outlined" size="small" color={status.color} label={status.label} />;
+      },
     },
     {
       field: "actions",
@@ -203,13 +230,10 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Actions</div>
-      ),
       renderCell: (params) => (
-        <Button onClick={() => handleOpenModal(params.row.id)}>
-          Update Status
-        </Button>
+        <IconButton aria-label="edit" onClick={() => handleOpenModal(params.row.id)}>
+          <EditIcon color="success" />
+        </IconButton>
       ),
     },
   ];
@@ -220,45 +244,17 @@ const AdminRedeemHistory = () => {
       <div className="content">
         <Navbar sidebarRef={sidebarRef} />
         <main>
-          <div className="header">
-            <div className="left">
-              <h1>Gift Redemption History</h1>
-            </div>
+          <div className="listContainer">
+            <DatatableNoAction
+              rowId={"redeemHistoryId"}
+              columns={columns}
+              rows={allHistory}
+              basePath={basePath}
+              setRows={setAllHistory}
+              title="Gift Redemption History"
+              apiPath={apiPath}
+            />
           </div>
-          <Box
-            sx={{
-              height: 400,
-              width: "100%",
-              "& .MuiDataGrid-root": { backgroundColor: "#f9f9f9" },
-              "& .MuiDataGrid-row": { backgroundColor: "#f4f4f4" },
-              "& .MuiDataGrid-row.Mui-selected": {
-                backgroundColor: "#c8f6e9 !important",
-              },
-              "& .MuiDataGrid-footerContainer": { backgroundColor: "#9f9f9f" },
-              "& .MuiPaginationItem-root": {
-                backgroundColor: "#b3f2ed",
-                color: "#3f3f3f",
-              },
-              "& .MuiPaginationItem-root:hover": { backgroundColor: "#ede4e2" },
-            }}
-          >
-            {isLoading ? (
-              <div style={{ textAlign: "center" }}>
-                <CircularProgress />
-              </div>
-            ) : (
-              <DataGrid
-                columns={columns}
-                rows={allHistory}
-                initialState={{
-                  pagination: {
-                    paginationModel: { page: 0, pageSize: 5 },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 20]}
-              />
-            )}
-          </Box>
         </main>
       </div>
 

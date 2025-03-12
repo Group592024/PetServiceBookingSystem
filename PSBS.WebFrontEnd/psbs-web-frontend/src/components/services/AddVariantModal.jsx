@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { Box, Modal, TextField } from '@mui/material';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import { Box, Modal, TextField } from "@mui/material";
 
 const AddVariantModal = ({
   id,
@@ -14,13 +14,13 @@ const AddVariantModal = ({
   const sidebarRef = useRef(null);
 
   const [variant, setVariant] = useState({
-    serviceContent: '',
-    servicePrice: '',
+    serviceContent: "",
+    servicePrice: "",
   });
 
   const [error, setError] = useState({
     content: false,
-    price: '',
+    price: "",
   });
 
   const handleBackdropClick = (event) => {
@@ -30,15 +30,15 @@ const AddVariantModal = ({
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (variant.serviceContent === '' && variant.servicePrice === '') {
+    if (variant.serviceContent === "" && variant.servicePrice === "") {
       setError({
         content: true,
-        price: 'Service price is required',
+        price: "Service price is required",
       });
       return;
     }
 
-    if (variant.serviceContent === '') {
+    if (variant.serviceContent === "") {
       setError((prev) => ({
         ...prev,
         content: true,
@@ -46,10 +46,10 @@ const AddVariantModal = ({
       return;
     }
 
-    if (variant.servicePrice === '') {
+    if (variant.servicePrice === "") {
       setError((prev) => ({
         ...prev,
-        price: 'Service price is required',
+        price: "Service price is required",
       }));
       return;
     } else if (
@@ -58,44 +58,51 @@ const AddVariantModal = ({
     ) {
       setError((prev) => ({
         ...prev,
-        price: 'Service price must be a positive number',
+        price: "Service price must be a positive number",
       }));
       return;
     }
 
     const formData = new FormData();
-    formData.append('serviceContent', variant.serviceContent);
-    formData.append('servicePrice', variant.servicePrice);
-    formData.append('serviceId', id);
+    formData.append("serviceContent", variant.serviceContent);
+    formData.append("servicePrice", variant.servicePrice);
+    formData.append("serviceId", id);
 
     try {
-      const response = await fetch(`http://localhost:5023/api/ServiceVariant`, {
-        method: 'POST',
+      const token = sessionStorage.getItem("token");
+      const response = await fetch(`http://localhost:5050/api/ServiceVariant`, {
+        method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         Swal.fire(
-          'Add Service Variant',
-          'Service Variant Added Successfully!',
-          'success'
+          "Add Service Variant",
+          "Service Variant Added Successfully!",
+          "success"
         );
-        localStorage.removeItem('serviceId');
+        
+        navigate(`/service/${localStorage.getItem('serviceId')}`)
+        localStorage.removeItem("serviceId");
         window.location.reload();
+        
       } else {
-        console.error('Failed create');
+        console.error("Failed create");
         Swal.fire(
-          'Add Service Variant',
-          'Failed to add service variant!',
-          'error'
+          "Add Service Variant",
+          "Failed to add service variant!",
+          "error"
         );
       }
     } catch (error) {
-      console.error('Failed fetching api', error);
+      console.error("Failed fetching api", error);
       Swal.fire(
-        'Add Service Variant',
-        'Failed to add service variant!',
-        'error'
+        "Add Service Variant",
+        "Failed to add service variant!",
+        "error"
       );
     }
   };
@@ -111,41 +118,41 @@ const AddVariantModal = ({
       >
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '50%',
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "50%",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
             boxShadow: 24,
             p: 4,
           }}
         >
           <main>
-            <div className='header'>
-              <div className='left flex justify-center w-full'>
-                <h1 className='text-3xl font-bold p-5'>
+            <div className="header">
+              <div className="left flex justify-center w-full">
+                <h1 className="text-3xl font-bold p-5">
                   Create Service Variant
                 </h1>
               </div>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className='p-10 bg-customLightPrimary rounded-lg '>
-                <div className='p-10  bg-customLight rounded-3xl'>
+              <div className="p-10 bg-customLightPrimary rounded-lg ">
+                <div className="p-10  bg-customLight rounded-3xl">
                   <div>
-                    <p className='font-semibold text-2xl '>Service Content:</p>
+                    <p className="font-semibold text-2xl ">Service Content:</p>
                     <TextField
-                      type='text'
+                      type="text"
                       value={variant.serviceContent}
                       multiline
-                      rows='7'
+                      rows="7"
                       sx={{
-                        borderRadius: '10px',
-                        margin: '20px',
+                        borderRadius: "10px",
+                        margin: "20px",
                       }}
-                      className=' rounded-3xl p-3 m-10 w-full'
+                      className=" rounded-3xl p-3 m-10 w-full"
                       onChange={(e) => {
                         setVariant((prev) => ({
                           ...prev,
@@ -158,30 +165,30 @@ const AddVariantModal = ({
                       }}
                       error={error.content}
                       helperText={
-                        error.content ? 'Service content is required.' : ''
+                        error.content ? "Service content is required." : ""
                       }
                     />
                   </div>
                   <div>
-                    <p className='font-semibold text-2xl '>Service Price:</p>
+                    <p className="font-semibold text-2xl ">Service Price:</p>
                     <TextField
-                      type='text'
+                      type="text"
                       sx={{
-                        borderRadius: '10px',
-                        margin: '20px',
+                        borderRadius: "10px",
+                        margin: "20px",
                       }}
-                      className='rounded-3xl p-3 m-5
-                    w-full resize-none'
+                      className="rounded-3xl p-3 m-5
+                    w-full resize-none"
                       value={variant.servicePrice}
                       onChange={(e) => {
                         setVariant((prev) => ({
                           ...prev,
                           servicePrice: e.target.value,
                         }));
-                        if (e.target.value !== '') {
+                        if (e.target.value !== "") {
                           setError((prev) => ({
                             ...prev,
-                            price: '',
+                            price: "",
                           }));
                         }
                       }}
@@ -190,33 +197,33 @@ const AddVariantModal = ({
                     />
                   </div>
 
-                  <div className='flex justify-between'>
+                  <div className="flex justify-between">
                     <button
-                      type='submit'
-                      className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
-                  hover:bg-customLightPrimary hover:text-customPrimary'
+                      type="submit"
+                      className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                  hover:bg-customLightPrimary hover:text-customPrimary"
                     >
                       Save
                     </button>
 
                     <button
-                      className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
-                  hover:bg-customPrimary hover:text-customLightPrimary'
+                      className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
+                  hover:bg-customPrimary hover:text-customLightPrimary"
                       onClick={(e) => {
                         if (disableBackdrop) {
                           Swal.fire({
-                            title: 'Are you sure?',
-                            text: 'If you close this popup, the service you just created will be deleted after some minutes',
-                            icon: 'warning',
+                            title: "Are you sure?",
+                            text: "If you close this popup, the service you just created will be deleted after some minutes",
+                            icon: "warning",
                             showCancelButton: true,
-                            confirmButtonText: 'OK',
-                            cancelButtonText: 'Cancel',
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: "OK",
+                            cancelButtonText: "Cancel",
+                            confirmButtonColor: "#d33",
+                            cancelButtonColor: "#3085d6",
                           }).then((result) => {
                             if (result.isConfirmed) {
                               handleClose(false);
-                              navigate('/service');
+                              navigate("/service");
                             }
                           });
                         } else {

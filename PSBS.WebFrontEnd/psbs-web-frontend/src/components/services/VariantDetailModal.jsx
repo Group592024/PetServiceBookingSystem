@@ -14,8 +14,16 @@ const VariantDetailModal = ({ id, open, handleClose }) => {
   useEffect(() => {
     const fetchDataUpdate = async () => {
       try {
+        const token = sessionStorage.getItem("token");
         const data = await fetch(
-          `http://localhost:5023/api/ServiceVariant/${id}`
+          `http://localhost:5050/api/ServiceVariant/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         ).then((response) => response.json());
 
         console.log('day la data', data);

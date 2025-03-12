@@ -29,6 +29,7 @@ const Register = () => {
     let valid = true;
     let errorMessages = { ...errors };
   
+    // Kiểm tra email và số điện thoại có tồn tại không
     if (!AccountName) {
       errorMessages.name = 'Name is required';
       valid = false;
@@ -53,7 +54,7 @@ const Register = () => {
       errorMessages.phone = 'Phone number is required';
       valid = false;
     } else {
-      const phoneRegex =/^0\d{9}$/; 
+      const phoneRegex = /^0\d{9}$/;
       if (!phoneRegex.test(AccountPhoneNumber)) {
         errorMessages.phone = 'Please enter a valid phone number';
         valid = false;
@@ -61,7 +62,6 @@ const Register = () => {
         errorMessages.phone = '';
       }
     }
-    
   
     if (!AccountPassword) {
       errorMessages.password = 'Password is required';
@@ -84,33 +84,25 @@ const Register = () => {
       errorMessages.dob = 'Date of birth is required';
       valid = false;
     } else {
-      const birthDate = new Date(AccountDob); 
+      const birthDate = new Date(AccountDob);
       const currentDate = new Date();
-    
-      if (isNaN(birthDate)) {
-        errorMessages.dob = 'Invalid date format';
+      if (birthDate > currentDate) {
+        errorMessages.dob = 'Date of birth cannot be in the future';
         valid = false;
       } else {
-        if (birthDate > currentDate) {
-          errorMessages.dob = 'Date of birth cannot be in the future';
+        let age = currentDate.getFullYear() - birthDate.getFullYear();
+        const monthDifference = currentDate.getMonth() - birthDate.getMonth();
+        if (monthDifference < 0 || (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())) {
+          age--;
+        }
+        if (age > 100) {
+          errorMessages.dob = 'Age cannot be greater than 100 years';
           valid = false;
         } else {
-          let age = currentDate.getFullYear() - birthDate.getFullYear();
-          const monthDifference = currentDate.getMonth() - birthDate.getMonth();
-          if (monthDifference < 0 || (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())) {
-            age--;
-          }
-          if (age > 100) {
-            errorMessages.dob = 'Age cannot be greater than 100 years';
-            valid = false;
-          } else {
-            errorMessages.dob = '';
-          }
+          errorMessages.dob = '';
         }
       }
     }
-    
-    
   
     if (!AccountAddress) {
       errorMessages.address = 'Address is required';
@@ -119,58 +111,72 @@ const Register = () => {
       errorMessages.address = '';
     }
   
-    setErrors(errorMessages);  
+    setErrors(errorMessages);
   
     if (!valid) return;
-
-  const formData = new FormData();
-  formData.append('RegisterTempDTO.AccountName', AccountName);
-  formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
-  formData.append('RegisterTempDTO.AccountPhoneNumber', AccountPhoneNumber);
-  formData.append('RegisterTempDTO.AccountPassword', AccountPassword);
-  formData.append('RegisterTempDTO.AccountGender', AccountGender);
-  formData.append('RegisterTempDTO.AccountDob', AccountDob);
-  formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
-  formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
-
-  try {
-    const response = await fetch('http://localhost:5000/api/Account/register', {
-      method: 'POST',
-      headers: {
-        'accept': 'text/plain',
-      },
-      body: formData,
-    });
-
-    const result = await response.json();
-    if (response.ok && result.flag) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Registration Successful!',
-        text: 'Please log in.',
-      }).then(() => navigate('/login'));
-    } else {
-      console.log(result);  
-
+  
+    const formData = new FormData();
+    formData.append('RegisterTempDTO.AccountName', AccountName);
+    formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
+    formData.append('RegisterTempDTO.AccountPhoneNumber', AccountPhoneNumber);
+    formData.append('RegisterTempDTO.AccountPassword', AccountPassword);
+    formData.append('RegisterTempDTO.AccountGender', AccountGender);
+    formData.append('RegisterTempDTO.AccountDob', AccountDob);
+    formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
+    formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
+  
+    try {
+      const token = sessionStorage.getItem("token");
+    
+      const response = await fetch('http://localhost:5050/api/Account/register', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`, 
+          'Accept': 'application/json', 
+        },
+        body: formData,
+      });
+    
+      const result = await response.json().catch(() => null);
+    
+      if (response.ok && result?.flag) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Registration Successful!',
+          text: 'Please log in.',
+        }).then(() => navigate('/login'));
+      } else {
+        let newErrors = { ...errors };
+    
+        if (result?.message?.includes('Email already exists')) {
+          newErrors.email = result.message;
+        }
+        if (result?.message?.includes('Phone number already exists')) {
+          newErrors.phone = result.message;
+        }
+    
+        setErrors(newErrors);
+    
+        if (!result?.message?.includes('Email already exists') && 
+            !result?.message?.includes('Phone number already exists')) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Registration Failed',
+            text: result?.message || 'Registration failed. Please try again.',
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error:', err);
       Swal.fire({
         icon: 'error',
-        title: 'Registration Failed',
-        text: result.message || 'Registration failed. Please try again.',
-        footer: result.details || 'Additional details about the error.',
+        title: 'An error occurred',
+        text: err.message || 'Please try again later.',
+        footer: 'Network or server error. Please check your connection.',
       });
     }
-  } catch (err) {
-    console.error(err);  
-    Swal.fire({
-      icon: 'error',
-      title: 'An error occurred',
-      text: err.message || 'Please try again later.',
-      footer: 'Network or server error. Please check your connection.',
-    });
-  }
-};
+  };
   
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">

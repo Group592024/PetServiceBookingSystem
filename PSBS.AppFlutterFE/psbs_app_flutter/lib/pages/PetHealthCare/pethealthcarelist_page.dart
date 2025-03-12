@@ -6,7 +6,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'pethealthcaredetail_page.dart';
 
 class PetHealthBookList extends StatefulWidget {
-  // Nếu petId được truyền từ trang petdetails, chỉ hiển thị pet đó
   final String? petId;
   PetHealthBookList({this.petId});
 
@@ -38,23 +37,46 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     }
   }
 
+  Future<Map<String, String>> getHeaders() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
+  }
+
   Future<void> fetchData() async {
     if (accountId == null) return;
     try {
-      final petHealthRes =
-          await http.get(Uri.parse("http://10.0.2.2:5003/api/PetHealthBook"));
-      final medicinesRes =
-          await http.get(Uri.parse("http://10.0.2.2:5003/Medicines"));
-      final petsRes = await http.get(Uri.parse("http://10.0.2.2:5010/api/pet"));
-      final bookingServiceItemsRes = await http.get(Uri.parse(
-          "http://10.0.2.2:5023/api/BookingServiceItems/GetBookingServiceList"));
+      final headers = await getHeaders();
+
+      final petHealthRes = await http.get(
+        Uri.parse("http://10.0.2.2:5050/api/PetHealthBook"),
+        headers: headers,
+      );
+      final medicinesRes = await http.get(
+        Uri.parse("http://10.0.2.2:5050/Medicines"),
+        headers: headers,
+      );
+      final petsRes = await http.get(
+        Uri.parse("http://10.0.2.2:5050/api/pet"),
+        headers: headers,
+      );
+      final bookingServiceItemsRes = await http.get(
+        Uri.parse(
+            "http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList"),
+        headers: headers,
+      );
 
       if (petHealthRes.statusCode != 200 ||
           medicinesRes.statusCode != 200 ||
           petsRes.statusCode != 200 ||
           bookingServiceItemsRes.statusCode != 200) {
+        print("Failed to fetch data");
         return;
       }
+
       var petHealthData = jsonDecode(petHealthRes.body);
       if (petHealthData is Map) {
         petHealthData = petHealthData['data'] ?? [];
@@ -71,8 +93,10 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
       if (bookingServiceItemsData is Map) {
         bookingServiceItemsData = bookingServiceItemsData['data'] ?? [];
       }
+
       List accountPets =
           (petsData as List).where((p) => p['accountId'] == accountId).toList();
+
       List result = accountPets.map((pet) {
         List healthForThisPet = (petHealthData as List).where((health) {
           var bsi = bookingServiceItemsData.firstWhere(
@@ -83,15 +107,18 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
           if (bsi == null) return false;
           return bsi['petId'] == pet['petId'];
         }).toList();
+
         List healthRecords = healthForThisPet.map((health) {
           List medIds = health['medicineIds'] ?? [];
           List medNames = (medicinesData as List)
               .where((m) => medIds.contains(m['medicineId']))
               .map((m) => m['medicineName'])
               .toList();
+
           String medicineNames = medNames.isNotEmpty
               ? medNames.join(", ")
               : "No Medicines Assigned";
+
           return {
             'healthBookId': health['healthBookId'] ?? "",
             'medicineNames': medicineNames,
@@ -99,8 +126,8 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
             'createdAt': health['createdAt'] ?? "",
           };
         }).toList();
+
         return {
-          // Thêm petId để sau này kiểm tra
           'petId': pet['petId'],
           'petName': pet['petName'] ?? "Unknown",
           'dateOfBirth': pet['dateOfBirth'] ?? "",
@@ -108,6 +135,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
           'healthBooks': healthRecords,
         };
       }).toList();
+
       setState(() {
         mergedPets = result;
       });
@@ -197,7 +225,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                                       image: DecorationImage(
                                         image: petRecord['petImage'].isNotEmpty
                                             ? NetworkImage(
-                                                "http://10.0.2.2:5010${petRecord['petImage']}")
+                                                "http://10.0.2.2:5050/pet-service${petRecord['petImage']}")
                                             : AssetImage(
                                                     'assets/default-image.png')
                                                 as ImageProvider,
@@ -292,7 +320,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
 Widget buildPetImage(String? imagePath) {
   if (imagePath != null && imagePath.isNotEmpty) {
-    String imageUrl = "http://10.0.2.2:5010$imagePath";
+    String imageUrl = "http://10.0.2.2:5050$imagePath";
     return Image.network(
       imageUrl,
       width: 50,

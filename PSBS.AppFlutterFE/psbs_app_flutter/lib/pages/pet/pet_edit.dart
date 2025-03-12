@@ -38,7 +38,7 @@ class _PetEditState extends State<PetEdit> {
   bool _petGender = true;
   DateTime? _dateOfBirth;
   String? _accountId;
- late String userId;
+  late String userId;
   @override
   void initState() {
     super.initState();
@@ -46,17 +46,27 @@ class _PetEditState extends State<PetEdit> {
     _fetchPetTypes();
     _loadAccountId();
   }
- Future<void> _loadAccountId() async {
+
+  Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
     });
   }
+
   Future<void> _fetchPetData() async {
     setState(() => _isLoading = true);
     try {
-      final response = await http
-          .get(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -93,8 +103,17 @@ class _PetEditState extends State<PetEdit> {
 
   Future<void> _fetchPetTypes() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/petType'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/petType'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -111,8 +130,17 @@ class _PetEditState extends State<PetEdit> {
 
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
-      final response = await http.get(Uri.parse(
-          'http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag'] && data['data'] != null) {
@@ -312,11 +340,18 @@ class _PetEditState extends State<PetEdit> {
     setState(() => _isLoading = true);
 
     try {
+      setState(() => _isLoading = true);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       var request = http.MultipartRequest(
         'PUT',
         Uri.parse('http://10.0.2.2:5050/api/pet'),
       );
-
+      request.headers.addAll({
+        'Content-Type': 'multipart/form-data',
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
       request.fields.addAll({
         'petId': widget.petId,
         'accountId': _accountId!,
@@ -329,25 +364,24 @@ class _PetEditState extends State<PetEdit> {
         'petFurColor': _furColorController.text,
         'petNote': _noteController.text,
       });
-
       if (_image != null) {
         request.files.add(await http.MultipartFile.fromPath(
           'imageFile',
           _image!.path,
         ));
       }
-
-      final response = await request.send();
-
+      var response = await request.send();
       if (response.statusCode == 200) {
         _showSuccessDialog();
       } else {
-      String responseData = await response.stream.bytesToString();
-      var decodedResponse = jsonDecode(responseData);  
-      String errorMessage = decodedResponse['message'] ?? 'Unknown error';  
-      _showErrorDialog(errorMessage);      }
+        String responseData = await response.stream.bytesToString();
+        var decodedResponse = jsonDecode(responseData);
+        String errorMessage =
+            decodedResponse['message'] ?? 'Lỗi không xác định';
+        _showErrorDialog(errorMessage);
+      }
     } catch (e) {
-      _showErrorDialog('Error updating pet');
+      _showErrorDialog('Lỗi khi cập nhật thú cưng: $e');
     } finally {
       setState(() => _isLoading = false);
     }
@@ -487,265 +521,478 @@ class _PetEditState extends State<PetEdit> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Pet'),
-      ),
       body: _isLoading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: Container(
-                        height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(8),
+          ? Center(child: CircularProgressIndicator(color: Colors.blue))
+          : CustomScrollView(
+              slivers: [
+                SliverAppBar(
+                  expandedHeight: 120,
+                  pinned: true,
+                  backgroundColor: Colors.blue,
+                  leading: IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.arrow_back, color: Colors.blue),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: Text(
+                      'Edit Pet',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    background: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topRight,
+                          end: Alignment.bottomLeft,
+                          colors: [Colors.blue.shade300, Colors.blue.shade700],
                         ),
-                        child: _imagePreview != null
-                            ? _image != null
-                                ? Image.file(_image!, fit: BoxFit.cover)
-                                : Image.network(_imagePreview!,
-                                    fit: BoxFit.cover)
-                            : Center(child: Text('Select an image')),
                       ),
                     ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: InputDecoration(
-                        labelText: 'Pet Name',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Please enter pet name'
-                          : null,
-                    ),
-                    SizedBox(height: 16),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<bool>(
-                            value: _petGender,
-                            decoration: InputDecoration(
-                              labelText: 'Gender',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: true,
-                                child: Text('Male'),
-                              ),
-                              DropdownMenuItem(
-                                value: false,
-                                child: Text('Female'),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                _petGender = value!;
-                              });
-                            },
-                          ),
-                        ),
-                        SizedBox(width: 16),
-                        Expanded(
-                          child: TextFormField(
-                            decoration: InputDecoration(
-                              labelText: 'Date of Birth',
-                              border: OutlineInputBorder(),
-                            ),
-                            readOnly: true,
-                            controller: TextEditingController(
-                              text: _dateOfBirth != null
-                                  ? DateFormat('yyyy-MM-dd')
-                                      .format(_dateOfBirth!)
-                                  : '',
-                            ),
-                            onTap: () async {
-                              final DateTime? picked = await showDatePicker(
-                                context: context,
-                                initialDate: _dateOfBirth ?? DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime.now(),
-                              );
-                              if (picked != null) {
-                                setState(() {
-                                  _dateOfBirth = picked;
-                                });
-                              }
-                            },
-                            validator: (value) => value?.isEmpty ?? true
-                                ? 'Please select date of birth'
-                                : null,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _selectedPetTypeId,
-                      decoration: InputDecoration(
-                        labelText: 'Pet Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _petTypes.map((type) {
-                        return DropdownMenuItem(
-                          value: type.id,
-                          child: Text(type.name),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedPetTypeId = value;
-                          _selectedBreedId = null;
-                          _fetchBreeds(value!);
-                        });
-                      },
-                      validator: (value) =>
-                          value == null ? 'Please select pet type' : null,
-                    ),
-                    SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: _selectedBreedId,
-                      decoration: InputDecoration(
-                        labelText: 'Breed',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: _breeds.map((breed) {
-                        return DropdownMenuItem(
-                          value: breed.id,
-                          child: Text(breed.name),
-                        );
-                      }).toList(),
-                      onChanged: _selectedPetTypeId == null
-                          ? null
-                          : (value) {
-                              setState(() {
-                                _selectedBreedId = value;
-                              });
-                            },
-                      validator: (value) =>
-                          value == null ? 'Please select breed' : null,
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: _weightController,
-                      decoration: InputDecoration(
-                        labelText: 'Weight (kg)',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) {
-                          return 'Please enter weight';
-                        }
-                        if (double.tryParse(value!) == null ||
-                            double.parse(value) <= 0) {
-                          return 'Please enter a valid weight';
-                        }
-                        return null;
-                      },
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: _furTypeController,
-                      decoration: InputDecoration(
-                        labelText: 'Fur Type',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Please enter fur type'
-                          : null,
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: _furColorController,
-                      decoration: InputDecoration(
-                        labelText: 'Fur Color',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator: (value) => value?.isEmpty ?? true
-                          ? 'Please enter fur color'
-                          : null,
-                    ),
-                    SizedBox(height: 16),
-                    TextFormField(
-                      controller: _noteController,
-                      decoration: InputDecoration(
-                        labelText: 'Notes',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 3,
-                      validator: (value) =>
-                          value?.isEmpty ?? true ? 'Please enter notes' : null,
-                    ),
-                    SizedBox(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            side: BorderSide(color: Colors.blue),
-                          ),
-                          onPressed: _handleSubmit,
-                          child: Text(
-                            'Update',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                        TextButton(
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 40, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pushAndRemoveUntil(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => MyHomePage(
-                                  accountId: userId,
-                                  title: 'Flutter Demo Home Page',
-                                  initialIndex: 1,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          // Image Picker
+                          GestureDetector(
+                            onTap: _pickImage,
+                            child: Container(
+                              height: 200,
+                              decoration: BoxDecoration(
+                                color: Colors.grey[100],
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(
+                                  color: Colors.blue.withOpacity(0.3),
+                                  width: 2,
                                 ),
                               ),
-                              (route) => false,
-                            );
-                          },
-                          child: Text(
-                            'Cancel',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500,
+                              child: _imagePreview != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(18),
+                                      child: _image != null
+                                          ? Image.file(_image!,
+                                              fit: BoxFit.cover)
+                                          : Image.network(_imagePreview!,
+                                              fit: BoxFit.cover),
+                                    )
+                                  : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.add_photo_alternate_outlined,
+                                          size: 50,
+                                          color: Colors.blue,
+                                        ),
+                                        SizedBox(height: 10),
+                                        Text(
+                                          'Change Pet Photo',
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                             ),
                           ),
-                        )
-                      ],
+                          SizedBox(height: 24),
+
+                          // Basic Information Section
+                          _buildSectionTitle('Basic Information'),
+                          _buildTextField(
+                            controller: _nameController,
+                            label: 'Pet Name',
+                            icon: Icons.pets,
+                            validator: (value) => value?.isEmpty ?? true
+                                ? 'Please enter pet name'
+                                : null,
+                          ),
+                          SizedBox(height: 16),
+
+                          // Gender and DOB Row
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDropdownField(
+                                  value: _petGender,
+                                  label: 'Gender',
+                                  icon: Icons.transgender,
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: true,
+                                      child: Text('Male'),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: false,
+                                      child: Text('Female'),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() => _petGender = value!);
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: _buildDateField(
+                                  label: 'Date of Birth',
+                                  value: _dateOfBirth,
+                                  onTap: () async {
+                                    final date = await showDatePicker(
+                                      context: context,
+                                      initialDate:
+                                          _dateOfBirth ?? DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime.now(),
+                                    );
+                                    if (date != null) {
+                                      setState(() => _dateOfBirth = date);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 24),
+
+                          // Pet Details Section
+                          _buildSectionTitle('Pet Details'),
+                          _buildDropdownField<String?>(
+                            value: _selectedPetTypeId,
+                            label: 'Pet Type',
+                            icon: Icons.category,
+                            items: _petTypes.map((type) {
+                              return DropdownMenuItem<String?>(
+                                value: type.id,
+                                child: Text(type.name),
+                              );
+                            }).toList(),
+                            onChanged: (String? value) {
+                              setState(() {
+                                _selectedPetTypeId = value;
+                                _selectedBreedId = null;
+                                if (value != null) {
+                                  _fetchBreeds(value);
+                                }
+                              });
+                            },
+                          ),
+                          SizedBox(height: 16),
+
+                          _buildDropdownField<String?>(
+                            value: _selectedBreedId,
+                            label: 'Breed',
+                            icon: Icons.pets,
+                            items: _breeds.map((breed) {
+                              return DropdownMenuItem<String?>(
+                                value: breed.id,
+                                child: Text(breed.name),
+                              );
+                            }).toList(),
+                            onChanged: _selectedPetTypeId == null
+                                ? null
+                                : (String? value) {
+                                    setState(() => _selectedBreedId = value);
+                                  },
+                          ),
+                          SizedBox(height: 16),
+
+                          _buildTextField(
+                            controller: _weightController,
+                            label: 'Weight (kg)',
+                            icon: Icons.monitor_weight,
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true)
+                                return 'Please enter weight';
+                              if (double.tryParse(value!) == null ||
+                                  double.parse(value) <= 0) {
+                                return 'Please enter a valid weight';
+                              }
+                              return null;
+                            },
+                          ),
+                          SizedBox(height: 24),
+
+                          // Appearance Section
+                          _buildSectionTitle('Appearance'),
+                          _buildTextField(
+                            controller: _furTypeController,
+                            label: 'Fur Type',
+                            icon: Icons.brush,
+                            validator: (value) => value?.isEmpty ?? true
+                                ? 'Please enter fur type'
+                                : null,
+                          ),
+                          SizedBox(height: 16),
+
+                          _buildTextField(
+                            controller: _furColorController,
+                            label: 'Fur Color',
+                            icon: Icons.palette,
+                            validator: (value) => value?.isEmpty ?? true
+                                ? 'Please enter fur color'
+                                : null,
+                          ),
+                          SizedBox(height: 24),
+
+                          // Notes Section
+                          _buildSectionTitle('Additional Notes'),
+                          _buildTextField(
+                            controller: _noteController,
+                            label: 'Notes',
+                            icon: Icons.note,
+                            maxLines: 3,
+                            validator: (value) => value?.isEmpty ?? true
+                                ? 'Please enter notes'
+                                : null,
+                          ),
+                          SizedBox(height: 32),
+
+                          // Action Buttons
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildActionButton(
+                                  'Update',
+                                  Icons.check,
+                                  Colors.blue,
+                                  _handleSubmit,
+                                ),
+                              ),
+                              SizedBox(width: 16),
+                              Expanded(
+                                child: _buildActionButton(
+                                  'Cancel',
+                                  Icons.close,
+                                  Colors.red,
+                                  () => Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MyHomePage(
+                                        accountId: userId,
+                                        title: 'Flutter Demo Home Page',
+                                        initialIndex: 1,
+                                      ),
+                                    ),
+                                    (route) => false,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.blue.shade800,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    int maxLines = 1,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        maxLines: maxLines,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, color: Colors.blue),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required DateTime? value,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        readOnly: true,
+        onTap: onTap,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(Icons.calendar_today, color: Colors.blue),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'dd/mm/yyyy',
+        ),
+        controller: TextEditingController(
+          text: value == null ? '' : DateFormat('dd/MM/yyyy').format(value),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please select date of birth';
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget _buildDropdownField<T>({
+    required T? value,
+    required String label,
+    required IconData icon,
+    required List<DropdownMenuItem<T>> items,
+    required void Function(T?)? onChanged,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: DropdownButtonFormField<T>(
+        value: value,
+        items: items,
+        onChanged: onChanged,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, color: Colors.blue),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue.shade200),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.blue, width: 2),
+          ),
+          filled: true,
+          fillColor: Colors.white,
+        ),
+        validator: (value) => value == null ? 'Please select an option' : null,
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+      String label, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 2,
+      ),
+      onPressed: onPressed,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon),
+          SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

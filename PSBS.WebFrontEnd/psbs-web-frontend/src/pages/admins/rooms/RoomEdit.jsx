@@ -32,9 +32,21 @@ const RoomEdit = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const token = sessionStorage.getItem("token");
+
                 const [roomResponse, typesResponse] = await Promise.all([
-                    fetch(`http://localhost:5050/api/Room/${id}`),
-                    fetch('http://localhost:5050/api/RoomType/available')
+                    fetch(`http://localhost:5050/api/Room/${id}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    }),
+                    fetch("http://localhost:5050/api/RoomType/available", {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    })
                 ]);
 
                 const roomData = await roomResponse.json();
@@ -42,12 +54,18 @@ const RoomEdit = () => {
                 setRoomTypes(typesData.data || []);
 
                 if (roomData.flag && roomData.data) {
-                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`);
+                    const typeResponse = await fetch(`http://localhost:5050/api/RoomType/${roomData.data.roomTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
                     const typeData = await typeResponse.json();
 
                     setRoomName(roomData.data.roomName);
                     setRoomType(roomData.data.roomTypeId);
-                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : 'default-room-image.jpg');
+                    setTmpImage(roomData.data.roomImage ? `http://localhost:5050/facility-service${roomData.data.roomImage}` : "default-room-image.jpg");
                     setRoomDescription(roomData.data.description);
                     setRoomStatus(roomData.data.status);
                     setIsDeleted(roomData.data.isDeleted);
@@ -55,14 +73,13 @@ const RoomEdit = () => {
                     setRoomTypePrice(typeData.data.price);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                Swal.fire('Error', 'Failed to fetch data!', 'error');
+                console.error("Error:", error);
+                Swal.fire("Error", "Failed to fetch data!", "error");
             }
         };
 
         fetchData();
     }, [id]);
-
 
     const handleImageChange = (event) => {
         const fileImage = event.target.files[0];
@@ -125,11 +142,14 @@ const RoomEdit = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:5050/api/Room`, {
-                    method: 'PUT',
-                    body: formData,
+                const token = sessionStorage.getItem("token");
+                const response = await fetch("http://localhost:5050/api/Room", {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: formData
                 });
-
                 if (response.ok) {
                     Swal.fire('Edit Room', 'Room Updated Successfully!', 'success');
                     navigate('/room');
@@ -145,187 +165,209 @@ const RoomEdit = () => {
     };
 
     return (
-        <div className="bg-gray-200 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main className="flex-1 overflow-auto p-6">
-                    <div className="flex items-center mb-6 mx-auto w-full">
-                        <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
-                        <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
-                                Edit Room
-                            </button>
-                        </div>
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Enhanced Header */}
+                    <div className="flex items-center mb-8 bg-white rounded-xl p-4 shadow-sm">
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <h1 className="text-3xl font-bold text-gray-800 ml-4">Edit Room</h1>
                     </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex flex-col lg:flex-row gap-6">
-                            <div className="flex-1">
-                                <form>
-                                    {/* Room Name */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-5">Name:</label>
-                                        <TextField
-                                            className="bg-gray-50 rounded-xl"
-                                            fullWidth
-                                            type="text"
-                                            onChange={(e) => setRoomName(e.target.value)}
-                                            value={roomName}
-                                            error={error.roomName}
-                                            helperText={error.roomName ? 'Room Name is required.' : ''}
-                                        />
-                                    </div>
-
-                                    {/* Room Type */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-7">Type:</label>
-                                        <FormControl fullWidth>
-                                            <InputLabel id="room-type-label">Choose Type</InputLabel>
-                                            <Select
-                                                className="bg-gray-50 rounded-xl"
-                                                labelId="room-type-label"
-                                                value={roomType}
-                                                onChange={(e) => {
-                                                    const selectedTypeId = e.target.value;
-                                                    setRoomType(selectedTypeId);
-                                                    const selectedType = roomTypes.find(type => type.roomTypeId === selectedTypeId);
-                                                    if (selectedType) {
-                                                        setRoomTypeName(selectedType.name);
-                                                        setRoomTypePrice(selectedType.price);
+    
+                    <div className="bg-white rounded-xl p-8 shadow-lg">
+                        <form onSubmit={handleSubmit}>
+                            <div className="flex flex-col md:flex-row gap-12">
+                                {/* Left Column - Form Fields */}
+                                <div className="md:w-1/2 space-y-6">
+                                    <div className="space-y-4">
+                                        {/* Room Name */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+                                            <TextField
+                                                fullWidth
+                                                value={roomName}
+                                                onChange={(e) => setRoomName(e.target.value)}
+                                                error={error.roomName}
+                                                helperText={error.roomName ? 'Room Name is required.' : ''}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
                                                     }
                                                 }}
-                                                label="Choose Type"
-                                                error={error.roomType}
-                                                renderValue={(selected) => {
-                                                    const selectedType = roomTypes.find(type => type.roomTypeId === selected);
-                                                    return selectedType?.name || roomTypeName;
+                                            />
+                                        </div>
+    
+                                        {/* Room Type */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                                            <FormControl fullWidth>
+                                                <Select
+                                                    value={roomType}
+                                                    onChange={(e) => {
+                                                        const selectedTypeId = e.target.value;
+                                                        setRoomType(selectedTypeId);
+                                                        const selectedType = roomTypes.find(type => type.roomTypeId === selectedTypeId);
+                                                        if (selectedType) {
+                                                            setRoomTypeName(selectedType.name);
+                                                            setRoomTypePrice(selectedType.price);
+                                                        }
+                                                    }}
+                                                    sx={{
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }}
+                                                >
+                                                    {roomTypes.map((type) => (
+                                                        <MenuItem key={type.roomTypeId} value={type.roomTypeId}>
+                                                            {type.name}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+    
+                                        {/* Room Price */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Room Price</label>
+                                            <TextField
+                                                fullWidth
+                                                value={`${roomTypePrice} VND`}
+                                                InputProps={{
+                                                    readOnly: true,
                                                 }}
-                                            >
-                                                {roomTypes.map((type) => (
-                                                    <MenuItem key={type.roomTypeId} value={type.roomTypeId}>
-                                                        {type.name}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-
-                                    {/* Room Price */}
-                                    <div className="mb-3 flex items-center">
-                                        <label className="font-semibold text-base text-gray-500 mr-6">Price:</label>
-                                        <TextField
-                                            className="bg-gray-50 rounded-xl"
-                                            fullWidth
-                                            type="text"
-                                            value={roomTypePrice}
-                                            InputProps={{
-                                                readOnly: true,
-                                            }}
-                                        />
-                                    </div>
-
-                                    {/* Description */}
-                                    <div className="mb-3 flex flex-col">
-                                        <label className="font-semibold text-base text-gray-500 mb-2">Description:</label>
-                                        <TextField
-                                            className="bg-gray-50 rounded-xl"
-                                            fullWidth
-                                            multiline
-                                            rows={4}
-                                            onChange={(e) => setRoomDescription(e.target.value)}
-                                            value={roomDescription}
-                                            error={error.roomDescription}
-                                            helperText={error.roomDescription ? 'Description is required.' : ''}
-                                        />
-                                    </div>
-
-                                    {/* Status */}
-                                    <div className="mb-3 flex items-center mt-5">
-                                        <label className="font-semibold text-base text-gray-500 mr-6">Status:</label>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Choose Status</InputLabel>
-                                            <Select
-                                                className="bg-gray-50 rounded-xl"
-                                                value={roomStatus}
-                                                onChange={(e) => setRoomStatus(e.target.value)}
-                                                label="Choose Status"
                                                 sx={{
-                                                    color:
-                                                        roomStatus === 'In Use' ? '#FFA500' :
-                                                            roomStatus === 'Free' ? '#22C55E' :
-                                                                roomStatus === 'Maintenance' ? '#EF4444' : 'inherit',
-                                                    fontWeight: 'bold'
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }
                                                 }}
-                                            >
-                                                <MenuItem value="In Use" sx={{ color: '#FFA500', fontWeight: 'bold' }}>
-                                                    In Use
-                                                </MenuItem>
-                                                <MenuItem value="Free" sx={{ color: '#22C55E', fontWeight: 'bold' }}>
-                                                    Free
-                                                </MenuItem>
-                                                <MenuItem value="Maintenance" sx={{ color: '#EF4444', fontWeight: 'bold' }}>
-                                                    Maintenance
-                                                </MenuItem>
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-
-                                    {/* Available */}
-                                    <div className="mb-3">
-                                        <FormControl component="fieldset">
-                                            <div className="flex items-center">
-                                                <FormLabel component="legend" className="mr-4 text-gray-500 font-semibold">Available:</FormLabel>
+                                            />
+                                        </div>
+    
+                                        {/* Description */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                            <TextField
+                                                fullWidth
+                                                multiline
+                                                rows={4}
+                                                value={roomDescription}
+                                                onChange={(e) => setRoomDescription(e.target.value)}
+                                                error={error.roomDescription}
+                                                helperText={error.roomDescription ? 'Description is required.' : ''}
+                                                sx={{
+                                                    '& .MuiOutlinedInput-root': {
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                    }
+                                                }}
+                                            />
+                                        </div>
+    
+                                        {/* Status */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                            <FormControl fullWidth>
+                                                <Select
+                                                    value={roomStatus}
+                                                    onChange={(e) => setRoomStatus(e.target.value)}
+                                                    sx={{
+                                                        borderRadius: '0.75rem',
+                                                        backgroundColor: '#f8fafc',
+                                                        color:
+                                                            roomStatus === 'In Use' ? '#f97316' :
+                                                            roomStatus === 'Free' ? '#22c55e' :
+                                                            roomStatus === 'Maintenance' ? '#ef4444' : 'inherit',
+                                                        fontWeight: '600'
+                                                    }}
+                                                >
+                                                    <MenuItem value="In Use" sx={{ color: '#f97316', fontWeight: '600' }}>In Use</MenuItem>
+                                                    <MenuItem value="Free" sx={{ color: '#22c55e', fontWeight: '600' }}>Free</MenuItem>
+                                                    <MenuItem value="Maintenance" sx={{ color: '#ef4444', fontWeight: '600' }}>Maintenance</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                        </div>
+    
+                                        {/* Available Status */}
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
+                                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                                                 <RadioGroup
                                                     row
                                                     value={isDeleted ? 'true' : 'false'}
                                                     onChange={(e) => setIsDeleted(e.target.value === 'true')}
-                                                    className="flex items-center"
                                                 >
                                                     <FormControlLabel
                                                         value="false"
-                                                        control={<Radio />}
-                                                        label="Active"
-                                                        className="font-bold text-green-500 text-lg mr-4"
+                                                        control={<Radio color="success" />}
+                                                        label={<span className="text-green-600 font-medium">Active</span>}
+                                                        className="mr-8"
                                                     />
                                                     <FormControlLabel
                                                         value="true"
-                                                        control={<Radio />}
-                                                        label="Inactive"
-                                                        className="font-bold text-red-500 text-lg"
+                                                        control={<Radio color="error" />}
+                                                        label={<span className="text-red-600 font-medium">Inactive</span>}
                                                     />
                                                 </RadioGroup>
                                             </div>
-                                        </FormControl>
+                                        </div>
                                     </div>
-                                </form>
+                                </div>
+    
+                                {/* Right Column - Image Upload */}
+                                <div className="md:w-1/2 space-y-6">
+                                    <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
+                                        <div className="aspect-square mb-4">
+                                            {tmpImage ? (
+                                                <img
+                                                    src={tmpImage}
+                                                    alt="Preview"
+                                                    className="w-full h-full object-contain rounded-lg shadow-sm"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center">
+                                                    <svg className="w-12 h-12 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                    </svg>
+                                                    <span className="text-gray-500">Click to change room photo</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                        <input
+                                            type="file"
+                                            id="fileInput"
+                                            className="w-full"
+                                            accept=".jpg,.jpeg,.png,.gif,.webp"
+                                            onChange={handleImageChange}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-
-                            {/* Image Preview Section */}
-                            <div className="w-full lg:w-1/2 flex justify-center items-center">
-                                <img
-                                    src={tmpImage || 'default-room-image.jpg'}
-                                    alt="Room"
-                                    className="w-[400px] h-[400px] object-contain cursor-pointer"
-                                    onClick={() => document.getElementById('fileInput').click()}
-                                />
-                                <input
-                                    type="file"
-                                    id="fileInput"
-                                    style={{ display: 'none' }}
-                                    accept=".jpg,.jpeg,.png,.gif,.webp"
-                                    onChange={handleImageChange}
-                                />
+    
+                            {/* Action Buttons */}
+                            <div className="flex justify-center space-x-4 mt-12 pt-6 border-t">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/room')}
+                                    className="px-8 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-8 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                >
+                                    Save Changes
+                                </button>
                             </div>
-                        </div>
-                        <div className="flex justify-center gap-10 mt-6 pb-6">
-                            <button onClick={handleSubmit} className="bg-yellow-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-yellow-400">
-                                Save
-                            </button>
-                            <button className="bg-gray-300 text-black font-semibold text-lg px-4 py-2 rounded-lg shadow hover:bg-gray-400" onClick={() => navigate('/room')}>
-                                Cancel
-                            </button>
-                        </div>
+                        </form>
                     </div>
                 </main>
             </div>

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.FileProviders;
 using PetApi.Infrastructure.DependencyInjection;
-using PetApi.Presentation.Service;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -19,18 +18,12 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructureService(builder.Configuration);
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5010); 
-});
+
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5050/");
 });
-builder.Services.AddHttpClient<FacilityApiClient>(client =>
-{
-    client.BaseAddress = new Uri("http://localhost:5023/api/ReportFacility/");
-});
+
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("OnlyAdmin", policy => policy.RequireRole("admin"));

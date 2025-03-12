@@ -45,7 +45,7 @@ class _ChatListWidgetState extends State<ChatListWidget> {
   }
 
   Future<void> _startSignalR() async {
-    final hubUrl = 'http://192.168.2.28:5159/chatHub';
+    final hubUrl = 'http://10.0.2.2:5050/chatHub';
 
     signalRService.setHubUrl(hubUrl);
     await signalRService.startConnection(hubUrl, widget.currentUser.accountId);

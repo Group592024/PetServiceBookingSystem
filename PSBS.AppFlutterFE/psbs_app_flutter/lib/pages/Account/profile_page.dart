@@ -17,12 +17,14 @@ class _ProfilePageState extends State<ProfilePage> {
   String? imagePreview;
   String accountId = '';
   Future<void>? _fetchDataFuture;
+
   @override
   void initState() {
     super.initState();
     _loadAccountId();
   }
 
+  // Hàm định dạng ngày
   String formatDate(String date) {
     try {
       DateTime parsedDate = DateTime.parse(date);
@@ -30,6 +32,16 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       return date;
     }
+  }
+
+  // Hàm lấy header với token từ SharedPreferences
+  Future<Map<String, String>> getHeaders() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    return {
+      'Authorization': 'Bearer $token',
+      'Content-Type': 'application/json',
+    };
   }
 
   Future<void> _loadAccountId() async {
@@ -51,8 +63,10 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     try {
+      final headers = await getHeaders();
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5050/api/Account?AccountId=$accountId'),
+        headers: headers,
       );
 
       if (response.statusCode == 200) {
@@ -76,13 +90,13 @@ class _ProfilePageState extends State<ProfilePage> {
       print("Error: Filename null.");
       return;
     }
-
     try {
+      final headers = await getHeaders();
       final imageResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
+            'http://10.0.2.2:5050/api/Account/loadImage?filename=$filename'),
+        headers: headers,
       );
-
       if (imageResponse.statusCode == 200) {
         final imageData = jsonDecode(imageResponse.body);
         if (imageData['flag']) {
@@ -118,7 +132,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
                 }
-
                 if (snapshot.hasError) {
                   return Center(child: Text('Error load image'));
                 }
@@ -276,9 +289,7 @@ class ProfileField extends StatelessWidget {
 
 class GenderField extends StatelessWidget {
   final String selectedGender;
-
   const GenderField({super.key, required this.selectedGender});
-
   @override
   Widget build(BuildContext context) {
     return Column(

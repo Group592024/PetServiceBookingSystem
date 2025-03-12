@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerRoomDetail extends StatefulWidget {
   final String roomId;
@@ -26,27 +27,48 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
 
   Future<void> fetchDetail() async {
     try {
-      final roomResponse = await http.get(
-          Uri.parse('http://10.0.2.2:5050/api/Room/${widget.roomId}'));
-      final roomData = json.decode(roomResponse.body);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
 
+      final Map<String, String> headers = {
+        "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+      };
+
+      final roomResponse = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/Room/${widget.roomId}'),
+        headers: headers,
+      );
+
+      if (roomResponse.statusCode != 200) {
+        throw Exception('Failed to load room details');
+      }
+
+      final roomData = json.decode(roomResponse.body);
       setState(() {
         detail = roomData['data'];
       });
 
       if (detail.isNotEmpty && detail['roomTypeId'] != null) {
-        final roomTypeResponse = await http.get(Uri.parse(
-            'http://10.0.2.2:5050/api/RoomType/${detail['roomTypeId']}'));
-        final roomTypeData = json.decode(roomTypeResponse.body);
+        final roomTypeResponse = await http.get(
+          Uri.parse(
+              'http://10.0.2.2:5050/api/RoomType/${detail['roomTypeId']}'),
+          headers: headers,
+        );
 
+        if (roomTypeResponse.statusCode != 200) {
+          throw Exception('Failed to load room type');
+        }
+
+        final roomTypeData = json.decode(roomTypeResponse.body);
         setState(() {
           roomTypeName = roomTypeData['data']['name'];
           roomTypePrice = roomTypeData['data']['price'].toString();
-          loading = false;
         });
       }
     } catch (e) {
-      print('Failed fetching data: $e');
+      print('Error fetching data: $e');
+    } finally {
       setState(() {
         loading = false;
       });
@@ -56,174 +78,316 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Room Details'),
-        backgroundColor: Colors.blue,
-      ),
       body: loading
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Room Details
-                    Container(
-                      padding: EdgeInsets.all(16),
+          ? Center(child: CircularProgressIndicator(color: Colors.blue))
+          : CustomScrollView(
+              slivers: [
+                // Custom App Bar with Room Image
+                SliverAppBar(
+                  expandedHeight: 300,
+                  pinned: true,
+                  backgroundColor: Colors.blue,
+                  leading: IconButton(
+                    icon: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(Icons.arrow_back, color: Colors.blue),
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          'http://10.0.2.2:5050/facility-service${detail['roomImage']}',
+                          fit: BoxFit.contain,
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.7),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                SliverToBoxAdapter(
+                  child: Transform.translate(
+                    offset: Offset(0, -5),
+                    child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 10,
-                            spreadRadius: 5,
-                          ),
-                        ],
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(30)),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Room Image
-                          Image.network(
-                            'http://10.0.2.2:5050/facility-service${detail['roomImage']}',
-                            width: double.infinity,
-                            height: 300,
-                            fit: BoxFit.cover,
-                          ),
-                          SizedBox(height: 25),
-                          // Room Name and Price in one row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Room Name
-                              Text(
-                                detail['roomName'] ?? '',
-                                style: TextStyle(
-                                    fontSize: 30, fontWeight: FontWeight.bold),
-                              ),
-                              // Price
-                              Text(
-                                'Price: $roomTypePrice VND',
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 15),
-                          // Room Type and Status in another row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // Room Type Name
-                              Text(
-                                'Type: $roomTypeName',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              // Room Status
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: getStatusColor(detail['status']),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  detail['status'] ?? '',
-                                  style: TextStyle(
-                                    color: getStatusTextColor(detail['status']),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
+                      child: Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Room Name and Status
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    detail['roomName'] ?? '',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue.shade800,
+                                    ),
                                   ),
                                 ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: getStatusColor(detail['status']),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: getStatusTextColor(
+                                              detail['status']),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        detail['status'] ?? '',
+                                        style: TextStyle(
+                                          color: getStatusTextColor(
+                                              detail['status']),
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 16),
+
+                            // Room Type and Price
+                            Container(
+                              padding: EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 20),
-                          // Book Now Button in a separate row
-                          Center(
-                            child: SizedBox(
-                              width: 300, 
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Room Type',
+                                        style: TextStyle(
+                                          color: Colors.blue.shade700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        roomTypeName,
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Price',
+                                        style: TextStyle(
+                                          color: Colors.blue.shade700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      SizedBox(height: 4),
+                                      Text(
+                                        '$roomTypePrice VND',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue.shade900,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 24),
+
+                            // Description Section
+                            Container(
+                              width: double.infinity, // Đảm bảo full width
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Description',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blue.shade800,
+                                    ),
+                                  ),
+                                  SizedBox(height: 12),
+                                  Container(
+                                    width:
+                                        double.infinity, // Đảm bảo full width
+                                    padding: EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade50,
+                                      borderRadius: BorderRadius.circular(15),
+                                      border: Border.all(
+                                        color: Colors.grey.shade200,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          detail['description'] ?? '',
+                                          maxLines:
+                                              showFullDescription ? null : 5,
+                                          overflow: showFullDescription
+                                              ? TextOverflow.visible
+                                              : TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: Colors.grey[800],
+                                            height: 1.5,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              showFullDescription =
+                                                  !showFullDescription;
+                                            });
+                                          },
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                            minimumSize: Size.zero,
+                                            tapTargetSize: MaterialTapTargetSize
+                                                .shrinkWrap,
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                showFullDescription
+                                                    ? 'Show Less'
+                                                    : 'Read More',
+                                                style: TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              Icon(
+                                                showFullDescription
+                                                    ? Icons.keyboard_arrow_up
+                                                    : Icons.keyboard_arrow_down,
+                                                color: Colors.blue,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 24),
+
+                            // Book Now Button
+                            SizedBox(
+                              width: double.infinity,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/booking');
+                                  Navigator.pushNamed(context, '/booking');
                                 },
-                                style: ButtonStyle(
-                                  backgroundColor: WidgetStateProperty.all(
-                                      Colors.yellow[600]),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 2,
                                 ),
                                 child: Text(
                                   'Book Now',
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          SizedBox(height: 20),
-                          // Description
-                          Text(
-                            'Description',
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            detail['description'] ?? '',
-                            maxLines: showFullDescription ? null : 7,
-                            overflow: showFullDescription
-                                ? TextOverflow.visible
-                                : TextOverflow.ellipsis,
-                            style: TextStyle(color: Colors.grey[700]),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                showFullDescription = !showFullDescription;
-                              });
-                            },
-                            child: Text(
-                              showFullDescription ? 'Show Less' : 'See More',
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          ),
-                        ],
+                            SizedBox(height: 20),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
     );
   }
 
   Color getStatusColor(String? status) {
-    if (status == 'Free') {
-      return Colors.green[100]!;
-    } else if (status == 'In Use') {
-      return Colors.orange[100]!;
-    } else {
-      return Colors.red[100]!;
+    switch (status) {
+      case 'Free':
+        return Colors.green.shade50;
+      case 'In Use':
+        return Colors.orange.shade50;
+      default:
+        return Colors.red.shade50;
     }
   }
 
   Color getStatusTextColor(String? status) {
-    if (status == 'Free') {
-      return Colors.green[600]!;
-    } else if (status == 'In Use') {
-      return Colors.orange[600]!;
-    } else {
-      return Colors.red[600]!;
+    switch (status) {
+      case 'Free':
+        return Colors.green;
+      case 'In Use':
+        return Colors.orange;
+      default:
+        return Colors.red;
     }
   }
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import Swal from 'sweetalert2';
 
 const RoomDetail = () => {
     const sidebarRef = useRef(null);
@@ -14,35 +15,50 @@ const RoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
+                const token = sessionStorage.getItem("token");
+
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
                 const data = await response.json();
+
+                if (!response.ok || !data.data) {
+                    console.error("Failed to fetch room details");
+                    Swal.fire("Error", "Failed to fetch room details", "error");
+                    return;
+                }
+
                 setDetail(data.data);
-                if (data.data && data.data.roomTypeId) {
+
+                if (data.data.roomTypeId) {
                     try {
-                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
-                        const roomTypeResponseData = await roomTypeResponse.json();
-                        if (roomTypeResponseData && roomTypeResponseData.data && roomTypeResponseData.data.name && roomTypeResponseData.data.price) {
-                            setRoomTypeName(roomTypeResponseData.data.name);
-                            setRoomTypePrice(roomTypeResponseData.data.price);
+                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`, {
+                            headers: { "Authorization": `Bearer ${token}` }
+                        });
+                        const roomTypeData = await roomTypeResponse.json();
+
+                        if (roomTypeData?.data?.name && roomTypeData?.data?.price) {
+                            setRoomTypeName(roomTypeData.data.name);
+                            setRoomTypePrice(roomTypeData.data.price);
                         } else {
-                            console.log('RoomType data not found, setting as Unknown');
-                            setRoomTypeName('Unknown');
-                            setRoomTypePrice('Unknown');
+                            setRoomTypeName("Unknown");
+                            setRoomTypePrice("Unknown");
                         }
                     } catch (error) {
-                        console.error('Error fetching room type data:', error);
-                        setRoomTypeName('Unknown');
-                        setRoomTypePrice('Unknown');
+                        console.error("Error fetching room type data:", error);
+                        setRoomTypeName("Unknown");
+                        setRoomTypePrice("Unknown");
                     }
                 } else {
-                    console.log('No roomTypeId in Room data');
-                    setRoomTypeName('Unknown');
-                    setRoomTypePrice('Unknown');
+                    setRoomTypeName("Unknown");
+                    setRoomTypePrice("Unknown");
                 }
             } catch (error) {
-                console.error('Failed fetching data: ', error);
+                console.error("Failed fetching data:", error);
+                Swal.fire("Error", "Failed to fetch room details", "error");
             }
         };
+
         if (id) fetchDetail();
     }, [id]);
 
@@ -53,96 +69,101 @@ const RoomDetail = () => {
     const imageURL = `http://localhost:5050/facility-service${detail.roomImage}`;
 
     return (
-        <div className="bg-gray-200 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-gray-50 to-gray-200 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
                 <main className="flex-1 overflow-auto p-6">
-                    <div className="flex items-center mb-6 mx-auto w-full">
-                        <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
-                        <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
-                                Room Detail
-                            </button>
+                    {/* Header */}
+                    <div className="flex items-center mb-6 mx-auto w-full bg-white rounded-xl p-4 shadow-sm">
+                        <button 
+                            onClick={() => navigate(-1)} 
+                            className="hover:bg-gray-100 p-2 rounded-full transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <div className="text-center flex-1">
+                            <h1 className="text-2xl font-bold text-gray-800">Room Detail</h1>
                         </div>
                     </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex flex-col lg:flex-row gap-6">
-                            <div className="flex-1">
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[85px]">Name:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={detail.roomName}
-                                        readOnly
-                                    />
+    
+                    <div className="bg-white p-8 rounded-xl shadow-lg">
+                        <div className="flex flex-col lg:flex-row gap-8">
+                            <div className="flex-1 space-y-6">
+                                {/* Room Name */}
+                                <div className="flex items-center gap-4">
+                                    <label className="font-semibold text-gray-600 min-w-[100px]">Name:</label>
+                                    <div className="flex-1 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <span className="text-gray-700">{detail.roomName}</span>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[85px]">Type:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={roomTypeName}
-                                        readOnly
-                                    />
+    
+                                {/* Room Type */}
+                                <div className="flex items-center gap-4">
+                                    <label className="font-semibold text-gray-600 min-w-[100px]">Type:</label>
+                                    <div className="flex-1 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <span className="text-gray-700">{roomTypeName}</span>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[85px]">Price:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={`${roomTypePrice}`}
-                                        readOnly
-                                    />
+    
+                                {/* Price */}
+                                <div className="flex items-center gap-4">
+                                    <label className="font-semibold text-gray-600 min-w-[100px]">Price:</label>
+                                    <div className="flex-1 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <span className="text-blue-600 font-medium">
+                                            {new Intl.NumberFormat('vi-VN', { 
+                                                style: 'currency', 
+                                                currency: 'VND' 
+                                            }).format(roomTypePrice)}
+                                        </span>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 space-y-2">
-                                    <label className="font-bold text-lg text-gray-500">Description:</label>
-                                    <textarea
-                                        className="w-full p-3 border rounded-lg bg-gray-200 h-40 resize-none"
-                                        value={detail.description}
-                                        readOnly
-                                    />
+    
+                                {/* Description */}
+                                <div className="space-y-2">
+                                    <label className="font-semibold text-gray-600">Description:</label>
+                                    <div className="w-full p-4 bg-gray-50 rounded-lg border border-gray-200 min-h-[160px]">
+                                        <p className="text-gray-700 whitespace-pre-wrap">{detail.description}</p>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 flex items-center gap-4">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[85px]">Status:</label>
-                                    <input
-                                        type="text"
-                                        className={`flex-1 p-2 border rounded-lg font-semibold ${
-                                            detail.status === 'In Use' ? 'bg-orange-100 text-orange-500' :
-                                            detail.status === 'Free' ? 'bg-green-100 text-green-500' :
-                                            detail.status === 'Maintenance' ? 'bg-red-100 text-red-500' :
-                                            'bg-gray-50 text-gray-500'
-                                        }`}
-                                        value={detail.status || 'Unknown'}
-                                        readOnly
-                                    />
+    
+                                {/* Status */}
+                                <div className="flex items-center gap-4">
+                                    <label className="font-semibold text-gray-600 min-w-[100px]">Status:</label>
+                                    <div className={`flex-1 p-3 rounded-lg font-medium ${
+                                        detail.status === 'In Use' ? 'bg-orange-50 text-orange-600 border border-orange-200' :
+                                        detail.status === 'Free' ? 'bg-green-50 text-green-600 border border-green-200' :
+                                        detail.status === 'Maintenance' ? 'bg-red-50 text-red-600 border border-red-200' :
+                                        'bg-gray-50 text-gray-600 border border-gray-200'
+                                    }`}>
+                                        {detail.status || 'Unknown'}
+                                    </div>
                                 </div>
-
-                                <div className="mt-4 flex items-center gap-4">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[80px]">Available:</label>
-                                    <input
-                                        type="text"
-                                        className={`flex-1 p-2 border rounded-lg font-semibold ${
-                                            detail.isDeleted ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500'
-                                        }`}
-                                        value={detail.isDeleted ? 'Inactive' : 'Active'}
-                                        readOnly
-                                    />
+    
+                                {/* Available Status */}
+                                <div className="flex items-center gap-4">
+                                    <label className="font-semibold text-gray-600 min-w-[100px]">Available:</label>
+                                    <div className={`flex-1 p-3 rounded-lg font-medium ${
+                                        detail.isDeleted 
+                                            ? 'bg-red-50 text-red-600 border border-red-200' 
+                                            : 'bg-green-50 text-green-600 border border-green-200'
+                                    }`}>
+                                        {detail.isDeleted ? 'Inactive' : 'Active'}
+                                    </div>
                                 </div>
                             </div>
-
-                            <div className="w-full lg:w-1/2 flex justify-center items-center">
-                                <img
-                                    src={imageURL}
-                                    alt={detail.roomName}
-                                    className="w-[450px] h-[450px] object-contain"
-                                />
+    
+                            {/* Image Section */}
+                            <div className="lg:w-1/2 flex justify-center items-start">
+                                <div className="relative rounded-xl overflow-hidden shadow-lg">
+                                    <img
+                                        src={imageURL}
+                                        alt={detail.roomName}
+                                        className="w-[450px] h-[450px] object-contain"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -150,7 +171,7 @@ const RoomDetail = () => {
             </div>
         </div>
     );
-    
+
 };
 
 export default RoomDetail;

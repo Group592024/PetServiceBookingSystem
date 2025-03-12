@@ -1,14 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { Cell, Pie, PieChart, Tooltip } from 'recharts';
-import ReportCircleCard from './ReportCircleCard';
+import React, { useEffect, useState } from "react";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
+import ReportCircleCard from "./ReportCircleCard";
 
 const ReportBookingServiceItem = () => {
   const [data, setData] = useState([]);
 
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/ReportFacility/bookingServiceItem'
+        "http://localhost:5050/api/ReportFacility/bookingServiceItem",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -20,7 +28,7 @@ const ReportBookingServiceItem = () => {
 
       setData(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 

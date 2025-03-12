@@ -3,23 +3,23 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import Datatable from "../../../../components/datatable/Datatable";
 import { getData } from "../../../../Utilities/ApiFunctions";
-
+import { Chip } from "@mui/material";
+import RedeemIcon from "@mui/icons-material/Redeem";
 const VoucherList = () => {
   const sidebarRef = useRef(null);
   const [rows, setRows] = useState([]);
- 
-   useEffect(() => {
-     const fetchBookingStatuses = async () => {
-       try {
-         const data = await getData("api/Voucher");
-         setRows(data.data);
-       } catch (error) {
-         console.error("Error fetching voucher:", error);
-       }
-     };
-     fetchBookingStatuses();
-   }, []);
- 
+
+  useEffect(() => {
+    const fetchBookingStatuses = async () => {
+      try {
+        const data = await getData("api/Voucher");
+        setRows(data.data);
+      } catch (error) {
+        console.error("Error fetching voucher:", error);
+      }
+    };
+    fetchBookingStatuses();
+  }, []);
 
   // Temporary data
   const columns = [
@@ -37,13 +37,41 @@ const VoucherList = () => {
     {
       field: "voucherQuantity",
       headerName: "Voucher Quantity",
-      width: 200,
+      width: 150,
+      headerAlign: "center",
+      align: "center",
     },
-   
-    { field: "isGift", headerName: "Voucher Type", width: 120 },
-    { field: "isDeleted", headerName: "Status", width: 120 }
+
+    {
+      field: "isGift",
+      headerName: "Voucher Type",
+      width: 200,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        if (params.value === true) {
+          return <Chip icon={<RedeemIcon />} label="Voucher" color="primary" />;
+        } else {
+          return <Chip label="Normal" color="warning" />;
+        }
+      },
+    },
+    {
+      field: "isDeleted",
+      headerName: "Status",
+      width: 120,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        if (params.value === false) {
+          return <Chip label="Active" color="success" />;
+        } else {
+          return <Chip label="Inactive" color="error" />;
+        }
+      },
+    },
   ];
- 
+
   const basePath = "/vouchers/";
   const apiPath = "api/Voucher";
   return (
@@ -58,7 +86,7 @@ const VoucherList = () => {
               columns={columns}
               rows={rows}
               basePath={basePath}
-              setRows={setRows}            
+              setRows={setRows}
               title="Voucher"
               apiPath={apiPath}
             />

@@ -4,6 +4,27 @@ import Navbar from "../../../../components/navbar/Navbar";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Swal from 'sweetalert2';
 
+// Define helper components at the top
+const InfoField = ({ label, value, className, icon }) => (
+    <div className="flex items-center gap-4">
+        <label className="font-semibold text-gray-500 min-w-[120px]">{label}:</label>
+        <div className={`flex-1 p-3 bg-gray-50 rounded-lg ${className || 'text-gray-700'}`}>
+            {icon && <span className="mr-2">{icon}</span>}
+            {value}
+        </div>
+    </div>
+);
+
+const ActionButton = ({ label, icon, className, onClick }) => (
+    <button
+        onClick={onClick}
+        className={`flex items-center gap-2 px-6 py-3 text-white rounded-lg transition-all ${className}`}
+    >
+        <span>{icon}</span>
+        {label}
+    </button>
+);
+
 const AdminPetDetail = () => {
     const [pet, setPet] = useState(null);
     const sidebarRef = useRef(null);
@@ -16,13 +37,34 @@ const AdminPetDetail = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const petResponse = await fetch(`http://localhost:5050/api/Pet/${id}`);
+                const token = sessionStorage.getItem("token");
+
+                const petResponse = await fetch(`http://localhost:5050/api/Pet/${id}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const petData = await petResponse.json();
                 console.log(petData);
 
                 const [accountResponse, breedResponse] = await Promise.all([
-                    fetch('http://localhost:5050/api/Account/all'),
-                    fetch('http://localhost:5050/api/PetBreed'),
+                    fetch('http://localhost:5050/api/Account/all', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    }),
+                    fetch('http://localhost:5050/api/PetBreed', {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    })
                 ]);
 
                 const accountData = await accountResponse.json();
@@ -43,7 +85,6 @@ const AdminPetDetail = () => {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [id]);
 
@@ -74,15 +115,19 @@ const AdminPetDetail = () => {
             confirmButtonText: 'Yes, delete it!',
             cancelButtonText: 'No, keep it'
         });
-    
+
         if (confirmDelete.isConfirmed) {
             try {
+                const token = sessionStorage.getItem("token");
                 const response = await fetch(`http://localhost:5050/api/Pet/${petId}`, {
                     method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-    
+
                 const data = await response.json();
-    
+
                 if (response.ok) {
                     Swal.fire('Deleted!', 'The pet has been deleted.', 'success');
                     navigate('/pet');
@@ -94,154 +139,133 @@ const AdminPetDetail = () => {
             }
         }
     };
-    
+
     return (
-        <div className="bg-gray-200 min-h-screen flex flex-col">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />
-                <main className="flex-1 overflow-auto p-6">
-                    <div className="flex items-center mb-6 mx-auto w-full">
-                        <button onClick={() => navigate(-1)} className="text-black font-bold text-4xl">⬅️</button>
-                        <div className="text-center w-full">
-                            <button className="text-black font-bold text-4xl px-4 py-2 pointer-events-none">
-                                Pet Detail
+
+                <main className="flex-1 overflow-auto p-8">
+                    {/* Enhanced Header */}
+                    <div className="flex items-center justify-between mb-8 bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
+                        <div className="flex items-center">
+                            <button onClick={() => navigate(-1)}
+                                className="hover:bg-indigo-100 p-3 rounded-xl transition-all">
+                                <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
                             </button>
+                            <h1 className="text-4xl font-bold text-indigo-900 ml-6">Pet Profile</h1>
                         </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl shadow-lg">
-                        <div className="flex flex-col lg:flex-row gap-12">
-                            {/* Left Side */}
-                            <div className="flex-1">
-                                <div className="mb-3 flex justify-center">
-                                    <img
-                                        src={`http://localhost:5050/pet-service${pet.petImage || '/Images/default-image.png'}`}
-                                        alt="Pet"
-                                        className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"
-                                    />
+                    {/* Main Content Card */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl overflow-hidden border border-indigo-50">
+                        <div className="p-10">
+                            <div className="flex flex-col lg:flex-row gap-16">
+                                {/* Left Column */}
+                                <div className="flex-1 space-y-10">
+                                    {/* Enhanced Pet Image */}
+                                    <div className="relative group">
+                                        <div className="aspect-square rounded-3xl overflow-hidden shadow-2xl ring-4 ring-indigo-100">
+                                            <img
+                                                src={`http://localhost:5050/pet-service${pet.petImage || '/Images/default-image.png'}`}
+                                                alt="Pet"
+                                                className="w-full h-full object-cover transform group-hover:scale-105 transition-all duration-500"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Styled Basic Info */}
+                                    <div className="space-y-6 bg-indigo-50/50 p-6 rounded-2xl">
+                                        <InfoField
+                                            label="Name"
+                                            value={pet.petName || 'Unknown'}
+                                            className="text-lg font-semibold text-indigo-900"
+                                        />
+                                        <InfoField
+                                            label="Gender"
+                                            value={pet.petGender ? '♂ Male' : '♀ Female'}
+                                            className={`text-lg font-medium ${pet.petGender ? 'text-blue-600' : 'text-pink-600'}`}
+                                        />
+                                        <InfoField
+                                            label="Birthday"
+                                            value={formatDate(pet.dateOfBirth)}
+                                            className="text-gray-700"
+                                        />
+                                        <InfoField
+                                            label="Owner"
+                                            value={accountName}
+                                            icon="👤"
+                                            className="text-indigo-800"
+                                        />
+                                    </div>
                                 </div>
 
-                                <div className="mb-3 flex items-center gap-4 mt-7">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Name:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={pet.petName || 'Unknown'}
-                                        readOnly
-                                    />
-                                </div>
+                                {/* Right Column */}
+                                <div className="flex-1 space-y-8">
+                                    <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-8 rounded-2xl space-y-6">
+                                        <h3 className="text-xl font-semibold text-indigo-900 mb-6">Pet Details</h3>
+                                        <InfoField label="Breed" value={petBreed} className="text-indigo-700" />
+                                        <InfoField label="Weight" value={`${pet.petWeight || 'Unknown'} kg`} className="text-indigo-700" />
+                                        <InfoField label="Fur Type" value={pet.petFurType || 'Unknown'} className="text-indigo-700" />
+                                        <InfoField label="Fur Color" value={pet.petFurColor || 'Unknown'} className="text-indigo-700" />
+                                    </div>
 
-                                <div className="mb-3 flex items-center gap-4 mt-5">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Gender:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={pet.petGender ? 'Male' : 'Female'}
-                                        readOnly
-                                    />
-                                </div>
+                                    {/* Enhanced Notes Section */}
+                                    <div className="bg-white rounded-2xl p-6 shadow-inner">
+                                        <label className="block text-xl font-semibold text-indigo-900 mb-4">
+                                            📝 Notes
+                                        </label>
+                                        <div className="bg-gray-50 rounded-xl p-6 min-h-[200px]">
+                                            <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                                                {pet.petNote || 'No notes available'}
+                                            </p>
+                                        </div>
+                                    </div>
 
-                                <div className="mb-3 flex items-center gap-4 mt-5">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Date of Birth:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={formatDate(pet.dateOfBirth)}
-                                        readOnly
-                                    />
+                                    {/* Moved Status Here */}
+                                    <div className={`px-6 py-2 rounded-xl ${pet.isDelete
+                                            ? 'bg-red-50 border-2 border-red-200'
+                                            : 'bg-emerald-50 border-2 border-emerald-200'
+                                        }`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${pet.isDelete ? 'bg-red-500' : 'bg-emerald-500'
+                                                }`}></div>
+                                            <span className={`font-medium ${pet.isDelete ? 'text-red-700' : 'text-emerald-700'
+                                                }`}>
+                                                {pet.isDelete ? 'Inactive Pet' : 'Active Pet'}
+                                            </span>
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-5">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Owner:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={accountName}
-                                        readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-5">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Status:</label>
-                                    <input
-                                        type="text"
-                                        className={`flex-1 p-2 font-semibold border rounded-lg bg-gray-200 ${pet.isDelete ? 'text-red-500' : 'text-green-500'}`}
-                                        value={pet.isDelete ? 'Stopping' : 'Active'}
-                                        readOnly
-                                    />
-                                </div>
-
                             </div>
 
-                            {/* Right Side */}
-                            <div className="w-full lg:w-1/2 flex flex-col gap-6">
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Pet Breed:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={petBreed}
-                                        readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Weight:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={pet.petWeight || 'Unknown'}
-                                        readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Fur Type:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={pet.petFurType || 'Unknown'}
-                                        readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 flex items-center gap-4 mt-2">
-                                    <label className="font-bold text-lg text-gray-500 min-w-[120px]">Fur Color:</label>
-                                    <input
-                                        type="text"
-                                        className="flex-1 p-2 border rounded-lg bg-gray-200"
-                                        value={pet.petFurColor || 'Unknown'}
-                                        readOnly
-                                    />
-                                </div>
-
-                                <div className="mb-3 space-y-2">
-                                    <label className="font-bold text-lg text-gray-500">Note:</label>
-                                    <textarea
-                                        className="w-full p-3 border rounded-lg bg-gray-200 h-40 resize-none"
-                                        value={pet.petNote || 'No notes available'}
-                                        readOnly
-                                    />
-                                </div>
-                                {/* Buttons */}
-                                <div className="flex justify-center gap-4 mb-3">
-                                    <button className="bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600">Diary</button>
-                                    <button className="bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600">Healthbook</button>
-                                    <button
-                                        onClick={() => navigate(`/pet/edit/${pet.petId}`)}
-                                        className="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600"
-                                    >
-                                        Edit
-                                    </button>
-
-                                    <button
-                                        onClick={() => handleDelete(pet.petId)}
-                                        className="bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600"
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
+                            {/* Action Buttons */}
+                            <div className="mt-12 pt-8 border-t border-indigo-100 flex flex-wrap justify-center gap-4">
+                                <ActionButton
+                                    label="Pet Diary"
+                                    icon="📖"
+                                    className="bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-200"
+                                />
+                                <ActionButton
+                                    label="Health Book"
+                                    icon="💊"
+                                    className="bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200"
+                                />
+                                <ActionButton
+                                    label="Edit Pet"
+                                    icon="✏️"
+                                    className="bg-amber-500 hover:bg-amber-600 shadow-lg shadow-amber-200"
+                                    onClick={() => navigate(`/pet/edit/${pet.petId}`)}
+                                />
+                                <ActionButton
+                                    label="Delete Pet"
+                                    icon="🗑️"
+                                    className="bg-red-500 hover:bg-red-600 shadow-lg shadow-red-200"
+                                    onClick={() => handleDelete(pet.petId)}
+                                />
                             </div>
                         </div>
                     </div>
@@ -249,6 +273,7 @@ const AdminPetDetail = () => {
             </div>
         </div>
     );
+
 };
 
 export default AdminPetDetail;

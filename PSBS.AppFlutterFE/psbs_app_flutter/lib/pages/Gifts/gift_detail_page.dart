@@ -35,9 +35,20 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
   }
 
   Future<void> fetchGiftDetail() async {
-    final String apiUrl = 'http://10.0.2.2:5022/Gifts/detail/${widget.giftId}';
+    final String apiUrl = 'http://10.0.2.2:5050/Gifts/detail/${widget.giftId}';
+
     try {
-      final response = await http.get(Uri.parse(apiUrl));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token', // ✅ Add token
+        },
+      );
+
       final data = json.decode(response.body);
 
       if (data['flag']) {
@@ -63,15 +74,23 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
     final String redeemUrl =
         'http://10.0.2.2:5050/api/Account/redeem-points/${userId}';
     print(redeemUrl);
+
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.post(
         Uri.parse(redeemUrl),
-        headers: {"Content-Type": "application/json"}, // Set headers
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token', // ✅ Add token
+        },
         body: json.encode({
           "giftId": widget.giftId, // Sending gift ID
           "requiredPoints": gift!['giftPoint'], // Sending required points
         }),
       );
+
       print("Response Status Code: ${response.statusCode}");
       print("Response Body: ${response.body}");
       final data = json.decode(response.body);

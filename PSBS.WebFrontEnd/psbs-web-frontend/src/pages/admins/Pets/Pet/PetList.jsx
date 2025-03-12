@@ -16,10 +16,29 @@ const AdminPetList = () => {
 
     const fetchData = async () => {
         try {
+            const token = sessionStorage.getItem("token");
             const [petResponse, accountResponse, breedResponse] = await Promise.all([
-                fetch('http://localhost:5050/api/Pet'),
-                fetch('http://localhost:5050/api/Account/all'),
-                fetch('http://localhost:5050/api/PetBreed'),
+                fetch('http://localhost:5050/api/Pet', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }),
+                fetch('http://localhost:5050/api/Account/all', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                }),
+                fetch('http://localhost:5050/api/PetBreed', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
             ]);
 
             const petData = await petResponse.json();
@@ -51,7 +70,7 @@ const AdminPetList = () => {
                         status: item.isDelete ? 'Stopping' : 'Active',
                     };
                 });
-                
+
                 setData(result);
             } else {
                 console.error('Unexpected response format:', petData);
@@ -86,29 +105,31 @@ const AdminPetList = () => {
             if (result.isConfirmed) {
                 const fetchDelete = async () => {
                     try {
-                        const deleteResponse = await fetch(
-                            `http://localhost:5050/api/pet/${id}`,
-                            {
-                                method: 'DELETE',
+                        const token = sessionStorage.getItem("token");
+                        const deleteResponse = await fetch(`http://localhost:5050/api/pet/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
                             }
+                        }
                         );
-    
+
                         const data = await deleteResponse.json();
-    
+
                         if (deleteResponse.ok) {
                             Swal.fire(
                                 'Deleted!',
                                 'Pet has been deleted.',
                                 'success'
                             );
-                            fetchData();  
+                            fetchData();
                             setData((prevData) => {
                                 if (prevData.length === 1) {
-                                    return []; 
+                                    return [];
                                 }
-                               //Còn lại 1 cái để xóa
+                                //Còn lại 1 cái để xóa
                             });
-    
+
                         } else {
                             Swal.fire(
                                 'Error!',
@@ -121,24 +142,25 @@ const AdminPetList = () => {
                         Swal.fire('Error!', 'Failed to delete the Pet.', 'error');
                     }
                 };
-    
+
                 fetchDelete();
             }
         });
-    };    
+    };
 
     const handleDetail = (id) => {
         navigate(`/pet/${id}`);
     };
 
     const columns = [
-        { field: 'no', headerName: 'No.', flex: 0.3, headerAlign: 'center', align: 'center',
+        {
+            field: 'no', headerName: 'No.', flex: 0.3, headerAlign: 'center', align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  No.
+                    No.
                 </div>
-              ),
-         },
+            ),
+        },
         {
             field: 'petName',
             headerName: 'Pet Name',
@@ -147,47 +169,52 @@ const AdminPetList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Pet Name
+                    Pet Name
                 </div>
-              ),
+            ),
             renderCell: (params) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginLeft: '1rem'  }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginLeft: '1rem' }}>
                     <img
                         src={params.row.imageUrl}
                         alt={params.row.petName}
-                        style={{ width: 40, height: 40, borderRadius: '50%' }} 
+                        style={{ width: 40, height: 40, borderRadius: '50%' }}
                     />
                     <span>{params.row.petName}</span>
                 </div>
             ),
         },
-        { field: 'owner', headerName: 'Owner', flex: 1, headerAlign: 'center', align: 'center',             
-            renderHeader: () => (
-            <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-              Owner
-            </div>
-          ), },
-        { field: 'breed', headerName: 'Breed', flex: 1, headerAlign: 'center', align: 'center', 
+        {
+            field: 'owner', headerName: 'Owner', flex: 1, headerAlign: 'center', align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Breed
+                    Owner
                 </div>
-              ),
-         },
-        { field: 'dateOfBirth', headerName: 'Date of Birth', flex: 1, headerAlign: 'center', align: 'center',
+            ),
+        },
+        {
+            field: 'breed', headerName: 'Breed', flex: 1, headerAlign: 'center', align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Date of Birth
+                    Breed
                 </div>
-              ),
-         },
-        { field: 'gender', headerName: 'Gender', flex: 0.5, headerAlign: 'center', align: 'center',
+            ),
+        },
+        {
+            field: 'dateOfBirth', headerName: 'Date of Birth', flex: 1, headerAlign: 'center', align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Gender
+                    Date of Birth
                 </div>
-              ),
-         },
+            ),
+        },
+        {
+            field: 'gender', headerName: 'Gender', flex: 0.5, headerAlign: 'center', align: 'center',
+            renderHeader: () => (
+                <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
+                    Gender
+                </div>
+            ),
+        },
         {
             field: 'status',
             headerName: 'Status',
@@ -196,9 +223,9 @@ const AdminPetList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Status
+                    Status
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ fontWeight: 'bold', color: params.value === 'Active' ? 'green' : 'red' }}>
                     {params.value}
@@ -213,15 +240,15 @@ const AdminPetList = () => {
             align: 'center',
             renderHeader: () => (
                 <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-                  Actions
+                    Actions
                 </div>
-              ),
+            ),
             renderCell: (params) => (
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                     <IconButton color="primary" onClick={() => handleDetail(params.row.id)}>
                         <Info />
                     </IconButton>
-                    <IconButton style={{ color: 'green' }} onClick={() => handleEdit(params.row.id)}> 
+                    <IconButton style={{ color: 'green' }} onClick={() => handleEdit(params.row.id)}>
                         <Edit />
                     </IconButton>
                     <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
@@ -237,56 +264,60 @@ const AdminPetList = () => {
             <Sidebar ref={sidebarRef} />
             <div className='content'>
                 <Navbar sidebarRef={sidebarRef} />
-                <main>
-                    <div className='header'>
-                        <div className='left'>
-                            <h1 style={{ fontWeight: 'bold' }}>Pet List</h1>
+                <div className="p-8">
+                    <main className="bg-white shadow-lg rounded-lg p-6">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b pb-4 mb-4">
+                            <h1 className="text-2xl font-bold text-gray-800">Pet List</h1>
+                            <button
+                                className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
+                                onClick={() => navigate('/pet/add')}
+                            >
+                                <i className="bx bxs-plus-circle text-lg"></i>
+                                <span>NEW</span>
+                            </button>
                         </div>
-                        <button
-                            className='report'
-                            onClick={() => navigate('/pet/add')}
+
+                        {/* Data Grid */}
+                        <Box
+                            sx={{
+                                height: "100%",
+                                maxHeight: "400px",
+                                width: "100%",
+                                "& .MuiDataGrid-root": {
+                                    backgroundColor: "#ffffff",
+                                },
+                                "& .MuiDataGrid-row": {
+                                    backgroundColor: "#f8f9fa",
+                                },
+                                "& .MuiDataGrid-footerContainer": {
+                                    backgroundColor: "#e2e8f0",
+                                },
+                                "& .MuiPaginationItem-root": {
+                                    backgroundColor: "#93c5fd",
+                                    color: "#1e3a8a",
+                                },
+                            }}
                         >
-                            <i className='bx bxs-plus-circle'></i>
-                            <span>NEW</span>
-                        </button>
-                    </div>
-                    <Box
-                        sx={{
-                            height: 400,
-                            width: "100%",
-                            "& .MuiDataGrid-root": {
-                                backgroundColor: "#f9f9f9",
-                            },
-                            "& .MuiDataGrid-row": {
-                                backgroundColor: "#f4f4f4",
-                            },
-                            "& .MuiDataGrid-footerContainer": {
-                                backgroundColor: "#9f9f9f",
-                            },
-                            "& .MuiPaginationItem-root": {
-                                backgroundColor: "#b3f2ed",
-                                color: "#3f3f3f",
-                            },
-                        }}
-                    >
-                        {loading ? (
-                            <div style={{ textAlign: 'center' }}>
-                                <CircularProgress />
-                            </div>
-                        ) : (
-                            <DataGrid
-                                columns={columns}
-                                rows={data}
-                                initialState={{
-                                    pagination: {
-                                        paginationModel: { page: 0, pageSize: 5 },
-                                    },
-                                }}
-                                pageSizeOptions={[5, 10, 20]}
-                            />
-                        )}
-                    </Box>
-                </main>
+                            {loading ? (
+                                <div className="flex justify-center items-center h-full">
+                                    <CircularProgress />
+                                </div>
+                            ) : (
+                                <DataGrid
+                                    columns={columns}
+                                    rows={data}
+                                    initialState={{
+                                        pagination: {
+                                            paginationModel: { page: 0, pageSize: 5 },
+                                        },
+                                    }}
+                                    pageSizeOptions={[5, 10, 20]}
+                                />
+                            )}
+                        </Box>
+                    </main>
+                </div>
             </div>
         </div>
     );
