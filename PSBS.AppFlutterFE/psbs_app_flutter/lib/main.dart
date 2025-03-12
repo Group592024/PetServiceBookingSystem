@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final screens = [
     HomePage(),
-    //PetPage(),
+    PetPage(),
     RoomPage(),
     BookingListScreen(),
     ServicePage(),

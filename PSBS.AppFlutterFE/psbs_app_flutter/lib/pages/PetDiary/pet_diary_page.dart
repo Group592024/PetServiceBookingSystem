@@ -46,7 +46,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://10.66.187.111:5010/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+            'http://192.168.1.7:5050/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -110,8 +110,14 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     if (confirmDelete != true) return;
 
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-        Uri.parse('http://10.66.187.111:5010/api/PetDiary/$diaryId'),
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary/$diaryId'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
       );
 
       if (response.statusCode == 200) {

@@ -42,7 +42,8 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
   Future<void> fetchPetDetails() async {
     setState(() => isLoading = true);
-
+    print("blabla");
+    print("blabla" + widget.petId);
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -66,7 +67,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
       final breedResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
+            'http://192.168.1.7:5050/api/petBreed/${petData['data']['petBreedId']}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -509,11 +510,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         };
 
         final response = await http.delete(
-            Uri.parse('http://192.168.1.7:5010/api/pet/${widget.petId}'));
-=========
-        final response = await http
-            .delete(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
->>>>>>>>> Temporary merge branch 2
+            Uri.parse('http://192.168.1.7:5050/api/pet/${widget.petId}'));
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

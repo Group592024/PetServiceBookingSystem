@@ -58,12 +58,15 @@ const ServiceDetailPage = () => {
     try {
       console.log("id: ", id);
       const token = sessionStorage.getItem("token");
-      const fetchData = await fetch(`http://localhost:5050/service/${id}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const fetchData = await fetch(
+        `http://localhost:5050/api/ServiceVariant/service/${id}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({

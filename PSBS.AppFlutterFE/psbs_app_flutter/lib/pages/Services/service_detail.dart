@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ServiceDetail extends StatefulWidget {
   final String serviceId;
@@ -18,19 +19,26 @@ class _ServiceDetailState extends State<ServiceDetail> {
   bool showFullDescription = false;
 
   String get imageURL =>
-      'http://10.66.187.111:5023${detail['serviceImage'] ?? ''}';
+      'http://192.168.1.7:5023${detail['serviceImage'] ?? ''}';
 
   @override
   void initState() {
     super.initState();
     fetchDetail();
+    print("hinh ne" + imageURL);
     fetchVariantData();
   }
 
   Future<void> fetchDetail() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.get(
-        Uri.parse('http://10.66.187.111:5050/api/Service/${widget.serviceId}'),
+        Uri.parse('http://192.168.1.7:5050/api/Service/${widget.serviceId}'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
@@ -51,9 +59,15 @@ class _ServiceDetailState extends State<ServiceDetail> {
 
   Future<void> fetchVariantData() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(
-            'http://10.66.187.111:5023/service/${widget.serviceId}?showAll=false'),
+            'http://192.168.1.7:5050/api/ServiceVariant/service/${widget.serviceId}?showAll=false'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
       );
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);

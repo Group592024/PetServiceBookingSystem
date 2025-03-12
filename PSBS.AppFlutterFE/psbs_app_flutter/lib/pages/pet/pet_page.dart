@@ -565,6 +565,7 @@ class _CustomerPetListState extends State<PetPage> {
                               icon:
                                   Icon(Icons.info_outline, color: Colors.blue),
                               onPressed: () {
+                                print("pet ne" + pet.petId);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(

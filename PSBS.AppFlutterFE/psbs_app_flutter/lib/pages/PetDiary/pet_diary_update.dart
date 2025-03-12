@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -258,15 +259,19 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
 
       print("Updated diary content: $diaryContent");
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.put(
         Uri.parse(
-            'http://10.66.187.111:5010/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://192.168.1.7:5050/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
         },
         body: json.encode({'diary_Content': diaryContent}),
       );
+
+      print("response ne: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(

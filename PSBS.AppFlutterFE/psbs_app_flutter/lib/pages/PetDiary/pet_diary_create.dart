@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -47,11 +48,14 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
 
       String diaryContent = await convertDeltaToHtml(deltaJson);
 
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
       final response = await http.post(
         Uri.parse('http://192.168.1.7:5050/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          "Authorization": "Bearer $token",
         },
         body: json.encode({
           'pet_ID': widget.petId,
