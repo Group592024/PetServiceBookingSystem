@@ -193,7 +193,7 @@ const ReportIncome = () => {
             <Line
               type="monotone"
               dataKey="serviceAmount"
-              stroke="#7FFF00"
+              stroke="#008000"
               strokeWidth={2}
               name={`Total income of Service`}
             />

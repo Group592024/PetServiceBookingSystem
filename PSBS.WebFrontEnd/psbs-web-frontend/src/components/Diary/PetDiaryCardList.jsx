@@ -72,7 +72,7 @@ const PetDiaryCardList = ({ data }) => {
 
   return (
     <Stack>
-      <div className="h-[40rem] overflow-auto pr-2">
+      <div className="pr-2">
         {diaries?.map((item) => (
           <PetDiaryCard
             key={item?.diary_ID}

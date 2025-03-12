@@ -83,12 +83,14 @@ namespace ReservationApi.Infrastructure.Repositories
                 var allDays = Enumerable.Range(0, ((endDate ?? DateTime.Now) - (startDate ?? DateTime.Now)).Days + 1)
                     .Select(p => (startDate ?? DateTime.Now).AddDays(p)).ToList();
 
-                var response = bookings.GroupBy(p => p.BookingDate)
+                var response = bookings.GroupBy(p => p.BookingDate.Date)
                     .Select(s => new
                     {
                         Date = s.Key,
                         TotalAmount = s.Sum(m => m.TotalAmount)
                     }).ToList();
+
+                    Console.WriteLine("response ne nhe: "+response.ToString());
 
                 var result = allDays.Select(p => new AmountDTO(
                     p.ToString("yyyy/MM/dd"),

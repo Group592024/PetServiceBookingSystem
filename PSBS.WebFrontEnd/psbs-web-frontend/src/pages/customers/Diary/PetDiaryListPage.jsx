@@ -97,67 +97,71 @@ const PetDiaryListPage = () => {
         </div>
       ) : (
         <>
-          <div className="flex justify-center items-center gap-8 px-8 py-12">
-            <Stack
-              spacing={4}
-              className="flex flex-col justify-center items-center w-1/3"
-            >
-              <div className="py-8 px-6 bg-customPrimary rounded-xl">
-                <img
-                  src={
-                    petInfo
-                      ? `http://localhost:5010${petInfo.petImage}`
-                      : SampleImage
-                  }
-                  alt="sample-image"
-                  className="rounded-[2.6rem]"
-                />
-                <h2 className="text-4xl font-bold text-center mt-4 mb-1 text-white">
-                  {petInfo && petInfo.petName}
-                </h2>
-                <p className="text-lg text-center text-white">
-                  {petInfo && formatDateString(petInfo.petDoB)}
-                </p>
-              </div>
-
-              <button
-                to={"add"}
-                className="m-auto flex justify-center items-center gap-1 text-center rounded-s-full rounded-e-full bg-customPrimary text-white py-2 px-4 w-1/2 hover:opacity-90"
-                onClick={() => setAddModalOpen(true)}
+          <div className="px-8 py-5">
+            <div className="flex justify-center">
+              <Stack
+                spacing={2}
+                className="flex flex-col justify-center items-center w-1/3"
               >
-                <AddCircleOutlineIcon /> New Post
-              </button>
-            </Stack>
+                <div className="py-8 px-6 bg-customPrimary rounded-xl">
+                  <img
+                    src={
+                      petInfo
+                        ? `http://localhost:5010${petInfo.petImage}`
+                        : SampleImage
+                    }
+                    alt="sample-image"
+                    className="rounded-[2.6rem] max-h-96 w-[380px]"
+                  />
+                  <h2 className="text-4xl font-bold text-center mt-4 mb-1 text-white">
+                    {petInfo && petInfo.petName}
+                  </h2>
+                  <p className="text-lg text-center text-white">
+                    {petInfo && formatDateString(petInfo.petDoB)}
+                  </p>
+                </div>
 
-            <Stack className="w-2/3">
-              {petDiary?.data?.length !== 0 ? (
-                <>
-                  <PetDiaryCardList data={petDiary?.data} />
-                  <div className="flex justify-center items-center gap-4 w-1/3 mx-auto mt-4">
-                    <Button
-                      variant="contained"
-                      onClick={handleClickPrevious}
-                      disabled={pageIndex <= 1}
-                      className="flex justify-center items-center gap-1"
-                    >
-                      <ArrowBackIosIcon fontSize="1rem" /> Previous
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={handleClickNext}
-                      disabled={pageIndex >= petDiary?.meta?.totalPages}
-                      className="flex justify-center items-center gap-1"
-                    >
-                      Next <ArrowForwardIosIcon fontSize="1rem" />
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <p className="text-2xl font-semibold text-center">
-                  No diaries found
-                </p>
-              )}
-            </Stack>
+                <button
+                  to={"add"}
+                  className="m-auto flex justify-center items-center gap-1 text-center rounded-s-full rounded-e-full bg-customPrimary text-white py-2 px-4 w-1/2 hover:opacity-90"
+                  onClick={() => setAddModalOpen(true)}
+                >
+                  <AddCircleOutlineIcon /> New Post
+                </button>
+              </Stack>
+            </div>
+
+            <div className="flex justify-center">
+              <Stack className="w-3/4">
+                {petDiary?.data?.length !== 0 ? (
+                  <>
+                    <PetDiaryCardList data={petDiary?.data} />
+                    <div className="flex justify-center items-center gap-4 w-1/3 mx-auto mt-4">
+                      <Button
+                        variant="contained"
+                        onClick={handleClickPrevious}
+                        disabled={pageIndex <= 1}
+                        className="flex justify-center items-center gap-1"
+                      >
+                        <ArrowBackIosIcon fontSize="1rem" /> Previous
+                      </Button>
+                      <Button
+                        variant="contained"
+                        onClick={handleClickNext}
+                        disabled={pageIndex >= petDiary?.meta?.totalPages}
+                        className="flex justify-center items-center gap-1"
+                      >
+                        Next <ArrowForwardIosIcon fontSize="1rem" />
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-2xl font-semibold text-center">
+                    No diaries found
+                  </p>
+                )}
+              </Stack>
+            </div>
           </div>
         </>
       )}
