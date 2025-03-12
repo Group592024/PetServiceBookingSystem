@@ -17,7 +17,7 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://10.0.2.2:5050/api/pet/available/';
+  final String apiUrl = 'http://192.168.1.7:5050/api/pet/available/';
   final String deleteUrl = 'http://10.0.2.2:5050/api/pet/';
   late String userId;
   @override
@@ -89,7 +89,7 @@ class _CustomerPetListState extends State<PetPage> {
 
       final response = await http.delete(
         Uri.parse('$deleteUrl$petId'),
-        headers: headers, 
+        headers: headers,
       );
       final responseData = json.decode(response.body);
 

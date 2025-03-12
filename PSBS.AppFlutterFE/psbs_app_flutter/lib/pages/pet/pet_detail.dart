@@ -51,7 +51,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         headers['Authorization'] = 'Bearer $token';
       }
       final petResponse = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+        Uri.parse('http://192.168.1.7:5050/api/pet/${widget.petId}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 

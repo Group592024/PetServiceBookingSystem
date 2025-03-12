@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.Services.AddInfrastructureService(builder.Configuration);
 // Thêm logging để debug
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -57,6 +57,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 var app = builder.Build();
+
 
 //var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 //var ffmpegProcess = ffmpegService.StartFfmpegConversion();
