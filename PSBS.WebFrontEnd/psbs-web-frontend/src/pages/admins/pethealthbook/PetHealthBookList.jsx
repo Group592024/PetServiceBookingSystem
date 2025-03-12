@@ -16,6 +16,8 @@ const PetHealthBookList = () => {
   const [pets, setPets] = useState([]);
   const [medicines, setMedicines] = useState([]);
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
+
   const [treatments, setTreatments] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,53 +25,135 @@ const PetHealthBookList = () => {
   const [petName, setPetName] = useState("");
   const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
   const sidebarRef = useRef(null);
-  const userRole = localStorage.getItem("role");
+  
   const fetchPetHealthBooks = useCallback(async () => {
     try {
-      const [petHealthBooksRes, medicinesRes, treatmentsRes, bookingsRes, bookingServiceItemsRes, petDataRes, petBreedRes] = await Promise.all([
-        fetch("http://localhost:5003/api/PetHealthBook"),
-        fetch("http://localhost:5003/Medicines"),
-        fetch("http://localhost:5003/api/Treatment"),
-        fetch("http://localhost:5201/Bookings"),
-        fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
-        fetch("http://localhost:5010/api/pet"),
-        fetch("http://localhost:5010/api/petBreed"),
+      const token = sessionStorage.getItem("token");
+      const headers = {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+      };
+
+      const [
+        petHealthBooksRes,
+        medicinesRes,
+        treatmentsRes,
+        bookingsRes,
+        bookingServiceItemsRes,
+        petDataRes,
+        petBreedRes
+      ] = await Promise.all([
+        fetch("http://localhost:5050/api/PetHealthBook", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/Medicines", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/api/Treatment", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/Bookings", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/api/pet", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        }),
+        fetch("http://localhost:5050/api/petBreed", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        })
       ]);
-      const [petHealthBooksData, medicinesData, treatmentsData, bookingsData, bookingServiceItemsData, petsData, petBreedsData] = await Promise.all([
+
+      const [
+        petHealthBooksData,
+        medicinesData,
+        treatmentsData,
+        bookingsData,
+        bookingServiceItemsData,
+        petsData,
+        petBreedsData
+      ] = await Promise.all([
         petHealthBooksRes.json(),
         medicinesRes.json(),
         treatmentsRes.json(),
         bookingsRes.json(),
         bookingServiceItemsRes.json(),
         petDataRes.json(),
-        petBreedRes.json(),
+        petBreedRes.json()
       ]);
-      console.log("Fetched PetHealthBooks Data:", petHealthBooksData);
-      console.log("Fetched Bookings Data:", bookingsData);
-      console.log("Fetched BookingServiceItems Data:", bookingServiceItemsData);
+
       const petsWithDetails = await Promise.all(
         petHealthBooksData.data.map(async (pet) => {
           const bookingServiceItem = bookingServiceItemsData.data.find(
             (b) => b.bookingServiceItemId === pet.bookingServiceItemId
           );
+
           const booking = bookingServiceItem
             ? bookingsData.data.find((bk) => bk.bookingId === bookingServiceItem.bookingId)
             : null;
+
           const accountId = booking ? booking.accountId : null;
-          const accountPhoneNumber = accountId ? await fetchAccountPhoneNumber(accountId) : "No Phone Number";
-          const medicines = medicinesData.data.filter((m) => pet.medicineIds.includes(m.medicineId));
-          const medicineNames = medicines.length > 0 ? medicines.map((m) => m.medicineName).join(", ") : "No Medicines Assigned";
+          const accountPhoneNumber = accountId
+            ? await fetchAccountPhoneNumber(accountId)
+            : "No Phone Number";
+
+          const medicines = medicinesData.data.filter((m) =>
+            pet.medicineIds.includes(m.medicineId)
+          );
+
+          const medicineNames = medicines.length > 0
+            ? medicines.map((m) => m.medicineName).join(", ")
+            : "No Medicines Assigned";
+
           const treatmentNames = [...new Set(
             medicines.map((m) => {
-              const treatment = treatmentsData.data.find((t) => t.treatmentId === m.treatmentId);
+              const treatment = treatmentsData.data.find(
+                (t) => t.treatmentId === m.treatmentId
+              );
               return treatment ? treatment.treatmentName : null;
             }).filter(Boolean)
           )].join(", ") || "No Treatments Assigned";
-          const matchedPet = bookingServiceItem ? petsData.data.find((p) => p.petId === bookingServiceItem.petId) : null;
+
+          const matchedPet = bookingServiceItem
+            ? petsData.data.find((p) => p.petId === bookingServiceItem.petId)
+            : null;
 
           const breed = matchedPet && matchedPet.petBreedId
-            ? petBreedsData.data.find((b) => b.petBreedId === matchedPet.petBreedId)?.petBreedName || "Unknown Breed"
+            ? petBreedsData.data.find(
+              (b) => b.petBreedId === matchedPet.petBreedId
+            )?.petBreedName || "Unknown Breed"
             : "Unknown Breed";
+
           return {
             ...pet,
             bookingServiceItemId: pet.bookingServiceItemId,
@@ -81,6 +165,7 @@ const PetHealthBookList = () => {
           };
         })
       );
+
       setPets(petsWithDetails);
       setMedicines(medicinesData.data || []);
       setTreatments(treatmentsData.data || []);
@@ -92,10 +177,15 @@ const PetHealthBookList = () => {
 
   const fetchAccountPhoneNumber = async (accountId) => {
     try {
-      const accountResponse = await fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`);
-      const accountData = await accountResponse.json();
-      console.log("Fetched Account Data:", accountData);
-      return accountData.accountPhoneNumber || "No Phone Number";
+      const token = sessionStorage.getItem("token");
+      const response = await fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      });
+      const data = await response.json();
+      return data.accountPhoneNumber || "No Phone Number";
     } catch (error) {
       console.error("Error fetching account phone number:", error);
       return "No Phone Number";
@@ -105,7 +195,8 @@ const PetHealthBookList = () => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
 
-  const handleDelete = async (petId, petName, isDeleted) => {
+  const handleDelete = async (petId, petName) => {
+    const token = sessionStorage.getItem("token");
     Swal.fire({
       title: "Are you sure?",
       text: `You want to delete pet: ${petName}`,
@@ -117,9 +208,11 @@ const PetHealthBookList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const apiUrl = `http://localhost:5003/api/PetHealthBook/delete/${petId}`;
-          const response = await fetch(apiUrl, {
+          const response = await fetch(`http://localhost:5050/api/PetHealthBook/delete/${petId}`, {
             method: "DELETE",
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
           });
 
           if (response.ok) {
@@ -136,6 +229,40 @@ const PetHealthBookList = () => {
       }
     });
   };
+
+  const handleSubmit = async () => {
+    if (!petName || !accountPhoneNumber) {
+      Swal.fire({ icon: "error", title: "Oops...", text: "Please fill in all required fields." });
+      return;
+    }
+
+    const token = sessionStorage.getItem("token");
+
+    try {
+      const response = await fetch("http://localhost:5050/api/PetHealthBook/addpet", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          petName,
+          accountPhoneNumber
+        })
+      });
+
+      if (response.ok) {
+        Swal.fire("Success", "Pet added successfully!", "success");
+        setOpenDialog(false);
+        fetchPetHealthBooks();
+      } else {
+        const errorData = await response.json();
+        Swal.fire("Error", errorData.message || "Error adding pet", "error");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      Swal.fire("Error", "An error occurred while adding the pet.", "error");
+    }
+  };
   const filteredPets = pets.filter((pet) => {
     const query = searchQuery.toLowerCase();
     return (
@@ -148,39 +275,7 @@ const PetHealthBookList = () => {
       (pet.performBy && pet.performBy.toLowerCase().includes(query))
     );
   });
-  const handleSubmit = async () => {
-    if (!petName || !accountPhoneNumber) {
-      Swal.fire({ icon: "error", title: "Oops...", text: "Please fill in all required fields." });
-      return;
-    }
-    const phoneRegex = /^0\d{9}$/;
-    if (!phoneRegex.test(accountPhoneNumber)) {
-      Swal.fire({ icon: "error", title: "Invalid Phone", text: "Please enter a valid phone number" });
-      return;
-    }
-    const formData = new FormData();
-    formData.append("PetHealthBookDTO.petName", petName);
-    formData.append("PetHealthBookDTO.accountPhoneNumber", accountPhoneNumber);
-    try {
-      const response = await fetch("http://localhost:5003/api/PetHealthBook/addpet", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
-      if (response.ok) {
-        Swal.fire("Success", "Pet added successfully!", "success");
-        setOpenDialog(false);
-        fetchPetHealthBooks();
-        setPetName("");
-        setAccountPhoneNumber("");
-      } else {
-        Swal.fire("Error", data.message || "Error adding pet", "error");
-      }
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      Swal.fire("Error", "An error occurred while adding the pet.", "error");
-    }
-  };
+
   const columns = [
     { field: "serialNumber", headerName: "S.No", flex: 0.5, sortable: true, renderCell: (params) => <span>{params.row.id}</span>, sortComparator: (v1, v2) => v1 - v2 },
     { field: "petName", headerName: "Pet Name", flex: 1 },

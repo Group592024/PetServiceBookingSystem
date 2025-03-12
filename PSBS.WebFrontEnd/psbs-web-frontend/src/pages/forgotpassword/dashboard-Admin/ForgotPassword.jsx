@@ -6,6 +6,7 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({ email: '' });
+  const token = sessionStorage.getItem("token");
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
@@ -32,12 +33,20 @@ const ForgotPassword = () => {
       setLoading(false);
       return;
     }
-
+  
     try {
+      const token = sessionStorage.getItem("token");
       const response = await axios.post(
-        `http://localhost:5000/api/Account/ForgotPassword?email=${encodeURIComponent(email)}`
+        `http://localhost:5050/api/Account/ForgotPassword?email=${encodeURIComponent(email)}`,
+        {}, // Dữ liệu body (nếu không có thì để là {})
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Thêm token vào header
+            "Content-Type": "application/json",
+          },
+        }
       );
-
+  
       if (response.data && response.data.flag) {
         Swal.fire({
           icon: 'success',
@@ -69,8 +78,7 @@ const ForgotPassword = () => {
     } finally {
       setLoading(false);
     }
-  };
-
+  };  
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">

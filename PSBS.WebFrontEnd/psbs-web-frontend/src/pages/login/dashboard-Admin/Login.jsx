@@ -57,10 +57,13 @@ const Login = () => {
     }
 
     try {
+      const token = sessionStorage.getItem("token");
+
       const response = await fetch("http://localhost:5050/api/Account/Login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }), // Thêm token vào header nếu tồn tại
         },
         body: JSON.stringify({ AccountEmail, AccountPassword }),
       });
@@ -111,7 +114,6 @@ const Login = () => {
       });
     }
   };
-
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">

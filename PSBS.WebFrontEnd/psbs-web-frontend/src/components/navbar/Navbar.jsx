@@ -21,19 +21,28 @@ const Navbar = ({ sidebarRef }) => {
       setAccountId(decodedToken.AccountId); 
 
       if (decodedToken.AccountImage) {
-        fetch(`http://localhost:5000/api/Account/loadImage?filename=${decodedToken.AccountImage}`)
-          .then((response) => response.json())
+        fetch(`http://localhost:5050/api/Account/loadImage?filename=${decodedToken.AccountImage}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`, // Thêm token vào header
+          },
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error(`Failed to load image, Status: ${response.status}`);
+            return response.json();
+          })
           .then((imageData) => {
             if (imageData.flag) {
               const imgContent = imageData.data.fileContents;
               const imgContentType = imageData.data.contentType;
               setImagePreview(`data:${imgContentType};base64,${imgContent}`);
             } else {
-              console.error("Error loading image:", imageData.message);
+              console.error('Error loading image:', imageData.message);
             }
           })
-          .catch((error) => console.error("Error fetching image:", error));
+          .catch((error) => console.error('Error fetching image:', error));
       }
+      
     }
   }, []);
 

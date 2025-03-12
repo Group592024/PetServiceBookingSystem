@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
 import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
-
+import Swal from 'sweetalert2';
 
 const CustomerRoomDetail = () => {
     const sidebarRef = useRef(null);
@@ -17,23 +17,36 @@ const CustomerRoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
+                const token = sessionStorage.getItem("token");
+
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch room data");
+
                 const data = await response.json();
                 setDetail(data.data);
-                if (data.data && data.data.roomTypeId) {
-                    const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
+
+                if (data.data?.roomTypeId) {
+                    const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`, {
+                        headers: { "Authorization": `Bearer ${token}` }
+                    });
+
+                    if (!roomTypeResponse.ok) throw new Error("Failed to fetch room type data");
+
                     const roomTypeData = await roomTypeResponse.json();
-                    if (roomTypeData.data) {
-                        setRoomTypeName(roomTypeData.data.name);
-                        setRoomTypePrice(roomTypeData.data.price);
-                    }
+                    setRoomTypeName(roomTypeData.data?.name || "Unknown");
+                    setRoomTypePrice(roomTypeData.data?.price || "Unknown");
                 }
             } catch (error) {
-                console.error('Failed fetching data:', error);
+                Swal.fire("Error", "Failed to fetch data!", "error");
+                console.error("Error fetching data:", error);
             } finally {
                 setLoading(false);
             }
         };
+
         if (id) fetchDetail();
     }, [id]);
 

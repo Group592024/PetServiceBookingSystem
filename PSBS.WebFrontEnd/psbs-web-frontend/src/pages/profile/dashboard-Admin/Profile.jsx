@@ -6,6 +6,7 @@ import Navbar from "../../../components/navbar/Navbar";
 const Profile = () => {
   const [account, setAccount] = useState(null);
   const sidebarRef = useRef(null);
+  const token = sessionStorage.getItem("token");
   const [imagePreview, setImagePreview] = useState(null);
   const { accountId } = useParams();
   const formatDate = (dateString) => {
@@ -17,18 +18,33 @@ const Profile = () => {
   };
   useEffect(() => {
     if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
+      const token = sessionStorage.getItem("token");
+  
+      fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+      })
         .then((response) => response.json())
         .then(async (data) => {
           setAccount(data);
-
+  
           if (data.accountImage) {
             try {
               const response = await fetch(
-                `http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`
+                `http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`,
+                {
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`, 
+                  },
+                }
               );
               const imageData = await response.json();
-
+  
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
                 const imgContentType = imageData.data.contentType;
@@ -46,6 +62,7 @@ const Profile = () => {
         .catch((error) => console.error("Error fetching account data:", error));
     }
   }, [accountId]);
+  
 
   if (!account) {
     return <div>Loading...</div>;

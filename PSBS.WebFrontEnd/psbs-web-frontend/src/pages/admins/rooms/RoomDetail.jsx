@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import Swal from 'sweetalert2';
 
 const RoomDetail = () => {
     const sidebarRef = useRef(null);
@@ -14,35 +15,50 @@ const RoomDetail = () => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await fetch(`http://localhost:5050/api/Room/${id}`);
+                const token = sessionStorage.getItem("token");
+
+                const response = await fetch(`http://localhost:5050/api/Room/${id}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
                 const data = await response.json();
+
+                if (!response.ok || !data.data) {
+                    console.error("Failed to fetch room details");
+                    Swal.fire("Error", "Failed to fetch room details", "error");
+                    return;
+                }
+
                 setDetail(data.data);
-                if (data.data && data.data.roomTypeId) {
+
+                if (data.data.roomTypeId) {
                     try {
-                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`);
-                        const roomTypeResponseData = await roomTypeResponse.json();
-                        if (roomTypeResponseData && roomTypeResponseData.data && roomTypeResponseData.data.name && roomTypeResponseData.data.price) {
-                            setRoomTypeName(roomTypeResponseData.data.name);
-                            setRoomTypePrice(roomTypeResponseData.data.price);
+                        const roomTypeResponse = await fetch(`http://localhost:5050/api/RoomType/${data.data.roomTypeId}`, {
+                            headers: { "Authorization": `Bearer ${token}` }
+                        });
+                        const roomTypeData = await roomTypeResponse.json();
+
+                        if (roomTypeData?.data?.name && roomTypeData?.data?.price) {
+                            setRoomTypeName(roomTypeData.data.name);
+                            setRoomTypePrice(roomTypeData.data.price);
                         } else {
-                            console.log('RoomType data not found, setting as Unknown');
-                            setRoomTypeName('Unknown');
-                            setRoomTypePrice('Unknown');
+                            setRoomTypeName("Unknown");
+                            setRoomTypePrice("Unknown");
                         }
                     } catch (error) {
-                        console.error('Error fetching room type data:', error);
-                        setRoomTypeName('Unknown');
-                        setRoomTypePrice('Unknown');
+                        console.error("Error fetching room type data:", error);
+                        setRoomTypeName("Unknown");
+                        setRoomTypePrice("Unknown");
                     }
                 } else {
-                    console.log('No roomTypeId in Room data');
-                    setRoomTypeName('Unknown');
-                    setRoomTypePrice('Unknown');
+                    setRoomTypeName("Unknown");
+                    setRoomTypePrice("Unknown");
                 }
             } catch (error) {
-                console.error('Failed fetching data: ', error);
+                console.error("Failed fetching data:", error);
+                Swal.fire("Error", "Failed to fetch room details", "error");
             }
         };
+
         if (id) fetchDetail();
     }, [id]);
 
@@ -113,12 +129,11 @@ const RoomDetail = () => {
                                     <label className="font-bold text-lg text-gray-500 min-w-[85px]">Status:</label>
                                     <input
                                         type="text"
-                                        className={`flex-1 p-2 border rounded-lg font-semibold ${
-                                            detail.status === 'In Use' ? 'bg-orange-100 text-orange-500' :
-                                            detail.status === 'Free' ? 'bg-green-100 text-green-500' :
-                                            detail.status === 'Maintenance' ? 'bg-red-100 text-red-500' :
-                                            'bg-gray-50 text-gray-500'
-                                        }`}
+                                        className={`flex-1 p-2 border rounded-lg font-semibold ${detail.status === 'In Use' ? 'bg-orange-100 text-orange-500' :
+                                                detail.status === 'Free' ? 'bg-green-100 text-green-500' :
+                                                    detail.status === 'Maintenance' ? 'bg-red-100 text-red-500' :
+                                                        'bg-gray-50 text-gray-500'
+                                            }`}
                                         value={detail.status || 'Unknown'}
                                         readOnly
                                     />
@@ -128,9 +143,8 @@ const RoomDetail = () => {
                                     <label className="font-bold text-lg text-gray-500 min-w-[80px]">Available:</label>
                                     <input
                                         type="text"
-                                        className={`flex-1 p-2 border rounded-lg font-semibold ${
-                                            detail.isDeleted ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500'
-                                        }`}
+                                        className={`flex-1 p-2 border rounded-lg font-semibold ${detail.isDeleted ? 'bg-red-100 text-red-500' : 'bg-green-100 text-green-500'
+                                            }`}
                                         value={detail.isDeleted ? 'Inactive' : 'Active'}
                                         readOnly
                                     />
@@ -150,7 +164,7 @@ const RoomDetail = () => {
             </div>
         </div>
     );
-    
+
 };
 
 export default RoomDetail;

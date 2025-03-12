@@ -8,6 +8,7 @@ import Navbar from "../../../components/navbar/Navbar";
 
 const PetHealthBookCreate = () => {
   const navigate = useNavigate();
+  const token = sessionStorage.getItem("token");
   const sidebarRef = useRef(null);
   const [visitDetails, setVisitDetails] = useState({
     healthBookId: "",
@@ -29,22 +30,67 @@ const PetHealthBookCreate = () => {
   const [selectedPet, setSelectedPet] = useState("");
   useEffect(() => {
     const fetchData = async () => {
+
       try {
-        const [bookingsResponse, medicinesResponse, treatmentsResponse] = await Promise.all([
-          fetch("http://localhost:5201/Bookings"),
-          fetch("http://localhost:5003/Medicines"),
-          fetch("http://localhost:5003/api/Treatment"),
-          fetch("http://localhost:5010/api/pet"),
-          fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+          throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+        }
+        const [bookingsResponse, medicinesResponse, treatmentsResponse, petsResponse, bookingServiceItemsResponse] = await Promise.all([
+          fetch("http://localhost:5050/Bookings", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/Medicines", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/Treatment", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/pet", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          }),
+          fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            }
+          })
         ]);
+
+        // Kiểm tra phản hồi từ máy chủ
         if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
         if (!medicinesResponse.ok) throw new Error("Failed to fetch medicines.");
         if (!treatmentsResponse.ok) throw new Error("Failed to fetch treatments.");
-        const [bookingsData, medicinesData, treatmentsData] = await Promise.all([
+        if (!petsResponse.ok) throw new Error("Failed to fetch pets.");
+        if (!bookingServiceItemsResponse.ok) throw new Error("Failed to fetch booking service items.");
+
+        // Chuyển đổi phản hồi thành JSON
+        const [bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData] = await Promise.all([
           bookingsResponse.json(),
           medicinesResponse.json(),
           treatmentsResponse.json(),
+          petsResponse.json(),
+          bookingServiceItemsResponse.json()
         ]);
+
+        console.log({ bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData });
         console.log("Treatments API response:", treatmentsData);
         if (treatmentsData && Array.isArray(treatmentsData)) {
           setTreatments(treatmentsData);
@@ -74,7 +120,14 @@ const PetHealthBookCreate = () => {
         return;
       }
       try {
-        const response = await fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList");
+        // Thêm token vào headers
+        const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!response.ok) throw new Error("Failed to fetch booking service items.");
         const data = await response.json();
         console.log("Booking Service Items API response:", data);
@@ -90,7 +143,16 @@ const PetHealthBookCreate = () => {
           return;
         }
         const petResponses = await Promise.all(
-          petIds.map(petId => fetch(`http://localhost:5010/api/pet/${petId}`)));
+          petIds.map(petId => 
+            fetch(`http://localhost:5050/api/pet/${petId}`, {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`
+              }
+            })
+          )
+        );
         const petDetails = await Promise.all(petResponses.map(res => res.json()));
         console.log("Pet details from API:", petDetails);
         const formattedPets = petDetails.map(pet => ({
@@ -131,14 +193,21 @@ const PetHealthBookCreate = () => {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList");
+      // Thêm token vào headers
+      const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
       if (!response.ok) throw new Error("Failed to fetch booking service items.");
       const bookingServiceData = await response.json();
       console.log("Booking Service Items API response:", bookingServiceData);
       const matchingServiceItem = bookingServiceData.data.find(
         item => item.bookingId === selectedBooking.bookingId && item.petId === selectedPet
       );
-      
+  
       if (!matchingServiceItem) {
         Swal.fire("Error", "No matching Booking Service Item found.", "error");
         return;
@@ -159,9 +228,14 @@ const PetHealthBookCreate = () => {
         isDeleted: visitDetails.isDeleted || false,
       };
       console.log("Data sent to API:", newVisitDetails);
-      const createResponse = await fetch("http://localhost:5003/api/PetHealthBook", {
+  
+      // Thêm token vào headers khi tạo mới
+      const createResponse = await fetch("http://localhost:5050/api/PetHealthBook", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(newVisitDetails),
       });
       if (!createResponse.ok) {

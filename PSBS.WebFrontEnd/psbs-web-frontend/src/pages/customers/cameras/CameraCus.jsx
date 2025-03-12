@@ -1,0 +1,87 @@
+import React, { useEffect, useState } from "react";
+import "video.js/dist/video-js.css";
+import { Loader2, AlertCircle } from "lucide-react";
+import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
+import HLSPlayer from "./HLSPlayer";
+
+const CameraCus = () => {
+  const [cameraCode, setCameraCode] = useState("");
+  const [streamUrl, setStreamUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchCameraStream = () => {
+    if (!cameraCode) {
+      setError("Vui lòng nhập mã camera");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+
+    fetch(`http://localhost:5050/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const error = await res.text();
+          throw new Error(error || 'Lỗi không xác định');
+        }
+        return res.json();
+      })
+      .then((data) => {
+        if (data.streamUrl) {
+          setStreamUrl(data.streamUrl);
+          setError(null);
+        } else {
+          throw new Error("Không tìm thấy luồng video");
+        }
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+
+  };
+
+  return (
+    <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
+      <div className="overflow-y-auto w-full">
+        <NavbarCustomer />
+        <div className="flex flex-col items-center justify-center p-6 bg-gray-100 min-h-screen">
+          <div className="bg-white shadow-md rounded-lg p-4 w-full max-w-2xl">
+            <h2 className="text-2xl font-bold text-center mb-4">📹 Camera</h2>
+            <div className="flex gap-2 mb-4">
+              <input
+                type="text"
+                value={cameraCode}
+                onChange={(e) => setCameraCode(e.target.value)}
+                placeholder="Nhập mã camera..."
+                className="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={fetchCameraStream}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
+                Xem
+              </button>
+            </div>
+            {loading && (
+              <div className="flex justify-center items-center text-gray-500">
+                <Loader2 className="animate-spin w-6 h-6 mr-2" /> Đang tải...
+              </div>
+            )}
+            {error && (
+              <div className="flex items-center gap-2 text-red-600 bg-red-100 p-3 rounded-md">
+                <AlertCircle className="w-5 h-5" /> {error}
+              </div>
+            )}
+            {!error && !loading && streamUrl && (
+              <div className="relative border rounded-lg overflow-hidden shadow-md">
+                <HLSPlayer src={`${streamUrl}?t=${new Date().getTime()}`} />
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CameraCus;

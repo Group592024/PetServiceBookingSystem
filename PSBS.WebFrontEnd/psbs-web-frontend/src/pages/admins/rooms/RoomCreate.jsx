@@ -25,13 +25,22 @@ const RoomCreate = () => {
     useEffect(() => {
         const fetchRoomTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/RoomType/available');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/RoomType/available', {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch room types");
+                }
+
                 const data = await response.json();
-                setRoomTypes(data.data);
+                setRoomTypes(data.data || []);
             } catch (error) {
-                Swal.fire('Error', 'Failed to fetch room types!', 'error');
+                Swal.fire("Error", "Failed to fetch room types!", "error");
             }
         };
+
         fetchRoomTypes();
     }, []);
 
@@ -84,14 +93,16 @@ const RoomCreate = () => {
         formData.append('imageFile', selectedImage);
 
         try {
+            const token = sessionStorage.getItem("token");
+
             const response = await fetch('http://localhost:5050/api/Room', {
                 method: 'POST',
                 headers: {
-                    'Accept': 'application/json'
+                    "Authorization": `Bearer ${token}`,
+                    "Accept": "application/json"
                 },
                 body: formData,
             });
-
             const responseData = await response.json();
 
             if (response.ok) {

@@ -25,13 +25,23 @@ const CustomerPetCreate = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/petType');
+                const token = sessionStorage.getItem("token");
+
+                const response = await fetch("http://localhost:5050/api/petType", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 setPetTypes(data.filter(type => !type.isDelete));
             } catch (error) {
-                console.log('Error fetching pet types:', error);
+                console.log("Error fetching pet types:", error);
             }
         };
+
         fetchPetTypes();
     }, []);
 
@@ -39,30 +49,41 @@ const CustomerPetCreate = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
+                    const token = sessionStorage.getItem("token");
+
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
                     const data = await response.json();
 
                     if (!data.flag) {
                         Swal.fire({
-                            title: 'Information',
-                            text: 'No breeds available for this pet type',
-                            icon: 'info',
-                            confirmButtonText: 'OK'
+                            title: "Information",
+                            text: "No breeds available for this pet type",
+                            icon: "info",
+                            confirmButtonText: "OK"
                         });
                     }
                     setBreeds(data.data || []);
                 } catch (error) {
-                    console.log('Error fetching breeds:', error);
+                    console.log("Error fetching breeds:", error);
                     setBreeds([]);
                 }
             } else {
                 setBreeds([]);
             }
         };
+
         fetchBreeds();
     }, [pet.petTypeId]);
 
-   const handleImageChange = (e) => {
+
+    const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
@@ -75,10 +96,10 @@ const CustomerPetCreate = () => {
                 });
                 return;
             }
-    
+
             setPet({ ...pet, petImage: file });
-            setImagePreview(URL.createObjectURL(file)); 
-            setErrors({ ...errors, petImage: '' }); 
+            setImagePreview(URL.createObjectURL(file));
+            setErrors({ ...errors, petImage: '' });
         }
     };
 
@@ -114,8 +135,13 @@ const CustomerPetCreate = () => {
         formData.append('accountId', sessionStorage.getItem('accountId'));
 
         try {
-            const response = await fetch('http://localhost:5050/api/pet', {
-                method: 'POST',
+            const token = sessionStorage.getItem("token");
+
+            const response = await fetch("http://localhost:5050/api/pet", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
                 body: formData
             });
 
@@ -218,7 +244,7 @@ const CustomerPetCreate = () => {
                                         value={pet.petNote}
                                         onChange={(e) => {
                                             setPet({ ...pet, petNote: e.target.value });
-                                            setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));  
+                                            setErrors((prevErrors) => ({ ...prevErrors, petNote: '' }));
                                         }}
                                     />
                                     {errors.petNote && <span className="text-red-500 text-sm mt-1">{errors.petNote}</span>}

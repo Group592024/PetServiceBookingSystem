@@ -18,17 +18,18 @@ const AccountList = () => {
   const [accountEmail, setAccountEmail] = useState("");
   const [accountPhoneNumber, setAccountPhoneNumber] = useState("");
   const sidebarRef = useRef(null);
+  const token = sessionStorage.getItem("token");
 
   const userRole = localStorage.getItem("role"); 
 
   const fetchAccounts = async () => {
     try {
-      const token = sessionStorage.getItem("token"); // Retrieve token from sessionStorage
+      const token = sessionStorage.getItem("token"); 
       const response = await fetch("http://localhost:5050/api/Account/all", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}` // Attach token
+          Authorization: `Bearer ${token}`
         }
       });
   
@@ -72,6 +73,10 @@ const AccountList = () => {
             : `http://localhost:5050/api/Account/delete/${accountId}`;
           const response = await fetch(apiUrl, {
             method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}` // Attach token
+            }
           });
 
           if (response.ok) {
@@ -180,7 +185,10 @@ const AccountList = () => {
     try {
       const response = await fetch("http://localhost:5050/api/Account/addaccount", {
         method: "POST",
-        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: formData
       });
   
       const data = await response.json();

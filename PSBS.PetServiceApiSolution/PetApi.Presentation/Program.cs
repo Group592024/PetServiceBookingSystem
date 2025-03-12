@@ -18,10 +18,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructureService(builder.Configuration);
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(5010); 
-});
+
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5050/");

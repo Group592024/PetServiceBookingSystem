@@ -11,8 +11,9 @@ const CustomerPetList = () => {
 
   const fetchPets = async () => {
     try {
-      const token = sessionStorage.getItem("token");
       const accountId = sessionStorage.getItem("accountId");
+      const token = sessionStorage.getItem("token");
+
       const response = await fetch(
         `http://localhost:5050/api/pet/available/${accountId}`,
         {
@@ -23,6 +24,7 @@ const CustomerPetList = () => {
           },
         }
       );
+
       const data = await response.json();
       if (data.flag) {
         setPets(data.data.filter((pet) => !pet.isDelete));
@@ -58,6 +60,10 @@ const CustomerPetList = () => {
               `http://localhost:5050/api/pet/${petId}`,
               {
                 method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                },
               }
             );
 

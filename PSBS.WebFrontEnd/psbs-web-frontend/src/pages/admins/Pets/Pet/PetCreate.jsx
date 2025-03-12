@@ -31,26 +31,44 @@ const AdminPetCreate = () => {
     useEffect(() => {
         const fetchPetTypes = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/petType');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/petType', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 setPetTypes(data.filter(type => !type.isDelete));
             } catch (error) {
                 console.log('Error fetching pet types:', error);
             }
         };
+
         fetchPetTypes();
     }, []);
 
     useEffect(() => {
         const fetchAccounts = async () => {
             try {
-                const response = await fetch('http://localhost:5050/api/account/all');
+                const token = sessionStorage.getItem("token");
+                const response = await fetch('http://localhost:5050/api/account/all', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
                 const data = await response.json();
                 setAccounts(data.data || []);
             } catch (error) {
                 console.log('Error fetching accounts:', error);
             }
         };
+
         fetchAccounts();
     }, []);
 
@@ -58,9 +76,16 @@ const AdminPetCreate = () => {
         const fetchBreeds = async () => {
             if (pet.petTypeId) {
                 try {
-                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`);
-                    const data = await response.json();
+                    const token = sessionStorage.getItem("token");
+                    const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
 
+                    const data = await response.json();
                     if (!data.flag) {
                         Swal.fire({
                             title: 'Information',
@@ -78,6 +103,7 @@ const AdminPetCreate = () => {
                 setBreeds([]);
             }
         };
+
         fetchBreeds();
     }, [pet.petTypeId]);
 
@@ -136,6 +162,9 @@ const AdminPetCreate = () => {
         try {
             const response = await fetch('http://localhost:5050/api/pet', {
                 method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${sessionStorage.getItem("token")}`
+                },
                 body: formData
             });
 

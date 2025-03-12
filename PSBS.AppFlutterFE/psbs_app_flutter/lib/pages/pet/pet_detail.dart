@@ -22,6 +22,7 @@ class CustomerPetDetail extends StatefulWidget {
 class _CustomerPetDetailState extends State<CustomerPetDetail> {
   Map<String, dynamic>? pet;
   Map<String, dynamic>? petBreed;
+  String? errorMessage;
   bool isLoading = true;
   bool showFullNotes = false;
   late String userId;
@@ -40,47 +41,53 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
   }
 
   Future<void> fetchPetDetails() async {
+    setState(() => isLoading = true);
+
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      String? token = prefs.getString('token');
+      Map<String, String> headers = {};
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
       final petResponse = await http.get(
-        Uri.parse('http://10.66.187.111:5050/api/pet/${widget.petId}'),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
-        },
+        Uri.parse('http://192.168.1.7:5050/api/pet/${widget.petId}'),
+        headers: headers.isNotEmpty ? headers : null,
       );
+
+      if (petResponse.statusCode != 200) {
+        throw Exception('Failed to load pet details');
+      }
 
       final petData = json.decode(petResponse.body);
-
-      if (petData['flag']) {
-        final breedResponse = await http.get(Uri.parse(
-            'http://10.66.187.111:5010/api/petBreed/${petData['data']['petBreedId']}'));
-        final breedData = json.decode(breedResponse.body);
-
-        setState(() {
-          pet = petData['data'];
-          if (breedData['flag']) {
-            petBreed = breedData['data'];
-          }
-          isLoading = false;
-        });
+      if (!petData['flag']) {
+        throw Exception('Invalid pet data');
       }
-    } catch (e) {
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Failed to fetch data'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () => Navigator.pop(context),
-            ),
-          ],
-        ),
+
+      final breedResponse = await http.get(
+        Uri.parse(
+            'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
+        headers: headers.isNotEmpty ? headers : null,
       );
+
+      if (breedResponse.statusCode != 200) {
+        throw Exception('Failed to load breed details');
+      }
+
+      final breedData = json.decode(breedResponse.body);
+
+      setState(() {
+        pet = petData['data'];
+        if (breedData['flag']) {
+          petBreed = breedData['data'];
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Error: $e';
+        isLoading = false;
+      });
     }
   }
 
@@ -123,7 +130,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(15),
                   child: Image.network(
-                    'http://10.66.187.111:5010/pet-service${pet!['petImage']}',
+                    'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
                     height: 300,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -494,8 +501,19 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
     if (confirm == true) {
       try {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        String? token = prefs.getString('token');
+        Map<String, String> headers = {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        };
+
         final response = await http.delete(
-            Uri.parse('http://10.66.187.111:5010/api/pet/${widget.petId}'));
+            Uri.parse('http://192.168.1.7:5010/api/pet/${widget.petId}'));
+=========
+        final response = await http
+            .delete(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
+>>>>>>>>> Temporary merge branch 2
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

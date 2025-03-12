@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomerRoomDetail extends StatefulWidget {
   final String roomId;
@@ -26,27 +27,48 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
 
   Future<void> fetchDetail() async {
     try {
-      final roomResponse = await http.get(
-          Uri.parse('http://10.0.2.2:5050/api/Room/${widget.roomId}'));
-      final roomData = json.decode(roomResponse.body);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
 
+      final Map<String, String> headers = {
+        "Content-Type": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+      };
+
+      final roomResponse = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/Room/${widget.roomId}'),
+        headers: headers,
+      );
+
+      if (roomResponse.statusCode != 200) {
+        throw Exception('Failed to load room details');
+      }
+
+      final roomData = json.decode(roomResponse.body);
       setState(() {
         detail = roomData['data'];
       });
 
       if (detail.isNotEmpty && detail['roomTypeId'] != null) {
-        final roomTypeResponse = await http.get(Uri.parse(
-            'http://10.0.2.2:5050/api/RoomType/${detail['roomTypeId']}'));
-        final roomTypeData = json.decode(roomTypeResponse.body);
+        final roomTypeResponse = await http.get(
+          Uri.parse(
+              'http://10.0.2.2:5050/api/RoomType/${detail['roomTypeId']}'),
+          headers: headers,
+        );
 
+        if (roomTypeResponse.statusCode != 200) {
+          throw Exception('Failed to load room type');
+        }
+
+        final roomTypeData = json.decode(roomTypeResponse.body);
         setState(() {
           roomTypeName = roomTypeData['data']['name'];
           roomTypePrice = roomTypeData['data']['price'].toString();
-          loading = false;
         });
       }
     } catch (e) {
-      print('Failed fetching data: $e');
+      print('Error fetching data: $e');
+    } finally {
       setState(() {
         loading = false;
       });
@@ -150,11 +172,10 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                           // Book Now Button in a separate row
                           Center(
                             child: SizedBox(
-                              width: 300, 
+                              width: 300,
                               child: ElevatedButton(
                                 onPressed: () {
-                                  Navigator.pushNamed(
-                                      context, '/booking');
+                                  Navigator.pushNamed(context, '/booking');
                                 },
                                 style: ButtonStyle(
                                   backgroundColor: WidgetStateProperty.all(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:psbs_app_flutter/pages/room/room_detail.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RoomPage extends StatefulWidget {
   const RoomPage({super.key});
@@ -17,23 +18,51 @@ class _RoomPageState extends State<RoomPage> {
 
   // Fetch rooms and room types data
   Future<void> fetchRooms() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      final responseRooms =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/Room/available'));
-      final responseTypes =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/RoomType'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString("token");
+
+      if (token == null || token.isEmpty) {
+        throw Exception("Token does not exist. Please log in again.");
+      }
+
+      final responseRooms = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/Room/available'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      final responseTypes = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/RoomType'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
       if (responseRooms.statusCode == 200 && responseTypes.statusCode == 200) {
         final dataRooms = json.decode(responseRooms.body);
         final dataTypes = json.decode(responseTypes.body);
 
         setState(() {
-          rooms = dataRooms['data'];
-          roomTypes = dataTypes['data'];
+          rooms = dataRooms['data'] ?? [];
+          roomTypes = dataTypes['data'] ?? [];
           isLoading = false;
         });
+      } else if (responseRooms.statusCode == 404) {
+        setState(() {
+          rooms = [];
+          isLoading = false;
+        });
+        print("No available rooms.");
       } else {
-        throw Exception('Failed to load rooms and room types');
+        throw Exception('Failed to load rooms.');
       }
     } catch (e) {
       setState(() {

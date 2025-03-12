@@ -48,7 +48,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       String diaryContent = await convertDeltaToHtml(deltaJson);
 
       final response = await http.post(
-        Uri.parse('http://10.66.187.111:5010/api/PetDiary'),
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',

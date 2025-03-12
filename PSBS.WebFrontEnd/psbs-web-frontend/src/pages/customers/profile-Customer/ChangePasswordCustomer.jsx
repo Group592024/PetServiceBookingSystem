@@ -12,12 +12,13 @@ const ChangePasswordCustomer = () => {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const token = sessionStorage.getItem("token");
   const [accountName, setAccountName] = useState('');
   const [imagePreview, setImagePreview] = useState(null);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState({});  
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const storedAccountName = localStorage.getItem('accountName');
@@ -30,14 +31,29 @@ const ChangePasswordCustomer = () => {
 
   useEffect(() => {
     if (accountId) {
-      fetch(`http://localhost:5000/api/Account?AccountId=${accountId}`)
+      const token = sessionStorage.getItem('token');
+
+      fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // ➡️ Thêm token vào header
+          'Content-Type': 'application/json',
+        },
+      })
         .then((response) => response.json())
         .then(async (data) => {
           setAccountName(data.accountName || 'Admin');
           if (data.accountImage) {
             try {
               const response = await fetch(
-                `http://localhost:5000/api/Account/loadImage?filename=${data.accountImage}`
+                `http://localhost:5050/api/Account/loadImage?filename=${data.accountImage}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'Authorization': `Bearer ${token}`, // ➡️ Thêm token vào header khi tải ảnh
+                    'Content-Type': 'application/json',
+                  },
+                }
               );
               const imageData = await response.json();
 
@@ -63,9 +79,10 @@ const ChangePasswordCustomer = () => {
     }
   }, [accountId]);
 
+
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    
+
     setErrors({});
 
     const newErrors = {};
@@ -83,16 +100,20 @@ const ChangePasswordCustomer = () => {
     }
 
     if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);  
+      setErrors(newErrors);
       return;
     }
 
     const requestData = { currentPassword, newPassword, confirmPassword };
     try {
-      const url = `http://localhost:5000/api/Account/ChangePassword${accountId}`;
+      const token = sessionStorage.getItem('token');
+      const url = `http://localhost:5050/api/Account/ChangePassword${accountId}`;
       const response = await fetch(url, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // ➡️ Thêm token vào header
+        },
         body: JSON.stringify(requestData),
       });
 
@@ -120,6 +141,7 @@ const ChangePasswordCustomer = () => {
         text: 'An error occurred. Please try again later.',
       });
     }
+
   };
 
   const handleBackToPreviousPage = () => {
@@ -225,20 +247,20 @@ const ChangePasswordCustomer = () => {
                   {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
                 </div>
                 <div className="flex justify-between">
-                <button
-                type="submit"
-                className="px-6 py-2 bg-teal-500 text-white rounded"
-              >
-                Change Password
-              </button>
-              <button
-                type="button"
-                onClick={handleBackToPreviousPage}
-                className="px-6 py-2 bg-gray-300 rounded"
-              >
-                Back
-              </button>
-            </div>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 bg-teal-500 text-white rounded"
+                  >
+                    Change Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBackToPreviousPage}
+                    className="px-6 py-2 bg-gray-300 rounded"
+                  >
+                    Back
+                  </button>
+                </div>
               </form>
             </div>
           </div>

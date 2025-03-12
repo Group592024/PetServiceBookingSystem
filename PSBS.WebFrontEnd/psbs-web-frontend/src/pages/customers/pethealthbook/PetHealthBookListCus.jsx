@@ -7,23 +7,56 @@ import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import moment from "moment";
 
 const PetHealthBookListCus = () => {
-  const { petId: routePetId } = useParams(); // Lấy petId từ URL (ví dụ: /pethealthbooklist/123)
-  const [userPets, setUserPets] = useState([]); 
-  const [petHealthBooks, setPetHealthBooks] = useState([]); 
-  const [bookingServiceItemToPetMap, setBookingServiceItemToPetMap] = useState({}); 
+  const { petId: routePetId } = useParams(); 
+  const [userPets, setUserPets] = useState([]);
+  const [petHealthBooks, setPetHealthBooks] = useState([]);
+  const [bookingServiceItemToPetMap, setBookingServiceItemToPetMap] = useState({});
   const [medicines, setMedicines] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const token = sessionStorage.getItem("token");
 
   const fetchPetHealthBooks = useCallback(async () => {
     try {
       const accountId = sessionStorage.getItem("accountId");
+      const token = sessionStorage.getItem("token");
       if (!accountId) throw new Error("No accountId found in sessionStorage");
+      if (!token) throw new Error("No token found in sessionStorage");
+
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, 
+      };
       const [petHealthRes, medicinesRes, bookingServiceItemsRes, petsRes] = await Promise.all([
-        fetch("http://localhost:5003/api/PetHealthBook"),
-        fetch("http://localhost:5003/Medicines"),
-        fetch("http://localhost:5023/api/BookingServiceItems/GetBookingServiceList"),
-        fetch("http://localhost:5010/api/pet"),
+        fetch("http://localhost:5050/api/PetHealthBook", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5050/Medicines", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+        fetch("http://localhost:5050/api/pet", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       ]);
+
       if (!petHealthRes.ok) throw new Error(`Failed to fetch PetHealthBook: ${petHealthRes.status}`);
       if (!medicinesRes.ok) throw new Error(`Failed to fetch Medicines: ${medicinesRes.status}`);
       if (!bookingServiceItemsRes.ok) throw new Error(`Failed to fetch BookingServiceItems: ${bookingServiceItemsRes.status}`);
@@ -33,19 +66,20 @@ const PetHealthBookListCus = () => {
       const medicinesData = await medicinesRes.json();
       const bookingServiceItemsData = await bookingServiceItemsRes.json();
       const petsData = await petsRes.json();
+
       const petHealthArray = Array.isArray(petHealthData.data) ? petHealthData.data : [];
       const medicinesArray = Array.isArray(medicinesData.data) ? medicinesData.data : [];
       const petsArray = Array.isArray(petsData.data) ? petsData.data : [];
       const bookingServiceItemsArray = Array.isArray(bookingServiceItemsData.data)
         ? bookingServiceItemsData.data
         : [];
-      
+
       // Lọc pet theo accountId
       const filteredUserPets = petsArray.filter((pet) => pet.accountId === accountId);
       setUserPets(filteredUserPets);
       setPetHealthBooks(petHealthArray);
       setMedicines(medicinesArray);
-      
+
       // Tạo mapping: bookingServiceItemId -> petId
       const mapping = {};
       bookingServiceItemsArray.forEach((item) => {
@@ -58,6 +92,7 @@ const PetHealthBookListCus = () => {
       Swal.fire("Error", error.message, "error");
     }
   }, []);
+
 
   useEffect(() => {
     fetchPetHealthBooks();
@@ -120,7 +155,7 @@ const PetHealthBookListCus = () => {
                       <div className="w-[150px] h-[150px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mb-4">
                         {pet.petImage ? (
                           <img
-                            src={`http://localhost:5010${pet.petImage}`}
+                            src={`http://localhost:5050${pet.petImage}`}
                             alt={pet.petName || "Pet Image"}
                             className="w-full h-full object-cover"
                           />
@@ -154,7 +189,7 @@ const PetHealthBookListCus = () => {
                               </div>
                               <div className="flex items-center">
                                 <Link to={`/detailcus/${health.healthBookId}`}>
-                                <IconButton
+                                  <IconButton
                                     sx={{
                                       width: 24,
                                       height: 24,

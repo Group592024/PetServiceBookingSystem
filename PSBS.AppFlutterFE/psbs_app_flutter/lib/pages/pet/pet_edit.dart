@@ -38,7 +38,7 @@ class _PetEditState extends State<PetEdit> {
   bool _petGender = true;
   DateTime? _dateOfBirth;
   String? _accountId;
- late String userId;
+  late String userId;
   @override
   void initState() {
     super.initState();
@@ -46,17 +46,27 @@ class _PetEditState extends State<PetEdit> {
     _fetchPetTypes();
     _loadAccountId();
   }
- Future<void> _loadAccountId() async {
+
+  Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString('accountId') ?? ""; // Ensure it's never null
     });
   }
+
   Future<void> _fetchPetData() async {
     setState(() => _isLoading = true);
     try {
-      final response = await http
-          .get(Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -93,8 +103,17 @@ class _PetEditState extends State<PetEdit> {
 
   Future<void> _fetchPetTypes() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2:5050/api/petType'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/petType'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
+
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
         setState(() {
@@ -111,8 +130,17 @@ class _PetEditState extends State<PetEdit> {
 
   Future<void> _fetchBreeds(String petTypeId) async {
     try {
-      final response = await http.get(Uri.parse(
-          'http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/petBreed/byPetType/$petTypeId'),
+        headers: {
+          "Content-Type": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        },
+      );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag'] && data['data'] != null) {
@@ -312,11 +340,18 @@ class _PetEditState extends State<PetEdit> {
     setState(() => _isLoading = true);
 
     try {
+      setState(() => _isLoading = true);
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       var request = http.MultipartRequest(
         'PUT',
         Uri.parse('http://10.0.2.2:5050/api/pet'),
       );
-
+      request.headers.addAll({
+        'Content-Type': 'multipart/form-data',
+        if (token != null) 'Authorization': 'Bearer $token',
+      });
       request.fields.addAll({
         'petId': widget.petId,
         'accountId': _accountId!,
@@ -329,25 +364,24 @@ class _PetEditState extends State<PetEdit> {
         'petFurColor': _furColorController.text,
         'petNote': _noteController.text,
       });
-
       if (_image != null) {
         request.files.add(await http.MultipartFile.fromPath(
           'imageFile',
           _image!.path,
         ));
       }
-
-      final response = await request.send();
-
+      var response = await request.send();
       if (response.statusCode == 200) {
         _showSuccessDialog();
       } else {
-      String responseData = await response.stream.bytesToString();
-      var decodedResponse = jsonDecode(responseData);  
-      String errorMessage = decodedResponse['message'] ?? 'Unknown error';  
-      _showErrorDialog(errorMessage);      }
+        String responseData = await response.stream.bytesToString();
+        var decodedResponse = jsonDecode(responseData);
+        String errorMessage =
+            decodedResponse['message'] ?? 'Lỗi không xác định';
+        _showErrorDialog(errorMessage);
+      }
     } catch (e) {
-      _showErrorDialog('Error updating pet');
+      _showErrorDialog('Lỗi khi cập nhật thú cưng: $e');
     } finally {
       setState(() => _isLoading = false);
     }
