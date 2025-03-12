@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
@@ -42,8 +43,17 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
 
   Future<void> fetchRoomsAndPets() async {
     try {
-      final roomResponse =
-          await http.get(Uri.parse("http://127.0.0.1:5023/api/Room/available"));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      String? accountId = prefs.getString('accountId');
+
+      final roomResponse = await http.get(
+        Uri.parse("http://127.0.0.1:5023/api/Room/available"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
       final roomData = jsonDecode(roomResponse.body);
       if (roomData["flag"]) {
         setState(() {
@@ -52,10 +62,17 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       } else {
         setState(() => error = "Failed to fetch rooms.");
       }
+      print("Customer ID: ${widget.data['cusId']}");
 
       if (widget.data["cusId"] != null) {
-        final petResponse = await http.get(Uri.parse(
-            "http://127.0.0.1:5010/api/pet/available/${widget.data["cusId"]}"));
+        final petResponse = await http.get(
+          Uri.parse(
+              "http://127.0.0.1:5010/api/pet/available/${widget.data["cusId"]}"),
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        );
         final petData = jsonDecode(petResponse.body);
         if (petData["flag"]) {
           setState(() {
@@ -64,6 +81,9 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
         } else {
           setState(() => error = "Failed to fetch pets.");
         }
+        print("Pets Loaded: $pets");
+      } else {
+        print("Khong co cusId ");
       }
     } catch (e) {
       setState(() => error = "Error fetching data.");
@@ -74,12 +94,21 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
 
   Future<void> fetchRoomType(String roomTypeId) async {
     try {
-      final response = await http
-          .get(Uri.parse("http://127.0.0.1:5023/api/RoomType/$roomTypeId"));
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(
+        Uri.parse("http://127.0.0.1:5023/api/RoomType/$roomTypeId"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
       final data = jsonDecode(response.body);
       if (data["flag"] && data["data"] != null) {
         setState(() {
           selectedRoomType = data["data"];
+          formData["price"] =
+              selectedRoomType!["price"].toString(); 
           calculatePrice();
         });
       } else {
@@ -91,62 +120,72 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
   }
 
   Future<void> pickDateTime(String field) async {
-    print("Opening date picker for $field");
-    DateTime now = DateTime.now();
-    DateTime? pickedDate = await showDatePicker(
+  print("Opening date picker for $field");
+  DateTime now = DateTime.now();
+  DateTime? pickedDate = await showDatePicker(
+    context: context,
+    initialDate: now,
+    firstDate: now,
+    lastDate: DateTime(now.year + 5),
+  );
+
+  if (pickedDate != null) {
+    TimeOfDay? pickedTime = await showTimePicker(
       context: context,
-      initialDate: now,
-      firstDate: now,
-      lastDate: DateTime(now.year + 5),
+      initialTime: TimeOfDay.now(),
     );
 
-    if (pickedDate != null) {
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: TimeOfDay.now(),
+    if (pickedTime != null) {
+      DateTime fullDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
       );
 
-      if (pickedTime != null) {
-        DateTime fullDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-        handleChange(field, fullDateTime.toIso8601String());
-      }
-    }
-  }
-
-  void calculatePrice() {
-    if (formData["start"].isNotEmpty &&
-        formData["end"].isNotEmpty &&
-        selectedRoomType != null) {
-      DateTime startDate = DateTime.parse(formData["start"]);
-      DateTime endDate = DateTime.parse(formData["end"]);
-
-      if (startDate.isAfter(endDate)) {
-        setState(() => error = "End date must be after start date.");
-        return;
-      }
-
-      setState(() => error = null);
-
-      int daysDifference = endDate.difference(startDate).inDays;
-      double totalPrice = (selectedRoomType!["price"] ?? 0) * daysDifference;
-
-      if (formData["camera"] == true) {
-        totalPrice += 50000;
-      }
-
       setState(() {
-        formData["price"] = totalPrice.toString();
+        formData[field] = fullDateTime.toIso8601String();
       });
 
-      widget.onBookingDataChange({...formData, "price": totalPrice});
+      widget.onBookingDataChange({...formData});
+
+      calculatePrice(); 
     }
   }
+}
+
+
+  void calculatePrice() {
+  if (formData["start"].isNotEmpty &&
+      formData["end"].isNotEmpty &&
+      selectedRoomType != null) {
+    DateTime startDate = DateTime.parse(formData["start"]);
+    DateTime endDate = DateTime.parse(formData["end"]);
+
+    if (startDate.isAfter(endDate)) {
+      setState(() => error = "End date must be after start date.");
+      return;
+    }
+
+    setState(() => error = null);
+
+    int daysDifference = endDate.difference(startDate).inDays + 1; // Ensures at least 1 day
+    double roomPrice = selectedRoomType!["price"] ?? 0; 
+    double totalPrice = roomPrice * daysDifference;
+
+    if (formData["camera"] == true) {
+      totalPrice += 50000;
+    }
+
+    setState(() {
+      formData["price"] = totalPrice.toString();
+    });
+
+    widget.onBookingDataChange({...formData, "price": totalPrice});
+  }
+}
+
 
   void handleChange(String field, dynamic value) {
     setState(() {
@@ -169,11 +208,12 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
         : Container(
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(10),
-                boxShadow: [
-                  BoxShadow(color: Colors.black12, blurRadius: 5),
-                ]),
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(color: Colors.black12, blurRadius: 5),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -231,6 +271,21 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
                       style: TextStyle(color: Colors.black),
                     ),
                   ),
+                ),
+                SizedBox(height: 10),
+                CheckboxListTile(
+                  title: Text("Camera (+50,000 VND)"),
+                  value: formData["camera"],
+                  onChanged: (bool? value) {
+                    handleChange("camera", value ?? false);
+                    calculatePrice(); 
+                  },
+                  controlAffinity: ListTileControlAffinity.leading,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Total Price: ${formData["price"]} VND",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               ],
             ),

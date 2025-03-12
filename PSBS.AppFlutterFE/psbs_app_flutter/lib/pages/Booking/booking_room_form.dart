@@ -16,6 +16,8 @@ class BookingRoomForm extends StatefulWidget {
 
 class _BookingRoomFormState extends State<BookingRoomForm> {
   List<Map<String, dynamic>> _bookingRooms = [];
+  double _totalPrice = 0.0;
+
 
   void _addNewBookingRoom() {
     if (widget.cusId == null) {
@@ -43,11 +45,20 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   }
 
   void _updateBookingData(int index, Map<String, dynamic> newData) {
-    setState(() {
-      _bookingRooms[index] = newData;
-      _notifyParent();
-    });
-  }
+  setState(() {
+    _bookingRooms[index] = newData;
+    _calculateTotalPrice();
+    _notifyParent();
+  });
+}
+
+void _calculateTotalPrice() {
+  _totalPrice = _bookingRooms.fold(0.0, (sum, room) {
+    double price = double.tryParse(room["price"].toString()) ?? 0.0;
+    return sum + price;
+  });
+}
+
 
   void _notifyParent() {
     if (widget.onBookingDataChange != null) {
@@ -56,36 +67,42 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        ElevatedButton(
-          onPressed: _addNewBookingRoom,
-          child: Text("New Booking Room"),
-        ),
-        ..._bookingRooms.asMap().entries.map((entry) {
-          int index = entry.key;
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text("Room Booking #${index + 1}"),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _removeBookingRoom(index),
-                  ),
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      ElevatedButton(
+        onPressed: _addNewBookingRoom,
+        child: Text("New Booking Room"),
+      ),
+      ..._bookingRooms.asMap().entries.map((entry) {
+        int index = entry.key;
+        return Card(
+          margin: EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: [
+              ListTile(
+                title: Text("Room Booking #${index + 1}"),
+                trailing: IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red),
+                  onPressed: () => _removeBookingRoom(index),
                 ),
-                BookingRoomChoose(
-                  bookingData: _bookingRooms[index],
-                  onBookingDataChange: (data) => _updateBookingData(index, data),
-                  data: {"cusId": widget.cusId},
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ],
-    );
-  }
+              ),
+              BookingRoomChoose(
+                bookingData: _bookingRooms[index],
+                onBookingDataChange: (data) => _updateBookingData(index, data),
+                data: {"cusId": widget.cusId},
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+      SizedBox(height: 20),
+      Text(
+        "Total Price: $_totalPrice",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+    ],
+  );
+}
+
 }

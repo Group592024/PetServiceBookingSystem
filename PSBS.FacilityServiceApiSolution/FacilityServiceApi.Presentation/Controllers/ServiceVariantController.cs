@@ -41,7 +41,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("/service/{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetServiceVariantListById(Guid id, [FromQuery] bool showAll)
         {
             if (showAll)
