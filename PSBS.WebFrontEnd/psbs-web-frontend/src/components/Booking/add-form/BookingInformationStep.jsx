@@ -7,11 +7,20 @@ const BookingInformationStep = () => {
   const { formData, setFormData, loading } = useContext(BookingContext);
   const [paymentTypes, setPaymentTypes] = useState([]);
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   // Fetch payment types from the API
   useEffect(() => {
     const fetchPaymentTypes = async () => {
       try {
-        const response = await axios.get("http://localhost:5115/api/PaymentType");
+        const response = await axios.get("http://localhost:5050/api/PaymentType",
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          });
         if (response.data.flag && response.data.data) {
           setPaymentTypes(response.data.data);
         }

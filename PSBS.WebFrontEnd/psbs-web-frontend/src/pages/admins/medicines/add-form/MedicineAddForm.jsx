@@ -19,10 +19,18 @@ function MedicineAddForm() {
     image: "",
   });
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
+
   useEffect(() => {
     const fetchTreatments = async () => {
       try {
-        const response = await fetch("http://localhost:5003/api/Treatment/available");
+        const response = await fetch("http://localhost:5050/api/Treatment/available", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        });
         const result = await response.json();
         if (response.ok && result.flag) {
           setTreatmentFor({ id: null, label: "None" });
@@ -69,7 +77,10 @@ function MedicineAddForm() {
     formData.append("imageFile", document.getElementById("fileInput").files[0]);
 
     try {
-      const response = await fetch("http://localhost:5003/Medicines", {
+      const response = await fetch("http://localhost:5050/Medicines", {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        },
         method: "POST",
         body: formData,
       });

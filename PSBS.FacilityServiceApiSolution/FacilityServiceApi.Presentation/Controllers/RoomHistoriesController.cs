@@ -32,7 +32,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // GET api/<RoomHistoriesController>/5
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<RoomHistoryDTO>> GetRoomHistoryByBookingId(Guid id)
         {
             var bookingRoomItems = await roomHistoryInterface.GetRoomHistoryByBookingId(id);

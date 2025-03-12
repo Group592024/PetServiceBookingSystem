@@ -18,12 +18,20 @@ function MedicineDetailForm() {
   const [loading, setLoading] = useState(true);
   const [treatmentOptions, setTreatmentOptions] = useState([]);
   const navigate = useNavigate();
+  
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
 
   useEffect(() => {
     const fetchMedicineDetail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5003/Medicines/${medicineId}`
+          `http://localhost:5050/Medicines/${medicineId}`, {
+            headers: {
+              Authorization: `Bearer ${getToken()}`
+            }
+          }
         );
 
         if (response.data.flag) {

@@ -12,6 +12,11 @@ const CustomerBookingDatatable = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+  };
+
 
   useEffect(() => {
     fetchBookings();
@@ -39,7 +44,11 @@ const CustomerBookingDatatable = () => {
       }
 
       const bookingsResponse = await axios.get(
-        `http://localhost:5115/Bookings/list/${accountId}`
+        `http://localhost:5115/Bookings/list/${accountId}`, {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
       );
 
       if (!bookingsResponse.data.flag) {
@@ -54,13 +63,25 @@ const CustomerBookingDatatable = () => {
       const updatedBookings = await Promise.all(
         bookingsData.map(async (booking) => {
           try {
-            const accountResponse = await axios.get(`http://localhost:5000/api/Account?AccountId=${booking.accountId}`);
+            const accountResponse = await axios.get(`http://localhost:5050/api/Account?AccountId=${booking.accountId}`, {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            });
             const customerName = accountResponse.data?.accountName || "Unknown";
 
-            const statusResponse = await axios.get(`http://localhost:5115/api/BookingStatus/${booking.bookingStatusId}`);
+            const statusResponse = await axios.get(`http://localhost:5050/api/BookingStatus/${booking.bookingStatusId}`, {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            });
             const bookingStatusName = statusResponse.data?.data?.bookingStatusName || "Unknown";
 
-            const typeResponse = await axios.get(`http://localhost:5115/api/BookingType/${booking.bookingTypeId}`);
+            const typeResponse = await axios.get(`http://localhost:5050/api/BookingType/${booking.bookingTypeId}`, {
+              headers: {
+                Authorization: `Bearer ${getToken()}`
+              }
+            });
             const bookingTypeName = typeResponse.data?.data?.bookingTypeName || "Unknown";
 
             return {
@@ -92,7 +113,7 @@ const CustomerBookingDatatable = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 1, headerAlign: "center", align: "center" },
+    { field: "id", headerName: "No.", flex: 1, headerAlign: "center", align: "center" },
     { field: "customerName", headerName: "Customer Name", flex: 2, headerAlign: "center", align: "center" },
     { field: "totalAmount", headerName: "Total Amount", flex: 1, headerAlign: "center", align: "center" },
     { field: "bookingTypeName", headerName: "Booking Type", flex: 1, headerAlign: "center", align: "center" },

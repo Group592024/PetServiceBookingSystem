@@ -40,6 +40,10 @@ const Admin_Add_Booking = () => {
     setbookingServicesDate,
   } = useContext(BookingContext);
 
+  const getToken = () => {
+    return sessionStorage.getItem('token');
+};
+
   useEffect(() => {
     const fetchData = async () => {
       const token = sessionStorage.getItem("token");
@@ -50,7 +54,12 @@ const Admin_Add_Booking = () => {
         const accountId = decodedToken.AccountId;
 
         const response = await fetch(
-          `http://localhost:5000/api/Account?AccountId=${accountId}`
+          `http://localhost:5050/api/Account?AccountId=${accountId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
 
         if (!response.ok) throw new Error("Failed to fetch account data");
@@ -183,7 +192,12 @@ const Admin_Add_Booking = () => {
       let paymentTypeName = "";
       if (formData.paymentMethod) {
         const response = await fetch(
-          `http://localhost:5115/api/PaymentType/${formData.paymentMethod}`
+          `http://localhost:5050/api/PaymentType/${formData.paymentMethod}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         const data = await response.json();
         if (data.flag) {
@@ -226,6 +240,7 @@ const Admin_Add_Booking = () => {
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${getToken()}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestData),

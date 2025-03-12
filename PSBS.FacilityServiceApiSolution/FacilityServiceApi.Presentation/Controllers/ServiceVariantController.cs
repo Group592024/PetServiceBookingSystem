@@ -24,7 +24,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<ServiceVariantDTO>> GetServiceVariantById(Guid id)
         {
             var serviceVariant = await _serviceVariant.GetByIdAsync(id);
