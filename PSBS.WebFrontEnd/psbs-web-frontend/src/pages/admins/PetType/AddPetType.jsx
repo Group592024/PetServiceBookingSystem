@@ -1,17 +1,17 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Sidebar from '../../../components/sidebar/Sidebar';
-import Navbar from '../../../components/navbar/Navbar';
-import sampleImage from '../../../assets/sampleUploadImage.jpg';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
-import { TextField } from '@mui/material';
+import React, { useEffect, useRef, useState } from "react";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
+import sampleImage from "../../../assets/sampleUploadImage.jpg";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import { TextField } from "@mui/material";
 
 const AddPetType = () => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [tmpImage, setTmpImage] = useState(sampleImage);
   const [error, setError] = useState({
     name: false,
@@ -23,14 +23,14 @@ const AddPetType = () => {
 
     if (fileImage) {
       const validImageTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
       ];
       if (!validImageTypes.includes(fileImage.type)) {
         Swal.fire({
-          title: 'Only accept image files!',
+          title: "Only accept image files!",
           showClass: {
             popup: `
                  animate__animated
@@ -46,7 +46,7 @@ const AddPetType = () => {
                `,
           },
         });
-        event.target.value = '';
+        event.target.value = "";
         return;
       } else {
         const tmpUrl = URL.createObjectURL(fileImage);
@@ -54,13 +54,13 @@ const AddPetType = () => {
         setTmpImage(tmpUrl);
       }
     }
-    event.target.value = '';
+    event.target.value = "";
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (name == '' && description == '') {
+    if (name == "" && description == "") {
       setError({
         description: true,
         name: true,
@@ -68,7 +68,7 @@ const AddPetType = () => {
       return;
     }
 
-    if (name == '') {
+    if (name == "") {
       setError((prev) => ({
         ...prev,
         name: true,
@@ -76,7 +76,7 @@ const AddPetType = () => {
       return;
     }
 
-    if (description == '') {
+    if (description == "") {
       setError((prev) => ({
         ...prev,
         description: true,
@@ -84,11 +84,9 @@ const AddPetType = () => {
       return;
     }
 
-    
-
     if (selectedImage == null) {
       Swal.fire({
-        title: 'Pet Type Image is required!',
+        title: "Pet Type Image is required!",
         showClass: {
           popup: `
                  animate__animated
@@ -108,64 +106,68 @@ const AddPetType = () => {
     }
 
     const formData = new FormData();
-    formData.append('petType_Name', name);
-    formData.append('petType_Description', description);
-    formData.append('imageFile', selectedImage);
+    formData.append("petType_Name", name);
+    formData.append("petType_Description", description);
+    formData.append("imageFile", selectedImage);
 
     try {
-      const response = await fetch('http://localhost:5010/api/PetType', {
-        method: 'POST',
+      const token = sessionStorage.getItem("token");
+      const response = await fetch("http://localhost:5050/api/PetType", {
+        method: "POST",
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
-        setName('');
-        setDescription('');
+        setName("");
+        setDescription("");
         setName(null);
 
         Swal.fire(
-          'Add New Pet Type',
-          'Pet Type Added Successfully!',
-          'success'
+          "Add New Pet Type",
+          "Pet Type Added Successfully!",
+          "success"
         );
-        navigate('/petType');
+        navigate("/petType");
       } else {
-        Swal.fire('Add New Pet Type', 'Failed To Add Pet Type!', 'error');
-        navigate('/petType/add');
-        console.error('Failed create');
+        Swal.fire("Add New Pet Type", "Failed To Add Pet Type!", "error");
+        navigate("/petType/add");
+        console.error("Failed create");
       }
     } catch (error) {
-      console.error('Failed fetching api', error);
-      Swal.fire('Add New Pet Type', 'Failed To Add Pet Type!', 'error');
-      navigate('/petType/add');
-      console.error('Failed create');
+      console.error("Failed fetching api", error);
+      Swal.fire("Add New Pet Type", "Failed To Add Pet Type!", "error");
+      navigate("/petType/add");
+      console.error("Failed create");
     }
   };
 
   return (
     <div>
       <Sidebar ref={sidebarRef} />
-      <div class='content'>
+      <div class="content">
         <Navbar sidebarRef={sidebarRef} />
         <main>
-          <div className='header'>
-            <div className='left flex justify-center w-full'>
-              <h1 className=''>Add New Pet Type</h1>
+          <div className="header">
+            <div className="left flex justify-center w-full">
+              <h1 className="">Add New Pet Type</h1>
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
-              <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
+            <div className="p-10 bg-customLightPrimary rounded-lg flex justify-between">
+              <div className="p-10 w-1/2 bg-customLight rounded-3xl">
                 <div>
-                  <p className='font-semibold text-2xl '>Pet Type Name:</p>
+                  <p className="font-semibold text-2xl ">Pet Type Name:</p>
                   <TextField
-                    type='text'
+                    type="text"
                     sx={{
-                      borderRadius: '10px',
-                      margin: '20px',
+                      borderRadius: "10px",
+                      margin: "20px",
                     }}
-                    className=' rounded-3xl p-3 m-10 w-full'
+                    className=" rounded-3xl p-3 m-10 w-full"
                     onChange={(e) => {
                       setName(e.target.value);
                       setError((prev) => ({
@@ -174,23 +176,23 @@ const AddPetType = () => {
                       }));
                     }}
                     error={error.name}
-                    helperText={error.name ? 'Pet Type Name is required.' : ''}
+                    helperText={error.name ? "Pet Type Name is required." : ""}
                   />
                 </div>
                 <div>
-                  <p className='font-semibold text-2xl '>
+                  <p className="font-semibold text-2xl ">
                     Pet Type Description:
                   </p>
                   <TextField
-                    type='text'
+                    type="text"
                     sx={{
-                      borderRadius: '10px',
-                      margin: '20px',
+                      borderRadius: "10px",
+                      margin: "20px",
                     }}
                     multiline
-                    className='rounded-3xl p-3 m-5
-                    w-full resize-none'
-                    rows='7'
+                    className="rounded-3xl p-3 m-5
+                    w-full resize-none"
+                    rows="7"
                     onChange={(e) => {
                       setDescription(e.target.value);
                       setError((prev) => ({
@@ -201,46 +203,46 @@ const AddPetType = () => {
                     error={error.description}
                     helperText={
                       error.description
-                        ? 'Pet Type Description is required.'
-                        : ''
+                        ? "Pet Type Description is required."
+                        : ""
                     }
                   />
                 </div>
 
-                <div className='flex justify-between'>
+                <div className="flex justify-between">
                   <button
-                    type='submit'
-                    className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
-                  hover:bg-customLightPrimary hover:text-customPrimary'
+                    type="submit"
+                    className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                  hover:bg-customLightPrimary hover:text-customPrimary"
                   >
                     Save
                   </button>
 
                   <button
-                    className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
-                  hover:bg-customPrimary hover:text-customLightPrimary'
+                    className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
+                  hover:bg-customPrimary hover:text-customLightPrimary"
                     onClick={(e) => {
                       e.preventDefault();
-                      navigate('/petType');
+                      navigate("/petType");
                     }}
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-              <div className='w-1/2 flex justify-center items-center'>
+              <div className="w-1/2 flex justify-center items-center">
                 <img
-                  className='w-3/4 rounded-3xl'
+                  className="w-3/4 rounded-3xl"
                   src={tmpImage}
-                  alt='sampleImage'
-                  onClick={(e) => document.getElementById('inputFile').click()}
+                  alt="sampleImage"
+                  onClick={(e) => document.getElementById("inputFile").click()}
                 />
                 <input
-                  type='file'
-                  accept='image/*'
-                  id='inputFile'
+                  type="file"
+                  accept="image/*"
+                  id="inputFile"
                   onChange={(e) => handleImageChange(e)}
-                  className='hidden'
+                  className="hidden"
                 />
               </div>
             </div>

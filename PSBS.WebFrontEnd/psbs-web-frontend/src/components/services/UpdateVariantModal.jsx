@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { Box, Modal, TextField } from '@mui/material';
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import { Box, Modal, TextField } from "@mui/material";
 
 const UpdateVariantModal = ({ id, open, handleClose }) => {
   const navigate = useNavigate();
@@ -16,24 +16,32 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
     price: false,
   });
 
-  console.log('day laf id nhan vao: ', id);
+  console.log("day laf id nhan vao: ", id);
 
   useEffect(() => {
     const fetchDataUpdate = async () => {
       try {
+        const token = sessionStorage.getItem("token");
         const data = await fetch(
-          `http://localhost:5023/api/ServiceVariant/${id}`
+          `http://localhost:5050/api/ServiceVariant/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         ).then((response) => response.json());
 
-        console.log('day la data', data);
+        console.log("day la data", data);
         setVariant(data.data);
         setSelectedOption(data.data.isDeleted);
       } catch (error) {
-        console.error('Failed fetching api', error);
+        console.error("Failed fetching api", error);
         Swal.fire(
-          'Update Service Variant',
-          'Failed to load the service variant data!',
-          'error'
+          "Update Service Variant",
+          "Failed to load the service variant data!",
+          "error"
         );
       }
     };
@@ -42,13 +50,13 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
   }, []);
 
   const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value === 'true');
+    setSelectedOption(event.target.value === "true");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (variant.serviceContent == '' && variant.servicePrice == '') {
+    if (variant.serviceContent == "" && variant.servicePrice == "") {
       setError({
         content: true,
         price: true,
@@ -56,7 +64,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
       return;
     }
 
-    if (variant.serviceContent == '') {
+    if (variant.serviceContent == "") {
       setError((prev) => ({
         ...prev,
         content: true,
@@ -64,7 +72,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
       return;
     }
 
-    if (variant.servicePrice == '') {
+    if (variant.servicePrice == "") {
       setError((prev) => ({
         ...prev,
         price: true,
@@ -73,43 +81,47 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
     }
 
     const formData = new FormData();
-    formData.append('serviceContent', variant.serviceContent);
-    formData.append('servicePrice', variant.servicePrice);
-    formData.append('isDeleted', selectedOption);
+    formData.append("serviceContent", variant.serviceContent);
+    formData.append("servicePrice", variant.servicePrice);
+    formData.append("isDeleted", selectedOption);
 
     try {
+      const token = sessionStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5023/api/ServiceVariant/${id}`,
+        `http://localhost:5050/api/ServiceVariant/${id}`,
         {
-          method: 'PUT',
+          method: "PUT",
           body: formData,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       if (response.ok) {
         Swal.fire(
-          'Update Service Variant',
-          'Service Variant Updated Successfully!',
-          'success'
+          "Update Service Variant",
+          "Service Variant Updated Successfully!",
+          "success"
         );
-        
-       window.location.reload();
-        console.log('Update successfully');
+
+        window.location.reload();
+        console.log("Update successfully");
       } else {
-        console.error('Failed update');
+        console.error("Failed update");
         Swal.fire(
-          'Update Service Variant',
-          'Failed to update service variant!',
-          'error'
+          "Update Service Variant",
+          "Failed to update service variant!",
+          "error"
         );
-        console.log('Update successfully');
+        console.log("Update successfully");
       }
     } catch (error) {
-      console.error('Failed fetching api', error);
+      console.error("Failed fetching api", error);
       Swal.fire(
-        'Update Service Variant',
-        'Failed to update service variant!',
-        'error'
+        "Update Service Variant",
+        "Failed to update service variant!",
+        "error"
       );
     }
   };
@@ -119,40 +131,40 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '50%',
-            bgcolor: 'background.paper',
-            border: '2px solid #000',
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "50%",
+            bgcolor: "background.paper",
+            border: "2px solid #000",
             boxShadow: 24,
             p: 4,
           }}
         >
           <main>
-            <div className='header'>
-              <div className='left flex justify-center w-full'>
-                <h1 className='text-3xl font-bold p-5'>
+            <div className="header">
+              <div className="left flex justify-center w-full">
+                <h1 className="text-3xl font-bold p-5">
                   Update Service Variant
                 </h1>
               </div>
             </div>
 
             <form onSubmit={handleSubmit}>
-              <div className='p-10 bg-customLightPrimary rounded-lg '>
-                <div className='p-10  bg-customLight rounded-3xl'>
+              <div className="p-10 bg-customLightPrimary rounded-lg ">
+                <div className="p-10  bg-customLight rounded-3xl">
                   <div>
-                    <p className='font-semibold text-2xl '>Service Content:</p>
+                    <p className="font-semibold text-2xl ">Service Content:</p>
                     <TextField
-                      type='text'
+                      type="text"
                       value={variant.serviceContent}
                       sx={{
-                        borderRadius: '10px',
-                        marginBottom: '20px',
-                        marginTop: '20px',
+                        borderRadius: "10px",
+                        marginBottom: "20px",
+                        marginTop: "20px",
                       }}
-                      className=' rounded-3xl p-3 m-10 w-full'
+                      className=" rounded-3xl p-3 m-10 w-full"
                       onChange={(e) => {
                         setVariant((prev) => ({
                           ...prev,
@@ -165,23 +177,23 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       }}
                       error={error.content}
                       helperText={
-                        error.name ? 'Service content is required.' : ''
+                        error.name ? "Service content is required." : ""
                       }
                     />
                   </div>
                   <div>
-                    <p className='font-semibold text-2xl '>Service Price:</p>
+                    <p className="font-semibold text-2xl ">Service Price:</p>
                     <TextField
-                      type='text'
+                      type="text"
                       sx={{
-                        borderRadius: '10px',
-                        marginBottom: '20px',
-                        marginTop: '20px',
+                        borderRadius: "10px",
+                        marginBottom: "20px",
+                        marginTop: "20px",
                       }}
                       multiline
-                      className='rounded-3xl p-3 m-5
-                    w-full resize-none'
-                      rows='7'
+                      className="rounded-3xl p-3 m-5
+                    w-full resize-none"
+                      rows="7"
                       value={variant.servicePrice}
                       onChange={(e) => {
                         setVariant((prev) => ({
@@ -195,20 +207,20 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       }}
                       error={error.price}
                       helperText={
-                        error.price ? 'Service Price is required.' : ''
+                        error.price ? "Service Price is required." : ""
                       }
                     />
                   </div>
-                  <div className='p-5 '>
-                    <p className='font-semibold text-2xl '>
+                  <div className="p-5 ">
+                    <p className="font-semibold text-2xl ">
                       Service Variant Status:
                     </p>
                     <div>
                       <label>
                         <input
-                          type='radio'
-                          name='petTypeStatus'
-                          value='false'
+                          type="radio"
+                          name="petTypeStatus"
+                          value="false"
                           checked={selectedOption === false}
                           onChange={handleOptionChange}
                         />
@@ -218,9 +230,9 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                     <div>
                       <label>
                         <input
-                          type='radio'
-                          name='petTypeStatus'
-                          value='true'
+                          type="radio"
+                          name="petTypeStatus"
+                          value="true"
                           checked={selectedOption === true}
                           onChange={handleOptionChange}
                         />
@@ -229,18 +241,18 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                     </div>
                   </div>
 
-                  <div className='flex justify-between'>
+                  <div className="flex justify-between">
                     <button
-                      type='submit'
-                      className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
-                  hover:bg-customLightPrimary hover:text-customPrimary'
+                      type="submit"
+                      className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                  hover:bg-customLightPrimary hover:text-customPrimary"
                     >
                       Save
                     </button>
 
                     <button
-                      className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
-                  hover:bg-customPrimary hover:text-customLightPrimary'
+                      className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
+                  hover:bg-customPrimary hover:text-customLightPrimary"
                       onClick={(e) => {
                         e.preventDefault();
                       }}

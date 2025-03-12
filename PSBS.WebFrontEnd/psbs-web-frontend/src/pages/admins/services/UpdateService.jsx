@@ -37,8 +37,16 @@ const UpdateService = () => {
   //api serviceTypes
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service/serviceTypes'
+        'http://localhost:5050/api/Service/serviceTypes',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -116,8 +124,16 @@ const UpdateService = () => {
   useEffect(() => {
     const fetchDataUpdate = async () => {
       try {
+        const token = sessionStorage.getItem("token");
         const response = await fetch(
-          `http://localhost:5023/api/Service/${id}`
+          `http://localhost:5050/api/Service/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
         const data=await response.json();
@@ -157,9 +173,13 @@ const UpdateService = () => {
     formData.append('isDeleted', selectedOption);
 
     try {
-      const response = await fetch(`http://localhost:5023/api/Service/${id}`, {
+      const token = sessionStorage.getItem("token");
+      const response = await fetch(`http://localhost:5050/api/Service/${id}`, {
         method: 'PUT',
         body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
       });
 
       if (response.ok) {

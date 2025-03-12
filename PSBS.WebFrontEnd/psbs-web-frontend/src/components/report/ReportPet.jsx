@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Cell, Pie, PieChart, Tooltip } from 'recharts';
-import ReportCircleCard from './ReportCircleCard';
-import { useNavigate } from 'react-router-dom';
-import { Autocomplete, TextField } from '@mui/material';
+import React, { useEffect, useRef, useState } from "react";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
+import ReportCircleCard from "./ReportCircleCard";
+import { useNavigate } from "react-router-dom";
+import { Autocomplete, TextField } from "@mui/material";
 
 const ReportPet = () => {
   const sidebarRef = useRef(null);
@@ -14,8 +14,16 @@ const ReportPet = () => {
 
   const fetchDataServices = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service?showAll=false'
+        "http://localhost:5050/api/Service?showAll=false",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -26,7 +34,7 @@ const ReportPet = () => {
 
       setServices(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -42,8 +50,16 @@ const ReportPet = () => {
 
   const fetchDataCountPet = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        `http://localhost:5010/api/ReportPet/${seletedService.serviceId}`
+        `http://localhost:5050/api/ReportPet/${seletedService.serviceId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -58,11 +74,12 @@ const ReportPet = () => {
 
       setData(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
   useEffect(() => {
+    console.log("co goi toi pet ne");
     fetchDataCountPet();
   }, [seletedService]);
 
@@ -76,9 +93,9 @@ const ReportPet = () => {
         value={seletedService}
         onChange={handleServiceChange}
         renderInput={(params) => (
-          <TextField {...params} label='Select service' variant='outlined' />
+          <TextField {...params} label="Select service" variant="outlined" />
         )}
-        sx={{ width: '600px' }}
+        sx={{ width: "600px" }}
       />
       <ReportCircleCard data={data} />
     </div>

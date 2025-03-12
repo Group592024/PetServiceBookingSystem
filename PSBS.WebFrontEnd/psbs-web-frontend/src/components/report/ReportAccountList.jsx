@@ -23,8 +23,16 @@ const ReportAccountList = () => {
 
   const fetchDataStaff = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5000/api/ReportAccount/countStaff'
+        'http://localhost:5050/api/ReportAccount/countStaff',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -38,8 +46,16 @@ const ReportAccountList = () => {
 
   const fetchDataCustomer = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5000/api/ReportAccount/countCustomer'
+        'http://localhost:5050/api/ReportAccount/countCustomer',
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 

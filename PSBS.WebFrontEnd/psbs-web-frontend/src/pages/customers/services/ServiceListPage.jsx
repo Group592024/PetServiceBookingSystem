@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
-import { useNavigate } from 'react-router-dom';
-import ServiceCardList from '../../../components/ServiceCustomer/ServiceCardList';
+import React, { useEffect, useRef, useState } from "react";
+import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
+import { useNavigate } from "react-router-dom";
+import ServiceCardList from "../../../components/ServiceCustomer/ServiceCardList";
 
 const ServiceListPage = () => {
   const sidebarRef = useRef(null);
@@ -11,8 +11,15 @@ const ServiceListPage = () => {
 
   const fetchDataFunction = async () => {
     try {
+      const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5023/api/Service?showAll=false'
+        "http://localhost:5050/api/Service?showAll=false",
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const response = await fetchData.json();
 
@@ -23,7 +30,7 @@ const ServiceListPage = () => {
 
       setData(result);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -31,12 +38,13 @@ const ServiceListPage = () => {
     fetchDataFunction();
   }, []);
 
-
   return (
     <div>
-     <NavbarCustomer/>
-     <div className='flex justify-center p-5'><p className='text-3xl font-bold'>Services For Your Pets</p></div>
-     <ServiceCardList data={data}/>
+      <NavbarCustomer />
+      <div className="flex justify-center p-5">
+        <p className="text-3xl font-bold">Services For Your Pets</p>
+      </div>
+      <ServiceCardList data={data} />
     </div>
   );
 };
