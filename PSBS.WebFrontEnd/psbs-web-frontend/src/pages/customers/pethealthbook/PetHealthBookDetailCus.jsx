@@ -184,7 +184,7 @@ const PetHealthBookDetailCus = () => {
               <div className="flex flex-col items-center">
                 <img
                   src={
-                    petImage ? `http://localhost:5050${petImage}` : "/Images/default-image.png"
+                    petImage ? `http://localhost:5050/pet-service${petImage}` : "/Images/default-image.png"
                   }
                   alt="Pet Health Record"
                   className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"

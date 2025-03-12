@@ -29,6 +29,7 @@ const Register = () => {
     let valid = true;
     let errorMessages = { ...errors };
   
+    // Kiểm tra email và số điện thoại có tồn tại không
     if (!AccountName) {
       errorMessages.name = 'Name is required';
       valid = false;
@@ -126,33 +127,47 @@ const Register = () => {
   
     try {
       const token = sessionStorage.getItem("token");
-  
+    
       const response = await fetch('http://localhost:5050/api/Account/register', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'accept': 'text/plain',
+          'Authorization': `Bearer ${token}`, 
+          'Accept': 'application/json', 
         },
         body: formData,
       });
-  
-      const result = await response.json();
-      if (response.ok && result.flag) {
+    
+      const result = await response.json().catch(() => null);
+    
+      if (response.ok && result?.flag) {
         Swal.fire({
           icon: 'success',
           title: 'Registration Successful!',
           text: 'Please log in.',
         }).then(() => navigate('/login'));
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Registration Failed',
-          text: result.message || 'Registration failed. Please try again.',
-          footer: result.details || 'Additional details about the error.',
-        });
+        let newErrors = { ...errors };
+    
+        if (result?.message?.includes('Email already exists')) {
+          newErrors.email = result.message;
+        }
+        if (result?.message?.includes('Phone number already exists')) {
+          newErrors.phone = result.message;
+        }
+    
+        setErrors(newErrors);
+    
+        if (!result?.message?.includes('Email already exists') && 
+            !result?.message?.includes('Phone number already exists')) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Registration Failed',
+            text: result?.message || 'Registration failed. Please try again.',
+          });
+        }
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error:', err);
       Swal.fire({
         icon: 'error',
         title: 'An error occurred',
@@ -161,6 +176,7 @@ const Register = () => {
       });
     }
   };
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">

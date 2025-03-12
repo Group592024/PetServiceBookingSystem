@@ -39,7 +39,7 @@ builder.WebHost.ConfigureKestrel(options =>
 
 // Đăng ký FfmpegService
 // builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-// builder.Services.AddInfrastructureService(builder.Configuration);
+ builder.Services.AddInfrastructureService(builder.Configuration);
 // builder.Services.Configure<ApiBehaviorOptions>(options =>
 // {
 //     options.SuppressModelStateInvalidFilter = true;
