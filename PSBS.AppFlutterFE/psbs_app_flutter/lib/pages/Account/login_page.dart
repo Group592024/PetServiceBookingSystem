@@ -49,21 +49,26 @@ class _LoginPageState extends State<LoginPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
       final response = await http.post(
         Uri.parse('http://10.0.2.2:5050/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
+
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         if (result['flag'] == true) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString('token', result['data']);
           Map<String, dynamic> decodedToken = _parseJwt(result['data']);
           String accountId = decodedToken['AccountId'].toString();
           prefs.setString('accountId', accountId);
+
           useUserStore().loadUserDetails(accountId);
           print("Debug message: Current user is ${useUserStore().currentUser}");
+
           if (decodedToken['AccountIsDeleted'].toString().toLowerCase() ==
               'true') {
             _showToast(

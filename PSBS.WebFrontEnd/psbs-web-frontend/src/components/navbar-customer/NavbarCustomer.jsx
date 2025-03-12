@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import Swal from "sweetalert2"; // Import SweetAlert2
+import Swal from "sweetalert2"; 
 import "./style.css";
 
 const NavbarCustomer = () => {
@@ -16,18 +16,25 @@ const NavbarCustomer = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-
+  
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = jwt_decode(token);
       const { AccountName, AccountImage, AccountId } = decodedToken;
-
+  
       setAccountName(AccountName || "User");
       setAccountId(AccountId);
-
+  
       if (AccountImage) {
         fetch(
-          `http://localhost:5000/api/Account/loadImage?filename=${AccountImage}`
+          `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`, 
+              'Content-Type': 'application/json',
+            },
+          }
         )
           .then((response) => response.json())
           .then((imageData) => {
@@ -45,6 +52,7 @@ const NavbarCustomer = () => {
       setIsLoggedIn(false);
     }
   }, []);
+  
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);

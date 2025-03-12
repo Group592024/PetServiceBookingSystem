@@ -1,17 +1,17 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using Microsoft.Extensions.Configuration;
+﻿//using System;
+//using System.Diagnostics;
+//using System.IO;
+//using Microsoft.Extensions.Configuration;
 
-namespace FacilityServiceApi.Infrastructure.Services
-{
-    public class FfmpegService
-    {
-        private readonly string _ffmpegPath;
-        private readonly string _rtspUrl;
-        private readonly string _hlsOutputPath;
-        private readonly int _hlsSegmentTime;
-        private Process _ffmpegProcess;
+//namespace FacilityServiceApi.Infrastructure.Services
+//{
+//    public class FfmpegService
+//    {
+//        private readonly string _ffmpegPath;
+//        private readonly string _rtspUrl;
+//        private readonly string _hlsOutputPath;
+//        private readonly int _hlsSegmentTime;
+//        private Process _ffmpegProcess;
 
         // public FfmpegService(IConfiguration configuration)
         // {
@@ -104,3 +104,4 @@ namespace FacilityServiceApi.Infrastructure.Services
         // }
     }
 }
+

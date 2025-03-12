@@ -4,7 +4,7 @@ import { Loader2, AlertCircle } from "lucide-react";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import HLSPlayer from "./HLSPlayer";
 
-const Camera = () => {
+const CameraCus = () => {
   const [cameraCode, setCameraCode] = useState("");
   const [streamUrl, setStreamUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ const Camera = () => {
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:5023/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`)
+    fetch(`http://localhost:5050/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`)
       .then(async (res) => {
         if (!res.ok) {
           const error = await res.text();
@@ -84,4 +84,4 @@ const Camera = () => {
   );
 };
 
-export default Camera;
+export default CameraCus;

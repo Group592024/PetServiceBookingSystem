@@ -52,7 +52,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5000/api/Account?AccountId=$accountId'),
+        Uri.parse('http://10.0.2.2:5050/api/Account?AccountId=$accountId'),
       );
 
       if (response.statusCode == 200) {
@@ -80,7 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
     try {
       final imageResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5000/api/Account/loadImage?filename=$filename'),
+            'http://10.0.2.2:5050/api/Account/loadImage?filename=$filename'),
       );
 
       if (imageResponse.statusCode == 200) {

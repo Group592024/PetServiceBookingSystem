@@ -77,15 +77,16 @@
     },
     {
       // Chat Api
-      "DownstreamPathTemplate": "/api/ChatControllers/{everything}",
-      "DownstreamScheme": "http",
+      "DownstreamPathTemplate": "/chatHub/{everything}",
+      "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
+          
           "Host": "localhost",
           "Port": 5159
         }
       ],
-      "UpstreamPathTemplate": "/api/ChatControllers/{everything}",
+      "UpstreamPathTemplate": "/chatHub/{everything}",
       "UpstreamHttpMethod": [
         "GET",
         "POST"
@@ -639,6 +640,28 @@
         }
       ],
       "UpstreamPathTemplate": "/Gifts/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Gifts image API
+      "DownstreamPathTemplate": "/ImageGifts/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5022
+        }
+      ],
+      "UpstreamPathTemplate": "/ImageGifts/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,

@@ -6,15 +6,28 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Swal from "sweetalert2";
 import "./datatable.css";
-
+import { Chip } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import InfoIcon from "@mui/icons-material/Info";
+import { useNavigate } from "react-router-dom";
 const GiftDatatable = () => {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
+  const navigate = useNavigate();
   const fetchGifts = async () => {
     try {
       const giftResponse = await axios.get(
-        "http://localhost:5022/Gifts/admin-gift-list"
+        "http://localhost:5050/Gifts/admin-gift-list",
+        config
       );
 
       if (giftResponse.data.flag) {
@@ -57,7 +70,7 @@ const GiftDatatable = () => {
         <div className="cellWithTable">
           <img
             className="cellImg"
-            src={`http://localhost:5022${params.row.giftImage}`}
+            src={`http://localhost:5050${params.row.giftImage}`}
             alt="medicine"
           />
           {params.value}
@@ -81,18 +94,11 @@ const GiftDatatable = () => {
       headerAlign: "center",
       align: "center",
       renderCell: (params) => {
-        const giftStatus = params.row.giftStatus;
-        return (
-          <div
-            style={{
-              color: giftStatus ? "red" : "green",
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
-          >
-            {giftStatus ? "Inactive" : "Active"}
-          </div>
-        );
+        if (params.value === false) {
+          return <Chip label="Active" color="success" />;
+        } else {
+          return <Chip label="Inactive" color="error" />;
+        }
       },
     },
   ];
@@ -105,67 +111,27 @@ const GiftDatatable = () => {
       renderCell: (params) => {
         const giftId = params.row.giftId;
         return (
-          <div
-            className="cellAction"
-            class="flex justify-around items-center w-full h-full"
-          >
-            <Link
-              to={`/gifts/detail/${giftId}`}
-              className="detailBtn"
-              style={{ textDecoration: "none" }}
+          <div className="cellAction flex space-x-2">
+            <IconButton
+              aria-label="info"
+              onClick={() => navigate(`/gifts/detail/${giftId}`)}
             >
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                />
-              </svg>
-            </Link>
-            <Link
-              to={`/gifts/update/${giftId}`}
-              className="editBtn"
-              style={{ textDecoration: "none" }}
+              <InfoIcon color="info" />
+            </IconButton>
+            <IconButton
+              aria-label="edit"
+              onClick={() => navigate(`/gifts/update/${giftId}`)}
             >
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                />
-              </svg>
-            </Link>
-            <div className="deleteBtn" onClick={() => handleDelete(giftId)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M7.5 1h9v3H22v2h-2.029l-.5 17H4.529l-.5-17H2V4h5.5V1Zm2 3h5V3h-5v1ZM6.03 6l.441 15h11.058l.441-15H6.03ZM13 8v11h-2V8h2Z"
-                />
-              </svg>
-            </div>
+              <EditIcon color="success" />
+            </IconButton>
+            <IconButton
+              aria-label="delete"
+              onClick={() => {
+                handleDelete(giftId);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
           </div>
         );
       },
@@ -217,7 +183,8 @@ const GiftDatatable = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.delete(
-            `http://localhost:5022/Gifts/${giftId}`
+            `http://localhost:5050/Gifts/${giftId}`,
+            config
           );
           if (response.data.flag) {
             toast.success(

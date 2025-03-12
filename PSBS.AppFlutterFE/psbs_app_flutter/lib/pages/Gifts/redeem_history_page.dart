@@ -3,10 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:psbs_app_flutter/models/redeem_history.dart';
 import 'package:psbs_app_flutter/services/redeem_service.dart';
-import 'package:psbs_app_flutter/services/user_store.dart';
 import 'package:psbs_app_flutter/utils/dialog_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'gift_detail_page.dart';
 
 class RedeemHistoryPage extends StatefulWidget {
   @override

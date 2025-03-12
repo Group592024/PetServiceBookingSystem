@@ -22,12 +22,18 @@ function GiftUpdatePage() {
   const [errors, setErrors] = useState({});
   const [imagePreview, setImagePreview] = useState(""); // State for image preview
   const navigate = useNavigate();
-
+  const token = sessionStorage.getItem("token");
+  const config = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
   useEffect(() => {
     const fetchGiftDetail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5022/Gifts/${giftId}`
+          `http://localhost:5050/Gifts/${giftId}`,
+          config
         );
 
         if (response.data.flag) {
@@ -37,7 +43,7 @@ function GiftUpdatePage() {
             giftStatus: response.data.data.giftStatus, // Ensure giftStatus is correctly assigned
           });
           setImagePreview(
-            `http://localhost:5022${response.data.data.giftImage}`
+            `http://localhost:5050${response.data.data.giftImage}`
           ); // Set the image preview URL
           toast.success(
             response.data.message || "Gift data fetched successfully!"
@@ -149,9 +155,14 @@ function GiftUpdatePage() {
       }
 
       const response = await axios.put(
-        `http://localhost:5022/Gifts`,
+        `http://localhost:5050/Gifts`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (response.data.flag) {
@@ -267,24 +278,25 @@ function GiftUpdatePage() {
                   sx={{ mb: 2 }}
                 />
 
-<TextField
-  fullWidth
-  select
-  label="Gift Status"
-  name="giftStatus"
-  value={gift.giftStatus} 
-  onChange={(e) => setGift({ ...gift, giftStatus: e.target.value === "true" })} 
-  error={!!errors.giftStatus}
-  helperText={errors.giftStatus}
-  sx={{ mb: 2 }}
-  SelectProps={{
-    native: true, 
-  }}
->
-  <option value={false}>Active</option>
-  <option value={true}>Inactive</option>
-</TextField>
-
+                <TextField
+                  fullWidth
+                  select
+                  label="Gift Status"
+                  name="giftStatus"
+                  value={gift.giftStatus}
+                  onChange={(e) =>
+                    setGift({ ...gift, giftStatus: e.target.value === "true" })
+                  }
+                  error={!!errors.giftStatus}
+                  helperText={errors.giftStatus}
+                  sx={{ mb: 2 }}
+                  SelectProps={{
+                    native: true,
+                  }}
+                >
+                  <option value={false}>Active</option>
+                  <option value={true}>Inactive</option>
+                </TextField>
 
                 <TextField
                   fullWidth

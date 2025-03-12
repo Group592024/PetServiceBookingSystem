@@ -1,12 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:psbs_app_flutter/models/user.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class UserService {
   static Future<User?> fetchUser(String accountId) async {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, String> headers = {};
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
     try {
       final response = await http
-          .get(Uri.parse('http://10.0.2.2:5000/api/Account/$accountId'));
+          .get(Uri.parse('http://10.0.2.2:5050/api/Account/$accountId'), headers: headers,);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse =
@@ -23,9 +29,15 @@ class UserService {
     }
   }
    static Future<List<User>> fetchAllUsers() async {
+     SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      Map<String, String> headers = {};
+      if (token != null) {
+        headers['Authorization'] = 'Bearer $token';
+      }
     try {
       final response =
-          await http.get(Uri.parse('http://10.0.2.2:5000/api/Account/all'));
+          await http.get(Uri.parse('http://10.0.2.2:5050/api/Account/all'), headers: headers,);
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonResponse = json.decode(response.body)['data'];
