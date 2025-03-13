@@ -49,7 +49,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<RoomHistoriesController>
         [HttpPost]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreateRoomHistory([FromBody] CreateRoomHistoryDTO roomHistoryDTO)
         {
             var createEntity = RoomHistoryConversion.ToEntityForCreate(roomHistoryDTO);

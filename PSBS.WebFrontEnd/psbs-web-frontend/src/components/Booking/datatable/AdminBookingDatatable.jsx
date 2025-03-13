@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { Chip } from "@mui/material";
 
 const AdminBookingDatatable = () => {
     const [bookings, setBookings] = useState([]);
@@ -111,16 +112,18 @@ const AdminBookingDatatable = () => {
       { field: "bookingTypeName", headerName: "Booking Type", flex: 1, headerAlign: "center", align: "center" },
       { field: "bookingStatusName", headerName: "Status", flex: 1, headerAlign: "center", align: "center" },
       {
-          field: "paidStatus",
+          field: "isPaid",
           headerName: "Paid",
           flex: 1,
           headerAlign: "center",
           align: "center",
-          renderCell: (params) => (
-              <div style={{ color: params.value ? "green" : "red", fontWeight: "bold" }}>
-                  {params.value ? "Paid" : "Unpaid"}
-              </div>
-          ),
+          renderCell: (params) => {
+            if (params.value === true) {
+              return <Chip  label="Paid" color="primary" />;
+            } else {
+              return <Chip label="No" color="error" />;
+            }
+          },
       },
       {
           field: "action",

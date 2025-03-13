@@ -136,7 +136,7 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            'http://10.0.2.2:5022${gift!['giftImage']}',
+                            'http://10.0.2.2:5050${gift!['giftImage']}',
                             width: double.infinity,
                             height: 200,
                             fit: BoxFit.cover,

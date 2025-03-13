@@ -21,7 +21,7 @@ class _ServicePageState extends State<ServicePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final responseServices = await http.get(
-        Uri.parse('http://192.168.1.7:5050/api/Service?showAll=false'),
+        Uri.parse('http://10.0.2.2:5050/api/Service?showAll=false'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -77,7 +77,7 @@ class _ServicePageState extends State<ServicePage> {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: Image.network(
-                        'http://192.168.1.7:5023${service['serviceImage']}',
+                        'http://10.0.2.2:5023${service['serviceImage']}',
                         height: 200,
                         width: double.infinity,
                         fit: BoxFit.cover,

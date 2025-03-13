@@ -427,7 +427,10 @@ namespace ReservationApi.Presentation.Controllers
             string authorizationHeader = Request.Headers["Authorization"];
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            
+            LogExceptions.LogToConsole("Token ne "  +token);
+            LogExceptions.LogToConsole("BookingID ne " + bookingId);
+
+
 
             var booking = await context.Bookings.FindAsync(bookingId);
             if (booking == null) return NotFound(new Response(false, "Booking not found."));

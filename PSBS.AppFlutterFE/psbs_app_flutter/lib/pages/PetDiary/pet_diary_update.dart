@@ -263,7 +263,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.7:5050/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://10.0.2.2:5050/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
