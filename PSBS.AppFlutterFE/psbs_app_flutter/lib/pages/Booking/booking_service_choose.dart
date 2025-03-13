@@ -37,7 +37,7 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5023/api/Service"),
+        Uri.parse("http://10.0.2.2:5050/api/Service"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5010/api/pet/available/${widget.cusId}"),
+        Uri.parse("http://10.0.2.2:5050/api/pet/available/${widget.cusId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -117,7 +117,7 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5023/service/$serviceId"),
+        Uri.parse("http://10.0.2.2:5050/service/$serviceId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

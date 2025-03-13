@@ -175,6 +175,8 @@ const ServiceBookingDetailPage = () => {
         `http://localhost:5115/Bookings/updateServiceStatus/${bookingId}`,
         {
           status: nextStatus,
+        },
+        {
           headers: {
             Authorization: `Bearer ${getToken()}`,
           },

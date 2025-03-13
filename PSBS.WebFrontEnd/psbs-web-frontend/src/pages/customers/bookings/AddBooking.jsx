@@ -37,6 +37,10 @@ const AddBooking = () => {
     setbookingServicesDate,
   } = useContext(BookingContext);
 
+  const getToken = () => {
+    return sessionStorage.getItem("token");
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       const token = sessionStorage.getItem("token");
@@ -46,7 +50,12 @@ const AddBooking = () => {
         const accountId = decodedToken.AccountId;
 
         const response = await fetch(
-          `http://localhost:5000/api/Account?AccountId=${accountId}`
+          `http://localhost:5050/api/Account?AccountId=${accountId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
 
         if (!response.ok) throw new Error("Failed to fetch account data");
@@ -170,7 +179,12 @@ const AddBooking = () => {
       let paymentTypeName = "";
       if (formData.paymentMethod) {
         const response = await fetch(
-          `http://localhost:5115/api/PaymentType/${formData.paymentMethod}`
+          `http://localhost:5050/api/PaymentType/${formData.paymentMethod}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         const data = await response.json();
         if (data.flag) {
@@ -210,6 +224,7 @@ const AddBooking = () => {
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${getToken()}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify(requestData),
@@ -233,7 +248,7 @@ const AddBooking = () => {
             const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
             )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback`;
-            
+
             console.log("VNPay URL:", vnpayUrl);
 
             const vnpayResponse = await fetch(vnpayUrl, {
@@ -243,7 +258,7 @@ const AddBooking = () => {
 
             const vnpayResult = await vnpayResponse.text();
             console.log("VNPay API Response:", vnpayResult);
-            
+
             if (vnpayResult.startsWith("http")) {
               window.location.href = vnpayResult; // Redirect to VNPay
               return;
@@ -279,9 +294,9 @@ const AddBooking = () => {
         );
       case 1:
         return selectedOption === "Room" ? (
-          <BookingRoomForm formData={formData}/>
+          <BookingRoomForm formData={formData} />
         ) : (
-          <BookingServiceForm formData={formData}/>
+          <BookingServiceForm formData={formData} />
         );
       case 2:
         return (

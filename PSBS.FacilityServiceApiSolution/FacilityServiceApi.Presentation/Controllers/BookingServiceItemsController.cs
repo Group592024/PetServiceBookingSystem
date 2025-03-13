@@ -55,7 +55,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         // POST api/<BookingServiceItemsController>
         [HttpPost]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreateServiceItem([FromBody] CreateBookingServiceItemDTO createBookingServiceItem)
         {
 
