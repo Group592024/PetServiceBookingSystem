@@ -159,6 +159,9 @@ namespace ReservationApi.Presentation.Controllers
                     Console.WriteLine($"Camera: {room.Camera}");
                     Console.WriteLine("----------------------------");
                 }
+                //token
+                string authorizationHeader = Request.Headers["Authorization"];
+                string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
                 //check booking confirmed
                 var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
@@ -170,7 +173,8 @@ namespace ReservationApi.Presentation.Controllers
                         List<RoomHistoryDTO> bookingroomDetail;
                         using (HttpClient client = new HttpClient())
                         {
-                            client.BaseAddress = new Uri("http://localhost:5023/api/");
+                            client.BaseAddress = new Uri("http://localhost:5050/api/");
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                             HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
                             if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -201,7 +205,7 @@ namespace ReservationApi.Presentation.Controllers
                             {
                                 return BadRequest(new { flag = false, message = "The system has a booking in this time." });
                             }
-                            if ( room.End >= roomHistory.bookingStartDate &&  room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
+                            if (room.End >= roomHistory.bookingStartDate && room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
                             {
                                 return BadRequest(new { flag = false, message = "The system has a booking in this time." });
                             }
@@ -226,7 +230,8 @@ namespace ReservationApi.Presentation.Controllers
                 //Create Room History
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    client.BaseAddress = new Uri("http://localhost:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Call RoomHistories API for each booked room
@@ -259,7 +264,8 @@ namespace ReservationApi.Presentation.Controllers
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5022/api/Voucher/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/Voucher/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         if (bookingRequest.VoucherId != null && bookingRequest.VoucherId != Guid.Empty)
@@ -319,6 +325,11 @@ namespace ReservationApi.Presentation.Controllers
                     Console.WriteLine($"Service Variant: {service.ServiceVariant}");
                     Console.WriteLine("----------------------------");
                 }
+
+                //token
+                string authorizationHeader = Request.Headers["Authorization"];
+                string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
                 var bookingTypeRequest = await context.BookingTypes.Where(bt => bt.BookingTypeName.Contains("Service")).FirstOrDefaultAsync();
                 Console.WriteLine("BookingType Id" + bookingTypeRequest.BookingTypeId);
 
@@ -337,7 +348,8 @@ namespace ReservationApi.Presentation.Controllers
                 //Create Booking item
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    client.BaseAddress = new Uri("http://localhost:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Call RoomHistories API for each booked room
@@ -366,7 +378,8 @@ namespace ReservationApi.Presentation.Controllers
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5022/api/Voucher/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/Voucher/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         if (bookingRequest.VoucherId != null && bookingRequest.VoucherId != Guid.Empty)
@@ -410,6 +423,12 @@ namespace ReservationApi.Presentation.Controllers
         [HttpPut("updateRoomStatus/{bookingId}")]
         public async Task<IActionResult> UpdateBookingRoomStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
+            //token
+            string authorizationHeader = Request.Headers["Authorization"];
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+            
+
             var booking = await context.Bookings.FindAsync(bookingId);
             if (booking == null) return NotFound(new Response(false, "Booking not found."));
 
@@ -426,7 +445,8 @@ namespace ReservationApi.Presentation.Controllers
                 List<RoomHistoryDTO> roomHistoryDTOs;
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    client.BaseAddress = new Uri("http://localhost:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
                     if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -454,7 +474,8 @@ namespace ReservationApi.Presentation.Controllers
                         List<RoomHistoryDTO> bookingroomDetail;
                         using (HttpClient client = new HttpClient())
                         {
-                            client.BaseAddress = new Uri("http://localhost:5023/api/");
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                            client.BaseAddress = new Uri("http://localhost:5050/api/");
                             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                             HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
                             if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -499,7 +520,8 @@ namespace ReservationApi.Presentation.Controllers
                 List<RoomHistoryDTO> roomBookingHistory;
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    client.BaseAddress = new Uri("http://localhost:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
                     if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -525,7 +547,8 @@ namespace ReservationApi.Presentation.Controllers
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
@@ -571,7 +594,8 @@ namespace ReservationApi.Presentation.Controllers
                     LogExceptions.LogToConsole(room.ToString());
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
@@ -607,7 +631,8 @@ namespace ReservationApi.Presentation.Controllers
                 List<RoomHistoryDTO> roomBookingHistory;
                 using (HttpClient client = new HttpClient())
                 {
-                    client.BaseAddress = new Uri("http://localhost:5023/api/");
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    client.BaseAddress = new Uri("http://localhost:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
                     if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -633,7 +658,8 @@ namespace ReservationApi.Presentation.Controllers
                 {
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
@@ -679,7 +705,8 @@ namespace ReservationApi.Presentation.Controllers
                     LogExceptions.LogToConsole(room.ToString());
                     using (HttpClient client = new HttpClient())
                     {
-                        client.BaseAddress = new Uri("http://localhost:5023/api/");
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        client.BaseAddress = new Uri("http://localhost:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
@@ -698,7 +725,8 @@ namespace ReservationApi.Presentation.Controllers
                 {
                     var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
 
-                    var requestUrl = $"http://localhost:5000/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                    var requestUrl = $"http://localhost:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
 
                     // Sending request to update user points
                     var pointUpdateResponse = await client.PutAsync(requestUrl, null);
@@ -720,6 +748,10 @@ namespace ReservationApi.Presentation.Controllers
         [HttpPut("updateServiceStatus/{bookingId}")]
         public async Task<IActionResult> UpdateBookingServiceStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
+            //token
+            string authorizationHeader = Request.Headers["Authorization"];
+            string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
             var booking = await context.Bookings.FindAsync(bookingId);
             if (booking == null) return NotFound(new Response(false, "Booking not found."));
             var bookingCancel = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Cancelled"));
@@ -752,9 +784,10 @@ namespace ReservationApi.Presentation.Controllers
                 //Point rule
                 using (HttpClient client = new HttpClient())
                 {
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
 
-                    var requestUrl = $"http://localhost:5000/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+                    var requestUrl = $"http://localhost:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
 
                     // Sending request to update user points
                     var pointUpdateResponse = await client.PutAsync(requestUrl, null);
