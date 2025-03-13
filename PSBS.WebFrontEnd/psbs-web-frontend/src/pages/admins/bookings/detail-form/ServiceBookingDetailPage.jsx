@@ -173,7 +173,12 @@ const ServiceBookingDetailPage = () => {
     try {
       const response = await axios.put(
         `http://localhost:5115/Bookings/updateServiceStatus/${bookingId}`,
-        { status: nextStatus }
+        {
+          status: nextStatus,
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
       );
 
       if (response.data.flag) {

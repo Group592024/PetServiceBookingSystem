@@ -13,7 +13,7 @@ const BookingServiceChoice = ({ formData, handleChange, services ,data}) => {
     if (formData.service) {
       const fetchServiceVariants = async () => {
         try {
-          const response = await fetch(`http://localhost:5050/service/${formData.service}`,
+          const response = await fetch(`http://localhost:5050/api/ServiceVariant/service/${formData.service}`,
             {
               headers: {
                 Authorization: `Bearer ${getToken()}`,

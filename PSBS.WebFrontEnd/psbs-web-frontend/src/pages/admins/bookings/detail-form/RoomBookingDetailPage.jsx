@@ -106,7 +106,11 @@ const RoomBookingDetailPage = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(
-            `http://localhost:5115/Bookings/cancel/${bookingId}`
+            `http://localhost:5115/Bookings/cancel/${bookingId}`, {
+              headers: {
+                  Authorization: `Bearer ${getToken()}`
+              }
+          }
           );
 
           if (response.data.flag) {
@@ -151,7 +155,11 @@ const RoomBookingDetailPage = () => {
     try {
       const response = await axios.put(
         `http://localhost:5115/Bookings/updateRoomStatus/${bookingId}`,
-        { status: nextStatus }
+        { status: nextStatus,
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+        }
+         }
       );
 
       if (response.data.flag) {
