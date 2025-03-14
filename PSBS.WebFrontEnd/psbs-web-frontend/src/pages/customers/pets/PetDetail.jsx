@@ -185,7 +185,10 @@ const CustomerPetDetail = () => {
                   <div className='text-center mt-6 space-y-4'>
                     <h1 className='text-3xl font-bold text-gray-800'>{pet.petName}</h1>
                     <div className='flex justify-center gap-4'>
-                      <span className='px-4 py-2 bg-blue-50 text-blue-600 rounded-lg font-medium'>
+                      <span className={`px-4 py-2 rounded-lg font-medium ${pet.petGender
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'bg-pink-50 text-pink-600'
+                        }`}>
                         {pet.petGender ? '♂ Male' : '♀ Female'}
                       </span>
                       <span className='px-4 py-2 bg-green-50 text-green-600 rounded-lg font-medium'>

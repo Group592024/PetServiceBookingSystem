@@ -326,7 +326,7 @@ const CustomerPetEdit = () => {
                                         <div className="relative">
                                             <input
                                                 type="date"
-                                                className="hidden"
+                                                className="absolute left-0 top-full mt-1 w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
                                                 value={pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : ''}
                                                 onChange={(e) => {
                                                     setPet({ ...pet, dateOfBirth: e.target.value });
@@ -334,6 +334,7 @@ const CustomerPetEdit = () => {
                                                 }}
                                                 max={new Date().toISOString().split('T')[0]}
                                                 id="datePicker"
+                                                style={{ opacity: 0, zIndex: -1 }}
                                             />
                                             <input
                                                 type="text"
