@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import "./addUser.css";
 import { getData } from "../../../../../Utilities/ApiFunctions";
-
-const AddUser = ({ signalRService, currentUser, currentList }) => {
+import CloseIcon from "@mui/icons-material/Close";
+const AddUser = ({ signalRService, currentUser, currentList, setClose }) => {
   const [userList, setUserList] = useState([]);
   const [filteredUserList, setFilteredUserList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -16,7 +16,10 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
           const filtered = data.data.filter(
             (user) =>
               user.accountId !== currentUser.accountId &&
-            !currentList.some((chat) => chat.serveFor === user.accountId && !chat.isSupportRoom) // Exclude users in currentList
+              !currentList.some(
+                (chat) =>
+                  chat.serveFor === user.accountId && !chat.isSupportRoom
+              ) // Exclude users in currentList
           );
           setUserList(filtered);
           setFilteredUserList(filtered); // Set the filtered list initially to full list
@@ -41,7 +44,11 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
       const senderId = currentUser.accountId;
       await signalRService.invoke("CreateChatRoom", senderId, receiverId);
     } catch (err) {
-      Swal.fire("Error", "Failed to create chat room. Please try again.", "error");
+      Swal.fire(
+        "Error",
+        "Failed to create chat room. Please try again.",
+        "error"
+      );
       console.error("Error creating chat room:", err);
     }
   };
@@ -49,7 +56,6 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
   // Handle success and failure from SignalR
   useEffect(() => {
     signalRService.on("ChatRoomCreated", () => {
-     
       Swal.fire("Success", "Chat room created successfully!", "success");
     });
 
@@ -65,6 +71,9 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
 
   return (
     <div className="addUser">
+      <div className="close-button" onClick={() => setClose((prev) => !prev)}>
+        <CloseIcon />
+      </div>
       <form onSubmit={(e) => e.preventDefault()}>
         <input
           type="text"
@@ -72,7 +81,9 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button type="button" onClick={handleSearch}>Search</button>
+        <button type="button" onClick={handleSearch}>
+          Search
+        </button>
       </form>
 
       <div className="userContainer">
@@ -80,10 +91,19 @@ const AddUser = ({ signalRService, currentUser, currentList }) => {
           filteredUserList.map((user) => (
             <div className="user" key={user.accountId}>
               <div className="detail">
-                <img src="./avatar.png" alt="" />
+                <img
+                  src={
+                    user.accountImage
+                      ? `http://localhost:5050/account-service/images/${user.accountImage}`
+                      : "/avatar.png"
+                  }
+                  alt="Profile"
+                />
                 <span>{user.accountName}</span>
               </div>
-              <button onClick={() => handleAdd(user.accountId)}>Add User</button>
+              <button onClick={() => handleAdd(user.accountId)}>
+                Add User
+              </button>
             </div>
           ))
         ) : (

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatServiceApi.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatServiceDBContext))]
-    [Migration("20250211153324_Init")]
+    [Migration("20250315143007_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -44,7 +44,6 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ChatMessageId");
@@ -64,7 +63,6 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("LastMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdateAt")

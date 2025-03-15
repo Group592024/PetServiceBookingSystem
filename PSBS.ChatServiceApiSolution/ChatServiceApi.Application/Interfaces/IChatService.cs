@@ -9,7 +9,7 @@ namespace ChatServiceApi.Application.Interfaces
         Task<ChatRoom?> GetChatRoomAsync(Guid chatRoomId);
         Task<List<ChatUserDTO>> GetUserChatRoomsAsync(Guid userId);
         Task<List<ChatMessage>> GetChatMessagesAsync(Guid chatRoomId, Guid uid);
-        Task SendMessageAsync(Guid chatRoomId, Guid senderId, string message);
+        Task SendMessageAsync(Guid chatRoomId, Guid senderId, string? message, string? imageData);
         Task<Response> CreateChatRoom(Guid senderId, Guid receiverId);
         Task<List<Guid>> GetChatRoomParticipants(Guid chatRoomId);
         Task<Response> AssignStaffToChatRoom(Guid chatRoomId, Guid staffId, Guid customerId);

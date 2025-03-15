@@ -16,7 +16,7 @@ namespace ChatServiceApi.Infrastructure.Migrations
                 columns: table => new
                 {
                     ChatRoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LastMessage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastMessage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsSupportRoom = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -31,7 +31,7 @@ namespace ChatServiceApi.Infrastructure.Migrations
                 {
                     ChatMessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SenderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Image = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ChatRoomId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)

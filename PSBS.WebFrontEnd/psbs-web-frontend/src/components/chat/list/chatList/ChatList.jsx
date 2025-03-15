@@ -121,7 +121,14 @@ const ChatList = ({ signalRService, currentUser }) => {
           className={`item ${chat.isSupportRoom ? "support" : ""}`} // Apply support class dynamically
           onClick={() => handleSelect(chat)}
         >
-          <img src={chat.user.data?.avatar || "/avatar.png"} alt="" />
+          <img
+            src={
+              chat?.user.data.accountImage
+                ? `http://localhost:5050/account-service/images/${chat.user.data.accountImage}`
+                : "/avatar.png"
+            }
+            alt="Profile"
+          />
           <div className="texts">
             <span>
               {chat.isSupportRoom && currentUser.roleId === "user"
@@ -144,6 +151,7 @@ const ChatList = ({ signalRService, currentUser }) => {
           signalRService={signalRService}
           currentUser={currentUser}
           currentList={chats}
+          setClose={setAddMode}
         />
       )}
     </div>

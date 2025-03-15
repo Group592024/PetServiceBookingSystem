@@ -1,9 +1,11 @@
 ﻿using ChatServiceApi.Application.DTOs;
 using ChatServiceApi.Application.Interfaces;
-using ChatServiceApi.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace ChatServiceApi.Presentation.Controllers
 {
@@ -11,75 +13,34 @@ namespace ChatServiceApi.Presentation.Controllers
     [ApiController]
     public class ChatControllers : ControllerBase
     {
-        private readonly IChatService _chatService;
+        private readonly IChatRepository _chatRepository;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ChatControllers(IChatService chatService)
+        public ChatControllers( IChatRepository chatRepository, IWebHostEnvironment webHostEnvironment)
         {
-            _chatService = chatService;
+            _chatRepository = chatRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
 
-        /// <summary>
-        /// Get chat rooms for a user
-        /// </summary>
-        [HttpGet("user/{userId}/rooms")]
-        public async Task<ActionResult<List<ChatUserDTO>>> GetUserChatRooms(Guid userId)
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadImage(IFormFile image)
         {
-            var result = await _chatService.GetUserChatRoomsAsync(userId);
-            return Ok(result);
+            // Call the repository's StoreImage method, passing the image and webRootPath
+            var response = await _chatRepository.StoreImage(image, _webHostEnvironment.WebRootPath);
+
+            if (response.Flag)
+            {
+                // Construct the full URL
+                string imageUrl = $"{Request.Scheme}://{Request.Host}{response.Data}";
+
+                // Return a successful response with the constructed URL
+                return Ok(new Response(true, response.Message) { Data = imageUrl });
+            }
+            else
+            {
+                // Return a bad request response with the repository's error message
+                return BadRequest(response);
+            }
         }
-
-        /// <summary>
-        /// Get messages from a chat room
-        /// </summary>
-        [HttpGet("room/{chatRoomId}/messages")]
-        public async Task<ActionResult<List<ChatMessage>>> GetChatMessages(Guid chatRoomId, Guid uid)
-        {
-            var messages = await _chatService.GetChatMessagesAsync(chatRoomId, uid);
-            return Ok(messages);
-        }
-
-        /// <summary>
-        /// Send a message to a chat room
-        /// </summary>
-        [HttpPost("room/{chatRoomId}/send")]
-        public async Task<IActionResult> SendMessage(Guid chatRoomId, [FromBody] SendMessageRequest request)
-        {
-            await _chatService.SendMessageAsync(chatRoomId, request.SenderId, request.Message);
-            return Ok(new { Message = "Message sent successfully" });
-        }
-
-        /// <summary>
-        /// Create a new chat room
-        /// </summary>
-        [HttpPost("create")]
-        public async Task<ActionResult<Response>> CreateChatRoom([FromBody] CreateChatRoomRequest request)
-        {
-            var response = await _chatService.CreateChatRoom(request.SenderId, request.ReceiverId);
-            return Ok(response);
-        }
-
-        /// <summary>
-        /// Get participants in a chat room
-        /// </summary>
-        [HttpGet("room/{chatRoomId}/participants")]
-        public async Task<ActionResult<List<Guid>>> GetChatRoomParticipants(Guid chatRoomId)
-        {
-            var participants = await _chatService.GetChatRoomParticipants(chatRoomId);
-            return Ok(participants);
-        }
-    }
-
-    // DTOs for API requests
-    public class SendMessageRequest
-    {
-        public Guid SenderId { get; set; }
-        public string Message { get; set; } = string.Empty;
-    }
-
-    public class CreateChatRoomRequest
-    {
-        public Guid SenderId { get; set; }
-        public Guid ReceiverId { get; set; }
     }
 }
-

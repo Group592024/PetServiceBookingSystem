@@ -8,10 +8,15 @@ import { formatDate } from "../../../Utilities/convertDateTime";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import Swal from "sweetalert2";
 import { getData } from "../../../Utilities/ApiFunctions";
+import { Avatar, Chip } from "@mui/material";
 const ChatBox = () => {
   const [open, setOpen] = useState(false);
   const [chat, setChat] = useState([]); // Ensure it's initialized as an array
   const [text, setText] = useState("");
+  const [img, setImg] = useState({
+    file: null,
+    url: "",
+  });
   const [userMap, setUserMap] = useState({});
   const { chatId, user, isSupportChat, ChangeChat } = useChatStore();
   const { currentUser } = useUserStore();
@@ -63,7 +68,12 @@ const ChatBox = () => {
       await fetchUserDetails(senderIds); // Fetch user details
     };
 
-    const handleReceiveMessage = (senderId, messageText, updatedAt) => {
+    const handleReceiveMessage = (
+      senderId,
+      messageText,
+      updatedAt,
+      imageUrl
+    ) => {
       console.log("New message received:", { senderId, messageText });
       setChat((prevChat) => [
         ...prevChat,
@@ -72,6 +82,7 @@ const ChatBox = () => {
           createdAt: updatedAt,
           senderId,
           text: messageText,
+          image: imageUrl,
         },
       ]);
     };
@@ -107,20 +118,101 @@ const ChatBox = () => {
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
+  const handleImg = (e) => {
+    if (e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      console.log("Selected file:", selectedFile); // Log the selected file
 
-  const handleSend = async () => {
-    if (text.trim() === "") return;
-    try {
-      await signalRService.invoke(
-        "SendMessage",
-        chatId,
-        currentUser.accountId,
-        text
-      );
-      setText(""); // Clear input after sending
-    } catch (err) {
-      console.log("Error sending message:", err);
+      setImg({
+        file: selectedFile,
+        url: URL.createObjectURL(selectedFile),
+      });
+      console.log("Selected ne he:", img); // Log the selected file
     }
+  };
+  const handleSend = async () => {
+    if (text.trim() === "" && !img.file) return;
+
+    try {
+      if (img.file) {
+        // File size validation
+        const maxSize = 5 * 1024 * 1024; // 5MB limit
+        if (img.file.size > maxSize) {
+          Swal.fire("Error", "Image size exceeds the limit (5MB).", "error");
+          return;
+        }
+
+        // File type validation
+        const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
+        if (!allowedTypes.includes(img.file.type)) {
+          Swal.fire(
+            "Error",
+            "Invalid file type. Only JPEG, PNG, and GIF are allowed.",
+            "error"
+          );
+          return;
+        }
+
+        // Upload the image using the API
+        const formData = new FormData();
+        formData.append("image", img.file);
+
+        const response = await fetch(
+          "http://localhost:5050/api/ChatControllers/upload-image",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to upload image.");
+        }
+
+        const imageData = await response.json();
+
+        if (imageData.flag) {
+          const imageUrl = imageData.data;
+
+          // Send the image URL via SignalR
+          await signalRService.invoke(
+            "SendMessage",
+            chatId,
+            currentUser.accountId,
+            text,
+            imageUrl // Send the image URL
+          );
+
+          setText("");
+        } else {
+          Swal.fire("Error", imageData.message, "error");
+        }
+      } else {
+        // Send text-only message via SignalR
+        await signalRService.invoke(
+          "SendMessage",
+          chatId,
+          currentUser.accountId,
+          text,
+          null // Send null for imageUrl when text only
+        );
+        setText("");
+      }
+
+      setImg({
+        file: null,
+        url: "",
+      });
+    } catch (err) {
+      console.log(err);
+      Swal.fire("Error", "Failed to send the message.", "error");
+    }
+  };
+  const handleRemoveImg = () => {
+    setImg({
+      file: null,
+      url: "",
+    });
   };
   const handleKeyPress = (e) => {
     if (e.key === "Enter") {
@@ -176,12 +268,19 @@ const ChatBox = () => {
     <div className="chat">
       <div className="top">
         <div className="user">
-          <img src="/avatar.png" alt="" />
+          <img
+            src={
+              user?.accountImage
+                ? `http://localhost:5050/account-service/images/${user.accountImage}`
+                : "/avatar.png"
+            }
+            alt="Profile"
+          />
           <div className="texts">
             <span>
               {isSupportChat && currentUser.roleId === "user"
                 ? "Support Agent"
-                : user?.accountName}
+                : `Support For ${user?.accountName}`}
             </span>
 
             <p>Hey it's all me just don't go</p>
@@ -209,10 +308,15 @@ const ChatBox = () => {
             key={message.chatMessageId}
           >
             <div className="texts">
-              <strong>
-                {userMap[message.senderId]?.accountName || message.name}:
-              </strong>
-              <p>{message.text}</p>
+              {isSupportChat && (
+                <h6 className="font-semibold text-xs">
+                  {userMap[message.senderId]?.accountName || message.name}
+                </h6>
+              )}
+              {message.image && <img src={message.image} alt="" />}
+              {message.text && message.text.trim() !== "" && (
+                <p>{message.text}</p>
+              )}
               <span>{formatDate(message.createdAt)}</span>
             </div>
           </div>
@@ -220,6 +324,30 @@ const ChatBox = () => {
         <div ref={endRef}></div>
       </div>
       <div className="bottom">
+        <div className="icons">
+          {/* Toggle visibility based on img.url */}
+          {!img.url && (
+            <label htmlFor="file">
+              <img src="/img.png" alt="" />
+            </label>
+          )}
+          <input
+            type="file"
+            id="file"
+            style={{ display: "none" }}
+            onChange={handleImg}
+            accept="image/*"
+          />
+        </div>
+        {img.url && (
+          <Chip
+            avatar={<Avatar alt="Selected Image" src={img.url} />}
+            label=""
+            onDelete={handleRemoveImg}
+            color="primary"
+          />
+        )}
+
         <input
           type="text"
           placeholder="Type a message..."

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
 using PSPS.AccountAPI.Infrastructure.DependencyInjection;
@@ -44,6 +45,12 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "images")), // Replace "images" with your folder name
+    RequestPath = "/images" // The URL path to access the images (e.g., /images/myimage.jpg)
+});
 app.UseCors("AllowAllOrigins");
 app.UserInfrastructurePolicy();
 app.UseHttpsRedirection();
