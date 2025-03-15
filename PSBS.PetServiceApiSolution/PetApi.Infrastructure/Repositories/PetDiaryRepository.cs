@@ -10,20 +10,98 @@ namespace PetApi.Infrastructure.Repositories
 {
     public class PetDiaryRepository(PetDbContext context) : IPetDiary
     {
-        public async Task<(IEnumerable<PetDiary>, int totalRecords)> GetAllDiariesByPetIdsAsync(Guid id, int pageIndex = 1, int pageSize = 4)
+
+        public async Task<IEnumerable<string>> GetAllCategories(Guid petId)
+        {
+            try
+            {
+                var categories = await context.PetDiarys
+                    .Where(p => p.Pet_ID == petId)
+                    .GroupBy(p => p.Category.ToLower().Trim())
+                    .Select(s => s.Key.ToString())
+                    .ToListAsync();
+
+                return categories ?? new List<string>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred retrieving diary categories of the pet");
+            }
+        }
+
+        public async Task<IEnumerable<PetDiary>> GetDiariesByCategory(string category)
         {
             try
             {
                 var diaries = await context.PetDiarys
-                    .Where(p => p.Pet_ID == id)
-                    .OrderByDescending(p => p.Diary_Date)
-                    .Skip((pageIndex - 1) * pageSize)
-                    .Take(pageSize)
+                    .Where(p => p.Category.ToLower().Trim() == category.ToLower().Trim())
                     .ToListAsync();
 
-                var totalRecords = await context.PetDiarys
-                    .Where(p => p.Pet_ID == id)
-                    .CountAsync();
+                return diaries ?? new List<PetDiary>();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred retrieving diaries of the pet by category");
+            }
+        }
+
+        public async Task<(IEnumerable<PetDiary>, int totalRecords)> GetAllDiariesByPetIdsAsync(string? category, Guid id, int pageIndex = 1, int pageSize = 4)
+        {
+            try
+            {
+                var diaries = new List<PetDiary>();
+                int totalRecords;
+
+                if (!string.IsNullOrEmpty(category))
+                {
+
+                    if ((category.ToLower().Trim().Equals("all")))
+                    {
+                        diaries = await context.PetDiarys
+                            .Where(p => p.Pet_ID == id)
+                            .OrderByDescending(p => p.Diary_Date)
+                            .Skip((pageIndex - 1) * pageSize)
+                            .Take(pageSize)
+                            .ToListAsync();
+
+                        totalRecords = await context.PetDiarys
+                             .Where(p => p.Pet_ID == id)
+                             .CountAsync();
+                    }
+                    else
+                    {
+
+                        Console.WriteLine("co category");
+
+                        diaries = await context.PetDiarys
+                        .Where(p => p.Pet_ID == id && p.Category.ToLower().Trim().Equals(category.ToLower().Trim()))
+                        .OrderByDescending(p => p.Diary_Date)
+                        .Skip((pageIndex - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+
+                        totalRecords = await context.PetDiarys
+                            .Where(p => p.Pet_ID == id && p.Category.ToLower().Trim().Equals(category.ToLower().Trim()))
+                            .CountAsync();
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("ko co category");
+
+                    diaries = await context.PetDiarys
+                   .Where(p => p.Pet_ID == id)
+                   .OrderByDescending(p => p.Diary_Date)
+                   .Skip((pageIndex - 1) * pageSize)
+                   .Take(pageSize)
+                   .ToListAsync();
+
+                    totalRecords = await context.PetDiarys
+                         .Where(p => p.Pet_ID == id)
+                         .CountAsync();
+                }
 
                 return (diaries ?? new List<PetDiary>(), totalRecords);
             }
@@ -141,6 +219,8 @@ namespace PetApi.Infrastructure.Repositories
                     return new Response(false, $"Diary with ID {entity.Diary_ID} not found");
                 //context.Entry(pet).State = EntityState.Detached;
                 pet.Diary_Content = entity.Diary_Content;
+                pet.Category = entity.Category;
+                pet.Diary_Date = entity.Diary_Date;
 
 
                 context.PetDiarys.Update(pet);

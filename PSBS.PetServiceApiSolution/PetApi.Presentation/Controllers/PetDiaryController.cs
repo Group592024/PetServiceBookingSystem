@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
+using PetApi.Domain.Entities;
 using PSPS.SharedLibrary.Responses;
 
 namespace PetApi.Presentation.Controllers
@@ -21,9 +22,58 @@ namespace PetApi.Presentation.Controllers
             _pet = pet;
         }
 
+        [HttpGet("categories/{petId}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCategoriesByPetId(Guid petId)
+        {
+            var pet = await _pet.GetByIdAsync(petId);
+
+            if (pet == null)
+            {
+                return NotFound(new Response(false, $"Pet with GUID {petId} not found or is deleted"));
+            }
+
+            var categories = await _diary.GetAllCategories(petId);
+
+
+            if (!categories.Any())
+            {
+                return NotFound(new Response(false, "No categories found in the database"));
+            }
+
+            return Ok(new Response(true, "Diary categories retrieved successfully")
+            {
+                Data = new
+                {
+                    data = categories
+                }
+            });
+        }
+
+        [HttpGet("byCategories")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<IEnumerable<PetDiary>>> GetDiariesByCategory([FromQuery] string category)
+        {
+            var diaries = await _diary.GetDiariesByCategory(category);
+
+
+            if (!diaries.Any())
+            {
+                return NotFound(new Response(false, "No diaries found in the database"));
+            }
+
+            return Ok(new Response(true, "Diaries retrieved successfully")
+            {
+                Data = new
+                {
+                    data = diaries
+                }
+            });
+        }
+
         [HttpGet("diaries/{id}")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
-        public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId(Guid id, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 4)
+        public async Task<ActionResult<IEnumerable<PetDiaryDTO>>> GetPetDiaryListByPetId([FromQuery] string? category, [FromRoute] Guid id, [FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 4)
         {
             var pet = await _pet.GetByIdAsync(id);
 
@@ -32,7 +82,7 @@ namespace PetApi.Presentation.Controllers
                 return NotFound(new Response(false, $"Pet with GUID {id} not found or is deleted"));
             }
 
-            var (diaries, totalPages) = await _diary.GetAllDiariesByPetIdsAsync(id, pageIndex, pageSize);
+            var (diaries, totalPages) = await _diary.GetAllDiariesByPetIdsAsync(category, id, pageIndex, pageSize);
 
 
             if (!diaries.Any())
@@ -82,7 +132,8 @@ namespace PetApi.Presentation.Controllers
                 return NotFound($"Pet with ID {id} not found");
 
             bool hasChanges =
-                existingPet.Diary_Content != pet.Diary_Content;
+                existingPet.Diary_Content != pet.Diary_Content ||
+                existingPet.Category != pet.Category;
 
             if (!hasChanges)
             {
