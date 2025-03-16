@@ -118,7 +118,9 @@ const ChatList = ({ signalRService, currentUser }) => {
       {chats.map((chat) => (
         <div
           key={chat.chatRoomId}
-          className={`item ${chat.isSupportRoom ? "support" : ""}`} // Apply support class dynamically
+          className={`item ${chat.isSupportRoom ? "support" : ""} ${
+            chat.chatRoomId === chatId ? "selected" : ""
+          }`}
           onClick={() => handleSelect(chat)}
         >
           <img
@@ -131,9 +133,11 @@ const ChatList = ({ signalRService, currentUser }) => {
           />
           <div className="texts">
             <span>
-              {chat.isSupportRoom && currentUser.roleId === "user"
+              {chat.isSupportRoom && currentUser.roleId !== "user"
+                ? `Support For ${chat.user.data?.accountName}`
+                : chat.isSupportRoom && currentUser.roleId === "user"
                 ? "Support Agent"
-                : chat.user.data?.accountName}
+                : `${chat.user.data?.accountName}`}
             </span>
             <p className="truncate max-w-[200px]">
               {chat?.lastMessage || "null"}

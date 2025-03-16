@@ -194,7 +194,7 @@ const ChatBox = () => {
           chatId,
           currentUser.accountId,
           text,
-          null // Send null for imageUrl when text only
+          "" // Send null for imageUrl when text only
         );
         setText("");
       }
@@ -278,9 +278,11 @@ const ChatBox = () => {
           />
           <div className="texts">
             <span>
-              {isSupportChat && currentUser.roleId === "user"
+              {isSupportChat && currentUser.roleId !== "user"
+                ? `Support For ${user?.accountName}`
+                : isSupportChat && currentUser.roleId === "user"
                 ? "Support Agent"
-                : `Support For ${user?.accountName}`}
+                : `${user?.accountName}`}
             </span>
 
             <p>Hey it's all me just don't go</p>
@@ -313,7 +315,9 @@ const ChatBox = () => {
                   {userMap[message.senderId]?.accountName || message.name}
                 </h6>
               )}
-              {message.image && <img src={message.image} alt="" />}
+              {message.image && (
+                <img src={`http://localhost:5050${message.image}`} alt="" />
+              )}
               {message.text && message.text.trim() !== "" && (
                 <p>{message.text}</p>
               )}

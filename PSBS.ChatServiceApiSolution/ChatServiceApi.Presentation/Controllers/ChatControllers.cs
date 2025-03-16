@@ -31,7 +31,7 @@ namespace ChatServiceApi.Presentation.Controllers
             if (response.Flag)
             {
                 // Construct the full URL
-                string imageUrl = $"{Request.Scheme}://{Request.Host}{response.Data}";
+                string imageUrl = $"{response.Data}";
 
                 // Return a successful response with the constructed URL
                 return Ok(new Response(true, response.Message) { Data = imageUrl });
@@ -42,5 +42,6 @@ namespace ChatServiceApi.Presentation.Controllers
                 return BadRequest(response);
             }
         }
+        
     }
 }
