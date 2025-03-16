@@ -74,6 +74,12 @@ class _ChatListWidgetState extends State<ChatListWidget> {
       print('SignalR: Received staffremoved event');
       showSuccessDialog(context, "Leave room successfully");
     });
+    signalRService.on('SupportChatRoomCreated', (arguments) {
+      showSuccessDialog(context, "Support chat room created!");
+    });
+    signalRService.on('SupportChatRoomCreationFailed', (arguments) {
+      showErrorDialog(context, arguments.toString());
+    });
 
     try {
       await signalRService
@@ -94,6 +100,7 @@ class _ChatListWidgetState extends State<ChatListWidget> {
 
       if (userDetails != null) {
         updatedChats.add(chatRoom.copyWith(user: userDetails));
+        print("haha: " + userDetails.accountImage.toString());
       } else {
         updatedChats.add(chatRoom.copyWith(
             user: User(
@@ -117,6 +124,40 @@ class _ChatListWidgetState extends State<ChatListWidget> {
   void dispose() {
     signalRService.stopConnection();
     super.dispose();
+  }
+
+  void _initiateSupportChat() async {
+    if (widget.currentUser.roleId == 'user') {
+      bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Start Support Conversation?"),
+            content: Text("Are you sure you want to initiate a support chat?"),
+            actions: <Widget>[
+              TextButton(
+                child: Text("No, cancel"),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: Text("Yes, start chat!"),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmed == true) {
+        try {
+          await signalRService
+              .invoke("CreateSupportChatRoom", [widget.currentUser.accountId]);
+        } catch (error) {
+          print("Error invoking CreateSupportChatRoom: $error");
+          showErrorDialog(context, "Failed to initiate chat room creation.");
+        }
+      }
+    }
   }
 
   void _showAddUserWidget(BuildContext context) {
@@ -210,6 +251,20 @@ class _ChatListWidgetState extends State<ChatListWidget> {
                         color: Colors.white),
                   ),
                 ),
+                SizedBox(width: 20),
+                GestureDetector(
+                  onTap: _initiateSupportChat,
+                  child: Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: Color.fromRGBO(17, 25, 40, 0.5),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(_addMode ? Icons.remove : Icons.support_agent,
+                        color: Colors.white),
+                  ),
+                ),
               ],
             ),
           ),
@@ -245,10 +300,15 @@ class _ChatListWidgetState extends State<ChatListWidget> {
                               Row(
                                 children: [
                                   CircleAvatar(
+                                    backgroundImage: chatRoom
+                                                .user?.accountImage !=
+                                            null
+                                        ? NetworkImage(
+                                            "http://10.0.2.2:5050/account-service/images/${chatRoom.user?.accountImage}")
+                                        : AssetImage(
+                                                "assets/default-avatar.png")
+                                            as ImageProvider,
                                     radius: 25,
-                                    backgroundImage: AssetImage(
-                                        chatRoom.user?.avatar ??
-                                            'assets/avatar.png'),
                                   ),
                                   SizedBox(width: 20),
                                   Expanded(

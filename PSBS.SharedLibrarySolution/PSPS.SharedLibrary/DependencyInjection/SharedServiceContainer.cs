@@ -51,7 +51,7 @@ namespace PSPS.SharedLibrary.DependencyInjection
             // Use global exception
             app.UseMiddleware<GlobalException>();
             // Register middleware to block all outsiders api calls
-            //app.UseMiddleware<ListenToOnlyApiGateway>();
+            app.UseMiddleware<ListenToOnlyApiGateway>();
             return app;
         }
     }

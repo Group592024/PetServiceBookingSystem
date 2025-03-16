@@ -1,6 +1,5 @@
 using ChatServiceApi.Infrastructure.DependencyInjection;
 using ChatServiceApi.Presentation.Hubs;
-using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +9,7 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.AddSignalR();
 var app = builder.Build();
@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseStaticFiles();
 app.UserInfrastructurePolicy();
 app.UseAuthorization();
 
