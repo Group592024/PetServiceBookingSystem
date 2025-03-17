@@ -24,7 +24,8 @@ namespace PetApi.Presentation.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Policy = "AdminOrStaff")]
-        public async Task<ActionResult<Dictionary<string, int>>> getPetCount(Guid id)
+        public async Task<ActionResult<Dictionary<string, int>>> getPetCount(Guid id,
+            int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
 
             var authString = HttpContext.Request.Headers["Authorization"].ToString();
@@ -32,7 +33,7 @@ namespace PetApi.Presentation.Controllers
             var auth = authString.Substring(7);
             Console.WriteLine("token nef: " + auth);
 
-            var response = await _facilityApiClient.GetPetCount(id,auth);
+            var response = await _facilityApiClient.GetPetCount(id, auth, year, month, startDate, endDate);
 
             Console.WriteLine("response day nay" + response.Count());
 
