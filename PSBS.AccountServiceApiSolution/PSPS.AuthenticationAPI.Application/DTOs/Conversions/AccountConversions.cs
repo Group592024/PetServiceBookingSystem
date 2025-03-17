@@ -15,6 +15,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
             AccountPhoneNumber = accountDTO.AccountPhoneNumber,
             AccountAddress = accountDTO.AccountAddress,
             AccountDob = accountDTO.AccountDob,
+            CreatedAt = accountDTO.CreatedAt,
+            UpdatedAt = accountDTO.UpdatedAt,
             AccountGender = accountDTO.AccountGender,
             AccountImage = accountDTO.AccountImage,
             AccountLoyaltyPoint = accountDTO.AccountLoyaltyPoint,
@@ -35,6 +37,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
                     account.AccountPhoneNumber!,
                     account.AccountAddress!,
                     account.AccountDob!.Value,
+                    account.CreatedAt!.Value,
+                    account.UpdatedAt!.Value,
                     account.AccountGender!,
                     account.AccountImage!,
                     account.AccountLoyaltyPoint!,
@@ -54,6 +58,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
                     a.AccountPhoneNumber!,
                     a.AccountAddress!,
                     a.AccountDob!.Value,
+                    a.CreatedAt!.Value,
+                    a.UpdatedAt!.Value,
                     a.AccountGender!,
                     a.AccountImage!,
                     a.AccountLoyaltyPoint!,
@@ -77,6 +83,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
             AccountPassword = registerAccountDTO.RegisterTempDTO.AccountPassword,
             AccountGender = registerAccountDTO.RegisterTempDTO.AccountGender,
             AccountDob = registerAccountDTO.RegisterTempDTO.AccountDob,
+            CreatedAt = registerAccountDTO.RegisterTempDTO.CreatedAt,
+            UpdatedAt = registerAccountDTO.RegisterTempDTO.UpdatedAt,
             AccountAddress = registerAccountDTO.RegisterTempDTO.AccountAddress,
             AccountImage = registerAccountDTO.RegisterTempDTO.AccountImage,
             AccountIsDeleted = false,
@@ -92,6 +100,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
             existingAccount.AccountPhoneNumber = updateAccountDTO.AccountPhoneNumber;
             existingAccount.AccountGender = updateAccountDTO.AccountGender;
             existingAccount.AccountDob = updateAccountDTO.AccountDob;
+            existingAccount.CreatedAt = updateAccountDTO.CreatedAt;
+            existingAccount.UpdatedAt = updateAccountDTO.UpdatedAt;
             existingAccount.AccountAddress = updateAccountDTO.AccountAddress;
             existingAccount.AccountImage = updateAccountDTO.AccountImage;
             return existingAccount;
@@ -106,6 +116,8 @@ namespace PSPS.AccountAPI.Application.DTOs.Conversions
             account.AccountPassword!,
             account.AccountGender!,
             account.AccountDob!.Value,
+            account.CreatedAt!.Value,
+            account.UpdatedAt!.Value,  
             account.AccountAddress!,
             account.AccountImage!,
             account.AccountLoyaltyPoint!,

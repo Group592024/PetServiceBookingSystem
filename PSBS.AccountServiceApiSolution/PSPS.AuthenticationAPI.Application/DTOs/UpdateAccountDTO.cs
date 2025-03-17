@@ -10,6 +10,8 @@ namespace PSPS.AccountAPI.Application.DTOs
          string? AccountPhoneNumber,
          string? AccountGender,
          DateTime? AccountDob,
+         DateTime? CreatedAt,
+         DateTime? UpdatedAt,
          string? AccountAddress,
          string? AccountImage,
          bool? isPickImage,

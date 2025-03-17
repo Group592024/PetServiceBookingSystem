@@ -20,23 +20,17 @@ const Register = () => {
     dob: '',
     address: '',
   });
-
   const navigate = useNavigate();
-
   const handleRegister = async (e) => {
     e.preventDefault();
-  
     let valid = true;
     let errorMessages = { ...errors };
-  
-    // Kiểm tra email và số điện thoại có tồn tại không
     if (!AccountName) {
       errorMessages.name = 'Name is required';
       valid = false;
     } else {
       errorMessages.name = '';
     }
-  
     if (!AccountEmail) {
       errorMessages.email = 'Email is required';
       valid = false;
@@ -49,7 +43,6 @@ const Register = () => {
         errorMessages.email = '';
       }
     }
-  
     if (!AccountPhoneNumber) {
       errorMessages.phone = 'Phone number is required';
       valid = false;
@@ -62,7 +55,6 @@ const Register = () => {
         errorMessages.phone = '';
       }
     }
-  
     if (!AccountPassword) {
       errorMessages.password = 'Password is required';
       valid = false;
@@ -72,14 +64,12 @@ const Register = () => {
     } else {
       errorMessages.password = '';
     }
-  
     if (!AccountGender) {
       errorMessages.gender = 'Gender is required';
       valid = false;
     } else {
       errorMessages.gender = '';
     }
-  
     if (!AccountDob) {
       errorMessages.dob = 'Date of birth is required';
       valid = false;
@@ -103,18 +93,17 @@ const Register = () => {
         }
       }
     }
-  
+
     if (!AccountAddress) {
       errorMessages.address = 'Address is required';
       valid = false;
     } else {
       errorMessages.address = '';
     }
-  
+
     setErrors(errorMessages);
-  
     if (!valid) return;
-  
+
     const formData = new FormData();
     formData.append('RegisterTempDTO.AccountName', AccountName);
     formData.append('RegisterTempDTO.AccountEmail', AccountEmail);
@@ -124,64 +113,75 @@ const Register = () => {
     formData.append('RegisterTempDTO.AccountDob', AccountDob);
     formData.append('RegisterTempDTO.AccountAddress', AccountAddress);
     formData.append('RegisterTempDTO.AccountImage', 'default.jpg');
-  
+
     try {
       const token = sessionStorage.getItem("token");
-    
       const response = await fetch('http://localhost:5050/api/Account/register', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`, 
-          'Accept': 'application/json', 
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         },
         body: formData,
       });
-    
-      const result = await response.json().catch(() => null);
-    
+
+      const contentType = response.headers.get('content-type');
+      let result;
+      if (contentType && contentType.includes('application/json')) {
+        result = await response.json().catch(() => null);
+      } else {
+        result = { message: await response.text() };
+      }
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+      console.log('Backend error details:', result);
+
       if (response.ok && result?.flag) {
         Swal.fire({
           icon: 'success',
-          title: 'Registration Successful!',
-          text: 'Please log in.',
-        }).then(() => navigate('/login'));
+          title: 'Registration Successful',
+          text: 'Your account has been registered successfully!',
+        }).then(() => {
+          navigate('/login');
+        });
       } else {
-        let newErrors = { ...errors };
-    
-        if (result?.message?.includes('Email already exists')) {
-          newErrors.email = result.message;
-        }
-        if (result?.message?.includes('Phone number already exists')) {
-          newErrors.phone = result.message;
-        }
-    
-        setErrors(newErrors);
-    
-        if (!result?.message?.includes('Email already exists') && 
-            !result?.message?.includes('Phone number already exists')) {
-          Swal.fire({
-            icon: 'error',
-            title: 'Registration Failed',
-            text: result?.message || 'Registration failed. Please try again.',
+        if (result && result.errors) {
+          setErrors({
+            name: result.errors.AccountName || '',
+            email: result.errors.AccountEmail || '',
+            phone: result.errors.AccountPhoneNumber || '',
+            password: result.errors.AccountPassword || '',
+            gender: result.errors.AccountGender || '',
+            dob: result.errors.AccountDob || '',
+            address: result.errors.AccountAddress || '',
           });
+        } else {
+          const message = result?.message || 'Registration failed. Please try again.';
+          if (message.toLowerCase().includes('phone')) {
+            setErrors(prev => ({ ...prev, phone: message }));
+          } else if (message.toLowerCase().includes('email')) {
+            setErrors(prev => ({ ...prev, email: message }));
+          } else {
+            setErrors(prev => ({ ...prev, email: message }));
+          }
         }
       }
     } catch (err) {
       console.error('Error:', err);
-      Swal.fire({
-        icon: 'error',
-        title: 'An error occurred',
-        text: err.message || 'Please try again later.',
-        footer: 'Network or server error. Please check your connection.',
-      });
+      setErrors(prev => ({ ...prev, email: err.message || 'Please try again later.' }));
     }
   };
-  
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
-        <div className="w-1/2 bg-gray-300 flex items-center justify-center">
-          <h1 className="text-4xl font-bold">LOGO</h1>
+        <div className="w-1/2 bg-blue-100 flex items-center justify-center">
+          <div className="logo-name font-bold text-3xl">
+            <i className="bx bxs-cat text-blue-500 text-5xl"></i>
+            <span className="text-black text-3xl">Pet</span>
+            <span className="text-blue-500 text-3xl">Ease</span>
+          </div>
         </div>
 
         <div className="w-1/2 p-8">
@@ -201,7 +201,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 required
               />
-              {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="email" className="block text-gray-700 font-medium">Email</label>
@@ -214,7 +214,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 required
               />
-              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="phone" className="block text-gray-700 font-medium">Phone Number</label>
@@ -227,7 +227,7 @@ const Register = () => {
                 placeholder="Enter your phone number"
                 required
               />
-              {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+              {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="password" className="block text-gray-700 font-medium">Password</label>
@@ -240,7 +240,7 @@ const Register = () => {
                 placeholder="Enter your password"
                 required
               />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="gender" className="block text-gray-700 font-medium">Gender</label>
@@ -255,7 +255,7 @@ const Register = () => {
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select>
-              {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
+              {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="dob" className="block text-gray-700 font-medium">Date of Birth</label>
@@ -267,7 +267,7 @@ const Register = () => {
                 className="w-full mt-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
               />
-              {errors.dob && <p className="text-red-500 text-sm">{errors.dob}</p>}
+              {errors.dob && <p className="text-red-500 text-sm mt-1">{errors.dob}</p>}
             </div>
             <div className="mb-4">
               <label htmlFor="address" className="block text-gray-700 font-medium">Address</label>
@@ -280,7 +280,7 @@ const Register = () => {
                 placeholder="Enter your address"
                 required
               />
-              {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+              {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
             </div>
             <button
               type="submit"

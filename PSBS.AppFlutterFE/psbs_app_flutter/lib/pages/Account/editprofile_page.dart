@@ -29,7 +29,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   File? profileImage;
   String? imagePreview;
   Map<String, dynamic>? account;
-  get filename => null;
 
   @override
   void initState() {
@@ -39,7 +38,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _loadAccountId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     setState(() {
       accountId = prefs.getString('accountId') ?? '';
     });
@@ -89,7 +87,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> fetchImage(String filename) async {
     if (filename.isEmpty) return;
-
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -124,17 +121,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final pickedFile =
         await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
-      // Manually extract the filename from the path
-      String fileName = pickedFile.path.split('/').last;
-
       setState(() {
-        profileImage =
-            File(pickedFile.path); // Keep the full path for uploading the image
+        profileImage = File(pickedFile.path);
         imagePreview = null;
         isImagePicked = true;
       });
-
-      print("Selected image file name: $fileName"); // Print the file name
+      print("Selected image file: ${pickedFile.path.split('/').last}");
     } else {
       setState(() {
         isImagePicked = false;
@@ -145,7 +137,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
-
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -154,12 +145,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         'PUT',
         Uri.parse('http://10.0.2.2:5050/api/Account'),
       );
-
-      // Thêm header vào request
       request.headers['Authorization'] = 'Bearer $token';
       request.headers['Content-Type'] = 'application/json';
-
-      // Gửi dữ liệu văn bản
+      String updatedAt =
+          DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now());
       request.fields['accountTempDTO.accountId'] = accountId;
       request.fields['accountTempDTO.accountName'] = nameController.text;
       request.fields['accountTempDTO.accountEmail'] = email ?? '';
@@ -171,6 +160,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       request.fields['accountTempDTO.accountAddress'] = addressController.text;
       request.fields['accountTempDTO.isPickImage'] = isImagePicked.toString();
       request.fields['accountTempDTO.roleId'] = role;
+      request.fields['accountTempDTO.updatedAt'] = updatedAt;
 
       if (isImagePicked && profileImage != null) {
         var file = await http.MultipartFile.fromPath(
@@ -226,8 +216,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
           TextButton(
             onPressed: () {
               Navigator.of(ctx).pop();
-              Navigator.of(context).pop(
-                  true); // Quay về trang Profile và truyền kết quả thành công
+              Navigator.of(context).pop(true);
             },
             child: const Text('OK'),
           ),
@@ -240,167 +229,143 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('Profile',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
-        automaticallyImplyLeading: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(16),
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Colors.blue,
+            automaticallyImplyLeading: false,
+            leading: IconButton(
+              icon: Container(
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
                 ),
-                child: Column(
+                child: Icon(Icons.arrow_back, color: Colors.blue),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              background: GestureDetector(
+                onTap: _pickImage,
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: CircleAvatar(
-                        radius: 80,
-                        backgroundImage: (profileImage != null)
-                            ? FileImage(
-                                profileImage!) // Sử dụng FileImage khi có profileImage
-                            : (imagePreview != null && imagePreview!.isNotEmpty)
-                                ? MemoryImage(base64Decode(
-                                    imagePreview!)) // Sử dụng base64 cho ảnh tải từ server
-                                : null,
-                        child: profileImage == null && imagePreview == null
-                            ? Icon(Icons.person,
-                                size: 80,
-                                color: Colors
-                                    .grey) // Nếu không có ảnh, hiển thị icon mặc định
-                            : null,
+                    profileImage != null
+                        ? Image.file(profileImage!, fit: BoxFit.cover)
+                        : (imagePreview != null && imagePreview!.isNotEmpty)
+                            ? Image.memory(base64Decode(imagePreview!),
+                                fit: BoxFit.cover)
+                            : Container(color: Colors.grey),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.7),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      nameController.text,
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
-              ProfileField(label: 'Name', controller: nameController),
-              const SizedBox(height: 20),
-              ProfileField(
-                  label: 'Email',
-                  controller: TextEditingController(text: email),
-                  enabled: false),
-              const SizedBox(height: 20),
-              TextFormField(
-                readOnly: true,
-                decoration: InputDecoration(
-                  labelText: 'Birthday',
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () async {
-                      final selectedDate = await showDatePicker(
-                        context: context,
-                        initialDate: dob ?? DateTime.now(),
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                      );
-                      if (selectedDate != null) {
-                        setState(() => dob = selectedDate);
-                      }
-                    },
-                  ),
-                ),
-                controller: TextEditingController(
-                  text:
-                      dob != null ? DateFormat('dd/MM/yyyy').format(dob!) : '',
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  const Text("Gender:",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Flexible(
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 4), // Giảm padding hai bên
-                            title: const Text('Male'),
-                            leading: Radio<String>(
-                              value: 'male',
-                              groupValue: gender,
-                              onChanged: (value) =>
-                                  setState(() => gender = value!),
-                            ),
-                          ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ProfileField(label: 'Name', controller: nameController),
+                    const SizedBox(height: 20),
+                    ProfileField(
+                      label: 'Email',
+                      controller: TextEditingController(text: email),
+                      enabled: false,
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Birthday',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        const SizedBox(
-                            width: 8), // Giảm khoảng cách giữa hai ListTile
-                        Flexible(
-                          child: ListTile(
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 4),
-                            title: const Text('Female'),
-                            leading: Radio<String>(
-                              value: 'female',
-                              groupValue: gender,
-                              onChanged: (value) =>
-                                  setState(() => gender = value!),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.calendar_today),
+                          onPressed: () async {
+                            final selectedDate = await showDatePicker(
+                              context: context,
+                              initialDate: dob ?? DateTime.now(),
+                              firstDate: DateTime(1900),
+                              lastDate: DateTime.now(),
+                            );
+                            if (selectedDate != null) {
+                              setState(() => dob = selectedDate);
+                            }
+                          },
+                        ),
+                      ),
+                      controller: TextEditingController(
+                        text: dob != null
+                            ? DateFormat('dd/MM/yyyy').format(dob!)
+                            : '',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ProfileField(
+                        label: 'Phone Number', controller: phoneController),
+                    const SizedBox(height: 20),
+                    ProfileField(
+                        label: 'Address', controller: addressController),
+                    const SizedBox(height: 30),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _saveProfile,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
                           ),
+                          child: const Text("Save",
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16)),
+                        ),
+                        OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.grey),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 12),
+                          ),
+                          child: const Text("Back",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 16)),
                         ),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: 20),
-              ProfileField(label: 'Phone Number', controller: phoneController),
-              const SizedBox(height: 20),
-              ProfileField(label: 'Address', controller: addressController),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: _saveProfile,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    child: Text("Save",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                  ),
-                  OutlinedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    ),
-                    child: Text("Back",
-                        style: TextStyle(color: Colors.white, fontSize: 16)),
-                  ),
-                ],
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -435,9 +400,11 @@ class ProfileField extends StatelessWidget {
             controller: controller,
             enabled: enabled,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               filled: true,
-              fillColor: Colors.grey[100],
+              fillColor: Colors.grey[200],
             ),
           ),
         ],

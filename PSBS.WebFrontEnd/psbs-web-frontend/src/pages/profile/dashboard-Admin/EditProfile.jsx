@@ -39,7 +39,7 @@ const EditProfile = () => {
       fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`, 
+          "Authorization": `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       })
@@ -80,7 +80,7 @@ const EditProfile = () => {
         });
     }
   }, [accountId]);
-  
+
 
 
   const handleImageChange = (event) => {
@@ -153,16 +153,17 @@ const EditProfile = () => {
       errors.accountPhoneNumber = "Phone number must start with 0 and have 10 digits";
       valid = false;
     }
-   
+
     setErrorMessages(errors);
     return valid;
   };
 
   const handleEdit = async () => {
     if (!validateForm()) return;
-  
+
     let formattedDob = account.accountDob ? format(account.accountDob, 'yyyy-MM-dd') : '';
-  
+    let updatedAt = new Date().toISOString(); // Lấy thời gian hiện tại
+
     const formData = new FormData();
     formData.append("AccountTempDTO.AccountId", accountId);
     formData.append("AccountTempDTO.AccountName", account.accountName);
@@ -172,7 +173,8 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountDob", formattedDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-  
+    formData.append("AccountTempDTO.updatedAt", updatedAt); // Thêm updatedAt
+
     if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
       formData.append("UploadModel.ImageFile", account.accountImage);
@@ -180,9 +182,9 @@ const EditProfile = () => {
       formData.append("AccountTempDTO.isPickImage", false);
       formData.append("AccountTempDTO.AccountImage", account.accountImage || "");
     }
-  
+
     console.log("Form Data:", formData);
-    
+
     try {
       const response = await fetch(`http://localhost:5050/api/Account`, {
         method: "PUT",
@@ -191,19 +193,19 @@ const EditProfile = () => {
         },
         body: formData,
       });
-  
+
       console.log("Response:", response);
-      
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error("Error from server:", errorData);
         Swal.fire("Error", errorData.message || "Something went wrong", "error");
         return;
       }
-  
+
       const result = await response.json();
       console.log("Result:", result);
-  
+
       if (result.flag) {
         console.log("Profile updated successfully:", result);
         Swal.fire("Success", "Profile updated successfully!", "success");

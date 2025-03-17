@@ -92,7 +92,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       print("Error: Filename null.");
       return;
     }
-
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
@@ -192,7 +191,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       bool obscureText, VoidCallback toggleVisibility) {
     return TextFormField(
       controller: controller,
-      obscureText: !obscureText,
+      obscureText: obscureText,
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: IconButton(
@@ -218,16 +217,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text('',
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        iconTheme: IconThemeData(color: Colors.black),
-        automaticallyImplyLeading: false,
-      ),
       body: _fetchDataFuture == null
           ? Center(child: CircularProgressIndicator())
           : FutureBuilder<void>(
@@ -239,128 +228,150 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                 if (snapshot.hasError) {
                   return Center(child: Text('Lỗi khi tải dữ liệu'));
                 }
-                return SingleChildScrollView(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black12, blurRadius: 5)
+                return CustomScrollView(
+                  slivers: [
+                    SliverAppBar(
+                      expandedHeight: 300,
+                      pinned: true,
+                      backgroundColor: Colors.blue,
+                      leading: IconButton(
+                        icon: Container(
+                          padding: EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.arrow_back, color: Colors.blue),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                      flexibleSpace: FlexibleSpaceBar(
+                        background: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            (imagePreview != null && imagePreview!.isNotEmpty)
+                                ? Image.memory(
+                                    base64Decode(imagePreview!.split(",")[1]),
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(color: Colors.grey),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.7),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ],
                         ),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            CircleAvatar(
-                              radius: 60,
-                              backgroundImage: imagePreview != null
-                                  ? MemoryImage(
-                                      base64Decode(imagePreview!.split(",")[1]))
-                                  : null,
-                              child: imagePreview == null
-                                  ? Icon(Icons.person,
-                                      size: 60, color: Colors.grey)
-                                  : null,
-                            ),
-                            SizedBox(height: 10),
+                            // Hiển thị tên tài khoản (accountName)
                             Text(
-                              account?['accountName'] ?? 'N/A',
+                              account?['accountName'] ?? 'Your Account Name',
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 24, fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 16),
+                            Form(
+                              key: _formKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey, width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: buildPasswordField(
+                                      'Current Password',
+                                      _currentPasswordController,
+                                      _showCurrentPassword,
+                                      () {
+                                        setState(() => _showCurrentPassword =
+                                            !_showCurrentPassword);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey, width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: buildPasswordField(
+                                      'New Password',
+                                      _newPasswordController,
+                                      _showNewPassword,
+                                      () {
+                                        setState(() => _showNewPassword =
+                                            !_showNewPassword);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: 16),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Colors.grey, width: 1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: buildPasswordField(
+                                      'Confirm Password',
+                                      _confirmPasswordController,
+                                      _showConfirmPassword,
+                                      () {
+                                        setState(() => _showConfirmPassword =
+                                            !_showConfirmPassword);
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(height: 24),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      ElevatedButton(
+                                        onPressed: _changePassword,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.teal,
+                                          padding: EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 12),
+                                        ),
+                                        child: Text("Change Password",
+                                            style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 16)),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 16),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: buildPasswordField(
-                                  'Current Password',
-                                  _currentPasswordController,
-                                  _showCurrentPassword, () {
-                                setState(() => _showCurrentPassword =
-                                    !_showCurrentPassword);
-                              }),
-                            ),
-                            SizedBox(height: 16),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: buildPasswordField('New Password',
-                                  _newPasswordController, _showNewPassword, () {
-                                setState(
-                                    () => _showNewPassword = !_showNewPassword);
-                              }),
-                            ),
-                            SizedBox(height: 16),
-                            Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 6),
-                              decoration: BoxDecoration(
-                                border:
-                                    Border.all(color: Colors.grey, width: 1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: buildPasswordField(
-                                  'Confirm Password',
-                                  _confirmPasswordController,
-                                  _showConfirmPassword, () {
-                                setState(() => _showConfirmPassword =
-                                    !_showConfirmPassword);
-                              }),
-                            ),
-                            SizedBox(height: 24),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                ElevatedButton(
-                                  onPressed: _changePassword,
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.teal,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 12),
-                                  ),
-                                  child: Text("Change Password",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16)),
-                                ),
-                                OutlinedButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.grey,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 20, vertical: 12),
-                                  ),
-                                  child: Text("Back",
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 16)),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),

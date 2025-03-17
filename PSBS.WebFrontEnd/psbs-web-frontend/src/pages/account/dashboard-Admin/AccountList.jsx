@@ -5,6 +5,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Swal from "sweetalert2";
+import moment from "moment";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 import { Link } from "react-router-dom";
@@ -20,11 +21,11 @@ const AccountList = () => {
   const sidebarRef = useRef(null);
   const token = sessionStorage.getItem("token");
 
-  const userRole = localStorage.getItem("role"); 
+  const userRole = localStorage.getItem("role");
 
   const fetchAccounts = async () => {
     try {
-      const token = sessionStorage.getItem("token"); 
+      const token = sessionStorage.getItem("token");
       const response = await fetch("http://localhost:5050/api/Account/all", {
         method: "GET",
         headers: {
@@ -32,25 +33,25 @@ const AccountList = () => {
           Authorization: `Bearer ${token}`
         }
       });
-  
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
       if (data && data.data) {
         console.log("Filtered accounts:", filteredAccounts);
         console.log(accounts);
         console.log("RoleId:", userRole);
         console.log(localStorage.getItem("role"));
-  
+
         setAccounts(data.data);
       }
     } catch (error) {
       console.error("Error fetching accounts:", error);
     }
   };
-  
+
 
   useEffect(() => {
     fetchAccounts();
@@ -75,7 +76,7 @@ const AccountList = () => {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${token}` // Attach token
+              Authorization: `Bearer ${token}`
             }
           });
 
@@ -120,33 +121,33 @@ const AccountList = () => {
   };
 
   const filteredAccounts = accounts
-  .filter((account) => {  
-    if (!userRole) {
-      return true;
-    }
-  
-    if (userRole === "admin") {
-      return ["staff", "user"].includes(account.roleId);
-    }
-  
-    if (userRole === "staff") {
-      return account.roleId === "user";
-    }
-  
-    return false;
-  }) .filter((account) => {
-    const query = searchQuery.toLowerCase();
-    return (
-      !searchQuery ||
-      account.accountPhoneNumber.includes(query) ||
-      account.accountEmail.toLowerCase().includes(query) ||
-      account.accountName.toLowerCase().includes(query) 
+    .filter((account) => {
+      if (!userRole) {
+        return true;
+      }
 
-    );
-  });
-  
-  
-  
+      if (userRole === "admin") {
+        return ["staff", "user"].includes(account.roleId);
+      }
+
+      if (userRole === "staff") {
+        return account.roleId === "user";
+      }
+
+      return false;
+    }).filter((account) => {
+      const query = searchQuery.toLowerCase();
+      return (
+        !searchQuery ||
+        account.accountPhoneNumber.includes(query) ||
+        account.accountEmail.toLowerCase().includes(query) ||
+        account.accountName.toLowerCase().includes(query)
+
+      );
+    });
+
+
+
 
   const handleSubmit = async () => {
     if (!accountEmail || !accountPhoneNumber) {
@@ -157,7 +158,7 @@ const AccountList = () => {
       });
       return;
     }
-  
+
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(accountEmail)) {
       Swal.fire({
@@ -167,7 +168,7 @@ const AccountList = () => {
       });
       return;
     }
-  
+
     const phoneRegex = /^0\d{9}$/;
     if (!phoneRegex.test(accountPhoneNumber)) {
       Swal.fire({
@@ -177,11 +178,11 @@ const AccountList = () => {
       });
       return;
     }
-  
+
     const formData = new FormData();
     formData.append("RegisterTempDTO.AccountEmail", accountEmail);
     formData.append("RegisterTempDTO.AccountPhoneNumber", accountPhoneNumber);
-  
+
     try {
       const response = await fetch("http://localhost:5050/api/Account/addaccount", {
         method: "POST",
@@ -190,7 +191,7 @@ const AccountList = () => {
         },
         body: formData
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         Swal.fire("Success", "Account added successfully!", "success");
@@ -206,39 +207,46 @@ const AccountList = () => {
       Swal.fire("Error", "An error occurred while adding the account.", "error");
     }
   };
-  
+
 
   const columns = [
     {
       field: "serialNumber",
       headerName: "S.No",
-      flex: 0.5,
+      flex: 0.3,
       sortable: true,
-      renderCell: (params) => {
-        return <span>{params.row.id}</span>;
-      },
-      sortComparator: (v1, v2) => {
-        return v1 - v2;
-      },
+      renderCell: (params) => <span>{params.row.id}</span>,
+      sortComparator: (v1, v2) => v1 - v2,
     },
-    { field: "accountName", headerName: "Name", flex: 1 },
-    { field: "accountEmail", headerName: "Email", flex: 1 },
-    { field: "accountPhoneNumber", headerName: "Phone", flex: 1 },
-    { field: "roleId", headerName: "Role", flex: 0.5 },
+    { field: "accountName", headerName: "Name", flex: 1, minWidth: 80 },
+    { field: "accountEmail", headerName: "Email", flex: 1, minWidth: 180 },
+    { field: "accountPhoneNumber", headerName: "Phone", width: 120 },
+    { field: "roleId", headerName: "Role", width: 100 },
+    {
+      field: "createdAt",
+      headerName: "Created At",
+      flex: 0.5,
+      width: 100,
+      renderCell: (params) => moment(params.value).format("DD/MM/YYYY HH:mm"),
+    },
+    {
+      field: "updatedAt",
+      headerName: "Updated At",
+      flex: 0.5,
+      width: 100,
+      renderCell: (params) => moment(params.value).format("DD/MM/YYYY HH:mm"),
+    },
     {
       field: "status",
       headerName: "Status",
       flex: 0.5,
-      sortable: true,
       renderCell: (params) =>
         params.row.accountIsDeleted ? (
           <span style={{ color: "red", fontWeight: "bold" }}>Deleted</span>
         ) : (
           <span style={{ color: "green", fontWeight: "bold" }}>Active</span>
         ),
-      sortComparator: (v1, v2) => {
-        return v1 === v2 ? 0 : v1 ? 1 : -1;
-      },
+      sortComparator: (v1, v2) => (v1 === v2 ? 0 : v1 ? 1 : -1),
     },
     {
       field: "actions",
@@ -269,6 +277,7 @@ const AccountList = () => {
       ),
     },
   ];
+
 
   return (
     <div className="flex h-screen bg-dark-grey-100">
@@ -313,40 +322,50 @@ const AccountList = () => {
                 </button>
               </form>
               {userRole === "staff" && (
-              <button
-                type="button"
-                onClick={() => setOpenDialog(true)}
-                className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
-              >
-                <svg
-                  className="w-5 h-5 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
+                <button
+                  type="button"
+                  onClick={() => setOpenDialog(true)}
+                  className="ml-4 flex items-center px-5 py-2.5 text-sm font-medium text-blue-700 border border-blue-700 rounded-lg hover:text-white hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:border-blue-500 dark:text-blue-500 dark:hover:text-white dark:hover:bg-blue-500"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                New
-              </button>
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  New
+                </button>
               )}
             </div>
             <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
               <DataGrid
-                rows={filteredAccounts.sort((a, b) => a.accountIsDeleted - b.accountIsDeleted).map((acc, index) => ({ ...acc, id: index + 1 }))}
+                rows={filteredAccounts
+                  .sort((a, b) => a.accountIsDeleted - b.accountIsDeleted)
+                  .map((acc, index) => ({
+                    ...acc,
+                    id: index + 1,
+                    createdAt: acc.createdAt || new Date().toISOString(),
+                    updatedAt: acc.updatedAt || new Date().toISOString(),
+                  }))}
                 columns={columns}
                 pageSize={10}
                 rowsPerPageOptions={[10, 15, 20]}
                 disableSelectionOnClick
                 pagination
                 paginationMode="client"
-                getRowClassName={(params) => params.row.accountIsDeleted ? "row-deleted" : ""}
+                getRowClassName={(params) =>
+                  params.row.accountIsDeleted ? "row-deleted" : ""
+                }
               />
+
             </div>
           </div>
         </main>
@@ -356,29 +375,49 @@ const AccountList = () => {
           Create New Account
         </DialogTitle>
         <DialogContent className="py-4">
-          <Box display="flex" flexDirection="column" gap={2}> 
+          <Box display="flex" flexDirection="column" gap={3} p={2}>
             <TextField
-              placeholder="Email"
+              label="Email"
               variant="outlined"
               fullWidth
               value={accountEmail}
               onChange={(e) => setAccountEmail(e.target.value)}
-              className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
+              InputProps={{
+                style: { borderRadius: "8px", background: "#F8F9FA" },
+              }}
             />
             <TextField
-              placeholder="Phone Number"
+              label="Phone Number"
               variant="outlined"
               fullWidth
               value={accountPhoneNumber}
               onChange={(e) => setAccountPhoneNumber(e.target.value)}
-              className="mb-4 bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-all ease-in-out duration-300"
+              InputProps={{
+                style: { borderRadius: "8px", background: "#F8F9FA" },
+              }}
             />
           </Box>
+
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">Cancel</Button>
-          <Button onClick={handleSubmit} color="primary">Submit</Button>
+        <DialogActions sx={{ pb: 2, px: 3 }}>
+          <Button
+            onClick={() => setOpenDialog(false)}
+            variant="outlined"
+            color="error"
+            sx={{ borderRadius: "8px" }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            color="primary"
+            sx={{ borderRadius: "8px", boxShadow: 3 }}
+          >
+            Submit
+          </Button>
         </DialogActions>
+
       </Dialog>
     </div>
   );

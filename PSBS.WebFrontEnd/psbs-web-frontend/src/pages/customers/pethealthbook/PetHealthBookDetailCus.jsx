@@ -179,7 +179,6 @@ const PetHealthBookDetailCus = () => {
         <div className="p-6 bg-white shadow-md rounded-md w-full">
           <h2 className="mb-4 text-xl font-bold text-left">Health Book Detail</h2>
           <div className="flex justify-center flex-wrap gap-8 w-full">
-            {/* Left Column: Thông tin pet */}
             <div className="w-full sm:w-1/3 md:w-1/4 bg-white shadow-md rounded-md p-6 flex flex-col items-center">
               <div className="flex flex-col items-center">
                 <img
@@ -187,14 +186,12 @@ const PetHealthBookDetailCus = () => {
                     petImage ? `http://localhost:5050/pet-service${petImage}` : "/Images/default-image.png"
                   }
                   alt="Pet Health Record"
-                  className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg"
+                  className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-110"
                 />
                 <div className="mt-4 text-sm font-bold">{petName}</div>
                 <div className="mt-4 text-sm ">{formatDate(dateOfBirth)}</div>
               </div>
             </div>
-
-            {/* Right Column: Thông tin Health Book */}
             <div className="w-full sm:w-2/3 bg-white shadow-md rounded-md p-6">
               <form>
                 <div className="mb-3">
