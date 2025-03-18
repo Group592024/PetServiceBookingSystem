@@ -34,7 +34,10 @@ namespace PetApi.Presentation.Controllers
             Console.WriteLine("token nef: " + auth);
 
             var response = await _facilityApiClient.GetPetCount(id, auth, year, month, startDate, endDate);
-
+            if (response is null)
+            {
+                return NotFound("Error when getting pet count from Facility Service");
+            }
             Console.WriteLine("response day nay" + response.Count());
 
 

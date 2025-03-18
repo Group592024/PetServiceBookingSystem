@@ -3,10 +3,13 @@ import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import ReportCircleCard from "./ReportCircleCard";
 import { useNavigate } from "react-router-dom";
 import { Autocomplete, TextField } from "@mui/material";
+import useTimeStore from "../../lib/timeStore";
 
 const ReportPet = () => {
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
+
+  const { type, year, month, startDate, endDate, changeTime } = useTimeStore();
 
   const [services, setServices] = useState([]);
   const [seletedService, setSeletedService] = useState(null);
@@ -46,33 +49,39 @@ const ReportPet = () => {
     setSeletedService(newValue);
   };
 
-  console.log(seletedService);
-
   const fetchDataCountPet = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const fetchData = await fetch(
-        `http://localhost:5050/api/ReportPet/${seletedService.serviceId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const response = await fetchData.json();
 
-      console.log(response);
+      let url = `http://localhost:5050/api/ReportPet/${seletedService.serviceId}?`;
 
-      const listDictionary = response.data;
+      if (type === "year") url += `year=${year}`;
+      if (type === "month") url += `year=${year}&month=${month}`;
+      if (type === "day") url += `startDate=${startDate}&endDate=${endDate}`;
+      const fetchData = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      const result = Object.entries(listDictionary).map(([key, value]) => ({
-        name: key,
-        quantity: value,
-      }));
+      if (!fetchData.ok) {
+        setData([]);
+      } else {
+        const response = await fetchData.json();
 
-      setData(result);
+        const listDictionary = response.data;
+
+        const result = Object.entries(listDictionary).map(([key, value]) => ({
+          name: key,
+          quantity: value,
+        }));
+
+        setData(result);
+      }
+
+      console.log("data pet ne nhe" + data);
     } catch (error) {
       console.error("Error fetching data: ", error);
     }
@@ -81,22 +90,22 @@ const ReportPet = () => {
   useEffect(() => {
     console.log("co goi toi pet ne");
     fetchDataCountPet();
-  }, [seletedService]);
-
-  console.log(data);
+  }, [seletedService, type, year, month, startDate, endDate]);
 
   return (
     <div>
-      <Autocomplete
-        options={services}
-        getOptionLabel={(option) => option.serviceName}
-        value={seletedService}
-        onChange={handleServiceChange}
-        renderInput={(params) => (
-          <TextField {...params} label="Select service" variant="outlined" />
-        )}
-        sx={{ width: "600px" }}
-      />
+      <div className="flex justify-center">
+        <Autocomplete
+          options={services}
+          getOptionLabel={(option) => option.serviceName}
+          value={seletedService}
+          onChange={handleServiceChange}
+          renderInput={(params) => (
+            <TextField {...params} label="Select service" variant="outlined" />
+          )}
+          sx={{ width: "600px" }}
+        />
+      </div>
       <ReportCircleCard data={data} />
     </div>
   );

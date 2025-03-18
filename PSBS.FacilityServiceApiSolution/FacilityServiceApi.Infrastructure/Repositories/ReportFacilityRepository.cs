@@ -272,7 +272,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 var response = result.GroupBy(p => p.petId)
                         .Select(s => new PetCountDTO(s.Key, s.Count())).ToList();
 
-                return response;
+                return response ?? new List<PetCountDTO>();
             }
             catch (Exception ex)
             {

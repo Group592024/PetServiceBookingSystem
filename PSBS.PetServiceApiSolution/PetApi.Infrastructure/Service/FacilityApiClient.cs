@@ -45,7 +45,7 @@ namespace PetApi.Infrastructure.Service
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"Error Content: {errorContent}");
-                throw new Exception($"Error when getting pet count from Facility Service: {response.StatusCode}");
+                return null;
             }
 
             var content = await response.Content.ReadAsStringAsync();
