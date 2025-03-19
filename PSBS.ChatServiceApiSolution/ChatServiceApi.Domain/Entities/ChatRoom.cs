@@ -8,7 +8,7 @@ namespace ChatServiceApi.Domain.Entities
     {
         [Key]
         public Guid ChatRoomId { get; set; }    
-        public string LastMessage { get; set; } = null!;
+        public string? LastMessage { get; set; }
         public DateTime UpdateAt { get; set; }
         public bool IsSupportRoom { get; set; }
         [JsonIgnore]

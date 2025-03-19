@@ -76,7 +76,7 @@
       // }
     },
     {
-      // Chat Api
+      // Chat hub
       "DownstreamPathTemplate": "/chatHub/{everything}",
       "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
@@ -87,6 +87,32 @@
         }
       ],
       "UpstreamPathTemplate": "/chatHub/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST"
+      ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
+      // Chat Api
+      "DownstreamPathTemplate": "/api/ChatControllers/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          
+          "Host": "localhost",
+          "Port": 5159
+        }
+      ],
+      "UpstreamPathTemplate": "/api/ChatControllers/{everything}",
       "UpstreamHttpMethod": [
         "GET",
         "POST"
@@ -754,7 +780,7 @@
     },
     {
       //Image Chat Service
-      "DownstreamPathTemplate": "/images/{everything}",
+      "DownstreamPathTemplate": "/uploads/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -762,7 +788,7 @@
           "Port": 5159
         }
       ],
-      "UpstreamPathTemplate": "/chat-service/images/{everything}",
+      "UpstreamPathTemplate":  "/uploads/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
     },
     {

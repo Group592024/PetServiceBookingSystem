@@ -5,13 +5,17 @@ VisualStudioVersion = 17.11.35431.28
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{D501AC73-932A-4F64-82A2-36EDD755B22A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacilityServiceApi.Application", "FacilityServiceApi.Application\FacilityServiceApi.Application.csproj", "{AE5A4CB4-5835-4A1E-A2FA-ED3A2627DCD3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacilityServiceApi.Application", "FacilityServiceApi.Application\FacilityServiceApi.Application.csproj", "{AE5A4CB4-5835-4A1E-A2FA-ED3A2627DCD3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacilityServiceApi.Domain", "FacilityServiceApi.Domain\FacilityServiceApi.Domain.csproj", "{96B0A013-A78D-4D81-85D1-804BAF6A9A51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacilityServiceApi.Domain", "FacilityServiceApi.Domain\FacilityServiceApi.Domain.csproj", "{96B0A013-A78D-4D81-85D1-804BAF6A9A51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacilityServiceApi.Infrastructure", "FacilityServiceApi.Infrastructure\FacilityServiceApi.Infrastructure.csproj", "{8155E51F-2D94-4B86-8B04-3EBA838EFB7C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacilityServiceApi.Infrastructure", "FacilityServiceApi.Infrastructure\FacilityServiceApi.Infrastructure.csproj", "{8155E51F-2D94-4B86-8B04-3EBA838EFB7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacilityServiceApi.Presentation", "FacilityServiceApi.Presentation\FacilityServiceApi.Presentation.csproj", "{66A8F6BB-8F09-4082-AC19-91CB2E71C8F7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacilityServiceApi.Presentation", "FacilityServiceApi.Presentation\FacilityServiceApi.Presentation.csproj", "{66A8F6BB-8F09-4082-AC19-91CB2E71C8F7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{A1F7A2C8-693B-429F-BFD5-AD6656C3261E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest.FacilityServiceApi", "UnitTest.FacilityServiceApi\UnitTest.FacilityServiceApi.csproj", "{EB65A57C-FE6F-4945-9EA3-0EBED71822D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,9 +43,16 @@ Global
 		{66A8F6BB-8F09-4082-AC19-91CB2E71C8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{66A8F6BB-8F09-4082-AC19-91CB2E71C8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{66A8F6BB-8F09-4082-AC19-91CB2E71C8F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB65A57C-FE6F-4945-9EA3-0EBED71822D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB65A57C-FE6F-4945-9EA3-0EBED71822D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB65A57C-FE6F-4945-9EA3-0EBED71822D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB65A57C-FE6F-4945-9EA3-0EBED71822D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EB65A57C-FE6F-4945-9EA3-0EBED71822D3} = {A1F7A2C8-693B-429F-BFD5-AD6656C3261E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C9191101-A7CE-434F-B44C-76BE7B9689A2}

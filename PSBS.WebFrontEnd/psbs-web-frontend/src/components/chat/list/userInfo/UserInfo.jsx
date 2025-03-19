@@ -81,7 +81,7 @@ const UserInfor = () => {
     <div className="userInfo">
       <div className="user">
         <img
-          src="https://i.pinimg.com/736x/c3/c9/95/c3c9951496a19c743fd75defe47ed571.jpg"
+         src={`http://localhost:5050/account-service/images/${currentUser.accountImage}`}
           alt=""
         />
         <h4>{currentUser.accountName}</h4>

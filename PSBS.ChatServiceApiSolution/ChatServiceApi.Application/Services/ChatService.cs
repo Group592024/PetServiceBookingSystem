@@ -4,18 +4,18 @@ using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
-
+using Microsoft.AspNetCore.Hosting;
 namespace ChatServiceApi.Application.Services
 {
     public class ChatService : IChatService
     {
         private readonly IChatRepository _chatRepository;
-
-        public ChatService(IChatRepository chatRepository)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public ChatService(IChatRepository chatRepository, IWebHostEnvironment webHostEnvironment)
         {
             _chatRepository = chatRepository;
+            _webHostEnvironment = webHostEnvironment;
         }
-
         public async Task<ChatRoom?> GetChatRoomAsync(Guid chatRoomId)
         {
             return await _chatRepository.GetChatRoomByIdAsync(chatRoomId);
@@ -60,14 +60,15 @@ namespace ChatServiceApi.Application.Services
             return await _chatRepository.GetChatMessagesAsync(chatRoomId);
         }
 
-        public async Task SendMessageAsync(Guid chatRoomId, Guid senderId, string message)
+        public async Task SendMessageAsync(Guid chatRoomId, Guid senderId, string? message, string? imageData )
         {
             var chatMessage = new ChatMessage
             {
                 ChatRoomId = chatRoomId,
                 SenderId = senderId,
                 Text = message,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.Now,
+                Image = imageData
             };
             LogExceptions.LogToConsole("e ta oi");
             await _chatRepository.AddChatMessageAsync(chatMessage);

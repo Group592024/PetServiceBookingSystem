@@ -41,7 +41,6 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Text")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ChatMessageId");
@@ -61,7 +60,6 @@ namespace ChatServiceApi.Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("LastMessage")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdateAt")

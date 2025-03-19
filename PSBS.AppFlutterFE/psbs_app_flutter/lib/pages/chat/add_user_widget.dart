@@ -69,6 +69,7 @@ class _AddUserWidgetState extends State<AddUserWidget> {
       final senderId = widget.currentUser.accountId;
       await widget.signalRService
           .invoke("CreateChatRoom", [senderId, receiverId]);
+      widget.onClose();
     } catch (err) {
       showErrorDialog(context, "Failed to create chat room. Please try again.");
       print("Error creating chat room: $err");
@@ -148,8 +149,11 @@ class _AddUserWidgetState extends State<AddUserWidget> {
                             Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundImage:
-                                      AssetImage("assets/default-avatar.png"),
+                                  backgroundImage: user.accountImage != null
+                                      ? NetworkImage(
+                                          "http://10.0.2.2:5050/account-service/images/${user.accountImage}")
+                                      : AssetImage("assets/default-avatar.png")
+                                          as ImageProvider,
                                   radius: 25,
                                 ),
                                 SizedBox(width: 20),

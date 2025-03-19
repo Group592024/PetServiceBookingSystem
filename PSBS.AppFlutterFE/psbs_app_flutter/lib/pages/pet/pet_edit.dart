@@ -585,9 +585,9 @@ class _PetEditState extends State<PetEdit> {
                                       borderRadius: BorderRadius.circular(18),
                                       child: _image != null
                                           ? Image.file(_image!,
-                                              fit: BoxFit.cover)
+                                              fit: BoxFit.contain)
                                           : Image.network(_imagePreview!,
-                                              fit: BoxFit.cover),
+                                              fit: BoxFit.contain),
                                     )
                                   : Column(
                                       mainAxisAlignment:

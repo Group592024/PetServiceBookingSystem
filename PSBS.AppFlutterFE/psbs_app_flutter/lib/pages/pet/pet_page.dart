@@ -20,6 +20,8 @@ class _CustomerPetListState extends State<PetPage> {
   final String apiUrl = 'http://192.168.1.7:5050/api/pet/available/';
   final String deleteUrl = 'http://192.168.1.7:5050/api/pet/';
   late String userId;
+  bool isGridView = false;
+
   @override
   void initState() {
     super.initState();
@@ -468,6 +470,35 @@ class _CustomerPetListState extends State<PetPage> {
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'My Pets',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal.shade800,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          isGridView = !isGridView;
+                        });
+                      },
+                      icon: Icon(
+                        isGridView ? Icons.view_list : Icons.grid_view,
+                        color: Colors.teal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
               child: FutureBuilder<List<Pet>>(
                 future: pets,
                 builder: (context, snapshot) {
@@ -478,15 +509,17 @@ class _CustomerPetListState extends State<PetPage> {
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return _buildEmptyState();
                   } else {
-                    return Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      child: Column(
-                        children: snapshot.data!
-                            .map((pet) => _buildPetCard(pet))
-                            .toList(),
-                      ),
-                    );
+                    return isGridView
+                        ? _buildGridView(snapshot.data!)
+                        : Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            child: Column(
+                              children: snapshot.data!
+                                  .map((pet) => _buildPetCard(pet))
+                                  .toList(),
+                            ),
+                          );
                   }
                 },
               ),
@@ -746,6 +779,143 @@ class _CustomerPetListState extends State<PetPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGridView(List<Pet> pets) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.all(16),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.70,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: pets.length,
+      itemBuilder: (context, index) {
+        final pet = pets[index];
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                spreadRadius: 2,
+                blurRadius: 10,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 4,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  child: Image.network(
+                    'http://10.0.2.2:5050/pet-service${pet.petImage}',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        pet.petName,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal.shade800,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(Icons.cake, size: 14, color: Colors.grey),
+                          SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              DateFormat('dd/MM/yyyy')
+                                  .format(DateTime.parse(pet.dateOfBirth)),
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 12,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildGridActionButton(
+                            Icons.info_outline,
+                            Colors.blue,
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    CustomerPetDetail(petId: pet.petId),
+                              ),
+                            ),
+                          ),
+                          _buildGridActionButton(
+                            Icons.edit,
+                            Colors.green,
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PetEdit(petId: pet.petId),
+                              ),
+                            ),
+                          ),
+                          _buildGridActionButton(
+                            Icons.delete,
+                            Colors.red,
+                            () => confirmDelete(pet.petId),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildGridActionButton(
+      IconData icon, Color color, VoidCallback onPressed) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: color, size: 16),
+        padding: EdgeInsets.zero,
+        constraints: BoxConstraints(),
       ),
     );
   }
