@@ -9,9 +9,8 @@ export const validateNonNegativeInteger = (value) => {
   };
   
   export const validateVoucherStartDate = (value) => {
-    const today = new Date();
     const selectedDate = new Date(value);
-    return selectedDate >= today.setDate(today.getDate() + 1); // Returns true if valid (>= tomorrow)
+    return !isNaN(selectedDate.getTime()); // Returns true if valid date, false otherwise
   };
   
   export const validateVoucherEndDate = (value, data) => {

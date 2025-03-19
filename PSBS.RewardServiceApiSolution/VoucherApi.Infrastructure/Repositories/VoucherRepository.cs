@@ -48,7 +48,7 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var voucher = await GetByIdAsync(entity.VoucherId);
+                var voucher = await context.Vouchers.FindAsync(entity.VoucherId);
                 if (voucher is null)
                 {
                     return new Response(false, $"{entity.VoucherName} not found");
@@ -209,7 +209,9 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var existingVoucher = await GetByIdAsync(entity.VoucherId);
+
+                var existingVoucher = await context.Vouchers.FindAsync(entity.VoucherId);
+
                 if (existingVoucher is null)
                 {
                     return new Response(false, $"{entity.VoucherName} not found");
@@ -235,8 +237,7 @@ namespace VoucherApi.Infrastructure.Repositories
                     }
                 }
 
-                // Update other fields as needed
-                entity.VoucherStartDate = existingVoucher.VoucherStartDate;
+              
 
                 // Detach the existing entity to prevent conflicts
                 context.Entry(existingVoucher).State = EntityState.Detached;
