@@ -1,11 +1,10 @@
-﻿using PSBS.HealthCareApi.Application.Interfaces;
+﻿using Microsoft.EntityFrameworkCore;
+using PSBS.HealthCareApi.Application.Interfaces;
 using PSBS.HealthCareApi.Domain;
 using PSBS.HealthCareApi.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using PSBS.HealthCareApi.Application.DTOs;
 
 namespace PSBS.HealthCareApi.Infrastructure.Repositories
 {
