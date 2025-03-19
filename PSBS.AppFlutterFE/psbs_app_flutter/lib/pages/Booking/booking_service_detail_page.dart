@@ -34,7 +34,7 @@ class _CustomerServiceBookingDetailState
   Future<void> fetchBookingDetails() async {
     try {
       final bookingResponse = await http.get(
-        Uri.parse('http://10.0.2.2:5050/Bookings/${widget.bookingId}'),
+        Uri.parse('http://127.0.0.1:5050/Bookings/${widget.bookingId}'),
       );
       final bookingData = json.decode(bookingResponse.body)['data'];
       setState(() {
@@ -43,7 +43,7 @@ class _CustomerServiceBookingDetailState
 
       final paymentResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
+            'http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
       );
       setState(() {
         paymentTypeName = json.decode(paymentResponse.body)['data']
@@ -53,7 +53,7 @@ class _CustomerServiceBookingDetailState
 
       final accountResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}'),
+            'http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}'),
       );
       setState(() {
         accountName =
@@ -62,7 +62,7 @@ class _CustomerServiceBookingDetailState
 
       final statusResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
+            'http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
       );
       setState(() {
         bookingStatusName = json.decode(statusResponse.body)['data']
@@ -72,7 +72,7 @@ class _CustomerServiceBookingDetailState
 
       final serviceItemsResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/BookingServiceItems/${widget.bookingId}'),
+            'http://127.0.0.1:5050/api/BookingServiceItems/${widget.bookingId}'),
       );
       final serviceItemsData = json.decode(serviceItemsResponse.body)['data'];
 
@@ -83,13 +83,13 @@ class _CustomerServiceBookingDetailState
         if (serviceVariantId != "00000000-0000-0000-0000-000000000000") {
           final serviceVariantResponse = await http.get(
             Uri.parse(
-                'http://10.0.2.2:5050/api/ServiceVariant/$serviceVariantId'),
+                'http://127.0.0.1:5050/api/ServiceVariant/$serviceVariantId'),
           );
           final serviceId =
               json.decode(serviceVariantResponse.body)['data']['serviceId'];
           if (serviceId != null) {
             final serviceResponse = await http.get(
-              Uri.parse('http://10.0.2.2:5050/api/Service/$serviceId'),
+              Uri.parse('http://127.0.0.1:5050/api/Service/$serviceId'),
             );
             setState(() {
               serviceName = json.decode(serviceResponse.body)['data']
@@ -103,7 +103,7 @@ class _CustomerServiceBookingDetailState
         String petName = "Unknown";
         if (item['petId'] != null) {
           final petResponse = await http.get(
-            Uri.parse('http://10.0.2.2:5050/api/Pet/${item['petId']}'),
+            Uri.parse('http://127.0.0.1:5050/api/Pet/${item['petId']}'),
           );
           final petData = json.decode(petResponse.body)['data'];
           petName = petData != null ? petData['petName'] : "Unknown";
@@ -132,7 +132,7 @@ class _CustomerServiceBookingDetailState
     bool confirm = await showCancelConfirmationDialog();
     if (!confirm) return;
     final response = await http.put(
-      Uri.parse('http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}'),
+      Uri.parse('http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}'),
     );
     final responseData = json.decode(response.body);
     if (responseData['flag']) {

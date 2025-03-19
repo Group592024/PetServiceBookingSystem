@@ -168,6 +168,10 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
   // Get current date and time for min attribute
   const now = new Date().toISOString().slice(0, 16);
 
+  // Find the selected pet's name
+  const selectedPet = pets.find(pet => pet.petId === formData.pet);
+  const petName = selectedPet ? selectedPet.petName : "Loading...";
+
   return (
     <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -240,7 +244,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
           <input
             type="text"
             name="price"
-            value={formData.price ? `${formData.price} VND` : "N/A"}
+            value={formData.price ? `${formData.price.toLocaleString()} VND` : "N/A"}
             readOnly
             className="w-full p-3 border border-gray-300 rounded-md bg-gray-200 text-gray-500"
           />
