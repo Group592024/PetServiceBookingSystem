@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import BookingServiceChoice from "./BookingServiceChoice";
 import { useBookingContext } from "./BookingContext";
 import axios from "axios";
-import { TextField, MenuItem } from "@mui/material";
+import { TextField, MenuItem, Checkbox, FormControlLabel, Button, FormGroup } from "@mui/material";
 
 const BookingServiceForm = () => {
   const {
@@ -24,12 +24,17 @@ const BookingServiceForm = () => {
 
   const getToken = () => {
     return sessionStorage.getItem('token');
-};
+  };
 
   const [services, setServices] = useState([]);
   const [vouchers, setVouchers] = useState([]);
   const [voucherError, setVoucherError] = useState(null);
   const [minDateTime, setMinDateTime] = useState("");
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [selectedPets, setSelectedPets] = useState([]);
+  const [pets, setPets] = useState([]);
+  const [selectAllServices, setSelectAllServices] = useState(false);
+  const [selectAllPets, setSelectAllPets] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -52,6 +57,28 @@ const BookingServiceForm = () => {
     };
     fetchServices();
   }, []);
+
+  useEffect(() => {
+    const fetchPets = async () => {
+      if (formData.cusId) {
+        try {
+          const response = await fetch(`http://localhost:5050/api/pet/available/${formData.cusId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+              },
+            });
+          const result = await response.json();
+          if (result.flag) {
+            setPets(result.data);
+          }
+        } catch (error) {
+          console.error("Error fetching pets:", error);
+        }
+      }
+    };
+    fetchPets();
+  }, [formData.cusId]);
 
   useEffect(() => {
     const fetchVouchers = async () => {
@@ -109,11 +136,102 @@ const BookingServiceForm = () => {
     setbookingServicesDate(e.target.value);
   };
 
+  const handleServiceSelect = (serviceId) => {
+    if (serviceId === "all") {
+      setSelectAllServices(!selectAllServices);
+      if (!selectAllServices) {
+        setSelectedServices(services.map(s => s.serviceId));
+      } else {
+        setSelectedServices([]);
+      }
+    } else {
+      setSelectAllServices(false);
+      setSelectedServices(prev => 
+        prev.includes(serviceId) 
+          ? prev.filter(id => id !== serviceId)
+          : [...prev, serviceId]
+      );
+    }
+  };
+
+  const handlePetSelect = (petId) => {
+    if (petId === "all") {
+      setSelectAllPets(!selectAllPets);
+      if (!selectAllPets) {
+        setSelectedPets(pets.map(p => p.petId));
+      } else {
+        setSelectedPets([]);
+      }
+    } else {
+      setSelectAllPets(false);
+      setSelectedPets(prev => 
+        prev.includes(petId) 
+          ? prev.filter(id => id !== petId)
+          : [...prev, petId]
+      );
+    }
+  };
+
+  const handleCreateBookingServices = () => {
+    const newBookingServices = [];
+    
+    // If "All" is selected for both services and pets
+    if (selectAllServices && selectAllPets) {
+      services.forEach(service => {
+        pets.forEach(pet => {
+          newBookingServices.push({
+            service: service.serviceId,
+            pet: pet.petId,
+            price: 0
+          });
+        });
+      });
+    }
+    // If "All" is selected for services only
+    else if (selectAllServices) {
+      services.forEach(service => {
+        selectedPets.forEach(petId => {
+          newBookingServices.push({
+            service: service.serviceId,
+            pet: petId,
+            price: 0
+          });
+        });
+      });
+    }
+    // If "All" is selected for pets only
+    else if (selectAllPets) {
+      selectedServices.forEach(serviceId => {
+        pets.forEach(pet => {
+          newBookingServices.push({
+            service: serviceId,
+            pet: pet.petId,
+            price: 0
+          });
+        });
+      });
+    }
+    // If specific services and pets are selected
+    else {
+      selectedServices.forEach(serviceId => {
+        selectedPets.forEach(petId => {
+          newBookingServices.push({
+            service: serviceId,
+            pet: petId,
+            price: 0
+          });
+        });
+      });
+    }
+
+    setbookingServices(newBookingServices);
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       <div className="text-center mb-6">
         <h2 className="text-lg font-semibold">Choose Service</h2>
-        <p>Select the service you want to book from our offerings.</p>
+        <p>Select the services and pets you want to book.</p>
       </div>
 
       <div className="mb-4">
@@ -126,14 +244,87 @@ const BookingServiceForm = () => {
           className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
-      <button onClick={() => setbookingServices([...bookingServices, { service: "", pet: "", price: 0 }])} className="mb-4 px-4 py-2 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600">
-        New Booking Service
-      </button>
+
+      {/* Services Selection */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-3">Select Services</h3>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectAllServices}
+                onChange={() => handleServiceSelect("all")}
+                color="primary"
+              />
+            }
+            label="All Services"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+            {services.map((service) => (
+              <FormControlLabel
+                key={service.serviceId}
+                control={
+                  <Checkbox
+                    checked={selectedServices.includes(service.serviceId)}
+                    onChange={() => handleServiceSelect(service.serviceId)}
+                    color="primary"
+                    disabled={selectAllServices}
+                  />
+                }
+                label={service.serviceName}
+              />
+            ))}
+          </div>
+        </FormGroup>
+      </div>
+
+      {/* Pets Selection */}
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-3">Select Pets</h3>
+        <FormGroup>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={selectAllPets}
+                onChange={() => handlePetSelect("all")}
+                color="primary"
+              />
+            }
+            label="All Pets"
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
+            {pets.map((pet) => (
+              <FormControlLabel
+                key={pet.petId}
+                control={
+                  <Checkbox
+                    checked={selectedPets.includes(pet.petId)}
+                    onChange={() => handlePetSelect(pet.petId)}
+                    color="primary"
+                    disabled={selectAllPets}
+                  />
+                }
+                label={pet.petName}
+              />
+            ))}
+          </div>
+        </FormGroup>
+      </div>
+
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={handleCreateBookingServices}
+        disabled={(!selectAllServices && selectedServices.length === 0) || (!selectAllPets && selectedPets.length === 0)}
+        className="mb-6"
+      >
+        Create Booking Services
+      </Button>
 
       {bookingServices.map((serviceData, index) => (
         <div key={index} className="relative mb-6">
           <BookingServiceChoice
-          data = {formData}
+            data={formData}
             formData={serviceData}
             handleChange={(e) => {
               const { name, value } = e.target;

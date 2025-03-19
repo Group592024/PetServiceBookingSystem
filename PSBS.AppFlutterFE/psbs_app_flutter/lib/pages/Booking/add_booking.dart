@@ -45,7 +45,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/PaymentType'),
+        Uri.parse('http://127.0.0.1:5050/api/PaymentType'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -71,7 +71,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
       print("Token: $token");
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Voucher/valid-voucher'),
+        Uri.parse('http://127.0.0.1:5050/api/Voucher/valid-voucher'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -166,7 +166,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Room/$roomId'),
+        Uri.parse('http://127.0.0.1:5050/api/Room/$roomId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -201,7 +201,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/pet/$petId'),
+        Uri.parse('http://127.0.0.1:5050/api/pet/$petId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -234,7 +234,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Voucher/customer/$voucherId'),
+        Uri.parse('http://127.0.0.1:5050/api/Voucher/customer/$voucherId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -259,7 +259,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/PaymentType/$paymentTypeId'),
+        Uri.parse('http://127.0.0.1:5050/api/PaymentType/$paymentTypeId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

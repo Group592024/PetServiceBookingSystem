@@ -8,6 +8,7 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
   const [paymentTypeName, setPaymentTypeName] = useState("");
   const [serviceNames, setserviceNames] = useState({});
   const [serviceVariantNames, setServiceVariantNames] = useState({}); 
+  const [petNames, setPetNames] = useState({});
 
   const getToken = () => {
     return sessionStorage.getItem('token');
@@ -151,6 +152,58 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
     }
   }, [bookingServices]);
 
+  // Fetch pet names for both rooms and services
+  useEffect(() => {
+    const fetchPetNames = async () => {
+      const updatedPetNames = { ...petNames };
+      
+      // Fetch pet names for room bookings
+      for (const room of bookingRooms) {
+        if (room.pet && !petNames[room.pet]) {
+          try {
+            const response = await fetch(`http://localhost:5050/api/pet/${room.pet}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
+            const data = await response.json();
+            if (data.flag) {
+              updatedPetNames[room.pet] = data.data.petName;
+            }
+          } catch (error) {
+            console.error(`Error fetching pet name for ID ${room.pet}:`, error);
+          }
+        }
+      }
+
+      // Fetch pet names for service bookings
+      for (const service of bookingServices) {
+        if (service.pet && !petNames[service.pet]) {
+          try {
+            const response = await fetch(`http://localhost:5050/api/pet/${service.pet}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${getToken()}`,
+                },
+              });
+            const data = await response.json();
+            if (data.flag) {
+              updatedPetNames[service.pet] = data.data.petName;
+            }
+          } catch (error) {
+            console.error(`Error fetching pet name for ID ${service.pet}:`, error);
+          }
+        }
+      }
+      setPetNames(updatedPetNames);
+    };
+
+    if (bookingRooms.length > 0 || bookingServices.length > 0) {
+      fetchPetNames();
+    }
+  }, [bookingRooms, bookingServices]);
+
   const formatDateTime = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("en-GB", {
@@ -198,7 +251,7 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
             {bookingRooms.map((room, index) => (
               <li key={index} className="text-lg border p-4 rounded-lg bg-gray-100">
                 <p><strong>Room:</strong> {roomNames[room.room] || "Loading..."}</p>
-                <p><strong>Pet:</strong> {room.pet}</p>
+                <p><strong>Pet:</strong> {petNames[room.pet] || "Loading..."}</p>
                 <p><strong>Start Date & Time:</strong> {formatDateTime(room.start)}</p>
                 <p><strong>End Date & Time:</strong> {formatDateTime(room.end)}</p>
                 <p><strong>Price:</strong> {room.price.toLocaleString()} VND</p>
@@ -213,7 +266,7 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
               <li key={index} className="text-lg border p-4 rounded-lg bg-gray-100">
                 <p><strong>Service:</strong> {serviceNames[service.service] || "Loading..."}</p>
                 <p><strong>Service variant:</strong> {serviceVariantNames[service.serviceVariant] || "Loading..."}</p>
-                <p><strong>Pet:</strong> {service.pet}</p>
+                <p><strong>Pet:</strong> {petNames[service.pet] || "Loading..."}</p>
                 <p><strong>Price:</strong> {service.price.toLocaleString()} VND</p>
               </li>
             ))}

@@ -32,7 +32,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   Future<void> fetchBookingDetails() async {
   try {
     final bookingResponse = await http.get(
-      Uri.parse("http://10.0.2.2:5050/Bookings/${widget.bookingId}"),
+      Uri.parse("http://127.0.0.1:5050/Bookings/${widget.bookingId}"),
     );
     final bookingData = json.decode(bookingResponse.body)['data'];
 
@@ -40,19 +40,19 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
     final paymentResponse = await http.get(
       Uri.parse(
-          "http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
+          "http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
     );
     final accountResponse = await http.get(
       Uri.parse(
-          "http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}"),
+          "http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}"),
     );
     final statusResponse = await http.get(
       Uri.parse(
-          "http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
+          "http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
     );
     final historyResponse = await http.get(
       Uri.parse(
-          "http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
+          "http://127.0.0.1:5050/api/RoomHistories/${widget.bookingId}"),
     );
 
     final historyData = json.decode(historyResponse.body)['data'] ?? [];
@@ -95,7 +95,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
     for (var history in updatedRoomHistory) {
       try {
         final petResponse = await http.get(
-          Uri.parse("http://10.0.2.2:5050/api/pet/${history['petId']}"),
+          Uri.parse("http://127.0.0.1:5050/api/pet/${history['petId']}"),
         );
         final petData = json.decode(petResponse.body)['data'];
         print("Pet API Response: ${petResponse.body}");
@@ -131,7 +131,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   if (!confirm) return;
 
   final response = await http.put(
-    Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
+    Uri.parse("http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}"),
   );
   final responseData = json.decode(response.body);
 
