@@ -9,6 +9,7 @@ namespace PetApi.Application.DTOs.Conversions
             Diary_ID = petDiary.Diary_ID,
             Diary_Content = petDiary.Diary_Content,
             Diary_Date = petDiary.Diary_Date,
+            Category = petDiary.Category
         };
 
         public static PetDiary ToEntity(CreatePetDiaryDTO pet) => new PetDiary()
@@ -17,6 +18,7 @@ namespace PetApi.Application.DTOs.Conversions
             Diary_Content = pet.Diary_Content,
             Diary_Date = DateTime.Now,
             Pet_ID = pet.Pet_ID,
+            Category = pet.Category
         };
 
         public static PetDiary ToEntity(UpdatePetDiaryDTO pet) => new PetDiary()
@@ -24,6 +26,7 @@ namespace PetApi.Application.DTOs.Conversions
             Diary_ID = Guid.NewGuid(),
             Diary_Content = pet.Diary_Content,
             Diary_Date = DateTime.Now,
+            Category = pet.Category
         };
 
         public static (PetDiaryDTO?, IEnumerable<PetDiaryDTO>?) FromEntity(PetDiary? petDiary, IEnumerable<PetDiary>? petDiaries)
@@ -36,6 +39,7 @@ namespace PetApi.Application.DTOs.Conversions
                     Diary_ID = petDiary.Diary_ID,
                     Diary_Content = petDiary.Diary_Content,
                     Diary_Date = petDiary.Diary_Date,
+                    Category = petDiary.Category,
                     Pet = new PetInfoDTO
                     {
                         Pet_Name = petDiary.Pet.Pet_Name,
@@ -55,6 +59,7 @@ namespace PetApi.Application.DTOs.Conversions
                     Diary_ID = p.Diary_ID,
                     Diary_Content = p.Diary_Content,
                     Diary_Date = p.Diary_Date,
+                    Category = p.Category,
                     Pet = new PetInfoDTO
                     {
                         Pet_Name = p.Pet.Pet_Name,

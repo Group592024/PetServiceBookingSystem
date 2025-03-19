@@ -15,8 +15,10 @@ import 'package:image/image.dart' as img;
 
 class PetDiaryUpdatePage extends StatefulWidget {
   final Map<String, dynamic> diary;
+  final String petId;
 
-  const PetDiaryUpdatePage({Key? key, required this.diary}) : super(key: key);
+  const PetDiaryUpdatePage({Key? key, required this.diary, required this.petId})
+      : super(key: key);
 
   @override
   _PetDiaryUpdatePageState createState() => _PetDiaryUpdatePageState();
@@ -29,11 +31,81 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
   bool isLoading = false;
   bool isFetching = true;
   FocusNode _editorFocusNode = FocusNode();
+  List<String> categories = [];
+  String selectedCategory = "";
+
+  TextEditingController _categoryController = TextEditingController();
+
+  Widget _buildCategoryInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Create new category:",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        TextField(
+          controller: _categoryController,
+          decoration: InputDecoration(
+            hintText: "Enter new category",
+            border: OutlineInputBorder(),
+          ),
+          onChanged: (value) {
+            setState(() {
+              selectedCategory = value;
+            });
+          },
+        ),
+        SizedBox(height: 10),
+      ],
+    );
+  }
+
+  Future<void> _addNewCategory() async {
+    if (_categoryController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Category cannot be empty!")),
+      );
+      return;
+    }
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.post(
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary/categories'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+        body: jsonEncode({
+          "petId": widget.petId,
+          "category": _categoryController.text,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        setState(() {
+          categories.add(_categoryController.text);
+          selectedCategory = _categoryController.text;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Category added successfully!")),
+        );
+        _categoryController.clear();
+      } else {
+        throw Exception('Failed to add category');
+      }
+    } catch (error) {
+      print('Error adding category: $error');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     print("Received diary: ${widget.diary}");
+    fetchCategories();
     _loadDiaryEntryFromData();
 
     _controller.document.changes.listen((event) {
@@ -43,6 +115,38 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
         _editorFocusNode.requestFocus();
       }
     });
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      print("token ne: " + token);
+
+      print("petid nè: " + widget.petId);
+      final response = await http.get(
+        Uri.parse(
+            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        setState(() {
+          categories = List<String>.from(jsonResponse['data']['data']);
+          print("categories nè: " + categories.toString());
+          selectedCategory = widget.diary["category"] ??
+              (categories.isNotEmpty ? categories.first : "");
+        });
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (error) {
+      print('Error fetching categories: $error');
+    }
   }
 
   void _loadDiaryEntryFromData() async {
@@ -263,12 +367,15 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
       final response = await http.put(
         Uri.parse(
-            'http://10.0.2.2:5050/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://192.168.1.7:5050/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
         },
-        body: json.encode({'diary_Content': diaryContent}),
+        body: json.encode({
+          'diary_Content': diaryContent,
+          'category': selectedCategory,
+        }),
       );
 
       print("response ne: ${response.statusCode}");
@@ -354,6 +461,28 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
                     children: [
+                      Text("Select category:"),
+                      DropdownButton<String>(
+                        value: categories.contains(selectedCategory)
+                            ? selectedCategory
+                            : null,
+                        onChanged: (newValue) {
+                          setState(() {
+                            selectedCategory = newValue!;
+                          });
+                        },
+                        items: categories
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+
+                      SizedBox(height: 10),
+                      _buildCategoryInput(), // Thêm mục nhập category mới
+                      SizedBox(height: 10),
                       quill.QuillSimpleToolbar(
                         controller: _controller,
                         config: quill.QuillSimpleToolbarConfig(

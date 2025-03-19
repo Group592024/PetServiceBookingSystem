@@ -60,6 +60,14 @@ const Sidebar = forwardRef((_, ref) => {
             Dashboard
           </Link>
         </li>
+
+        <li className={location.pathname.startsWith("/report") ? "active" : ""}>
+          <Link to="/report">
+            <i className="bx bxs-report"></i>
+            Reports
+          </Link>
+        </li>
+
         <li
           className={
             location.pathname.startsWith("/admin/bookings/") ? "active" : ""

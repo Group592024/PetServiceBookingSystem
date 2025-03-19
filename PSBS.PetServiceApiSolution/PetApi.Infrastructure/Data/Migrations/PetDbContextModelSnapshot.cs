@@ -110,6 +110,10 @@ namespace PetApi.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Diary_Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

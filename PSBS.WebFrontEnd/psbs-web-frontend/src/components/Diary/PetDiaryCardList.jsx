@@ -63,10 +63,15 @@ const PetDiaryCardList = ({ data }) => {
     if (diaryIndex !== -1) {
       diaries[diaryIndex].diary_Content =
         localStorage.getItem("diaryContent") || clickedDiary.diary_Content;
+      diaries[diaryIndex].category =
+        localStorage.getItem("category") || clickedDiary.category;
+      diaries[diaryIndex].diary_Date = new Date().toISOString();
     }
 
     setClickedDiary(null);
+    console.log("ngay ne" + new Date().toISOString());
     localStorage.removeItem("diaryContent");
+    localStorage.removeItem("category");
     setOpen(false);
   };
 

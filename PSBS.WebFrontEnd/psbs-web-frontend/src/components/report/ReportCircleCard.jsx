@@ -15,6 +15,16 @@ const ReportCircleCard = ({ data }) => {
 
   console.log(total);
 
+  if (total === 0) {
+    return (
+      <div className="flex justify-center">
+        <div className="text-xl italic text-customPrimary h-10">
+          No data found
+        </div>
+      </div>
+    );
+  }
+
   const customLabel = ({ name, value, cx, cy, midAngle, outerRadius }) => {
     if (value === 0) return null;
     const radian = Math.PI / 180;
@@ -39,7 +49,7 @@ const ReportCircleCard = ({ data }) => {
 
   return (
     <div>
-      <PieChart width={800} height={600}>
+      <PieChart width={1200} height={600}>
         <Pie
           data={data}
           cx="50%"
