@@ -12,6 +12,8 @@ namespace PSPS.AccountAPI.Application.DTOs
         string? AccountPassword,
         string? AccountGender,
         DateTime? AccountDob,
+        DateTime? CreatedAt,
+        DateTime? UpdatedAt,
         string? AccountAddress,
         string? AccountImage
         

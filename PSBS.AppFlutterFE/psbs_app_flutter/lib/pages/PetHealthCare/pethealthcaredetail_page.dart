@@ -1,9 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
-
 import 'pethealthcaredetail_page.dart';
 
 class PetHealthBookDetail extends StatefulWidget {
@@ -25,6 +24,8 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
   String petImage = '';
   String petName = '';
   String dateOfBirth = '';
+  // Thêm biến petGender (true: Male, false: Female)
+  bool petGender = true;
 
   @override
   void initState() {
@@ -45,25 +46,32 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     try {
       final headers = await getHeaders();
       final healthBookRes = await http.get(
-          Uri.parse(
-              'http://10.0.2.2:5050/api/PetHealthBook/${widget.healthBookId}'),
-          headers: headers);
-
-      final medicinesRes = await http
-          .get(Uri.parse('http://10.0.2.2:5050/Medicines'), headers: headers);
-
+        Uri.parse(
+            'http://10.0.2.2:5050/api/PetHealthBook/${widget.healthBookId}'),
+        headers: headers,
+      );
+      final medicinesRes = await http.get(
+        Uri.parse('http://10.0.2.2:5050/Medicines'),
+        headers: headers,
+      );
       final treatmentsRes = await http.get(
-          Uri.parse('http://10.0.2.2:5050/api/Treatment'),
-          headers: headers);
-
-      final bookingsRes = await http
-          .get(Uri.parse('http://10.0.2.2:5050/Bookings'), headers: headers);
-      final petsRes = await http.get(Uri.parse('http://10.0.2.2:5050/api/pet'),
-          headers: headers);
+        Uri.parse('http://10.0.2.2:5050/api/Treatment'),
+        headers: headers,
+      );
+      final bookingsRes = await http.get(
+        Uri.parse('http://10.0.2.2:5050/Bookings'),
+        headers: headers,
+      );
+      final petsRes = await http.get(
+        Uri.parse('http://10.0.2.2:5050/api/pet'),
+        headers: headers,
+      );
       final bookingServiceItemsRes = await http.get(
-          Uri.parse(
-              'http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList'),
-          headers: headers);
+        Uri.parse(
+            'http://10.0.2.2:5050/api/BookingServiceItems/GetBookingServiceList'),
+        headers: headers,
+      );
+
       if (!healthBookRes.statusCode.toString().startsWith('2') ||
           !medicinesRes.statusCode.toString().startsWith('2') ||
           !treatmentsRes.statusCode.toString().startsWith('2') ||
@@ -100,6 +108,7 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             .where(
                 (treatment) => treatmentIds.contains(treatment['treatmentId']))
             .toList();
+
         if (healthBookData['bookingServiceItemId'] != null) {
           var bsi = bookingServiceItemsData.firstWhere(
             (item) =>
@@ -116,6 +125,8 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
               petImage = pet['petImage'] ?? '';
               petName = pet['petName'] ?? 'Unknown';
               dateOfBirth = pet['dateOfBirth'] ?? '';
+              // Nếu pet có trường petGender, gán giá trị cho biến petGender
+              petGender = pet['petGender'] ?? true;
             }
           }
         }
@@ -135,84 +146,22 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (petHealthBook == null) {
-      return Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("Pet Health Book Detail"),
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.white,
+  // Helper widget tạo chip hiển thị thông tin (giới tính, ngày sinh)
+  Widget _buildInfoChip(String label, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 80,
-                backgroundImage: petImage.isNotEmpty
-                    ? NetworkImage('http://10.0.2.2:5050/pet-service$petImage')
-                    : AssetImage('assets/default-image.png') as ImageProvider,
-              ),
-            ),
-            SizedBox(height: 10),
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    petName,
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    formatDate(dateOfBirth),
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            Divider(),
-            _buildRowText(
-                'Treatment',
-                treatments.isNotEmpty
-                    ? treatments.map((t) => t['treatmentName']).join(", ")
-                    : 'No Treatments Found'),
-            Divider(),
-            _buildRowText('Performed By', petHealthBook!['performBy'] ?? ''),
-            Divider(),
-            _buildRowText(
-                'Visit Date', formatDate(petHealthBook!['visitDate'])),
-            Divider(),
-            _buildRowText(
-                'Next Visit Date', formatDate(petHealthBook!['nextVisitDate'])),
-            Divider(),
-            _buildRowText(
-                'Medicine',
-                medicines.isNotEmpty
-                    ? medicines.map((m) => m['medicineName']).join(", ")
-                    : 'No Medicines Assigned'),
-            Divider(),
-            SizedBox(height: 10),
-            Align(
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text("Back",
-                    style: TextStyle(color: Colors.black, fontSize: 16)),
-              ),
-            )
-          ],
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          SizedBox(width: 6),
+          Text(label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }
@@ -221,21 +170,149 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     return Padding(
       padding: EdgeInsets.all(10),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(
             width: 100,
-            child: Text(title,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
           ),
           SizedBox(width: 30),
           Expanded(
-              child: Text(
-            value,
-            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-            maxLines: null,
-          )),
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+              maxLines: null,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (petHealthBook == null) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar với ảnh nền và gradient overlay
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Colors.blue,
+            leading: IconButton(
+              icon: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.arrow_back, color: Colors.blue),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+            flexibleSpace: FlexibleSpaceBar(
+              title: Text(
+                petName,
+                style: TextStyle(fontSize: 16),
+              ),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  petImage.isNotEmpty
+                      ? Image.network(
+                          'http://10.0.2.2:5050/pet-service$petImage',
+                          fit: BoxFit.cover,
+                        )
+                      : Container(color: Colors.grey),
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Nội dung chi tiết
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Tên pet với font lớn, màu xanh
+                  Center(
+                    child: Text(
+                      petName,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  // Row hiển thị chip petGender và ngày sinh (dateOfBirth)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildInfoChip(
+                        petGender ? 'Male' : 'Female',
+                        petGender ? Icons.male : Icons.female,
+                        petGender ? Colors.blue : Colors.pink,
+                      ),
+                      SizedBox(width: 8),
+                      _buildInfoChip(
+                        formatDate(dateOfBirth),
+                        Icons.cake,
+                        Colors.blue,
+                      ),
+                    ],
+                  ),
+                  Divider(),
+                  _buildRowText(
+                    'Treatment',
+                    treatments.isNotEmpty
+                        ? treatments.map((t) => t['treatmentName']).join(", ")
+                        : 'No Treatments Found',
+                  ),
+                  Divider(),
+                  _buildRowText(
+                      'Performed By', petHealthBook!['performBy'] ?? ''),
+                  Divider(),
+                  _buildRowText(
+                      'Visit Date', formatDate(petHealthBook!['visitDate'])),
+                  Divider(),
+                  _buildRowText('Next Visit Date',
+                      formatDate(petHealthBook!['nextVisitDate'])),
+                  Divider(),
+                  _buildRowText(
+                    'Medicine',
+                    medicines.isNotEmpty
+                        ? medicines.map((m) => m['medicineName']).join(", ")
+                        : 'No Medicines Assigned',
+                  ),
+                  Divider(),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

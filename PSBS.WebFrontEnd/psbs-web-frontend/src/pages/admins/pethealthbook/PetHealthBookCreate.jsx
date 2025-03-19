@@ -5,7 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import Swal from "sweetalert2";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-
+import { useSearchParams } from "react-router-dom";
+import jwtDecode from "jwt-decode";
 const PetHealthBookCreate = () => {
   const navigate = useNavigate();
   const token = sessionStorage.getItem("token");
@@ -21,6 +22,8 @@ const PetHealthBookCreate = () => {
     updatedAt: "",
     isDeleted: false,
   });
+  const [searchParams] = useSearchParams();
+  const bookingCodeFromUrl = searchParams.get("bookingCode");
   const [bookings, setBookings] = useState([]);
   const [bookingCodeError, setBookingCodeError] = useState("");
   const [medicines, setMedicines] = useState([]);
@@ -28,6 +31,29 @@ const PetHealthBookCreate = () => {
   const [pets, setPets] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [selectedPet, setSelectedPet] = useState("");
+  useEffect(() => {
+    if (bookingCodeFromUrl) {
+      setVisitDetails((prevState) => ({
+        ...prevState,
+        bookingId: bookingCodeFromUrl,
+      }));
+    }
+  }, [bookingCodeFromUrl]);
+  useEffect(() => {
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        if (decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"]) {
+          setVisitDetails((prevState) => ({
+            ...prevState,
+            performBy: decodedToken["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"], 
+          }));
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    }
+  }, [token]);
   useEffect(() => {
     const fetchData = async () => {
 
@@ -74,14 +100,12 @@ const PetHealthBookCreate = () => {
           })
         ]);
 
-        // Kiểm tra phản hồi từ máy chủ
         if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
         if (!medicinesResponse.ok) throw new Error("Failed to fetch medicines.");
         if (!treatmentsResponse.ok) throw new Error("Failed to fetch treatments.");
         if (!petsResponse.ok) throw new Error("Failed to fetch pets.");
         if (!bookingServiceItemsResponse.ok) throw new Error("Failed to fetch booking service items.");
 
-        // Chuyển đổi phản hồi thành JSON
         const [bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData] = await Promise.all([
           bookingsResponse.json(),
           medicinesResponse.json(),
@@ -90,7 +114,6 @@ const PetHealthBookCreate = () => {
           bookingServiceItemsResponse.json()
         ]);
 
-        console.log({ bookingsData, medicinesData, treatmentsData, petsData, bookingServiceItemsData });
         console.log("Treatments API response:", treatmentsData);
         if (treatmentsData && Array.isArray(treatmentsData)) {
           setTreatments(treatmentsData);
@@ -110,6 +133,15 @@ const PetHealthBookCreate = () => {
     fetchData();
   }, []);
   useEffect(() => {
+    const accountName = sessionStorage.getItem("accountName");
+    if (accountName) {
+      setVisitDetails(prevState => ({
+        ...prevState,
+        performBy: accountName,
+      }));
+    }
+  }, []);
+  useEffect(() => {
     const fetchPetsByBooking = async () => {
       if (!visitDetails.bookingId) return;
       const selectedBooking = bookings.find(
@@ -120,7 +152,6 @@ const PetHealthBookCreate = () => {
         return;
       }
       try {
-        // Thêm token vào headers
         const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
           method: "GET",
           headers: {
@@ -143,7 +174,7 @@ const PetHealthBookCreate = () => {
           return;
         }
         const petResponses = await Promise.all(
-          petIds.map(petId => 
+          petIds.map(petId =>
             fetch(`http://localhost:5050/api/pet/${petId}`, {
               method: "GET",
               headers: {
@@ -193,7 +224,6 @@ const PetHealthBookCreate = () => {
       return;
     }
     try {
-      // Thêm token vào headers
       const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
         method: "GET",
         headers: {
@@ -207,7 +237,7 @@ const PetHealthBookCreate = () => {
       const matchingServiceItem = bookingServiceData.data.find(
         item => item.bookingId === selectedBooking.bookingId && item.petId === selectedPet
       );
-  
+
       if (!matchingServiceItem) {
         Swal.fire("Error", "No matching Booking Service Item found.", "error");
         return;
@@ -222,14 +252,13 @@ const PetHealthBookCreate = () => {
         medicineIds: visitDetails.medicineId,
         visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
         nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
-        performBy: visitDetails.performBy,
+        performBy: visitDetails.performBy || sessionStorage.getItem("accountName"),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isDeleted: visitDetails.isDeleted || false,
       };
       console.log("Data sent to API:", newVisitDetails);
-  
-      // Thêm token vào headers khi tạo mới
+
       const createResponse = await fetch("http://localhost:5050/api/PetHealthBook", {
         method: "POST",
         headers: {
@@ -297,6 +326,7 @@ const PetHealthBookCreate = () => {
               value={visitDetails.bookingId}
               onChange={handleBookingCodeChange}
               placeholder="Enter Booking Code"
+              disabled
             />
             {bookingCodeError && <p className="text-red-500 text-sm mt-1">{bookingCodeError}</p>}
           </div>
@@ -325,6 +355,7 @@ const PetHealthBookCreate = () => {
               className="w-full p-3 border rounded-md"
               value={visitDetails.performBy}
               onChange={(e) => setVisitDetails({ ...visitDetails, performBy: e.target.value })}
+              disabled
             />
           </div>
           <div className="mb-3">

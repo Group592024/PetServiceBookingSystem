@@ -85,18 +85,28 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding:
-                      EdgeInsets.symmetric(vertical: 32.0, horizontal: 48.0),
-                  color: Colors.grey[300],
-                  child: Text(
-                    'Logo',
-                    style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.pets, color: Colors.blue, size: 48),
+                    SizedBox(width: 8),
+                    Text(
+                      'Pet',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
-                  ),
+                    Text(
+                      'Ease',
+                      style: TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(height: 32),
                 Card(

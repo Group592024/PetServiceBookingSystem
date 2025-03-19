@@ -191,7 +191,18 @@ const ProfileCustomer = () => {
                 disabled
               />
             </div>
-
+            <div className="mb-3">
+                  <label htmlFor="loyaltyPoints" className="block text-sm font-medium mb-1 font-bold">
+                    Loyalty Points
+                  </label>
+                  <input
+                    type="text"
+                    id="loyaltyPoints"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountLoyaltyPoint ? account.accountLoyaltyPoint.toLocaleString() : "0"}
+                    disabled
+                  />
+                </div>
             <div className="flex flex-wrap justify-between gap-4">
               <Link to={`/editprofilecustomer/${accountId}`}>
                 <button

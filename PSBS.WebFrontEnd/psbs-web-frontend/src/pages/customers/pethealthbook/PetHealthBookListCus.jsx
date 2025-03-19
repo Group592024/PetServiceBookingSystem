@@ -7,7 +7,7 @@ import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import moment from "moment";
 
 const PetHealthBookListCus = () => {
-  const { petId: routePetId } = useParams(); 
+  const { petId: routePetId } = useParams();
   const [userPets, setUserPets] = useState([]);
   const [petHealthBooks, setPetHealthBooks] = useState([]);
   const [bookingServiceItemToPetMap, setBookingServiceItemToPetMap] = useState({});
@@ -24,7 +24,7 @@ const PetHealthBookListCus = () => {
 
       const headers = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, 
+        Authorization: `Bearer ${token}`,
       };
       const [petHealthRes, medicinesRes, bookingServiceItemsRes, petsRes] = await Promise.all([
         fetch("http://localhost:5050/api/PetHealthBook", {
@@ -73,14 +73,10 @@ const PetHealthBookListCus = () => {
       const bookingServiceItemsArray = Array.isArray(bookingServiceItemsData.data)
         ? bookingServiceItemsData.data
         : [];
-
-      // Lọc pet theo accountId
       const filteredUserPets = petsArray.filter((pet) => pet.accountId === accountId);
       setUserPets(filteredUserPets);
       setPetHealthBooks(petHealthArray);
       setMedicines(medicinesArray);
-
-      // Tạo mapping: bookingServiceItemId -> petId
       const mapping = {};
       bookingServiceItemsArray.forEach((item) => {
         if (item.bookingServiceItemId && item.petId) {
@@ -98,7 +94,6 @@ const PetHealthBookListCus = () => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
 
-  // Nếu có petId từ route thì chỉ hiển thị pet đó, nếu không thì lọc theo search query
   const filteredUserPets = userPets.filter((pet) => {
     if (routePetId) {
       return pet.petId.toString() === routePetId;
@@ -124,7 +119,6 @@ const PetHealthBookListCus = () => {
         <NavbarCustomer />
         <main className="flex-1 p-4">
           <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
-          {/* Nếu không truyền petId, có thể hiển thị search input */}
           {!routePetId && (
             <div className="mb-4">
               <input
@@ -137,11 +131,9 @@ const PetHealthBookListCus = () => {
             </div>
           )}
 
-          {/* Danh sách Pet, mỗi pet + Health Book trong 1 row */}
           <div className="flex flex-col gap-6">
             {filteredUserPets.length > 0 ? (
               filteredUserPets.map((pet) => {
-                // Lọc Health Book theo petId
                 const petHealthRecords = petHealthBooks.filter(
                   (health) => bookingServiceItemToPetMap[health.bookingServiceItemId] === pet.petId
                 );
@@ -150,15 +142,15 @@ const PetHealthBookListCus = () => {
                     key={pet.petId}
                     className="flex gap-8 bg-white shadow-md rounded-md p-6"
                   >
-                    {/* Cột trái: Thông tin pet */}
                     <div className="w-1/3 flex flex-col items-center">
-                      <div className="w-[150px] h-[150px] bg-gray-200 rounded-full flex items-center justify-center overflow-hidden mb-4">
+                    <div className="flex flex-col items-center">
                         {pet.petImage ? (
                           <img
-                            src={`http://localhost:5050/pet-service${pet.petImage}`}
-                            alt={pet.petName || "Pet Image"}
-                            className="w-full h-full object-cover"
-                          />
+                          src={`http://localhost:5050/pet-service${pet.petImage}`}
+                          alt={pet.petName || "Pet Image"}
+                          className="w-[300px] h-[300px] object-cover rounded-lg shadow-lg transition-transform duration-300 hover:scale-110"
+                        />
+                        
                         ) : (
                           <span className="text-gray-500">No Image</span>
                         )}
@@ -166,8 +158,6 @@ const PetHealthBookListCus = () => {
                       <h3 className="text-lg font-semibold">{pet.petName}</h3>
                       <p className="text-sm text-gray-600">{formatDate(pet.dateOfBirth)}</p>
                     </div>
-
-                    {/* Cột phải: Danh sách Health Book */}
                     <div className="w-2/3 flex flex-col gap-2">
                       {petHealthRecords.length > 0 ? (
                         petHealthRecords.map((health) => {
@@ -177,16 +167,21 @@ const PetHealthBookListCus = () => {
                             relevantMedicines.length > 0
                               ? relevantMedicines.map((m) => m.medicineName).join(", ")
                               : "No Medicine";
+                          const isDone = moment(health.nextVisitDate).isAfter(moment(), "day");
+                          const status = isDone ? "Done" : "Pending";
+                          const statusColor = isDone ? "text-green-500" : "text-red-500";
+
                           return (
                             <div
                               key={health.healthBookId}
                               className="flex justify-between items-center bg-gray-600 shadow-md rounded-md p-4"
                             >
-                              <div className="text-sm text-white truncate w-1/4">{medicineNames}</div>
-                              <div className="text-sm text-white truncate w-1/4">{health.performBy}</div>
-                              <div className="text-sm text-white truncate w-1/4">
-                                {moment(health.createdAt).format("DD/MM/YYYY")}
+                              <div className="text-sm text-white truncate w-1/5">{medicineNames}</div>
+                              <div className="text-sm text-white truncate w-1/5">{health.performBy}</div>
+                              <div className="text-sm text-white truncate w-1/5">
+                                {moment(health.nextVisitDate).format("DD/MM/YYYY")}
                               </div>
+                              <div className={`text-sm font-semibold w-1/5 ${statusColor}`}>{status}</div>
                               <div className="flex items-center">
                                 <Link to={`/detailcus/${health.healthBookId}`}>
                                   <IconButton
@@ -214,6 +209,7 @@ const PetHealthBookListCus = () => {
                         <p className="text-sm text-gray-600">No Health Book Records</p>
                       )}
                     </div>
+
                   </form>
                 );
               })

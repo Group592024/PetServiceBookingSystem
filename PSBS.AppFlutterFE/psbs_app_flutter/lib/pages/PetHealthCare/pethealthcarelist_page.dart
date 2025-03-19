@@ -46,6 +46,21 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     };
   }
 
+  // Hàm lấy trạng thái dựa vào nextVisitDate
+  String getStatus(String nextVisitDate) {
+    try {
+      DateTime parsedDate = DateTime.parse(nextVisitDate);
+      if (parsedDate.isBefore(DateTime.now()) ||
+          parsedDate.isAtSameMomentAs(DateTime.now())) {
+        return "Done";
+      } else {
+        return "Pending";
+      }
+    } catch (e) {
+      return "Unknown";
+    }
+  }
+
   Future<void> fetchData() async {
     if (accountId == null) return;
     try {
@@ -97,6 +112,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
       List accountPets =
           (petsData as List).where((p) => p['accountId'] == accountId).toList();
 
+      // Cập nhật mapping để bao gồm petGender (true: Male, false: Female)
       List result = accountPets.map((pet) {
         List healthForThisPet = (petHealthData as List).where((health) {
           var bsi = bookingServiceItemsData.firstWhere(
@@ -123,7 +139,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
             'healthBookId': health['healthBookId'] ?? "",
             'medicineNames': medicineNames,
             'performBy': health['performBy'] ?? "Unknown",
-            'createdAt': health['createdAt'] ?? "",
+            'nextVisitDate': health['nextVisitDate'] ?? "",
           };
         }).toList();
 
@@ -131,6 +147,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
           'petId': pet['petId'],
           'petName': pet['petName'] ?? "Unknown",
           'dateOfBirth': pet['dateOfBirth'] ?? "",
+          'petGender': pet['petGender'] ?? true, // true: Male, false: Female
           'petImage': pet['petImage'] ?? "",
           'healthBooks': healthRecords,
         };
@@ -153,9 +170,29 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     }
   }
 
+  // Hàm tạo chip hiển thị thông tin (ví dụ: giới tính, ngày sinh)
+  Widget _buildInfoChip(String label, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16, color: color),
+          SizedBox(width: 6),
+          Text(label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Nếu có petId truyền vào, chỉ lọc pet đó
+    // Tính danh sách đã lọc
     List filteredPets = widget.petId != null && widget.petId!.isNotEmpty
         ? mergedPets
             .where((record) =>
@@ -176,141 +213,207 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text("Pet Health Book List"),
-        backgroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          // Nếu không có petId truyền vào, hiển thị ô tìm kiếm
-          if (widget.petId == null || widget.petId!.isEmpty)
-            Padding(
-              padding: EdgeInsets.all(8.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  labelText: "Search Pets...",
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    searchQuery = value.toLowerCase();
-                  });
-                },
+      // Sử dụng CustomScrollView để kết hợp SliverAppBar và nội dung
+      body: CustomScrollView(
+        slivers: [
+          // SliverAppBar với ảnh nền và gradient overlay
+          SliverAppBar(
+            expandedHeight: 300,
+            pinned: true,
+            backgroundColor: Colors.blue,
+            // Trong phần SliverAppBar, thay đoạn mã hiển thị ảnh như sau:
+            flexibleSpace: FlexibleSpaceBar(
+              title: widget.petId == null || widget.petId!.isEmpty
+                  ? Text("Pet Health Book List")
+                  : null,
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  // Nếu có petId và filteredPets không rỗng, lấy ảnh của pet đúng đó
+                  if (widget.petId != null &&
+                      widget.petId!.isNotEmpty &&
+                      filteredPets.isNotEmpty)
+                    Image.network(
+                      "http://10.0.2.2:5050/pet-service${filteredPets.first['petImage']}",
+                      fit: BoxFit.cover,
+                    )
+                  else
+                    Container(color: Colors.grey),
+                  // Gradient overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.7),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          Expanded(
-            child: filteredPets.isEmpty
-                ? Center(child: Text("No Health Books Found"))
-                : ListView.builder(
-                    itemCount: filteredPets.length,
-                    itemBuilder: (context, index) {
-                      var petRecord = filteredPets[index];
-                      return Card(
-                        color: Colors.white,
-                        elevation: 3,
-                        margin:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        child: Padding(
-                          padding: EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+
+            leading: IconButton(
+              icon: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.arrow_back, color: Colors.blue),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+          if (widget.petId == null || widget.petId!.isEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: TextField(
+                  decoration: InputDecoration(
+                    labelText: "Search Pets...",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value.toLowerCase();
+                    });
+                  },
+                ),
+              ),
+            ),
+          // Danh sách các health book của từng pet
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                var petRecord = filteredPets[index];
+                return Card(
+                  color: Colors.white,
+                  elevation: 3,
+                  margin: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Padding(
+                    padding: EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header: Tên thú cưng, giới tính và ngày sinh
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
                                 children: [
-                                  Container(
-                                    width: 80,
-                                    height: 80,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      image: DecorationImage(
-                                        image: petRecord['petImage'].isNotEmpty
-                                            ? NetworkImage(
-                                                "http://10.0.2.2:5050/pet-service${petRecord['petImage']}")
-                                            : AssetImage(
-                                                    'assets/default-image.png')
-                                                as ImageProvider,
-                                        fit: BoxFit.cover,
+                                  Center(
+                                    child: Text(
+                                      petRecord['petName'],
+                                      style: TextStyle(
+                                        fontSize:
+                                            22, // Tăng font size cho tên pet
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            Colors.blue, // Màu xanh cho tên pet
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        petRecord['petName'],
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
+                                      _buildInfoChip(
+                                        petRecord['petGender']
+                                            ? 'Male'
+                                            : 'Female',
+                                        petRecord['petGender']
+                                            ? Icons.male
+                                            : Icons.female,
+                                        petRecord['petGender']
+                                            ? Colors.blue
+                                            : Colors.pink,
                                       ),
-                                      Text(
+                                      SizedBox(
+                                          width:
+                                              8), // Khoảng cách nhỏ giữa 2 chip
+                                      _buildInfoChip(
                                         formatDate(petRecord['dateOfBirth']),
-                                        style: TextStyle(
-                                            fontSize: 16, color: Colors.grey),
+                                        Icons.cake,
+                                        Colors.blue,
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                              Divider(),
-                              petRecord['healthBooks'].isEmpty
-                                  ? Text("No Health Book Records")
-                                  : Column(
-                                      children: List.generate(
-                                        petRecord['healthBooks'].length,
-                                        (i) {
-                                          var health =
-                                              petRecord['healthBooks'][i];
-                                          return ListTile(
-                                            title: Text(
-                                              "Medicine: ${health['medicineNames']}",
+                            ),
+                          ],
+                        ),
+                        Divider(),
+                        petRecord['healthBooks'].isEmpty
+                            ? Text("No Health Book Records")
+                            : Column(
+                                children: List.generate(
+                                  petRecord['healthBooks'].length,
+                                  (i) {
+                                    var health = petRecord['healthBooks'][i];
+                                    return ListTile(
+                                      title: Text(
+                                        "Medicine: ${health['medicineNames']}",
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                              "Performed By: ${health['performBy']}"),
+                                          Text(
+                                              "Next Visit Date: ${formatDate(health['nextVisitDate'])}"),
+                                          Text(
+                                            "Status: ${getStatus(health['nextVisitDate'])}",
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: getStatus(health[
+                                                          'nextVisitDate']) ==
+                                                      'Done'
+                                                  ? Colors.green
+                                                  : Colors.orange,
                                             ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                    "Performed By: ${health['performBy']}"),
-                                                Text(
-                                                    "Created At: ${formatDate(health['createdAt'])}"),
-                                              ],
-                                            ),
-                                            trailing: IconButton(
-                                              icon: Icon(Icons.info,
-                                                  color: Colors.grey),
-                                              onPressed: () {
-                                                if (health['healthBookId'] ==
-                                                        null ||
-                                                    health['healthBookId']
-                                                        .isEmpty) {
-                                                  print(
-                                                      "Error: healthBookId is null or empty");
-                                                  return;
-                                                }
-                                                Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        PetHealthBookDetail(
-                                                      healthBookId: health[
-                                                          'healthBookId'],
-                                                      pet: petRecord,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
+                                          ),
+                                        ],
+                                      ),
+                                      trailing: IconButton(
+                                        icon: Icon(Icons.info,
+                                            color: Colors.grey),
+                                        onPressed: () {
+                                          if (health['healthBookId'] == null ||
+                                              health['healthBookId'].isEmpty) {
+                                            print(
+                                                "Error: healthBookId is null or empty");
+                                            return;
+                                          }
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  PetHealthBookDetail(
+                                                healthBookId:
+                                                    health['healthBookId'],
+                                                pet: petRecord,
+                                              ),
                                             ),
                                           );
                                         },
                                       ),
-                                    ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
+                                    );
+                                  },
+                                ),
+                              ),
+                      ],
+                    ),
                   ),
+                );
+              },
+              childCount: filteredPets.length,
+            ),
           ),
         ],
       ),

@@ -12,8 +12,8 @@ using PSPS.AccountAPI.Infrastructure.Data;
 namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
-    [Migration("20250227074011_init")]
-    partial class init
+    [Migration("20250316131425_First")]
+    partial class First
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,9 +61,15 @@ namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
                     b.Property<string>("AccountPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("RoleId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("AccountId");
 

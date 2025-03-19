@@ -19,18 +19,18 @@ const Profile = () => {
   useEffect(() => {
     if (accountId) {
       const token = sessionStorage.getItem("token");
-  
+
       fetch(`http://localhost:5050/api/Account?AccountId=${accountId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
       })
         .then((response) => response.json())
         .then(async (data) => {
           setAccount(data);
-  
+
           if (data.accountImage) {
             try {
               const response = await fetch(
@@ -39,12 +39,12 @@ const Profile = () => {
                   method: "GET",
                   headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`, 
+                    Authorization: `Bearer ${token}`,
                   },
                 }
               );
               const imageData = await response.json();
-  
+
               if (imageData.flag) {
                 const imgContent = imageData.data.fileContents;
                 const imgContentType = imageData.data.contentType;
@@ -62,7 +62,7 @@ const Profile = () => {
         .catch((error) => console.error("Error fetching account data:", error));
     }
   }, [accountId]);
-  
+
 
   if (!account) {
     return <div>Loading...</div>;
@@ -194,6 +194,18 @@ const Profile = () => {
                     id="address"
                     className="w-full p-3 border rounded-md"
                     value={account.accountAddress}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="loyaltyPoints" className="block text-sm font-medium mb-1 font-bold">
+                    Loyalty Points
+                  </label>
+                  <input
+                    type="text"
+                    id="loyaltyPoints"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountLoyaltyPoint ? account.accountLoyaltyPoint.toLocaleString() : "0"}
                     disabled
                   />
                 </div>

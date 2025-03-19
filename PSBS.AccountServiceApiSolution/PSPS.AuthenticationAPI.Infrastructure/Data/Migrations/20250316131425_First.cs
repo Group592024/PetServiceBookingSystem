@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,8 @@ namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
                     AccountPassword = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountGender = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountDob = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AccountAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountImage = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AccountLoyaltyPoint = table.Column<int>(type: "int", nullable: false),

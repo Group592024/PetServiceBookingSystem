@@ -12,6 +12,8 @@ namespace PSPS.AccountAPI.Application.DTOs
         [Required] string AccountPassword,
         [Required] string AccountGender,
         [Required] DateTime AccountDob,
+        [Required] DateTime CreatedAt,
+        [Required] DateTime UpdatedAt,
         [Required] string AccountAddress,
         [Required] string AccountImage,
         [Required] int AccountLoyaltyPoint,

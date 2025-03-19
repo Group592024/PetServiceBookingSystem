@@ -88,7 +88,7 @@ const Login = () => {
         } else {
           const role =
             decodedToken[
-              "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
           localStorage.setItem("role", role);
 
@@ -117,8 +117,13 @@ const Login = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
-        <div className="w-1/2 bg-gray-300 flex items-center justify-center">
-          <h1 className="text-4xl font-bold">LOGO</h1>
+        <div className="w-1/2 bg-blue-100 flex items-center justify-center">
+          <div className="logo-name font-bold text-3xl">
+            <i className="bx bxs-cat text-blue-500 text-5xl"></i>
+            <span className="text-black text-3xl">Pet</span>
+            <span className="text-blue-500 text-3xl">Ease</span>
+          </div>
+
         </div>
 
         <div className="w-1/2 p-8">

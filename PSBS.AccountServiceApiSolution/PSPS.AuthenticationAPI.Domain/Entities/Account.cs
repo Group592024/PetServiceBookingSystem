@@ -22,7 +22,8 @@ namespace PSPS.AccountAPI.Domain.Entities
         public string? AccountGender { get; set; }
 
         public DateTime? AccountDob { get; set; }
-
+        public DateTime? CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
         public string? AccountAddress { get; set; }
 
         public string? AccountImage { get; set; }

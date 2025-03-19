@@ -58,9 +58,15 @@ namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
                     b.Property<string>("AccountPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("RoleId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("AccountId");
 

@@ -48,6 +48,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 account.AccountPassword ?? string.Empty,
                 account.AccountGender ?? string.Empty,
                 account.AccountDob ?? DateTime.MinValue,
+                account.CreatedAt ?? DateTime.MinValue,
+                account.UpdatedAt ?? DateTime.MinValue,
                 account.AccountAddress ?? string.Empty,
                 account.AccountImage ?? string.Empty,
                 account.AccountLoyaltyPoint,
@@ -136,6 +138,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountPassword ?? string.Empty,
                     account.AccountGender ?? string.Empty,
                     account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
                     account.AccountAddress ?? string.Empty,
                     account.AccountImage ?? string.Empty,
                     account.AccountLoyaltyPoint,
@@ -169,6 +173,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountPassword ?? string.Empty,
                     account.AccountGender ?? string.Empty,
                     account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
                     account.AccountAddress ?? string.Empty,
                     account.AccountImage ?? string.Empty,
                     account.AccountLoyaltyPoint,
@@ -202,6 +208,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountPassword ?? string.Empty,
                     account.AccountGender ?? string.Empty,
                     account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
                     account.AccountAddress ?? string.Empty,
                     account.AccountImage ?? string.Empty,
                     account.AccountLoyaltyPoint,
@@ -238,6 +246,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountPassword ?? string.Empty,
                     account.AccountGender ?? string.Empty,
                     account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
                     account.AccountAddress ?? string.Empty,
                     account.AccountImage ?? string.Empty,
                     account.AccountLoyaltyPoint,
@@ -274,6 +284,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     account.AccountPassword ?? string.Empty,
                     account.AccountGender ?? string.Empty,
                     account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
                     account.AccountAddress ?? string.Empty,
                     account.AccountImage ?? string.Empty,
                     account.AccountLoyaltyPoint,
@@ -341,7 +353,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public async Task<Response> Register([FromForm] RegisterAccountDTO model)//Register account
+        public async Task<Response> Register([FromForm] RegisterAccountDTO model)
         {
             try
             {
@@ -352,10 +364,16 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 if (existingAccount != null)
                 {
                     if (existingAccount.AccountEmail == model.RegisterTempDTO.AccountEmail)
+                    {
+                        Console.WriteLine($"Register failed: Email {model.RegisterTempDTO.AccountEmail} already exists.");
                         return new Response(false, "Email already exists!");
+                    }
 
                     if (existingAccount.AccountPhoneNumber == model.RegisterTempDTO.AccountPhoneNumber)
+                    {
+                        Console.WriteLine($"Register failed: Phone number {model.RegisterTempDTO.AccountPhoneNumber} already exists.");
                         return new Response(false, "Phone number already exists!");
+                    }
                 }
 
                 string fileName = GetDefaultImage();
@@ -367,6 +385,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                     if (string.IsNullOrEmpty(fileExtension) || !allowedExtensions.Contains(fileExtension, StringComparer.OrdinalIgnoreCase))
                     {
+                        Console.WriteLine($"Register failed: Unsupported file format {fileExtension}.");
                         return new Response(false, "Unsupported file format.");
                     }
 
@@ -395,6 +414,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     AccountAddress = model.RegisterTempDTO.AccountAddress ?? "N/A",
                     AccountImage = fileName,
                     AccountDob = model.RegisterTempDTO.AccountDob ?? new DateTime(2000, 1, 1),
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
                     AccountId = Guid.NewGuid(),
                     RoleId = "user"
                 };
@@ -402,19 +423,24 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 var result = context.Accounts.Add(newAccount);
                 await context.SaveChangesAsync();
 
+                Console.WriteLine($"Account registered successfully for {newAccount.AccountEmail}.");
+
                 return !string.IsNullOrEmpty(result.Entity.AccountId.ToString())
                     ? new Response(true, "Account registered successfully")
                     : new Response(false, "Invalid data provided");
             }
             catch (DbUpdateException dbEx)
             {
+                Console.WriteLine($"Database error while registering account for {model.RegisterTempDTO.AccountEmail}: {dbEx}");
                 return new Response(false, $"Database error: {dbEx.Message}");
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"Unexpected error while registering account for {model.RegisterTempDTO.AccountEmail}: {ex}");
                 return new Response(false, $"An unexpected error occurred: {ex.Message}");
             }
         }
+
 
 
 
@@ -459,10 +485,12 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                     AccountEmail = model.RegisterTempDTO.AccountEmail,
                     AccountPassword = BCrypt.Net.BCrypt.HashPassword("123456"),
                     AccountPhoneNumber = model.RegisterTempDTO.AccountPhoneNumber,
-                    AccountGender = "Male",
+                    AccountGender = "male",
                     AccountAddress = "Address",
                     AccountImage = fileName,
                     AccountDob = DateTime.Now.AddYears(-20),
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now,
                     AccountId = Guid.NewGuid(),
                     RoleId = "user"
                 };
@@ -575,7 +603,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 {
 
                 }
-
+                account.UpdatedAt = DateTime.Now;
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
 
@@ -817,6 +845,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 account.AccountPassword ?? string.Empty,
                 account.AccountGender ?? string.Empty,
                 account.AccountDob ?? DateTime.MinValue,
+                account.CreatedAt ?? DateTime.MinValue,
+                account.UpdatedAt ?? DateTime.MinValue,
                 account.AccountAddress ?? string.Empty,
                 account.AccountImage ?? string.Empty,
                 account.AccountLoyaltyPoint,

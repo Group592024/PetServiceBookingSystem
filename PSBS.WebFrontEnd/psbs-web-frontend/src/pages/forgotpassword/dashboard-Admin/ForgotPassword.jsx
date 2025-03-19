@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -33,7 +33,7 @@ const ForgotPassword = () => {
       setLoading(false);
       return;
     }
-  
+
     try {
       const token = sessionStorage.getItem("token");
       const response = await axios.post(
@@ -46,7 +46,7 @@ const ForgotPassword = () => {
           },
         }
       );
-  
+
       if (response.data && response.data.flag) {
         Swal.fire({
           icon: 'success',
@@ -78,12 +78,16 @@ const ForgotPassword = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-200">
       <div className="flex w-2/3 bg-white shadow-lg">
-        <div className="w-1/2 bg-gray-300 flex items-center justify-center">
-          <h1 className="text-4xl font-bold">LOGO</h1>
+        <div className="w-1/2 bg-blue-100 flex items-center justify-center">
+          <div className="logo-name font-bold text-3xl">
+            <i className="bx bxs-cat text-blue-500 text-5xl"></i>
+            <span className="text-black text-3xl">Pet</span>
+            <span className="text-blue-500 text-3xl">Ease</span>
+          </div>
         </div>
 
         <div className="w-1/2 p-8">
@@ -92,7 +96,7 @@ const ForgotPassword = () => {
           </div>
           <h2 className="text-2xl font-semibold text-gray-800 text-center mb-6">Forgot Password</h2>
           <p className="text-sm text-center text-gray-600 mb-4">
-            Remember your password? 
+            Remember your password?
             <a href="/login" className="text-cyan-500 hover:underline">Login here</a>
           </p>
           <form onSubmit={handleSubmit}>
