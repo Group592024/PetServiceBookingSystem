@@ -82,6 +82,7 @@ namespace PetApi.Infrastructure.Data.Migrations
                 {
                     Diary_ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Diary_Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Diary_Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Pet_ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

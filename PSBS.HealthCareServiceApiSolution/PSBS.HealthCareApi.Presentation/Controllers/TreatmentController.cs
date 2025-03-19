@@ -1,14 +1,9 @@
-﻿using PSBS.HealthCareApi.Application.DTOs;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PSBS.HealthCareApi.Application.DTOs;
 using PSBS.HealthCareApi.Application.DTOs.Conversions;
 using PSBS.HealthCareApi.Application.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using PSBS.HealthCareApi.Application.DTOs.Conversions.PSBS.HealthCareApi.Application.DTOs.Conversions;
-using Microsoft.AspNetCore.Authorization;
 
 namespace PSBS.HealthCareApi.Presentation.Controllers
 {

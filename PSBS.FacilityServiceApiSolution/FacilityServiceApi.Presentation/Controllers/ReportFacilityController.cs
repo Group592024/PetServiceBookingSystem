@@ -53,9 +53,10 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         [HttpGet("roomHistory")]
         [Authorize(Policy = "AdminOrStaff")]
-        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetRoomHistory()
+        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetRoomHistory(
+            int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
-            var roomHistory = await _report.GetRoomTypeQuantity();
+            var roomHistory = await _report.GetRoomTypeQuantity(year, month, startDate, endDate);
             if (!roomHistory.Any())
                 return NotFound(new Response(false, "No room histories found in the database"));
 
@@ -67,9 +68,10 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         [HttpGet("bookingServiceItem")]
         [Authorize(Policy = "AdminOrStaff")]
-        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetBookingServiceItem()
+        public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetBookingServiceItem(
+            int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
-            var roomHistory = await _report.GetServiceQuantity();
+            var roomHistory = await _report.GetServiceQuantity(year, month, startDate, endDate);
             if (!roomHistory.Any())
                 return NotFound(new Response(false, "No booking service items found in the database"));
 
@@ -81,9 +83,10 @@ namespace FacilityServiceApi.Presentation.Controllers
 
         [HttpGet("petCount/{id}")]
         [Authorize(Policy = "AdminOrStaff")]
-        public async Task<ActionResult<IEnumerable<PetCountDTO>>> GetPetCount([FromRoute] Guid id)
+        public async Task<ActionResult<IEnumerable<PetCountDTO>>> GetPetCount([FromRoute] Guid id,
+            int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
-            var petCountDTOs = await _report.GetAllBookingByPet(id);
+            var petCountDTOs = await _report.GetAllBookingByPet(id, year, month, startDate, endDate);
             if (!petCountDTOs.Any())
                 return NotFound(new Response(false, "No pet count dtos found in the database"));
 

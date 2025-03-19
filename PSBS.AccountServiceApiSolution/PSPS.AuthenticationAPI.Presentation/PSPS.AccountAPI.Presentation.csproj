@@ -7,6 +7,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="images\2jvneayz.5yc.jpg" />
+    <Content Include="images\2zamo0cu.v5x.jpg" />
+    <Content Include="images\34o2f0ny.csj.png" />
+    <Content Include="images\5fccxth4.ugo.png" />
+    <Content Include="images\avdvmi2m.oay.png" />
+    <Content Include="images\cel2logp.sh4.jpg" />
+    <Content Include="images\clv1ubj2.rol.jpg" />
+    <Content Include="images\default.jpg" />
+    <Content Include="images\dms2vmsq.3ql.png" />
+    <Content Include="images\gtrli1bh.b4g.png" />
+    <Content Include="images\hfpa4uxw.3nb.jpg" />
+    <Content Include="images\hrusjggs.fhu.jpg" />
+    <Content Include="images\jhmdcn4t.0u1.jpg" />
+    <Content Include="images\jxikqu1t.qzw.jpg" />
+    <Content Include="images\lqppxmvc.mcz.jpg" />
+    <Content Include="images\mbjzxabi.kzv.jpg" />
+    <Content Include="images\nslb21ku.akn.jpg" />
+    <Content Include="images\ntqpl5je.uu5.jpg" />
+    <Content Include="images\xfme3cpa.1l4.jpg" />
+    <Content Include="images\ybnr3ja1.2yi.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.7">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,6 +47,7 @@
   <ItemGroup>
     <Folder Include="images\" />
     <Folder Include="mailssave\" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

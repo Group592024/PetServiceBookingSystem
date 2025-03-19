@@ -30,11 +30,43 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
   int pageIndex = 1;
   int totalPages = 1;
   bool isLoading = false;
+  List<String> categories = ["All"];
+  String selectedCategory = "All";
 
   @override
   void initState() {
     super.initState();
+    fetchCategories();
     fetchPetDiary(widget.petId, pageIndex);
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse(
+            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List<dynamic> categoryList = data['data']['data'];
+
+        setState(() {
+          categories = ["All", ...categoryList.cast<String>()];
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading categories')),
+      );
+    }
   }
 
   Future<void> fetchPetDiary(String petId, int page) async {
@@ -46,7 +78,8 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/PetDiary/diaries/$petId?pageIndex=$page&pageSize=4'),
+          'http://192.168.1.7:5050/api/PetDiary/diaries/$petId?category=${selectedCategory == "All" ? "" : selectedCategory}&pageIndex=$page&pageSize=4',
+        ),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -56,13 +89,11 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final entries = data['data']?['data'];
-        if (entries is List) {
-          setState(() {
-            diaryEntries = entries;
-            totalPages = data['data']?['meta']?['totalPages'] ?? 1;
-          });
-        }
-        print(entries[0]['diary_Content']);
+
+        setState(() {
+          diaryEntries = entries ?? [];
+          totalPages = data['data']?['meta']?['totalPages'] ?? 1;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -78,7 +109,8 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PetDiaryUpdatePage(diary: diary),
+        builder: (context) =>
+            PetDiaryUpdatePage(diary: diary, petId: widget.petId),
       ),
     );
 
@@ -113,7 +145,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-        Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary/$diaryId'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -191,7 +223,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://10.66.187.111:5010${widget.petImage}')
+                              'http://192.168.1.7:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),
@@ -209,6 +241,42 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                     ),
                   ],
                 ),
+              ),
+            ),
+          ),
+
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Select a category: ",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  DropdownButton<String>(
+                    value: selectedCategory,
+                    isExpanded: true,
+                    items: categories.map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedCategory = newValue!;
+                      });
+                      fetchPetDiary(widget.petId, 1);
+                    },
+                  ),
+                ],
               ),
             ),
           ),
@@ -275,7 +343,25 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                                       ),
                                       SizedBox(height: 5),
 
-                                      // Nội dung được giới hạn theo chiều cao
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.shade100,
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          entry['category'] ?? 'No Category',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue.shade800,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+
                                       AnimatedContainer(
                                         duration: Duration(milliseconds: 300),
                                         constraints: BoxConstraints(

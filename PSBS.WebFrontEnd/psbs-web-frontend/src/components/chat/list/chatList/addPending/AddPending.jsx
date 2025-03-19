@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 import "./addUser.css";
 import { getData } from "../../../../../Utilities/ApiFunctions";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 
 const AddPending = ({
   signalRService,
@@ -103,7 +103,7 @@ const AddPending = ({
   return (
     <div className="addUser">
       <div className="close-button">
-        <CloseIcon onClick={handleClose} style={{ cursor: 'pointer' }} />
+        <CloseIcon onClick={handleClose} style={{ cursor: "pointer" }} />
       </div>
       <form onSubmit={(e) => e.preventDefault()}>
         <input
@@ -112,14 +112,23 @@ const AddPending = ({
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button type="button" onClick={handleSearch}>Search</button>
+        <button type="button" onClick={handleSearch}>
+          Search
+        </button>
       </form>
       <div className="userContainer">
         {filteredUserList.length > 0 ? (
           filteredUserList.map((user) => (
             <div className="user" key={user.chatRoomId}>
               <div className="detail">
-                <img src={user.user?.avatar || "./avatar.png"} alt="" />
+                <img
+                  src={
+                    user.user.accountImage
+                      ? `http://localhost:5050/account-service/images/${user.user.accountImage}`
+                      : "/avatar.png"
+                  }
+                  alt="Profile"
+                />
                 <div className="nameAndMessage">
                   <span>{user.user?.accountName}</span>
                   <p className="truncate max-w-[200px]">

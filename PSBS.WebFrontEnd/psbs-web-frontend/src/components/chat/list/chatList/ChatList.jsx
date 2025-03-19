@@ -118,15 +118,26 @@ const ChatList = ({ signalRService, currentUser }) => {
       {chats.map((chat) => (
         <div
           key={chat.chatRoomId}
-          className={`item ${chat.isSupportRoom ? "support" : ""}`} // Apply support class dynamically
+          className={`item ${chat.isSupportRoom ? "support" : ""} ${
+            chat.chatRoomId === chatId ? "selected" : ""
+          }`}
           onClick={() => handleSelect(chat)}
         >
-          <img src={chat.user.data?.avatar || "/avatar.png"} alt="" />
+          <img
+            src={
+              chat?.user.data.accountImage
+                ? `http://localhost:5050/account-service/images/${chat.user.data.accountImage}`
+                : "/avatar.png"
+            }
+            alt="Profile"
+          />
           <div className="texts">
             <span>
-              {chat.isSupportRoom && currentUser.roleId === "user"
+              {chat.isSupportRoom && currentUser.roleId !== "user"
+                ? `Support For ${chat.user.data?.accountName}`
+                : chat.isSupportRoom && currentUser.roleId === "user"
                 ? "Support Agent"
-                : chat.user.data?.accountName}
+                : `${chat.user.data?.accountName}`}
             </span>
             <p className="truncate max-w-[200px]">
               {chat?.lastMessage || "null"}
@@ -144,6 +155,7 @@ const ChatList = ({ signalRService, currentUser }) => {
           signalRService={signalRService}
           currentUser={currentUser}
           currentList={chats}
+          setClose={setAddMode}
         />
       )}
     </div>

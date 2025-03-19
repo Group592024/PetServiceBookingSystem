@@ -3,6 +3,7 @@
 using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using ChatServiceApi.Infrastructure.Data;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
@@ -38,13 +39,19 @@ namespace ChatServiceApi.Infrastructure.Repositories
 
         public async Task AddChatMessageAsync(ChatMessage message)
         {
-            await _context.ChatMessages.AddAsync(message);
-
+            await _context.ChatMessages.AddAsync(message);       
             var userChat = await _context.ChatRooms.FindAsync(message.ChatRoomId);
             if (userChat != null) // Ensure the chat room exists
             {
-                userChat.LastMessage = message.Text;
-                userChat.UpdateAt = DateTime.UtcNow; // Use UTC for consistency
+              if(string.IsNullOrEmpty(message.Text))
+                {
+                    userChat.LastMessage = "Send an image";
+                }
+                else
+                {
+                    userChat.LastMessage = message.Text;
+                }
+                userChat.UpdateAt = DateTime.Now; // Use UTC for consistency
 
                 _context.ChatRooms.Update(userChat); // Explicitly mark as updated
             }
@@ -98,7 +105,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             ChatRoom chatRoom = new ChatRoom()
             {
                 UpdateAt = DateTime.UtcNow, 
-                LastMessage = "",
+                LastMessage = "Start the chat now!",
             };
 
             var createdChatRoom = _context.ChatRooms.Add(chatRoom);
@@ -332,5 +339,39 @@ namespace ChatServiceApi.Infrastructure.Repositories
 
             return new Response(allLeftAndUnseen, allLeftAndUnseen ? "All supporters have left and are unseen." : "There are active supporters.");
         }
+
+        public async Task<Response> StoreImage(IFormFile image, string webRootPath)
+        {
+            if (image == null || image.Length == 0)
+            {
+                return new Response(false, "No image file provided.");
+            }
+
+            if (webRootPath == null)
+            {
+                return new Response(false, "WebRootPath is null.");
+            }
+
+            try
+            {
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                string filePath = Path.Combine(webRootPath, "uploads", fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                string imageUrl = $"/uploads/{fileName}";
+
+                return new Response(true, "Image uploaded successfully.") { Data = imageUrl };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error storing image: {ex.Message}");
+                return new Response(false, "Internal server error.");
+            }
+        }
     }
+
 }

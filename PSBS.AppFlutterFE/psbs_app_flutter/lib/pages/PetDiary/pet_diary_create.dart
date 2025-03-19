@@ -23,12 +23,17 @@ class PetDiaryCreatePage extends StatefulWidget {
 class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
   final ImagePicker _picker = ImagePicker();
   List<XFile>? _mediaFileList;
+  List<String> categories = [];
+  String? selectedCategory;
+  bool isLoadingCategories = true;
 
   void _setImageFileListFromFile(XFile? value) {
     _mediaFileList = value == null ? null : <XFile>[value];
   }
 
   QuillController _controller = QuillController.basic();
+  TextEditingController categoryTextController = TextEditingController();
+
   bool isLoading = false;
 
   Future<void> _saveDiaryEntry() async {
@@ -51,7 +56,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5050/api/PetDiary'),
+        Uri.parse('http://192.168.1.7:5050/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -60,6 +65,9 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
         body: json.encode({
           'pet_ID': widget.petId,
           'diary_Content': diaryContent,
+          'category': categoryTextController.text.isNotEmpty
+              ? categoryTextController.text
+              : selectedCategory,
         }),
       );
 
@@ -80,6 +88,41 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       );
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _fetchCategories() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse(
+            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+        headers: {
+          'Accept': 'application/json',
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print("response ne: " + response.body);
+        Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        List<dynamic> data = jsonResponse["data"]["data"];
+
+        setState(() {
+          categories = data.map((item) => item.toString()).toList();
+          selectedCategory = categories.isNotEmpty ? categories[0] : null;
+          isLoadingCategories = false;
+        });
+      } else {
+        throw Exception('Failed to load categories');
+      }
+    } catch (e) {
+      print('Error fetching categories: $e');
+      setState(() {
+        isLoadingCategories = false;
+      });
     }
   }
 
@@ -191,6 +234,12 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _fetchCategories();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(title: Text('Create Pet Diary')),
@@ -198,8 +247,48 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text("Select or create a category:",
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+                isLoadingCategories
+                    ? CircularProgressIndicator()
+                    : DropdownButton<String>(
+                        value: categories.contains(selectedCategory)
+                            ? selectedCategory
+                            : null,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedCategory = newValue!;
+                            categoryTextController.text = "";
+                          });
+                        },
+                        items: categories
+                            .map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
+                      ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: categoryTextController,
+                  decoration: InputDecoration(
+                    labelText: "Create new category",
+                    border: OutlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCategory = value;
+
+                      if (value.isNotEmpty && !categories.contains(value)) {
+                        categories.add(value);
+                      }
+                    });
+                  },
+                ),
+                SizedBox(height: 10),
                 QuillSimpleToolbar(
                   controller: _controller,
                   config: QuillSimpleToolbarConfig(
@@ -235,6 +324,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
   @override
   void dispose() {
     _controller.dispose();
+    categoryTextController.dispose();
     super.dispose();
   }
 }

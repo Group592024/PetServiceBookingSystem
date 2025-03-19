@@ -1,5 +1,5 @@
-import { Avatar, Modal, Stack } from "@mui/material";
-import React, { useRef, useState } from "react";
+import { Autocomplete, Avatar, Modal, Stack, TextField } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import sampleImage from "../../assets/sampleUploadImage.jpg";
 import JoditEditor from "jodit-react";
@@ -12,6 +12,8 @@ const AddDiaryModal = ({ open, onClose }) => {
 
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const config = {
     readonly: false,
@@ -63,6 +65,7 @@ const AddDiaryModal = ({ open, onClose }) => {
         body: JSON.stringify({
           pet_ID: petInfo?.petId,
           diary_Content: content,
+          category: selectedCategory,
         }),
       });
 
@@ -81,6 +84,9 @@ const AddDiaryModal = ({ open, onClose }) => {
         title: "Success",
         text: `Pet Diary Created Successfully!`,
       });
+      setSelectedCategory("");
+
+      console.log("current category: " + selectedCategory);
 
       setContent("");
       onClose();
@@ -95,55 +101,109 @@ const AddDiaryModal = ({ open, onClose }) => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const fetchData = await fetch(
+        `http://localhost:5050/api/PetDiary/categories/${petInfo?.petId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const response = await fetchData.json();
+
+      const listCategories = response.data.data;
+      console.log(listCategories);
+      setCategories(listCategories);
+
+      //return listCategories;
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (event, newValue) => {
+    setSelectedCategory(newValue);
+  };
+
   return (
     <Modal open={open} onClose={onClose}>
-      <Stack
-        spacing={4}
-        className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[10%] max-h-[500px]"
-      >
-        <div className="flex justify-start items-center gap-4 w-full">
-          <button onClick={onClose}>
-            <ArrowBackIosIcon />
-          </button>
-
-          <div className="flex justify-center items-center gap-2">
-            <Avatar
-              alt={petInfo?.petName}
-              src={petInfo?.petImage || sampleImage}
-            />
-            <h3 className="font-bold">{petInfo?.petName}</h3>
-          </div>
-        </div>
-
-        <div
-          style={{
-            borderRadius: "0.5rem",
-            overflowY: "auto",
-            maxHeight: "300px",
-          }}
-          className="no-scroll-bar"
+      <div>
+        <Stack
+          spacing={4}
+          className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[10%] max-h-[500px]"
         >
-          <JoditEditor
-            ref={editor}
-            value={content}
-            config={config}
-            tabIndex={1}
-            onBlur={(newContent) => setContent(newContent)}
-          />
-        </div>
+          <div className="flex justify-start items-center gap-4 w-full">
+            <button onClick={onClose}>
+              <ArrowBackIosIcon />
+            </button>
 
-        <div className="flex justify-center mt-8">
-          <button
-            className={`rounded-full px-8 py-4 bg-customPrimary text-customLight w-1/3 ${
-              loading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
-            disabled={loading}
-            onClick={handleSave}
+            <div className="flex justify-center items-center gap-2">
+              <Avatar
+                alt={petInfo?.petName}
+                src={petInfo?.petImage || sampleImage}
+              />
+              <h3 className="font-bold">{petInfo?.petName}</h3>
+            </div>
+          </div>
+
+          <div className="flex justify-between">
+            <Autocomplete
+              options={categories}
+              getOptionLabel={(option) => option}
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select category"
+                  variant="outlined"
+                />
+              )}
+              sx={{ width: "300px" }}
+            />
+            <span className="me-4">Create new category: </span>
+            <TextField onChange={(e) => setSelectedCategory(e.target.value)} />
+          </div>
+
+          <div
+            style={{
+              borderRadius: "0.5rem",
+              overflowY: "auto",
+              maxHeight: "300px",
+            }}
+            className="no-scroll-bar"
           >
-            {loading ? "Saving..." : "Save"}
-          </button>
-        </div>
-      </Stack>
+            <JoditEditor
+              ref={editor}
+              value={content}
+              config={config}
+              tabIndex={1}
+              onBlur={(newContent) => setContent(newContent)}
+            />
+          </div>
+
+          <div className="flex justify-center mt-8">
+            <button
+              className={`rounded-full px-8 py-4 bg-customPrimary text-customLight w-1/3 ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading}
+              onClick={handleSave}
+            >
+              {loading ? "Saving..." : "Save"}
+            </button>
+          </div>
+        </Stack>
+      </div>
     </Modal>
   );
 };

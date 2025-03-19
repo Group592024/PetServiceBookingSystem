@@ -18,5 +18,13 @@
   <ItemGroup>
     <ProjectReference Include="..\ChatServiceApi.Infrastructure\ChatServiceApi.Infrastructure.csproj" />
   </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="wwwroot\uploads\" />
+	</ItemGroup>
 
 </Project>

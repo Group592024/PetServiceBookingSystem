@@ -107,8 +107,8 @@
 
     /* Support Chat Item */
     .support {
-        background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
-        border-left: 5px solid rgba(0, 123, 255, 0.8); /* Blue left border */
+        /* background-color: rgba(0, 123, 255, 0.1); /* Light blue background */
+        /* border-left: 5px solid rgba(0, 123, 255, 0.8); Blue left border  */
 
         /* Support Icon Styling */
         .supportIcon {
@@ -119,5 +119,10 @@
             font-size: 40px;
             color: rgba(0, 123, 255, 0.4);
         }
+    }
+    .item.selected {
+        background-color: rgba(0, 123, 255, 0.2); /* Slightly darker blue */
+        border-left: 5px solid rgba(0, 123, 255, 0.9); /* More prominent blue border */
+        font-weight: bold; /* Make selected item text bold */
     }
 }

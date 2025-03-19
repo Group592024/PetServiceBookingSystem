@@ -74,7 +74,7 @@ namespace PSPS.Presentation.Controllers
             return Ok(result);
         }
         [HttpGet("all")]
-        [Authorize(Policy ="AdminOrStaff")]
+        [Authorize(Policy ="AdminOrStaffOrUser")]
         public async Task<ActionResult<List<GetAccountDTO>>> GetAllAccount()// Get all account
         {
             var result = await account.GetAllAccount();

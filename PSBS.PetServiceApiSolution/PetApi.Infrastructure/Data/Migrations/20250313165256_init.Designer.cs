@@ -12,7 +12,7 @@ using PetApi.Infrastructure.Data;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PetDbContext))]
-    [Migration("20250224132324_init")]
+    [Migration("20250313165256_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -112,6 +112,10 @@ namespace PetApi.Infrastructure.Data.Migrations
                     b.Property<Guid>("Diary_ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Diary_Content")
                         .IsRequired()

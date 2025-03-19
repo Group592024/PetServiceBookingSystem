@@ -47,7 +47,7 @@ namespace ChatServiceApi.Presentation.Hubs
             return base.OnDisconnectedAsync(exception);
         }
 
-        public async Task SendMessage(string chatRoomId, string userId, string message)
+        public async Task SendMessage(string chatRoomId, string userId, string message, string? imageUrl)
         {
             try
             {
@@ -58,10 +58,10 @@ namespace ChatServiceApi.Presentation.Hubs
 
                 if (!Guid.TryParse(userId, out Guid userGuid))
                     throw new ArgumentException("Invalid userId format.", nameof(userId));
+             
+                 await _chatService.SendMessageAsync(chatRoomGuid, userGuid, message, imageUrl);  
 
-                await _chatService.SendMessageAsync(chatRoomGuid, userGuid, message);
-
-                await Clients.Group(chatRoomId).SendAsync("ReceiveMessage", userGuid, message, DateTime.Now);
+                await Clients.Group(chatRoomId).SendAsync("ReceiveMessage", userGuid, message, DateTime.Now, imageUrl);
                 await Clients.All.SendAsync("UpdatePendingSupportRequests", await _chatService.GetPendingSupportRequestsAsync());
 
                 var participants = await _chatService.GetChatRoomParticipants(chatRoomGuid);

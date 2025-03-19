@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import SampleImage from "../../../assets/sampleUploadImage.jpg";
-import { Button, CircularProgress, Stack } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  CircularProgress,
+  Stack,
+  TextField,
+} from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import PetDiaryCardList from "../../../components/Diary/PetDiaryCardList";
 import AddDiaryModal from "../../../components/Diary/AddDiaryModal";
@@ -19,15 +25,19 @@ const PetDiaryListPage = () => {
   const [loading, setLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
   const [petDiary, setPetDiary] = useState({ data: [], meta: null });
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [categories, setCategories] = useState([]);
 
   const [addModalOpen, setAddModalOpen] = useState(false);
 
-  const fetchPetDiary = async (petId, pageIndex) => {
+  const fetchPetDiary = async (petId, selectedCategory, pageIndex) => {
     try {
+      console.log("category ne troi: " + selectedCategory);
+      console.log("pageindex ne troi: " + pageIndex);
       setLoading(true);
       const token = sessionStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:5050/api/PetDiary/diaries/${petId}?pageIndex=${pageIndex}&pageSize=4`,
+        `http://localhost:5050/api/PetDiary/diaries/${petId}?category=${selectedCategory}&pageIndex=${pageIndex}&pageSize=4`,
         {
           method: "GET",
           headers: {
@@ -67,8 +77,8 @@ const PetDiaryListPage = () => {
   };
 
   useEffect(() => {
-    fetchPetDiary(petId, pageIndex);
-  }, [petId, pageIndex]);
+    fetchPetDiary(petId, selectedCategory, pageIndex);
+  }, [petId, selectedCategory, pageIndex]);
 
   // Pagination handler
   const handleClickNext = () => {
@@ -84,7 +94,41 @@ const PetDiaryListPage = () => {
   // Add Pet Modal Processing
   const handleCloseAddModal = () => {
     setAddModalOpen(false);
-    fetchPetDiary(petId, 1);
+    fetchPetDiary(petId, selectedCategory, 1);
+    setSelectedCategory("All");
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const fetchData = await fetch(
+        `http://localhost:5050/api/PetDiary/categories/${petId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const response = await fetchData.json();
+
+      const listCategories = response.data.data;
+      console.log(listCategories);
+      setCategories(listCategories);
+
+      //return listCategories;
+    } catch (error) {
+      console.error("Error fetching data: ", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, [selectedCategory, petDiary]);
+
+  const handleCategoryChange = (event, newValue) => {
+    setSelectedCategory(newValue);
   };
 
   return (
@@ -130,6 +174,21 @@ const PetDiaryListPage = () => {
                 </button>
               </Stack>
             </div>
+
+            <Autocomplete
+              options={["All", ...categories]}
+              getOptionLabel={(option) => option}
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select category"
+                  variant="outlined"
+                />
+              )}
+              sx={{ width: "300px" }}
+            />
 
             <div className="flex justify-center">
               <Stack className="w-3/4">

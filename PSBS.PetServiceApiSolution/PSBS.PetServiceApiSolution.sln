@@ -13,6 +13,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PetApi.Presentation", "PetA
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PSPS.SharedLibrary", "..\PSBS.SharedLibrarySolution\PSPS.SharedLibrary\PSPS.SharedLibrary.csproj", "{AE64FB48-2ABF-4749-98A2-1518D686CD40}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{8A7995DB-7C2E-41B5-973F-4D2397F670BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest.PetServiceApi", "UnitTest.PetServiceApi\UnitTest.PetServiceApi.csproj", "{A8B2708B-CEE9-4433-9E8B-55970AD6001D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,9 +43,16 @@ Global
 		{AE64FB48-2ABF-4749-98A2-1518D686CD40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE64FB48-2ABF-4749-98A2-1518D686CD40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE64FB48-2ABF-4749-98A2-1518D686CD40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8B2708B-CEE9-4433-9E8B-55970AD6001D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8B2708B-CEE9-4433-9E8B-55970AD6001D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8B2708B-CEE9-4433-9E8B-55970AD6001D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8B2708B-CEE9-4433-9E8B-55970AD6001D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A8B2708B-CEE9-4433-9E8B-55970AD6001D} = {8A7995DB-7C2E-41B5-973F-4D2397F670BB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {74699835-FBD7-4498-BF4D-6A4D7147F6E4}

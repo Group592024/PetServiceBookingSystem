@@ -55,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
       String? token = prefs.getString('token');
 
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5050/api/Account/Login'),
+        Uri.parse('http://192.168.1.7:5050/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );
@@ -80,11 +80,18 @@ class _LoginPageState extends State<LoginPage> {
             String role = decodedToken[
                 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
             prefs.setString('role', role);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      MyHomePage(title: 'PetEase Home', accountId: accountId)),
+            Navigator.of(context).pushAndRemoveUntil(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    MyHomePage(title: 'PetEase Home', accountId: accountId),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  return child; // No transition
+                },
+                maintainState: false, // Important: Don't maintain state
+                settings: null, // Important: Remove settings
+              ),
+              (Route<dynamic> route) => false, // Remove all previous routes
             );
           }
         } else {

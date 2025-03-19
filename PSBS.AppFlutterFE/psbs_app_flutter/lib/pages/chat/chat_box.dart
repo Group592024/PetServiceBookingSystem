@@ -1,11 +1,17 @@
+import 'dart:io';
+
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:psbs_app_flutter/models/chat_message.dart';
 import 'package:psbs_app_flutter/models/user.dart';
 import 'package:psbs_app_flutter/services/signal_r_service.dart';
 import 'package:psbs_app_flutter/utils/dialog_utils.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:path/path.dart' as path;
 
 class ChatBoxWidget extends StatefulWidget {
   final User currentUser;
@@ -25,21 +31,19 @@ class ChatBoxWidget extends StatefulWidget {
 }
 
 class _ChatBoxWidgetState extends State<ChatBoxWidget> {
-  bool _openEmoji = false;
   List<ChatMessage> _chat = [];
   String _text = "";
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
-
+  File? _selectedImage;
+  String _imageUrl = '';
   @override
   void initState() {
     super.initState();
     _startSignalR();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_openEmoji) {
-        _focusNode.requestFocus();
-      }
+      _focusNode.requestFocus();
     });
   }
 
@@ -60,7 +64,8 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
         final senderId = arguments[0].toString();
         final messageText = arguments[1].toString();
         final updatedAt = arguments[2].toString();
-        _receiveMessage(senderId, messageText, updatedAt);
+        final image = arguments[3].toString();
+        _receiveMessage(senderId, messageText, updatedAt, image);
       }
     });
 
@@ -91,19 +96,25 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     if (mounted) {
       setState(() {
         _chat = messages;
+        print("Chat Messages:");
+        _chat.forEach((message) {
+          print(
+              "  - Sender: ${message.senderId}, Text: ${message.text}, Image: ${message.image}, CreatedAt: ${message.createdAt}");
+        });
       });
     }
     _scrollToBottom();
   }
 
-  void _receiveMessage(String senderId, String messageText, String updatedAt) {
+  void _receiveMessage(String senderId, String messageText, String updatedAt,
+      String messageImage) {
     if (mounted) {
       setState(() {
         _chat.add(ChatMessage(
-          createdAt: updatedAt,
-          senderId: senderId,
-          text: messageText,
-        ));
+            createdAt: updatedAt,
+            senderId: senderId,
+            text: messageText,
+            image: messageImage));
       });
     }
     _scrollToBottom();
@@ -119,14 +130,65 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     });
   }
 
-  void _handleSend() {
+  Future<void> _handleSend() async {
     String trimmedText = _textController.text.trim();
 
-    if (trimmedText.isNotEmpty) {
-      _textController.clear();
-      _text = '';
-      signalRService.invoke("SendMessage",
-          [widget.chatId, widget.currentUser.accountId, trimmedText]);
+    if (trimmedText.isNotEmpty || _selectedImage != null) {
+      try {
+        if (_selectedImage != null) {
+          await _uploadImage(); // Upload image first
+          if (_imageUrl.isNotEmpty) {
+            // Send image URL with the message
+            await signalRService.invoke("SendMessage", [
+              widget.chatId,
+              widget.currentUser.accountId,
+              trimmedText,
+              _imageUrl
+            ]);
+            _imageUrl = ''; // Reset the image URL after sending
+          } else {
+            showErrorDialog(context, "Failed to upload image.");
+            return;
+          }
+        } else {
+          await signalRService.invoke("SendMessage",
+              [widget.chatId, widget.currentUser.accountId, trimmedText, ""]);
+        }
+        _textController.clear();
+        _text = '';
+        setState(() {
+          _selectedImage = null; // Reset selected image after sending
+        });
+      } catch (e) {
+        print("Error sending message: $e");
+        showErrorDialog(context, "Failed to send message.");
+      }
+    }
+  }
+
+  Future<void> _uploadImage() async {
+    if (_selectedImage == null) return;
+
+    try {
+      var request = http.MultipartRequest('POST',
+          Uri.parse('http://10.0.2.2:5050/api/ChatControllers/upload-image'));
+      request.files.add(await http.MultipartFile.fromPath(
+          'image', _selectedImage!.path,
+          filename: path.basename(_selectedImage!.path)));
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+      var decodedResponse = json.decode(responseBody);
+
+      if (decodedResponse['flag']) {
+        setState(() {
+          _imageUrl = decodedResponse['data'];
+        });
+      } else {
+        throw Exception(decodedResponse['message']);
+      }
+    } catch (e) {
+      print("Error uploading image: $e");
+      throw Exception('Failed to upload image.');
     }
   }
 
@@ -152,6 +214,23 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+    });
+  }
+
   @override
   void dispose() {
     signalRService.invoke("LeaveChatRoom", [widget.chatId]);
@@ -173,7 +252,11 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
         title: Row(
           children: [
             CircleAvatar(
-              backgroundImage: AssetImage("default-avatar.png"),
+              backgroundImage: widget.chatUser?.accountImage != null
+                  ? NetworkImage(
+                      "http://10.0.2.2:5050/account-service/images/${widget.chatUser?.accountImage}")
+                  : AssetImage("assets/default-avatar.png") as ImageProvider,
+              radius: 25,
             ),
             SizedBox(width: 10),
             Text(
@@ -211,7 +294,8 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                               message.senderId != widget.chatUser?.accountId) ||
                           (!widget.isSupportChat &&
                               message.senderId == widget.currentUser.accountId);
-
+                  // Log the message.image before rendering
+                  print("Message Image: ${message.image}");
                   return Align(
                     alignment: isOwnMessage
                         ? Alignment.centerRight
@@ -231,10 +315,20 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            message.text,
-                            style: TextStyle(fontSize: 16),
-                          ),
+                          if (message.image != null &&
+                              message.image!.isNotEmpty &&
+                              message.image != "null")
+                            Image.network(
+                              "http://10.0.2.2:5050${message.image!}",
+                              width: 200,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          if (message.text.isNotEmpty)
+                            Text(
+                              message.text,
+                              style: TextStyle(fontSize: 16),
+                            ),
                           Text(
                             DateFormat('yyyy-MM-dd HH:mm')
                                 .format(DateTime.parse(message.createdAt)),
@@ -253,6 +347,21 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
             padding: EdgeInsets.all(8.0),
             child: Row(
               children: [
+                if (_selectedImage ==
+                    null) // Show icon only if no image is selected
+                  IconButton(
+                    icon: Icon(Icons.image, color: Colors.blue),
+                    onPressed: _pickImage,
+                  ),
+                if (_selectedImage != null)
+                  Chip(
+                    avatar: CircleAvatar(
+                      backgroundImage: FileImage(_selectedImage!),
+                    ),
+                    label: Text(''),
+                    onDeleted: _removeImage,
+                  ),
+                SizedBox(width: 10),
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
@@ -282,24 +391,6 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
                 ),
                 IconButton(
                   icon: Icon(
-                    _openEmoji ? Icons.keyboard : Icons.emoji_emotions,
-                    color: Colors.blue,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _openEmoji = !_openEmoji;
-                    });
-                    if (_openEmoji) {
-                      _focusNode.unfocus();
-                    } else {
-                      Future.delayed(Duration(milliseconds: 100), () {
-                        _focusNode.requestFocus();
-                      });
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
                     Icons.send,
                     color: Colors.blue,
                   ),
@@ -308,46 +399,6 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
               ],
             ),
           ),
-          if (_openEmoji)
-            SizedBox(
-              height: 250,
-              child: EmojiPicker(
-                onEmojiSelected: (category, emoji) {
-                  setState(() {
-                    _textController.text = _textController.text + emoji.emoji;
-                  });
-                },
-                onBackspacePressed: () {
-                  if (_textController.selection.baseOffset > 0) {
-                    _textController.text = _textController.text.substring(
-                            0, _textController.selection.baseOffset - 1) +
-                        _textController.text
-                            .substring(_textController.selection.baseOffset);
-                    _textController.selection = TextSelection.fromPosition(
-                        TextPosition(
-                            offset: _textController.selection.baseOffset - 1));
-                  }
-                },
-                config: Config(
-                  checkPlatformCompatibility: true,
-                  emojiViewConfig: EmojiViewConfig(
-                    emojiSizeMax: 28 *
-                        (foundation.defaultTargetPlatform == TargetPlatform.iOS
-                            ? 1.20
-                            : 1.0),
-                  ),
-                  viewOrderConfig: const ViewOrderConfig(
-                    top: EmojiPickerItem.categoryBar,
-                    middle: EmojiPickerItem.emojiView,
-                    bottom: EmojiPickerItem.searchBar,
-                  ),
-                  skinToneConfig: const SkinToneConfig(),
-                  categoryViewConfig: const CategoryViewConfig(),
-                  bottomActionBarConfig: const BottomActionBarConfig(),
-                  searchViewConfig: const SearchViewConfig(),
-                ),
-              ),
-            ),
         ],
       ),
     );
