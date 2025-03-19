@@ -227,14 +227,14 @@ const AccountList = () => {
       headerName: "Created At",
       flex: 0.5,
       width: 100,
-      renderCell: (params) => moment(params.value).format("DD/MM/YYYY HH:mm"),
+      renderCell: (params) => moment(params.value).format("DD/MM/YYYY"),
     },
     {
       field: "updatedAt",
       headerName: "Updated At",
       flex: 0.5,
       width: 100,
-      renderCell: (params) => moment(params.value).format("DD/MM/YYYY HH:mm"),
+      renderCell: (params) => moment(params.value).format("DD/MM/YYYY"),
     },
     {
       field: "status",

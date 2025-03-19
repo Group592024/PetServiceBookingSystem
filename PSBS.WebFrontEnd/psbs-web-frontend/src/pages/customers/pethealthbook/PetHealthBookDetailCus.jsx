@@ -9,20 +9,14 @@ const PetHealthBookDetailCus = () => {
 
   const navigate = useNavigate();
   const { healthBookId } = useParams();
-
-  // State để lưu trữ dữ liệu
   const [petHealthBook, setPetHealthBook] = useState(null);
   const [medicines, setMedicines] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [bookingServiceItems, setBookingServiceItems] = useState([]);
   const [pets, setPets] = useState([]);
-
-  // Thông tin pet hiển thị
   const [petImage, setPetImage] = useState("");
   const [petName, setPetName] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
-
-  // Hàm format ngày
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
@@ -90,8 +84,6 @@ const PetHealthBookDetailCus = () => {
         ) {
           throw new Error("Failed to fetch some data.");
         }
-
-        // Chuyển đổi dữ liệu sang JSON
         const [
           healthBookData,
           medicinesData,
@@ -107,25 +99,18 @@ const PetHealthBookDetailCus = () => {
         ]);
 
         console.log("Pet Health Book Data:", healthBookData);
-
-        // Lưu vào state
         setPetHealthBook(healthBookData.data || {});
         setMedicines(medicinesData.data || []);
         setTreatments(treatmentsData.data || []);
         setBookingServiceItems(bookingServiceItemsData.data || []);
         setPets(petsData.data || []);
-
-        // Xử lý dữ liệu Pet từ BookingServiceItemId
         const currentHealthBook = healthBookData.data;
         if (!currentHealthBook?.bookingServiceItemId) return;
-
         const matchedServiceItem = (bookingServiceItemsData.data || []).find(
           (item) =>
             item.bookingServiceItemId === currentHealthBook.bookingServiceItemId
         );
-
         if (!matchedServiceItem?.petId) return;
-
         const matchedPet = (petsData.data || []).find(
           (p) => p.petId === matchedServiceItem.petId
         );
@@ -147,22 +132,18 @@ const PetHealthBookDetailCus = () => {
     navigate(-1);
   };
 
-  // Nếu chưa load xong data
   if (!petHealthBook) {
     return <div>Loading...</div>;
   }
 
-  // Tách dữ liệu từ petHealthBook
   const { performBy, visitDate, nextVisitDate, medicineIds } = petHealthBook;
 
-  // Xác định danh sách medicine
   const selectedMedicines = medicines.filter((m) =>
     (medicineIds || []).includes(m.medicineId)
   );
   const medicineNames =
     selectedMedicines.map((m) => m.medicineName).join(", ") || "No Medicines Assigned";
 
-  // Xác định danh sách treatment
   const treatmentIds = [
     ...new Set(selectedMedicines.map((m) => m.treatmentId).filter(Boolean)),
   ];

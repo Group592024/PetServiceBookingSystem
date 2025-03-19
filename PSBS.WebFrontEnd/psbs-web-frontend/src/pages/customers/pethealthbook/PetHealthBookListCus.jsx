@@ -73,14 +73,10 @@ const PetHealthBookListCus = () => {
       const bookingServiceItemsArray = Array.isArray(bookingServiceItemsData.data)
         ? bookingServiceItemsData.data
         : [];
-
-      // Lọc pet theo accountId
       const filteredUserPets = petsArray.filter((pet) => pet.accountId === accountId);
       setUserPets(filteredUserPets);
       setPetHealthBooks(petHealthArray);
       setMedicines(medicinesArray);
-
-      // Tạo mapping: bookingServiceItemId -> petId
       const mapping = {};
       bookingServiceItemsArray.forEach((item) => {
         if (item.bookingServiceItemId && item.petId) {
@@ -98,7 +94,6 @@ const PetHealthBookListCus = () => {
     fetchPetHealthBooks();
   }, [fetchPetHealthBooks]);
 
-  // Nếu có petId từ route thì chỉ hiển thị pet đó, nếu không thì lọc theo search query
   const filteredUserPets = userPets.filter((pet) => {
     if (routePetId) {
       return pet.petId.toString() === routePetId;
@@ -124,7 +119,6 @@ const PetHealthBookListCus = () => {
         <NavbarCustomer />
         <main className="flex-1 p-4">
           <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
-          {/* Nếu không truyền petId, có thể hiển thị search input */}
           {!routePetId && (
             <div className="mb-4">
               <input
@@ -137,11 +131,9 @@ const PetHealthBookListCus = () => {
             </div>
           )}
 
-          {/* Danh sách Pet, mỗi pet + Health Book trong 1 row */}
           <div className="flex flex-col gap-6">
             {filteredUserPets.length > 0 ? (
               filteredUserPets.map((pet) => {
-                // Lọc Health Book theo petId
                 const petHealthRecords = petHealthBooks.filter(
                   (health) => bookingServiceItemToPetMap[health.bookingServiceItemId] === pet.petId
                 );
@@ -175,7 +167,7 @@ const PetHealthBookListCus = () => {
                             relevantMedicines.length > 0
                               ? relevantMedicines.map((m) => m.medicineName).join(", ")
                               : "No Medicine";
-                          const isDone = moment(health.nextVisitDate).isSameOrBefore(moment(), "day");
+                          const isDone = moment(health.nextVisitDate).isAfter(moment(), "day");
                           const status = isDone ? "Done" : "Pending";
                           const statusColor = isDone ? "text-green-500" : "text-red-500";
 

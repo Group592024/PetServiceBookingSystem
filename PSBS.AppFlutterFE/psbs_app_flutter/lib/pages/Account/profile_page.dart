@@ -198,6 +198,12 @@ class _ProfilePageState extends State<ProfilePage> {
                                       label: "Address",
                                       value:
                                           account?['accountAddress'] ?? 'N/A'),
+                                  ProfileField(
+                                      label:
+                                          "Loyalty Points", // Thêm Loyalty Point ở đây
+                                      value: account?['accountLoyaltyPoint']
+                                              ?.toString() ??
+                                          '0'),
                                 ],
                               ),
                             ),
