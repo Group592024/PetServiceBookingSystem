@@ -17,7 +17,7 @@ namespace VoucherApi.Application.DTOs
         [Required, Range(0, double.MaxValue)] decimal VoucherMaximum,
         [Required, Range(0, double.MaxValue)] decimal VoucherMinimumSpend,
         [Required] string VoucherCode,
-         [Required, CustomDateValidation]
+        
         DateTime VoucherStartDate,
 
         [Required, CompareDates(nameof(VoucherStartDate))]

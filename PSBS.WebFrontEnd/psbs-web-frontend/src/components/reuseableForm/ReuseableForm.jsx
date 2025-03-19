@@ -22,7 +22,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
       fields.forEach((field) => {
         if (field.type === "Date" && initialData[field.name]) {
           const date = new Date(initialData[field.name]);
-          formattedData[field.name] = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+          formattedData[field.name] = date.toLocaleDateString("en-CA"); // Format as YYYY-MM-DD
         }
       });
       setFormValues(formattedData);
@@ -60,7 +60,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
         tempErrors[field.name] = `${field.label} is not a valid email address`;
       }
       if (field.customValidation) {
-        const customError = field.customValidation(value);
+        const customError = field.customValidation(value, formValues); // Pass formValues
         if (customError) {
           tempErrors[field.name] = customError;
         }
