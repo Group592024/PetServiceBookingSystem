@@ -161,7 +161,7 @@ namespace PetApi.Infrastructure.Repositories
             catch (Exception ex)
             {
                 LogExceptions.LogException(ex);
-                throw new InvalidOperationException("Error occurred retrieving non-deleted rooms");
+                throw new InvalidOperationException("Error occurred retrieving non-deleted pet type");
             }
         }
 
