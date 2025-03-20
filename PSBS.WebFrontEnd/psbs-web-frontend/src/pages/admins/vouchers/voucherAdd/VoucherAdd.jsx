@@ -81,7 +81,7 @@ const VoucherAdd = () => {
       type: "Date",
       customValidation: (value) => {
         if (!validateVoucherStartDate(value)) {
-          return "Voucher Start Date must be at least one day ahead";
+          return "Voucher Start Date must be a valid date";
         }
         return null;
       },
@@ -90,8 +90,8 @@ const VoucherAdd = () => {
       name: "voucherEndDate",
       label: "Voucher End Date",
       type: "Date",
-      customValidation: (value) => {
-        if (!validateVoucherStartDate(value)) {
+      customValidation: (value, data) => {
+        if (!validateVoucherEndDate(value, data)) {
           return "Voucher End Date must be later than Voucher Start Date";
         }
         return null;

@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'booking_service_choose.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingServiceForm extends StatefulWidget {
   final String? cusId;
   final Function(List<Map<String, dynamic>>) onBookingServiceDataChange;
 
-  BookingServiceForm({required this.cusId, required this.onBookingServiceDataChange});
+  BookingServiceForm(
+      {required this.cusId, required this.onBookingServiceDataChange});
 
   @override
   _BookingServiceFormState createState() => _BookingServiceFormState();
@@ -25,7 +27,6 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   String? _error;
   Map<String, String> _petNames = {};
   List<Map<String, dynamic>> _vouchers = [];
-  String? _selectedVoucherId;
   String? _voucherError;
   double _totalPrice = 0.0;
   double _finalDiscount = 0.0;
@@ -36,14 +37,15 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     super.initState();
     _fetchServices();
     _fetchPets();
-    _fetchVouchers();
   }
 
   Future<void> _fetchServices() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/Service'),
-        headers: {'Authorization': 'Bearer ${await _getToken()}'},
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -61,9 +63,11 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   Future<void> _fetchPets() async {
     if (widget.cusId == null) return;
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
-        headers: {'Authorization': 'Bearer ${await _getToken()}'},
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -82,36 +86,13 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     }
   }
 
-  Future<void> _fetchVouchers() async {
-    try {
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Voucher/valid-voucher'),
-        headers: {'Authorization': 'Bearer ${await _getToken()}'},
-      );
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        if (data['flag']) {
-          setState(() {
-            _vouchers = List<Map<String, dynamic>>.from(data['data']);
-          });
-        }
-      }
-    } catch (e) {
-      print('Error fetching vouchers: $e');
-    }
-  }
-
-  Future<String> _getToken() async {
-    // Implement your token retrieval logic here
-    return 'your-token';
-  }
-
   void _handleServiceSelect(String serviceId) {
     setState(() {
       if (serviceId == 'all') {
         _selectAllServices = !_selectAllServices;
         if (_selectAllServices) {
-          _selectedServices = _services.map((s) => s['serviceId'].toString()).toList();
+          _selectedServices =
+              _services.map((s) => s['serviceId'].toString()).toList();
         } else {
           _selectedServices = [];
         }
@@ -237,29 +218,6 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       return sum + price;
     });
 
-    // Apply voucher discount if selected
-    if (_selectedVoucherId != null) {
-      final selectedVoucher = _vouchers.firstWhere(
-        (v) => v['voucherId'].toString() == _selectedVoucherId,
-        orElse: () => <String, dynamic>{}, // Return empty map instead of null
-      );
-
-      if (selectedVoucher.isNotEmpty) {
-        if (_totalPrice >= (selectedVoucher['voucherMinimumSpend'] as num).toDouble()) {
-          final discountAmount = (_totalPrice * (selectedVoucher['voucherDiscount'] as num).toDouble()) / 100;
-          _finalDiscount = discountAmount.clamp(0.0, (selectedVoucher['voucherMaximum'] as num).toDouble());
-          _discountedPrice = _totalPrice - _finalDiscount;
-          _voucherError = null;
-        } else {
-          _voucherError = 'Minimum spend required: ${selectedVoucher['voucherMinimumSpend']} VND';
-          _finalDiscount = 0;
-          _discountedPrice = _totalPrice;
-        }
-      }
-    } else {
-      _finalDiscount = 0;
-      _discountedPrice = _totalPrice;
-    }
   }
 
   void _notifyParent() {
@@ -323,10 +281,12 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
                 ),
                 if (!_selectAllServices)
                   ..._services.map((service) => CheckboxListTile(
-                    title: Text(service['serviceName']),
-                    value: _selectedServices.contains(service['serviceId'].toString()),
-                    onChanged: (bool? value) => _handleServiceSelect(service['serviceId'].toString()),
-                  )),
+                        title: Text(service['serviceName']),
+                        value: _selectedServices
+                            .contains(service['serviceId'].toString()),
+                        onChanged: (bool? value) => _handleServiceSelect(
+                            service['serviceId'].toString()),
+                      )),
               ],
             ),
           ),
@@ -351,10 +311,11 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
                 ),
                 if (!_selectAllPets)
                   ..._pets.map((pet) => CheckboxListTile(
-                    title: Text(pet['petName']),
-                    value: _selectedPets.contains(pet['petId'].toString()),
-                    onChanged: (bool? value) => _handlePetSelect(pet['petId'].toString()),
-                  )),
+                        title: Text(pet['petName']),
+                        value: _selectedPets.contains(pet['petId'].toString()),
+                        onChanged: (bool? value) =>
+                            _handlePetSelect(pet['petId'].toString()),
+                      )),
               ],
             ),
           ),
@@ -372,55 +333,6 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
         ElevatedButton(
           onPressed: _handleCreateBookingServices,
           child: Text("Create Booking Services"),
-        ),
-
-        // Voucher Selection
-        Card(
-          margin: EdgeInsets.all(8),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Select Voucher",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                DropdownButtonFormField<String>(
-                  value: _selectedVoucherId,
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    DropdownMenuItem(
-                      value: null,
-                      child: Text("None"),
-                    ),
-                    ..._vouchers.map((voucher) => DropdownMenuItem(
-                      value: voucher['voucherId'].toString(),
-                      child: Text(
-                        "${voucher['voucherName']} - ${voucher['voucherCode']} (${voucher['voucherDiscount']}% Off, Max ${voucher['voucherMaximum']} VND)",
-                      ),
-                    )),
-                  ],
-                  onChanged: (String? value) {
-                    setState(() {
-                      _selectedVoucherId = value;
-                      _calculateTotalPrice();
-                    });
-                  },
-                ),
-                if (_voucherError != null)
-                  Padding(
-                    padding: EdgeInsets.only(top: 8),
-                    child: Text(
-                      _voucherError!,
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-              ],
-            ),
-          ),
         ),
 
         // Booking Choices List

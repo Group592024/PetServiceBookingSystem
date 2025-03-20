@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'booking_room_choose.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingRoomForm extends StatefulWidget {
   final String? cusId;
@@ -37,9 +38,11 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
   Future<void> _fetchRooms() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/Room/available'),
-        headers: {'Authorization': 'Bearer ${await _getToken()}'},
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -57,9 +60,11 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   Future<void> _fetchPets() async {
     if (widget.cusId == null) return;
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
-        headers: {'Authorization': 'Bearer ${await _getToken()}'},
+        headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -77,12 +82,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
       print('Error fetching pets: $e');
     }
   }
-
-  Future<String> _getToken() async {
-    // Implement your token retrieval logic here
-    return 'your-token';
-  }
-
+  
   void _handleRoomSelect(String roomId) {
     setState(() {
       if (roomId == 'all') {

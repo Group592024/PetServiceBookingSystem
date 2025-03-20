@@ -12,43 +12,44 @@ namespace VoucherApi.Infrastructure.Repositories
 
         public async Task<Response> AddRedeemGiftHistory(RedeemGiftHistory redeemGiftHistory)
         {
-            var existingRecord = await _context.RedeemGiftHistories
-                .Where(x =>
-                    x.AccountId == redeemGiftHistory.AccountId &&
-                    x.GiftId == redeemGiftHistory.GiftId &&
-                    x.RedeemDate.Date == redeemGiftHistory.RedeemDate.Date &&
-                    x.RedeemDate.Hour == redeemGiftHistory.RedeemDate.Hour &&
-                    x.RedeemDate.Minute == redeemGiftHistory.RedeemDate.Minute &&
-                    Math.Abs((x.RedeemDate.Second - redeemGiftHistory.RedeemDate.Second)) <= 15)
-                .FirstOrDefaultAsync();
+            try
+            {
+                var gift = await _context.Gifts.FirstOrDefaultAsync(g => g.GiftId == redeemGiftHistory.GiftId);
+                if (gift == null)
+                {
+                    return new Response(false, "The gift does not exist to redeem");
+                }
+                if (gift.GiftQuantity == 0)
+                {
+                    return new Response(false, "The gift is out of stock");
+                }
 
-            var gift = await _context.Gifts.FirstOrDefaultAsync(g => g.GiftId == redeemGiftHistory.GiftId);
-            if (gift == null)
-            {
-                return new Response(false, "The gift does not exist to redeem");
-            }
-            if (gift.GiftQuantity == 0)
-            {
-                return new Response(false, "The gift is out of stock");
-            }
 
-            if (existingRecord == null)
-            {
-              
+
                 gift.GiftQuantity--; // Decrease gift quantity by 1
-               if(gift.GiftCode != null)
+                if(gift.GiftQuantity <= 0)
+                {
+                    gift.GiftStatus = false;
+                }
+                if (gift.GiftCode != null)
                 {
                     redeemGiftHistory.ReddeemStautsId = Guid.Parse("33b84495-c2a6-4b3e-98ca-f13d9c150946");
                 }
                 redeemGiftHistory.ReddeemStautsId = Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4");
                 // Add new redeem history and save changes
                 _context.RedeemGiftHistories.Add(redeemGiftHistory);
+                _context.Gifts.Update(gift);
                 await _context.SaveChangesAsync();
 
                 return new Response(true, "Gift redemption completed successfully");
             }
+            catch (Exception ex) {
 
-            return new Response(false, "Cannot redeem this gift");
+                return new Response(false, "Cannot redeem this gift, an error ocurr");
+            }
+            
+
+            
         }
 
 
@@ -109,7 +110,10 @@ namespace VoucherApi.Infrastructure.Repositories
                 {
                     var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == redeemHistory.GiftId);
                     gift.GiftQuantity += 1;
+                    _context.Gifts.Update(gift);
                 }
+                _context.RedeemGiftHistories.Update(redeemHistory);
+               
                 await _context.SaveChangesAsync();
                 return new Response(true, "Redeem status updated successfully.")
                 {
