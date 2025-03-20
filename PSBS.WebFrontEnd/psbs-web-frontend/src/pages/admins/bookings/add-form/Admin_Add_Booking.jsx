@@ -237,6 +237,7 @@ const Admin_Add_Booking = () => {
 
       console.log("Request Payload:", JSON.stringify(requestData, null, 2)); // Log data before sending
       try {
+        console.log("Request Data:", requestData);
         const response = await fetch(apiUrl, {
           method: "POST",
           headers: {

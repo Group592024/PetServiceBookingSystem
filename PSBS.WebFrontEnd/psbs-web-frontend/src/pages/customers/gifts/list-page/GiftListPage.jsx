@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const GiftListPage = () => {
   const [gifts, setGifts] = useState([]);
@@ -35,11 +36,11 @@ const GiftListPage = () => {
 
   if (loading) {
     return (
-      <div class="flex items-center justify-center h-svh">
+      <div className="flex items-center justify-center h-svh bg-gradient-to-br from-purple-50 to-blue-50">
         <div role="status">
           <svg
             aria-hidden="true"
-            class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
+            className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -53,23 +54,28 @@ const GiftListPage = () => {
               fill="currentFill"
             />
           </svg>
-          <span class="sr-only">Loading...</span>
+          <span className="sr-only">Loading...</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
       <NavbarCustomer />
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold text-gray-800">
+      <div className="container mx-auto px-4 py-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex justify-between items-center mb-8"
+        >
+          <h1 className="text-4xl font-bold text-purple-800">
             Gift List
           </h1>
           <button
             onClick={() => navigate('/customer/redeemHistory')}
-            className="flex items-center gap-2 px-6 py-3 text-lg bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 shadow-md"
+            className="flex items-center gap-2 px-6 py-3 text-lg bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -85,35 +91,72 @@ const GiftListPage = () => {
             </svg>
             History
           </button>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {gifts.map((gift) => (
-            <div
-              key={gift.giftId}
-              className="border border-gray-300 rounded-lg shadow-sm p-4 hover:shadow-lg transition-shadow"
-              onClick={() => navigate(`/customer/gifts/detail/${gift.giftId}`)}
-            >
-              {/* Gift image */}
-              <img
-                src={`http://localhost:5050${gift.giftImage}`}
-                alt={gift.giftName}
-                className="w-full h-32 object-cover rounded-md mb-4"
-              />
-              {/* Gift name */}
-              <h2 className="text-lg font-semibold text-gray-700 text-center">
-                {gift.giftName}
-              </h2>
-              {/* Gift description */}
-              <p className="text-sm text-gray-500 truncate">
-                {gift.giftDescription}
-              </p>
-              {/* Gift points */}
-              <p className="text-sm font-semibold font- text-blue-600 mt-1 text-right">
-                Points: {gift.giftPoint}
-              </p>
-            </div>
-          ))}
-        </div>
+        </motion.div>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"
+        >
+          <AnimatePresence>
+            {gifts.map((gift, index) => (
+              <motion.div
+                key={gift.giftId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group bg-white border border-purple-100 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden"
+                onClick={() => navigate(`/customer/gifts/detail/${gift.giftId}`)}
+              >
+                {/* Gift image container with overlay */}
+                <div className="relative overflow-hidden">
+                  <img
+                    src={`http://localhost:5050${gift.giftImage}`}
+                    alt={gift.giftName}
+                    className="w-full h-48 object-cover transform group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
+
+                {/* Gift content */}
+                <div className="p-6">
+                  {/* Gift name with hover effect */}
+                  <h2 className="text-xl font-semibold text-purple-800 text-center mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                    {gift.giftName}
+                  </h2>
+
+                  {/* Gift description with better visibility */}
+                  <div className="relative">
+                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
+                      {gift.giftDescription}
+                    </p>
+                    <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+
+                  {/* Gift points with enhanced styling */}
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-purple-100">
+                    <span className="text-sm font-medium text-gray-500">
+                      Available Points
+                    </span>
+                    <span className="text-sm font-bold text-purple-600 bg-purple-50 px-4 py-1.5 rounded-full shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                      {gift.giftPoint}
+                    </span>
+                  </div>
+
+                  {/* View details button */}
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full mt-4 py-2 px-4 bg-purple-50 text-purple-600 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-purple-100"
+                  >
+                    View Details
+                  </motion.button>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </div>
   );
