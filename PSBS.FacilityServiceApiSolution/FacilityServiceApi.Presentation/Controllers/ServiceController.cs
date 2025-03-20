@@ -151,7 +151,12 @@ namespace FacilityServiceApi.Presentation.Controllers
                 return NotFound(new Response(false, $"Service Type with ID {service.serviceTypeId} not found"));
             }
 
-            string imagePath = await HandleImageUpload(imageFile) ?? "default_image.jpg";
+            string imagePath = await HandleImageUpload(imageFile);
+            if (imagePath == null)
+            {
+                return BadRequest(new Response(false, "The uploaded file failed"));
+            }
+
 
             var getEntity = ServiceConversion.ToEntity(service, imagePath);
 
@@ -238,6 +243,16 @@ namespace FacilityServiceApi.Presentation.Controllers
         {
             if (imageFile != null && imageFile.Length > 0)
             {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var fileExtension = Path.GetExtension(imageFile.FileName).ToLower();
+
+                if (!allowedExtensions.Contains(fileExtension))
+                {
+                    return null;
+                }
+
+
+
                 // Đường dẫn thư mục lưu ảnh
                 var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "images");
                 if (!Directory.Exists(imagesDirectory))

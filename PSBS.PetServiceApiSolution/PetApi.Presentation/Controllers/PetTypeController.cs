@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
 using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
-using PetApi.Infrastructure.Repositories;
 using PSPS.SharedLibrary.Responses;
 
 namespace PetApi.Presentation.Controllers
@@ -23,30 +22,36 @@ namespace PetApi.Presentation.Controllers
         }
 
         [HttpGet]
-        [Authorize(Policy ="AdminOrStaffOrUser")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<IEnumerable<PetTypeDTO>>> GetPetTypes()
         {
             var pets = await petInterface.GetAllAsync();
             if (!pets.Any())
-                return NotFound("No pet types detected in the database");
+                return NotFound(new Response(false, "No pet types detected in the database"));
 
             var (_, list) = PetTypeConversion.FromEntity(null!, pets);
-            return list!.Any() ? Ok(list) : NotFound("No pet found");
+            return Ok(new Response(true, "Service types retrieved successfully")
+            {
+                Data = list
+            });
         }
 
         [HttpGet("{id:Guid}")]
-        [Authorize(Policy = "AdminOrStaffOrUser")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<PetTypeDTO>> GetPetType(Guid id)
         {
 
             var pet = await petInterface.GetByIdAsync(id);
             if (pet is null)
             {
-                return NotFound("PetType requested not found");
+                return NotFound(new Response(false, "PetType requested not found"));
             }
 
             var (_pet, _) = PetTypeConversion.FromEntity(pet, null!);
-            return _pet is not null ? Ok(_pet) : NotFound("PetType not found");
+            return Ok(new Response(true, "Pet types retrieved successfully")
+            {
+                Data = _pet
+            });
         }
 
 
@@ -78,7 +83,7 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<Response>> CreatePetType([FromForm] CreatePetTypeDTO pet, IFormFile imageFile)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new Response(false, "Validation Error") { Data = ModelState });
 
             string imagePath = await HandleImageUpload(imageFile);
 
@@ -99,11 +104,11 @@ namespace PetApi.Presentation.Controllers
         {
             Console.WriteLine("pet " + pet);
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new Response(false, "Validation Error") { Data = ModelState });
 
             var existingPet = await petInterface.GetByIdAsync(id);
             if (existingPet == null)
-                return NotFound($"Pet with ID {id} not found");
+                return NotFound(new Response(false, $"Pet with ID {id} not found"));
 
             bool hasChanges =
                 existingPet.PetType_Name != pet.PetType_Name ||
@@ -117,12 +122,19 @@ namespace PetApi.Presentation.Controllers
                 return NoContent();
             }
 
-            // Xử lý hình ảnh
-            string? imagePath = existingPet.PetType_Image; // Giữ nguyên đường dẫn cũ nếu không có tệp mới
+            string? imagePath = existingPet.PetType_Image;
             if (imageFile != null)
             {
-                imagePath = await HandleImageUpload(imageFile, existingPet.PetType_Image);
+                var uploadedImagePath = await HandleImageUpload(imageFile, existingPet.PetType_Image);
+
+                if (uploadedImagePath == null)
+                {
+                    return BadRequest(new Response(false, "Invalid image format."));
+                }
+
+                imagePath = uploadedImagePath;
             }
+
 
             // Chuyển đổi và cập nhật
             var updatedEntity = PetTypeConversion.ToEntity(pet, imagePath);
@@ -137,11 +149,11 @@ namespace PetApi.Presentation.Controllers
             Console.WriteLine("response ddaay: " + response);
             if (!response.Flag)
             {
-                return BadRequest(new { message = "Failed to update pet." });
+                return BadRequest(new Response(false, "Failed to update pet type"));
             }
 
 
-            return Ok(response);
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
 
         private async Task<string?> HandleImageUpload(IFormFile imageFile, string? existingImagePath = null)
@@ -197,7 +209,7 @@ namespace PetApi.Presentation.Controllers
         {
             var existingPetType = await petInterface.GetByIdAsync(id);
             if (existingPetType == null)
-                return NotFound($"Pet type with ID {id} not found");
+                return NotFound(new Response(false, $"Pet type with ID {id} not found"));
             Response response;
             var checkPetType = await _petBreed.CheckIfPetTypeHasPetBreed(id);
 
@@ -217,7 +229,7 @@ namespace PetApi.Presentation.Controllers
                 }
                 else
                 {
-                    return Conflict("Can't delete this pet type because it has pet breed");
+                    return Conflict(new Response(false, "Can't delete this pet type because it has pet breed"));
                 }
             }
         }
@@ -228,11 +240,11 @@ namespace PetApi.Presentation.Controllers
             var pettypes = await petInterface.ListAvailablePetTypeAsync();
             if (!pettypes.Any())
             {
-                return NotFound(new Response(false, "No available rooms found"));
+                return NotFound(new Response(false, "No pet types found"));
             }
 
             var (_, petTypeDtos) = PetTypeConversion.FromEntity(null!, pettypes);
-            return Ok(new Response(true, "Available rooms retrieved successfully")
+            return Ok(new Response(true, "Available pet types retrieved successfully")
             {
                 Data = petTypeDtos
             });

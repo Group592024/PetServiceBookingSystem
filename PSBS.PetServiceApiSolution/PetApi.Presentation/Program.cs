@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 using PetApi.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,11 @@ builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
     client.BaseAddress = new Uri("http://localhost:5050/");
+});
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
 });
 
 builder.Services.AddAuthorization(options =>
