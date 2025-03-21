@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class First : Migration
+    public partial class New : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

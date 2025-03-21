@@ -12,8 +12,8 @@ using PetApi.Infrastructure.Data;
 namespace PetApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PetDbContext))]
-    [Migration("20250313165256_init")]
-    partial class init
+    [Migration("20250321091900_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
