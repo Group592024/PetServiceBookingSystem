@@ -21,6 +21,7 @@ namespace ChatServiceApi.Infrastructure.DependencyInjection
             // create DI
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<INoticationRepository, NotificationRepository>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)
