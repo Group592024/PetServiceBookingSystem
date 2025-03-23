@@ -4,6 +4,7 @@ using ChatServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatServiceApi.Infrastructure.Migrations
 {
     [DbContext(typeof(ChatServiceDBContext))]
-    partial class ChatServiceDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250322102519_UpdateBoxes")]
+    partial class UpdateBoxes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,12 +81,6 @@ namespace ChatServiceApi.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsPushed")
-                        .HasColumnType("bit");
 
                     b.Property<Guid>("NotiTypeId")
                         .HasColumnType("uniqueidentifier");

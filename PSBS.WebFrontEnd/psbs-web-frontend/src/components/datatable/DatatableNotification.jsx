@@ -5,13 +5,18 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Button from "@mui/material/Button";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import InfoIcon from "@mui/icons-material/Info";
+import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import "./style.css";
 import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
-import { deleteData } from "../../Utilities/ApiFunctions";
+import { deleteData, postData, updateData } from "../../Utilities/ApiFunctions";
 import { useNavigate } from "react-router-dom";
-const Datatable = ({
+import { useState } from "react";
+import CreateNotificationModal from "../../pages/admins/notification/addNotiForm/addModal";
+import UpdateNotificationModal from "../../pages/admins/notification/updateNotification/updateModal";
+import SelectReceiverModal from "../../pages/admins/notification/pushNotification/PushModal";
+const DatatableNotification = ({
   columns,
   rows,
   apiPath,
@@ -21,13 +26,74 @@ const Datatable = ({
   rowId,
 }) => {
   const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setEditIsModalOpen] = useState(false);
+  const [isPushModalOpen, setPushModalOpen] = useState(false);
+  const [selectedData, setSelectedData] = useState(null);
+  const handleCreateNotification = async (values) => {
+    // Send the data to your API here
+    try {
+      const response = await postData(`${apiPath}`, values);
+      if (response.flag) {
+        Swal.fire({
+          title: "Success!",
+          text: response.message,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        setRows((prevRows) => [...prevRows, response.data]);
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: response.message,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      toast.error("Failed to submit data.");
+    }
+  };
+
+  const handleUpdateNotification = async (values) => {
+    console.log("Notification to update:", values);
+    // Send the data to your API here
+    try {
+      const response = await updateData(`${apiPath}`, values);
+      if (response.flag) {
+        Swal.fire({
+          title: "Success!",
+          text: response.message,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            row[rowId] === values[rowId] ? { ...row, ...response.data } : row
+          )
+        );
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: response.message,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      toast.error("Failed to submit data.");
+    }
+  };
+  const handlePushNotification = async (values) => {};
   const actionColumn = [
     {
       field: "action",
       headerName: "Action",
       headerAlign: "center",
       align: "center",
-      width: 200,
+      width: 250,
       renderCell: (params) => {
         const handleDelete = async () => {
           Swal.fire({
@@ -79,7 +145,6 @@ const Datatable = ({
             }
           });
         };
-
         return (
           <div className="cellAction flex space-x-2">
             <IconButton
@@ -97,6 +162,14 @@ const Datatable = ({
             <IconButton aria-label="delete" onClick={handleDelete}>
               <DeleteIcon color="error" />
             </IconButton>
+            {!params.row.isPushed && (
+              <IconButton
+                aria-label="push"
+                onClick={() => handlePush(params.row.notificationId)}
+              >
+                <ArrowCircleUpIcon color="warning" />
+              </IconButton>
+            )}
           </div>
         );
       },
@@ -104,10 +177,15 @@ const Datatable = ({
   ];
 
   const handleOpen = () => {
-    navigate(`${basePath}new`);
+    setIsModalOpen(true);
   };
   const handleEditOpen = (row) => {
-    navigate(`${basePath}update/${row[rowId]}`, { state: { rowData: row } });
+    setSelectedData(row);
+    setEditIsModalOpen(true);
+  };
+  const handlePush = (row) => {
+    setSelectedData(row);
+    setPushModalOpen(true);
   };
   const handleDetailOpen = (row) => {
     navigate(`${basePath}detail/${row[rowId]}`, { state: { rowData: row } });
@@ -137,8 +215,24 @@ const Datatable = ({
         pageSizeOptions={[5, 10]}
       />
       <ToastContainer />
+      <CreateNotificationModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreate={handleCreateNotification}
+      />
+      <UpdateNotificationModal
+        open={isEditModalOpen}
+        onClose={() => setEditIsModalOpen(false)}
+        onUpdate={handleUpdateNotification}
+        initialNotification={selectedData}
+      />
+      <SelectReceiverModal
+        open={isPushModalOpen}
+        onClose={() => setPushModalOpen(false)}
+        onConfirm={handlePushNotification}
+      />
     </div>
   );
 };
 
-export default Datatable;
+export default DatatableNotification;

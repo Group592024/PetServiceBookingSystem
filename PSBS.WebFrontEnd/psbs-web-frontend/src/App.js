@@ -94,6 +94,7 @@ import CustomerRoomBookingDetail from "./pages/customers/bookings/detail-pages/C
 import CameraCreate from "./pages/admins/camera/CreateCamera";
 import CameraCus from "./pages/customers/cameras/CameraCus";
 import Unauthorized from "./pages/authorize/Unauthorized";
+import ListNotification from "./pages/admins/notification/listNotification/ListNotification";
 
 function App() {
   const userId = sessionStorage.getItem("accountId");
@@ -811,6 +812,25 @@ function App() {
                 </ProtectedRoute>
               }
             />
+          </Route>
+          {/**Notification links */}
+          <Route path="/notification">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <ListNotification />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route
+              path="detail/:voucherId"
+              element={
+                <ProtectedRoute allowedRoles={["user"]}>
+                  <CustomerVoucherDetail />
+                </ProtectedRoute>
+              }
+            /> */}
           </Route>
         </Routes>
       </BrowserRouter>
