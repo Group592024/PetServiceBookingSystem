@@ -7,13 +7,22 @@ namespace ChatServiceApi.Application.DTOs.Conversions
     public class NotificationConversion
     {
         public static Notification ToEntity(CreateNotificationDTO createNotiDTO) => new()
-        {
+        {           
             NotificationTitle = createNotiDTO.NotificationTitle,
             NotificationContent = createNotiDTO.NotificationContent,
             NotiTypeId = createNotiDTO.NotiTypeId,
             CreatedDate = DateTime.Now,
+            IsDeleted = false
         };
-
+        public static Notification UpdateToEntity(UpdateNotificationDTO createNotiDTO) => new()
+        {
+            NotificationId = createNotiDTO.notificationId,
+            NotificationTitle = createNotiDTO.NotificationTitle,
+            NotificationContent = createNotiDTO.NotificationContent,
+            NotiTypeId = createNotiDTO.NotiTypeId,
+            CreatedDate = DateTime.Now,
+            IsDeleted = createNotiDTO.IsDeleted
+        };
 
         public static (NotificationDTO?, IEnumerable<NotificationDTO>?) FromEntity(Notification notification,
             IEnumerable<Notification>? notifications)
@@ -25,7 +34,9 @@ namespace ChatServiceApi.Application.DTOs.Conversions
                   notification.NotificationType.NotiName,
                   notification.NotificationTitle,
                   notification.NotificationContent,
-                  notification.CreatedDate
+                  notification.CreatedDate,
+                  notification.IsDeleted,
+                  notification.IsPushed
                     );
                 return (singleNotification, null);
             }
@@ -37,7 +48,9 @@ namespace ChatServiceApi.Application.DTOs.Conversions
                   p.NotificationType.NotiName,
                   p.NotificationTitle,
                   p.NotificationContent,
-                  p.CreatedDate
+                  p.CreatedDate,
+                  p.IsDeleted,
+                  p.IsPushed
                     )).ToList();
                 return (null, list);
             }

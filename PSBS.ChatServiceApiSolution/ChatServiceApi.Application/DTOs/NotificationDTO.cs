@@ -8,7 +8,9 @@ namespace ChatServiceApi.Application.DTOs
      string NotiTypeName ,
      string NotificationTitle, 
      string NotificationContent ,
-     DateTime CreatedDate 
+     DateTime CreatedDate,
+     bool IsDeleted,
+     bool IsPushed
 
         );
 }

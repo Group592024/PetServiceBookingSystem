@@ -11,9 +11,8 @@ namespace ChatServiceApi.Application.DTOs
     [Required]
      string NotificationTitle,
     [Required]
-     string NotificationContent,
-     [Required]
-     List<ReceiverDTO> Receivers
+     string NotificationContent
+    
         );
 
 }

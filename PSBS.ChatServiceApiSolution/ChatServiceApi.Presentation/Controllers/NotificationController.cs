@@ -27,26 +27,68 @@ namespace ChatServiceApi.Presentation.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var notification = NotificationConversion.ToEntity(createNotificationDTO);
-            var lists = NotificationConversion.GetUserIdsFromReceivers(createNotificationDTO.Receivers);
-            if(notification is null && lists is  null)
+            var notification = NotificationConversion.ToEntity(createNotificationDTO);          
+            if(notification is null)
             {
                 return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
             }
 
-            var response = await _notificationRepository.CreateNotification(notification!, lists);
+            var response = await _notificationRepository.CreateNotification(notification!);
+
+            return Ok(response);
+        }
+        [HttpPost("push")]
+        public async Task<IActionResult> PushNotification([FromBody] PushNotificationDTO pushNotificationDTO)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var lists = NotificationConversion.GetUserIdsFromReceivers(pushNotificationDTO.Receivers);
+            if (lists is null)
+            {
+                return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
+            }
+
+            var response = await _notificationRepository.PushNotification(pushNotificationDTO.notificationId, lists);
 
             return Ok(response);
         }
 
+        [HttpPut]
+        public async Task<IActionResult> UpdateNotification([FromBody] UpdateNotificationDTO updateNotificationDTO)
+        {
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var notification = NotificationConversion.UpdateToEntity(updateNotificationDTO);
+            //var lists = NotificationConversion.GetUserIdsFromReceivers(createNotificationDTO.Receivers);
+            if (notification is null )
+            {
+                return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
+            }
+
+            var response = await _notificationRepository.UpdateNotification(notification!);
+
+            return Ok(response);
+        }
         [HttpDelete("{notificationBoxId}")]
-        public async Task<IActionResult> DeleteNotification(Guid notificationBoxId)
+        public async Task<IActionResult> DeleteUserNotification(Guid notificationBoxId)
         {
             var response = await _notificationRepository.DetelteNotification(notificationBoxId);
 
             return Ok(response);
         }
+        [HttpDelete("user/{notificationBoxId}")]
+        public async Task<IActionResult> DeleteNotification(Guid notificationBoxId)
+        {
+            var response = await _notificationRepository.DetelteUserNotification(notificationBoxId);
 
+            return Ok(response);
+        }
         [HttpGet]
         public async Task<IActionResult> GetNotifications()
         {

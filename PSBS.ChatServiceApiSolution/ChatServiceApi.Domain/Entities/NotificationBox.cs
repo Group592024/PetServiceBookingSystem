@@ -1,6 +1,7 @@
 ﻿
 
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace ChatServiceApi.Domain.Entities
 {
@@ -11,7 +12,7 @@ namespace ChatServiceApi.Domain.Entities
         public Guid NotificationId { get; set; }
         public Guid UserId { get; set; }
         public bool IsDeleted { get; set; }
-
+        [JsonIgnore]
         public virtual Notification Notification { get; set; } = null!;
     }
 }
