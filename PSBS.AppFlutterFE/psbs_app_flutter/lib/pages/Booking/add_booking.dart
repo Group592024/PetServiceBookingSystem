@@ -4,6 +4,7 @@ import 'booking_room_form.dart';
 import 'booking_service_form.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -471,158 +472,229 @@ class _AddBookingPageState extends State<AddBookingPage> {
       }
     }
   }
+  Future<String?> _getPaymentTypeName(String paymentTypeId) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    
+    final response = await http.get(
+      Uri.parse('http://127.0.0.1:5050/api/PaymentType/$paymentTypeId'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['flag']) {
+        return data['data']['paymentTypeName'];
+      }
+    }
+    return null;
+  } catch (e) {
+    print("Error fetching payment type: $e");
+    return null;
+  }
+}
 
   Future<void> _sendRoomBookingRequest() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-      String? accountId = prefs.getString('accountId');
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    String? accountId = prefs.getString('accountId');
 
-      // Fetch customer information
-      final customerResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+    // Get payment type name
+    String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
 
-      if (customerResponse.statusCode != 200) {
-        throw Exception('Failed to fetch customer information');
-      }
+    // Fetch customer information
+    final customerResponse = await http.get(
+      Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
 
-      final customerData = json.decode(customerResponse.body)['data'];
+    if (customerResponse.statusCode != 200) {
+      throw Exception('Failed to fetch customer information');
+    }
 
-      // Format the request data
-      Map<String, dynamic> requestData = {
-        'bookingRooms': _bookingRoomData
-            .map((room) => {
-                  'room': room['room'],
-                  'pet': room['pet'],
-                  'start': room['start'],
-                  'end': room['end'],
-                  'price': room['price'],
-                  'camera': room['camera'],
-                  'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
-                })
-            .toList(),
-        'customer': {
-          'cusId': accountId,
-          'name': customerData['accountName'],
-          'address': customerData['accountAddress'],
-          'phone': customerData['accountPhoneNumber'],
-          'note': '',
-          'paymentMethod': _selectedPaymentType
-        },
-        'selectedOption': 'Room',
-        'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
-        'totalPrice': _totalPrice,
-        'discountedPrice': _totalPrice
-      };
+    final customerData = json.decode(customerResponse.body)['data'];
 
-      final response = await http.post(
-        Uri.parse('http://localhost:5115/Bookings/room'),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(requestData),
-      );
+    // Format the request data
+    Map<String, dynamic> requestData = {
+      'bookingRooms': _bookingRoomData
+          .map((room) => {
+                'room': room['room'],
+                'pet': room['pet'],
+                'start': room['start'],
+                'end': room['end'],
+                'price': room['price'],
+                'camera': room['camera'],
+                'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
+              })
+          .toList(),
+      'customer': {
+        'cusId': accountId,
+        'name': customerData['accountName'],
+        'address': customerData['accountAddress'],
+        'phone': customerData['accountPhoneNumber'],
+        'note': '',
+        'paymentMethod': _selectedPaymentType
+      },
+      'selectedOption': 'Room',
+      'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
+      'totalPrice': _totalPrice,
+      'discountedPrice': _totalPrice
+    };
 
-      if (response.statusCode == 200) {
+    final response = await http.post(
+      Uri.parse('http://localhost:5115/Bookings/room'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(requestData),
+    );
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      
+      if (paymentTypeName == "VNPay") {
+        // Handle VNPay payment
+        final bookingCode = result['data'].toString().trim();
+        final amount = _totalPrice.toInt();
+        
+        final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
+          'moneyToPay=$amount&'
+          'description=$bookingCode&'
+          'returnUrl=https://localhost:5201/Vnpay/Callback';
+        
+        // Open VNPay URL in browser
+        if (await canLaunch(vnpayUrl)) {
+          await launch(vnpayUrl);
+        } else {
+          throw Exception('Could not launch VNPay');
+        }
+      } else {
+        // Regular payment success
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Room booking created successfully')),
         );
         Navigator.pop(context);
-      } else {
-        throw Exception('Failed to create room booking: ${response.body}');
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating room booking: $e')),
-      );
+    } else {
+      throw Exception('Failed to create room booking: ${response.body}');
     }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error creating room booking: $e')),
+    );
   }
+}
 
   Future<void> _sendServiceBookingRequest() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-      String? accountId = prefs.getString('accountId');
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    String? accountId = prefs.getString('accountId');
 
-      // Fetch customer information
-      final customerResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
+    // Get payment type name
+    String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
 
-      if (customerResponse.statusCode != 200) {
-        throw Exception('Failed to fetch customer information');
-      }
+    // Fetch customer information
+    final customerResponse = await http.get(
+      Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
 
-      final customerData = json.decode(customerResponse.body)['data'];
+    if (customerResponse.statusCode != 200) {
+      throw Exception('Failed to fetch customer information');
+    }
 
-      // Format the booking services data
-      List<Map<String, dynamic>> services = _bookingServiceData.map((service) {
-        return {
-          "service": service["service"]["id"].toString(),
-          "pet": service["pet"]["id"].toString(),
-          "price": service["price"] ?? 0.0,
-          "serviceVariant": service["serviceVariant"]["id"].toString(),
-        };
-      }).toList();
+    final customerData = json.decode(customerResponse.body)['data'];
 
-      // Format the request data
-      Map<String, dynamic> requestData = {
-        "services": services,
-        "customer": {
-          "cusId": accountId,
-          "name": customerData['accountName'],
-          "address": customerData['accountAddress'],
-          "phone": customerData['accountPhoneNumber'],
-          "note": '',
-          "paymentMethod": _selectedPaymentType
-        },
-        "selectedOption": "Service",
-        "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
-        "totalPrice": _totalPrice,
-        "discountedPrice": _totalPrice,
-        "bookingServicesDate": _bookingServiceData.isNotEmpty 
-            ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
-            : DateTime.now().toIso8601String().substring(0, 16)
+    // Format the booking services data
+    List<Map<String, dynamic>> services = _bookingServiceData.map((service) {
+      return {
+        "service": service["service"]["id"].toString(),
+        "pet": service["pet"]["id"].toString(),
+        "price": service["price"] ?? 0.0,
+        "serviceVariant": service["serviceVariant"]["id"].toString(),
       };
+    }).toList();
 
-      print("Sending service booking data: ${jsonEncode(requestData)}");
+    // Format the request data
+    Map<String, dynamic> requestData = {
+      "services": services,
+      "customer": {
+        "cusId": accountId,
+        "name": customerData['accountName'],
+        "address": customerData['accountAddress'],
+        "phone": customerData['accountPhoneNumber'],
+        "note": '',
+        "paymentMethod": _selectedPaymentType
+      },
+      "selectedOption": "Service",
+      "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
+      "totalPrice": _totalPrice,
+      "discountedPrice": _totalPrice,
+      "bookingServicesDate": _bookingServiceData.isNotEmpty 
+          ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
+          : DateTime.now().toIso8601String().substring(0, 16)
+    };
 
-      final response = await http.post(
-        Uri.parse('http://localhost:5115/Bookings/service'),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-        body: jsonEncode(requestData),
-      );
+    print("Sending service booking data: ${jsonEncode(requestData)}");
 
-      if (response.statusCode == 200) {
+    final response = await http.post(
+      Uri.parse('http://localhost:5115/Bookings/service'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(requestData),
+    );
+
+    if (response.statusCode == 200) {
+      final result = json.decode(response.body);
+      
+      if (paymentTypeName == "VNPay") {
+        // Handle VNPay payment
+        final bookingCode = result['data'].toString().trim();
+        final amount = _totalPrice.toInt();
+        
+        final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
+          'moneyToPay=$amount&'
+          'description=$bookingCode&'
+          'returnUrl=https://localhost:5201/Vnpay/Callback';
+
+        if (await canLaunch(vnpayUrl)) {
+          await launch(vnpayUrl);
+        } else {
+          throw Exception('Could not launch VNPay');
+        }
+      } else {
+        // Regular payment success
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Service booking created successfully')),
         );
         Navigator.pop(context);
-      } else {
-        print("Response error: ${response.body}");
-        throw Exception('Failed to create service booking: ${response.body}');
       }
-    } catch (e) {
-      print("Error in _sendServiceBookingRequest: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating service booking: $e')),
-      );
+    } else {
+      print("Response error: ${response.body}");
+      throw Exception('Failed to create service booking: ${response.body}');
     }
+  } catch (e) {
+    print("Error in _sendServiceBookingRequest: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error creating service booking: $e')),
+    );
   }
-
+}
   void _onStepCancel() {
     if (_currentStep > 0) {
       setState(() => _currentStep -= 1);

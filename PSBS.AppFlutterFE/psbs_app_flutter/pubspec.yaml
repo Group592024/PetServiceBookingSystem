@@ -36,6 +36,7 @@ dependencies:
   signalr_netcore: ^1.4.1
   emoji_picker_flutter: ^4.3.0
   flutter_zustand: ^0.0.5
+  url_launcher: ^6.1.7
 
 dev_dependencies:
   flutter_test:
