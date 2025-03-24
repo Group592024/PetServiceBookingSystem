@@ -50,7 +50,7 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
           setState(() {
             _services = data.map((service) {
               return {
-                "id": service["serviceId"],
+                "id": service["serviceId"].toString(),
                 "name": service["serviceName"]
               };
             }).toList();
@@ -90,7 +90,10 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
           List<dynamic> data = responseBody["data"];
           setState(() {
             _pets = data.map((pet) {
-              return {"id": pet["petId"], "name": pet["petName"]};
+              return {
+                "id": pet["petId"].toString(),
+                "name": pet["petName"].toString()
+              };
             }).toList();
           });
         } else {
@@ -130,9 +133,9 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
           List<dynamic> data = responseBody["data"];
           return data.map((variant) {
             return {
-              "id": variant["serviceVariantId"],
+              "id": variant["serviceVariantId"].toString(),
               "content": variant["serviceContent"],
-              "price": variant["servicePrice"],
+              "price": double.tryParse(variant["servicePrice"].toString()) ?? 0.0,
             };
           }).toList();
         }
@@ -148,28 +151,39 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
       return; // Prevent out-of-bounds errors
 
     setState(() {
-      widget.bookingChoices[index][key] = value;
+      if (key == "service") {
+        widget.bookingChoices[index]["service"] = value["id"].toString();
+      } else if (key == "pet") {
+        widget.bookingChoices[index]["pet"] = value["id"].toString();
+      } else if (key == "serviceVariant") {
+        widget.bookingChoices[index]["serviceVariant"] = value != null ? {
+          "id": value["id"].toString(),
+          "content": value["content"],
+          "price": value["price"]
+        } : null;
+      } else {
+        widget.bookingChoices[index][key] = value;
+      }
 
       if (key == "service") {
         // Only reset if it's a different service
         if (widget.bookingChoices[index]["service"] == null ||
-            widget.bookingChoices[index]["service"]["id"] != value["id"]) {
+            widget.bookingChoices[index]["service"] != value["id"].toString()) {
           widget.bookingChoices[index]["serviceVariants"] = []; // Reset list
-          widget.bookingChoices[index]["serviceVariant"] =
-              null; // Reset selected variant
+          widget.bookingChoices[index]["serviceVariant"] = null; // Reset selected variant
           widget.bookingChoices[index]["price"] = 0.0; // Reset price
         }
       }
 
       if (key == "serviceVariant") {
         widget.bookingChoices[index]["price"] =
-            value != null ? value["price"] : 0.0;
+            value != null ? double.tryParse(value["price"].toString()) ?? 0.0 : 0.0;
       }
     });
 
     if (key == "service" && value != null) {
       List<Map<String, dynamic>> variants =
-          await _fetchServiceVariants(value["id"]);
+          await _fetchServiceVariants(value["id"].toString());
 
       // Update only if the list has changed
       setState(() {
@@ -189,41 +203,62 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
           int index = entry.key;
           var choice = entry.value;
 
+          // Find the selected service and pet objects
+          var selectedService = _services.firstWhere(
+            (s) => s["id"].toString() == choice["service"].toString(),
+            orElse: () => {"id": "", "name": ""},
+          );
+          var selectedPet = _pets.firstWhere(
+            (p) => p["id"].toString() == choice["pet"].toString(),
+            orElse: () => {"id": "", "name": ""},
+          );
+
           return Card(
             margin: EdgeInsets.symmetric(vertical: 8),
             child: Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
                 children: [
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    value: choice["service"],
+                  DropdownButtonFormField<String>(
+                    value: choice["service"].toString(),
                     hint: Text("Select Service"),
-                    items:
-                        _services.map<DropdownMenuItem<Map<String, dynamic>>>(
+                    items: _services.map<DropdownMenuItem<String>>(
                       (service) {
-                        return DropdownMenuItem<Map<String, dynamic>>(
-                          value: service,
+                        return DropdownMenuItem<String>(
+                          value: service["id"].toString(),
                           child: Text(service["name"]),
                         );
                       },
                     ).toList(),
                     onChanged: (value) {
-                      _updateChoice(index, "service", value);
+                      if (value != null) {
+                        var service = _services.firstWhere(
+                          (s) => s["id"].toString() == value,
+                          orElse: () => {"id": "", "name": ""},
+                        );
+                        _updateChoice(index, "service", service);
+                      }
                     },
                   ),
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    value: choice["pet"],
+                  DropdownButtonFormField<String>(
+                    value: choice["pet"].toString(),
                     hint: Text("Select Pet"),
-                    items: _pets.map<DropdownMenuItem<Map<String, dynamic>>>(
+                    items: _pets.map<DropdownMenuItem<String>>(
                       (pet) {
-                        return DropdownMenuItem<Map<String, dynamic>>(
-                          value: pet,
+                        return DropdownMenuItem<String>(
+                          value: pet["id"].toString(),
                           child: Text(pet["name"]),
                         );
                       },
                     ).toList(),
                     onChanged: (value) {
-                      _updateChoice(index, "pet", value);
+                      if (value != null) {
+                        var pet = _pets.firstWhere(
+                          (p) => p["id"].toString() == value,
+                          orElse: () => {"id": "", "name": ""},
+                        );
+                        _updateChoice(index, "pet", pet);
+                      }
                     },
                   ),
                   if (choice["serviceVariants"] != null &&

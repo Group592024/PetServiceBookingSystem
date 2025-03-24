@@ -463,13 +463,12 @@ class _AddBookingPageState extends State<AddBookingPage> {
     if (_currentStep < _getSteps().length - 1) {
       setState(() => _currentStep += 1);
     } else {
-      print("Booking Complete:");
-      print("Service Type: $_serviceType");
-      print("Selected Voucher: $_selectedVoucher");
-      print("Selected Payment Type: $_selectedPaymentType");
-      print("Booking Room Data: ${jsonEncode(_bookingRoomData)}");
-      print("Booking Service Data: ${jsonEncode(_bookingServiceData)}");
-      Navigator.pop(context);
+      // Send the appropriate booking request based on service type
+      if (_serviceType == "Room") {
+        _sendRoomBookingRequest();
+      } else if (_serviceType == "Service") {
+        _sendServiceBookingRequest();
+      }
     }
   }
 
@@ -477,37 +476,137 @@ class _AddBookingPageState extends State<AddBookingPage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
+      String? accountId = prefs.getString('accountId');
 
-      // Construct the request body
-      Map<String, dynamic> requestBody = {
-        'SelectedOption': _serviceType,
-        'VoucherId': _selectedVoucher,
-        'TotalPrice': _totalPrice,
-        'DiscountedPrice': _totalPrice,
-        'BookingRooms': _bookingRoomData,
-        'Customer': '',
-      };
-
-      final response = await http.post(
-        Uri.parse('http://YOUR_API_ENDPOINT/room'), // Replace with your API URL
+      // Fetch customer information
+      final customerResponse = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
-        body: jsonEncode(requestBody),
+      );
+
+      if (customerResponse.statusCode != 200) {
+        throw Exception('Failed to fetch customer information');
+      }
+
+      final customerData = json.decode(customerResponse.body)['data'];
+
+      // Format the request data
+      Map<String, dynamic> requestData = {
+        'bookingRooms': _bookingRoomData.map((room) => {
+          'room': room['room'],
+          'pet': room['pet'],
+          'start': room['start'],
+          'end': room['end'],
+          'price': room['price'],
+          'camera': room['camera'],
+          'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
+        }).toList(),
+        'customer': {
+          'cusId': accountId,
+          'name': customerData['accountName'],
+          'address': customerData['accountAddress'],
+          'phone': customerData['accountPhoneNumber'],
+          'note': '',
+          'paymentMethod': _selectedPaymentType
+        },
+        'selectedOption': 'Room',
+        'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
+        'totalPrice': _totalPrice,
+        'discountedPrice': _totalPrice
+      };
+
+      final response = await http.post(
+        Uri.parse('http://localhost:5115/Bookings/room'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestData),
       );
 
       if (response.statusCode == 200) {
-        print('Room booking request successful: ${response.body}');
-        // Handle success (e.g., show a success message)
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Room booking created successfully')),
+        );
+        Navigator.pop(context);
       } else {
-        print(
-            'Room booking request failed: ${response.statusCode}, ${response.body}');
-        // Handle failure (e.g., show an error message)
+        throw Exception('Failed to create room booking: ${response.body}');
       }
     } catch (e) {
-      print('Error sending room booking request: $e');
-      // Handle error (e.g., show an error message)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating room booking: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendServiceBookingRequest() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      String? accountId = prefs.getString('accountId');
+
+      // Fetch customer information
+      final customerResponse = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (customerResponse.statusCode != 200) {
+        throw Exception('Failed to fetch customer information');
+      }
+
+      final customerData = json.decode(customerResponse.body)['data'];
+
+      // Format the request data
+      Map<String, dynamic> requestData = {
+        'services': _bookingServiceData.map((service) => {
+          'service': service['service'],
+          'pet': service['pet'],
+          'price': service['price'],
+          'serviceVariant': service['serviceVariant']['id']
+        }).toList(),
+        'customer': {
+          'cusId': accountId,
+          'name': customerData['accountName'],
+          'address': customerData['accountAddress'],
+          'phone': customerData['accountPhoneNumber'],
+          'note': '',
+          'paymentMethod': _selectedPaymentType
+        },
+        'selectedOption': 'Service',
+        'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
+        'totalPrice': _totalPrice,
+        'discountedPrice': _totalPrice,
+        'bookingServicesDate': DateTime.now().toIso8601String()
+      };
+
+      final response = await http.post(
+        Uri.parse('http://localhost:5115/Bookings/service'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Service booking created successfully')),
+        );
+        Navigator.pop(context);
+      } else {
+        throw Exception('Failed to create service booking: ${response.body}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating service booking: $e')),
+      );
     }
   }
 

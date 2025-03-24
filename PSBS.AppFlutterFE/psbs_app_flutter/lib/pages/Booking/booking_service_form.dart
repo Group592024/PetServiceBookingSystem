@@ -17,6 +17,7 @@ class BookingServiceForm extends StatefulWidget {
 
 class _BookingServiceFormState extends State<BookingServiceForm> {
   DateTime _selectedDate = DateTime.now();
+  TimeOfDay _selectedTime = TimeOfDay.now();
   List<Map<String, dynamic>> _bookingChoices = [];
   List<Map<String, dynamic>> _services = [];
   List<Map<String, dynamic>> _pets = [];
@@ -91,8 +92,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       if (serviceId == 'all') {
         _selectAllServices = !_selectAllServices;
         if (_selectAllServices) {
-          _selectedServices =
-              _services.map((s) => s['serviceId'].toString()).toList();
+          _selectedServices = _services.map((s) => s['serviceId'].toString()).toList();
         } else {
           _selectedServices = [];
         }
@@ -101,7 +101,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
         if (_selectedServices.contains(serviceId)) {
           _selectedServices.remove(serviceId);
         } else {
-          _selectedServices.add(serviceId);
+          _selectedServices.add(serviceId.toString());
         }
       }
     });
@@ -121,10 +121,55 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
         if (_selectedPets.contains(petId)) {
           _selectedPets.remove(petId);
         } else {
-          _selectedPets.add(petId);
+          _selectedPets.add(petId.toString());
         }
       }
     });
+  }
+
+  Future<void> _selectDateTime() async {
+    // First select date
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate != null) {
+      // Then select time
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: _selectedTime,
+      );
+
+      if (pickedTime != null) {
+        // Combine date and time
+        DateTime fullDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        // Validate if selected time is at least 1 hour after current time
+        if (fullDateTime.isBefore(DateTime.now().add(Duration(hours: 1)))) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Please select a time at least 1 hour from now'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+
+        setState(() {
+          _selectedDate = fullDateTime;
+          _selectedTime = pickedTime;
+        });
+      }
+    }
   }
 
   void _handleCreateBookingServices() {
@@ -133,60 +178,48 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       _bookingChoices = [];
     });
 
-    // If "All" is selected for both services and pets
-    if (_selectAllServices && _selectAllPets) {
-      for (var service in _services) {
-        for (var pet in _pets) {
-          _bookingChoices.add({
-            "service": service['serviceId'],
-            "pet": pet['petId'],
-            "price": 0.0,
-            "serviceVariants": [],
-            "serviceVariant": null,
-          });
-        }
-      }
+    // Validate if date is selected
+    if (_selectedDate.isBefore(DateTime.now().add(Duration(hours: 1)))) {
+      setState(() {
+        _error = 'Please select a valid booking date and time (at least 1 hour from now)';
+      });
+      return;
     }
-    // If "All" is selected for services only
-    else if (_selectAllServices) {
-      for (var service in _services) {
-        for (var petId in _selectedPets) {
-          _bookingChoices.add({
-            "service": service['serviceId'],
-            "pet": petId,
-            "price": 0.0,
-            "serviceVariants": [],
-            "serviceVariant": null,
-          });
-        }
-      }
+
+    // Get the list of selected services
+    List<Map<String, dynamic>> servicesToBook;
+    if (_selectAllServices) {
+      servicesToBook = _services;
+    } else {
+      servicesToBook = _services.where((s) => _selectedServices.contains(s['serviceId'].toString())).toList();
     }
-    // If "All" is selected for pets only
-    else if (_selectAllPets) {
-      for (var serviceId in _selectedServices) {
-        for (var pet in _pets) {
-          _bookingChoices.add({
-            "service": serviceId,
-            "pet": pet['petId'],
-            "price": 0.0,
-            "serviceVariants": [],
-            "serviceVariant": null,
-          });
-        }
-      }
+
+    // Get the list of selected pets
+    List<Map<String, dynamic>> petsToBook;
+    if (_selectAllPets) {
+      petsToBook = _pets;
+    } else {
+      petsToBook = _pets.where((p) => _selectedPets.contains(p['petId'].toString())).toList();
     }
-    // If specific services and pets are selected
-    else {
-      for (var serviceId in _selectedServices) {
-        for (var petId in _selectedPets) {
-          _bookingChoices.add({
-            "service": serviceId,
-            "pet": petId,
-            "price": 0.0,
-            "serviceVariants": [],
-            "serviceVariant": null,
-          });
-        }
+
+    // Validate if any services or pets are selected
+    if (servicesToBook.isEmpty || petsToBook.isEmpty) {
+      setState(() {
+        _error = 'Please select at least one service and one pet';
+      });
+      return;
+    }
+
+    // Create booking choices for each pet with all selected services
+    for (var pet in petsToBook) {
+      for (var service in servicesToBook) {
+        _bookingChoices.add({
+          "service": service['serviceId'].toString(),
+          "pet": pet['petId'].toString(),
+          "price": 0.0,
+          "serviceVariants": [],
+          "serviceVariant": null,
+        });
       }
     }
 
@@ -237,26 +270,21 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Select Booking Date",
+                  "Select Booking Date & Time",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
                 ElevatedButton(
-                  onPressed: () async {
-                    DateTime? picked = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate,
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(2100),
-                    );
-                    if (picked != null) {
-                      setState(() {
-                        _selectedDate = picked;
-                      });
-                    }
-                  },
-                  child: Text("${_selectedDate.toLocal()}".split(' ')[0]),
+                  onPressed: _selectDateTime,
+                  child: Text(
+                    "${_selectedDate.toLocal().toString().split('.')[0]}",
+                  ),
                 ),
+                if (_selectedDate.isBefore(DateTime.now().add(Duration(hours: 1))))
+                  Text(
+                    "Please select a time at least 1 hour from now",
+                    style: TextStyle(color: Colors.red),
+                  ),
               ],
             ),
           ),

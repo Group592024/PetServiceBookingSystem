@@ -218,8 +218,8 @@ const AddBooking = () => {
         return;
       }
 
-      console.log("Request Payload:", JSON.stringify(requestData, null, 2)); // Log data before sending
-
+      console.log("Request Payload:", JSON.stringify(requestData, null, 2)); 
+      alert(requestData);
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
