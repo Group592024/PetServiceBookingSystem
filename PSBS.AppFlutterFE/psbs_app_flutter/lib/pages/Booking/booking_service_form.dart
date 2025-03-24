@@ -3,13 +3,17 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'booking_service_choose.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/booking_service_type.dart';
 
 class BookingServiceForm extends StatefulWidget {
   final String? cusId;
   final Function(List<Map<String, dynamic>>) onBookingServiceDataChange;
 
-  BookingServiceForm(
-      {required this.cusId, required this.onBookingServiceDataChange});
+  const BookingServiceForm({
+    required this.cusId,
+    required this.onBookingServiceDataChange,
+    Key? key,
+  }) : super(key: key);
 
   @override
   _BookingServiceFormState createState() => _BookingServiceFormState();
@@ -17,21 +21,15 @@ class BookingServiceForm extends StatefulWidget {
 
 class _BookingServiceFormState extends State<BookingServiceForm> {
   DateTime _selectedDate = DateTime.now();
-  TimeOfDay _selectedTime = TimeOfDay.now();
-  List<Map<String, dynamic>> _bookingChoices = [];
-  List<Map<String, dynamic>> _services = [];
-  List<Map<String, dynamic>> _pets = [];
+  List<BookingChoice> _bookingChoices = [];
+  List<Service> _services = [];
+  List<Pet> _pets = [];
   List<String> _selectedServices = [];
   List<String> _selectedPets = [];
   bool _selectAllServices = false;
   bool _selectAllPets = false;
   String? _error;
-  Map<String, String> _petNames = {};
-  List<Map<String, dynamic>> _vouchers = [];
-  String? _voucherError;
   double _totalPrice = 0.0;
-  double _finalDiscount = 0.0;
-  double _discountedPrice = 0.0;
 
   @override
   void initState() {
@@ -40,19 +38,23 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     _fetchPets();
   }
 
+
   Future<void> _fetchServices() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/Service'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag']) {
           setState(() {
-            _services = List<Map<String, dynamic>>.from(data['data']);
+            _services = (data['data'] as List)
+                .map((service) => Service.fromMap(service))
+                .toList();
           });
         }
       }
@@ -64,21 +66,19 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   Future<void> _fetchPets() async {
     if (widget.cusId == null) return;
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['flag']) {
           setState(() {
-            _pets = List<Map<String, dynamic>>.from(data['data']);
-            // Initialize pet names
-            for (var pet in _pets) {
-              _petNames[pet['petId']] = pet['petName'];
-            }
+            _pets =
+                (data['data'] as List).map((pet) => Pet.fromMap(pet)).toList();
           });
         }
       }
@@ -87,21 +87,58 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     }
   }
 
+  Future<void> _selectDateTime() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate == null) return;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDate),
+    );
+
+    if (pickedTime == null) return;
+
+    final fullDateTime = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    if (fullDateTime.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a time at least 1 hour from now'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _selectedDate = fullDateTime;
+    });
+  }
+
   void _handleServiceSelect(String serviceId) {
     setState(() {
       if (serviceId == 'all') {
         _selectAllServices = !_selectAllServices;
-        if (_selectAllServices) {
-          _selectedServices = _services.map((s) => s['serviceId'].toString()).toList();
-        } else {
-          _selectedServices = [];
-        }
+        _selectedServices =
+            _selectAllServices ? _services.map((s) => s.id).toList() : [];
       } else {
         _selectAllServices = false;
         if (_selectedServices.contains(serviceId)) {
           _selectedServices.remove(serviceId);
         } else {
-          _selectedServices.add(serviceId.toString());
+          _selectedServices.add(serviceId);
         }
       }
     });
@@ -111,98 +148,40 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     setState(() {
       if (petId == 'all') {
         _selectAllPets = !_selectAllPets;
-        if (_selectAllPets) {
-          _selectedPets = _pets.map((p) => p['petId'].toString()).toList();
-        } else {
-          _selectedPets = [];
-        }
+        _selectedPets = _selectAllPets ? _pets.map((p) => p.id).toList() : [];
       } else {
         _selectAllPets = false;
         if (_selectedPets.contains(petId)) {
           _selectedPets.remove(petId);
         } else {
-          _selectedPets.add(petId.toString());
+          _selectedPets.add(petId);
         }
       }
     });
   }
 
-  Future<void> _selectDateTime() async {
-    // First select date
-    DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-
-    if (pickedDate != null) {
-      // Then select time
-      TimeOfDay? pickedTime = await showTimePicker(
-        context: context,
-        initialTime: _selectedTime,
-      );
-
-      if (pickedTime != null) {
-        // Combine date and time
-        DateTime fullDateTime = DateTime(
-          pickedDate.year,
-          pickedDate.month,
-          pickedDate.day,
-          pickedTime.hour,
-          pickedTime.minute,
-        );
-
-        // Validate if selected time is at least 1 hour after current time
-        if (fullDateTime.isBefore(DateTime.now().add(Duration(hours: 1)))) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Please select a time at least 1 hour from now'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-
-        setState(() {
-          _selectedDate = fullDateTime;
-          _selectedTime = pickedTime;
-        });
-      }
-    }
-  }
-
-  void _handleCreateBookingServices() {
+  Future<void> _handleCreateBookingServices() async {
     setState(() {
       _error = null;
       _bookingChoices = [];
     });
 
-    // Validate if date is selected
-    if (_selectedDate.isBefore(DateTime.now().add(Duration(hours: 1)))) {
+    if (_selectedDate.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
       setState(() {
-        _error = 'Please select a valid booking date and time (at least 1 hour from now)';
+        _error =
+            'Please select a valid booking date and time (at least 1 hour from now)';
       });
       return;
     }
 
-    // Get the list of selected services
-    List<Map<String, dynamic>> servicesToBook;
-    if (_selectAllServices) {
-      servicesToBook = _services;
-    } else {
-      servicesToBook = _services.where((s) => _selectedServices.contains(s['serviceId'].toString())).toList();
-    }
+    final servicesToBook = _selectAllServices
+        ? _services
+        : _services.where((s) => _selectedServices.contains(s.id)).toList();
 
-    // Get the list of selected pets
-    List<Map<String, dynamic>> petsToBook;
-    if (_selectAllPets) {
-      petsToBook = _pets;
-    } else {
-      petsToBook = _pets.where((p) => _selectedPets.contains(p['petId'].toString())).toList();
-    }
+    final petsToBook = _selectAllPets
+        ? _pets
+        : _pets.where((p) => _selectedPets.contains(p.id)).toList();
 
-    // Validate if any services or pets are selected
     if (servicesToBook.isEmpty || petsToBook.isEmpty) {
       setState(() {
         _error = 'Please select at least one service and one pet';
@@ -210,24 +189,67 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       return;
     }
 
-    // Create booking choices for each pet with all selected services
-    for (var pet in petsToBook) {
-      for (var service in servicesToBook) {
-        _bookingChoices.add({
-          "service": service['serviceId'].toString(),
-          "pet": pet['petId'].toString(),
-          "price": 0.0,
-          "serviceVariants": [],
-          "serviceVariant": null,
+    // Create booking choices for each pet-service combination
+    for (final pet in petsToBook) {
+      for (final service in servicesToBook) {
+        final variants = await _fetchServiceVariants(service.id);
+
+        // Automatically select first variant if available
+        ServiceVariant? selectedVariant;
+        double price = 0.0;
+
+        if (variants.isNotEmpty) {
+          selectedVariant = variants.first;
+          price = variants.first.price;
+        }
+
+        setState(() {
+          _bookingChoices.add(BookingChoice(
+            service: service,
+            pet: pet,
+            serviceVariant: selectedVariant,
+            price: price,
+            bookingDate: _selectedDate.toIso8601String(),
+            variants: variants,
+          ));
         });
       }
     }
 
     _updateBookingServiceData();
+    _calculateTotalPrice();
+  }
+
+  Future<List<ServiceVariant>> _fetchServiceVariants(String serviceId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      final response = await http.get(
+        Uri.parse("http://127.0.0.1:5050/api/ServiceVariant/service/$serviceId"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        if (responseBody.containsKey("data") && responseBody["data"] is List) {
+          return (responseBody["data"] as List)
+              .map((variant) => ServiceVariant.fromMap(variant))
+              .toList();
+        }
+      }
+    } catch (error) {
+      print("Error fetching service variants: $error");
+    }
+    return [];
   }
 
   void _updateBookingServiceData() {
-    widget.onBookingServiceDataChange(_bookingChoices);
+    final formattedData =
+        _bookingChoices.map((choice) => choice.toMap()).toList();
+    widget.onBookingServiceDataChange(formattedData);
   }
 
   void _removeBookingChoice(int index) {
@@ -235,187 +257,172 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       _bookingChoices.removeAt(index);
     });
     _updateBookingServiceData();
-  }
-
-  void _updateBookingChoice(int index, Map<String, dynamic> newData) {
-    setState(() {
-      _bookingChoices[index] = newData;
-      _calculateTotalPrice();
-    });
-    _updateBookingServiceData();
+    _calculateTotalPrice();
   }
 
   void _calculateTotalPrice() {
-    _totalPrice = _bookingChoices.fold(0.0, (sum, choice) {
-      double price = double.tryParse(choice["price"].toString()) ?? 0.0;
-      return sum + price;
+    final total =
+        _bookingChoices.fold(0.0, (sum, choice) => sum + choice.price);
+    setState(() {
+      _totalPrice = total;
     });
-
-  }
-
-  void _notifyParent() {
-    widget.onBookingServiceDataChange(_bookingChoices);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Date Selection
-        Card(
-          margin: EdgeInsets.all(8),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Select Booking Date & Time",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _selectDateTime,
-                  child: Text(
-                    "${_selectedDate.toLocal().toString().split('.')[0]}",
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Date Selection
+          Card(
+            margin: const EdgeInsets.all(8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Select Booking Date & Time",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                if (_selectedDate.isBefore(DateTime.now().add(Duration(hours: 1))))
-                  Text(
-                    "Please select a time at least 1 hour from now",
-                    style: TextStyle(color: Colors.red),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _selectDateTime,
+                    child: Text(
+                      _selectedDate.toLocal().toString().split('.')[0],
+                    ),
                   ),
-              ],
-            ),
-          ),
-        ),
-
-        // Services Selection
-        Card(
-          margin: EdgeInsets.all(8),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Select Services",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                CheckboxListTile(
-                  title: Text("All Services"),
-                  value: _selectAllServices,
-                  onChanged: (bool? value) => _handleServiceSelect('all'),
-                ),
-                if (!_selectAllServices)
-                  ..._services.map((service) => CheckboxListTile(
-                        title: Text(service['serviceName']),
-                        value: _selectedServices
-                            .contains(service['serviceId'].toString()),
-                        onChanged: (bool? value) => _handleServiceSelect(
-                            service['serviceId'].toString()),
-                      )),
-              ],
-            ),
-          ),
-        ),
-
-        // Pets Selection
-        Card(
-          margin: EdgeInsets.all(8),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Select Pets",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                CheckboxListTile(
-                  title: Text("All Pets"),
-                  value: _selectAllPets,
-                  onChanged: (bool? value) => _handlePetSelect('all'),
-                ),
-                if (!_selectAllPets)
-                  ..._pets.map((pet) => CheckboxListTile(
-                        title: Text(pet['petName']),
-                        value: _selectedPets.contains(pet['petId'].toString()),
-                        onChanged: (bool? value) =>
-                            _handlePetSelect(pet['petId'].toString()),
-                      )),
-              ],
-            ),
-          ),
-        ),
-
-        if (_error != null)
-          Padding(
-            padding: EdgeInsets.all(8),
-            child: Text(
-              _error!,
-              style: TextStyle(color: Colors.red),
+                  if (_selectedDate
+                      .isBefore(DateTime.now().add(const Duration(hours: 1))))
+                    const Text(
+                      "Please select a time at least 1 hour from now",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                ],
+              ),
             ),
           ),
 
-        ElevatedButton(
-          onPressed: _handleCreateBookingServices,
-          child: Text("Create Booking Services"),
-        ),
-
-        // Booking Choices List
-        ..._bookingChoices.asMap().entries.map((entry) {
-          int index = entry.key;
-          return Card(
-            margin: EdgeInsets.symmetric(vertical: 8),
-            child: Column(
-              children: [
-                ListTile(
-                  title: Text("Service Booking #${index + 1}"),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => _removeBookingChoice(index),
+          // Services Selection
+          Card(
+            margin: const EdgeInsets.all(8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Select Services",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                ),
-                BookingServiceChoice(
-                  cusId: widget.cusId ?? "",
-                  bookingChoices: [_bookingChoices[index]],
-                  onRemove: (index) => _removeBookingChoice(index),
-                  onUpdate: () => _notifyParent(),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-
-        // Price Summary
-        Card(
-          margin: EdgeInsets.all(8),
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Price Summary",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 10),
-                Text("Original Price: ${_totalPrice.toStringAsFixed(2)} VND"),
-                if (_finalDiscount > 0)
-                  Text(
-                    "Discount: -${_finalDiscount.toStringAsFixed(2)} VND",
-                    style: TextStyle(color: Colors.green),
+                  CheckboxListTile(
+                    title: const Text("All Services"),
+                    value: _selectAllServices,
+                    onChanged: (bool? value) => _handleServiceSelect('all'),
                   ),
-                Text(
-                  "Total Price: ${_discountedPrice.toStringAsFixed(2)} VND",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ],
+                  if (!_selectAllServices)
+                    ..._services.map((service) => CheckboxListTile(
+                          title: Text(service.name),
+                          value: _selectedServices.contains(service.id),
+                          onChanged: (bool? value) =>
+                              _handleServiceSelect(service.id),
+                        )),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+
+          // Pets Selection
+          Card(
+            margin: const EdgeInsets.all(8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Select Pets",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  CheckboxListTile(
+                    title: const Text("All Pets"),
+                    value: _selectAllPets,
+                    onChanged: (bool? value) => _handlePetSelect('all'),
+                  ),
+                  if (!_selectAllPets)
+                    ..._pets.map((pet) => CheckboxListTile(
+                          title: Text(pet.name),
+                          value: _selectedPets.contains(pet.id),
+                          onChanged: (bool? value) => _handlePetSelect(pet.id),
+                        )),
+                ],
+              ),
+            ),
+          ),
+
+          if (_error != null)
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ),
+
+          ElevatedButton(
+            onPressed: _handleCreateBookingServices,
+            child: const Text("Create Booking Services"),
+          ),
+
+          // Booking Choices List
+          ..._bookingChoices.asMap().entries.map((entry) {
+            final index = entry.key;
+            return Card(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: Column(
+                children: [
+                  ListTile(
+                    title: Text("Service Booking #${index + 1}"),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => _removeBookingChoice(index),
+                    ),
+                  ),
+                  BookingServiceChoice(
+                    cusId: widget.cusId ?? "",
+                    bookingChoices: [_bookingChoices[index]],
+                    onRemove: (index) => _removeBookingChoice(index),
+                    onUpdate: () {
+                      _updateBookingServiceData();
+                      _calculateTotalPrice();
+                    },
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+
+          // Price Summary
+          Card(
+            margin: const EdgeInsets.all(8),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Price Summary",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  Text("Total Price: ${_totalPrice.toStringAsFixed(2)} VND",
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

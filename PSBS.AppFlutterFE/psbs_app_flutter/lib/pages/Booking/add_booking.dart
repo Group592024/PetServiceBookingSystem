@@ -495,15 +495,17 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       // Format the request data
       Map<String, dynamic> requestData = {
-        'bookingRooms': _bookingRoomData.map((room) => {
-          'room': room['room'],
-          'pet': room['pet'],
-          'start': room['start'],
-          'end': room['end'],
-          'price': room['price'],
-          'camera': room['camera'],
-          'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
-        }).toList(),
+        'bookingRooms': _bookingRoomData
+            .map((room) => {
+                  'room': room['room'],
+                  'pet': room['pet'],
+                  'start': room['start'],
+                  'end': room['end'],
+                  'price': room['price'],
+                  'camera': room['camera'],
+                  'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
+                })
+            .toList(),
         'customer': {
           'cusId': accountId,
           'name': customerData['accountName'],
@@ -563,28 +565,37 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       final customerData = json.decode(customerResponse.body)['data'];
 
+      // Format the booking services data
+      List<Map<String, dynamic>> services = _bookingServiceData.map((service) {
+        return {
+          "service": service["service"]["id"].toString(),
+          "pet": service["pet"]["id"].toString(),
+          "price": service["price"] ?? 0.0,
+          "serviceVariant": service["serviceVariant"]["id"].toString(),
+        };
+      }).toList();
+
       // Format the request data
       Map<String, dynamic> requestData = {
-        'services': _bookingServiceData.map((service) => {
-          'service': service['service'],
-          'pet': service['pet'],
-          'price': service['price'],
-          'serviceVariant': service['serviceVariant']['id']
-        }).toList(),
-        'customer': {
-          'cusId': accountId,
-          'name': customerData['accountName'],
-          'address': customerData['accountAddress'],
-          'phone': customerData['accountPhoneNumber'],
-          'note': '',
-          'paymentMethod': _selectedPaymentType
+        "services": services,
+        "customer": {
+          "cusId": accountId,
+          "name": customerData['accountName'],
+          "address": customerData['accountAddress'],
+          "phone": customerData['accountPhoneNumber'],
+          "note": '',
+          "paymentMethod": _selectedPaymentType
         },
-        'selectedOption': 'Service',
-        'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
-        'totalPrice': _totalPrice,
-        'discountedPrice': _totalPrice,
-        'bookingServicesDate': DateTime.now().toIso8601String()
+        "selectedOption": "Service",
+        "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
+        "totalPrice": _totalPrice,
+        "discountedPrice": _totalPrice,
+        "bookingServicesDate": _bookingServiceData.isNotEmpty 
+            ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
+            : DateTime.now().toIso8601String().substring(0, 16)
       };
+
+      print("Sending service booking data: ${jsonEncode(requestData)}");
 
       final response = await http.post(
         Uri.parse('http://localhost:5115/Bookings/service'),
@@ -597,13 +608,15 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Service booking created successfully')),
+          const SnackBar(content: Text('Service booking created successfully')),
         );
         Navigator.pop(context);
       } else {
+        print("Response error: ${response.body}");
         throw Exception('Failed to create service booking: ${response.body}');
       }
     } catch (e) {
+      print("Error in _sendServiceBookingRequest: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error creating service booking: $e')),
       );
