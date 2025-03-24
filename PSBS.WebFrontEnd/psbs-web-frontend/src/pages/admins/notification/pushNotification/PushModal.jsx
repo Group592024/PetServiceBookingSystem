@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   Box,
@@ -9,12 +9,21 @@ import {
   Select,
   MenuItem,
   Chip,
+  Typography,
+  Divider,
+  Paper,
+  Stack,
+  Avatar,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  IconButton,
 } from "@mui/material";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
+import { Close, Person, Search, CheckCircle } from "@mui/icons-material";
 
 const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
-  const [receiverType, setReceiverType] = useState("all");
+  const [receiverType, setReceiverType] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -38,7 +47,22 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
       accountPhoneNumber: "0323321343",
       roleId: "admin",
     },
+    {
+      accountId: "224e8845-9fa0-4cc0-bcb3-958eefd2e663",
+      accountName: "ドラ",
+      accountPhoneNumber: "0323321341",
+      roleId: "admin",
+    },
   ];
+
+  // Reset all state when modal closes
+  useEffect(() => {
+    if (!open) {
+      setReceiverType("");
+      setSelectedUsers([]);
+      setSearchTerm("");
+    }
+  }, [open]);
 
   // Filter users based on search input
   const filteredUsers = users.filter(
@@ -52,7 +76,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
     const value = event.target.value;
     setReceiverType(value);
     if (value === "all") {
-      setSelectedUsers([]);
+      setSelectedUsers([...users]); // Create new array to trigger state change
     } else if (value === "users") {
       setSelectedUsers(users.filter((user) => user.roleId === "user"));
     } else if (value === "employees") {
@@ -71,7 +95,15 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
 
   // Remove a selected user
   const handleRemoveUser = (userId) => {
-    setSelectedUsers(selectedUsers.filter((user) => user.accountId !== userId));
+    const newSelectedUsers = selectedUsers.filter(
+      (user) => user.accountId !== userId
+    );
+    setSelectedUsers(newSelectedUsers);
+
+    // If all users are removed, reset receiverType to "customize" if it was a group selection
+    if (newSelectedUsers.length === 0 && receiverType !== "customize") {
+      setReceiverType("customize");
+    }
   };
 
   const handleSubmit = () => {
@@ -80,7 +112,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
     }));
 
     const pushNotificationDTO = {
-      notificationId: initId, // Using initId as notificationId
+      notificationId: initId,
       Receivers: selectedReceiverDTOs,
     };
 
@@ -88,87 +120,180 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
     onClose();
   };
 
+  // Disable confirm button when:
+  // - No receiver type selected OR
+  // - No users selected (regardless of mode)
+  const isConfirmDisabled = !receiverType || selectedUsers.length === 0;
+
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      className="flex items-center justify-center"
-    >
-      <Box className="bg-white p-6 rounded-lg shadow-xl w-96">
-        <h2 className="text-lg font-semibold mb-4">Select Receivers</h2>
-
-        {/* Receiver Type Selection */}
-        <FormControl fullWidth>
-          <InputLabel id="receiverType-label">Receiver Type</InputLabel>
-          <Select
-            labelId="receiverType-label"
-            value={receiverType}
-            onChange={handleReceiverChange}
-            label="Receiver Type"
-            className="!text-black"
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: { xs: "90%", sm: "80%", md: "500px" },
+          bgcolor: "background.paper",
+          boxShadow: 24,
+          borderRadius: 2,
+          outline: "none",
+        }}
+      >
+        <Paper elevation={0} sx={{ p: 3 }}>
+          {/* Header */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 2,
+            }}
           >
-            <MenuItem value="all">All</MenuItem>
-            <MenuItem value="users">Users</MenuItem>
-            <MenuItem value="employees">Employees</MenuItem>
-            <MenuItem value="customize">Customize</MenuItem>
-          </Select>
-        </FormControl>
+            <Typography variant="h6" component="h2" fontWeight="bold">
+              Select Notification Receivers
+            </Typography>
+            <IconButton onClick={onClose} size="small">
+              <Close />
+            </IconButton>
+          </Box>
 
-        {/* Search Input (Shown Only When Customize is Selected) */}
-        {receiverType === "customize" && (
-          <div className="mt-4">
-            <TextField
-              label="Search by Name or Phone"
-              fullWidth
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="!text-black"
-            />
-            {/* Display Search Results */}
-            {searchTerm && (
-              <div className="mt-2 max-h-32 overflow-y-auto bg-gray-100 p-2 rounded">
-                {filteredUsers.map((user) => (
-                  <div
-                    key={user.accountId}
-                    className="flex justify-between p-2 hover:bg-gray-200 cursor-pointer"
-                    onClick={() => handleUserSelect(user)}
+          <Divider sx={{ my: 2 }} />
+
+          {/* Receiver Type Selection */}
+          <FormControl fullWidth sx={{ mb: 3 }}>
+            <InputLabel id="receiverType-label">Receiver Type *</InputLabel>
+            <Select
+              labelId="receiverType-label"
+              value={receiverType}
+              onChange={handleReceiverChange}
+              label="Receiver Type *"
+            >
+              <MenuItem value="">
+                <em>Select an option</em>
+              </MenuItem>
+              <MenuItem value="all">All Users</MenuItem>
+              <MenuItem value="users">Regular Users Only</MenuItem>
+              <MenuItem value="employees">Employees Only</MenuItem>
+              <MenuItem value="customize">Custom Selection</MenuItem>
+            </Select>
+          </FormControl>
+
+          {/* Search Input (Shown Only When Customize is Selected) */}
+          {(receiverType === "customize" || selectedUsers.length > 0) && (
+            <Box sx={{ mb: 3 }}>
+              {receiverType === "customize" && (
+                <TextField
+                  label="Search by name or phone"
+                  fullWidth
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <Search sx={{ color: "action.active", mr: 1 }} />
+                    ),
+                  }}
+                />
+              )}
+
+              {/* Display Search Results */}
+              {receiverType === "customize" && searchTerm && (
+                <Paper
+                  elevation={2}
+                  sx={{ mt: 2, maxHeight: 200, overflow: "auto" }}
+                >
+                  <List dense>
+                    {filteredUsers.map((user) => (
+                      <ListItem
+                        key={user.accountId}
+                        button
+                        onClick={() => handleUserSelect(user)}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "action.hover",
+                          },
+                        }}
+                        secondaryAction={
+                          selectedUsers.some(
+                            (u) => u.accountId === user.accountId
+                          ) ? (
+                            <CheckCircle color="success" />
+                          ) : null
+                        }
+                      >
+                        <ListItemAvatar>
+                          <Avatar>
+                            <Person />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary={user.accountName}
+                          secondary={user.accountPhoneNumber}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              )}
+
+              {/* Selected Users (Displayed as Chips) */}
+              {selectedUsers.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography
+                    variant="subtitle2"
+                    color="text.secondary"
+                    gutterBottom
                   >
-                    <span>
-                      {user.accountName} ({user.accountPhoneNumber})
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                    Selected Receivers ({selectedUsers.length})
+                  </Typography>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ flexWrap: "wrap", gap: 1 }}
+                  >
+                    {selectedUsers.map((user) => (
+                      <Chip
+                        key={user.accountId}
+                        avatar={
+                          <Avatar>
+                            <Person />
+                          </Avatar>
+                        }
+                        label={user.accountName}
+                        onDelete={() => handleRemoveUser(user.accountId)}
+                        variant="outlined"
+                        color="primary"
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+            </Box>
+          )}
 
-        {/* Selected Users (Displayed as Chips) */}
-        {selectedUsers.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2">
-            {selectedUsers.map((user) => (
-              <Chip
-                key={user.accountId}
-                label={user.accountName}
-                onDelete={() => handleRemoveUser(user.accountId)}
-                className="!text-black"
-              />
-            ))}
-          </div>
-        )}
+          <Divider sx={{ my: 2 }} />
 
-        {/* Buttons */}
-        <div className="flex justify-between mt-4">
-          <Button onClick={onClose}>Back</Button>
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-          >
-            Confirm
-          </Button>
-        </div>
+          {/* Buttons */}
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Button
+              onClick={onClose}
+              variant="outlined"
+              color="inherit"
+              sx={{ px: 4 }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmit}
+              disabled={isConfirmDisabled}
+              sx={{ px: 4 }}
+            >
+              Confirm Selection
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     </Modal>
   );

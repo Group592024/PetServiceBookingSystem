@@ -12,6 +12,7 @@ namespace ChatServiceApi.Domain.Entities
         public Guid NotificationId { get; set; }
         public Guid UserId { get; set; }
         public bool IsDeleted { get; set; }
+        public bool IsRead { get; set; }
         [JsonIgnore]
         public virtual Notification Notification { get; set; } = null!;
     }

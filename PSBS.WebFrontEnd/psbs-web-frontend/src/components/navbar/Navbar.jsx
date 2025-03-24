@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 
 const Navbar = ({ sidebarRef }) => {
   const [accountName, setAccountName] = useState(null);
@@ -10,7 +11,7 @@ const Navbar = ({ sidebarRef }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const navigate = useNavigate();
-
+  const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
   useEffect(() => {
     const token = sessionStorage.getItem("token");
 
@@ -50,7 +51,9 @@ const Navbar = ({ sidebarRef }) => {
       }
     }
   }, []);
-
+  const toggleNotificationDropdown = () => {
+    setNotificationDropdownVisible(!notificationDropdownVisible);
+  };
   const handleMenuClick = () => {
     if (sidebarRef.current) {
       const isClosed = sidebarRef.current.classList.toggle("close");
@@ -104,11 +107,19 @@ const Navbar = ({ sidebarRef }) => {
       </form>
       <input type="checkbox" id="theme-toggle" hidden />
       <label htmlFor="theme-toggle"></label>
-      <a href="chat" className="notifications">
+      <div className="notifications" onClick={toggleNotificationDropdown}>
+        <i class="bx bx-bell"></i>
+        <span className="count">12</span>
+      </div>
+      <a href="/chat" className="notifications">
         <i className="bx bx-message-square-dots"></i>
         <span className="count">12</span>
       </a>
-
+      {notificationDropdownVisible && (
+          <NotificationsDropdown 
+            onClose={() => setNotificationDropdownVisible(false)}
+          />
+        )}
       <div className="navbar-profile" onClick={toggleDropdown}>
         {imagePreview ? (
           <img

@@ -16,6 +16,7 @@ import { useState } from "react";
 import CreateNotificationModal from "../../pages/admins/notification/addNotiForm/addModal";
 import UpdateNotificationModal from "../../pages/admins/notification/updateNotification/updateModal";
 import SelectReceiverModal from "../../pages/admins/notification/pushNotification/PushModal";
+import NotificationDetailModal from "../../pages/admins/notification/detailNotiform/DetailNotification";
 const DatatableNotification = ({
   columns,
   rows,
@@ -30,6 +31,7 @@ const DatatableNotification = ({
   const [isEditModalOpen, setEditIsModalOpen] = useState(false);
   const [isPushModalOpen, setPushModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const handleCreateNotification = async (values) => {
     // Send the data to your API here
     try {
@@ -86,7 +88,35 @@ const DatatableNotification = ({
       toast.error("Failed to submit data.");
     }
   };
-  const handlePushNotification = async (values) => {};
+  const handlePushNotification = async (values) => {
+    console.log("push to update:", values);
+    try {
+      const response = await postData(`${apiPath}/push`, values);
+      if (response.flag) {
+        Swal.fire({
+          title: "Success!",
+          text: response.message,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            row[rowId] === values[rowId] ? { ...row, ...response.data } : row
+          )
+        );
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: response.message,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      toast.error("Failed to submit data.");
+    }
+  };
   const actionColumn = [
     {
       field: "action",
@@ -188,7 +218,8 @@ const DatatableNotification = ({
     setPushModalOpen(true);
   };
   const handleDetailOpen = (row) => {
-    navigate(`${basePath}detail/${row[rowId]}`, { state: { rowData: row } });
+    setSelectedData(row);
+    setIsDetailModalOpen(true);
   };
   return (
     <div className="datatable">
@@ -230,6 +261,12 @@ const DatatableNotification = ({
         open={isPushModalOpen}
         onClose={() => setPushModalOpen(false)}
         onConfirm={handlePushNotification}
+        initId={selectedData}
+      />
+      <NotificationDetailModal
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        notification={selectedData}
       />
     </div>
   );

@@ -72,7 +72,7 @@ const ListNotification = () => {
         if (params.value === true) {
           return <Chip label="Pushed" color="primary" />;
         } else {
-          return <Chip label="Haven't pushed" color="warning" />;
+          return <Chip label="Pending" color="warning" />;
         }
       },
     },

@@ -61,12 +61,20 @@ namespace ChatServiceApi.Infrastructure.Repositories
                             NotificationId = currentNotification.NotificationId,
                             UserId = guid,
                             IsDeleted = false,
+                            IsRead = false,
                         };
                         context.NotificationBoxes.Add(notiBox);
                     }
 
                     await context.SaveChangesAsync();
-                    return new Response(true, $"the notification pushed successfully");
+                    // Fetch the updated notification with NotificationType included
+                    var updatedNotification = await context.Notifications
+                        .Include(n => n.NotificationType)
+                        .FirstOrDefaultAsync(n => n.NotificationId == currentNotification.NotificationId);
+
+                    var (noti, _) = NotificationConversion.FromEntity(updatedNotification!, null);
+
+                    return new Response(true, "Notification pushed successfully") { Data = noti };
                 }
             }
             catch (Exception ex)
@@ -175,6 +183,8 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 }
 
                 // Update the existing entity
+            notification.IsPushed = existingNoti.IsPushed;
+            notification.CreatedDate = existingNoti.CreatedDate;
                 context.Entry(existingNoti).CurrentValues.SetValues(notification);
                 await context.SaveChangesAsync();
 
