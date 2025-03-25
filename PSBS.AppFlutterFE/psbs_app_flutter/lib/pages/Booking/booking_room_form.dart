@@ -41,7 +41,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Room/available'),
+        Uri.parse('http://127.0.0.1:5050/api/Room/available'),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {
@@ -63,7 +63,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/pet/available/${widget.cusId}'),
+        Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
       );
       if (response.statusCode == 200) {

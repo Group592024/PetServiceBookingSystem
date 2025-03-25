@@ -38,7 +38,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse("http://10.0.2.2:5050/Bookings/${widget.bookingId}"),
+        Uri.parse("http://127.0.0.1:5050/Bookings/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            "http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
+            "http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -59,7 +59,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            "http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}"),
+            "http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            "http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
+            "http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch room history
       final historyResponse = await http.get(
-        Uri.parse("http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
+        Uri.parse("http://127.0.0.1:5050/api/RoomHistories/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -124,7 +124,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token');
         final petResponse = await http.get(
-          Uri.parse("http://10.0.2.2:5050/api/pet/${history['petId']}"),
+          Uri.parse("http://127.0.0.1:5050/api/pet/${history['petId']}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -147,7 +147,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final roomResponse = await http.get(
-        Uri.parse("http://10.0.2.2:5050/api/Room/$roomId"),
+        Uri.parse("http://127.0.0.1:5050/api/Room/$roomId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -170,7 +170,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
+        Uri.parse("http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

@@ -67,7 +67,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       if (widget.data["cusId"] != null) {
         final petResponse = await http.get(
           Uri.parse(
-              "http://10.0.2.2:5050/api/pet/available/${widget.data["cusId"]}"),
+              "http://127.0.0.1:5050/api/pet/available/${widget.data["cusId"]}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -97,7 +97,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:5050/api/RoomType/$roomTypeId"),
+        Uri.parse("http://127.0.0.1:5050/api/RoomType/$roomTypeId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

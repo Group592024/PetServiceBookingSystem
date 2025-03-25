@@ -14,9 +14,9 @@ class AddBookingPage extends StatefulWidget {
 
 class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
-  static const String apiBaseUrl = 'http://10.0.2.2:5050';
-  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
-  static const String paymentBaseUrl = 'https://10.66.183.143:5201';
+  static const String apiBaseUrl = 'http://127.0.0.1:5050';
+  static const String bookingBaseUrl = 'http://127.0.0.1:5115';
+  static const String paymentBaseUrl = 'https://10.211.55.7:5201';
 
   // Rest of your existing variables
   int _currentStep = 0;
@@ -113,9 +113,15 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   void _updateBookingServiceData(List<Map<String, dynamic>> data) {
+    print('=== AddBookingPage: _updateBookingServiceData ===');
+    print('Received Data:');
+    print(json.encode(data));
+    
     if (mounted) {
       setState(() {
-        _bookingServiceData = data;
+        _bookingServiceData = List<Map<String, dynamic>>.from(data);
+        print('Updated _bookingServiceData length: ${_bookingServiceData.length}');
+        print('Updated Service Variant: ${_bookingServiceData.first['serviceVariant']['content']} - ${_bookingServiceData.first['serviceVariant']['price']}');
         _calculateTotalPrice();
       });
     }
@@ -131,11 +137,8 @@ class _AddBookingPageState extends State<AddBookingPage> {
       });
     } else if (_serviceType == "Service") {
       total = _bookingServiceData.fold(0.0, (sum, service) {
-        if (service["serviceVariant"] != null &&
-            service["serviceVariant"]["price"] != null) {
-          double price =
-              double.tryParse(service["serviceVariant"]["price"].toString()) ??
-                  0.0;
+        if (service["serviceVariant"] != null) {
+          double price = double.tryParse(service["serviceVariant"]["price"].toString()) ?? 0.0;
           return sum + price;
         }
         return sum;

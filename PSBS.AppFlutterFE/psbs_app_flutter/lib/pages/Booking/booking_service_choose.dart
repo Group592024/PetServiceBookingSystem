@@ -9,12 +9,14 @@ class BookingServiceChoice extends StatefulWidget {
   final List<BookingChoice> bookingChoices;
   final Function(int) onRemove;
   final Function() onUpdate;
+  final Function(BookingChoice) onVariantChange;
 
   const BookingServiceChoice({
     required this.cusId,
     required this.bookingChoices,
     required this.onRemove,
     required this.onUpdate,
+    required this.onVariantChange,
     Key? key,
   }) : super(key: key);
 
@@ -26,16 +28,25 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
   String _error = "";
 
   void _updateVariant(int index, ServiceVariant newVariant) {
+    print('=== BookingServiceChoice: _updateVariant ===');
+    print('Previous variant: ${widget.bookingChoices[index].serviceVariant?.content} - ${widget.bookingChoices[index].serviceVariant?.price}');
+    print('New variant: ${newVariant.content} - ${newVariant.price}');
+    
+    final updatedChoice = BookingChoice(
+      service: widget.bookingChoices[index].service,
+      pet: widget.bookingChoices[index].pet,
+      serviceVariant: newVariant,
+      price: newVariant.price,  // Update price with new variant price
+      bookingDate: widget.bookingChoices[index].bookingDate,
+      variants: widget.bookingChoices[index].variants,
+    );
+
     setState(() {
-      widget.bookingChoices[index] = BookingChoice(
-        service: widget.bookingChoices[index].service,
-        pet: widget.bookingChoices[index].pet,
-        serviceVariant: newVariant,
-        price: newVariant.price,
-        bookingDate: widget.bookingChoices[index].bookingDate,
-        variants: widget.bookingChoices[index].variants,
-      );
+      widget.bookingChoices[index] = updatedChoice;
     });
+
+    // Notify parent components of the change
+    widget.onVariantChange(updatedChoice);
     widget.onUpdate();
   }
 
@@ -61,7 +72,7 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
                   
                   if (choice.variants.isNotEmpty)
                     DropdownButtonFormField<ServiceVariant>(
-                      value: choice.serviceVariant,
+                      value: choice.serviceVariant,  // This will show the current variant (initially the first one)
                       decoration: InputDecoration(
                         labelText: "Service Variant",
                         border: OutlineInputBorder(),
@@ -80,22 +91,13 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
                     ),
                   
                   SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Price: ${choice.price.toStringAsFixed(2)} VND",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => widget.onRemove(index),
-                      ),
-                    ],
+                  Text(
+                    "Price: ${choice.price.toStringAsFixed(2)} VND",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
                   ),
                 ],
               ),

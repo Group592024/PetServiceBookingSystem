@@ -43,7 +43,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Service'),
+        Uri.parse('http://127.0.0.1:5050/api/Service'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -68,7 +68,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/pet/available/${widget.cusId}'),
+        Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -167,8 +167,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
 
     if (_selectedDate.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
       setState(() {
-        _error =
-            'Please select a valid booking date and time (at least 1 hour from now)';
+        _error = 'Please select a valid booking date and time (at least 1 hour from now)';
       });
       return;
     }
@@ -193,22 +192,20 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       for (final service in servicesToBook) {
         final variants = await _fetchServiceVariants(service.id);
 
-        // Set default variant and price
-        ServiceVariant? selectedVariant;
-        double price = 0.0;
-
-        if (variants.isNotEmpty) {
-          selectedVariant = variants.first;
-          price = selectedVariant
-              .price; // Set initial price based on selected variant
+        if (variants.isEmpty) {
+          print('Warning: No variants found for service ${service.name}');
+          continue; // Skip this service if no variants available
         }
 
+        // Always select the first variant by default
+        final defaultVariant = variants.first;
+        
         setState(() {
           _bookingChoices.add(BookingChoice(
             service: service,
             pet: pet,
-            serviceVariant: selectedVariant,
-            price: price,
+            serviceVariant: defaultVariant, // Set first variant as default
+            price: defaultVariant.price,    // Set price from first variant
             bookingDate: _selectedDate.toIso8601String(),
             variants: variants,
           ));
@@ -225,7 +222,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://10.0.2.2:5050/api/ServiceVariant/service/$serviceId"),
+        Uri.parse("http://127.0.0.1:5050/api/ServiceVariant/service/$serviceId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -247,23 +244,34 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _updateBookingServiceData() {
-    final formattedData = _bookingChoices
-        .map((choice) => {
-              'service': {
-                'id': choice.service.id,
-                'name': choice.service.name,
-                // Add other necessary service fields
-              },
-              'pet': {
-                'id': choice.pet.id,
-                'name': choice.pet.name,
-                // Add other necessary pet fields
-              },
-              'serviceVariant': choice.serviceVariant?.toMap(),
-              'price': choice.serviceVariant?.price ?? 0.0,
-              'bookingDate': choice.bookingDate,
-            })
-        .toList();
+    print('=== BookingServiceForm: _updateBookingServiceData ===');
+    
+    final formattedData = _bookingChoices.map((choice) {
+      final serviceVariant = choice.serviceVariant;
+      print('Processing choice - Service: ${choice.service.name}, Variant: ${serviceVariant?.content}, Price: ${serviceVariant?.price}');
+      
+      final data = {
+        'service': {
+          'id': choice.service.id,
+          'name': choice.service.name,
+        },
+        'pet': {
+          'id': choice.pet.id,
+          'name': choice.pet.name,
+        },
+        'serviceVariant': {
+          'id': serviceVariant?.id ?? '',
+          'content': serviceVariant?.content ?? '',
+          'price': serviceVariant?.price ?? 0.0,
+        },
+        'price': serviceVariant?.price ?? 0.0,
+        'bookingDate': choice.bookingDate,
+      };
+      
+      print('Formatted data for ${choice.service.name}:');
+      print(json.encode(data));
+      return data;
+    }).toList();
 
     widget.onBookingServiceDataChange(formattedData);
   }
@@ -285,11 +293,33 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _onBookingChoiceUpdate() {
-    setState(() {
-      // Update local state if needed
-    });
+    print('=== BookingServiceForm: _onBookingChoiceUpdate ===');
+    print('Current Booking Choices:');
+    for (var choice in _bookingChoices) {
+      print('Service: ${choice.service.name}');
+      print('Variant: ${choice.serviceVariant?.content} - ${choice.serviceVariant?.price}');
+    }
+    
     _updateBookingServiceData();
     _calculateTotalPrice();
+  }
+
+  void _handleVariantChange(BookingChoice updatedChoice) {
+    print('=== BookingServiceForm: _handleVariantChange ===');
+    print('Updated Variant: ${updatedChoice.serviceVariant?.content} - ${updatedChoice.serviceVariant?.price}');
+    
+    setState(() {
+      final index = _bookingChoices.indexWhere(
+        (choice) => choice.service.id == updatedChoice.service.id && 
+                    choice.pet.id == updatedChoice.pet.id
+      );
+      
+      if (index != -1) {
+        _bookingChoices[index] = updatedChoice;
+      }
+    });
+    
+    _updateBookingServiceData();
   }
 
   @override
@@ -400,23 +430,23 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
 
           // Booking Choices List
           ..._bookingChoices.asMap().entries.map((entry) {
-            final index = entry.key;
             return Card(
               margin: const EdgeInsets.symmetric(vertical: 8),
               child: Column(
                 children: [
                   ListTile(
-                    title: Text("Service Booking #${index + 1}"),
+                    title: Text("Service Booking #${entry.key + 1}"),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () => _removeBookingChoice(index),
+                      onPressed: () => _removeBookingChoice(entry.key),
                     ),
                   ),
                   BookingServiceChoice(
                     cusId: widget.cusId ?? "",
-                    bookingChoices: [_bookingChoices[index]],
+                    bookingChoices: [_bookingChoices[entry.key]],
                     onRemove: (index) => _removeBookingChoice(index),
                     onUpdate: _onBookingChoiceUpdate,
+                    onVariantChange: _handleVariantChange,
                   ),
                 ],
               ),
