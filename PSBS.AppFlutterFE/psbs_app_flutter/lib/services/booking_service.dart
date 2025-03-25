@@ -15,7 +15,7 @@ class BookingService {
 
     try {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/Bookings/list/$accountId'), // API URL
+        Uri.parse('http://10.0.2.2:5050/Bookings/list/$accountId'), // API URL
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token', // Attach token
@@ -28,7 +28,8 @@ class BookingService {
           List<dynamic> data = jsonResponse['data'];
           return data.map((json) => Booking.fromJson(json)).toList();
         } else {
-          throw Exception('Failed to load bookings: ${jsonResponse['message']}');
+          throw Exception(
+              'Failed to load bookings: ${jsonResponse['message']}');
         }
       } else {
         throw Exception('Failed to load bookings: ${response.statusCode}');

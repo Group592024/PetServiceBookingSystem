@@ -38,13 +38,12 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     _fetchPets();
   }
 
-
   Future<void> _fetchServices() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Service'),
+        Uri.parse('http://10.0.2.2:5050/api/Service'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -69,7 +68,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
+        Uri.parse('http://10.0.2.2:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -200,7 +199,8 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
 
         if (variants.isNotEmpty) {
           selectedVariant = variants.first;
-          price = selectedVariant.price; // Set initial price based on selected variant
+          price = selectedVariant
+              .price; // Set initial price based on selected variant
         }
 
         setState(() {
@@ -225,7 +225,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/ServiceVariant/service/$serviceId"),
+        Uri.parse("http://10.0.2.2:5050/api/ServiceVariant/service/$serviceId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -247,22 +247,24 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _updateBookingServiceData() {
-    final formattedData = _bookingChoices.map((choice) => {
-      'service': {
-        'id': choice.service.id,
-        'name': choice.service.name,
-        // Add other necessary service fields
-      },
-      'pet': {
-        'id': choice.pet.id,
-        'name': choice.pet.name,
-        // Add other necessary pet fields
-      },
-      'serviceVariant': choice.serviceVariant?.toMap(),
-      'price': choice.serviceVariant?.price ?? 0.0,
-      'bookingDate': choice.bookingDate,
-    }).toList();
-    
+    final formattedData = _bookingChoices
+        .map((choice) => {
+              'service': {
+                'id': choice.service.id,
+                'name': choice.service.name,
+                // Add other necessary service fields
+              },
+              'pet': {
+                'id': choice.pet.id,
+                'name': choice.pet.name,
+                // Add other necessary pet fields
+              },
+              'serviceVariant': choice.serviceVariant?.toMap(),
+              'price': choice.serviceVariant?.price ?? 0.0,
+              'bookingDate': choice.bookingDate,
+            })
+        .toList();
+
     widget.onBookingServiceDataChange(formattedData);
   }
 
@@ -275,7 +277,8 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _calculateTotalPrice() {
-    final total = _bookingChoices.fold(0.0, (sum, choice) => sum + choice.price);
+    final total =
+        _bookingChoices.fold(0.0, (sum, choice) => sum + choice.price);
     setState(() {
       _totalPrice = total;
     });

@@ -35,51 +35,51 @@ class _CustomerServiceBookingDetailState
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      
+
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/Bookings/${widget.bookingId}'),
+        Uri.parse('http://10.0.2.2:5050/Bookings/${widget.bookingId}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
       final bookingData = json.decode(bookingResponse.body)['data'];
-      
+
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
+            'http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}'),
+            'http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
+            'http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch service items
       final serviceItemsResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/BookingServiceItems/${widget.bookingId}'),
+            'http://10.0.2.2:5050/api/BookingServiceItems/${widget.bookingId}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -93,11 +93,11 @@ class _CustomerServiceBookingDetailState
       for (var item in serviceItemsData) {
         String petName = "Unknown";
         String serviceName = "Unknown";
-        
+
         // Get pet name if petId exists
         if (item['petId'] != null) {
           final petResponse = await http.get(
-            Uri.parse('http://127.0.0.1:5050/api/Pet/${item['petId']}'),
+            Uri.parse('http://10.0.2.2:5050/api/Pet/${item['petId']}'),
             headers: {
               "Authorization": "Bearer $token",
               "Content-Type": "application/json",
@@ -108,29 +108,34 @@ class _CustomerServiceBookingDetailState
         }
 
         // Get service name from service variant
-        if (item['serviceVariantId'] != null && 
-            item['serviceVariantId'] != "00000000-0000-0000-0000-000000000000") {
+        if (item['serviceVariantId'] != null &&
+            item['serviceVariantId'] !=
+                "00000000-0000-0000-0000-000000000000") {
           try {
             final serviceVariantResponse = await http.get(
-              Uri.parse('http://127.0.0.1:5050/api/ServiceVariant/${item['serviceVariantId']}'),
+              Uri.parse(
+                  'http://10.0.2.2:5050/api/ServiceVariant/${item['serviceVariantId']}'),
               headers: {
                 "Authorization": "Bearer $token",
                 "Content-Type": "application/json",
               },
             );
-            
-            final variantData = json.decode(serviceVariantResponse.body)['data'];
+
+            final variantData =
+                json.decode(serviceVariantResponse.body)['data'];
             if (variantData != null && variantData['serviceId'] != null) {
               final serviceResponse = await http.get(
-                Uri.parse('http://127.0.0.1:5050/api/Service/${variantData['serviceId']}'),
+                Uri.parse(
+                    'http://10.0.2.2:5050/api/Service/${variantData['serviceId']}'),
                 headers: {
                   "Authorization": "Bearer $token",
                   "Content-Type": "application/json",
                 },
               );
               final serviceData = json.decode(serviceResponse.body)['data'];
-              serviceName = serviceData != null ? serviceData['serviceName'] : "Unknown";
-              
+              serviceName =
+                  serviceData != null ? serviceData['serviceName'] : "Unknown";
+
               // Include variant name if available
               if (variantData['variantName'] != null) {
                 serviceName += " (${variantData['variantName']})";
@@ -151,9 +156,14 @@ class _CustomerServiceBookingDetailState
 
       setState(() {
         booking = bookingData;
-        paymentTypeName = json.decode(paymentResponse.body)['data']['paymentTypeName'] ?? "Unknown";
-        accountName = json.decode(accountResponse.body)['accountName'] ?? "Unknown";
-        bookingStatusName = json.decode(statusResponse.body)['data']['bookingStatusName'] ?? "Unknown";
+        paymentTypeName = json.decode(paymentResponse.body)['data']
+                ['paymentTypeName'] ??
+            "Unknown";
+        accountName =
+            json.decode(accountResponse.body)['accountName'] ?? "Unknown";
+        bookingStatusName = json.decode(statusResponse.body)['data']
+                ['bookingStatusName'] ??
+            "Unknown";
         serviceItems = updatedServiceItems;
       });
     } catch (e) {
@@ -171,17 +181,17 @@ class _CustomerServiceBookingDetailState
   Future<void> cancelBooking() async {
     bool confirm = await showCancelConfirmationDialog();
     if (!confirm) return;
-    
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final response = await http.put(
-      Uri.parse('http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}'),
+      Uri.parse('http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}'),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
     );
-    
+
     final responseData = json.decode(response.body);
     if (responseData['flag']) {
       setState(() {
@@ -214,97 +224,100 @@ class _CustomerServiceBookingDetailState
 
   Future<bool> showCancelConfirmationDialog() async {
     return await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.all(20),
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.warning_amber_rounded,
-                    color: Colors.orange, size: 60),
-                SizedBox(height: 16),
-                Text(
-                  "Confirm Cancellation",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "Are you sure you want to cancel this booking?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        backgroundColor: Colors.grey[200],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        "No",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        "Yes, Cancel",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.all(20),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    ) ?? false;
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded,
+                        color: Colors.orange, size: 60),
+                    SizedBox(height: 16),
+                    Text(
+                      "Confirm Cancellation",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      "Are you sure you want to cancel this booking?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            backgroundColor: Colors.grey[200],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "No",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: Text(
+                            "Yes, Cancel",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ) ??
+        false;
   }
 
   @override
@@ -353,7 +366,8 @@ class _CustomerServiceBookingDetailState
                         onPressed: fetchBookingDetails,
                         child: Text("Retry"),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           backgroundColor: Colors.blue.shade700,
                         ),
                       ),
@@ -387,7 +401,8 @@ class _CustomerServiceBookingDetailState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "Booking Summary",
@@ -433,8 +448,9 @@ class _CustomerServiceBookingDetailState
                               _buildDetailRow(
                                 Icons.calendar_today,
                                 "Booking Date:",
-                                DateFormat('dd MMM yyyy').format(
-                                    DateTime.parse(booking?['bookingDate'] ?? DateTime.now().toString())),
+                                DateFormat('dd MMM yyyy').format(DateTime.parse(
+                                    booking?['bookingDate'] ??
+                                        DateTime.now().toString())),
                               ),
                               _buildDetailRow(
                                 Icons.payment,
@@ -519,7 +535,8 @@ class _CustomerServiceBookingDetailState
                                       ),
                                     ),
                                     subtitle: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(height: 6),
                                         Text(
@@ -554,7 +571,8 @@ class _CustomerServiceBookingDetailState
                                   SizedBox(width: 10),
                                   Text(
                                     "No service items found for this booking.",
-                                    style: TextStyle(color: Colors.grey.shade700),
+                                    style:
+                                        TextStyle(color: Colors.grey.shade700),
                                   ),
                                 ],
                               ),
@@ -604,7 +622,8 @@ class _CustomerServiceBookingDetailState
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String title, String value, {bool? isPaid}) {
+  Widget _buildDetailRow(IconData icon, String title, String value,
+      {bool? isPaid}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -634,7 +653,9 @@ class _CustomerServiceBookingDetailState
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: isPaid != null
-                        ? isPaid ? Colors.green.shade700 : Colors.red.shade700
+                        ? isPaid
+                            ? Colors.green.shade700
+                            : Colors.red.shade700
                         : Colors.black87,
                   ),
                 ),

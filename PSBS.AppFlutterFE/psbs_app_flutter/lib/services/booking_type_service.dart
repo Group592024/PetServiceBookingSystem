@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class BookingTypeService {
   Future<String?> fetchBookingType(String bookingTypeId) async {
-    final String url = 'http://127.0.0.1:5050/api/BookingType/$bookingTypeId';
+    final String url = 'http://10.0.2.2:5050/api/BookingType/$bookingTypeId';
 
     try {
       final response = await http.get(Uri.parse(url));

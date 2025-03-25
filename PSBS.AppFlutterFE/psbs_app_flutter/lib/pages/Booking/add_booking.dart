@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import 'booking_room_form.dart';
 import 'booking_service_form.dart';
 import 'package:http/http.dart' as http;
@@ -12,6 +13,12 @@ class AddBookingPage extends StatefulWidget {
 }
 
 class _AddBookingPageState extends State<AddBookingPage> {
+  // Network configuration
+  static const String apiBaseUrl = 'http://10.0.2.2:5050';
+  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+  static const String paymentBaseUrl = 'https://10.66.183.143:5201';
+
+  // Rest of your existing variables
   int _currentStep = 0;
   String? _cusId;
   List<Map<String, dynamic>> _paymentTypes = [];
@@ -36,9 +43,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
   Future<void> _loadCustomerId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _cusId = prefs.getString('accountId');
-    });
+    if (mounted) {
+      setState(() {
+        _cusId = prefs.getString('accountId');
+      });
+    }
   }
 
   Future<void> _fetchPaymentTypes() async {
@@ -46,14 +55,14 @@ class _AddBookingPageState extends State<AddBookingPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/PaymentType'),
+        Uri.parse('$apiBaseUrl/api/PaymentType'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         final data = json.decode(response.body);
         setState(() {
           _paymentTypes = List<Map<String, dynamic>>.from(data['data']);
@@ -69,14 +78,14 @@ class _AddBookingPageState extends State<AddBookingPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Voucher/valid-voucher'),
+        Uri.parse('$apiBaseUrl/api/Voucher/valid-voucher'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         final data = json.decode(response.body);
         setState(() {
           _vouchers = List<Map<String, dynamic>>.from(data['data']);
@@ -88,6 +97,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   void _updateBookingRoomData(List<Map<String, dynamic>> data) {
+    if (!mounted) return;
     setState(() {
       _bookingRoomData = data;
       _calculateTotalPrice();
@@ -103,10 +113,12 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   void _updateBookingServiceData(List<Map<String, dynamic>> data) {
-    setState(() {
-      _bookingServiceData = data;
-      _calculateTotalPrice();
-    });
+    if (mounted) {
+      setState(() {
+        _bookingServiceData = data;
+        _calculateTotalPrice();
+      });
+    }
   }
 
   void _calculateTotalPrice() {
@@ -119,8 +131,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
       });
     } else if (_serviceType == "Service") {
       total = _bookingServiceData.fold(0.0, (sum, service) {
-        if (service["serviceVariant"] != null && service["serviceVariant"]["price"] != null) {
-          double price = double.tryParse(service["serviceVariant"]["price"].toString()) ?? 0.0;
+        if (service["serviceVariant"] != null &&
+            service["serviceVariant"]["price"] != null) {
+          double price =
+              double.tryParse(service["serviceVariant"]["price"].toString()) ??
+                  0.0;
           return sum + price;
         }
         return sum;
@@ -132,16 +147,20 @@ class _AddBookingPageState extends State<AddBookingPage> {
           (v) => v['voucherId'] == _selectedVoucher,
           orElse: () => {});
       if (voucher.isNotEmpty) {
-        double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
-        double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+        double discount =
+            double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+        double maxDiscount =
+            double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
         double discountAmount = (total * discount / 100).clamp(0, maxDiscount);
         total -= discountAmount;
       }
     }
 
-    setState(() {
-      _totalPrice = total;
-    });
+    if (mounted) {
+      setState(() {
+        _totalPrice = total;
+      });
+    }
   }
 
   Future<void> _fetchRoomName(String roomId) async {
@@ -152,23 +171,25 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Room/$roomId'),
+        Uri.parse('$apiBaseUrl/api/Room/$roomId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         final data = json.decode(response.body);
         setState(() {
           _roomNames[roomId] = data['data']['roomName'] ?? 'Unknown Room';
         });
       }
     } catch (e) {
-      setState(() {
-        _roomNames[roomId] = 'Unknown Room';
-      });
+      if (mounted) {
+        setState(() {
+          _roomNames[roomId] = 'Unknown Room';
+        });
+      }
     }
   }
 
@@ -180,38 +201,44 @@ class _AddBookingPageState extends State<AddBookingPage> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/pet/$petId'),
+        Uri.parse('$apiBaseUrl/api/pet/$petId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 && mounted) {
         final data = json.decode(response.body);
         setState(() {
           _petNames[petId] = data['data']['petName'] ?? 'Unknown Pet';
         });
       }
     } catch (e) {
-      setState(() {
-        _petNames[petId] = 'Unknown Pet';
-      });
+      if (mounted) {
+        setState(() {
+          _petNames[petId] = 'Unknown Pet';
+        });
+      }
     }
   }
 
   Future<bool> _launchUrl(String url) async {
-    if (await canLaunch(url)) {
-      await launch(
-        url,
-        forceSafariVC: false,
-        forceWebView: false,
-      );
-      return true;
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Could not launch payment page')),
-      );
+    try {
+      print('[DEBUG] Attempting to launch URL: $url');
+
+      if (await canLaunchUrl(Uri.parse(url))) {
+        final result = await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        );
+        print('[DEBUG] launchUrl result: $result');
+        return result;
+      }
+      print('[ERROR] URL cannot be handled: $url');
+      return false;
+    } catch (e, stackTrace) {
+      print('[ERROR] Exception in _launchUrl: $e\n$stackTrace');
       return false;
     }
   }
@@ -220,9 +247,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      
+
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/PaymentType/$paymentTypeId'),
+        Uri.parse('$apiBaseUrl/api/PaymentType/$paymentTypeId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -243,16 +270,17 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   Future<void> _sendRoomBookingRequest() async {
-    setState(() => _isProcessing = true);
+    if (mounted) setState(() => _isProcessing = true);
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       String? accountId = prefs.getString('accountId');
 
-      String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
+      String? paymentTypeName =
+          await _getPaymentTypeName(_selectedPaymentType ?? '');
 
       final customerResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+        Uri.parse('$apiBaseUrl/api/Account/$accountId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -292,7 +320,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       };
 
       final response = await http.post(
-        Uri.parse('http://localhost:5115/Bookings/room'),
+        Uri.parse('$bookingBaseUrl/Bookings/room'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -302,48 +330,69 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
-        
+
         if (paymentTypeName == "VNPay") {
           final bookingCode = result['data'].toString().trim();
           final amount = _totalPrice.toInt();
-          
-          final vnpayUrl = 'https://127.0.0.1:5201/Bookings/CreatePaymentUrl?'
-            'moneyToPay=$amount&'
-            'description=$bookingCode&'
-            'returnUrl=https://127.0.0.1:5201/Vnpay/Callback';
-          
+
+          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+              'moneyToPay=$amount&'
+              'description=$bookingCode&'
+              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
+
           if (!await _launchUrl(vnpayUrl)) {
-            Navigator.pop(context);
+            if (mounted) {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Payment')),
+                    body: WebViewWidget(
+                      // Changed from WebView to WebViewWidget
+                      controller: WebViewController()
+                        ..loadRequest(Uri.parse(vnpayUrl))
+                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
+                    ),
+                  ),
+                ),
+              );
+            }
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Room booking created successfully')),
-          );
-          Navigator.pop(context);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Room booking created successfully')),
+            );
+            Navigator.pop(context);
+          }
         }
       } else {
         throw Exception('Failed to create room booking: ${response.body}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating room booking: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating room booking: $e')),
+        );
+      }
     } finally {
-      setState(() => _isProcessing = false);
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
   Future<void> _sendServiceBookingRequest() async {
-    setState(() => _isProcessing = true);
+    if (mounted) setState(() => _isProcessing = true);
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
       String? accountId = prefs.getString('accountId');
 
-      String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
+      String? paymentTypeName =
+          await _getPaymentTypeName(_selectedPaymentType ?? '');
 
       final customerResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+        Uri.parse('$apiBaseUrl/api/Account/$accountId'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -379,13 +428,13 @@ class _AddBookingPageState extends State<AddBookingPage> {
         "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
         "totalPrice": _totalPrice,
         "discountedPrice": _totalPrice,
-        "bookingServicesDate": _bookingServiceData.isNotEmpty 
+        "bookingServicesDate": _bookingServiceData.isNotEmpty
             ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
             : DateTime.now().toIso8601String().substring(0, 16)
       };
 
       final response = await http.post(
-        Uri.parse('http://localhost:5115/Bookings/service'),
+        Uri.parse('$bookingBaseUrl/Bookings/service'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -395,34 +444,53 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
-        
+
         if (paymentTypeName == "VNPay") {
           final bookingCode = result['data'].toString().trim();
           final amount = _totalPrice.toInt();
-          
-          final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
-            'moneyToPay=$amount&'
-            'description=$bookingCode&'
-            'returnUrl=https://localhost:5201/Vnpay/Callback';
-          
+
+          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+              'moneyToPay=$amount&'
+              'description=$bookingCode&'
+              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
+
           if (!await _launchUrl(vnpayUrl)) {
-            Navigator.pop(context);
+            if (mounted) {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Scaffold(
+                    appBar: AppBar(title: const Text('Payment')),
+                    body: WebViewWidget(
+                      controller: WebViewController()
+                        ..loadRequest(Uri.parse(vnpayUrl))
+                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
+                    ),
+                  ),
+                ),
+              );
+            }
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Service booking created successfully')),
-          );
-          Navigator.pop(context);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                  content: Text('Service booking created successfully')),
+            );
+            Navigator.pop(context);
+          }
         }
       } else {
         throw Exception('Failed to create service booking: ${response.body}');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating service booking: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error creating service booking: $e')),
+        );
+      }
     } finally {
-      setState(() => _isProcessing = false);
+      if (mounted) setState(() => _isProcessing = false);
     }
   }
 
@@ -658,7 +726,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
                   onPressed: _isProcessing ? null : details.onStepContinue,
                   child: _isProcessing
                       ? CircularProgressIndicator(color: Colors.white)
-                      : Text(_currentStep == _getSteps().length - 1 ? 'Submit' : 'Next'),
+                      : Text(_currentStep == _getSteps().length - 1
+                          ? 'Submit'
+                          : 'Next'),
                 ),
               ],
             ),

@@ -35,10 +35,10 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-      
+
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/Bookings/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -49,36 +49,36 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
+            "http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}"),
+            "http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
+            "http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
-      
+
       // Fetch room history
       final historyResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/RoomHistories/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -89,9 +89,14 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       setState(() {
         booking = bookingData;
-        paymentTypeName = json.decode(paymentResponse.body)['data']['paymentTypeName'] ?? "Unknown";
-        accountName = json.decode(accountResponse.body)['accountName'] ?? "Unknown";
-        bookingStatusName = json.decode(statusResponse.body)['data']['bookingStatusName'] ?? "Unknown";
+        paymentTypeName = json.decode(paymentResponse.body)['data']
+                ['paymentTypeName'] ??
+            "Unknown";
+        accountName =
+            json.decode(accountResponse.body)['accountName'] ?? "Unknown";
+        bookingStatusName = json.decode(statusResponse.body)['data']
+                ['bookingStatusName'] ??
+            "Unknown";
         roomHistory = historyData;
       });
 
@@ -119,7 +124,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token');
         final petResponse = await http.get(
-          Uri.parse("http://127.0.0.1:5050/api/pet/${history['petId']}"),
+          Uri.parse("http://10.0.2.2:5050/api/pet/${history['petId']}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -142,14 +147,15 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final roomResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Room/$roomId"),
+        Uri.parse("http://10.0.2.2:5050/api/Room/$roomId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
       setState(() {
-        roomName = json.decode(roomResponse.body)['data']['roomName'] ?? "Unknown";
+        roomName =
+            json.decode(roomResponse.body)['data']['roomName'] ?? "Unknown";
       });
     } catch (error) {
       print("Error fetching room name: $error");
@@ -164,7 +170,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse("http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -175,7 +181,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       if (responseData['flag']) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(responseData['message'] ?? "Booking has been cancelled."),
+            content:
+                Text(responseData['message'] ?? "Booking has been cancelled."),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -190,7 +197,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(responseData['message'] ?? "The booking can't be cancelled."),
+            content: Text(
+                responseData['message'] ?? "The booking can't be cancelled."),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -217,96 +225,99 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
   Future<bool> showCancelConfirmationDialog() async {
     return await showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return Dialog(
-          backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.all(20),
-          child: AnimatedContainer(
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            padding: EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 10,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.hotel, color: Colors.orange, size: 60),
-                SizedBox(height: 16),
-                Text(
-                  "Cancel Room Booking?",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "This will cancel all associated room reservations. Are you sure?",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                  ),
-                ),
-                SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        backgroundColor: Colors.grey[200],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      child: Text(
-                        "No",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        backgroundColor: Colors.red,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        elevation: 2,
-                      ),
-                      child: Text(
-                        "Yes, Cancel",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                        ),
-                      ),
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.all(20),
+              child: AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 10,
+                      spreadRadius: 2,
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-        );
-      },
-    ) ?? false;
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.hotel, color: Colors.orange, size: 60),
+                    SizedBox(height: 16),
+                    Text(
+                      "Cancel Room Booking?",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    Text(
+                      "This will cancel all associated room reservations. Are you sure?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            backgroundColor: Colors.grey[200],
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "No",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            backgroundColor: Colors.red,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 2,
+                          ),
+                          child: Text(
+                            "Yes, Cancel",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ) ??
+        false;
   }
 
   String formatDate(String dateString) {
@@ -364,7 +375,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                         onPressed: fetchBookingDetails,
                         child: Text("Retry"),
                         style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
                           backgroundColor: Colors.blue.shade700,
                         ),
                       ),
@@ -398,7 +410,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "Booking Summary",
@@ -444,7 +457,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                               _buildDetailRow(
                                 Icons.calendar_today,
                                 "Booking Date:",
-                                formatDate(booking?['bookingDate'] ?? DateTime.now().toString()),
+                                formatDate(booking?['bookingDate'] ??
+                                    DateTime.now().toString()),
                               ),
                               _buildDetailRow(
                                 Icons.payment,
@@ -509,11 +523,12 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                                   child: Padding(
                                     padding: EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Row(
                                           children: [
-                                            Icon(Icons.king_bed, 
+                                            Icon(Icons.king_bed,
                                                 color: Colors.blue.shade700,
                                                 size: 24),
                                             SizedBox(width: 8),
@@ -535,7 +550,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                                         _buildRoomDetailRow(
                                           Icons.login,
                                           "Check-in:",
-                                          formatDate(history['bookingStartDate']),
+                                          formatDate(
+                                              history['bookingStartDate']),
                                         ),
                                         _buildRoomDetailRow(
                                           Icons.logout,
@@ -546,7 +562,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                                         Row(
                                           children: [
                                             Icon(Icons.circle,
-                                                color: _getStatusColor(history['status']),
+                                                color: _getStatusColor(
+                                                    history['status']),
                                                 size: 16),
                                             SizedBox(width: 8),
                                             Text(
@@ -575,7 +592,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                                   SizedBox(width: 10),
                                   Text(
                                     "No room reservations found for this booking.",
-                                    style: TextStyle(color: Colors.grey.shade700),
+                                    style:
+                                        TextStyle(color: Colors.grey.shade700),
                                   ),
                                 ],
                               ),
@@ -625,7 +643,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String title, String value, {bool? isPaid}) {
+  Widget _buildDetailRow(IconData icon, String title, String value,
+      {bool? isPaid}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -655,7 +674,9 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: isPaid != null
-                        ? isPaid ? Colors.green.shade700 : Colors.red.shade700
+                        ? isPaid
+                            ? Colors.green.shade700
+                            : Colors.red.shade700
                         : Colors.black87,
                   ),
                 ),
