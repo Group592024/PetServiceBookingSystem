@@ -194,13 +194,13 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       for (final service in servicesToBook) {
         final variants = await _fetchServiceVariants(service.id);
 
-        // Automatically select first variant if available
+        // Set default variant and price
         ServiceVariant? selectedVariant;
         double price = 0.0;
 
         if (variants.isNotEmpty) {
           selectedVariant = variants.first;
-          price = variants.first.price;
+          price = selectedVariant.price; // Set initial price based on selected variant
         }
 
         setState(() {
@@ -247,8 +247,22 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _updateBookingServiceData() {
-    final formattedData =
-        _bookingChoices.map((choice) => choice.toMap()).toList();
+    final formattedData = _bookingChoices.map((choice) => {
+      'service': {
+        'id': choice.service.id,
+        'name': choice.service.name,
+        // Add other necessary service fields
+      },
+      'pet': {
+        'id': choice.pet.id,
+        'name': choice.pet.name,
+        // Add other necessary pet fields
+      },
+      'serviceVariant': choice.serviceVariant?.toMap(),
+      'price': choice.serviceVariant?.price ?? 0.0,
+      'bookingDate': choice.bookingDate,
+    }).toList();
+    
     widget.onBookingServiceDataChange(formattedData);
   }
 
@@ -261,11 +275,18 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   }
 
   void _calculateTotalPrice() {
-    final total =
-        _bookingChoices.fold(0.0, (sum, choice) => sum + choice.price);
+    final total = _bookingChoices.fold(0.0, (sum, choice) => sum + choice.price);
     setState(() {
       _totalPrice = total;
     });
+  }
+
+  void _onBookingChoiceUpdate() {
+    setState(() {
+      // Update local state if needed
+    });
+    _updateBookingServiceData();
+    _calculateTotalPrice();
   }
 
   @override
@@ -392,10 +413,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
                     cusId: widget.cusId ?? "",
                     bookingChoices: [_bookingChoices[index]],
                     onRemove: (index) => _removeBookingChoice(index),
-                    onUpdate: () {
-                      _updateBookingServiceData();
-                      _calculateTotalPrice();
-                    },
+                    onUpdate: _onBookingChoiceUpdate,
                   ),
                 ],
               ),

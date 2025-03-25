@@ -24,6 +24,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
   double _totalPrice = 0.0;
   Map<String, String> _roomNames = {};
   Map<String, String> _petNames = {};
+  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -38,7 +39,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
     setState(() {
       _cusId = prefs.getString('accountId');
     });
-    print(_cusId);
   }
 
   Future<void> _fetchPaymentTypes() async {
@@ -58,8 +58,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
         setState(() {
           _paymentTypes = List<Map<String, dynamic>>.from(data['data']);
         });
-      } else {
-        print("Failed to load payment types");
       }
     } catch (e) {
       print("Error fetching payment types: $e");
@@ -70,7 +68,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-      print("Token: $token");
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/Voucher/valid-voucher'),
         headers: {
@@ -84,8 +81,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
         setState(() {
           _vouchers = List<Map<String, dynamic>>.from(data['data']);
         });
-      } else {
-        print("Failed to load vouchers");
       }
     } catch (e) {
       print("Error fetching vouchers: $e");
@@ -97,7 +92,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
       _bookingRoomData = data;
       _calculateTotalPrice();
     });
-    // Fetch room and pet names for each booking item
     for (var room in data) {
       if (room.containsKey('room')) {
         _fetchRoomName(room['room'].toString());
@@ -116,7 +110,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   void _calculateTotalPrice() {
-    double total = 0.0; // Initialize total
+    double total = 0.0;
 
     if (_serviceType == "Room") {
       total = _bookingRoomData.fold(0.0, (sum, room) {
@@ -125,19 +119,12 @@ class _AddBookingPageState extends State<AddBookingPage> {
       });
     } else if (_serviceType == "Service") {
       total = _bookingServiceData.fold(0.0, (sum, service) {
-        // Check if serviceVariant and price are not null
-        if (service["serviceVariant"] != null &&
-            service["serviceVariant"]["price"] != null) {
-          double price =
-              double.tryParse(service["serviceVariant"]["price"].toString()) ??
-                  0.0;
+        if (service["serviceVariant"] != null && service["serviceVariant"]["price"] != null) {
+          double price = double.tryParse(service["serviceVariant"]["price"].toString()) ?? 0.0;
           return sum + price;
-        } else {
-          return sum;
         }
+        return sum;
       });
-    } else {
-      total = 0.0;
     }
 
     if (_selectedVoucher != null) {
@@ -145,10 +132,8 @@ class _AddBookingPageState extends State<AddBookingPage> {
           (v) => v['voucherId'] == _selectedVoucher,
           orElse: () => {});
       if (voucher.isNotEmpty) {
-        double discount =
-            double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
-        double maxDiscount =
-            double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+        double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+        double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
         double discountAmount = (total * discount / 100).clamp(0, maxDiscount);
         total -= discountAmount;
       }
@@ -160,7 +145,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   Future<void> _fetchRoomName(String roomId) async {
-    if (_roomNames.containsKey(roomId)) return; // Prevent duplicate fetch
+    if (_roomNames.containsKey(roomId)) return;
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -176,18 +161,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        String roomName = data['data']['roomName'] ?? 'Unknown Room';
-
         setState(() {
-          _roomNames[roomId] = roomName;
-        });
-      } else {
-        setState(() {
-          _roomNames[roomId] = 'Unknown Room';
+          _roomNames[roomId] = data['data']['roomName'] ?? 'Unknown Room';
         });
       }
     } catch (e) {
-      print("Error fetching room: $e");
       setState(() {
         _roomNames[roomId] = 'Unknown Room';
       });
@@ -195,7 +173,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   Future<void> _fetchPetName(String petId) async {
-    if (_petNames.containsKey(petId)) return; // Prevent duplicate fetch
+    if (_petNames.containsKey(petId)) return;
 
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -211,54 +189,38 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        String petName = data['data']['petName'] ?? 'Unknown Pet';
-
         setState(() {
-          _petNames[petId] = petName;
-        });
-      } else {
-        setState(() {
-          _petNames[petId] = 'Unknown Pet';
+          _petNames[petId] = data['data']['petName'] ?? 'Unknown Pet';
         });
       }
     } catch (e) {
-      print("Error fetching pet: $e");
       setState(() {
         _petNames[petId] = 'Unknown Pet';
       });
     }
   }
 
-  Future<String> _fetchVoucherName(String voucherId) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-
-      final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Voucher/customer/$voucherId'),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
+  Future<bool> _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(
+        url,
+        forceSafariVC: false,
+        forceWebView: false,
       );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['data']['voucherName'] ?? 'No Voucher';
-      } else {
-        return 'No Voucher';
-      }
-    } catch (e) {
-      print("Error fetching voucher: $e");
-      return 'No Voucher';
+      return true;
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch payment page')),
+      );
+      return false;
     }
   }
 
-  Future<String> _fetchPaymentTypeName(String paymentTypeId) async {
+  Future<String?> _getPaymentTypeName(String paymentTypeId) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
-
+      
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/PaymentType/$paymentTypeId'),
         headers: {
@@ -269,13 +231,198 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        return data['data']['paymentTypeName'] ?? 'Unknown Payment Type';
-      } else {
-        return 'Unknown Payment Type';
+        if (data['flag']) {
+          return data['data']['paymentTypeName'];
+        }
       }
+      return null;
     } catch (e) {
       print("Error fetching payment type: $e");
-      return 'Unknown Payment Type';
+      return null;
+    }
+  }
+
+  Future<void> _sendRoomBookingRequest() async {
+    setState(() => _isProcessing = true);
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      String? accountId = prefs.getString('accountId');
+
+      String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
+
+      final customerResponse = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (customerResponse.statusCode != 200) {
+        throw Exception('Failed to fetch customer information');
+      }
+
+      final customerData = json.decode(customerResponse.body)['data'];
+
+      Map<String, dynamic> requestData = {
+        'bookingRooms': _bookingRoomData
+            .map((room) => {
+                  'room': room['room'],
+                  'pet': room['pet'],
+                  'start': room['start'],
+                  'end': room['end'],
+                  'price': room['price'],
+                  'camera': room['camera'],
+                  'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
+                })
+            .toList(),
+        'customer': {
+          'cusId': accountId,
+          'name': customerData['accountName'],
+          'address': customerData['accountAddress'],
+          'phone': customerData['accountPhoneNumber'],
+          'note': '',
+          'paymentMethod': _selectedPaymentType
+        },
+        'selectedOption': 'Room',
+        'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
+        'totalPrice': _totalPrice,
+        'discountedPrice': _totalPrice
+      };
+
+      final response = await http.post(
+        Uri.parse('http://localhost:5115/Bookings/room'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        
+        if (paymentTypeName == "VNPay") {
+          final bookingCode = result['data'].toString().trim();
+          final amount = _totalPrice.toInt();
+          
+          final vnpayUrl = 'https://127.0.0.1:5201/Bookings/CreatePaymentUrl?'
+            'moneyToPay=$amount&'
+            'description=$bookingCode&'
+            'returnUrl=https://127.0.0.1:5201/Vnpay/Callback';
+          
+          if (!await _launchUrl(vnpayUrl)) {
+            Navigator.pop(context);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Room booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        throw Exception('Failed to create room booking: ${response.body}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating room booking: $e')),
+      );
+    } finally {
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  Future<void> _sendServiceBookingRequest() async {
+    setState(() => _isProcessing = true);
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      String? accountId = prefs.getString('accountId');
+
+      String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
+
+      final customerResponse = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (customerResponse.statusCode != 200) {
+        throw Exception('Failed to fetch customer information');
+      }
+
+      final customerData = json.decode(customerResponse.body)['data'];
+
+      List<Map<String, dynamic>> services = _bookingServiceData.map((service) {
+        return {
+          "service": service["service"]["id"].toString(),
+          "pet": service["pet"]["id"].toString(),
+          "price": service["price"] ?? 0.0,
+          "serviceVariant": service["serviceVariant"]["id"].toString(),
+        };
+      }).toList();
+
+      Map<String, dynamic> requestData = {
+        "services": services,
+        "customer": {
+          "cusId": accountId,
+          "name": customerData['accountName'],
+          "address": customerData['accountAddress'],
+          "phone": customerData['accountPhoneNumber'],
+          "note": '',
+          "paymentMethod": _selectedPaymentType
+        },
+        "selectedOption": "Service",
+        "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
+        "totalPrice": _totalPrice,
+        "discountedPrice": _totalPrice,
+        "bookingServicesDate": _bookingServiceData.isNotEmpty 
+            ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
+            : DateTime.now().toIso8601String().substring(0, 16)
+      };
+
+      final response = await http.post(
+        Uri.parse('http://localhost:5115/Bookings/service'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestData),
+      );
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        
+        if (paymentTypeName == "VNPay") {
+          final bookingCode = result['data'].toString().trim();
+          final amount = _totalPrice.toInt();
+          
+          final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
+            'moneyToPay=$amount&'
+            'description=$bookingCode&'
+            'returnUrl=https://localhost:5201/Vnpay/Callback';
+          
+          if (!await _launchUrl(vnpayUrl)) {
+            Navigator.pop(context);
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Service booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
+      } else {
+        throw Exception('Failed to create service booking: ${response.body}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error creating service booking: $e')),
+      );
+    } finally {
+      setState(() => _isProcessing = false);
     }
   }
 
@@ -410,7 +557,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
                         style: TextStyle(fontSize: 14),
                       ),
                       Text(
-                        'Variant: ${service["serviceVariant"]?["price"] ?? "No Price"}',
+                        'Price: ${service["serviceVariant"]?["price"] ?? "No Price"} VND',
                         style: TextStyle(fontSize: 14),
                       ),
                       Text(
@@ -461,10 +608,16 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   void _onStepContinue() {
+    if (_currentStep == 0 && _serviceType.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a booking type')),
+      );
+      return;
+    }
+
     if (_currentStep < _getSteps().length - 1) {
       setState(() => _currentStep += 1);
     } else {
-      // Send the appropriate booking request based on service type
       if (_serviceType == "Room") {
         _sendRoomBookingRequest();
       } else if (_serviceType == "Service") {
@@ -472,229 +625,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
       }
     }
   }
-  Future<String?> _getPaymentTypeName(String paymentTypeId) async {
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    
-    final response = await http.get(
-      Uri.parse('http://127.0.0.1:5050/api/PaymentType/$paymentTypeId'),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      if (data['flag']) {
-        return data['data']['paymentTypeName'];
-      }
-    }
-    return null;
-  } catch (e) {
-    print("Error fetching payment type: $e");
-    return null;
-  }
-}
-
-  Future<void> _sendRoomBookingRequest() async {
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    String? accountId = prefs.getString('accountId');
-
-    // Get payment type name
-    String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
-
-    // Fetch customer information
-    final customerResponse = await http.get(
-      Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
-
-    if (customerResponse.statusCode != 200) {
-      throw Exception('Failed to fetch customer information');
-    }
-
-    final customerData = json.decode(customerResponse.body)['data'];
-
-    // Format the request data
-    Map<String, dynamic> requestData = {
-      'bookingRooms': _bookingRoomData
-          .map((room) => {
-                'room': room['room'],
-                'pet': room['pet'],
-                'start': room['start'],
-                'end': room['end'],
-                'price': room['price'],
-                'camera': room['camera'],
-                'petName': _petNames[room['pet'].toString()] ?? 'Unknown Pet'
-              })
-          .toList(),
-      'customer': {
-        'cusId': accountId,
-        'name': customerData['accountName'],
-        'address': customerData['accountAddress'],
-        'phone': customerData['accountPhoneNumber'],
-        'note': '',
-        'paymentMethod': _selectedPaymentType
-      },
-      'selectedOption': 'Room',
-      'voucherId': _selectedVoucher ?? '00000000-0000-0000-0000-000000000000',
-      'totalPrice': _totalPrice,
-      'discountedPrice': _totalPrice
-    };
-
-    final response = await http.post(
-      Uri.parse('http://localhost:5115/Bookings/room'),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode(requestData),
-    );
-
-    if (response.statusCode == 200) {
-      final result = json.decode(response.body);
-      
-      if (paymentTypeName == "VNPay") {
-        // Handle VNPay payment
-        final bookingCode = result['data'].toString().trim();
-        final amount = _totalPrice.toInt();
-        
-        final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
-          'moneyToPay=$amount&'
-          'description=$bookingCode&'
-          'returnUrl=https://localhost:5201/Vnpay/Callback';
-        
-        // Open VNPay URL in browser
-        if (await canLaunch(vnpayUrl)) {
-          await launch(vnpayUrl);
-        } else {
-          throw Exception('Could not launch VNPay');
-        }
-      } else {
-        // Regular payment success
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Room booking created successfully')),
-        );
-        Navigator.pop(context);
-      }
-    } else {
-      throw Exception('Failed to create room booking: ${response.body}');
-    }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error creating room booking: $e')),
-    );
-  }
-}
-
-  Future<void> _sendServiceBookingRequest() async {
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    String? accountId = prefs.getString('accountId');
-
-    // Get payment type name
-    String? paymentTypeName = await _getPaymentTypeName(_selectedPaymentType ?? '');
-
-    // Fetch customer information
-    final customerResponse = await http.get(
-      Uri.parse('http://127.0.0.1:5050/api/Account/$accountId'),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-    );
-
-    if (customerResponse.statusCode != 200) {
-      throw Exception('Failed to fetch customer information');
-    }
-
-    final customerData = json.decode(customerResponse.body)['data'];
-
-    // Format the booking services data
-    List<Map<String, dynamic>> services = _bookingServiceData.map((service) {
-      return {
-        "service": service["service"]["id"].toString(),
-        "pet": service["pet"]["id"].toString(),
-        "price": service["price"] ?? 0.0,
-        "serviceVariant": service["serviceVariant"]["id"].toString(),
-      };
-    }).toList();
-
-    // Format the request data
-    Map<String, dynamic> requestData = {
-      "services": services,
-      "customer": {
-        "cusId": accountId,
-        "name": customerData['accountName'],
-        "address": customerData['accountAddress'],
-        "phone": customerData['accountPhoneNumber'],
-        "note": '',
-        "paymentMethod": _selectedPaymentType
-      },
-      "selectedOption": "Service",
-      "voucherId": _selectedVoucher ?? "00000000-0000-0000-0000-000000000000",
-      "totalPrice": _totalPrice,
-      "discountedPrice": _totalPrice,
-      "bookingServicesDate": _bookingServiceData.isNotEmpty 
-          ? _bookingServiceData[0]["bookingDate"].toString().substring(0, 16)
-          : DateTime.now().toIso8601String().substring(0, 16)
-    };
-
-    print("Sending service booking data: ${jsonEncode(requestData)}");
-
-    final response = await http.post(
-      Uri.parse('http://localhost:5115/Bookings/service'),
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode(requestData),
-    );
-
-    if (response.statusCode == 200) {
-      final result = json.decode(response.body);
-      
-      if (paymentTypeName == "VNPay") {
-        // Handle VNPay payment
-        final bookingCode = result['data'].toString().trim();
-        final amount = _totalPrice.toInt();
-        
-        final vnpayUrl = 'https://localhost:5201/Bookings/CreatePaymentUrl?'
-          'moneyToPay=$amount&'
-          'description=$bookingCode&'
-          'returnUrl=https://localhost:5201/Vnpay/Callback';
-
-        if (await canLaunch(vnpayUrl)) {
-          await launch(vnpayUrl);
-        } else {
-          throw Exception('Could not launch VNPay');
-        }
-      } else {
-        // Regular payment success
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Service booking created successfully')),
-        );
-        Navigator.pop(context);
-      }
-    } else {
-      print("Response error: ${response.body}");
-      throw Exception('Failed to create service booking: ${response.body}');
-    }
-  } catch (e) {
-    print("Error in _sendServiceBookingRequest: $e");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error creating service booking: $e')),
-    );
-  }
-}
   void _onStepCancel() {
     if (_currentStep > 0) {
       setState(() => _currentStep -= 1);
@@ -710,8 +641,29 @@ class _AddBookingPageState extends State<AddBookingPage> {
       body: Stepper(
         steps: _getSteps(),
         currentStep: _currentStep,
-        onStepContinue: _onStepContinue,
-        onStepCancel: _onStepCancel,
+        onStepContinue: _isProcessing ? null : _onStepContinue,
+        onStepCancel: _isProcessing ? null : _onStepCancel,
+        controlsBuilder: (BuildContext context, ControlsDetails details) {
+          return Padding(
+            padding: const EdgeInsets.only(top: 16.0),
+            child: Row(
+              children: [
+                if (_currentStep != 0)
+                  TextButton(
+                    onPressed: _isProcessing ? null : details.onStepCancel,
+                    child: Text('Back'),
+                  ),
+                SizedBox(width: 12),
+                ElevatedButton(
+                  onPressed: _isProcessing ? null : details.onStepContinue,
+                  child: _isProcessing
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text(_currentStep == _getSteps().length - 1 ? 'Submit' : 'Next'),
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
