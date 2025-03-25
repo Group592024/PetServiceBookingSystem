@@ -129,14 +129,15 @@ class _AddBookingPageState extends State<AddBookingPage> {
 
   void _calculateTotalPrice() {
     double total = 0.0;
+    double subtotal = 0.0;
 
     if (_serviceType == "Room") {
-      total = _bookingRoomData.fold(0.0, (sum, room) {
+      subtotal = _bookingRoomData.fold(0.0, (sum, room) {
         double price = double.tryParse(room["price"].toString()) ?? 0.0;
         return sum + price;
       });
     } else if (_serviceType == "Service") {
-      total = _bookingServiceData.fold(0.0, (sum, service) {
+      subtotal = _bookingServiceData.fold(0.0, (sum, service) {
         if (service["serviceVariant"] != null) {
           double price = double.tryParse(service["serviceVariant"]["price"].toString()) ?? 0.0;
           return sum + price;
@@ -145,18 +146,31 @@ class _AddBookingPageState extends State<AddBookingPage> {
       });
     }
 
+    // Apply voucher discount if selected
     if (_selectedVoucher != null) {
       var voucher = _vouchers.firstWhere(
           (v) => v['voucherId'] == _selectedVoucher,
           orElse: () => {});
+      
       if (voucher.isNotEmpty) {
-        double discount =
-            double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
-        double maxDiscount =
-            double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
-        double discountAmount = (total * discount / 100).clamp(0, maxDiscount);
-        total -= discountAmount;
+        double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+        double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+        
+        // Calculate discount amount
+        double discountAmount = (subtotal * discount / 100).clamp(0, maxDiscount);
+        total = subtotal - discountAmount;
+
+        print('=== Price Calculation with Voucher ===');
+        print('Subtotal: $subtotal');
+        print('Discount Percentage: $discount%');
+        print('Maximum Discount: $maxDiscount');
+        print('Applied Discount: $discountAmount');
+        print('Final Total: $total');
+      } else {
+        total = subtotal;
       }
+    } else {
+      total = subtotal;
     }
 
     if (mounted) {
@@ -599,22 +613,30 @@ class _AddBookingPageState extends State<AddBookingPage> {
             Text("Service Type: $_serviceType"),
             Text("Booking Details:",
                 style: TextStyle(fontWeight: FontWeight.bold)),
-            if (_serviceType == "Room")
+            if (_serviceType == "Room") ...[
               ..._bookingRoomData.map((room) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                          "Room: ${_roomNames[room["room"].toString()] ?? "Loading..."}"),
-                      Text(
-                          "Pet: ${_petNames[room["pet"].toString()] ?? "Loading..."}"),
-                      Text("Start Date: ${room["start"]}"),
-                      Text("End Date: ${room["end"]}"),
-                      Text("Price: ${room["price"]} VND"),
-                      Text("Camera: ${room["camera"] ? "Yes" : "No"}"),
-                      Divider(),
-                    ],
-                  ))
-            else
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Room: ${_roomNames[room["room"].toString()] ?? "Loading..."}"),
+                  Text("Pet: ${_petNames[room["pet"].toString()] ?? "Loading..."}"),
+                  Text("Start Date: ${room["start"]}"),
+                  Text("End Date: ${room["end"]}"),
+                  Text("Room Price: ${room["price"]} VND"),
+                  Text("Camera: ${room["camera"] ? "Yes (+50,000 VND)" : "No"}"),
+                  Divider(),
+                ],
+              )),
+              Text("Subtotal: ${_calculateSubtotal()} VND",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              if (_selectedVoucher != null) ...[
+                Text("Voucher Applied: ${_vouchers.firstWhere((v) => v['voucherId'] == _selectedVoucher, orElse: () => {})['voucherName']}"),
+                Text("Discount: ${_calculateDiscount()} VND",
+                    style: TextStyle(color: Colors.green)),
+              ],
+              Divider(thickness: 2),
+              Text("Final Total: $_totalPrice VND",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ] else
               ..._bookingServiceData.map((service) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -739,5 +761,31 @@ class _AddBookingPageState extends State<AddBookingPage> {
         },
       ),
     );
+  }
+
+  double _calculateSubtotal() {
+    if (_serviceType == "Room") {
+      return _bookingRoomData.fold(0.0, (sum, room) {
+        double price = double.tryParse(room["price"].toString()) ?? 0.0;
+        return sum + price;
+      });
+    }
+    return 0.0;
+  }
+
+  double _calculateDiscount() {
+    if (_selectedVoucher == null) return 0.0;
+    
+    var voucher = _vouchers.firstWhere(
+        (v) => v['voucherId'] == _selectedVoucher,
+        orElse: () => {});
+    
+    if (voucher.isEmpty) return 0.0;
+    
+    double subtotal = _calculateSubtotal();
+    double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+    double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+    
+    return (subtotal * discount / 100).clamp(0, maxDiscount);
   }
 }

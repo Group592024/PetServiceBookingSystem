@@ -28,6 +28,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   bool _selectAllPets = false;
   String? _error;
   Map<String, String> _petNames = {};
+  Map<String, double> _roomPrices = {};
 
   @override
   void initState() {
@@ -50,6 +51,10 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
           setState(() {
             _rooms = List<Map<String, dynamic>>.from(data['data']);
           });
+          // Fetch price for each room
+          for (var room in _rooms) {
+            await _fetchRoomPrice(room['roomTypeId']);
+          }
         }
       }
     } catch (e) {
@@ -80,6 +85,27 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
       }
     } catch (e) {
       print('Error fetching pets: $e');
+    }
+  }
+
+  Future<void> _fetchRoomPrice(String roomTypeId) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/RoomType/$roomTypeId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['flag']) {
+          setState(() {
+            _roomPrices[roomTypeId] = double.parse(data['data']['price'].toString());
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching room price: $e');
     }
   }
 
@@ -246,7 +272,8 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 if (!_selectAllRooms)
                   ..._rooms.map((room) => CheckboxListTile(
                         title: Text(
-                            "${room['roomName']} - ${room['description']}"),
+                          "${room['roomName']} - ${room['description']} - ${_roomPrices[room['roomTypeId']]?.toStringAsFixed(0) ?? '...'} VND/day"
+                        ),
                         value:
                             _selectedRooms.contains(room['roomId'].toString()),
                         onChanged: (bool? value) =>
