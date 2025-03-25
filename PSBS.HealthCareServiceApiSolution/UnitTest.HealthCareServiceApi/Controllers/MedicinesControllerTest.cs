@@ -330,41 +330,6 @@ namespace UnitTest.MedicinesControllerTests
             Assert.False(response.Flag);
             Assert.Equal("The medicine is not found!", response.Message);
         }
-
-        //[Fact]
-        //public async Task DeleteMedicine_ReturnsOk_WhenDeletedSuccessfully()
-        //{
-        //    var medicine = new PSBS.HealthCareApi.Domain.Medicine
-        //    {
-        //        medicineId = Guid.NewGuid(),
-        //        treatmentId = Guid.NewGuid(),
-        //        medicineName = "Medicine to Delete",
-        //        medicineImage = "/ImageMedicines/test.jpg",
-        //        isDeleted = true 
-        //    };
-        //    dbContext.Medicines.Add(medicine);
-        //    await dbContext.SaveChangesAsync();
-
-        //    A.CallTo(() => fakeMedicineService.GetByIdAsync(medicine.medicineId))
-        //        .Returns(Task.FromResult(medicine));
-
-        //    var successResponse = new Response(true, "Medicine deleted successfully");
-        //    A.CallTo(() => fakeMedicineService.DeleteAsync(medicine))
-        //        .Returns(Task.FromResult(successResponse));
-
-        //    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "ImageMedicines");
-        //    Directory.CreateDirectory(folderPath);
-        //    var filePath = Path.Combine(folderPath, "test.jpg");
-        //    File.WriteAllText(filePath, "dummy content");
-        //    var result = await controller.DeleteMedicine(medicine.medicineId);
-        //    var okResult = Assert.IsType<OkObjectResult>(result.Result);
-        //    var responseObj = Assert.IsType<Response>(okResult.Value);
-        //    Assert.True(responseObj.Flag);
-        //    Assert.Equal("Medicine deleted successfully", responseObj.Message);
-        //    Assert.False(File.Exists(filePath));
-        //}
-
-
         #endregion
     }
 }

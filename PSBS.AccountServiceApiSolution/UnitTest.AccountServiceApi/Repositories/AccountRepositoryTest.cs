@@ -62,11 +62,8 @@ namespace UnitTest.AccountRepositoryTests
             _emailRepository = A.Fake<IEmail>();
 
             _httpClientFactory = A.Fake<IHttpClientFactory>();
-            var fakeClient = new HttpClient(new FakeHttpMessageHandler())
-            {
-                BaseAddress = new Uri("http://localhost/")
-            };
-            A.CallTo(() => _httpClientFactory.CreateClient("ApiGateway")).Returns(fakeClient);
+           
+        
 
             _repository = new AccountRepository(_context, _configuration, _hostingEnvironment, _emailRepository, _httpClientFactory);
         }
@@ -173,109 +170,6 @@ namespace UnitTest.AccountRepositoryTests
             Assert.NotNull(result);
             Assert.Equal(account.AccountName, result.AccountName);
         }
-
-        #endregion
-
-        #region RedeemPointsAsync
-
-        //[Fact]
-        //public async Task RedeemPointsAsync_ReturnsAccountNotFound_WhenAccountDoesNotExist()
-        //{
-        //    // Arrange
-        //    var redeemRequest = new RedeemRequest
-        //    {
-        //        GiftId = Guid.NewGuid(),
-        //        RequiredPoints = 100
-        //    };
-
-        //    // Act
-        //    var response = await _repository.RedeemPointsAsync(Guid.NewGuid(), redeemRequest);
-
-        //    // Assert
-        //    Assert.False(response.Flag);
-        //    Assert.Equal("Account not found", response.Message);
-        //}
-
-        //[Fact]
-        //public async Task RedeemPointsAsync_ReturnsNotEnoughPoints_WhenInsufficient()
-        //{
-        //    // Arrange
-        //    var account = new Account
-        //    {
-        //        AccountId = Guid.NewGuid(),
-        //        AccountName = "Redeem Test",
-        //        AccountLoyaltyPoint = 50, // ít hơn điểm yêu cầu
-        //        AccountEmail = "redeem@example.com",
-        //        AccountPhoneNumber = "000",
-        //        AccountPassword = "pass",
-        //        AccountGender = "Male",
-        //        AccountDob = DateTime.UtcNow,
-        //        CreatedAt = DateTime.UtcNow,
-        //        UpdatedAt = DateTime.UtcNow,
-        //        AccountAddress = "Address",
-        //        AccountImage = "img.jpg",
-        //        AccountIsDeleted = false,
-        //        RoleId = "User"
-        //    };
-        //    _context.Accounts.Add(account);
-        //    await _context.SaveChangesAsync();
-
-        //    var redeemRequest = new RedeemRequest
-        //    {
-        //        GiftId = Guid.NewGuid(),
-        //        RequiredPoints = 100 // yêu cầu nhiều hơn
-        //    };
-
-        //    // Act
-        //    var response = await _repository.RedeemPointsAsync(account.AccountId ?? Guid.Empty, redeemRequest);
-
-        //    // Assert
-        //    Assert.False(response.Flag);
-        //    Assert.Equal("Not enough points to redeem gift", response.Message);
-        //}
-
-        //[Fact]
-        //public async Task RedeemPointsAsync_ReturnsSuccessfulResponse_WhenSucceed()
-        //{
-        //    // Arrange
-        //    var account = new Account
-        //    {
-        //        AccountId = Guid.NewGuid(),
-        //        AccountName = "Redeem Success",
-        //        AccountLoyaltyPoint = 200,
-        //        AccountEmail = "redeem_success@example.com",
-        //        AccountPhoneNumber = "123123123",
-        //        AccountPassword = "pass",
-        //        AccountGender = "Male",
-        //        AccountDob = DateTime.UtcNow,
-        //        CreatedAt = DateTime.UtcNow,
-        //        UpdatedAt = DateTime.UtcNow,
-        //        AccountAddress = "Address",
-        //        AccountImage = "img.jpg",
-        //        AccountIsDeleted = false,
-        //        RoleId = "User"
-        //    };
-        //    _context.Accounts.Add(account);
-        //    await _context.SaveChangesAsync();
-
-        //    var redeemRequest = new RedeemRequest
-        //    {
-        //        GiftId = Guid.NewGuid(),
-        //        RequiredPoints = 100
-        //    };
-
-        //    // Fake HttpClient trong FakeHttpMessageHandler (xem phần dưới)
-        //    // Act
-        //    var response = await _repository.RedeemPointsAsync(account.AccountId ?? Guid.Empty, redeemRequest);
-
-        //    // Assert
-        //    Assert.True(response.Flag);
-        //    Assert.Equal("Redeem successful", response.Message);
-
-        //    // Kiểm tra số điểm đã được trừ
-        //    var updated = await _context.Accounts.FindAsync(account.AccountId);
-        //    Assert.Equal(100, updated.AccountLoyaltyPoint);
-        //}
 
         #endregion
 
@@ -1152,65 +1046,8 @@ namespace UnitTest.AccountRepositoryTests
             Assert.Equal("The account does not exist!", response.Message);
         }
 
-        //[Fact]
-        //public async Task RefundAccountPoint_ReturnsSuccess_WhenRefunded()
-        //{
-        //    // Arrange: Thêm account với số điểm ban đầu
-        //    var account = new Account
-        //    {
-        //        AccountId = Guid.NewGuid(),
-        //        AccountName = "RefundUser",
-        //        AccountEmail = "refund@example.com",
-        //        AccountLoyaltyPoint = 100,
-        //        AccountPhoneNumber = "7777777",
-        //        AccountPassword = "pass",
-        //        AccountGender = "Male",
-        //        AccountDob = DateTime.UtcNow,
-        //        CreatedAt = DateTime.UtcNow,
-        //        UpdatedAt = DateTime.UtcNow,
-        //        AccountAddress = "Address",
-        //        AccountImage = "img.jpg",
-        //        AccountIsDeleted = false,
-        //        RoleId = "User"
-        //    };
-        //    _context.Accounts.Add(account);
-        //    await _context.SaveChangesAsync();
-
-        //    var redeemRequest = new RedeemRequest
-        //    {
-        //        GiftId = Guid.NewGuid(),
-        //        RequiredPoints = 50
-        //    };
-
-        //    // Act
-        //    var response = await _repository.RefundAccountPoint(account.AccountId!.Value, redeemRequest);
-
-        //    // Assert
-        //    Assert.True(response.Flag);
-        //    Assert.Equal("Point of user successfully updated", response.Message);
-
-        //    var updated = await _context.Accounts.FindAsync(account.AccountId);
-        //    Assert.Equal(150, updated.AccountLoyaltyPoint);
-        //}
-
         #endregion
 
-        #region Fake HttpMessageHandler for RefundAccountPoint and RedeemPointsAsync
-
-        private class FakeHttpMessageHandler : HttpMessageHandler
-        {
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-            {
-                // Mô phỏng phản hồi thành công cho PutAsync của RefundAccountPoint
-                // và cho PostAsJsonAsync của RedeemPointsAsync.
-                var httpResponse = new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = JsonContent.Create(new Response(true, "Redeem successful"))
-                };
-                return Task.FromResult(httpResponse);
-            }
-        }
-
-        #endregion
+        
     }
 }

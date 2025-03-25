@@ -1,8 +1,10 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.DependencyInjection;
 using FacilityServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,16 +24,19 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
     options.SuppressModelStateInvalidFilter = true;
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Cấu hình CORS với origin cụ thể và cho phép credentials
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins", builder =>
+    options.AddPolicy("AllowLocalhost3000", policyBuilder =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policyBuilder
+            .WithOrigins("http://localhost:3000")  
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -41,14 +46,13 @@ builder.WebHost.ConfigureKestrel(options =>
     options.ListenAnyIP(5023);
 });
 
-
-// Đăng ký FfmpegService
-// builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+// Đăng ký FfmpegService và các service khác
+builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 builder.Services.AddInfrastructureService(builder.Configuration);
-// builder.Services.Configure<ApiBehaviorOptions>(options =>
-// {
-//     options.SuppressModelStateInvalidFilter = true;
-// });
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 
 // Đăng ký quyền
 builder.Services.AddAuthorization(options =>
@@ -63,64 +67,46 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-//var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-//var ffmpegProcess = ffmpegService.StartFfmpegConversion();
-// var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
-// var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+// Khởi động FfmpegService (với kiểm tra lỗi)
+var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+Process? ffmpegProcess = null;
+try
+{
+    ffmpegProcess = ffmpegService.StartFfmpegConversion();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Error starting FfmpegService: {ex.Message}");
+}
 
+// Lấy đường dẫn HLS từ cấu hình
+var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
 
-// Khởi động FfmpegService (kiểm tra lỗi)
-// try
-// {
-//     var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-//     var ffmpegProcess = ffmpegService.StartFfmpegConversion();
-// }
-// catch (Exception ex)
-// {
-//     Console.WriteLine($"Error starting FfmpegService: {ex.Message}");
-// }
-
-// // Cấu hình Static Files
-// var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
-// var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
-
+// Cấu hình Static Files cho Images
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
 });
 
-// app.UseStaticFiles(new StaticFileOptions
-// {
-//     FileProvider = hlsFileProvider,
-//     RequestPath = "/hls",
-//     ServeUnknownFileTypes = true,
-//     DefaultContentType = "application/vnd.apple.mpegurl",
-//     OnPrepareResponse = ctx =>
-//     {
-//         ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*"); 
-//         ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
-//         ctx.Context.Response.Headers.Append("Pragma", "no-cache");
-//         ctx.Context.Response.Headers.Append("Expires", "0");
-//     }
-// });
-
-
-
-// app.UseStaticFiles(new StaticFileOptions
-// {
-//     FileProvider = hlsFileProvider,
-//     RequestPath = "/hls",
-//     ServeUnknownFileTypes = true,
-//     DefaultContentType = "application/vnd.apple.mpegurl",
-//     OnPrepareResponse = ctx =>
-//     {
-//         ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
-//         ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
-//         ctx.Context.Response.Headers.Append("Pragma", "no-cache");
-//         ctx.Context.Response.Headers.Append("Expires", "0");
-//     }
-// });
+// Cấu hình Static Files cho HLS với header CORS đúng
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = hlsFileProvider,
+    RequestPath = "/hls",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/vnd.apple.mpegurl",
+    OnPrepareResponse = ctx =>
+    {
+        // Thay vì "*" thì chỉ định origin cụ thể và cho phép credentials
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+        ctx.Context.Response.Headers.Append("Expires", "0");
+    }
+});
 
 // Xử lý exception
 if (app.Environment.IsDevelopment())
@@ -134,11 +120,13 @@ else
 
 app.UseSwagger();
 app.UseSwaggerUI();
-app.UseCors("AllowAllOrigins");
 app.UseInfrastructurePolicy();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Áp dụng CORS với policy đã định nghĩa
+app.UseCors("AllowLocalhost3000");
 
 // Định tuyến Controller
 app.MapControllers();

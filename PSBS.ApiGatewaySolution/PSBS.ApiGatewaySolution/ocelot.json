@@ -81,7 +81,7 @@
       "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
-          
+
           "Host": "localhost",
           "Port": 5159
         }
@@ -107,7 +107,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          
+
           "Host": "localhost",
           "Port": 5159
         }
@@ -612,6 +612,28 @@
       // }
     },
     {
+      // Booking Type API
+      "DownstreamPathTemplate": "/api/Camera/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5023
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Camera/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
       // Payment Type API
       "DownstreamPathTemplate": "/api/PaymentType/{everything}",
       "DownstreamScheme": "http",
@@ -788,7 +810,7 @@
           "Port": 5159
         }
       ],
-      "UpstreamPathTemplate":  "/uploads/{everything}",
+      "UpstreamPathTemplate": "/uploads/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
     },
     {

@@ -12,32 +12,63 @@ const CameraCus = () => {
 
   const fetchCameraStream = () => {
     if (!cameraCode) {
-      setError("Vui lòng nhập mã camera");
+      setError("Please enter the camera code");
       return;
     }
     setLoading(true);
     setError(null);
 
-    fetch(`http://localhost:5050/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`)
+    const token = sessionStorage.getItem("token");
+
+    fetch(`http://localhost:5050/api/Camera/stream/${cameraCode}?_=${new Date().getTime()}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then(async (res) => {
         if (!res.ok) {
-          const error = await res.text();
-          throw new Error(error || 'Lỗi không xác định');
+          let errorMessage = "Unknown error";
+          try {
+            const errorData = await res.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (parseError) {
+            errorMessage = await res.text();
+          }
+          console.error("Backend error:", errorMessage);
+
+          if (errorMessage.toLowerCase().includes("camera not found")) {
+            errorMessage = "Camera not found. Please check the camera code.";
+          } else if (errorMessage.toLowerCase().includes("camera is deleted")) {
+            errorMessage = "Camera is deleted. Please contact the administrator.";
+          } else if (errorMessage.toLowerCase().includes("camera is not active")) {
+            errorMessage = "Camera is not active. Please try again later.";
+          } else if (errorMessage.toLowerCase().includes("camera address not found")) {
+            errorMessage = "Camera address not found.";
+          }
+          throw new Error(errorMessage);
         }
         return res.json();
       })
       .then((data) => {
         if (data.streamUrl) {
+          console.log("Stream URL received:", data.streamUrl);
           setStreamUrl(data.streamUrl);
           setError(null);
         } else {
-          throw new Error("Không tìm thấy luồng video");
+          const errMsg = "Stream not found";
+          console.error("Error:", errMsg);
+          throw new Error(errMsg);
         }
       })
-      .catch((err) => setError(err.message))
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setError(err.message);
+      })
       .finally(() => setLoading(false));
-
   };
+
 
   return (
     <div className="flex h-screen bg-dark-grey-100 overflow-x-hidden">
@@ -73,10 +104,14 @@ const CameraCus = () => {
             )}
             {!error && !loading && streamUrl && (
               <div className="relative border rounded-lg overflow-hidden shadow-md">
-                <HLSPlayer src={`${streamUrl}?t=${new Date().getTime()}`} />
+                {(() => {
+                  const timestampParam = streamUrl.includes('?')
+                    ? `&t=${new Date().getTime()}`
+                    : `?t=${new Date().getTime()}`;
+                  return <HLSPlayer src={`${streamUrl}${timestampParam}`} />;
+                })()}
               </div>
             )}
-
           </div>
         </div>
       </div>
