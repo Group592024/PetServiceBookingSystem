@@ -28,6 +28,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   bool _selectAllPets = false;
   String? _error;
   Map<String, String> _petNames = {};
+  Map<String, double> _roomPrices = {};
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
   Future<void> _fetchRooms() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+      String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/Room/available'),
         headers: {'Authorization': 'Bearer $token'},
@@ -50,6 +51,10 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
           setState(() {
             _rooms = List<Map<String, dynamic>>.from(data['data']);
           });
+          // Fetch price for each room
+          for (var room in _rooms) {
+            await _fetchRoomPrice(room['roomTypeId']);
+          }
         }
       }
     } catch (e) {
@@ -61,7 +66,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
     if (widget.cusId == null) return;
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+      String? token = prefs.getString('token');
       final response = await http.get(
         Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
@@ -82,7 +87,28 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
       print('Error fetching pets: $e');
     }
   }
-  
+
+  Future<void> _fetchRoomPrice(String roomTypeId) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(
+        Uri.parse('http://127.0.0.1:5050/api/RoomType/$roomTypeId'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['flag']) {
+          setState(() {
+            _roomPrices[roomTypeId] = double.parse(data['data']['price'].toString());
+          });
+        }
+      }
+    } catch (e) {
+      print('Error fetching room price: $e');
+    }
+  }
+
   void _handleRoomSelect(String roomId) {
     setState(() {
       if (roomId == 'all') {
@@ -123,8 +149,10 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
     });
   }
 
-  bool _checkTimeOverlap(String start1, String end1, String start2, String end2) {
-    if (start1.isEmpty || end1.isEmpty || start2.isEmpty || end2.isEmpty) return false;
+  bool _checkTimeOverlap(
+      String start1, String end1, String start2, String end2) {
+    if (start1.isEmpty || end1.isEmpty || start2.isEmpty || end2.isEmpty)
+      return false;
     final s1 = DateTime.parse(start1);
     final e1 = DateTime.parse(end1);
     final s2 = DateTime.parse(start2);
@@ -143,20 +171,27 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
     if (numRooms < numPets) {
       setState(() {
-        _error = "Number of rooms must be greater than or equal to the number of pets";
+        _error =
+            "Number of rooms must be greater than or equal to the number of pets";
       });
       return;
     }
 
-    final selectedRoomsList = _selectAllRooms 
-        ? _rooms 
-        : _rooms.where((r) => _selectedRooms.contains(r['roomId'].toString())).toList();
-    final selectedPetsList = _selectAllPets 
-        ? _pets 
-        : _pets.where((p) => _selectedPets.contains(p['petId'].toString())).toList();
+    final selectedRoomsList = _selectAllRooms
+        ? _rooms
+        : _rooms
+            .where((r) => _selectedRooms.contains(r['roomId'].toString()))
+            .toList();
+    final selectedPetsList = _selectAllPets
+        ? _pets
+        : _pets
+            .where((p) => _selectedPets.contains(p['petId'].toString()))
+            .toList();
 
     final newBookingRooms = <Map<String, dynamic>>[];
-    for (var i = 0; i < selectedPetsList.length && i < selectedRoomsList.length; i++) {
+    for (var i = 0;
+        i < selectedPetsList.length && i < selectedRoomsList.length;
+        i++) {
       newBookingRooms.add({
         "room": selectedRoomsList[i]['roomId'],
         "pet": selectedPetsList[i]['petId'],
@@ -236,10 +271,14 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 ),
                 if (!_selectAllRooms)
                   ..._rooms.map((room) => CheckboxListTile(
-                    title: Text("${room['roomName']} - ${room['description']}"),
-                    value: _selectedRooms.contains(room['roomId'].toString()),
-                    onChanged: (bool? value) => _handleRoomSelect(room['roomId'].toString()),
-                  )),
+                        title: Text(
+                          "${room['roomName']} - ${room['description']} - ${_roomPrices[room['roomTypeId']]?.toStringAsFixed(0) ?? '...'} VND/day"
+                        ),
+                        value:
+                            _selectedRooms.contains(room['roomId'].toString()),
+                        onChanged: (bool? value) =>
+                            _handleRoomSelect(room['roomId'].toString()),
+                      )),
               ],
             ),
           ),
@@ -264,10 +303,11 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 ),
                 if (!_selectAllPets)
                   ..._pets.map((pet) => CheckboxListTile(
-                    title: Text(pet['petName']),
-                    value: _selectedPets.contains(pet['petId'].toString()),
-                    onChanged: (bool? value) => _handlePetSelect(pet['petId'].toString()),
-                  )),
+                        title: Text(pet['petName']),
+                        value: _selectedPets.contains(pet['petId'].toString()),
+                        onChanged: (bool? value) =>
+                            _handlePetSelect(pet['petId'].toString()),
+                      )),
               ],
             ),
           ),
@@ -309,9 +349,11 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 BookingRoomChoose(
                   bookingData: {
                     ..._bookingRooms[index],
-                    'petName': _petNames[_bookingRooms[index]['pet']] ?? 'Loading...',
+                    'petName':
+                        _petNames[_bookingRooms[index]['pet']] ?? 'Loading...',
                   },
-                  onBookingDataChange: (data) => _updateBookingData(index, data),
+                  onBookingDataChange: (data) =>
+                      _updateBookingData(index, data),
                   data: {"cusId": widget.cusId},
                 ),
               ],
