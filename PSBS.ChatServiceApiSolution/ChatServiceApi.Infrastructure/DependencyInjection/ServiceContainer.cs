@@ -3,6 +3,8 @@
 using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Application.Services;
 using ChatServiceApi.Infrastructure.Data;
+using ChatServiceApi.Infrastructure.NotificationWorker;
+using ChatServiceApi.Infrastructure.RabbitMessaging;
 using ChatServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +24,11 @@ namespace ChatServiceApi.Infrastructure.DependencyInjection
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<INoticationRepository, NotificationRepository>();
+            services.AddScoped<INotificationMessagePublisher, RabbitMQMessagePublisher>();
+            services.AddScoped<RabbitMessageConsumer>();
+
+            // Register the BackgroundService
+            services.AddHostedService<NotificationMessageWorker>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)

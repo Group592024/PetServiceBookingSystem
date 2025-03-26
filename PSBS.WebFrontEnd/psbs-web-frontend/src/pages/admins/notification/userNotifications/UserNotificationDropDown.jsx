@@ -124,12 +124,15 @@ const NotificationsDropdown = ({ onClose }) => {
     setUnreadCount(0);
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleNotificationClick = async (notification) => {
     if (!notification.isRead) {
       markAsRead(notification.notificationId);
     }
     // Handle navigation or other actions
     console.log("Notification clicked:", notification);
+    await deleteData(
+      `api/Notification/user/isRead/${notification.notificationId}`
+    );
   };
 
   const getNotificationIcon = (type) => {
@@ -175,14 +178,14 @@ const NotificationsDropdown = ({ onClose }) => {
           Notifications {unreadCount > 0 && `(${unreadCount})`}
         </Typography>
         <Box>
-          <IconButton
+          {/* <IconButton
             onClick={markAllAsRead}
             size="small"
             disabled={unreadCount === 0}
             title="Mark all as read"
           >
             <CheckCircle fontSize="small" />
-          </IconButton>
+          </IconButton> */}
           <IconButton onClick={fetchNotifications} size="small" title="Refresh">
             <Refresh fontSize="small" />
           </IconButton>

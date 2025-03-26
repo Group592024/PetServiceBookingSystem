@@ -41,7 +41,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             }
         }
 
-        public async Task<Response> PushNotification(Guid notificationId, List<Guid> guids)
+        public async Task<Response> PushNotificationUsers(Guid notificationId)
         {
             try
             {
@@ -53,19 +53,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 else
                 {
                     currentNotification.IsPushed = true;
-                    context.Notifications.Update(currentNotification);
-                    foreach (var guid in guids)
-                    {
-                        var notiBox = new NotificationBox
-                        {
-                            NotificationId = currentNotification.NotificationId,
-                            UserId = guid,
-                            IsDeleted = false,
-                            IsRead = false,
-                        };
-                        context.NotificationBoxes.Add(notiBox);
-                    }
-
+                    context.Notifications.Update(currentNotification);                
                     await context.SaveChangesAsync();
                     // Fetch the updated notification with NotificationType included
                     var updatedNotification = await context.Notifications
@@ -201,6 +189,74 @@ namespace ChatServiceApi.Infrastructure.Repositories
             {
                 LogExceptions.LogException(ex);
                 return new Response(false, "Error occurred updating notification");
+            }
+        }
+
+        public async Task<Response> SetNotificationIsRead(Guid notificationBoxId)
+        {
+            try
+            {
+                var notification = await context.NotificationBoxes
+                    .Include(nb => nb.Notification)
+                    .ThenInclude(n => n.NotificationType)
+                    .FirstOrDefaultAsync(n => n.NotiBoxId == notificationBoxId);
+                if (notification is null)
+                {
+                    return new Response(false, $"the notification does not exist");
+                }
+                notification.IsRead = true;
+                var current = context.Update(notification).Entity;
+                await context.SaveChangesAsync();
+                var (noti, list) = NotificationConversion.FromEntityToUserNoti(current, null);
+                return new Response(true, $"the notification is update to isRead successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                // display scary-free message to the client
+                return new Response(false, "Error occured updating the notification");
+            }
+        }
+        public async Task<Response> PushSingleNotification(Guid notificationId, Guid guid)
+        {
+            try
+            {
+                var currentNotification = await context.Notifications.FindAsync(notificationId);
+                if (currentNotification == null)
+                {
+                    return new Response(false, $"the notification does not exist");
+                }
+                else
+                {
+                    currentNotification.IsPushed = true;
+                    context.Notifications.Update(currentNotification);
+                    
+                        var notiBox = new NotificationBox
+                        {
+                            NotificationId = currentNotification.NotificationId,
+                            UserId = guid,
+                            IsDeleted = false,
+                            IsRead = false,
+                        };
+                        context.NotificationBoxes.Add(notiBox);
+                    
+
+                    await context.SaveChangesAsync();
+                    // Fetch the updated notification with NotificationType included
+                    var updatedNotification = await context.Notifications
+                        .Include(n => n.NotificationType)
+                        .FirstOrDefaultAsync(n => n.NotificationId == currentNotification.NotificationId);
+
+                    var (noti, _) = NotificationConversion.FromEntity(updatedNotification!, null);
+
+                    return new Response(true, "Notification pushed successfully") { Data = noti };
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                // display scary-free message to the client
+                return new Response(false, "Error occured pushing the notification");
             }
         }
     }

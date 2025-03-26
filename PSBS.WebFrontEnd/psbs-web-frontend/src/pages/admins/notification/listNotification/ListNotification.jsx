@@ -16,7 +16,7 @@ const ListNotification = () => {
         const data = await getData("api/Notification");
         const processedData = data.data.map((row, index) => ({
           ...row,
-          autoId: index + 1,
+       
         }));
         setRows(processedData);
       } catch (error) {
@@ -28,13 +28,19 @@ const ListNotification = () => {
 
   const columns = [
     {
-      field: "autoId",
-      headerName: "ID",
+      field: "serialNumber",
+      headerName: "No.",
       headerAlign: "center",
       align: "center",
       width: 50,
+      renderCell: (params) => {
+        // Find the index of the current row in the rows array
+        const rowIndex = rows.findIndex(row => 
+          row.notificationId === params.row.notificationId
+        );
+        return rowIndex + 1;
+      }
     },
-
     {
       field: "notificationTitle",
       headerName: "Notification Title",

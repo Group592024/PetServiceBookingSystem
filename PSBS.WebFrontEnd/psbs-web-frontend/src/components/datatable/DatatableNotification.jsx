@@ -43,7 +43,7 @@ const DatatableNotification = ({
           icon: "success",
           confirmButtonText: "OK",
         });
-        setRows((prevRows) => [...prevRows, response.data]);
+        setRows((prevRows) => [response.data, ...prevRows]);
       } else {
         Swal.fire({
           title: "Error!",
@@ -180,22 +180,29 @@ const DatatableNotification = ({
             <IconButton
               aria-label="info"
               onClick={() => handleDetailOpen(params.row)}
+              title="Detail"
             >
               <InfoIcon color="info" />
             </IconButton>
             <IconButton
               aria-label="edit"
               onClick={() => handleEditOpen(params.row)}
+              title="Edit"
             >
               <EditIcon color="success" />
             </IconButton>
-            <IconButton aria-label="delete" onClick={handleDelete}>
+            <IconButton
+              aria-label="delete"
+              onClick={handleDelete}
+              title="Delete"
+            >
               <DeleteIcon color="error" />
             </IconButton>
             {!params.row.isPushed && (
               <IconButton
                 aria-label="push"
                 onClick={() => handlePush(params.row.notificationId)}
+                title="Push"
               >
                 <ArrowCircleUpIcon color="warning" />
               </IconButton>
@@ -240,10 +247,10 @@ const DatatableNotification = ({
         columns={columns.concat(actionColumn)}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
+            paginationModel: { page: 0, pageSize: 10 },
           },
         }}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[5, 10, 15, 20]}
       />
       <ToastContainer />
       <CreateNotificationModal

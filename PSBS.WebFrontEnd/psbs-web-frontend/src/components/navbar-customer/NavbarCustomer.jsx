@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import Swal from "sweetalert2"; 
-import "./style.css";
-
+import Swal from "sweetalert2";
+import "./style.css"; // Make sure this path is correct
+import { NavLink } from "react-router-dom";
+import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 const NavbarCustomer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountName, setAccountName] = useState("Guest");
@@ -12,27 +13,29 @@ const NavbarCustomer = () => {
   );
   const [accountId, setAccountId] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [notificationDropdownVisible, setNotificationDropdownVisible] =
+    useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-  
+
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = jwt_decode(token);
       const { AccountName, AccountImage, AccountId } = decodedToken;
-  
+
       setAccountName(AccountName || "User");
       setAccountId(AccountId);
-  
+
       if (AccountImage) {
         fetch(
           `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Authorization': `Bearer ${token}`, 
-              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           }
         )
@@ -52,7 +55,6 @@ const NavbarCustomer = () => {
       setIsLoggedIn(false);
     }
   }, []);
-  
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -94,6 +96,10 @@ const NavbarCustomer = () => {
     });
   };
 
+  const toggleNotificationDropdown = () => {
+    setNotificationDropdownVisible(!notificationDropdownVisible);
+  };
+
   return (
     <div className="navbarCustomer">
       <a href="/" className="logo">
@@ -115,73 +121,114 @@ const NavbarCustomer = () => {
 
         <ul className="navbar-links">
           <li>
-            <Link to="/customer/services">
+            <NavLink
+              to="/customer/services"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-store-alt"></i>
               Service
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/bookings">
+            <NavLink
+              to="/bookings"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-home-heart"></i>
               Booking
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/camera">
-              <i className="bx bx-camera"></i>
-              Camera
-            </Link>
-          </li>
-          <li>
-            <Link to="/customer/pet">
+            <NavLink
+              to="/customer/pet"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bxs-dog"></i>
               Pet
-            </Link>
+            </NavLink>
           </li>
-          
+
           <li>
-            <Link to="/customer/gifts">
+            <NavLink
+              to="/customer/gifts"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-gift"></i>
               Gift
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/customer/vouchers">
+            <NavLink
+              to="/customer/vouchers"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-wallet"></i>
               Voucher
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>
 
-      {/* Show Login button if not logged in, otherwise show profile */}
-      {!isLoggedIn ? (
-        <div>
-        <Link
-          to="/login"
-          className="login-button bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition duration-300 hover:opacity-80"
-        >
-          <i className="bx bx-log-in text-xl"></i> Login
-        </Link>
-      </div>
-      ) : (
-        <div className="navbar-profile" onClick={toggleDropdown}>
-          <img
-            src={accountImage}
-            alt="Profile Avatar"
-            className="profile-avatar"
-          />
-
-          {dropdownVisible && (
-            <div className="dropdown-menu">
-              <ul>
-                <li onClick={handleViewProfile}>View Profile</li>
-                <li onClick={handleLogout}>Logout</li>
-              </ul>
+      {/* Right side icons and profile */}
+      <div className="navbar-right">
+        {isLoggedIn && (
+          <>
+            <div className="notifications" onClick={toggleNotificationDropdown}>
+              <i className="bx bx-bell"></i>
+              <span className="count">12</span>
             </div>
-          )}
-        </div>
-      )}
+
+            <Link to="/chat/customer" className="notifications">
+              <i className="bx bx-message-square-dots"></i>
+              <span className="count">12</span>
+            </Link>
+          </>
+        )}
+
+        {/* Show Login button if not logged in, otherwise show profile */}
+        {!isLoggedIn ? (
+          <Link
+            to="/login"
+            className="login-button bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition duration-300 hover:opacity-80"
+          >
+            <i className="bx bx-log-in text-xl"></i> Login
+          </Link>
+        ) : (
+          <div className="navbar-profile" onClick={toggleDropdown}>
+            <img
+              src={accountImage}
+              alt="Profile Avatar"
+              className="profile-avatar"
+            />
+
+            {dropdownVisible && (
+              <div className="dropdown-menu">
+                <ul>
+                  <li>{accountName || "User"}</li>
+                  <li onClick={handleViewProfile}>View Profile</li>
+                  <li onClick={handleLogout}>Logout</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {notificationDropdownVisible && (
+          <NotificationsDropdown
+            onClose={() => setNotificationDropdownVisible(false)}
+          />
+        )}
+      </div>
     </div>
   );
 };
