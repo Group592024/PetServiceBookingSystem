@@ -118,6 +118,7 @@ const EditCamera = () => {
               onChange={handleChange}
               placeholder="Nhập Camera Type"
               className="w-full p-3 border rounded-md"
+              readOnly
             />
           </div>
           <div className="mb-3">
