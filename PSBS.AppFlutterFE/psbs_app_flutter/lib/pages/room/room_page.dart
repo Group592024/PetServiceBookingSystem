@@ -15,7 +15,7 @@ class _RoomPageState extends State<RoomPage> {
   List<dynamic> rooms = [];
   List<dynamic> roomTypes = [];
   bool isLoading = true;
-  bool isGridView = false;
+  bool isListView = false;
 
   // Fetch rooms and room types data
   Future<void> fetchRooms() async {
@@ -127,12 +127,12 @@ class _RoomPageState extends State<RoomPage> {
             actions: [
               IconButton(
                 icon: Icon(
-                  isGridView ? Icons.view_list : Icons.grid_view,
+                  isListView ? Icons.view_list : Icons.grid_view,
                   color: Colors.white,
                 ),
                 onPressed: () {
                   setState(() {
-                    isGridView = !isGridView;
+                    isListView = !isListView;
                   });
                 },
               ),
@@ -148,8 +148,8 @@ class _RoomPageState extends State<RoomPage> {
                   )
                 : rooms.isEmpty
                     ? _buildEmptyState()
-                    : isGridView
-                        ? _buildGridView()
+                    : isListView
+                        ? _buildListView()
                         : Padding(
                             padding: EdgeInsets.all(16),
                             child: ListView.builder(
@@ -366,159 +366,147 @@ class _RoomPageState extends State<RoomPage> {
     );
   }
 
-  Widget _buildGridView() {
-    return GridView.builder(
+  Widget _buildListView() {
+    return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      padding: EdgeInsets.all(16),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.6,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: rooms.length,
       itemBuilder: (context, index) {
         final room = rooms[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 10,
-                offset: Offset(0, 4),
+
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => CustomerRoomDetail(
+                  roomId: room['roomId'],
+                ),
               ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            );
+          },
+          child: Stack(
             children: [
-              Expanded(
-                flex: 4,
-                child: Stack(
+              Container(
+                margin: EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.08),
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          BorderRadius.vertical(top: Radius.circular(20)),
+                      borderRadius: BorderRadius.circular(14),
                       child: Image.network(
                         'http://10.0.2.2:5050/facility-service${room['roomImage']}',
-                        fit: BoxFit.cover,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 100,
+                            height: 100,
+                            color: Colors.grey[200],
+                            child: Icon(Icons.image_not_supported,
+                                color: Colors.grey[400]),
+                          );
+                        },
                       ),
                     ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color:
-                              _getStatusColor(room['status']).withOpacity(0.9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
+                    SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            room['roomName'],
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue.shade800,
                             ),
-                            SizedBox(width: 4),
-                            Text(
-                              room['status'],
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            getRoomTypeName(room['roomTypeId']),
+                            style: TextStyle(
+                                fontSize: 14, color: Colors.grey[600]),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(Icons.attach_money,
+                                  color: Colors.green, size: 16),
+                              SizedBox(width: 4),
+                              Text(
+                                getRoomTypePrice(room['roomTypeId']),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green.shade700,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colors.grey[400],
                     ),
                   ],
                 ),
               ),
-              Expanded(
-                flex: 4,
-                child: Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              Positioned(
+                top: 6,
+                right: 6,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(room['status']),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: _getStatusColor(room['status']).withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        room['roomName'],
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade800,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 2),
-                      Text(
-                        getRoomTypeName(room['roomTypeId']),
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 4),
                       Container(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        width: 6,
+                        height: 6,
                         decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          getRoomTypePrice(room['roomTypeId']),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
-                          ),
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                         ),
                       ),
-                      SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CustomerRoomDetail(
-                                  roomId: room['roomId'],
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 8),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            'View Details',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      SizedBox(width: 4),
+                      Text(
+                        room['status'],
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],

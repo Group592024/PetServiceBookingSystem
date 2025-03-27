@@ -12,8 +12,8 @@ using PSPS.AccountAPI.Infrastructure.Data;
 namespace PSPS.AccountAPI.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PSPSDbContext))]
-    [Migration("20250316131425_First")]
-    partial class First
+    [Migration("20250321091621_New")]
+    partial class New
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

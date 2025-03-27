@@ -56,7 +56,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:5050/api/PetDiary'),
+        Uri.parse('http://10.0.2.2:5050/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -98,7 +98,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+            'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           'Accept': 'application/json',
           "Authorization": "Bearer $token",
