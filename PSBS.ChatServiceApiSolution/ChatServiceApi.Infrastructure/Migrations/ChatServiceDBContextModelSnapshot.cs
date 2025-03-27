@@ -70,6 +70,93 @@ namespace ChatServiceApi.Infrastructure.Migrations
                     b.ToTable("ChatRooms");
                 });
 
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPushed")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("NotiTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NotificationContent")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NotificationTitle")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("NotiTypeId");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.NotificationBox", b =>
+                {
+                    b.Property<Guid>("NotiBoxId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("NotificationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("NotiBoxId");
+
+                    b.HasIndex("NotificationId");
+
+                    b.ToTable("NotificationBoxes");
+                });
+
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.NotificationType", b =>
+                {
+                    b.Property<Guid>("NotiTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NotiName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("NotiTypeId");
+
+                    b.ToTable("NotificationTypes");
+
+                    b.HasData(
+                        new
+                        {
+                            NotiTypeId = new Guid("11111111-1111-1111-1111-111111111111"),
+                            NotiName = "Common"
+                        },
+                        new
+                        {
+                            NotiTypeId = new Guid("22222222-2222-2222-2222-222222222222"),
+                            NotiName = "Booking"
+                        },
+                        new
+                        {
+                            NotiTypeId = new Guid("33333333-3333-3333-3333-333333333333"),
+                            NotiName = "Other"
+                        });
+                });
+
             modelBuilder.Entity("ChatServiceApi.Domain.Entities.RoomParticipant", b =>
                 {
                     b.Property<Guid>("RoomParticipantId")
@@ -112,6 +199,28 @@ namespace ChatServiceApi.Infrastructure.Migrations
                     b.Navigation("ChatRoom");
                 });
 
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("ChatServiceApi.Domain.Entities.NotificationType", "NotificationType")
+                        .WithMany("Notifications")
+                        .HasForeignKey("NotiTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("NotificationType");
+                });
+
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.NotificationBox", b =>
+                {
+                    b.HasOne("ChatServiceApi.Domain.Entities.Notification", "Notification")
+                        .WithMany("NotificationBoxes")
+                        .HasForeignKey("NotificationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Notification");
+                });
+
             modelBuilder.Entity("ChatServiceApi.Domain.Entities.RoomParticipant", b =>
                 {
                     b.HasOne("ChatServiceApi.Domain.Entities.ChatRoom", "ChatRoom")
@@ -128,6 +237,16 @@ namespace ChatServiceApi.Infrastructure.Migrations
                     b.Navigation("ChatMessages");
 
                     b.Navigation("Participants");
+                });
+
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.Notification", b =>
+                {
+                    b.Navigation("NotificationBoxes");
+                });
+
+            modelBuilder.Entity("ChatServiceApi.Domain.Entities.NotificationType", b =>
+                {
+                    b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618
         }
