@@ -4,6 +4,7 @@ using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using ChatServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 
@@ -127,7 +128,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             .Include(nb => nb.Notification)
             .ThenInclude(n => n.NotificationType) 
             .Where(nb => nb.UserId == userId && !nb.IsDeleted)
-            .OrderByDescending(nb => nb.Notification.CreatedDate)
+            .OrderByDescending(nb => nb.CreatedDate)
             .ToListAsync();
         }
 
@@ -237,6 +238,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
                             UserId = guid,
                             IsDeleted = false,
                             IsRead = false,
+                            CreatedDate = DateTime.Now,
                         };
                         context.NotificationBoxes.Add(notiBox);
                     
@@ -258,6 +260,14 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 // display scary-free message to the client
                 return new Response(false, "Error occured pushing the notification");
             }
+        }
+        public async Task<int> CountUnreadNotificationsAsync(Guid userId)
+        {
+            return await context.NotificationBoxes
+                .Where(nb => nb.UserId == userId &&
+                            !nb.IsRead &&
+                            !nb.IsDeleted)
+                .CountAsync();
         }
     }
 }

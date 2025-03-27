@@ -21,12 +21,12 @@ import {
   IconButton,
 } from "@mui/material";
 import { Close, Person, Search, CheckCircle } from "@mui/icons-material";
-
+import CircularProgress from '@mui/material/CircularProgress';
 const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
   const [receiverType, setReceiverType] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [isLoading, setIsLoading] = useState(false);
   // Temporary user data
   const users = [
     {
@@ -106,18 +106,27 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
     }
   };
 
-  const handleSubmit = () => {
-    const selectedReceiverDTOs = selectedUsers.map((user) => ({
-      UserId: user.accountId,
-    }));
+  const handleSubmit = async () => {
+    setIsLoading(true);
 
-    const pushNotificationDTO = {
-      notificationId: initId,
-      Receivers: selectedReceiverDTOs,
-    };
+    try {
+      const selectedReceiverDTOs = selectedUsers.map((user) => ({
+        UserId: user.accountId,
+      }));
 
-    onConfirm(pushNotificationDTO);
-    onClose();
+      const pushNotificationDTO = {
+        notificationId: initId,
+        Receivers: selectedReceiverDTOs,
+      };
+
+      await onConfirm(pushNotificationDTO); // Make sure to await the API call
+      onClose();
+    } catch (error) {
+      console.error("Error submitting:", error);
+      // Optionally show error message
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Disable confirm button when:
@@ -287,10 +296,15 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
               variant="contained"
               color="primary"
               onClick={handleSubmit}
-              disabled={isConfirmDisabled}
+              disabled={isConfirmDisabled || isLoading}
               sx={{ px: 4 }}
+              startIcon={
+                isLoading ? (
+                  <CircularProgress size={20} color="inherit" />
+                ) : null
+              }
             >
-              Confirm Selection
+              {isLoading ? "Processing..." : "Confirm Selection"}
             </Button>
           </Box>
         </Paper>

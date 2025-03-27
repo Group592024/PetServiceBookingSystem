@@ -11,10 +11,12 @@ namespace ChatServiceApi.Application.Services
     {
         private readonly IChatRepository _chatRepository;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public ChatService(IChatRepository chatRepository, IWebHostEnvironment webHostEnvironment)
+        private readonly INoticationRepository _notificationRepository;
+        public ChatService(IChatRepository chatRepository, IWebHostEnvironment webHostEnvironment, INoticationRepository notificationRepository)
         {
             _chatRepository = chatRepository;
             _webHostEnvironment = webHostEnvironment;
+            _notificationRepository = notificationRepository;
         }
         public async Task<ChatRoom?> GetChatRoomAsync(Guid chatRoomId)
         {
@@ -150,6 +152,16 @@ namespace ChatServiceApi.Application.Services
         public async Task<Response> CheckIfAllSupportersLeftAndUnseen(Guid chatRoomId)
         {
             return await _chatRepository.CheckIfAllSupportersLeftAndUnseen(chatRoomId);
+        }
+
+        public async Task<int> CountUnreadChatsAsync(Guid userId)
+        {
+            return await _chatRepository.CountUnreadChatsAsync(userId);
+        }
+
+        public async Task<int> CountUnreadNotificationAsync(Guid userId)
+        {
+         return  await _notificationRepository.CountUnreadNotificationsAsync(userId);
         }
     }
 }

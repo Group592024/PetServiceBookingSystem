@@ -23,7 +23,7 @@ import {
 import { getData, deleteData } from "../../../../Utilities/ApiFunctions";
 import Swal from "sweetalert2";
 
-const NotificationsDropdown = ({ onClose }) => {
+const NotificationsDropdown = ({ onClose,onUnreadCountChange  }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -42,7 +42,9 @@ const NotificationsDropdown = ({ onClose }) => {
 
       if (response.flag) {
         setNotifications(response.data);
-        setUnreadCount(response.data.filter((n) => !n.isRead).length);
+        const unread = response.data.filter(n => !n.isRead).length;
+        setUnreadCount(unread);
+        onUnreadCountChange(unread); 
       } else {
         throw new Error(response.message || "Failed to fetch notifications");
       }
@@ -116,11 +118,14 @@ const NotificationsDropdown = ({ onClose }) => {
         n.notificationId === notificationId ? { ...n, isRead: true } : n
       )
     );
-    setUnreadCount((prev) => prev - 1);
+    const newUnread = unreadCount - 1;
+    setUnreadCount(newUnread);
+    onUnreadCountChange(newUnread); 
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    onUnreadCountChange(0); // Update parent
     setUnreadCount(0);
   };
 

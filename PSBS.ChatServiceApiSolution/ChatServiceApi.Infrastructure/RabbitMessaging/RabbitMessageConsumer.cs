@@ -1,86 +1,176 @@
-﻿
-using ChatServiceApi.Application.DTOs;
+﻿using ChatServiceApi.Application.DTOs;
 using ChatServiceApi.Application.Interfaces;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.Extensions.Logging;
+using ChatServiceApi.Infrastructure.Repositories;
 using Newtonsoft.Json;
+using Polly;
+using Polly.CircuitBreaker;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using RabbitMQ.Client.Exceptions;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Channels;
 
 namespace ChatServiceApi.Infrastructure.RabbitMessaging
 {
-    public class RabbitMessageConsumer
+    public class RabbitMessageConsumer : IDisposable
     {
-        private readonly IConnection _connection;
-        private readonly RabbitMQ.Client.IModel _channel;
+        private IConnection _connection;
+        private IModel _channel;
         private readonly INoticationRepository _notificationRepository;
+        public bool IsRabbitAvailable { get;  set; } = false;
 
-        public RabbitMessageConsumer(INoticationRepository noticationRepository)
+        private static readonly CircuitBreakerPolicy _circuitBreaker = Policy
+            .Handle<BrokerUnreachableException>()
+            .Or<SocketException>()
+            .CircuitBreaker(
+                exceptionsAllowedBeforeBreaking: 3,
+                durationOfBreak: TimeSpan.FromMinutes(1)
+            );
+
+        private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(60);
+        private DateTime _lastConnectionAttempt = DateTime.MinValue;
+
+        public RabbitMessageConsumer(INoticationRepository notificationRepository)
         {
-            var factory = new ConnectionFactory
+            _notificationRepository = notificationRepository;
+            TryInitializeRabbitMQWithRetry();
+        }
+
+        private void TryInitializeRabbitMQWithRetry()
+        {
+            // Don't attempt if we recently tried
+            if (DateTime.UtcNow - _lastConnectionAttempt < _reconnectDelay && !IsRabbitAvailable)
+                return;
+
+            _lastConnectionAttempt = DateTime.UtcNow;
+
+            if (_circuitBreaker.CircuitState == CircuitState.Open)
             {
-                Uri = new Uri("amqp://guest:guest@localhost:5672"),
-                ClientProvidedName = "Rabbit Receive App"
-            };
-            _notificationRepository = noticationRepository;
-            _connection = factory.CreateConnection();
-            _channel = _connection.CreateModel();
+                LogExceptions.LogToDebugger("⚠️ Circuit breaker is open - skipping RabbitMQ connection attempt");
+                IsRabbitAvailable = false;
+                return;
+            }
 
-            string exchangeName = "NotificationExchange";
-            string routingKey = "notification-routing-key";
-            string queueName = "notification_queue";
+            try
+            {
+                _circuitBreaker.Execute(() =>
+                {
+                    // Close existing connection if present
+                    _channel?.Close();
+                    _connection?.Close();
 
-            _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-            _channel.QueueDeclare(queueName, false, false, false, null);
-            _channel.QueueBind(queueName, exchangeName, routingKey, null);
-            _channel.BasicQos(0, 1, false);
-       
+                    var factory = new ConnectionFactory
+                    {
+                        Uri = new Uri("amqp://guest:guest@localhost:5672"),
+                        ClientProvidedName = "Rabbit Receive App",
+                        AutomaticRecoveryEnabled = true,
+                        NetworkRecoveryInterval = TimeSpan.FromSeconds(30),  // Longer recovery interval
+                        RequestedHeartbeat = TimeSpan.FromSeconds(30),       // Explicit heartbeat
+                        ContinuationTimeout = TimeSpan.FromSeconds(20),      // Operation timeout
+                        DispatchConsumersAsync = true                        // Async consumer mode
+                    };
+
+                    _connection = factory.CreateConnection();
+                    _channel = _connection.CreateModel();
+
+                    string exchangeName = "NotificationExchange";
+                    string routingKey = "notification-routing-key";
+                    string queueName = "notification_queue";
+
+                    // Declare the exchange and queue, and bind them
+                    _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
+                    _channel.QueueDeclare(queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    _channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+                    // Setup connection events
+                    _connection.ConnectionShutdown += (sender, args) =>
+                    {
+                        IsRabbitAvailable = false;
+                        LogExceptions.LogToDebugger($"⚠️ RabbitMQ connection shut down: {args.ReplyText}");
+                    };
+
+                    _connection.ConnectionBlocked += (sender, args) =>
+                    {
+                        LogExceptions.LogToDebugger($"⚠️ RabbitMQ connection blocked: {args.Reason}");
+                    };
+
+                    _connection.ConnectionUnblocked += (sender, args) =>
+                    {
+                        IsRabbitAvailable = true;
+                        LogExceptions.LogToDebugger("✅ RabbitMQ connection unblocked");
+                    };
+
+                    IsRabbitAvailable = true;
+                    LogExceptions.LogToDebugger("✅ RabbitMQ connection established");
+                });
+            }
+            catch (Exception ex)
+            {
+                IsRabbitAvailable = false;
+                LogExceptions.LogToDebugger($"⚠️ RabbitMQ connection failed: {ex.Message}");
+            }
         }
 
         public async Task<Response> PushedNotificationConsumer()
         {
-        
-            var consumer = new EventingBasicConsumer(_channel);
-
-            consumer.Received += async (sender, args) => // Add async here
+            // Attempt reconnection if not available
+            if (!IsRabbitAvailable)
             {
-                try
-                {
-                    var body = args.Body.ToArray();
-                    string message = Encoding.UTF8.GetString(body);
-                    LogExceptions.LogToDebugger("New message received: " + message);
-                    var result = await ProcessMessage(message); // Await the ProcessMessage
-                                                                // Await the Ack
-                    if (result.Flag)
-                    {
-                         _channel.BasicAck(args.DeliveryTag, false);
-                    }
-                    else
-                    {
-                         _channel.BasicNack(args.DeliveryTag, false, true);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
-                    // Decide if you want to requeue or not.
-                    _channel.BasicNack(args.DeliveryTag, false, true); // example of Nack.
-                }
-            };
+                TryInitializeRabbitMQWithRetry();
 
-             _channel.BasicConsume(queue: "notification_queue",
-                                     autoAck: false,
-                                     consumer: consumer);
+                return new Response
+                {
+                    Flag = false,
+                    Message = "RabbitMQ is not available. Messages will not be processed."
+                };
+            }
 
-            return new Response { Flag = true, Message = "The message consumer is running." }; // change flag to true since consumer is running.
+            try
+            {
+                var consumer = new AsyncEventingBasicConsumer(_channel);
+                consumer.Received += async (sender, args) =>
+                {
+                    try
+                    {
+                        var body = args.Body.ToArray();
+                        string message = Encoding.UTF8.GetString(body);
+                        LogExceptions.LogToDebugger("New message received: " + message);
+                        var result = await ProcessMessage(message);
+
+                        if (result.Flag)
+                        {
+                            _channel.BasicAck(args.DeliveryTag, false);
+                        }
+                        else
+                        {
+                            _channel.BasicNack(args.DeliveryTag, false, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
+                        _channel.BasicNack(args.DeliveryTag, false, true);
+                    }
+                    await Task.Yield();
+                };
+
+                _channel.BasicConsume(
+                    queue: "notification_queue",
+                    autoAck: false,
+                    consumer: consumer);
+
+                return new Response { Flag = true, Message = "Consumer started" };
+            }
+            catch (Exception ex)
+            {
+                IsRabbitAvailable = false;
+                LogExceptions.LogToDebugger($"⚠️ RabbitMQ consumption error: {ex.Message}");
+                return new Response { Flag = false, Message = $"Failed to start consumer: {ex.Message}" };
+            }
         }
-         
-    
-
 
         private async Task<Response> ProcessMessage(string message)
         {
@@ -126,6 +216,21 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             {
                 LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
                 return new Response { Flag = false, Message = $"Error processing message: {ex.Message}" };
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                _channel?.Close();
+                _connection?.Close();
+                _channel?.Dispose();
+                _connection?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToDebugger($"Error disposing RabbitMQ resources: {ex.Message}");
             }
         }
     }

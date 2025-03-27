@@ -44,6 +44,7 @@ const DatatableNotification = ({
           confirmButtonText: "OK",
         });
         setRows((prevRows) => [response.data, ...prevRows]);
+        return true;
       } else {
         Swal.fire({
           title: "Error!",
@@ -55,6 +56,7 @@ const DatatableNotification = ({
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("Failed to submit data.");
+      throw error;
     }
   };
 
@@ -112,9 +114,11 @@ const DatatableNotification = ({
           confirmButtonText: "OK",
         });
       }
+      return true;
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("Failed to submit data.");
+      throw error;
     }
   };
   const actionColumn = [

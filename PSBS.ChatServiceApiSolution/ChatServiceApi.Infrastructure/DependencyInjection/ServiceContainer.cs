@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSPS.SharedLibrary.DependencyInjection;
+using RabbitMQ.Client;
 
 namespace ChatServiceApi.Infrastructure.DependencyInjection
 {
@@ -24,8 +25,21 @@ namespace ChatServiceApi.Infrastructure.DependencyInjection
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<INoticationRepository, NotificationRepository>();
-            services.AddScoped<INotificationMessagePublisher, RabbitMQMessagePublisher>();
-            services.AddScoped<RabbitMessageConsumer>();
+            // Reuse connections across requests
+            services.AddSingleton<IConnection>(sp =>
+                new ConnectionFactory().CreateConnection());
+            if (!string.IsNullOrEmpty(config["RabbitMQ:Uri"]))
+            {
+                services.AddScoped<INotificationMessagePublisher, RabbitMQMessagePublisher>();
+                services.AddScoped<RabbitMessageConsumer>();
+            }
+            else
+            {
+                services.AddScoped<INotificationMessagePublisher, NullMessagePublisher>(); // Fallback
+                services.AddScoped<RabbitMessageConsumer>(_ =>
+                    new RabbitMessageConsumer(null) { IsRabbitAvailable = false });
+            }
+
 
             // Register the BackgroundService
             services.AddHostedService<NotificationMessageWorker>();

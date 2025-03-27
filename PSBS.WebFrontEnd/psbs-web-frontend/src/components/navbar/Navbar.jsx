@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
+import signalRService from "../../lib/ChatService";
 
 const Navbar = ({ sidebarRef }) => {
   const [accountName, setAccountName] = useState(null);
@@ -11,7 +12,46 @@ const Navbar = ({ sidebarRef }) => {
   const [imagePreview, setImagePreview] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const navigate = useNavigate();
-  const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
+  const [notificationDropdownVisible, setNotificationDropdownVisible] =
+    useState(false);
+    const [notificationCount, setNotificationCount] = useState("0");
+  const intervalRef = useRef(null);
+  const isNotificationOpenRef = useRef(false);
+
+  // Create a ref to store the latest notification count from dropdown
+  const dropdownUnreadCountRef = useRef(0);
+  useEffect(() => {
+    const id = sessionStorage.getItem("accountId");
+
+    const handleNotificationCount = (value) => {
+      // Only update if dropdown is closed or we haven't received data from dropdown
+      if (!isNotificationOpenRef.current) {
+        setNotificationCount(value.unreadChats);
+      }
+    };
+
+    const fetchNotificationCount = () => {
+      if (id) {
+        signalRService.invoke("GetUnreadNotificationCount", id).catch(console.error);
+      }
+    };
+
+    // Initial fetch
+    fetchNotificationCount();
+
+    // Set up periodic refresh only when dropdown is closed
+    intervalRef.current = setInterval(fetchNotificationCount, 30000);
+
+    // Set up listener
+    signalRService.on("chatcount", handleNotificationCount);
+
+    return () => {
+      clearInterval(intervalRef.current);
+      signalRService.off("chatcount", handleNotificationCount);
+    };
+  }, []);
+
+
   useEffect(() => {
     const token = sessionStorage.getItem("token");
 
@@ -52,7 +92,23 @@ const Navbar = ({ sidebarRef }) => {
     }
   }, []);
   const toggleNotificationDropdown = () => {
-    setNotificationDropdownVisible(!notificationDropdownVisible);
+    const newState = !notificationDropdownVisible;
+    setNotificationDropdownVisible(newState);
+    isNotificationOpenRef.current = newState;
+
+    // When opening, use the dropdown's count
+    if (newState) {
+      setNotificationCount(dropdownUnreadCountRef.current.toString());
+    } else {
+      // When closing, fetch the latest count from SignalR
+      const id = sessionStorage.getItem("accountId");
+      if (id) {
+        signalRService.invoke("GetUnreadNotificationCount", id).catch(console.error);
+      }
+    }
+  };
+  const toggleDropdown = () => {
+    setDropdownVisible(!dropdownVisible);
   };
   const handleMenuClick = () => {
     if (sidebarRef.current) {
@@ -60,11 +116,6 @@ const Navbar = ({ sidebarRef }) => {
       localStorage.setItem("sidebarClosed", isClosed);
     }
   };
-
-  const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
-  };
-
   const handleLogout = () => {
     Swal.fire({
       title: "Are you sure? You want to log out?",
@@ -109,17 +160,23 @@ const Navbar = ({ sidebarRef }) => {
       <label htmlFor="theme-toggle"></label>
       <div className="notifications" onClick={toggleNotificationDropdown}>
         <i class="bx bx-bell"></i>
-        <span className="count">12</span>
+        <span className="count">{notificationCount}</span>
       </div>
       <a href="/chat" className="notifications">
         <i className="bx bx-message-square-dots"></i>
-        <span className="count">12</span>
       </a>
       {notificationDropdownVisible && (
-          <NotificationsDropdown 
-            onClose={() => setNotificationDropdownVisible(false)}
-          />
-        )}
+         <NotificationsDropdown 
+         onClose={() => {
+           setNotificationDropdownVisible(false);
+           isNotificationOpenRef.current = false;
+         }}
+         onUnreadCountChange={(count) => {
+           dropdownUnreadCountRef.current = count;
+           setNotificationCount(count.toString());
+         }}
+       />
+      )}
       <div className="navbar-profile" onClick={toggleDropdown}>
         {imagePreview ? (
           <img

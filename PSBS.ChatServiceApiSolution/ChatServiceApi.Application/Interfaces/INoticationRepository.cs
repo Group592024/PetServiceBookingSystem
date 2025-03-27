@@ -15,5 +15,6 @@ namespace ChatServiceApi.Application.Interfaces
         Task<Response> DetelteNotification(Guid notificationId);
         Task<Response> SetNotificationIsRead(Guid notificationBoxId);
         Task<Response> PushSingleNotification(Guid notificationId, Guid guid);
+        Task<int> CountUnreadNotificationsAsync(Guid userId);
     }
 }

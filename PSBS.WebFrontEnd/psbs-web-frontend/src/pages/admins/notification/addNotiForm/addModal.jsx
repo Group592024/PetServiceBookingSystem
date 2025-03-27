@@ -17,14 +17,14 @@ import {
 import { Close, Send } from "@mui/icons-material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-
+import CircularProgress from '@mui/material/CircularProgress';
 const CreateNotificationModal = ({ open, onClose, onCreate }) => {
   const [notificationTypes] = useState([
     { NotiTypeId: "11111111-1111-1111-1111-111111111111", NotiName: "Common" },
     { NotiTypeId: "22222222-2222-2222-2222-222222222222", NotiName: "Booking" },
     { NotiTypeId: "33333333-3333-3333-3333-333333333333", NotiName: "Other" },
   ]);
-
+  const [isLoading, setIsLoading] = useState(false);
   const validationSchema = Yup.object().shape({
     NotiTypeId: Yup.string().required("Notification Type is required"),
     NotificationTitle: Yup.string()
@@ -41,10 +41,16 @@ const CreateNotificationModal = ({ open, onClose, onCreate }) => {
     NotificationContent: "",
   };
 
-  const handleSubmit = (values, { resetForm }) => {
-    onCreate(values);
-    resetForm();
-    onClose();
+  const handleSubmit = async (values, { resetForm }) => {
+    setIsLoading(true);
+    try {
+      await onCreate(values);
+      resetForm();
+      onClose();
+    } catch (error) {
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -185,10 +191,17 @@ const CreateNotificationModal = ({ open, onClose, onCreate }) => {
                       type="submit"
                       variant="contained"
                       color="primary"
-                      endIcon={<Send />}
-                      sx={{ px: 4 }}
+                      endIcon={
+                        isLoading ? (
+                          <CircularProgress size={24} color="inherit" />
+                        ) : (
+                          <Send />
+                        )
+                      }
+                      sx={{ px: 4, minWidth: 180 }}
+                      disabled={isLoading}
                     >
-                      Create Notification
+                      {isLoading ? "Creating..." : "Create Notification"}
                     </Button>
                   </Box>
                 </Stack>
