@@ -2,16 +2,21 @@ import "./datatable.css";
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Swal from "sweetalert2";
+import EditIcon from "@mui/icons-material/Edit";
+import IconButton from "@mui/material/IconButton";
+import DeleteIcon from "@mui/icons-material/Delete";
+import InfoIcon from "@mui/icons-material/Info";
 
 const Datatable = () => {
   const [medicines, setMedicines] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const getToken = () => {
     return sessionStorage.getItem('token');
@@ -35,10 +40,6 @@ const Datatable = () => {
       );
 
       if (medicinesResponse.data.flag) {
-        toast.success(
-          medicinesResponse.data.message ||
-            "Medicines data fetched successfully!"
-        );
         setMedicines(medicinesResponse.data.data);
       } else {
         setError(medicinesResponse.data.message || "No medicines found");
@@ -143,63 +144,26 @@ const Datatable = () => {
             className="cellAction"
             class="flex justify-around items-center w-full h-full"
           >
-            <Link
-              to={`/medicines/detail/${medicineId}`}
-              className="detailBtn"
-              style={{ textDecoration: "none" }}
+            <IconButton
+              aria-label="info"
+              onClick={() => navigate(`/medicines/detail/${medicineId}`)}
             >
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                />
-              </svg>
-            </Link>
-            <Link
-              to={`/medicines/update/${medicineId}`}
-              className="editBtn"
-              style={{ textDecoration: "none" }}
+              <InfoIcon color="info" />
+            </IconButton>
+            <IconButton
+              aria-label="edit"
+              onClick={() => navigate(`/medicines/update/${medicineId}`)}
             >
-              <svg
-                className="w-6 h-6 text-gray-800 dark:text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
-                />
-              </svg>
-            </Link>
-            <div className="deleteBtn" onClick={() => handleDelete(medicineId)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M7.5 1h9v3H22v2h-2.029l-.5 17H4.529l-.5-17H2V4h5.5V1Zm2 3h5V3h-5v1ZM6.03 6l.441 15h11.058l.441-15H6.03ZM13 8v11h-2V8h2Z"
-                />
-              </svg>
-            </div>
+              <EditIcon color="success" />
+            </IconButton>
+            <IconButton
+              aria-label="delete"
+              onClick={() => {
+                handleDelete(medicineId);
+              }}
+            >
+              <DeleteIcon color="error" />
+            </IconButton>
           </div>
         );
       },

@@ -6,6 +6,7 @@ import 'booking_service_form.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -606,73 +607,265 @@ class _AddBookingPageState extends State<AddBookingPage> {
         isActive: _currentStep >= 2,
       ),
       Step(
-        title: Text("Booking Summary"),
-        content: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Service Type: $_serviceType"),
-            Text("Booking Details:",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            if (_serviceType == "Room") ...[
-              ..._bookingRoomData.map((room) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Room: ${_roomNames[room["room"].toString()] ?? "Loading..."}"),
-                  Text("Pet: ${_petNames[room["pet"].toString()] ?? "Loading..."}"),
-                  Text("Start Date: ${room["start"]}"),
-                  Text("End Date: ${room["end"]}"),
-                  Text("Room Price: ${room["price"]} VND"),
-                  Text("Camera: ${room["camera"] ? "Yes (+50,000 VND)" : "No"}"),
-                  Divider(),
-                ],
-              )),
-              Text("Subtotal: ${_calculateSubtotal()} VND",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              if (_selectedVoucher != null) ...[
-                Text("Voucher Applied: ${_vouchers.firstWhere((v) => v['voucherId'] == _selectedVoucher, orElse: () => {})['voucherName']}"),
-                Text("Discount: ${_calculateDiscount()} VND",
-                    style: TextStyle(color: Colors.green)),
-              ],
-              Divider(thickness: 2),
-              Text("Final Total: $_totalPrice VND",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-            ] else
-              ..._bookingServiceData.map((service) => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Service Name: ${service["service"]?["name"] ?? "Unknown Service"}',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Variant: ${service["serviceVariant"]?["content"] ?? "No Variant"}',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      Text(
-                        'Price: ${service["serviceVariant"]?["price"] ?? "No Price"} VND',
-                        style: TextStyle(fontSize: 14),
-                      ),
-                      Text(
-                        'Pet: ${service["pet"]?["name"] ?? "Unknown Pet"}',
-                        style: TextStyle(
-                            fontSize: 14, fontStyle: FontStyle.italic),
-                      ),
-                      Divider(),
-                    ],
-                  )),
-            Text("Total Price: $_totalPrice VND",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            Text(
-                "Voucher Applied: ${_vouchers.firstWhere((v) => v['voucherId'] == _selectedVoucher, orElse: () => {})['voucherName'] ?? "No Voucher"}"),
-            Text(
-                "Payment Type: ${_paymentTypes.firstWhere((p) => p['paymentTypeId'] == _selectedPaymentType, orElse: () => {})['paymentTypeName'] ?? "Not Selected"}"),
-          ],
+  title: Text(
+    "Booking Summary",
+    style: TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.bold,
+      color: Colors.blue.shade800,
+    ),
+  ),
+  content: Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      // Service Type Header
+      Container(
+        padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.blue.shade50,
+          borderRadius: BorderRadius.circular(8),
         ),
-        isActive: _currentStep >= 3,
+        child: Text(
+          "Service Type: $_serviceType",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue.shade700,
+          ),
+        ),
       ),
+      SizedBox(height: 16),
+
+      Text(
+        "Booking Details:",
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade800,
+        ),
+      ),
+      SizedBox(height: 8),
+
+      if (_serviceType == "Room") ...[
+        ..._bookingRoomData.map((room) => Card(
+          elevation: 2,
+          margin: EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow(
+                  icon: Icons.meeting_room,
+                  label: "Room",
+                  value: _roomNames[room["room"].toString()] ?? "Loading...",
+                ),
+                _buildDetailRow(
+                  icon: Icons.pets,
+                  label: "Pet",
+                  value: _petNames[room["pet"].toString()] ?? "Loading...",
+                ),
+                _buildDetailRow(
+                  icon: Icons.calendar_today,
+                  label: "Start Date",
+                  value: _formatDate(room["start"]),
+                ),
+                _buildDetailRow(
+                  icon: Icons.calendar_today,
+                  label: "End Date",
+                  value: _formatDate(room["end"]),
+                ),
+                _buildDetailRow(
+                  icon: Icons.attach_money,
+                  label: "Room Price",
+                  value: "${room["price"]} VND",
+                  valueStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+                _buildDetailRow(
+                  icon: Icons.videocam,
+                  label: "Camera",
+                  value: room["camera"] ? "Yes (+50,000 VND)" : "No",
+                ),
+                Divider(height: 20),
+              ],
+            ),
+          ),
+        )),
+        _buildPriceRow(
+          label: "Subtotal",
+          value: "${_calculateSubtotal()} VND",
+        ),
+        if (_selectedVoucher != null) ...[
+          SizedBox(height: 8),
+          _buildDetailRow(
+            icon: Icons.local_offer,
+            label: "Voucher Applied",
+            value: _vouchers.firstWhere(
+              (v) => v['voucherId'] == _selectedVoucher, 
+              orElse: () => {}
+            )['voucherName'],
+            valueStyle: TextStyle(color: Colors.blue.shade700),
+          ),
+          _buildPriceRow(
+            label: "Discount",
+            value: "${_calculateDiscount()} VND",
+            isDiscount: true,
+          ),
+        ],
+        Divider(thickness: 2, height: 24),
+        _buildPriceRow(
+          label: "Final Total",
+          value: "$_totalPrice VND",
+          isTotal: true,
+        ),
+      ] else ...[
+        ..._bookingServiceData.map((service) => Card(
+          elevation: 2,
+          margin: EdgeInsets.only(bottom: 12),
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  service["service"]?["name"] ?? "Unknown Service",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.purple.shade700,
+                  ),
+                ),
+                SizedBox(height: 8),
+                _buildDetailRow(
+                  icon: Icons.category,
+                  label: "Variant",
+                  value: service["serviceVariant"]?["content"] ?? "No Variant",
+                ),
+                _buildDetailRow(
+                  icon: Icons.attach_money,
+                  label: "Price",
+                  value: "${service["serviceVariant"]?["price"] ?? "0"} VND",
+                  valueStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green.shade700,
+                  ),
+                ),
+                _buildDetailRow(
+                  icon: Icons.pets,
+                  label: "Pet",
+                  value: service["pet"]?["name"] ?? "Unknown Pet",
+                ),
+                Divider(height: 20),
+              ],
+            ),
+          ),
+        )),
+        _buildPriceRow(
+          label: "Total Price",
+          value: "$_totalPrice VND",
+        ),
+      ],
+      SizedBox(height: 16),
+      _buildDetailRow(
+        icon: Icons.local_offer,
+        label: "Voucher Applied",
+        value: _vouchers.firstWhere(
+          (v) => v['voucherId'] == _selectedVoucher, 
+          orElse: () => {}
+        )['voucherName'] ?? "No Voucher",
+      ),
+      _buildDetailRow(
+        icon: Icons.payment,
+        label: "Payment Type",
+        value: _paymentTypes.firstWhere(
+          (p) => p['paymentTypeId'] == _selectedPaymentType, 
+          orElse: () => {}
+        )['paymentTypeName'] ?? "Not Selected",
+      ),
+    ],
+  ),
+  isActive: _currentStep >= 3,
+),
     ];
   }
+  Widget _buildDetailRow({
+  required IconData icon,
+  required String label,
+  required String value,
+  TextStyle? valueStyle,
+}) {
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey.shade600),
+        SizedBox(width: 8),
+        Text(
+          "$label: ",
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: valueStyle ?? TextStyle(),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildPriceRow({
+  required String label,
+  required String value,
+  bool isDiscount = false,
+  bool isTotal = false,
+}) {
+  return Container(
+    padding: EdgeInsets.all(12),
+    margin: EdgeInsets.symmetric(vertical: 4),
+    decoration: BoxDecoration(
+      color: isTotal ? Colors.blue.shade50 : Colors.grey.shade50,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDiscount ? Colors.red.shade700 : Colors.grey.shade800,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: isTotal ? 16 : 14,
+            color: isDiscount 
+              ? Colors.red.shade700 
+              : isTotal 
+                ? Colors.blue.shade800 
+                : Colors.green.shade700,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+String _formatDate(String dateString) {
+  try {
+    final date = DateTime.parse(dateString);
+    return DateFormat('MMM dd, yyyy - hh:mm a').format(date);
+  } catch (e) {
+    return dateString;
+  }
+}
 
   Widget _buildServiceOption(String option) {
     return GestureDetector(

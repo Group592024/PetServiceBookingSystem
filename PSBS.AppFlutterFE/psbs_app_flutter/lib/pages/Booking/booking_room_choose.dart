@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class BookingRoomChoose extends StatefulWidget {
   final Map<String, dynamic> bookingData;
@@ -258,108 +259,286 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
+          ),
+        ),
+      );
     }
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 5)],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          DropdownButtonFormField(
-            decoration: InputDecoration(
-              labelText: "Room",
-              border: OutlineInputBorder(),
-            ),
-            value: formData["room"].isNotEmpty ? formData["room"] : null,
-            onChanged: (value) => handleChange("room", value),
-            items: rooms.map((room) {
-              return DropdownMenuItem(
-                value: room["roomId"],
-                child: Text("${room["roomName"]} - ${room["description"]}"),
-              );
-            }).toList(),
-            validator: (value) => value == null ? 'Please select a room' : null,
-          ),
-          SizedBox(height: 10),
-          DropdownButtonFormField(
-            decoration: InputDecoration(
-              labelText: "Pet",
-              border: OutlineInputBorder(),
-            ),
-            value: formData["pet"].isNotEmpty ? formData["pet"] : null,
-            onChanged: (value) => handleChange("pet", value),
-            items: pets.map((pet) {
-              return DropdownMenuItem(
-                value: pet["petId"],
-                child: Text(pet["petName"]),
-              );
-            }).toList(),
-            validator: (value) => value == null ? 'Please select a pet' : null,
-          ),
-          SizedBox(height: 10),
-          InkWell(
-            onTap: () => pickDateTime("start"),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: "Start Date & Time",
-                border: OutlineInputBorder(),
-              ),
-              child: Text(
-                formData["start"].isNotEmpty
-                    ? DateTime.parse(formData["start"]).toString()
-                    : "Select Date & Time",
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          InkWell(
-            onTap: () => pickDateTime("end"),
-            child: InputDecorator(
-              decoration: InputDecoration(
-                labelText: "End Date & Time",
-                border: OutlineInputBorder(),
-              ),
-              child: Text(
-                formData["end"].isNotEmpty
-                    ? DateTime.parse(formData["end"]).toString()
-                    : "Select Date & Time",
-              ),
-            ),
-          ),
-          SizedBox(height: 10),
-          CheckboxListTile(
-            title: Text("Camera (+50,000 VND)"),
-            value: formData["camera"] ?? false,
-            onChanged: (bool? value) {
-              handleChange("camera", value ?? false);
-            },
-            controlAffinity: ListTileControlAffinity.leading,
-          ),
-          if (error != null)
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8),
-              child: Text(
-                error!,
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          SizedBox(height: 10),
           Text(
-            "Total Price: ${formData["price"]} VND",
+            "Booking Details",
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.green,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(height: 20),
+          
+          // Room Selection
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Select Room",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonFormField(
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Choose a room",
+                    ),
+                    value: formData["room"].isNotEmpty ? formData["room"] : null,
+                    onChanged: (value) => handleChange("room", value),
+                    items: rooms.map((room) {
+                      return DropdownMenuItem(
+                        value: room["roomId"],
+                        child: Text(
+                          "${room["roomName"]} - ${room["description"]}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a room' : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Pet Selection
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Select Pet",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonFormField(
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Choose your pet",
+                    ),
+                    value: formData["pet"].isNotEmpty ? formData["pet"] : null,
+                    onChanged: (value) => handleChange("pet", value),
+                    items: pets.map((pet) {
+                      return DropdownMenuItem(
+                        value: pet["petId"],
+                        child: Text(
+                          pet["petName"],
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a pet' : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Date/Time Pickers
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateTimePicker(
+                  "Start Date & Time",
+                  formData["start"],
+                  () => pickDateTime("start"),
+                ),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: _buildDateTimePicker(
+                  "End Date & Time",
+                  formData["end"],
+                  () => pickDateTime("end"),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Camera Option
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: CheckboxListTile(
+              title: Text(
+                "Add Camera Monitoring",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(
+                "+50,000 VND",
+                style: TextStyle(color: Colors.green.shade700),
+              ),
+              value: formData["camera"] ?? false,
+              onChanged: (bool? value) {
+                handleChange("camera", value ?? false);
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+          
+          if (error != null) ...[
+            SizedBox(height: 12),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      error!,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          
+          SizedBox(height: 20),
+          
+          // Price Display
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  "Total Price",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "${formData["price"]} VND",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue.shade900,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildDateTimePicker(String label, String value, VoidCallback onTap) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      SizedBox(height: 8),
+      InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: Colors.grey.shade600,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  value.isNotEmpty
+                      ? "${DateFormat('MMM dd, yyyy').format(DateTime.parse(value))} at ${DateFormat('hh:mm a').format(DateTime.parse(value))}"
+                      : "Select",
+                  style: TextStyle(
+                    color: value.isNotEmpty ? Colors.black : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
 }

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'booking_room_choose.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class BookingRoomForm extends StatefulWidget {
   final String? cusId;
   final Function(List<Map<String, dynamic>>)? onBookingDataChange;
@@ -341,6 +342,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                     onPressed: () {
                       setState(() {
                         _bookingRooms.removeAt(index);
+                        _calculateTotalPrice();
                       });
                       _notifyParent();
                     },
