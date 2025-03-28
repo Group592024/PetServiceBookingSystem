@@ -17,8 +17,8 @@ class PetPage extends StatefulWidget {
 
 class _CustomerPetListState extends State<PetPage> {
   late Future<List<Pet>> pets;
-  final String apiUrl = 'http://192.168.1.6:5050/api/pet/available/';
-  final String deleteUrl = 'http://192.168.1.6:5050/api/pet/';
+  final String apiUrl = 'http://10.0.2.2:5050/api/pet/available/';
+  final String deleteUrl = 'http://10.0.2.2:5050/api/pet/';
   late String userId;
   bool isGridView = false;
 
@@ -462,7 +462,7 @@ class _CustomerPetListState extends State<PetPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.teal.shade50,
+              Colors.blue.shade50,
               Colors.white,
             ],
           ),
@@ -480,7 +480,7 @@ class _CustomerPetListState extends State<PetPage> {
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.teal.shade800,
+                        color: Colors.blue.shade800,
                       ),
                     ),
                     IconButton(
@@ -490,8 +490,8 @@ class _CustomerPetListState extends State<PetPage> {
                         });
                       },
                       icon: Icon(
-                        isGridView ? Icons.view_list : Icons.grid_view,
-                        color: Colors.teal,
+                        isGridView ? Icons.grid_view : Icons.view_list,
+                        color: Colors.blue,
                       ),
                     ),
                   ],
@@ -561,7 +561,7 @@ class _CustomerPetListState extends State<PetPage> {
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.network(
-              'http://192.168.1.6:5050/pet-service${pet.petImage}',
+       'http://10.0.2.2:5050/pet-service${pet.petImage}',
               height: 250,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -582,7 +582,7 @@ class _CustomerPetListState extends State<PetPage> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal.shade800,
+                          color: Colors.blue.shade800,
                         ),
                       ),
                     ),
@@ -685,13 +685,13 @@ class _CustomerPetListState extends State<PetPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.teal),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
           ),
           SizedBox(height: 16),
           Text(
             'Loading your pets...',
             style: TextStyle(
-              color: Colors.teal,
+              color: Colors.blue,
               fontSize: 16,
               fontWeight: FontWeight.w500,
             ),
@@ -710,13 +710,13 @@ class _CustomerPetListState extends State<PetPage> {
           Container(
             padding: EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.teal.withOpacity(0.1),
+              color: Colors.blue.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.pets,
               size: 72,
-              color: Colors.teal,
+              color: Colors.blue,
             ),
           ),
           SizedBox(height: 24),
@@ -725,7 +725,7 @@ class _CustomerPetListState extends State<PetPage> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Colors.teal.shade800,
+              color: Colors.blue.shade800,
             ),
           ),
           SizedBox(height: 12),
@@ -835,7 +835,7 @@ class _CustomerPetListState extends State<PetPage> {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.teal.shade800,
+                          color: Colors.blue.shade800,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

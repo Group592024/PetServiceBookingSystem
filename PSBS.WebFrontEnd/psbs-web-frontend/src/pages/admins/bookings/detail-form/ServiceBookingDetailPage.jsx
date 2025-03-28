@@ -13,13 +13,12 @@ const ServiceBookingDetailPage = () => {
   const [booking, setBooking] = useState(null);
   const [serviceItems, setServiceItems] = useState([]);
   const [paymentTypeName, setPaymentTypeName] = useState("");
-  const [serviceName, setServiceName] = useState("");
   const [accountName, setAccountName] = useState("");
   const [bookingStatusName, setBookingStatusName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
-  const [serviceVariantInfo, setServiceVariantInfo] = useState({});
+  const [serviceInfo, setServiceInfo] = useState({}); // Stores both service and variant info
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -47,9 +46,10 @@ const ServiceBookingDetailPage = () => {
     }
   };
 
-  const fetchServiceVariantInfo = async (serviceVariantId) => {
+  const fetchServiceDetails = async (serviceVariantId) => {
     try {
-      const response = await axios.get(
+      // First get the variant details
+      const variantResponse = await axios.get(
         `http://localhost:5050/api/ServiceVariant/${serviceVariantId}`,
         {
           headers: {
@@ -57,14 +57,38 @@ const ServiceBookingDetailPage = () => {
           },
         }
       );
-      if (response.data.flag) {
-        setServiceVariantInfo(prev => ({
-          ...prev,
-          [serviceVariantId]: response.data.data
-        }));
+
+      if (variantResponse.data.flag) {
+        const variantData = variantResponse.data.data;
+        const serviceId = variantData.serviceId;
+
+        // Then get the service details
+        const serviceResponse = await axios.get(
+          `http://localhost:5050/api/Service/${serviceId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
+        );
+
+        if (serviceResponse.data.flag) {
+          const serviceData = serviceResponse.data.data;
+          
+          // Store both service and variant info
+          setServiceInfo(prev => ({
+            ...prev,
+            [serviceVariantId]: {
+              serviceName: serviceData.serviceName,
+              variantName: variantData.serviceVariantName,
+              variantContent: variantData.serviceContent,
+              variantPrice: variantData.servicePrice
+            }
+          }));
+        }
       }
     } catch (error) {
-      console.error("Error fetching service variant info:", error);
+      console.error("Error fetching service details:", error);
     }
   };
 
@@ -129,46 +153,13 @@ const ServiceBookingDetailPage = () => {
         );
 
         if (itemsResponse.data && itemsResponse.data.data.length > 0) {
-          const item = itemsResponse.data.data[0];
-          const serviceVariantId = item.serviceVariantId;
-
-          if (
-            serviceVariantId &&
-            serviceVariantId !== "00000000-0000-0000-0000-000000000000"
-          ) {
-            const serviceVariantResponse = await axios.get(
-              `http://localhost:5050/api/ServiceVariant/${serviceVariantId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${getToken()}`,
-                },
-              }
-            );
-            const serviceId = serviceVariantResponse.data?.data?.serviceId;
-
-            if (serviceId) {
-              const serviceResponse = await axios.get(
-                `http://localhost:5050/api/Service/${serviceId}`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${getToken()}`,
-                  },
-                }
-              );
-              setServiceName(
-                serviceResponse.data?.data?.serviceName || "Unknown"
-              );
-            }
-          } else {
-            setError("Invalid service variant ID");
-          }
-
           setServiceItems(itemsResponse.data.data);
-          // Fetch pet names and service variant info for all items
+          
+          // Fetch details for each item
           itemsResponse.data.data.forEach(item => {
             fetchPetName(item.petId);
-            if (item.serviceVariantId) {
-              fetchServiceVariantInfo(item.serviceVariantId);
+            if (item.serviceVariantId && item.serviceVariantId !== "00000000-0000-0000-0000-000000000000") {
+              fetchServiceDetails(item.serviceVariantId);
             }
           });
         }
@@ -215,6 +206,7 @@ const ServiceBookingDetailPage = () => {
       }
     });
   };
+
   const handleNextStatus = async () => {
     const statusOrder = ["Pending", "Confirmed", "Processing", "Completed"];
     const currentIndex = statusOrder.indexOf(bookingStatusName);
@@ -258,6 +250,7 @@ const ServiceBookingDetailPage = () => {
       );
     }
   };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -363,10 +356,6 @@ const ServiceBookingDetailPage = () => {
                       {bookingStatusName}
                     </span>
                   </p>
-                  <p className="text-lg">
-                    <span className="font-semibold text-gray-700">Service:</span>{" "}
-                    <span className="text-gray-800">{serviceName}</span>
-                  </p>
                 </div>
               </div>
               <div className="mt-6 pt-6 border-t border-gray-200">
@@ -425,25 +414,37 @@ const ServiceBookingDetailPage = () => {
                 >
                   <h4 className="text-xl font-semibold text-gray-800 mb-4">Service Item #{index + 1}</h4>
                   <div className="space-y-3">
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Service Name:</span>{" "}
-                      <span className="text-blue-600">{serviceName}</span>
-                    </p>
-                    {serviceVariantInfo[item.serviceVariantId] && (
-                      <div className="bg-gray-50 p-3 rounded-lg">
+                    {serviceInfo[item.serviceVariantId] ? (
+                      <>
                         <p className="text-gray-700">
-                          <span className="font-semibold">Service Variant:</span>{" "}
-                          <span className="text-gray-800">
-                            {serviceVariantInfo[item.serviceVariantId].serviceContent}
+                          <span className="font-semibold">Service:</span>{" "}
+                          <span className="text-blue-600">
+                            {serviceInfo[item.serviceVariantId].serviceName}
                           </span>
                         </p>
-                        <p className="text-gray-700 mt-1">
-                          <span className="font-semibold">Variant Price:</span>{" "}
-                          <span className="text-green-600 font-semibold">
-                            {serviceVariantInfo[item.serviceVariantId].servicePrice.toLocaleString()} VND
-                          </span>
-                        </p>
-                      </div>
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <p className="text-gray-700">
+                            <span className="font-semibold">Variant:</span>{" "}
+                            <span className="text-gray-800">
+                              {serviceInfo[item.serviceVariantId].variantName}
+                            </span>
+                          </p>
+                          <p className="text-gray-700 mt-1">
+                            <span className="font-semibold">Content:</span>{" "}
+                            <span className="text-gray-800">
+                              {serviceInfo[item.serviceVariantId].variantContent}
+                            </span>
+                          </p>
+                          <p className="text-gray-700 mt-1">
+                            <span className="font-semibold">Base Price:</span>{" "}
+                            <span className="text-green-600 font-semibold">
+                              {serviceInfo[item.serviceVariantId].variantPrice.toLocaleString()} VND
+                            </span>
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <p className="text-gray-500">Loading service details...</p>
                     )}
                     <p className="text-gray-700">
                       <span className="font-semibold">Pet:</span>{" "}

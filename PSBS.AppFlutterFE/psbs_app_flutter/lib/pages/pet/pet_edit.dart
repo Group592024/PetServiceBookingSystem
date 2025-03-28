@@ -107,7 +107,7 @@ class _PetEditState extends State<PetEdit> {
       String? token = prefs.getString('token');
 
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/petType'),
+        Uri.parse('http://10.0.2.2:5050/api/petType/available'),
         headers: {
           "Content-Type": "application/json",
           if (token != null) "Authorization": "Bearer $token",
@@ -115,13 +115,22 @@ class _PetEditState extends State<PetEdit> {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        setState(() {
-          _petTypes = data
-              .where((type) => type['isDelete'] != true)
-              .map((json) => PetType.fromJson(json))
-              .toList();
-        });
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        if (jsonResponse.containsKey('data') && jsonResponse['data'] is List) {
+          final List<dynamic> data = jsonResponse['data'];
+
+          setState(() {
+            _petTypes = data
+                .where((type) => type['isDelete'] != true)
+                .map((json) => PetType.fromJson(json))
+                .toList();
+          });
+        } else {
+          _showErrorDialog('Invalid API response format');
+        }
+      } else {
+        _showErrorDialog('Failed to fetch pet types: ${response.statusCode}');
       }
     } catch (e) {
       _showErrorDialog('Failed to fetch pet types');
@@ -538,7 +547,23 @@ class _PetEditState extends State<PetEdit> {
                       ),
                       child: Icon(Icons.arrow_back, color: Colors.blue),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      String? accountId = prefs.getString('accountId');
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyHomePage(
+                            title: "PetEase App",
+                            accountId: accountId ?? "",
+                            initialIndex: 1,
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    },
                   ),
                   flexibleSpace: FlexibleSpaceBar(
                     title: Text(

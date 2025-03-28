@@ -74,7 +74,7 @@ const Sidebar = forwardRef((_, ref) => {
           }
         >
           <Link to="/admin/bookings/">
-            <i className="bx bxs-cat"></i>
+          <i class='bx bxs-book-content'></i>
             Booking
           </Link>
         </li>
@@ -140,16 +140,24 @@ const Sidebar = forwardRef((_, ref) => {
             Voucher
           </Link>
         </li>
+        <li
+          className={location.pathname.startsWith("/notification") ? "active" : ""}
+        >
+          <Link to="/notification">
+          <i class='bx bx-bell'></i>
+            Notification
+          </Link>
+        </li>
       </ul>
 
-      <ul className="side-menu">
+      {/* <ul className="side-menu">
         <li>
           <a href="#" className="logout" onClick={handleLogout}>
             <i className="bx bx-log-out-circle"></i>
             Logout
           </a>
         </li>
-      </ul>
+      </ul> */}
     </div>
   );
 });

@@ -52,7 +52,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         headers['Authorization'] = 'Bearer $token';
       }
       final petResponse = await http.get(
-        Uri.parse('http://192.168.1.6:5050/api/pet/${widget.petId}'),
+   Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -67,7 +67,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
       final breedResponse = await http.get(
         Uri.parse(
-            'http://192.168.1.6:5050/api/petBreed/${petData['data']['petBreedId']}'),
+        'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -121,14 +121,29 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 ),
                 child: Icon(Icons.arrow_back, color: Colors.blue),
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                String? accountId = prefs.getString('accountId');
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyHomePage(
+                      title: "PetEase App",
+                      accountId: accountId ?? "",
+                      initialIndex: 1,
+                    ),
+                  ),
+                  (route) => false,
+                );
+              },
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    'http://192.168.1.6:5050/pet-service${pet!['petImage']}',
+   'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
                     fit: BoxFit.cover,
                   ),
                   Container(
@@ -580,9 +595,10 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         };
-
         final response = await http.delete(
-            Uri.parse('http://192.168.1.6:5050/api/pet/${widget.petId}'));
+     Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+          headers: headers,
+        );
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

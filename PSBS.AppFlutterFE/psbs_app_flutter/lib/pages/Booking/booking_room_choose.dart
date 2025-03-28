@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 
 class BookingRoomChoose extends StatefulWidget {
   final Map<String, dynamic> bookingData;
@@ -30,14 +31,14 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
     "pet": "",
     "start": "",
     "end": "",
-    "price": "",
+    "price": "0",
     "camera": false,
   };
 
   @override
   void initState() {
     super.initState();
-    formData = widget.bookingData;
+    formData = {...widget.bookingData};
     fetchRoomsAndPets();
   }
 
@@ -47,6 +48,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       String? token = prefs.getString('token');
       String? accountId = prefs.getString('accountId');
 
+      // Fetch rooms
       final roomResponse = await http.get(
         Uri.parse("http://127.0.0.1:5050/api/Room/available"),
         headers: {
@@ -54,41 +56,60 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
           "Content-Type": "application/json",
         },
       );
-      final roomData = jsonDecode(roomResponse.body);
-      if (roomData["flag"]) {
-        setState(() {
-          rooms = List<Map<String, dynamic>>.from(roomData["data"]);
-        });
-      } else {
-        setState(() => error = "Failed to fetch rooms.");
+      
+      if (roomResponse.statusCode == 200) {
+        final roomData = jsonDecode(roomResponse.body);
+        if (roomData["flag"]) {
+          setState(() {
+            rooms = List<Map<String, dynamic>>.from(roomData["data"]);
+          });
+          
+          // If room is already selected, fetch its type
+          if (formData["room"].isNotEmpty) {
+            await _fetchRoomTypeForSelectedRoom();
+          }
+        }
       }
-      print("Customer ID: ${widget.data['cusId']}");
 
+      // Fetch pets if customer ID exists
       if (widget.data["cusId"] != null) {
         final petResponse = await http.get(
-          Uri.parse(
-              "http://127.0.0.1:5050/api/pet/available/${widget.data["cusId"]}"),
+          Uri.parse("http://127.0.0.1:5050/api/pet/available/${widget.data["cusId"]}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
           },
         );
-        final petData = jsonDecode(petResponse.body);
-        if (petData["flag"]) {
-          setState(() {
-            pets = List<Map<String, dynamic>>.from(petData["data"]);
-          });
-        } else {
-          setState(() => error = "Failed to fetch pets.");
+        
+        if (petResponse.statusCode == 200) {
+          final petData = jsonDecode(petResponse.body);
+          if (petData["flag"]) {
+            setState(() {
+              pets = List<Map<String, dynamic>>.from(petData["data"]);
+            });
+          }
         }
-        print("Pets Loaded neee: $pets");
-      } else {
-        print("Khong co cusId ");
       }
     } catch (e) {
-      setState(() => error = "Error fetching data.");
+      print('Error fetching data: $e');
+      setState(() => error = "Error loading data. Please try again.");
     } finally {
       setState(() => isLoading = false);
+    }
+  }
+
+  Future<void> _fetchRoomTypeForSelectedRoom() async {
+    try {
+      final selectedRoom = rooms.firstWhere(
+        (room) => room["roomId"] == formData["room"],
+        orElse: () => {},
+      );
+      
+      if (selectedRoom.isNotEmpty && selectedRoom["roomTypeId"] != null) {
+        await fetchRoomType(selectedRoom["roomTypeId"]);
+      }
+    } catch (e) {
+      print('Error finding selected room: $e');
     }
   }
 
@@ -96,6 +117,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString('token');
+      
       final response = await http.get(
         Uri.parse("http://127.0.0.1:5050/api/RoomType/$roomTypeId"),
         headers: {
@@ -103,99 +125,132 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
           "Content-Type": "application/json",
         },
       );
-      final data = jsonDecode(response.body);
-      if (data["flag"] && data["data"] != null) {
-        setState(() {
-          selectedRoomType = data["data"];
-          formData["price"] =
-              selectedRoomType!["price"].toString(); 
-          calculatePrice();
-        });
-      } else {
-        setState(() => error = "Failed to fetch room type.");
+      
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data["flag"] && data["data"] != null) {
+          setState(() {
+            selectedRoomType = data["data"];
+          });
+          
+          // Recalculate price if dates are already set
+          if (formData["start"].isNotEmpty && formData["end"].isNotEmpty) {
+            calculatePrice();
+          }
+        }
       }
     } catch (e) {
-      setState(() => error = "Error fetching room type.");
+      print('Error fetching room type: $e');
+      setState(() => error = "Error loading room details");
     }
   }
 
   Future<void> pickDateTime(String field) async {
-  print("Opening date picker for $field");
-  DateTime now = DateTime.now();
-  DateTime? pickedDate = await showDatePicker(
-    context: context,
-    initialDate: now,
-    firstDate: now,
-    lastDate: DateTime(now.year + 5),
-  );
-
-  if (pickedDate != null) {
-    TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (pickedTime != null) {
-      DateTime fullDateTime = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-
-      setState(() {
-        formData[field] = fullDateTime.toIso8601String();
-      });
-
-      widget.onBookingDataChange({...formData});
-
-      calculatePrice(); 
-    }
-  }
-}
-
-
-  void calculatePrice() {
-  if (formData["start"].isNotEmpty &&
-      formData["end"].isNotEmpty &&
-      selectedRoomType != null) {
-    DateTime startDate = DateTime.parse(formData["start"]);
-    DateTime endDate = DateTime.parse(formData["end"]);
-
-    if (startDate.isAfter(endDate)) {
-      setState(() => error = "End date must be after start date.");
+    if (formData["room"].isEmpty) {
+      setState(() => error = "Please select a room first");
       return;
     }
 
-    setState(() => error = null);
+    final initialDate = field == "start" ? DateTime.now() : 
+        (formData["start"].isNotEmpty ? DateTime.parse(formData["start"]) : DateTime.now());
 
-    int daysDifference = endDate.difference(startDate).inDays + 1; // Ensures at least 1 day
-    double roomPrice = selectedRoomType!["price"] ?? 0; 
-    double totalPrice = roomPrice * daysDifference;
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: field == "start" ? DateTime.now() : DateTime.parse(formData["start"]),
+      lastDate: DateTime.now().add(Duration(days: 365)),
+    );
 
-    if (formData["camera"] == true) {
-      totalPrice += 50000;
+    if (pickedDate != null) {
+      TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
+
+      if (pickedTime != null) {
+        final fullDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        setState(() {
+          formData[field] = fullDateTime.toIso8601String();
+        });
+
+        if (formData["start"].isNotEmpty && formData["end"].isNotEmpty) {
+          calculatePrice();
+        }
+      }
+    }
+  }
+
+  void calculatePrice() {
+    if (selectedRoomType == null || 
+        formData["start"].isEmpty || 
+        formData["end"].isEmpty) {
+      return;
     }
 
-    setState(() {
-      formData["price"] = totalPrice.toString();
-    });
+    try {
+      final startDate = DateTime.parse(formData["start"]);
+      final endDate = DateTime.parse(formData["end"]);
 
-    widget.onBookingDataChange({...formData, "price": totalPrice});
+      if (startDate.isAfter(endDate)) {
+        setState(() => error = "End date must be after start date");
+        return;
+      }
+
+      final difference = endDate.difference(startDate);
+      final daysDifference = difference.inHours > 0 
+          ? (difference.inHours / 24).ceil()
+          : 1;
+
+      final roomPrice = double.tryParse(selectedRoomType!["price"].toString()) ?? 0.0;
+      var totalPrice = roomPrice * daysDifference;
+
+      if (formData["camera"] == true) {
+        totalPrice += 50000;
+      }
+
+      setState(() {
+        formData["price"] = totalPrice.toStringAsFixed(0);
+        error = null;
+      });
+
+      widget.onBookingDataChange({
+        ...formData,
+        "price": totalPrice,
+      });
+    } catch (e) {
+      print('Error calculating price: $e');
+      setState(() => error = "Error calculating price");
+    }
   }
-}
-
 
   void handleChange(String field, dynamic value) {
     setState(() {
       formData[field] = value;
+      error = null;
     });
 
     if (field == "room") {
-      String roomTypeId =
-          rooms.firstWhere((room) => room["roomId"] == value)["roomTypeId"];
-      fetchRoomType(roomTypeId);
+      if (value != null) {
+        final selectedRoom = rooms.firstWhere(
+          (room) => room["roomId"] == value,
+          orElse: () => {},
+        );
+        
+        if (selectedRoom.isNotEmpty) {
+          fetchRoomType(selectedRoom["roomTypeId"]);
+        }
+      }
+    } else if (field == "camera") {
+      if (selectedRoomType != null) {
+        calculatePrice();
+      }
     }
 
     widget.onBookingDataChange(formData);
@@ -203,92 +258,287 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
 
   @override
   Widget build(BuildContext context) {
-    return isLoading
-        ? Center(child: CircularProgressIndicator())
-        : Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(color: Colors.black12, blurRadius: 5),
-              ],
+    if (isLoading) {
+      return Center(
+        child: Padding(
+          padding: EdgeInsets.all(24),
+          child: CircularProgressIndicator(
+            strokeWidth: 2.5,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Booking Details",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade800,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownButtonFormField(
-                  decoration: InputDecoration(
-                      labelText: "Room", border: OutlineInputBorder()),
-                  value: formData["room"].isNotEmpty ? formData["room"] : null,
-                  onChanged: (value) => handleChange("room", value),
-                  items: rooms.map((room) {
-                    return DropdownMenuItem(
+          ),
+          SizedBox(height: 20),
+          
+          // Room Selection
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Select Room",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonFormField(
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Choose a room",
+                    ),
+                    value: formData["room"].isNotEmpty ? formData["room"] : null,
+                    onChanged: (value) => handleChange("room", value),
+                    items: rooms.map((room) {
+                      return DropdownMenuItem(
                         value: room["roomId"],
                         child: Text(
-                            "${room["roomName"]} - ${room["description"]}"));
-                  }).toList(),
-                ),
-                SizedBox(height: 10),
-                DropdownButtonFormField(
-                  decoration: InputDecoration(
-                      labelText: "Pet", border: OutlineInputBorder()),
-                  value: formData["pet"].isNotEmpty ? formData["pet"] : null,
-                  onChanged: (value) => handleChange("pet", value),
-                  items: pets.map((pet) {
-                    return DropdownMenuItem(
-                        value: pet["petId"], child: Text("${pet["petName"]}"));
-                  }).toList(),
-                ),
-                SizedBox(height: 10),
-                InkWell(
-                  onTap: () => pickDateTime("start"),
-                  child: InputDecorator(
-                    decoration: InputDecoration(
-                      labelText: "Start Date & Time",
-                      border: OutlineInputBorder(),
-                    ),
-                    child: Text(
-                      formData["start"].isNotEmpty
-                          ? formData["start"]
-                          : "Select Date & Time",
-                      style: TextStyle(color: Colors.black),
-                    ),
+                          "${room["roomName"]} - ${room["description"]}",
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a room' : null,
                   ),
                 ),
-                SizedBox(height: 10),
-                InkWell(
-                  onTap: () => pickDateTime("end"),
-                  child: InputDecorator(
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Pet Selection
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Select Pet",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              SizedBox(height: 8),
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonFormField(
+                    isExpanded: true,
                     decoration: InputDecoration(
-                      labelText: "End Date & Time",
-                      border: OutlineInputBorder(),
+                      border: InputBorder.none,
+                      hintText: "Choose your pet",
                     ),
-                    child: Text(
-                      formData["end"].isNotEmpty
-                          ? formData["end"]
-                          : "Select Date & Time",
-                      style: TextStyle(color: Colors.black),
-                    ),
+                    value: formData["pet"].isNotEmpty ? formData["pet"] : null,
+                    onChanged: (value) => handleChange("pet", value),
+                    items: pets.map((pet) {
+                      return DropdownMenuItem(
+                        value: pet["petId"],
+                        child: Text(
+                          pet["petName"],
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    }).toList(),
+                    validator: (value) => value == null ? 'Please select a pet' : null,
                   ),
                 ),
-                SizedBox(height: 10),
-                CheckboxListTile(
-                  title: Text("Camera (+50,000 VND)"),
-                  value: formData["camera"],
-                  onChanged: (bool? value) {
-                    handleChange("camera", value ?? false);
-                    calculatePrice(); 
-                  },
-                  controlAffinity: ListTileControlAffinity.leading,
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Date/Time Pickers
+          Row(
+            children: [
+              Expanded(
+                child: _buildDateTimePicker(
+                  "Start Date & Time",
+                  formData["start"],
+                  () => pickDateTime("start"),
                 ),
-                SizedBox(height: 10),
+              ),
+              SizedBox(width: 12),
+              Expanded(
+                child: _buildDateTimePicker(
+                  "End Date & Time",
+                  formData["end"],
+                  () => pickDateTime("end"),
+                ),
+              ),
+            ],
+          ),
+          
+          SizedBox(height: 16),
+          
+          // Camera Option
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: CheckboxListTile(
+              title: Text(
+                "Add Camera Monitoring",
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
+              subtitle: Text(
+                "+50,000 VND",
+                style: TextStyle(color: Colors.green.shade700),
+              ),
+              value: formData["camera"] ?? false,
+              onChanged: (bool? value) {
+                handleChange("camera", value ?? false);
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+          ),
+          
+          if (error != null) ...[
+            SizedBox(height: 12),
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: Colors.red.shade700, size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      error!,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          
+          SizedBox(height: 20),
+          
+          // Price Display
+          Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              children: [
                 Text(
-                  "Total Price: ${formData["price"]} VND",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  "Total Price",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue.shade700,
+                  ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  "${formData["price"]} VND",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue.shade900,
+                  ),
                 ),
               ],
             ),
-          );
+          ),
+        ],
+      ),
+    );
   }
+
+  Widget _buildDateTimePicker(String label, String value, VoidCallback onTap) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        label,
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      SizedBox(height: 8),
+      InkWell(
+        onTap: onTap,
+        child: Container(
+          padding: EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey.shade300),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                size: 18,
+                color: Colors.grey.shade600,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  value.isNotEmpty
+                      ? "${DateFormat('MMM dd, yyyy').format(DateTime.parse(value))} at ${DateFormat('hh:mm a').format(DateTime.parse(value))}"
+                      : "Select",
+                  style: TextStyle(
+                    color: value.isNotEmpty ? Colors.black : Colors.grey.shade600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ],
+  );
+}
 }

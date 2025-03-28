@@ -47,7 +47,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.6:5050/api/PetDiary/categories/${widget.petId}'),
+   'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -83,7 +83,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-          'http://192.168.1.6:5050/api/PetDiary/diaries/$petId?category=${selectedCategory == "All" ? "" : selectedCategory}&pageIndex=$page&pageSize=4',
+          'http://10.0.2.2:5050/api/PetDiary/diaries/$petId?category=${selectedCategory == "All" ? "" : selectedCategory}&pageIndex=$page&pageSize=4',
         ),
         headers: {
           "Content-Type": "application/json",
@@ -151,7 +151,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-        Uri.parse('http://192.168.1.6:5050/api/PetDiary/$diaryId'),
+  Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -228,7 +228,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://192.168.1.6:5010${widget.petImage}')
+                'http://10.0.2.2:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),

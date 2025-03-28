@@ -12,23 +12,29 @@ const Navbar = ({ sidebarRef }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = sessionStorage.getItem("token"); 
+    const token = sessionStorage.getItem("token");
 
     if (token) {
-      const decodedToken = jwt_decode(token); 
-      setAccountName(decodedToken.AccountName); 
+      const decodedToken = jwt_decode(token);
+      setAccountName(decodedToken.AccountName);
       setAccountImage(decodedToken.AccountImage);
-      setAccountId(decodedToken.AccountId); 
+      setAccountId(decodedToken.AccountId);
 
       if (decodedToken.AccountImage) {
-        fetch(`http://localhost:5050/api/Account/loadImage?filename=${decodedToken.AccountImage}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`, // Thêm token vào header
-          },
-        })
+        fetch(
+          `http://localhost:5050/api/Account/loadImage?filename=${decodedToken.AccountImage}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`, // Thêm token vào header
+            },
+          }
+        )
           .then((response) => {
-            if (!response.ok) throw new Error(`Failed to load image, Status: ${response.status}`);
+            if (!response.ok)
+              throw new Error(
+                `Failed to load image, Status: ${response.status}`
+              );
             return response.json();
           })
           .then((imageData) => {
@@ -37,12 +43,11 @@ const Navbar = ({ sidebarRef }) => {
               const imgContentType = imageData.data.contentType;
               setImagePreview(`data:${imgContentType};base64,${imgContent}`);
             } else {
-              console.error('Error loading image:', imageData.message);
+              console.error("Error loading image:", imageData.message);
             }
           })
-          .catch((error) => console.error('Error fetching image:', error));
+          .catch((error) => console.error("Error fetching image:", error));
       }
-      
     }
   }, []);
 
@@ -52,7 +57,6 @@ const Navbar = ({ sidebarRef }) => {
       localStorage.setItem("sidebarClosed", isClosed);
     }
   };
-  
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -107,16 +111,26 @@ const Navbar = ({ sidebarRef }) => {
 
       <div className="navbar-profile" onClick={toggleDropdown}>
         {imagePreview ? (
-          <img src={imagePreview} alt="Profile Avatar" className="profile-avatar" />
+          <img
+            src={imagePreview}
+            alt="Profile Avatar"
+            className="profile-avatar"
+          />
         ) : (
-          <img src="/avatar.png" alt="Profile Avatar" className="profile-avatar" />
+          <img
+            src="/avatar.png"
+            alt="Profile Avatar"
+            className="profile-avatar"
+          />
         )}
         {dropdownVisible && (
           <div className="dropdown-menu">
             <ul>
               <li>{accountName || "User"}</li>
-              <li><a href={`/profile/${accountId}`}>View Profile</a></li>
-              <li><a href="#" onClick={handleLogout}>Logout</a></li>
+              <li>
+                <a href={`/profile/${accountId}`}>View Profile</a>
+              </li>
+              <li onClick={handleLogout}>Logout</li>
             </ul>
           </div>
         )}
