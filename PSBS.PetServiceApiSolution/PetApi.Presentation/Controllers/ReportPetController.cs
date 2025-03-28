@@ -36,15 +36,10 @@ namespace PetApi.Presentation.Controllers
             var response = await _facilityApiClient.GetPetCount(id, auth, year, month, startDate, endDate);
             if (response is null)
             {
-                return NotFound("Error when getting pet count from Facility Service");
+                return NotFound("Error when getting pet count from Facility Service or No pet count dto found");
             }
             Console.WriteLine("response day nay" + response.Count());
 
-
-            if (!response.Any())
-            {
-                return NotFound(new Response(false, "No pet count dto found"));
-            }
 
             var result = await _report.GetPetBreedByPetCoutDTO(response);
 

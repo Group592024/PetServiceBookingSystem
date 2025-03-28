@@ -10,7 +10,8 @@ const ServiceDetailPage = () => {
 
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const [isExpanded, setIsExpanded] = useState(false);
+  const MAX_LENGTH = 200;
   const [dataVariant, setDataVariant] = useState([]);
   const [idVariant, setIdVariant] = useState("");
 
@@ -20,6 +21,7 @@ const ServiceDetailPage = () => {
     setIdVariant(id);
   };
   const handleCloseDetail = () => setOpenDetail(false);
+  const description = detail?.serviceDescription || "";
 
   useEffect(() => {
     const fetchDetail = async () => {
@@ -82,41 +84,64 @@ const ServiceDetailPage = () => {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <NavbarCustomer />
-      <div>
-        <div className="p-10 mx-20 flex justify-start items-start">
-          <div className="p-10 w-1/2 flex justify-center">
+      <div className="max-w-7xl mx-auto p-10">
+        <div className="flex gap-14 items-start bg-white shadow-lg p-10 rounded-3xl">
+          <div className="w-1/2 flex flex-col justify-center">
             <img
-              className="rounded-3xl w-4/5 object-cover"
+              className="rounded-3xl w-full h-[300px] object-cover shadow-md transition-transform 
+             duration-300 hover:scale-105"
               src={imageURL}
               alt={detail.serviceName}
             />
-          </div>
-          <div className="w-1/2 p-10">
-            <p className="text-5xl font-bold p-5">{detail.serviceName}</p>
-            <p className="text-3xl font-bold p-5 text-customPrimary italic">
-              {detail.serviceTypeName} Service
-            </p>
-            <div className="flex justify-start items-center">
-              {dataVariant.map((item) => (
-                <VariantCard key={item.serviceVariantId} data={item} />
-              ))}
-            </div>
-            <div className="">
+
+            <div className="flex justify-center">
               <button
-                className="mt-5 bg-customDanger p-3 w-2/3 rounded-3xl text-customLight text-xl font-semibold 
-                      hover:bg-customLight hover:text-customDark text-center"
+                className="mt-5 bg-customDanger px-6 py-3 w-2/3 rounded-full text-white text-xl font-semibold text-center 
+                        hover:bg-red-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 Booking Now
               </button>
             </div>
           </div>
+
+          <div className="w-1/2 space-y-6">
+            <p className="text-4xl font-extrabold text-customDark">
+              {detail.serviceName}
+            </p>
+            <p className="text-xl font-semibold text-customPrimary">
+              Available service variants:
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              {dataVariant.map((item) => (
+                <VariantCard key={item.serviceVariantId} data={item} />
+              ))}
+            </div>
+          </div>
         </div>
-        <div className="p-5 bg-customDarkGrey rounded-3xl mx-28">
-          <p className="text-3xl font-bold p-5">Service Description</p>
-          <div className="p-5 bg-customGrey rounded-3xl text-xl">
-            <p>{detail.serviceDescription}</p>
+
+        <div className="mt-10 p-8 bg-customDarkGrey rounded-3xl shadow-lg">
+          <p className="text-3xl font-bold text-white mb-5">
+            Service Description
+          </p>
+
+          <div className="p-6 bg-customGrey rounded-3xl text-lg text-gray-800 shadow-md">
+            <p>
+              {isExpanded || description.length <= MAX_LENGTH
+                ? description
+                : `${description.slice(0, MAX_LENGTH)}...`}
+            </p>
+
+            {description.length > MAX_LENGTH && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="mt-3 text-customPrimary font-semibold hover:underline transition-all duration-300"
+              >
+                {isExpanded ? "See Less ▲" : "See More ▼"}
+              </button>
+            )}
           </div>
         </div>
       </div>

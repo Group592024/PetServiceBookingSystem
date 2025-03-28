@@ -47,7 +47,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
+   'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -67,6 +67,11 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
         SnackBar(content: Text('Error loading categories')),
       );
     }
+  }
+
+  Future<void> refreshData() async {
+    await fetchCategories();
+    await fetchPetDiary(widget.petId, pageIndex);
   }
 
   Future<void> fetchPetDiary(String petId, int page) async {
@@ -89,6 +94,8 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final entries = data['data']?['data'];
+
+        print(widget.petImage);
 
         setState(() {
           diaryEntries = entries ?? [];
@@ -115,8 +122,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
     );
 
     if (result == true) {
-      // Nếu cập nhật thành công, load lại dữ liệu
-      fetchPetDiary(widget.petId, pageIndex);
+      await refreshData();
     }
   }
 
@@ -145,7 +151,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-        Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
+  Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -161,8 +167,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
           SnackBar(content: Text("Diary entry deleted successfully")),
         );
 
-        // Làm mới danh sách sau khi xóa
-        await fetchPetDiary(widget.petId, pageIndex);
+        await refreshData();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Failed to delete diary entry")),
@@ -223,7 +228,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://10.0.2.2:5010${widget.petImage}')
+                'http://10.0.2.2:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),
@@ -246,17 +251,22 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
           ),
 
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
+            child: Container(
+              margin: const EdgeInsets.all(12.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Select a category: ",
+                    "View by topic: ",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      color: Colors.black,
                     ),
                   ),
                   SizedBox(height: 8),
@@ -342,7 +352,6 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                                         ],
                                       ),
                                       SizedBox(height: 5),
-
                                       Container(
                                         padding: EdgeInsets.symmetric(
                                             horizontal: 12, vertical: 6),
@@ -361,7 +370,6 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                                         ),
                                       ),
                                       SizedBox(height: 10),
-
                                       AnimatedContainer(
                                         duration: Duration(milliseconds: 300),
                                         constraints: BoxConstraints(
@@ -384,8 +392,6 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                                           ),
                                         ),
                                       ),
-
-                                      // Nút bấm "Xem thêm" hoặc "Thu gọn"
                                       Align(
                                         alignment: Alignment.centerRight,
                                         child: TextButton(
@@ -429,8 +435,6 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
           ),
         ],
       ),
-
-      // Floating Button to Add Diary Entry
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           final result = await Navigator.push(
@@ -441,8 +445,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
           );
 
           if (result == true) {
-            fetchPetDiary(widget.petId,
-                pageIndex); // Refresh danh sách sau khi tạo nhật ký
+            await refreshData();
           }
         },
         backgroundColor: Colors.blueAccent,
