@@ -18,33 +18,44 @@ const PetDiaryCard = ({ petDiary, onEdit, onDelete }) => {
   }, [petDiary]);
 
   return (
-    <div className="bg-customLightPrimary p-6 my-4 rounded-2xl">
+    <div className="bg-white p-6 my-4 rounded-2xl shadow-md">
       <div className="flex justify-between items-center">
         <div className="flex justify-center items-center gap-3">
           <Avatar
             alt={petDiary?.pet?.pet_Name}
-            src={petDiary?.pet?.pet_Image || sampleImage}
+            src={
+              petDiary
+                ? `http://localhost:5010${petDiary?.pet?.pet_Image}`
+                : sampleImage
+            }
           />
           <h3 className="font-bold text-lg">{petDiary?.pet?.pet_Name}</h3>
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="me-6">
-            <p className="text-xl p-2 bg-white text-customPrimary font-bold rounded-lg w-20">
-              {petDiary?.category}
-            </p>
-          </span>
           <span className="italic me-4">
-            {formatDateString(petDiary?.diary_Date)}
+            Last update: {formatDateString(petDiary?.diary_Date)}
           </span>
-          <IconButton aria-label="edit" onClick={onEdit} color="info">
-            <EditIcon />
-          </IconButton>
+          <span className="bg-customLightPrimary p-1 rounded-xl hover:scale-125 mr-2 border-2 border-customPrimary">
+            <IconButton aria-label="edit" onClick={onEdit} color="info">
+              <EditIcon />
+            </IconButton>
+          </span>
 
-          <IconButton aria-label="delete" onClick={onDelete} color="error">
-            <DeleteIcon />
-          </IconButton>
+          <span className="bg-customLightDanger p-1 rounded-xl hover:scale-125 mr-2 border-2 border-customDanger">
+            <IconButton aria-label="delete" onClick={onDelete} color="error">
+              <DeleteIcon />
+            </IconButton>
+          </span>
         </div>
+      </div>
+      <div className="mt-2">
+        <p className="">
+          Topic:{" "}
+          <span className=" ml-3 text-lg py-2 px-6 bg-customLightPrimary text-customPrimary font-semibold rounded-full">
+            {petDiary?.category}
+          </span>
+        </p>
       </div>
       <div
         ref={contentRef}

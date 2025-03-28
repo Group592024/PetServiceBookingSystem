@@ -6,7 +6,7 @@ namespace FacilityServiceApi.Domain.Entities
 {
     public class RoomType
     {
-        [Key,Column("roomType_id")]
+        [Key, Column("roomType_id")]
         public Guid roomTypeId { get; set; }
         [Column("name")]
         public string name { get; set; }

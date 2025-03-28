@@ -52,7 +52,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         headers['Authorization'] = 'Bearer $token';
       }
       final petResponse = await http.get(
-        Uri.parse('http://192.168.1.7:5050/api/pet/${widget.petId}'),
+        Uri.parse('http://192.168.1.6:5050/api/pet/${widget.petId}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -67,7 +67,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
       final breedResponse = await http.get(
         Uri.parse(
-            'http://192.168.1.7:5050/api/petBreed/${petData['data']['petBreedId']}'),
+            'http://192.168.1.6:5050/api/petBreed/${petData['data']['petBreedId']}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -128,7 +128,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    'http://192.168.1.7:5050/pet-service${pet!['petImage']}',
+                    'http://192.168.1.6:5050/pet-service${pet!['petImage']}',
                     fit: BoxFit.cover,
                   ),
                   Container(
@@ -582,7 +582,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         };
 
         final response = await http.delete(
-            Uri.parse('http://192.168.1.7:5050/api/pet/${widget.petId}'));
+            Uri.parse('http://192.168.1.6:5050/api/pet/${widget.petId}'));
         final responseData = json.decode(response.body);
 
         if (response.statusCode == 200 && responseData['flag'] == true) {

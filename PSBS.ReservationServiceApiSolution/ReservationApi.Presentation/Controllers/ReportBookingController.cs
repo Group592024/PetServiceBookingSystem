@@ -38,10 +38,10 @@ namespace ReservationApi.Presentation.Controllers
                 return NotFound(new Response(false, "No Booking type detected"));
             // convert data from entity to DTO and return
 
-            return bookingStatus!.Any() ? Ok(new Response(true, "Booking Status retrieved successfully!")
+            return bookingStatus!.Any() ? Ok(new Response(true, "Booking type retrieved successfully!")
             {
                 Data = bookingStatus
-            }) : NotFound(new Response(false, "No Booking Status detected"));
+            }) : NotFound(new Response(false, "No Booking type detected"));
 
         }
 

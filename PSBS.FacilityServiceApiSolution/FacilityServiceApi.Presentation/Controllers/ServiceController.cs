@@ -173,7 +173,7 @@ namespace FacilityServiceApi.Presentation.Controllers
 
                 var trigger = TriggerBuilder.Create()
                     .WithIdentity($"DeleteServiceTrigger-{getEntity.serviceId}")
-                    .StartAt(DateTimeOffset.Now.AddMinutes(1))
+                    .StartAt(DateTimeOffset.Now.AddMinutes(3))
                     .Build();
 
                 await scheduler.ScheduleJob(jobDetail, trigger);

@@ -40,22 +40,60 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("Create new category:",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        TextField(
-          controller: _categoryController,
-          decoration: InputDecoration(
-            hintText: "Enter new category",
-            border: OutlineInputBorder(),
-          ),
-          onChanged: (value) {
-            setState(() {
-              selectedCategory = value;
-            });
-          },
+        ElevatedButton(
+          onPressed: _showCreateCategoryDialog,
+          style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.black,
+              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          child: Text("Create new topic"),
         ),
         SizedBox(height: 10),
       ],
+    );
+  }
+
+  void _showCreateCategoryDialog() {
+    TextEditingController newCategoryController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Create New Category"),
+          content: TextField(
+            controller: newCategoryController,
+            decoration: InputDecoration(
+              labelText: "Category Name",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String newCategory = newCategoryController.text.trim();
+                if (newCategory.isNotEmpty &&
+                    !categories.contains(newCategory)) {
+                  setState(() {
+                    categories.add(newCategory);
+                    selectedCategory = newCategory;
+                  });
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text("Create"),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -72,7 +110,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:5050/api/PetDiary/categories'),
+        Uri.parse('http://192.168.1.6:5050/api/PetDiary/categories'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -126,7 +164,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       print("petid nè: " + widget.petId);
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+            'http://192.168.1.6:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -367,7 +405,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
       final response = await http.put(
         Uri.parse(
-            'http://192.168.1.7:5050/api/PetDiary/${widget.diary['diary_ID']}'),
+            'http://192.168.1.6:5050/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -455,34 +493,69 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
     return Scaffold(
         appBar: AppBar(title: const Text('Update Pet Diary')),
         body: SingleChildScrollView(
-          child: Padding(
+          child: Container(
+            margin: const EdgeInsets.all(12.0),
             padding: const EdgeInsets.all(16.0),
             child: isFetching
                 ? const Center(child: CircularProgressIndicator())
                 : Column(
                     children: [
-                      Text("Select category:"),
-                      DropdownButton<String>(
-                        value: categories.contains(selectedCategory)
-                            ? selectedCategory
-                            : null,
-                        onChanged: (newValue) {
-                          setState(() {
-                            selectedCategory = newValue!;
-                          });
-                        },
-                        items: categories
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Select a topic:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            DropdownButton<String>(
+                              value: categories.contains(selectedCategory)
+                                  ? selectedCategory
+                                  : null,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedCategory = newValue!;
+                                });
+                              },
+                              isExpanded: true,
+                              items: categories.map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                            SizedBox(height: 10),
+                            _buildCategoryInput(),
+                          ],
+                        ),
+                      ), // Thêm mục nhập category mới
+                      SizedBox(height: 10),
 
-                      SizedBox(height: 10),
-                      _buildCategoryInput(), // Thêm mục nhập category mới
-                      SizedBox(height: 10),
+                      Container(
+                        padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        height: 400,
+                        child: quill.QuillEditor.basic(
+                          controller: _controller,
+                          config: quill.QuillEditorConfig(
+                            embedBuilders: FlutterQuillEmbeds
+                                .editorBuilders(), // Giữ nguyên ảnh
+                          ),
+                          focusNode: _editorFocusNode,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       quill.QuillSimpleToolbar(
                         controller: _controller,
                         config: quill.QuillSimpleToolbarConfig(
@@ -497,25 +570,22 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
                           ),
                         ),
                       ),
-                      Container(
-                        height: 400,
-                        child: quill.QuillEditor.basic(
-                          controller: _controller,
-                          config: quill.QuillEditorConfig(
-                            embedBuilders: FlutterQuillEmbeds
-                                .editorBuilders(), // Giữ nguyên ảnh
-                          ),
-                          focusNode: _editorFocusNode,
-                        ),
-                      ),
                       const SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: isLoading ? null : _updateDiaryEntry,
-                        child: isLoading
-                            ? const CircularProgressIndicator(
-                                color: Colors.white)
-                            : const Text('Update'),
-                      ),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : _updateDiaryEntry,
+                          style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.blue,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 24, vertical: 12),
+                              textStyle: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          child: isLoading
+                              ? CircularProgressIndicator(color: Colors.blue)
+                              : Text('Update'),
+                        ),
+                      )
                     ],
                   ),
           ),
