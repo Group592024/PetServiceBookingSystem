@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -44,42 +45,23 @@ class _RegisterPageState extends State<RegisterPage> {
 
         final result = jsonDecode(response.body);
         if (response.statusCode == 200 && result['flag']) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Registration Successful!'),
-              content: Text('Please log in.'),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pushNamed(context, '/login'),
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-          );
+          _showToast('Registration Successful! Please log in.');
+          Navigator.pushReplacementNamed(context, '/login');
         } else {
-          _showError(
+          _showToast(
               result['message'] ?? 'Registration failed. Please try again.');
         }
       } catch (error) {
-        _showError(error.toString());
+        _showToast('An error occurred. Please try again.');
       }
     }
   }
 
-  void _showError(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('OK'),
-          ),
-        ],
-      ),
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
     );
   }
 
