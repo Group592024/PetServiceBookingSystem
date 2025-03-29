@@ -12,7 +12,7 @@ namespace PetApi.Infrastructure.Service
             _httpClient = httpClient;
         }
 
-        public async Task<IEnumerable<PetCountDTO>> GetPetCount(Guid id, string token,
+        public virtual async Task<IEnumerable<PetCountDTO>> GetPetCount(Guid id, string token,
             int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
             _httpClient.DefaultRequestHeaders.Authorization

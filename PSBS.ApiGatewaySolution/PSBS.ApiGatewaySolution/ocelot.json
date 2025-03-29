@@ -412,6 +412,29 @@
       //   "AuthenticationProviderKey": "Bearer",
       //   "AllowedScopes": []
       // }
+    }
+    ,
+    {
+      // Notification API
+      "DownstreamPathTemplate": "/api/Notification/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5159
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Notification/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
     },
     {
       // Pet API

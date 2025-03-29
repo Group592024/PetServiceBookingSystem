@@ -25,6 +25,8 @@ const Datatable = ({
     {
       field: "action",
       headerName: "Action",
+      headerAlign: "center",
+      align: "center",
       width: 200,
       renderCell: (params) => {
         const handleDelete = async () => {

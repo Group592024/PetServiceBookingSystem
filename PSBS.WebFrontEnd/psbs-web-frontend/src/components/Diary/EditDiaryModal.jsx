@@ -4,6 +4,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import sampleImage from "../../assets/sampleUploadImage.jpg";
 import JoditEditor from "jodit-react";
 import Swal from "sweetalert2";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 const EditDiaryModal = ({ open, onClose, diary }) => {
   console.log(diary);
@@ -13,6 +14,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
 
   const [content, setContent] = useState(diary?.diary_Content || "");
   const [loading, setLoading] = useState(false);
+  const [openCategory, setOpenCategory] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState(
     diary?.category || ""
@@ -42,6 +44,10 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
     events: {
       error: (e) => alert("Upload failed:", e),
     },
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenCategory(false);
   };
 
   // Edit diary processing
@@ -143,7 +149,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
       <div>
         <Stack
           spacing={4}
-          className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[10%] max-h-[500px]"
+          className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[5%] max-h-[550px] rounded-xl"
         >
           <div className="flex justify-start items-center gap-4 w-full">
             <button onClick={onClose}>
@@ -153,13 +159,17 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
             <div className="flex justify-center items-center gap-2">
               <Avatar
                 alt={petInfo?.petName}
-                src={petInfo?.petImage || sampleImage}
+                src={
+                  petInfo
+                    ? `http://localhost:5010${petInfo?.petImage}`
+                    : sampleImage
+                }
               />
               <h3 className="font-bold">{petInfo?.petName}</h3>
             </div>
           </div>
 
-          <div className="flex justify-between">
+          <div className="flex justify-start">
             <Autocomplete
               options={categories}
               getOptionLabel={(option) => option}
@@ -174,10 +184,15 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
               )}
               sx={{ width: "500px" }}
             />
-            <span className="text-xl font-semibold text-customPrimary">
-              Create new category:{" "}
-            </span>
-            <TextField onChange={(e) => setSelectedCategory(e.target.value)} />
+            <div className="mx-5">
+              <button
+                className="m-auto flex justify-center items-center gap-1 text-center rounded-xl
+                     bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
+                onClick={() => setOpenCategory(true)}
+              >
+                <AddCircleOutlineIcon /> New topic
+              </button>
+            </div>
           </div>
 
           <div
@@ -209,6 +224,36 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
             </button>
           </div>
         </Stack>
+
+        <Modal open={openCategory} onClose={handleCloseAddModal}>
+          <div>
+            <Stack
+              spacing={4}
+              className="px-8 py-12 bg-white w-1/3 mx-auto mt-[15%] max-h-[500px] rounded-xl"
+            >
+              <p className="text-customPrimary font-semibold text-xl">
+                Create new category:
+              </p>
+              <TextField
+                multiline
+                onChange={(e) => {
+                  if (e.target.value.trim() !== "") {
+                    setSelectedCategory(e.target.value);
+                  }
+                }}
+              />
+              <div className="mt-5">
+                <button
+                  className="m-auto flex justify-center items-center gap-1 text-center rounded-xl hover:scale-110
+                             bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
+                  onClick={() => setOpenCategory(false)}
+                >
+                  Create
+                </button>
+              </div>
+            </Stack>
+          </div>
+        </Modal>
       </div>
     </Modal>
   );

@@ -2,182 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../../models/booking_service_type.dart';
 
 class BookingServiceChoice extends StatefulWidget {
   final String cusId;
-  final List<Map<String, dynamic>> bookingChoices;
+  final List<BookingChoice> bookingChoices;
   final Function(int) onRemove;
   final Function() onUpdate;
+  final Function(BookingChoice) onVariantChange;
 
-  BookingServiceChoice({
+  const BookingServiceChoice({
     required this.cusId,
     required this.bookingChoices,
     required this.onRemove,
     required this.onUpdate,
-  });
+    required this.onVariantChange,
+    Key? key,
+  }) : super(key: key);
 
   @override
   _BookingServiceChoiceState createState() => _BookingServiceChoiceState();
 }
 
 class _BookingServiceChoiceState extends State<BookingServiceChoice> {
-  List<Map<String, dynamic>> _services = [];
-  List<Map<String, dynamic>> _pets = [];
   String _error = "";
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchServices();
-    _fetchPets();
-  }
-
-  Future<void> _fetchServices() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-      final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Service"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-        if (responseBody.containsKey("data") && responseBody["data"] is List) {
-          List<dynamic> data = responseBody["data"];
-          setState(() {
-            _services = data.map((service) {
-              return {
-                "id": service["serviceId"],
-                "name": service["serviceName"]
-              };
-            }).toList();
-          });
-        } else {
-          setState(() {
-            _error = "Invalid data format from API.";
-          });
-        }
-      } else {
-        setState(() {
-          _error =
-              "Failed to fetch services. Status Code: ${response.statusCode}";
-        });
-      }
-    } catch (error) {
-      setState(() {
-        _error = "Error fetching services: $error";
-      });
-    }
-  }
-
-  Future<void> _fetchPets() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-      final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/pet/available/${widget.cusId}"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-        if (responseBody.containsKey("data") && responseBody["data"] is List) {
-          List<dynamic> data = responseBody["data"];
-          setState(() {
-            _pets = data.map((pet) {
-              return {"id": pet["petId"], "name": pet["petName"]};
-            }).toList();
-          });
-        } else {
-          setState(() {
-            _error = "Invalid data format from API.";
-          });
-        }
-      } else {
-        setState(() {
-          _error = "Failed to fetch pets. Status Code: ${response.statusCode}";
-        });
-      }
-    } catch (error) {
-      setState(() {
-        _error = "Error fetching pets: $error";
-      });
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchServiceVariants(
-      String serviceId) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-
-      final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/service/$serviceId"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        Map<String, dynamic> responseBody = jsonDecode(response.body);
-        if (responseBody.containsKey("data") && responseBody["data"] is List) {
-          List<dynamic> data = responseBody["data"];
-          return data.map((variant) {
-            return {
-              "id": variant["serviceVariantId"],
-              "content": variant["serviceContent"],
-              "price": variant["servicePrice"],
-            };
-          }).toList();
-        }
-      }
-    } catch (error) {
-      print("Error fetching service variants: $error");
-    }
-    return [];
-  }
-
-  void _updateChoice(int index, String key, dynamic value) async {
-    if (index >= widget.bookingChoices.length)
-      return; // Prevent out-of-bounds errors
+  void _updateVariant(int index, ServiceVariant newVariant) {
+    print('=== BookingServiceChoice: _updateVariant ===');
+    print('Previous variant: ${widget.bookingChoices[index].serviceVariant?.content} - ${widget.bookingChoices[index].serviceVariant?.price}');
+    print('New variant: ${newVariant.content} - ${newVariant.price}');
+    
+    final updatedChoice = BookingChoice(
+      service: widget.bookingChoices[index].service,
+      pet: widget.bookingChoices[index].pet,
+      serviceVariant: newVariant,
+      price: newVariant.price,  // Update price with new variant price
+      bookingDate: widget.bookingChoices[index].bookingDate,
+      variants: widget.bookingChoices[index].variants,
+    );
 
     setState(() {
-      widget.bookingChoices[index][key] = value;
-
-      if (key == "service") {
-        // Only reset if it's a different service
-        if (widget.bookingChoices[index]["service"] == null ||
-            widget.bookingChoices[index]["service"]["id"] != value["id"]) {
-          widget.bookingChoices[index]["serviceVariants"] = []; // Reset list
-          widget.bookingChoices[index]["serviceVariant"] =
-              null; // Reset selected variant
-          widget.bookingChoices[index]["price"] = 0.0; // Reset price
-        }
-      }
-
-      if (key == "serviceVariant") {
-        widget.bookingChoices[index]["price"] =
-            value != null ? value["price"] : 0.0;
-      }
+      widget.bookingChoices[index] = updatedChoice;
     });
 
-    if (key == "service" && value != null) {
-      List<Map<String, dynamic>> variants =
-          await _fetchServiceVariants(value["id"]);
-
-      // Update only if the list has changed
-      setState(() {
-        if (widget.bookingChoices[index]["serviceVariants"].isEmpty) {
-          widget.bookingChoices[index]["serviceVariants"] = variants;
-        }
-      });
-    }
+    // Notify parent components of the change
+    widget.onVariantChange(updatedChoice);
     widget.onUpdate();
   }
 
@@ -186,78 +55,194 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
     return Column(
       children: [
         ...widget.bookingChoices.asMap().entries.map((entry) {
-          int index = entry.key;
-          var choice = entry.value;
+          final index = entry.key;
+          final choice = entry.value;
 
           return Card(
+            elevation: 3,
             margin: EdgeInsets.symmetric(vertical: 8),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    value: choice["service"],
-                    hint: Text("Select Service"),
-                    items:
-                        _services.map<DropdownMenuItem<Map<String, dynamic>>>(
-                      (service) {
-                        return DropdownMenuItem<Map<String, dynamic>>(
-                          value: service,
-                          child: Text(service["name"]),
-                        );
-                      },
-                    ).toList(),
-                    onChanged: (value) {
-                      _updateChoice(index, "service", value);
-                    },
+                  // Service and Pet Info
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.medical_services, 
+                                    size: 18, 
+                                    color: Colors.purple.shade700),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Service",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              choice.service.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.pets, 
+                                    size: 18, 
+                                    color: Colors.green.shade700),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Pet",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              choice.pet.name,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    value: choice["pet"],
-                    hint: Text("Select Pet"),
-                    items: _pets.map<DropdownMenuItem<Map<String, dynamic>>>(
-                      (pet) {
-                        return DropdownMenuItem<Map<String, dynamic>>(
-                          value: pet,
-                          child: Text(pet["name"]),
-                        );
-                      },
-                    ).toList(),
-                    onChanged: (value) {
-                      _updateChoice(index, "pet", value);
-                    },
-                  ),
-                  if (choice["serviceVariants"] != null &&
-                      choice["serviceVariants"].isNotEmpty)
-                    DropdownButtonFormField<Map<String, dynamic>>(
-                      value: choice["serviceVariant"],
-                      hint: Text("Select Service Variant"),
-                      items: (choice["serviceVariants"]
-                              as List<Map<String, dynamic>>)
-                          .map<DropdownMenuItem<Map<String, dynamic>>>(
-                              (variant) {
-                        return DropdownMenuItem<Map<String, dynamic>>(
-                          value: variant,
-                          child: Text(
-                              "${variant["content"]} - ${variant["price"]} VND"),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        _updateChoice(index, "serviceVariant", value);
-                      },
+                  SizedBox(height: 20),
+
+                  // Variant Selection
+                  if (choice.variants.isNotEmpty) ...[
+                    Text(
+                      "Service Variant",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
-                  Text("Price: ${choice["price"] ?? "0"} VND",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () => widget.onRemove(index),
+                    SizedBox(height: 8),
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade300),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: DropdownButtonFormField<ServiceVariant>(
+                          isExpanded: true,
+                          decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: "Select variant",
+                          ),
+                          value: choice.serviceVariant,
+                          items: choice.variants.map((variant) {
+                            return DropdownMenuItem<ServiceVariant>(
+                              value: variant,
+                              child: Text(
+                                "${variant.content} - ${variant.price} VND",
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (ServiceVariant? value) {
+                            if (value != null) {
+                              _updateVariant(index, value);
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+
+                  // Price Display
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total Price:",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade800,
+                          ),
+                        ),
+                        Text(
+                          "${choice.price.toStringAsFixed(2)} VND",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           );
         }).toList(),
+
+        // Error Message
         if (_error.isNotEmpty)
-          Text(_error, style: TextStyle(color: Colors.red)),
+          Padding(
+            padding: EdgeInsets.all(12),
+            child: Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.shade100),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, 
+                      color: Colors.red.shade700, 
+                      size: 20),
+                  SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _error,
+                      style: TextStyle(color: Colors.red.shade700),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
       ],
     );
   }

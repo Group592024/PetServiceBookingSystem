@@ -54,6 +54,7 @@ const PetDiaryListPage = () => {
       const data = await response.json();
 
       if (data.flag) {
+        console.log(data?.data);
         setPetDiary(data?.data);
       }
 
@@ -141,57 +142,98 @@ const PetDiaryListPage = () => {
         </div>
       ) : (
         <>
-          <div className="px-8 py-5">
-            <div className="flex justify-center">
-              <Stack
-                spacing={2}
-                className="flex flex-col justify-center items-center w-1/3"
-              >
-                <div className="py-8 px-6 bg-customPrimary rounded-xl">
-                  <img
-                    src={
-                      petInfo
-                        ? `http://localhost:5010${petInfo.petImage}`
-                        : SampleImage
-                    }
-                    alt="sample-image"
-                    className="rounded-[2.6rem] max-h-96 w-[380px]"
-                  />
-                  <h2 className="text-4xl font-bold text-center mt-4 mb-1 text-white">
-                    {petInfo && petInfo.petName}
-                  </h2>
-                  <p className="text-lg text-center text-white">
-                    {petInfo && formatDateString(petInfo.petDoB)}
-                  </p>
-                </div>
-
-                <button
-                  to={"add"}
-                  className="m-auto flex justify-center items-center gap-1 text-center rounded-s-full rounded-e-full bg-customPrimary text-white py-2 px-4 w-1/2 hover:opacity-90"
-                  onClick={() => setAddModalOpen(true)}
+          <div className="px-8 py-5 flex justify-between">
+            <div className="w-1/3">
+              <div className="">
+                <Stack
+                  spacing={2}
+                  className="flex flex-col justify-center items-center w-full"
                 >
-                  <AddCircleOutlineIcon /> New Post
-                </button>
-              </Stack>
+                  <div className="py-8 px-6 bg-customLightPrimary rounded-xl">
+                    <img
+                      src={
+                        petInfo
+                          ? `http://localhost:5010${petInfo.petImage}`
+                          : SampleImage
+                      }
+                      alt="sample-image"
+                      className="rounded-xl max-h-96 w-[380px]"
+                    />
+                    <h2 className="text-4xl font-bold text-center mt-4 mb-1 ">
+                      {petInfo && petInfo.petName}
+                    </h2>
+                    <p className="text-lg text-center ">
+                      {petInfo && formatDateString(petInfo.petDoB)}
+                    </p>
+                  </div>
+                </Stack>
+                <div className="mt-5">
+                  <button
+                    to={"add"}
+                    className="m-auto flex justify-center items-center gap-1 text-center rounded-xl hover:scale-110
+                     bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
+                    onClick={() => setAddModalOpen(true)}
+                  >
+                    <AddCircleOutlineIcon /> New Post
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex justify-center ">
+                <div className="mt-5 p-5 bg-white shadow-md rounded-xl w-3/4 max-h-96 overflow-y-auto">
+                  <div className="flex justify-center">
+                    <p className="text-xl font-semibold text-customPrimary">
+                      View by topic
+                    </p>
+                  </div>
+
+                  {/* <Autocomplete
+                    options={["All", ...categories]}
+                    getOptionLabel={(option) => option}
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select category"
+                        variant="outlined"
+                      />
+                    )}
+                    sx={{ width: "300px" }}
+                  /> */}
+
+                  <div className="">
+                    <p
+                      className={`p-3 bg-customLightPrimary rounded-xl m-3 hover:scale-110 hover:bg-customPrimary
+                        ${
+                          selectedCategory === "All"
+                            ? "bg-customPrimary text-white"
+                            : ""
+                        }`}
+                      onClick={() => setSelectedCategory("All")}
+                    >
+                      View all
+                    </p>
+                    {categories.map((item) => (
+                      <p
+                        className={`p-3 bg-customLightPrimary rounded-xl m-3 hover:scale-110 hover:bg-customPrimary
+                          ${
+                            selectedCategory === item
+                              ? "bg-customPrimary  text-white"
+                              : ""
+                          }`}
+                        onClick={() => setSelectedCategory(item)}
+                      >
+                        {item}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <Autocomplete
-              options={["All", ...categories]}
-              getOptionLabel={(option) => option}
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Select category"
-                  variant="outlined"
-                />
-              )}
-              sx={{ width: "300px" }}
-            />
-
-            <div className="flex justify-center">
-              <Stack className="w-3/4">
+            <div className=" w-2/3 ">
+              <Stack className="w-full">
                 {petDiary?.data?.length !== 0 ? (
                   <>
                     <PetDiaryCardList data={petDiary?.data} />
@@ -200,7 +242,7 @@ const PetDiaryListPage = () => {
                         variant="contained"
                         onClick={handleClickPrevious}
                         disabled={pageIndex <= 1}
-                        className="flex justify-center items-center gap-1"
+                        className="flex justify-center items-center gap-1 "
                       >
                         <ArrowBackIosIcon fontSize="1rem" /> Previous
                       </Button>
@@ -208,7 +250,7 @@ const PetDiaryListPage = () => {
                         variant="contained"
                         onClick={handleClickNext}
                         disabled={pageIndex >= petDiary?.meta?.totalPages}
-                        className="flex justify-center items-center gap-1"
+                        className="flex justify-center items-center gap-1 "
                       >
                         Next <ArrowForwardIosIcon fontSize="1rem" />
                       </Button>
@@ -224,7 +266,13 @@ const PetDiaryListPage = () => {
           </div>
         </>
       )}
-      <AddDiaryModal open={addModalOpen} onClose={handleCloseAddModal} />
+      {Array.isArray(categories) && categories.length > 0 && (
+        <AddDiaryModal
+          categories={categories}
+          open={addModalOpen}
+          onClose={handleCloseAddModal}
+        />
+      )}
       <ToastContainer />
     </div>
   );

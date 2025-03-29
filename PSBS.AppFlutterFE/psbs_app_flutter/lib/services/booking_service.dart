@@ -28,7 +28,8 @@ class BookingService {
           List<dynamic> data = jsonResponse['data'];
           return data.map((json) => Booking.fromJson(json)).toList();
         } else {
-          throw Exception('Failed to load bookings: ${jsonResponse['message']}');
+          throw Exception(
+              'Failed to load bookings: ${jsonResponse['message']}');
         }
       } else {
         throw Exception('Failed to load bookings: ${response.statusCode}');

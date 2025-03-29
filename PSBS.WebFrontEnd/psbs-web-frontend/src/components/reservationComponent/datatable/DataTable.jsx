@@ -58,7 +58,6 @@ const Datatable = ({
       setRows((prevRows) => [...prevRows, response.data]);
      }
      else{
-      console.log("ua trong day ne poh hon");
       Swal.fire({
         title: 'Error!',
         text: response.message,

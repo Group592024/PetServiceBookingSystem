@@ -13,6 +13,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReservationApi.Infrastructu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReservationApi.Presentation", "ReservationApi.Presentation\ReservationApi.Presentation.csproj", "{FD15BF9D-E385-40A7-A5F2-98D4B37C1CE1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest.ReservationApi", "UnitTest.ReservationApi\UnitTest.ReservationApi.csproj", "{63B58629-5D45-4555-8DF1-ADAB3BA58DFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,9 +43,16 @@ Global
 		{FD15BF9D-E385-40A7-A5F2-98D4B37C1CE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD15BF9D-E385-40A7-A5F2-98D4B37C1CE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD15BF9D-E385-40A7-A5F2-98D4B37C1CE1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63B58629-5D45-4555-8DF1-ADAB3BA58DFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63B58629-5D45-4555-8DF1-ADAB3BA58DFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63B58629-5D45-4555-8DF1-ADAB3BA58DFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63B58629-5D45-4555-8DF1-ADAB3BA58DFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{63B58629-5D45-4555-8DF1-ADAB3BA58DFE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CAB66D91-E4C8-4C0D-84BE-C2511A9F3888}
