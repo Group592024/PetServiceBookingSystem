@@ -19,14 +19,19 @@ import {
   ListItemAvatar,
   ListItemText,
   IconButton,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { Close, Person, Search, CheckCircle } from "@mui/icons-material";
-import CircularProgress from '@mui/material/CircularProgress';
+import CircularProgress from "@mui/material/CircularProgress";
+
 const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
   const [receiverType, setReceiverType] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmail, setIsEmail] = useState(false); // New state for email toggle
+
   // Temporary user data
   const users = [
     {
@@ -48,10 +53,10 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
       roleId: "admin",
     },
     {
-      accountId: "224e8845-9fa0-4cc0-bcb3-958eefd2e663",
-      accountName: "ドラ",
+      accountId: "F15F7961-40EC-46AE-9AF9-423181A37D34",
+      accountName: "Trinh tran phuong tuan",
       accountPhoneNumber: "0323321341",
-      roleId: "admin",
+      roleId: "user",
     },
   ];
 
@@ -61,6 +66,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
       setReceiverType("");
       setSelectedUsers([]);
       setSearchTerm("");
+      setIsEmail(false); // Reset email toggle
     }
   }, [open]);
 
@@ -117,6 +123,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
       const pushNotificationDTO = {
         notificationId: initId,
         Receivers: selectedReceiverDTOs,
+        isEmail: isEmail, // Include the isEmail flag
       };
 
       await onConfirm(pushNotificationDTO); // Make sure to await the API call
@@ -168,6 +175,19 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
           </Box>
 
           <Divider sx={{ my: 2 }} />
+
+          {/* Email Toggle */}
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isEmail}
+                onChange={(e) => setIsEmail(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Include Sending Email"
+            sx={{ mb: 2 }}
+          />
 
           {/* Receiver Type Selection */}
           <FormControl fullWidth sx={{ mb: 3 }}>

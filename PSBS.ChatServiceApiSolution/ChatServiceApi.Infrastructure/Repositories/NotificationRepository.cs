@@ -269,5 +269,10 @@ namespace ChatServiceApi.Infrastructure.Repositories
                             !nb.IsDeleted)
                 .CountAsync();
         }
+
+        public async Task<Notification> GetNotificationById(Guid notificationId)
+        {
+            return await context.Notifications.FindAsync(notificationId);
+        }
     }
 }

@@ -26,5 +26,14 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                 Message = "RabbitMQ is not available. Message not published."
             });
         }
+
+        public Task<Response> SendEmailNotificationMessageAsync(SendNotificationDTO sendNotification)
+        {
+            return Task.FromResult(new Response
+            {
+                Flag = false,
+                Message = "RabbitMQ is not available. Message not published."
+            });
+        }
     }
     }

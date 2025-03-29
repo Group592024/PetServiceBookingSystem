@@ -6,7 +6,7 @@ namespace ChatServiceApi.Application.Interfaces
 {
     public interface INotificationMessagePublisher
     {
-        Task<Response> PublishNotificationMessageAsync(NotificationMessage message);
+        Task<Response> SendEmailNotificationMessageAsync(SendNotificationDTO sendNotification);
         Task<Response> BatchingPushNotificationAsync(PushNotificationDTO pushNotification);
     }
 }

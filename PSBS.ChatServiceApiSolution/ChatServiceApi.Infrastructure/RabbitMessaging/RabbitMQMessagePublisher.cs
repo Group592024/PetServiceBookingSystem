@@ -128,7 +128,7 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                 for (int i = 0; i < receiverCount; i += batchSize)
                 {
                     var batch = pushNotification.Receivers.Skip(i).Take(batchSize).ToList();
-                    var batchNotification = new PushNotificationDTO(pushNotification.notificationId, batch);
+                    var batchNotification = new PushNotificationDTO(pushNotification.notificationId, batch, pushNotification.isEmail);
                     var messageBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(batchNotification));
 
                     // Use async publishing with confirmation
@@ -168,53 +168,7 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             }
         }
 
-        public async Task<Response> PublishNotificationMessageAsync(NotificationMessage message)
-        {
-            if (!_isRabbitAvailable)
-            {
-                return new Response
-                {
-                    Flag = false,
-                    Message = "RabbitMQ is not available. Message was not published."
-                };
-            }
-
-            try
-            {
-                var messageBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
-
-                // Use publisher confirms for reliability
-                _channel.ConfirmSelect();
-                _channel.BasicPublish(
-                    exchange: "NotificationExchange",
-                    routingKey: "notification-routing-key",
-                    basicProperties: null,
-                    body: messageBody);
-
-                if (_channel.WaitForConfirms(TimeSpan.FromSeconds(5)))
-                {
-                    return new Response
-                    {
-                        Flag = true,
-                        Message = "Message published successfully."
-                    };
-                }
-                else
-                {
-                    throw new Exception("Message publish confirmation not received");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogExceptions.LogToDebugger($"Error publishing message: {ex.Message}");
-                return new Response
-                {
-                    Flag = false,
-                    Message = "Failed to publish message.",
-                    Data = ex
-                };
-            }
-        }
+   
 
         public void Dispose()
         {
@@ -232,6 +186,76 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             finally
             {
                 GC.SuppressFinalize(this);
+            }
+        }
+
+        public async Task<Response> SendEmailNotificationMessageAsync(SendNotificationDTO sendNotification)
+        {
+            if (!_isRabbitAvailable)
+            {
+                LogExceptions.LogToDebugger("RabbitMQ unavailable - messages not published");
+                return new Response
+                {
+                    Flag = false,
+                    Message = "RabbitMQ is not available. Messages were not published."
+                };
+            }
+
+            try
+            {
+                int batchSize = 100;
+                int receiverCount = sendNotification.Receivers.Count;
+                int publishedCount = 0;
+
+                var publishTasks = new List<Task>();
+                var batchLock = new object();
+
+                for (int i = 0; i < receiverCount; i += batchSize)
+                {
+                    var batch = sendNotification.Receivers.Skip(i).Take(batchSize).ToList();
+                    var batchNotification = new SendNotificationDTO(sendNotification.notificationId,sendNotification.NotificationTitle, sendNotification.NotificationContent ,batch);
+                    var messageBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(batchNotification));   
+                    var mailMessage = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(sendNotification));
+                    // Use async publishing with confirmation
+                    var task = Task.Run(() =>
+                    {
+                        lock (batchLock)
+                        {                       
+                                _channel.BasicPublish(
+                               exchange: "NotificationExchange",
+                               routingKey: "notification-email-key",
+                               basicProperties: null,
+                               body: mailMessage);
+                         
+                            _channel.BasicPublish(
+                                exchange: "NotificationExchange",
+                                routingKey: "notification-routing-key",
+                                basicProperties: null,
+                                body: messageBody);
+                            publishedCount += batch.Count;
+                        }
+                    });
+
+                    publishTasks.Add(task);
+                }
+
+                await Task.WhenAll(publishTasks);
+
+                return new Response
+                {
+                    Flag = true,
+                    Message = $"Published {publishedCount} messages in batches successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToDebugger($"Error publishing batch: {ex.Message}");
+                return new Response
+                {
+                    Flag = false,
+                    Message = "Failed to publish messages in batches.",
+                    Data = ex
+                };
             }
         }
     }

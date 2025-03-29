@@ -1,41 +1,42 @@
-﻿using ChatServiceApi.Application.DTOs;
-using ChatServiceApi.Application.Interfaces;
-using ChatServiceApi.Infrastructure.Repositories;
-using Newtonsoft.Json;
-using Polly;
+﻿
 using Polly.CircuitBreaker;
-using PSPS.SharedLibrary.PSBSLogs;
-using PSPS.SharedLibrary.Responses;
+using Polly;
+using PSPS.AccountAPI.Application.Interfaces;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
 using RabbitMQ.Client.Exceptions;
 using System.Net.Sockets;
+using PSPS.SharedLibrary.PSBSLogs;
+using PSPS.SharedLibrary.Responses;
+using System.ComponentModel;
+using RabbitMQ.Client.Events;
 using System.Text;
+using Newtonsoft.Json;
+using PSPS.AccountAPI.Application.DTOs;
 
-namespace ChatServiceApi.Infrastructure.RabbitMessaging
+namespace PSPS.AccountAPI.Infrastructure.RabbitMessing
 {
-    public class RabbitMessageConsumer : IDisposable
+   public class RabbitMessageConsumer
     {
         private IConnection _connection;
         private IModel _channel;
-        private readonly INoticationRepository _notificationRepository;
-        public bool IsRabbitAvailable { get;  set; } = false;
-
+        private readonly IEmail _emailRepository;
+        private readonly IAccount _accountRepository;
+        public bool IsRabbitAvailable { get; set; } = false;
         private static readonly CircuitBreakerPolicy _circuitBreaker = Policy
-            .Handle<BrokerUnreachableException>()
-            .Or<SocketException>()
-            .CircuitBreaker(
-                exceptionsAllowedBeforeBreaking: 3,
-                durationOfBreak: TimeSpan.FromMinutes(1)
-            );
-
+         .Handle<BrokerUnreachableException>()
+         .Or<SocketException>()
+         .CircuitBreaker(
+             exceptionsAllowedBeforeBreaking: 3,
+             durationOfBreak: TimeSpan.FromMinutes(1)
+         );
         private readonly TimeSpan _reconnectDelay = TimeSpan.FromSeconds(60);
         private DateTime _lastConnectionAttempt = DateTime.MinValue;
 
-        public RabbitMessageConsumer(INoticationRepository notificationRepository)
+        public RabbitMessageConsumer(IEmail emailRepository, IAccount accountRepository)
         {
-            _notificationRepository = notificationRepository;
+            _emailRepository = emailRepository;
             TryInitializeRabbitMQWithRetry();
+            _accountRepository = accountRepository;
         }
 
         private void TryInitializeRabbitMQWithRetry()
@@ -76,8 +77,8 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                     _channel = _connection.CreateModel();
 
                     string exchangeName = "NotificationExchange";
-                    string routingKey = "notification-routing-key";
-                    string queueName = "notification_queue";
+                    string routingKey = "notification-email-key";
+                    string queueName = "send-notification-email";
 
                     // Declare the exchange and queue, and bind them
                     _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
@@ -113,9 +114,8 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             }
         }
 
-        public async Task<Response> PushedNotificationConsumer()
+        public async Task<Response> SendNotificationEmailConsumer()
         {
-            // Attempt reconnection if not available
             if (!IsRabbitAvailable)
             {
                 TryInitializeRabbitMQWithRetry();
@@ -137,7 +137,7 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                         var body = args.Body.ToArray();
                         string message = Encoding.UTF8.GetString(body);
                         LogExceptions.LogToDebugger("New message received: " + message);
-                        var result = await ProcessMessage(message);
+                        var result = await ProcessNotificationMessage(message);
 
                         if (result.Flag)
                         {
@@ -157,10 +157,9 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                 };
 
                 _channel.BasicConsume(
-                    queue: "notification_queue",
-                    autoAck: false,
-                    consumer: consumer);
-
+                    queue: "send-notification-email",
+                    autoAck:false,
+                    consumer:consumer);
                 return new Response { Flag = true, Message = "Consumer started" };
             }
             catch (Exception ex)
@@ -171,26 +170,31 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             }
         }
 
-        private async Task<Response> ProcessMessage(string message)
+        private async Task<Response> ProcessNotificationMessage(string message)
         {
             try
             {
-                PushNotificationDTO pushNotification = JsonConvert.DeserializeObject<PushNotificationDTO>(message);
-
-                if (pushNotification != null)
+                var notification = JsonConvert.DeserializeObject<SendNotificationDTO>(message);
+                if (notification != null)
                 {
-                    foreach (var receiver in pushNotification.Receivers)
+                    var content = new NotificationMessage { NotificationTitle = notification.NotificationTitle, NotificationContent = notification.NotificationContent };
+                    foreach (var receiver in notification.Receivers)
                     {
                         try
                         {
-                            // Process each receiver
-                            var result = await _notificationRepository.PushSingleNotification(pushNotification.notificationId, receiver.UserId);
-
-                            if (!result.Flag)
+                            var account = await _accountRepository.GetByIdAsync(receiver.UserId);
+                            if (account is null)
                             {
                                 LogExceptions.LogToDebugger($"Error processing receiver: {receiver.UserId}");
                                 return new Response { Flag = false, Message = $"Error processing receiver: {receiver.UserId}" };
                             }
+                            else
+                            {
+                                // Process each receiver
+                             await _emailRepository.SendNotificationEmail(account, content);
+                            
+                            }
+                             
                         }
                         catch (Exception ex)
                         {
@@ -202,34 +206,19 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                 }
                 else
                 {
-                    LogExceptions.LogToDebugger("Failed to deserialize message to PushNotificationDTO.");
-                    return new Response { Flag = false, Message = "Failed to deserialize message to PushNotificationDTO." };
+                    LogExceptions.LogToDebugger("Failed to deserialize message to SendNotificationDTO.");
+                    return new Response { Flag = false, Message = "Failed to deserialize message to SendNotificationDTO." };
                 }
             }
             catch (JsonException ex)
             {
                 LogExceptions.LogToDebugger($"Error deserializing JSON: {ex.Message}");
-                return new Response { Flag = false, Message = "Failed to deserialize message to PushNotificationDTO." };
+                return new Response { Flag = false, Message = "Failed to deserialize message to SendNotificationDTO." };
             }
             catch (Exception ex)
             {
                 LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
                 return new Response { Flag = false, Message = $"Error processing message: {ex.Message}" };
-            }
-        }
-
-        public void Dispose()
-        {
-            try
-            {
-                _channel?.Close();
-                _connection?.Close();
-                _channel?.Dispose();
-                _connection?.Dispose();
-            }
-            catch (Exception ex)
-            {
-                LogExceptions.LogToDebugger($"Error disposing RabbitMQ resources: {ex.Message}");
             }
         }
     }

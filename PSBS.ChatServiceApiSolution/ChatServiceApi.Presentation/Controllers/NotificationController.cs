@@ -55,7 +55,21 @@ namespace ChatServiceApi.Presentation.Controllers
                     return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
                 }
 
-                var response = await _notificationMessagePublisher.BatchingPushNotificationAsync(pushNotificationDTO);
+                var response = new PSPS.SharedLibrary.Responses.Response();
+                if (pushNotificationDTO.isEmail)
+                {
+                    var notification = await _notificationRepository.GetNotificationById(pushNotificationDTO.notificationId);
+                    if(notification is null)
+                    {
+                        return NotFound();
+                    }
+                    var sendNoti = new SendNotificationDTO(pushNotificationDTO.notificationId, notification.NotificationTitle, notification.NotificationContent, pushNotificationDTO.Receivers);
+                   response= await _notificationMessagePublisher.SendEmailNotificationMessageAsync(sendNoti);
+                }
+                else
+                {
+                    response = await _notificationMessagePublisher.BatchingPushNotificationAsync(pushNotificationDTO);
+                }
 
                 if (response.Flag)
                 {
