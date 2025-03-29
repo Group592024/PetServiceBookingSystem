@@ -7,7 +7,6 @@ import Navbar from "../../../components/navbar/Navbar";
 const CreateCamera = () => {
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
-  const token = sessionStorage.getItem("token");
 
   const [cameraDetails, setCameraDetails] = useState({
     cameraType: "",
@@ -18,12 +17,22 @@ const CreateCamera = () => {
     isDeleted: false,
   });
 
+  // Hàm tạo GUID cho cameraId
   const generateGuid = () => {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
       const r = Math.random() * 16 | 0;
       const v = c === "x" ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
+  };
+
+  // Hàm lấy headers với token từ sessionStorage
+  const getHeaders = () => {
+    const token = sessionStorage.getItem("token");
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    };
   };
 
   const handleChange = (e) => {
@@ -35,6 +44,7 @@ const CreateCamera = () => {
   };
 
   const handleCreate = async () => {
+    // Kiểm tra các trường bắt buộc
     if (
       !cameraDetails.cameraType ||
       !cameraDetails.cameraCode ||
@@ -45,24 +55,22 @@ const CreateCamera = () => {
       Swal.fire("Error", "Please fill in all required fields", "error");
       return;
     }
-  
+
+    // Tạo mới object camera với cameraId được tạo từ generateGuid
     const newCamera = {
       cameraId: generateGuid(),
       ...cameraDetails,
     };
-  
+
     try {
-      const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
-  
+      const headers = getHeaders();
+
       const response = await fetch(`http://localhost:5050/api/Camera/create`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Thêm token vào header
-        },
+        headers,
         body: JSON.stringify(newCamera),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         Swal.fire("Error", errorData.message || "Failed to create camera", "error");
@@ -76,7 +84,6 @@ const CreateCamera = () => {
       Swal.fire("Error", "An error occurred while creating the camera", "error");
     }
   };
-  
 
   const handleBack = () => {
     navigate(-1);

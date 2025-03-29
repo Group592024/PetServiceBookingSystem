@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { DataGrid } from "@mui/x-data-grid";
-import { IconButton, Button } from "@mui/material";
+import { IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -13,31 +13,37 @@ import { Link, useNavigate } from "react-router-dom";
 const CameraList = () => {
   const [cameras, setCameras] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const token = sessionStorage.getItem("token");
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
 
+  const getHeaders = () => {
+    const token = sessionStorage.getItem("token");
+    console.log("Token:", token); // Log token
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    };
+  };
+
+
   const fetchCameras = async () => {
     try {
-      const token = sessionStorage.getItem("token");
-      if (!token) {
-        throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
-      }
+      const headers = getHeaders();
 
       const response = await fetch(`http://localhost:5050/api/Camera/all`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
-      },
+        headers,
       });
+
+      console.log("Response status:", response.status);
 
       if (!response.ok) {
         throw new Error("Failed to fetch camera data");
       }
 
       const data = await response.json();
-      setCameras(Array.isArray(data?.data) ? data.data : []);
+      console.log("Data received:", data);
+      setCameras(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching cameras:", error);
       Swal.fire("Error", error.message || "Failed to load camera data", "error");
@@ -58,6 +64,7 @@ const CameraList = () => {
       (camera.cameraAddress?.toLowerCase() ?? "").includes(query)
     );
   });
+  console.log("Filtered Cameras:", filteredCameras);
 
 
   const handleDelete = (cameraId, cameraCode) => {
@@ -72,17 +79,10 @@ const CameraList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const token = sessionStorage.getItem("token");
-          if (!token) {
-            throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
-          }
-
+          const headers = getHeaders();
           const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
             method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // Thêm token vào header
-            },
+            headers,
           });
 
           const data = await response.json();

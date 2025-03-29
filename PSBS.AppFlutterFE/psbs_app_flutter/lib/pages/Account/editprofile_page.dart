@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage(
@@ -78,10 +79,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
           }
         });
       } else {
-        _showErrorDialog('Failed to load account data.');
+        _showToast('Failed to load account data.', backgroundColor: Colors.red);
       }
     } catch (error) {
-      _showErrorDialog('Error fetching account data: $error');
+      _showToast('Error fetching account data: $error',
+          backgroundColor: Colors.red);
     }
   }
 
@@ -117,22 +119,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        profileImage = File(pickedFile.path);
-        imagePreview = null;
-        isImagePicked = true;
-      });
-      print("Selected image file: ${pickedFile.path.split('/').last}");
-    } else {
-      setState(() {
-        isImagePicked = false;
-      });
-      print("No image selected.");
-    }
+  // Hàm showToast sử dụng Fluttertoast để hiển thị thông báo
+  void _showToast(String message, {Color backgroundColor = Colors.black54}) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: backgroundColor,
+      textColor: Colors.white,
+    );
   }
 
   Future<void> _saveProfile() async {
@@ -178,51 +173,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
       if (response.statusCode == 200) {
         final result = json.decode(responseCompleted.body);
         if (result['flag']) {
-          _showSuccessDialog('Profile updated successfully!');
+          _showToast('Profile updated successfully!',
+              backgroundColor: Colors.green);
+          Navigator.of(context).pop(true);
         } else {
-          _showErrorDialog(result['message'] ?? 'Something went wrong.');
+          _showToast(result['message'] ?? 'Something went wrong.',
+              backgroundColor: Colors.red);
         }
       } else {
-        _showErrorDialog('Failed to update profile.');
+        _showToast('Failed to update profile.', backgroundColor: Colors.red);
       }
     } catch (error) {
-      _showErrorDialog('Error: $error');
+      _showToast('Error: $error', backgroundColor: Colors.red);
     }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccessDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Success'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-              Navigator.of(context).pop(true);
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -322,7 +285,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                     const SizedBox(height: 20),
                     ProfileField(
-                        label: 'Phone Number', controller: phoneController),
+                      label: 'Phone Number',
+                      controller: phoneController,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter phone number';
+                        }
+                        final regex = RegExp(r'^0\d{9}$');
+                        if (!regex.hasMatch(value)) {
+                          return 'Please enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
                     const SizedBox(height: 20),
                     ProfileField(
                         label: 'Address', controller: addressController),
@@ -369,18 +344,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
       ),
     );
   }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        profileImage = File(pickedFile.path);
+        imagePreview = null;
+        isImagePicked = true;
+      });
+      print("Selected image file: ${pickedFile.path.split('/').last}");
+    } else {
+      setState(() {
+        isImagePicked = false;
+      });
+      print("No image selected.");
+    }
+  }
 }
 
 class ProfileField extends StatelessWidget {
   final String label;
   final TextEditingController controller;
   final bool enabled;
+  final String? Function(String?)? validator;
 
   const ProfileField({
     super.key,
     required this.label,
     required this.controller,
     this.enabled = true,
+    this.validator,
   });
 
   @override
@@ -399,6 +394,7 @@ class ProfileField extends StatelessWidget {
           TextFormField(
             controller: controller,
             enabled: enabled,
+            validator: validator,
             decoration: InputDecoration(
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
