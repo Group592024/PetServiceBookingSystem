@@ -2,15 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Polly.Retry;
+using Polly;
 using PSBS.HealthCareApi.Application.Interfaces;
 using PSBS.HealthCareApi.Infrastructure.Data;
 using PSBS.HealthCareApi.Infrastructure.Repositories;
 using PSPS.SharedLibrary.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net.Http.Headers;
+
+using PSPS.SharedLibrary.PSBSLogs;
+using PSBS.HealthCareApi.Infrastructure.Services;
 
 namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
 {
@@ -26,8 +27,40 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             services.AddScoped<IMedicine, MedicineRepository>();
             services.AddScoped<ITreatment, TreatmentRepository>();
             services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
+            services.AddScoped<IFetchHealthBookDetail, FetchHealthBookDetailService>();
             services.AddDbContext<HealthCareDbContext>(options =>
         options.UseSqlServer(config.GetConnectionString("Default")));
+
+            services.AddHttpClient("ApiGateway", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5050/");
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", config["MySerilog:DefaultToken"]!);
+                client.DefaultRequestHeaders.Accept.Add(
+       new MediaTypeWithQualityHeaderValue("application/json"));
+            });
+
+            // create Retry Strategy
+            var retryStrategy = new RetryStrategyOptions()
+            {
+                ShouldHandle = new PredicateBuilder().Handle<TaskCanceledException>(),
+                BackoffType = DelayBackoffType.Constant,
+                UseJitter = true,
+                MaxRetryAttempts = 3,
+                Delay = TimeSpan.FromMilliseconds(500),
+                OnRetry = args =>
+                {
+                    string message = $"OnRetry, Attempt: {args.AttemptNumber} OutCome {args.Outcome}";
+                    LogExceptions.LogToConsole(message);
+                    LogExceptions.LogToDebugger(message);
+                    return ValueTask.CompletedTask;
+                }
+            };
+
+            // use Retry strategy
+            services.AddResiliencePipeline("my-retry-pipeline", builder =>
+            {
+                builder.AddRetry(retryStrategy);
+            });
             return services;
         }
 
