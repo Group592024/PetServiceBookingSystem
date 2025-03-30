@@ -1,5 +1,6 @@
 ﻿using ChatServiceApi.Application.DTOs;
 using ChatServiceApi.Application.Interfaces;
+using ChatServiceApi.Domain.Entities;
 using ChatServiceApi.Infrastructure.Repositories;
 using Newtonsoft.Json;
 using Polly;
@@ -84,6 +85,15 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                     _channel.QueueDeclare(queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
                     _channel.QueueBind(queueName, exchangeName, routingKey, null);
 
+
+                    // Healthbook Reminder Exchange and Queue
+                    string healthbookExchange = "HealthbookExchange";
+                    string healthbookRoutingKey = "healthbook-reminder";
+                    string healthbookQueue = "notification-healthbook-create";
+                    // Declare healthbook exchange and queue
+                    _channel.ExchangeDeclare(healthbookExchange, ExchangeType.Direct);
+                    _channel.QueueDeclare(healthbookQueue, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    _channel.QueueBind(healthbookQueue, healthbookExchange, healthbookRoutingKey, null);
                     // Setup connection events
                     _connection.ConnectionShutdown += (sender, args) =>
                     {
@@ -171,6 +181,64 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             }
         }
 
+        public async Task<Response> HealthBookNotificationConsumer()
+        {
+            // Attempt reconnection if not available
+            if (!IsRabbitAvailable)
+            {
+                TryInitializeRabbitMQWithRetry();
+
+                return new Response
+                {
+                    Flag = false,
+                    Message = "RabbitMQ is not available. Messages will not be processed."
+                };
+            }
+
+            try
+            {
+                var consumer = new AsyncEventingBasicConsumer(_channel);
+                consumer.Received += async (sender, args) =>
+                {
+                    try
+                    {
+                        var body = args.Body.ToArray();
+                        string message = Encoding.UTF8.GetString(body);
+                        LogExceptions.LogToDebugger("New message received: " + message);
+                        var result = await ProcessHealthBookMessage(message);
+
+                        if (result.Flag)
+                        {
+                            _channel.BasicAck(args.DeliveryTag, false);
+                        }
+                        else
+                        {
+                            _channel.BasicNack(args.DeliveryTag, false, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
+                        _channel.BasicNack(args.DeliveryTag, false, true);
+                    }
+                    await Task.Yield();
+                };
+
+                _channel.BasicConsume(
+                    queue: "notification-healthbook-create",
+                    autoAck: false,
+                    consumer: consumer);
+
+                return new Response { Flag = true, Message = "Consumer started" };
+            }
+            catch (Exception ex)
+            {
+                IsRabbitAvailable = false;
+                LogExceptions.LogToDebugger($"⚠️ RabbitMQ consumption error: {ex.Message}");
+                return new Response { Flag = false, Message = $"Failed to start consumer: {ex.Message}" };
+            }
+        }
+
         private async Task<Response> ProcessMessage(string message)
         {
             try
@@ -218,6 +286,64 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
             }
         }
 
+        private async Task<Response> ProcessHealthBookMessage(string message)
+        {
+            try
+            {
+                var pushNotification = JsonConvert.DeserializeObject<IEnumerable<HealthBookMessageDTO>>(message);
+
+                if (pushNotification != null)
+                {
+                    foreach (var receiver in pushNotification)
+                    {
+                        try
+                        {
+                            //prepare title and content
+                            string title = $"[PetEase] Reminder: {receiver.PetName}'s Visit on {receiver.nextVisitDate:MMMM dd}";
+                            string content = "Please check your email for more detail";
+                            var notification = new Notification
+                            {
+                                NotificationTitle = title,
+                                NotificationContent = content,
+                                CreatedDate = DateTime.Now,
+                                NotiTypeId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                                IsPushed = true,
+                                IsDeleted= false,
+                            };
+                            // Process each receiver
+                            var result = await _notificationRepository.CreateHealthBookNotification(receiver.UserId, notification);
+
+                            if (!result.Flag)
+                            {
+                                LogExceptions.LogToDebugger($"Error processing receiver: {receiver.UserId}");
+                                return new Response { Flag = false, Message = $"Error processing receiver: {receiver.UserId}" };
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogExceptions.LogToDebugger($"Error processing receiver: {ex.Message}");
+                            return new Response { Flag = false, Message = $"Error processing receiver: {ex.Message}" };
+                        }
+                    }
+                    return new Response { Flag = true, Message = "All receivers processed successfully." };
+                }
+                else
+                {
+                    LogExceptions.LogToDebugger("Failed to deserialize message to PushNotificationDTO.");
+                    return new Response { Flag = false, Message = "Failed to deserialize message to PushNotificationDTO." };
+                }
+            }
+            catch (JsonException ex)
+            {
+                LogExceptions.LogToDebugger($"Error deserializing JSON: {ex.Message}");
+                return new Response { Flag = false, Message = "Failed to deserialize message to PushNotificationDTO." };
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
+                return new Response { Flag = false, Message = $"Error processing message: {ex.Message}" };
+            }
+        }
         public void Dispose()
         {
             try

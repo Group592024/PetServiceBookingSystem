@@ -2,8 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
+using PSPS.SharedLibrary.Responses;
 using System.Threading.Tasks;
 
 namespace ChatServiceApi.Infrastructure.NotificationWorker
@@ -12,9 +11,12 @@ namespace ChatServiceApi.Infrastructure.NotificationWorker
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<NotificationMessageWorker> _logger;
-        private RabbitMessageConsumer _messageConsumer; // Hold a single instance
+        private Task _notificationConsumerTask;
+        private Task _healthbookConsumerTask;
 
-        public NotificationMessageWorker(IServiceScopeFactory scopeFactory, ILogger<NotificationMessageWorker> logger)
+        public NotificationMessageWorker(
+            IServiceScopeFactory scopeFactory,
+            ILogger<NotificationMessageWorker> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -22,27 +24,65 @@ namespace ChatServiceApi.Infrastructure.NotificationWorker
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using (var scope = _scopeFactory.CreateScope()) //Create the scope once.
+            using (var scope = _scopeFactory.CreateScope())
             {
-                _messageConsumer = scope.ServiceProvider.GetRequiredService<RabbitMessageConsumer>(); // Get a single instance.
-                var response = await _messageConsumer.PushedNotificationConsumer(); //start the consumer.
-                if (!response.Flag)
-                {
-                    _logger.LogWarning("RabbitMQ issue: {Message}", response.Message);
-                    return; // Stop the worker if the consumer fails to start.
-                }
+                var messageConsumer = scope.ServiceProvider.GetRequiredService<RabbitMessageConsumer>();
 
-                while (!stoppingToken.IsCancellationRequested)
+                // Start both consumers in parallel
+                _notificationConsumerTask = RunConsumerAsync(
+                    messageConsumer.PushedNotificationConsumer,
+                    "Notification",
+                    stoppingToken);
+
+                _healthbookConsumerTask = RunConsumerAsync(
+                    messageConsumer.HealthBookNotificationConsumer,
+                    "HealthBook",
+                    stoppingToken);
+
+                // Wait for both tasks to complete (which they won't unless cancelled)
+                await Task.WhenAll(_notificationConsumerTask, _healthbookConsumerTask);
+            }
+        }
+
+        private async Task RunConsumerAsync(
+            Func<Task<Response>> consumerAction,
+            string consumerName,
+            CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
                 {
-                    await Task.Delay(5000, stoppingToken); //just keep the worker alive.
+                    _logger.LogInformation($"Starting {consumerName} consumer...");
+                    var response = await consumerAction();
+
+                    if (!response.Flag)
+                    {
+                        _logger.LogWarning($"{consumerName} consumer failed: {response.Message}");
+                        await Task.Delay(5000, stoppingToken); // Wait before retrying
+                        continue;
+                    }
+
+                    // If successful, just wait until cancellation
+                    await Task.Delay(Timeout.Infinite, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Expected during shutdown
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error in {consumerName} consumer");
+                    await Task.Delay(5000, stoppingToken); // Wait before retrying
                 }
             }
         }
 
-        public override void Dispose()
+        public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _messageConsumer?.Dispose(); //Dispose the consumer.
-            base.Dispose();
+            _logger.LogInformation("Stopping notification worker...");
+            await base.StopAsync(cancellationToken);
         }
     }
 }

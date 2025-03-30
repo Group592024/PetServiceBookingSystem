@@ -274,5 +274,44 @@ namespace ChatServiceApi.Infrastructure.Repositories
         {
             return await context.Notifications.FindAsync(notificationId);
         }
+
+        public async Task<Response> CreateHealthBookNotification(Guid userId, Notification notification)
+        {
+            try
+            {
+                context.Notifications.Add(notification);
+                await context.SaveChangesAsync();
+
+                // Fetch the Notification with NotificationType included
+                var createdNotification = await context.Notifications
+                    .Include(n => n.NotificationType)
+                    .FirstOrDefaultAsync(n => n.NotificationId == notification.NotificationId);
+
+                if (createdNotification != null)
+                {
+                    var (noti, _) = NotificationConversion.FromEntity(createdNotification, null);
+                    var notibox = new NotificationBox
+                    {
+                        NotificationId = createdNotification.NotificationId,
+                        CreatedDate = DateTime.Now,
+                        IsDeleted = false,
+                        IsRead = false,
+                        UserId = userId,
+                    };
+                    context.NotificationBoxes.Add(notibox);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Notification added successfully") { Data = noti };
+                }
+                else
+                {
+                    return new Response(false, "Failed to add notification"); // Corrected to false
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred adding new notification");
+            }
+        }
     }
 }

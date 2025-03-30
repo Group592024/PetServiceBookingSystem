@@ -4,8 +4,8 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Polly;
 using Polly.CircuitBreaker;
+using PSBS.HealthCareApi.Application.DTOs;
 using PSBS.HealthCareApi.Application.Interfaces;
-using PSBS.HealthCareApi.Domain;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using RabbitMQ.Client;
@@ -77,15 +77,16 @@ namespace PSBS.HealthCareApi.Infrastructure.RabbitMessaging
                     _connection = factory.CreateConnection();
                     _channel = _connection.CreateModel();
 
-                    // Declare with durable settings for better reliability
-                    string exchangeName = "NotificationExchange";
-                    string routingKey = "notification-healthbook-key";
-                    string queueName = "healthbook-queue";
+                    // Healthbook Reminder Exchange and Queue
+                    string healthbookExchange = "HealthbookExchange";
+                    string healthbookRoutingKey = "healthbook-reminder";
+                    string healthbookQueue = "send-healthbook-reminder";
 
-                    // Declare the exchange and queue, and bind them
-                    _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
-                    _channel.QueueDeclare(queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
-                    _channel.QueueBind(queueName, exchangeName, routingKey, null);
+                    // Declare healthbook exchange and queue
+                    _channel.ExchangeDeclare(healthbookExchange, ExchangeType.Direct);
+                    _channel.QueueDeclare(healthbookQueue, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    _channel.QueueBind(healthbookQueue, healthbookExchange, healthbookRoutingKey, null);
+
 
                     // Set up connection event handlers
                     _connection.ConnectionShutdown += (sender, args) =>
@@ -108,7 +109,7 @@ namespace PSBS.HealthCareApi.Infrastructure.RabbitMessaging
             }
         }
 
-        public async Task<Response> PublishHealthCareBookAsync(IEnumerable<PetHealthBook> healthBooks)
+        public async Task<Response> PublishHealthCareBookAsync(IEnumerable<HealthBookMessageDTO> healthBooks)
         {
             if (!_isRabbitAvailable)
             {
@@ -131,9 +132,8 @@ namespace PSBS.HealthCareApi.Infrastructure.RabbitMessaging
 
                 for (int i = 0; i < receiverCount; i += batchSize)
                 {
-                    var batch = healthBooks.Skip(i).Take(batchSize).ToList();
-                    //var batchNotification = new PushNotificationDTO(pushNotification.notificationId, batch, pushNotification.isEmail);
-                    var messageBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(""));
+                    var batch = healthBooks.Skip(i).Take(batchSize).ToList();               
+                    var messageBody = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(batch));
 
                     // Use async publishing with confirmation
                     var task = Task.Run(() =>
@@ -141,8 +141,8 @@ namespace PSBS.HealthCareApi.Infrastructure.RabbitMessaging
                         lock (batchLock)
                         {
                             _channel.BasicPublish(
-                                exchange: "NotificationExchange",
-                                routingKey: "notification-routing-key",
+                                exchange: "HealthbookExchange",
+                                routingKey: "healthbook-reminder",
                                 basicProperties: null,
                                 body: messageBody);
                             publishedCount += batch.Count;

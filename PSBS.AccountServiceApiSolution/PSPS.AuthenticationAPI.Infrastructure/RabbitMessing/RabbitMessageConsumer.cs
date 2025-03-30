@@ -80,10 +80,21 @@ namespace PSPS.AccountAPI.Infrastructure.RabbitMessing
                     string routingKey = "notification-email-key";
                     string queueName = "send-notification-email";
 
+                    // Healthbook Reminder Exchange and Queue
+                    string healthbookExchange = "HealthbookExchange";
+                    string healthbookRoutingKey = "healthbook-reminder";
+                    string healthbookQueue = "send-healthbook-reminder";
+
                     // Declare the exchange and queue, and bind them
                     _channel.ExchangeDeclare(exchangeName, ExchangeType.Direct);
                     _channel.QueueDeclare(queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
                     _channel.QueueBind(queueName, exchangeName, routingKey, null);
+
+                    // Declare healthbook exchange and queue
+                    _channel.ExchangeDeclare(healthbookExchange, ExchangeType.Direct);
+                    _channel.QueueDeclare(healthbookQueue, durable: false, exclusive: false, autoDelete: false, arguments: null);
+                    _channel.QueueBind(healthbookQueue, healthbookExchange, healthbookRoutingKey, null);
+
 
                     // Setup connection events
                     _connection.ConnectionShutdown += (sender, args) =>
@@ -214,6 +225,114 @@ namespace PSPS.AccountAPI.Infrastructure.RabbitMessing
             {
                 LogExceptions.LogToDebugger($"Error deserializing JSON: {ex.Message}");
                 return new Response { Flag = false, Message = "Failed to deserialize message to SendNotificationDTO." };
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
+                return new Response { Flag = false, Message = $"Error processing message: {ex.Message}" };
+            }
+        }
+
+        public async Task<Response> SendReminderEmailConsumer()
+        {
+            if (!IsRabbitAvailable)
+            {
+                TryInitializeRabbitMQWithRetry();
+
+                return new Response
+                {
+                    Flag = false,
+                    Message = "RabbitMQ is not available. Messages will not be processed."
+                };
+            }
+
+            try
+            {
+                var consumer = new AsyncEventingBasicConsumer(_channel);
+                consumer.Received += async (sender, args) =>
+                {
+                    try
+                    {
+                        var body = args.Body.ToArray();
+                        string message = Encoding.UTF8.GetString(body);
+                        LogExceptions.LogToDebugger("New message received: " + message);
+                        var result = await ProcessReminderMessage(message);
+
+                        if (result.Flag)
+                        {
+                            _channel.BasicAck(args.DeliveryTag, false);
+                        }
+                        else
+                        {
+                            _channel.BasicNack(args.DeliveryTag, false, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogExceptions.LogToDebugger($"Error processing message: {ex.Message}");
+                        _channel.BasicNack(args.DeliveryTag, false, true);
+                    }
+                    await Task.Yield();
+                };
+
+                _channel.BasicConsume(
+                    queue: "send-healthbook-reminder",
+                    autoAck: false,
+                    consumer: consumer);
+                return new Response { Flag = true, Message = "Consumer started" };
+            }
+            catch (Exception ex)
+            {
+                IsRabbitAvailable = false;
+                LogExceptions.LogToDebugger($"⚠️ RabbitMQ consumption error: {ex.Message}");
+                return new Response { Flag = false, Message = $"Failed to start consumer: {ex.Message}" };
+            }
+        }
+
+        private async Task<Response> ProcessReminderMessage(string message)
+        {
+            try
+            {
+                var notification = JsonConvert.DeserializeObject<IEnumerable<HealthBookMessageDTO>>(message);
+                if (notification != null)
+                {
+                    
+                    foreach (var receiver in notification)
+                    {
+                        try
+                        {
+                            var account = await _accountRepository.GetByIdAsync(receiver.UserId);
+                            if (account is null)
+                            {
+                                LogExceptions.LogToDebugger($"Error processing receiver: {receiver.UserId}");
+                                return new Response { Flag = false, Message = $"Error processing receiver: {receiver.UserId}" };
+                            }
+                            else
+                            {
+                                // Process each receiver
+                                await _emailRepository.SendHealthBookReminder(account, receiver);
+
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            LogExceptions.LogToDebugger($"Error processing receiver: {ex.Message}");
+                            return new Response { Flag = false, Message = $"Error processing receiver: {ex.Message}" };
+                        }
+                    }
+                    return new Response { Flag = true, Message = "All receivers processed successfully." };
+                }
+                else
+                {
+                    LogExceptions.LogToDebugger("Failed to deserialize message to HealthBookMessageDTO.");
+                    return new Response { Flag = false, Message = "Failed to deserialize message to HealthBookMessageDTO." };
+                }
+            }
+            catch (JsonException ex)
+            {
+                LogExceptions.LogToDebugger($"Error deserializing JSON: {ex.Message}");
+                return new Response { Flag = false, Message = "Failed to deserialize message to HealthBookMessageDTO." };
             }
             catch (Exception ex)
             {

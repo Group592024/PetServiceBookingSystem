@@ -12,6 +12,9 @@ using System.Net.Http.Headers;
 
 using PSPS.SharedLibrary.PSBSLogs;
 using PSBS.HealthCareApi.Infrastructure.Services;
+using PSBS.HealthCareApi.Infrastructure.RabbitMessaging;
+using PSBS.HealthCareApi.Infrastructure.NotificationWorker;
+
 
 namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
 {
@@ -28,6 +31,14 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             services.AddScoped<ITreatment, TreatmentRepository>();
             services.AddScoped<IPetHealthBook, PetHealthBookRepository>();
             services.AddScoped<IFetchHealthBookDetail, FetchHealthBookDetailService>();
+            if (!string.IsNullOrEmpty(config["RabbitMQ:Uri"]))
+            {
+                services.AddScoped<IHealthBookPublisher, HealthBookPublisher>();            
+            }
+            else
+            {
+                services.AddScoped<IHealthBookPublisher, NullMessagePublisher>(); // Fallback             
+            }
             services.AddDbContext<HealthCareDbContext>(options =>
         options.UseSqlServer(config.GetConnectionString("Default")));
 
@@ -61,6 +72,8 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
             {
                 builder.AddRetry(retryStrategy);
             });
+
+            services.AddHostedService<HealthBookReminderWorker>();
             return services;
         }
 
