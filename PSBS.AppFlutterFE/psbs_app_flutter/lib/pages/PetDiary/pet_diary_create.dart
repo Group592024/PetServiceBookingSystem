@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill_extensions/flutter_quill_extensions.dart';
 import 'package:http/http.dart' as http;
+import 'package:psbs_app_flutter/pages/PetDiary/pet_diary_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vsc_quill_delta_to_html/vsc_quill_delta_to_html.dart';
 import 'dart:convert';
@@ -26,6 +27,49 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
   List<String> categories = [];
   String? selectedCategory;
   bool isLoadingCategories = true;
+
+  void _showCreateCategoryDialog() {
+    TextEditingController newCategoryController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Create New Category"),
+          content: TextField(
+            controller: newCategoryController,
+            decoration: InputDecoration(
+              labelText: "Category Name",
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                String newCategory = newCategoryController.text.trim();
+                if (newCategory.isNotEmpty &&
+                    !categories.contains(newCategory)) {
+                  setState(() {
+                    categories.add(newCategory);
+                    selectedCategory = newCategory;
+                  });
+                }
+
+                Navigator.pop(context);
+              },
+              child: Text("Create"),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   void _setImageFileListFromFile(XFile? value) {
     _mediaFileList = value == null ? null : <XFile>[value];
@@ -56,7 +100,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:5050/api/PetDiary'),
+  Uri.parse('http://10.0.2.2:5050/api/PetDiary'),
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
@@ -75,6 +119,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Pet Diary Created Successfully!')),
         );
+
         Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -98,7 +143,7 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
 
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.7:5050/api/PetDiary/categories/${widget.petId}'),
+  'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           'Accept': 'application/json',
           "Authorization": "Bearer $token",
@@ -244,51 +289,77 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
     return Scaffold(
         appBar: AppBar(title: Text('Create Pet Diary')),
         body: SingleChildScrollView(
-          child: Padding(
+          child: Container(
+            margin: const EdgeInsets.all(12.0),
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Select or create a category:",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                isLoadingCategories
-                    ? CircularProgressIndicator()
-                    : DropdownButton<String>(
-                        value: categories.contains(selectedCategory)
-                            ? selectedCategory
-                            : null,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedCategory = newValue!;
-                            categoryTextController.text = "";
-                          });
-                        },
-                        items: categories
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                      ),
-                SizedBox(height: 10),
-                TextField(
-                  controller: categoryTextController,
-                  decoration: InputDecoration(
-                    labelText: "Create new category",
-                    border: OutlineInputBorder(),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      selectedCategory = value;
-
-                      if (value.isNotEmpty && !categories.contains(value)) {
-                        categories.add(value);
-                      }
-                    });
-                  },
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Select a topic:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 8),
+                      isLoadingCategories
+                          ? CircularProgressIndicator()
+                          : DropdownButton<String>(
+                              value: (selectedCategory != null &&
+                                      categories.contains(selectedCategory))
+                                  ? selectedCategory
+                                  : null,
+                              onChanged: (String? newValue) {
+                                setState(() {
+                                  selectedCategory = newValue!;
+                                });
+                              },
+                              isExpanded: true, // Ensures full width
+                              items: categories.map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(value),
+                                );
+                              }).toList(),
+                            ),
+                      SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: _showCreateCategoryDialog,
+                        style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.black,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
+                            textStyle: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: Text("Create new topic"),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: 10),
+                Container(
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  height: 400,
+                  child: QuillEditor.basic(
+                    controller: _controller,
+                    config: QuillEditorConfig(
+                        embedBuilders: FlutterQuillEmbeds.editorBuilders(),
+                        placeholder: "Start typing here..."),
+                  ),
+                ),
                 QuillSimpleToolbar(
                   controller: _controller,
                   config: QuillSimpleToolbarConfig(
@@ -300,21 +371,22 @@ class _PetDiaryCreatePageState extends State<PetDiaryCreatePage> {
                     })),
                   ),
                 ),
-                Container(
-                  height: 400,
-                  child: QuillEditor.basic(
-                    controller: _controller,
-                    config: QuillEditorConfig(
-                        embedBuilders: FlutterQuillEmbeds.editorBuilders()),
-                  ),
-                ),
                 SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: isLoading ? null : _saveDiaryEntry,
-                  child: isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Save'),
-                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: isLoading ? null : _saveDiaryEntry,
+                    style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.blue,
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        textStyle: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    child: isLoading
+                        ? CircularProgressIndicator(color: Colors.blue)
+                        : Text('Save'),
+                  ),
+                )
               ],
             ),
           ),

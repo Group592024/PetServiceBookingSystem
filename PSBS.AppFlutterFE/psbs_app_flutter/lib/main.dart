@@ -159,12 +159,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-                // } else if (value == 'camera') {
-                //   // 👉 Điều hướng sang trang xem camera
-                //   Navigator.push(
-                //     context,
-                //     // MaterialPageRoute(builder: (context) => CameraScreen()),
-                //   );
+              } else if (value == 'camera') {
+                // 👉 Điều hướng sang trang xem camera
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
@@ -188,8 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
               PopupMenuItem(
                 value: 'camera',
                 child: ListTile(
-                  leading: const Icon(Icons.videocam, color: Colors.green),
-                  title: const Text('Xem Camera',
+                  leading: const Icon(Icons.videocam, color: Colors.blue),
+                  title: const Text('Camera',
                       style: TextStyle(color: Colors.black)),
                 ),
               ),

@@ -12,6 +12,7 @@ function GiftAddForm() {
   const [giftDescription, setGiftDescription] = useState("");
   const [giftPoint, setGiftPoint] = useState("");
   const [giftCode, setGiftCode] = useState("");
+  const [quantity, setQuantity] = useState("");
   const [image, setImage] = useState(null);
   const [errors, setErrors] = useState({
     giftName: "",
@@ -19,6 +20,7 @@ function GiftAddForm() {
     giftPoint: "",
     giftCode: "",
     image: "",
+    quantity:"",
   });
   const token = sessionStorage.getItem("token");
  
@@ -28,6 +30,7 @@ function GiftAddForm() {
       giftDescription: giftDescription ? "" : "Gift Description is required.",
       giftPoint: giftPoint > 0 ? "" : "Gift Point must be greater than 0.",
       //   giftCode: giftCode ? "" : "Gift Code is required.",
+      quantity: quantity > 0 ? "" : "Quantity must be greater than 0.",
       image: image ? "" : "Gift Image is required.",
     };
 
@@ -45,6 +48,7 @@ function GiftAddForm() {
     formData.append("giftDescription", giftDescription);
     formData.append("giftPoint", giftPoint);
     formData.append("giftCode", giftCode);
+    formData.append("quantity", quantity);
     formData.append("imageFile", document.getElementById("fileInput").files[0]);
 
     try {
@@ -75,6 +79,7 @@ function GiftAddForm() {
     setGiftDescription("");
     setGiftPoint("");
     setGiftCode("");
+    setQuantity("");
     setImage(null);
     setErrors({
       giftName: "",
@@ -198,26 +203,26 @@ function GiftAddForm() {
                   />
                 </div>
 
-                {/* Gift Code */}
-                {/* <div className="mb-4">
+                {/* Gift Quantity */}
+                <div className="mb-4">
                   <TextField
-                    label="Gift Code"
+                    label="Gift Quantity"
                     variant="outlined"
                     fullWidth
-                    value={giftCode}
+                    value={quantity}
                     onChange={(e) => {
-                      setGiftCode(e.target.value);
+                      setQuantity(e.target.value);
                       if (e.target.value) {
                         setErrors((prevErrors) => ({
                           ...prevErrors,
-                          giftCode: "",
+                          quantity: "",
                         }));
                       }
                     }}
-                    error={!!errors.giftCode}
-                    helperText={errors.giftCode}
+                    error={!!errors.quantity}
+                    helperText={errors.quantity}
                   />
-                </div> */}
+                </div>
 
                 {/* Gift Code */}
                 <div className="mb-4">

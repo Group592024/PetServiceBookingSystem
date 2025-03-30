@@ -46,7 +46,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     };
   }
 
-  // Hàm lấy trạng thái dựa vào nextVisitDate
   String getStatus(String nextVisitDate) {
     try {
       DateTime parsedDate = DateTime.parse(nextVisitDate);
@@ -112,7 +111,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
       List accountPets =
           (petsData as List).where((p) => p['accountId'] == accountId).toList();
 
-      // Cập nhật mapping để bao gồm petGender (true: Male, false: Female)
       List result = accountPets.map((pet) {
         List healthForThisPet = (petHealthData as List).where((health) {
           var bsi = bookingServiceItemsData.firstWhere(
@@ -147,7 +145,7 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
           'petId': pet['petId'],
           'petName': pet['petName'] ?? "Unknown",
           'dateOfBirth': pet['dateOfBirth'] ?? "",
-          'petGender': pet['petGender'] ?? true, // true: Male, false: Female
+          'petGender': pet['petGender'] ?? true,
           'petImage': pet['petImage'] ?? "",
           'healthBooks': healthRecords,
         };
@@ -170,7 +168,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
     }
   }
 
-  // Hàm tạo chip hiển thị thông tin (ví dụ: giới tính, ngày sinh)
   Widget _buildInfoChip(String label, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -192,7 +189,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
   @override
   Widget build(BuildContext context) {
-    // Tính danh sách đã lọc
     List filteredPets = widget.petId != null && widget.petId!.isNotEmpty
         ? mergedPets
             .where((record) =>
@@ -213,15 +209,12 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      // Sử dụng CustomScrollView để kết hợp SliverAppBar và nội dung
       body: CustomScrollView(
         slivers: [
-          // SliverAppBar với ảnh nền và gradient overlay
           SliverAppBar(
             expandedHeight: 300,
             pinned: true,
             backgroundColor: Colors.blue,
-            // Trong phần SliverAppBar, thay đoạn mã hiển thị ảnh như sau:
             flexibleSpace: FlexibleSpaceBar(
               title: widget.petId == null || widget.petId!.isEmpty
                   ? Text("Pet Health Book List")
@@ -229,7 +222,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Nếu có petId và filteredPets không rỗng, lấy ảnh của pet đúng đó
                   if (widget.petId != null &&
                       widget.petId!.isNotEmpty &&
                       filteredPets.isNotEmpty)
@@ -239,7 +231,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                     )
                   else
                     Container(color: Colors.grey),
-                  // Gradient overlay
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -255,7 +246,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                 ],
               ),
             ),
-
             leading: IconButton(
               icon: Container(
                 padding: EdgeInsets.all(8),
@@ -285,7 +275,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                 ),
               ),
             ),
-          // Danh sách các health book của từng pet
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -299,7 +288,6 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header: Tên thú cưng, giới tính và ngày sinh
                         Row(
                           children: [
                             Expanded(
@@ -309,11 +297,9 @@ class _PetHealthBookListState extends State<PetHealthBookList> {
                                     child: Text(
                                       petRecord['petName'],
                                       style: TextStyle(
-                                        fontSize:
-                                            22, // Tăng font size cho tên pet
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold,
-                                        color:
-                                            Colors.blue, // Màu xanh cho tên pet
+                                        color: Colors.blue,
                                       ),
                                     ),
                                   ),

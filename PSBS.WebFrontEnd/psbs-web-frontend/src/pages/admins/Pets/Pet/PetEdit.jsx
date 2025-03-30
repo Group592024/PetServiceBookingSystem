@@ -67,7 +67,7 @@ const AdminPetEdit = () => {
         const fetchPetTypes = async () => {
             try {
                 const token = sessionStorage.getItem("token");
-                const response = await fetch('http://localhost:5050/api/petType', {
+                const response = await fetch('http://localhost:5050/api/petType/available', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ const AdminPetEdit = () => {
                 });
 
                 const data = await response.json();
-                setPetTypes(data.filter(type => !type.isDelete));
+                setPetTypes(data.data.filter(type => !type.isDelete));
             } catch (error) {
                 console.log('Error fetching pet types:', error);
             }
@@ -347,7 +347,7 @@ const AdminPetEdit = () => {
                                             <div className="relative">
                                                 <input
                                                     type="date"
-                                                    className="absolute left-0 top-full mt-1 w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                                                    className="absolute left-0 mb-20 w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
                                                     value={pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : ''}
                                                     onChange={(e) => {
                                                         setPet({ ...pet, dateOfBirth: e.target.value });

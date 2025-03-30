@@ -17,14 +17,14 @@ namespace VoucherApi.Infrastructure.Repositories
                 var existingGift = await GetByIdAsync(entity.GiftId);
                 if (existingGift != null)
                 {
-                    return new Response(false, $"{entity.GiftName} already exist! ");
+                    return new Response(false, $"{entity.GiftName} already exist!");
                 }
                 if(entity.GiftCode != null)
                 {
                     var existingGiftCode = await context.Gifts.Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus).FirstOrDefaultAsync();
                     if (existingGiftCode != null)
                     {
-                        return new Response(false, $"{entity.GiftCode} already exist! ");
+                        return new Response(false, $"{entity.GiftCode} already exist!");
                     }
                 }
                 entity.GiftStatus = false;
@@ -46,21 +46,31 @@ namespace VoucherApi.Infrastructure.Repositories
                 {
                     return new Response(false, "Gift can't not found");
                 }
-                if (!entity.GiftStatus)
+
+                var existingGift = await GetByIdAsync(entity.GiftId);
+                if (existingGift == null)
                 {
-                    entity.GiftStatus = true;
-                    context.Gifts.Update(entity);
-                    context.SaveChanges();
+                    return new Response(false, "Gift can't not found");
+                }
+
+                if (!existingGift.GiftStatus)
+                {
+                    existingGift.GiftStatus = true;
+                    context.Gifts.Update(existingGift);
+                    await context.SaveChangesAsync();
                     return new Response(true, "Gift is inactive successfully");
                 }
-                var existUsingGifts = context.RedeemGiftHistories.FirstOrDefault(rgh => rgh.GiftId == entity.GiftId);
-                if (existUsingGifts != null)
+                else
                 {
-                    return new Response(false, "The gift has an redeem history that cannot be erased.");
+                    var existUsingGifts = context.RedeemGiftHistories.FirstOrDefault(rgh => rgh.GiftId == existingGift.GiftId);
+                    if (existUsingGifts != null)
+                    {
+                        return new Response(false, "The gift has an redeem history that cannot be erased.");
+                    }
+                    context.Gifts.Remove(existingGift);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "The gift is deleted successfully");
                 }
-                context.Gifts.Remove(entity);
-                await context.SaveChangesAsync();
-                return new Response { Flag = true, Message = "The gift is deleted successfully" };
             }
             catch (Exception ex)
             {
@@ -147,7 +157,7 @@ namespace VoucherApi.Infrastructure.Repositories
                     var existingGiftCode = await context.Gifts.Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus && g.GiftId != entity.GiftId).FirstOrDefaultAsync();
                     if (existingGiftCode != null)
                     {
-                        return new Response(false, $"{entity.GiftCode} already exist! ");
+                        return new Response(false, $"{entity.GiftCode} already exist!");
                     }
                 }
                  if(entity.GiftCode.IsNullOrEmpty())

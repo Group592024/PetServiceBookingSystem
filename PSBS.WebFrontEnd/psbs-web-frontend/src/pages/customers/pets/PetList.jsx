@@ -211,7 +211,7 @@ const CustomerPetList = () => {
                 {/* Empty State */}
                 {pets.length === 0 && (
                     <div className="text-center py-12">
-                        <div className="bg-white rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+                        <div className="bg-white rounded-2xl p-6 max-w-md mx-auto shadow-sm">
                             <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4M12 4v16" />
                             </svg>
