@@ -1,9 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:psbs_app_flutter/pages/Camera/camera.dart';
 import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
-import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
-    as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
@@ -133,6 +130,16 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
         actions: <Widget>[
+          IconButton(
+            onPressed: () {
+              // Navigate to chat list
+              Navigator.pushNamed(
+                  context, '/notification'); // Navigate to ChatPage
+            },
+            icon:
+                const Icon(Icons.notifications, color: Colors.white, size: 28),
+            tooltip: 'Chat',
+          ),
           IconButton(
             onPressed: () {
               // Navigate to chat list

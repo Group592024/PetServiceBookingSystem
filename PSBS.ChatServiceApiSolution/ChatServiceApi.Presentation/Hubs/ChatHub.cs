@@ -75,6 +75,8 @@ namespace ChatServiceApi.Presentation.Hubs
                             LogExceptions.LogToConsole("Participant: " + participant);
                             await Clients.Client(connectionId).SendAsync("GetList",
                                 await _chatService.GetUserChatRoomsAsync(participant));
+                            await Clients.Clients(connectionId).SendAsync("chatCount",
+                                new { count = await _chatService.CountUnreadChatsAsync(participant) });
                         }
                     }
                 }
@@ -154,13 +156,12 @@ namespace ChatServiceApi.Presentation.Hubs
                     {
                         await Clients.Client(receiverConnectionId).SendAsync("updateaftercreate", receiverChatRooms);
                     }
-
-                    LogExceptions.LogToConsole("da tao dc roi ne , PINK PONY CLUB");
+                   
                 }
                 else
                 {
                     await Clients.Caller.SendAsync("ChatRoomCreationFailed", response.Message);
-                    LogExceptions.LogToConsole("da tao dc roi ne , bIJ LOI NHA BINI B");
+               
                 }
             }
             catch (Exception ex)
@@ -299,7 +300,27 @@ namespace ChatServiceApi.Presentation.Hubs
                 await Clients.Caller.SendAsync("RequestNewSupporterFailed", "An error occurred while requesting a new supporter.");
             }
         }
+        public async Task GetUnreadNotificationCount(Guid userId)
+        {
+            try
+            {
+                var unreadChats = await _chatService.CountUnreadNotificationAsync(userId);
+                //var unreadNotifications = await _chatService.GetUnreadNotificationCountAsync(userId);
+                LogExceptions.LogToConsole("hong tao dc ne: "+unreadChats);
+                await Clients.Caller.SendAsync("chatCount", new
+                {
+                    UnreadChats = unreadChats,                 
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetUnreadCounts: {ex.Message}");
+                await Clients.Caller.SendAsync("Error", "Failed to get unread counts");
+            }
+        }
 
+     
+      
 
     }
 }

@@ -1,20 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Polly;
 using PSBS.HealthCareApi.Application.Interfaces;
 using PSBS.HealthCareApi.Domain;
 using PSBS.HealthCareApi.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using System.Text.Json;
-using PSBS.HealthCareApi.Application.DTOs;
-
 namespace PSBS.HealthCareApi.Infrastructure.Repositories
 {
     public class PetHealthBookRepository(HealthCareDbContext context) : IPetHealthBook
@@ -123,6 +115,30 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
             {
                 LogExceptions.LogException(ex);
                 throw new Exception("Error occurred booking status.");
+            }
+        }
+
+        public async Task<IEnumerable<PetHealthBook>> GetUpcomingVisitsAsync(int daysBefore = 1)
+        {
+            try
+            {
+                var currentDate = DateTime.UtcNow.Date;
+                var targetDate = currentDate.AddDays(daysBefore);
+
+                var upcomingVisits = await context.PetHealthBooks
+                    .Include(p => p.Medicines)
+                    .Where(p => p.nextVisitDate.HasValue &&
+                               !p.isDeleted &&
+                               p.nextVisitDate.Value.Date >= currentDate &&
+                               p.nextVisitDate.Value.Date <= targetDate)
+                    .AsNoTracking()
+                    .ToListAsync();
+                return upcomingVisits;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred pethealth.");
             }
         }
 

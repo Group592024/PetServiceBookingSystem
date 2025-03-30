@@ -13,10 +13,12 @@ namespace ChatServiceApi.Presentation.Controllers
     public class NotificationController : ControllerBase
     {
         private readonly INoticationRepository _notificationRepository;
+        private readonly INotificationMessagePublisher _notificationMessagePublisher;
 
-        public NotificationController(INoticationRepository noticationRepository)
+        public NotificationController(INoticationRepository noticationRepository, INotificationMessagePublisher notificationMessagePublisher)
         {
           _notificationRepository = noticationRepository;
+          _notificationMessagePublisher = notificationMessagePublisher;
         }
 
         [HttpPost]
@@ -40,22 +42,49 @@ namespace ChatServiceApi.Presentation.Controllers
         [HttpPost("push")]
         public async Task<IActionResult> PushNotification([FromBody] PushNotificationDTO pushNotificationDTO)
         {
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            var lists = NotificationConversion.GetUserIdsFromReceivers(pushNotificationDTO.Receivers);
-            if (lists is null)
+
+            try
             {
-                return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
+                var lists = NotificationConversion.GetUserIdsFromReceivers(pushNotificationDTO.Receivers);
+                if (lists is null)
+                {
+                    return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
+                }
+
+                var response = new PSPS.SharedLibrary.Responses.Response();
+                if (pushNotificationDTO.isEmail)
+                {
+                    var notification = await _notificationRepository.GetNotificationById(pushNotificationDTO.notificationId);
+                    if(notification is null)
+                    {
+                        return NotFound();
+                    }
+                    var sendNoti = new SendNotificationDTO(pushNotificationDTO.notificationId, notification.NotificationTitle, notification.NotificationContent, pushNotificationDTO.Receivers);
+                   response= await _notificationMessagePublisher.SendEmailNotificationMessageAsync(sendNoti);
+                }
+                else
+                {
+                    response = await _notificationMessagePublisher.BatchingPushNotificationAsync(pushNotificationDTO);
+                }
+
+                if (response.Flag)
+                {
+                    var result = await _notificationRepository.PushNotificationUsers(pushNotificationDTO.notificationId);
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(response); // Returns the response, indicating failure.
+                }
             }
-
-            var response = await _notificationRepository.PushNotification(pushNotificationDTO.notificationId, lists);
-
-            return Ok(response);
+            catch (Exception ex) { 
+            return BadRequest(new PSPS.SharedLibrary.Responses.Response(false, $"the error occur when pushing: "+ex));
+            }
         }
-
         [HttpPut]
         public async Task<IActionResult> UpdateNotification([FromBody] UpdateNotificationDTO updateNotificationDTO)
         {
@@ -86,6 +115,13 @@ namespace ChatServiceApi.Presentation.Controllers
         public async Task<IActionResult> DeleteNotification(Guid notificationBoxId)
         {
             var response = await _notificationRepository.DetelteUserNotification(notificationBoxId);
+
+            return Ok(response);
+        }
+        [HttpDelete("user/isRead/{notificationBoxId}")]
+        public async Task<IActionResult> SetIsReadNotification(Guid notificationBoxId)
+        {
+            var response = await _notificationRepository.SetNotificationIsRead(notificationBoxId);
 
             return Ok(response);
         }

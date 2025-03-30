@@ -23,5 +23,6 @@ namespace ChatServiceApi.Application.Interfaces
         Task<Response> RequestNewSupporter(Guid chatRoomId);
         Task<Response> CheckIfAllSupportersLeftAndUnseen(Guid chatRoomId);
         Task<Response> StoreImage(IFormFile image, string webRootPath);
+        Task<int> CountUnreadChatsAsync(Guid userId);
     }
 }

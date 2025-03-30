@@ -10,8 +10,13 @@ namespace ChatServiceApi.Application.Interfaces
         Task<IEnumerable<Notification>> GetNotifications();
         Task<Response> CreateNotification(Notification notification);
         Task<Response> DetelteUserNotification(Guid NotificationBoxId);
-        Task<Response> PushNotification(Guid notificationId, List<Guid> guids);
+        Task<Response> PushNotificationUsers(Guid notificationId);
         Task<Response> UpdateNotification(Notification notification);
         Task<Response> DetelteNotification(Guid notificationId);
+        Task<Response> SetNotificationIsRead(Guid notificationBoxId);
+        Task<Response> PushSingleNotification(Guid notificationId, Guid guid);
+        Task<int> CountUnreadNotificationsAsync(Guid userId);
+        Task<Notification> GetNotificationById(Guid notificationId);
+        Task<Response> CreateHealthBookNotification(Guid userId, Notification notification);
     }
 }
