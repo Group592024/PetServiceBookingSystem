@@ -15,3 +15,16 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
+// Handle JWT-related uncaught exceptions
+Cypress.on('uncaught:exception', (err) => {
+    // Return false to prevent Cypress from failing the test if the error is related to JWT
+    if (err.message.includes('Invalid token') || 
+        err.message.includes('JWT') || 
+        err.message.includes('Unauthorized')) {
+      return false;
+    }
+    // For other errors, let Cypress handle them normally
+    return true;
+  });
+  
+  

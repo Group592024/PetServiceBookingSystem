@@ -174,7 +174,7 @@ public class ServiceTypeControllerTests
     {
         // Arrange
         var serviceTypeId = Guid.NewGuid();
-        var existingServiceType = new ServiceType { serviceTypeId = serviceTypeId };
+        var existingServiceType = new ServiceType { serviceTypeId = serviceTypeId , isDeleted = false};
         var response = new Response(true, "Service type soft deleted successfully");
 
         A.CallTo(() => _serviceTypeService.GetByIdAsync(serviceTypeId)).Returns(Task.FromResult(existingServiceType));
@@ -194,7 +194,7 @@ public class ServiceTypeControllerTests
     {
         // Arrange
         var serviceTypeId = Guid.NewGuid();
-        var existingServiceType = new ServiceType { serviceTypeId = serviceTypeId };
+        var existingServiceType = new ServiceType { serviceTypeId = serviceTypeId, isDeleted = true };
         var response = new Response(true, "Service type permanently deleted successfully");
 
         A.CallTo(() => _serviceTypeService.GetByIdAsync(serviceTypeId)).Returns(Task.FromResult(existingServiceType));
@@ -207,6 +207,32 @@ public class ServiceTypeControllerTests
         var okResult = result.Result as OkObjectResult;
         okResult.Should().NotBeNull();
         okResult!.StatusCode.Should().Be(StatusCodes.Status200OK);
+    }
+
+    [Fact]
+    public async Task DeleteServiceType_WhenServiceFails_ReturnsBadRequest()
+    {
+        // Arrange
+        var serviceTypeId = Guid.NewGuid();
+        var existingServiceType = new ServiceType { serviceTypeId = serviceTypeId, isDeleted = true };
+
+        var failureResponse = new Response(false, "Cannot permanently delete ServiceType because there are linked services.");
+
+        A.CallTo(() => _serviceTypeService.GetByIdAsync(serviceTypeId)).Returns(Task.FromResult(existingServiceType));
+        A.CallTo(() => _serviceTypeService.DeleteAsync(existingServiceType)).Returns(Task.FromResult(failureResponse));
+
+        // Act
+        var result = await _controller.DeleteServiceType(serviceTypeId);
+
+        // Assert
+        var badRequestResult = result.Result as BadRequestObjectResult;
+        badRequestResult.Should().NotBeNull();
+        badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+        var response = badRequestResult.Value as Response;
+        response.Should().NotBeNull();
+        response!.Flag.Should().BeFalse();
+        response.Message.Should().Contain("Cannot permanently delete");
     }
 
     [Fact]

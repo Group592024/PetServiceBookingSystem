@@ -395,7 +395,7 @@ namespace PSBS.HealthCareApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task DeleteTreatment_WhenServiceFails_ReturnsBadRequest()
+        public async Task HardDeleteTreatment_WhenHasRelatedMedicine_ReturnsBadRequest()
         {
             // Arrange
             var treatmentId = Guid.NewGuid();
@@ -403,10 +403,10 @@ namespace PSBS.HealthCareApi.Tests.Controllers
             {
                 treatmentId = treatmentId,
                 treatmentName = "In-Use Treatment",
-                isDeleted = false
+                isDeleted = true
             };
 
-            var failureResponse = new Response(false, "Cannot delete treatment because it is in use");
+            var failureResponse = new Response(false, "Cannot delete treatment because it has related medicines.");
 
             A.CallTo(() => _treatmentService.GetByIdAsync(treatmentId)).Returns(Task.FromResult(treatment));
             A.CallTo(() => _treatmentService.DeleteAsync(treatment)).Returns(Task.FromResult(failureResponse));
@@ -422,7 +422,9 @@ namespace PSBS.HealthCareApi.Tests.Controllers
             var response = badRequestResult.Value as Response;
             response.Should().NotBeNull();
             response!.Flag.Should().BeFalse();
+            response.Message.Should().Contain("Cannot delete treatment because it has related medicines.");
         }
+
         [Fact]
         public async Task GetAvailableTreatments_WhenTreatmentsExist_ReturnsOkResponseWithData()
         {

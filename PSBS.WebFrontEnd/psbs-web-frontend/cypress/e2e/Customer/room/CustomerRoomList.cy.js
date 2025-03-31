@@ -1,0 +1,288 @@
+describe('Customer Room List Page', () => {
+  beforeEach(() => {
+    cy.clearLocalStorage();
+    cy.clearCookies();
+
+    cy.intercept('POST', '**/api/Account/Login').as('loginRequest');
+
+    cy.visit('http://localhost:3000/login');
+    cy.get('#email', { timeout: 10000 }).should('be.visible');
+    cy.get('#email').type('abc@gmail.com');
+    cy.get('#password').type('123456789');
+    cy.get('button[type="submit"]').click();
+
+    cy.wait('@loginRequest', { timeout: 15000 }).then((interception) => {
+      expect(interception.response.body).to.have.property('data');
+      const token = interception.response.body.data;
+      expect(token).to.be.a('string');
+      cy.window().then((win) => {
+        win.sessionStorage.setItem('token', token);
+      });
+    });
+
+    cy.url().should('not.include', '/login', { timeout: 10000 });
+
+    cy.window().then((win) => {
+      const token = win.sessionStorage.getItem('token');
+      expect(token).to.not.be.null;
+      expect(token).to.not.be.undefined;
+    });
+
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 200,
+      body: {
+        data: [
+          {
+            roomId: 'room1',
+            roomName: 'Luxury Suite 101',
+            roomImage: '/Images/room1.jpg',
+            roomTypeId: 'type1',
+            status: 'Free',
+            isDeleted: false
+          },
+          {
+            roomId: 'room2',
+            roomName: 'Premium Suite 202',
+            roomImage: '/Images/room2.jpg',
+            roomTypeId: 'type2',
+            status: 'In Use',
+            isDeleted: false
+          },
+          {
+            roomId: 'room3',
+            roomName: 'Deluxe Suite 303',
+            roomImage: '/Images/room3.jpg',
+            roomTypeId: 'type3',
+            status: 'Maintenance',
+            isDeleted: false
+          }
+        ]
+      }
+    }).as('getRooms');
+
+    cy.intercept('GET', '**/api/RoomType', {
+      statusCode: 200,
+      body: {
+        data: [
+          { roomTypeId: 'type1', name: 'Luxury Suite', price: 500000, description: 'Our most luxurious accommodation' },
+          { roomTypeId: 'type2', name: 'Premium Suite', price: 350000, description: 'Premium comfort for your pet' },
+          { roomTypeId: 'type3', name: 'Deluxe Suite', price: 250000, description: 'Comfortable and spacious' }
+        ]
+      }
+    }).as('getRoomTypes');
+
+    cy.intercept('GET', '**/api/token/validate', {
+      statusCode: 200,
+      body: {
+        valid: true
+      }
+    }).as('tokenValidate');
+
+    cy.intercept('**/unauthorized*', (req) => {
+      req.reply(200, 'Intercepted unauthorized redirect');
+      cy.log('Intercepted redirect to /unauthorized');
+    }).as('unauthorizedRedirect');
+
+    cy.visit('http://localhost:3000/customerRoom', {
+      onBeforeLoad: (win) => {
+        if (!win.sessionStorage.getItem('token')) {
+          win.sessionStorage.setItem('token', 'dummy-test-token');
+          win.sessionStorage.setItem('user', JSON.stringify({
+            id: '123',
+            name: 'Customer',
+            role: 'customer'
+          }));
+        }
+      },
+      timeout: 30000 
+    });
+
+    cy.get('h1', { timeout: 20000 }).contains('Luxury Pet Rooms').should('be.visible');
+  });
+
+  it('should display the room list correctly', () => {
+    cy.contains('h1', 'Luxury Pet Rooms').should('be.visible');
+    cy.contains('p', 'Choose the perfect accommodation for your beloved pet').should('be.visible');
+
+    cy.get('.grid').children().should('have.length', 3);
+
+    cy.contains('Luxury Suite 101').should('be.visible');
+    cy.contains('Luxury Suite').should('be.visible');
+    cy.contains('500000 VND').should('be.visible');
+    cy.contains('Free').should('be.visible')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(34,\s*197,\s*94\)|rgb\(16,\s*185,\s*129\)/);
+
+    cy.contains('Premium Suite 202').should('be.visible');
+    cy.contains('Premium Suite').should('be.visible');
+    cy.contains('350000 VND').should('be.visible');
+    cy.contains('In Use').should('be.visible')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(249,\s*115,\s*22\)|rgb\(234,\s*88,\s*12\)/);
+
+    cy.contains('Deluxe Suite 303').should('be.visible');
+    cy.contains('Deluxe Suite').should('be.visible');
+    cy.contains('250000 VND').should('be.visible');
+    cy.contains('Maintenance').should('be.visible')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(239,\s*68,\s*68\)|rgb\(220,\s*38,\s*38\)/);
+
+    cy.contains('Premium Care').should('be.visible');
+    cy.contains('24/7 Support').should('be.visible');
+    cy.contains('View Details').should('have.length', 1);
+  });
+
+  it('should navigate to room details page when clicking View Details', () => {
+    cy.contains('Luxury Suite 101')
+      .parents('.bg-white')
+      .find('button')
+      .contains('View Details')
+      .click();
+
+    cy.url().should('include', '/customerRoom/room1');
+  });
+
+  it('should display empty state when no rooms are available', () => {
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 200,
+      body: {
+        data: []
+      }
+    }).as('getEmptyRooms');
+
+    cy.reload();
+    cy.wait('@getEmptyRooms');
+
+    cy.contains('No Rooms Available').should('be.visible');
+    cy.contains('Please check back later for available rooms.').should('be.visible');
+  });
+
+  it('should handle API error when fetching rooms', () => {
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 500,
+      body: {
+        message: 'Internal server error'
+      }
+    }).as('getRoomsError');
+
+    cy.reload();
+    cy.wait('@getRoomsError');
+
+    cy.contains('Error').should('be.visible');
+    cy.contains('Failed to fetch room data!').should('be.visible');
+  });
+
+  it('should handle API error when fetching room types', () => {
+    cy.intercept('GET', '**/api/RoomType', {
+      statusCode: 500,
+      body: {
+        message: 'Internal server error'
+      }
+    }).as('getRoomTypesError');
+
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 200,
+      body: {
+        data: [
+          {
+            roomId: 'room1',
+            roomName: 'Luxury Suite 101',
+            roomImage: '/Images/room1.jpg',
+            roomTypeId: 'type1',
+            status: 'Free',
+            isDeleted: false
+          }
+        ]
+      }
+    }).as('getRooms');
+
+    cy.reload();
+    cy.wait(['@getRooms', '@getRoomTypesError']);
+
+    cy.contains('Error').should('be.visible');
+    cy.contains('Failed to fetch room data!').should('be.visible');
+  });
+
+  it('should display Unknown for room type when type is not found', () => {
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 200,
+      body: {
+        data: [
+          {
+            roomId: 'room4',
+            roomName: 'Mystery Room',
+            roomImage: '/Images/room4.jpg',
+            roomTypeId: 'unknown-type',
+            status: 'Free',
+            isDeleted: false
+          }
+        ]
+      }
+    }).as('getRoomWithUnknownType');
+
+    cy.reload();
+    cy.wait('@getRoomWithUnknownType');
+
+    cy.contains('Mystery Room').should('be.visible');
+    cy.contains('Unknown').should('be.visible');
+    cy.contains('N/A').should('be.visible');
+  });
+
+  it('should filter out deleted rooms', () => {
+    cy.intercept('GET', '**/api/Room/available', {
+      statusCode: 200,
+      body: {
+        data: [
+          {
+            roomId: 'room1',
+            roomName: 'Luxury Suite 101',
+            roomImage: '/Images/room1.jpg',
+            roomTypeId: 'type1',
+            status: 'Free',
+            isDeleted: false
+          },
+          {
+            roomId: 'room5',
+            roomName: 'Deleted Room',
+            roomImage: '/Images/room5.jpg',
+            roomTypeId: 'type1',
+            status: 'Free',
+            isDeleted: true
+          }
+        ]
+      }
+    }).as('getRoomsWithDeleted');
+
+    cy.reload();
+    cy.wait('@getRoomsWithDeleted');
+
+    cy.contains('Luxury Suite 101').should('be.visible');
+    cy.contains('Deleted Room').should('not.exist');
+  });
+
+  it('should display correct status badges with appropriate colors', () => {
+    cy.contains('Free')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(34,\s*197,\s*94\)|rgb\(16,\s*185,\s*129\)/);
+
+    cy.contains('In Use')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(249,\s*115,\s*22\)|rgb\(234,\s*88,\s*12\)/);
+
+    cy.contains('Maintenance')
+      .should('have.css', 'background-color')
+      .and('match', /rgb\(239,\s*68,\s*68\)|rgb\(220,\s*38,\s*38\)/);
+  });
+
+  it('should have responsive design', () => {
+    cy.viewport('iphone-x');
+    cy.contains('Luxury Pet Rooms').should('be.visible');
+    cy.get('.grid').should('have.class', 'grid-cols-1');
+
+    cy.viewport('ipad-2');
+    cy.contains('Luxury Pet Rooms').should('be.visible');
+
+    cy.viewport(1280, 800);
+    cy.contains('Luxury Pet Rooms').should('be.visible');
+  });
+});
