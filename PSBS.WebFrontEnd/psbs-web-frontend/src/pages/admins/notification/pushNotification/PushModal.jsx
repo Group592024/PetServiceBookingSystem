@@ -24,42 +24,34 @@ import {
 } from "@mui/material";
 import { Close, Person, Search, CheckCircle } from "@mui/icons-material";
 import CircularProgress from "@mui/material/CircularProgress";
-
+import { getData } from "../../../../Utilities/ApiFunctions";
 const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
   const [receiverType, setReceiverType] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmail, setIsEmail] = useState(false); // New state for email toggle
+  const [users, setUsers] = useState([]); // Renamed from setUser to setUsers for clarity
 
-  // Temporary user data
-  const users = [
-    {
-      accountId: "e7a5df67-508a-469a-9641-3ac1be3096b4",
-      accountName: "binhtt",
-      accountPhoneNumber: "0355231547",
-      roleId: "user",
-    },
-    {
-      accountId: "e1e53bce-0c16-4311-af5d-8d6a4b73b4e2",
-      accountName: "Cao My Le",
-      accountPhoneNumber: "0332213433",
-      roleId: "user",
-    },
-    {
-      accountId: "224e8845-9fa0-4cc0-bcb3-958eefd2e667",
-      accountName: "ドラえもん",
-      accountPhoneNumber: "0323321343",
-      roleId: "admin",
-    },
-    {
-      accountId: "F15F7961-40EC-46AE-9AF9-423181A37D34",
-      accountName: "Trinh tran phuong tuan",
-      accountPhoneNumber: "0323321341",
-      roleId: "user",
-    },
-  ];
+  // Fetch users when modal opens
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (open) {
+        setIsLoading(true);
+        try {
+          const response = await getData("api/Account/all");
+          setUsers(response.data || []); // Assuming response has data property
+        } catch (error) {
+          console.error("Error fetching users:", error);
+          setUsers([]); // Set empty array on error
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
 
+    fetchUsers();
+  }, [open]);
   // Reset all state when modal closes
   useEffect(() => {
     if (!open) {
