@@ -160,7 +160,7 @@ const RoomTypeList = () => {
       ),
       renderCell: (params) => (
         <div style={{ textAlign: "center", color: params.value ? "red" : "green" }}>
-          {params.value ? "Stopping" : "Active"}
+          {params.value ? "Inactive" : "Active"}
         </div>
       ),
     },

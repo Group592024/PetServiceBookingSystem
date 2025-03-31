@@ -126,21 +126,25 @@ const AdminPetEdit = () => {
                 try {
                     const token = sessionStorage.getItem("token");
                     const response = await fetch(`http://localhost:5050/api/petBreed/byPetType/${pet.petTypeId}`, {
-                        method: "GET",
+                        method: 'GET',
                         headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${token}`
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
                         }
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`Failed to fetch breeds: ${response.status}`);
-                    }
-
                     const data = await response.json();
+                    if (!data.flag) {
+                        Swal.fire({
+                            title: 'Information',
+                            text: 'No breeds available for this pet type',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+                    }
                     setBreeds(data.data || []);
                 } catch (error) {
-                    console.log("Error fetching breeds:", error);
+                    console.log('Error fetching breeds:', error);
                     setBreeds([]);
                 }
             } else {

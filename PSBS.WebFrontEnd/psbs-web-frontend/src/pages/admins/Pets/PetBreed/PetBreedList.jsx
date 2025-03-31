@@ -27,10 +27,10 @@ const PetBreedList = () => {
             });
 
             const data = await response.json();
-            if (Array.isArray(data)) {
-                setPetTypes(data);
+            if (Array.isArray(data.data)) {
+                setPetTypes(data.data);
             } else {
-                console.error("Unexpected response format for petTypes:", data);
+                console.error("Unexpected response format for petTypes:", data.data);
             }
         } catch (error) {
             console.error("Error fetching pet types:", error);

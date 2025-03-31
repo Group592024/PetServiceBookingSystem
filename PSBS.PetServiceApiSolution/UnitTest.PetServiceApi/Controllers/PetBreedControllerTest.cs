@@ -559,6 +559,36 @@ namespace UnitTest.PetServiceApi.Controllers
         }
 
         [Fact]
+        public async Task DeletePetBreed_WhenHasRelatedPets_ReturnsBadRequest()
+        {
+            // Arrange
+            var breedId = Guid.NewGuid();
+            var petBreed = new PetBreed
+            {
+                PetBreed_ID = breedId,
+                PetBreed_Name = "Test Breed",
+                IsDelete = true
+            };
+
+            A.CallTo(() => _petBreedInterface.GetByIdAsync(breedId))
+                .Returns(petBreed);
+
+            A.CallTo(() => _petBreedInterface.DeleteAsync(A<PetBreed>.Ignored))
+                .Returns(new Response(false, $"Cannot permanently delete Pet Breed {petBreed.PetBreed_Name} because there are pets using it."));
+
+            // Act
+            var result = await _controller.DeletePetBreed(breedId);
+
+            // Assert
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+            var response = badRequestResult.Value.Should().BeOfType<Response>().Subject;
+            response.Flag.Should().BeFalse();
+            response.Message.Should().Be($"Cannot permanently delete Pet Breed {petBreed.PetBreed_Name} because there are pets using it.");
+        }
+
+        [Fact]
         public async Task DeletePetBreed_WhenServiceFails_ReturnsBadRequest()
         {
             // Arrange

@@ -549,6 +549,36 @@ namespace UnitTest.PetServiceApi.Controllers
         }
 
         [Fact]
+        public async Task DeletePet_WhenPetHasBookings_ReturnsBadRequest()
+        {
+            // Arrange
+            var petId = Guid.NewGuid();
+            var pet = new Pet
+            {
+                Pet_ID = petId,
+                Pet_Name = "Test Pet",
+                IsDelete = false
+            };
+
+            A.CallTo(() => _petInterface.GetByIdAsync(petId))
+                .Returns(pet);
+
+            A.CallTo(() => _petInterface.DeleteAsync(A<Pet>.Ignored))
+                .Returns(new Response(false, $"Pet {pet.Pet_Name} cannot be deleted because it has associated bookings."));
+
+            // Act
+            var result = await _controller.DeletePet(petId);
+
+            // Assert
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+            var response = badRequestResult.Value.Should().BeOfType<Response>().Subject;
+            response.Flag.Should().BeFalse();
+            response.Message.Should().Be($"Pet {pet.Pet_Name} cannot be deleted because it has associated bookings.");
+        }
+
+        [Fact]
         public async Task DeletePet_WhenServiceFails_ReturnsBadRequest()
         {
             // Arrange

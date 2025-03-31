@@ -388,7 +388,7 @@ public class RoomTypeControllerTest
             roomTypeId = roomTypeId,
             name = "Test Room",
             price = 100,
-            isDeleted = false
+            isDeleted = true
         };
 
         var successResponse = new Response(true, "RoomType permanently deleted.") { Data = null };
