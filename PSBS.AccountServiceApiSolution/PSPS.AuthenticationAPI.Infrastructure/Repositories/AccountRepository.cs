@@ -826,9 +826,9 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Account> GetByIdAsync(Guid id)
+        public async Task<Account> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await context.Accounts.FindAsync(id);
         }
 
         public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
@@ -920,6 +920,23 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 LogExceptions.LogException(ex);
                 // Display a user-friendly message to the client
                 return new Response(false, "Error occurred while updating the existing Point.");
+            }
+        }
+
+        public async Task<Response> SendNotificationEmail(Guid accountId, NotificationMessage notificationMessage)
+        {
+            try
+            {
+                var acc = await context.Accounts.FindAsync(accountId);
+                if (acc == null)
+                {
+                    return new Response(false, "Account does not exist");
+                }
+                await _emailRepository.SendNotificationEmail(acc, notificationMessage);
+                return new Response(true, "Send successfully");
+            }
+            catch (Exception ex) {
+                return new Response(false, "Cannot send email due to the errors");
             }
         }
     }

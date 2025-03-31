@@ -15,6 +15,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
 
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
+  }
+
   void handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -30,32 +38,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
       );
 
       if (response.data != null && response.data['flag'] == true) {
-        Fluttertoast.showToast(
-          msg: response.data['message'],
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.green,
-          textColor: Colors.white,
-        );
+        _showToast(response.data['message']);
       } else {
-        Fluttertoast.showToast(
-          msg: 'Something went wrong, please try again.',
-          toastLength: Toast.LENGTH_LONG,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-        );
+        _showToast('Something went wrong, please try again.');
       }
     } on DioException catch (error) {
       String errorMessage = error.response?.data['message'] ??
           'An error occurred. Please try again later.';
-      Fluttertoast.showToast(
-        msg: errorMessage,
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-      );
+      _showToast(errorMessage);
     } finally {
       setState(() {
         isLoading = false;

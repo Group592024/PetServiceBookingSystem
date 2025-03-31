@@ -146,7 +146,6 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     }
   }
 
-  // Helper widget tạo chip hiển thị thông tin (giới tính, ngày sinh)
   Widget _buildInfoChip(String label, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -176,14 +175,14 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
             width: 100,
             child: Text(
               title,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
           SizedBox(width: 30),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
               maxLines: null,
             ),
           ),
@@ -201,119 +200,123 @@ class _PetHealthBookDetailState extends State<PetHealthBookDetail> {
     }
     return Scaffold(
       backgroundColor: Colors.white,
-      body: CustomScrollView(
-        slivers: [
-          // SliverAppBar với ảnh nền và gradient overlay
-          SliverAppBar(
-            expandedHeight: 300,
-            pinned: true,
-            backgroundColor: Colors.blue,
-            leading: IconButton(
-              icon: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
-                  shape: BoxShape.circle,
+      body: DefaultTextStyle(
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 16,
+          color: Colors.black,
+        ),
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              expandedHeight: 300,
+              pinned: true,
+              backgroundColor: Colors.blue,
+              leading: IconButton(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.arrow_back, color: Colors.blue),
                 ),
-                child: Icon(Icons.arrow_back, color: Colors.blue),
+                onPressed: () => Navigator.pop(context),
               ),
-              onPressed: () => Navigator.pop(context),
-            ),
-            flexibleSpace: FlexibleSpaceBar(
-              title: Text(
-                petName,
-                style: TextStyle(fontSize: 16),
-              ),
-              background: Stack(
-                fit: StackFit.expand,
-                children: [
-                  petImage.isNotEmpty
-                      ? Image.network(
-                          'http://10.0.2.2:5050/pet-service$petImage',
-                          fit: BoxFit.cover,
-                        )
-                      : Container(color: Colors.grey),
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.7),
-                        ],
+              flexibleSpace: FlexibleSpaceBar(
+                title: Text(
+                  petName,
+                  style: TextStyle(fontSize: 16),
+                ),
+                background: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    petImage.isNotEmpty
+                        ? Image.network(
+                            'http://10.0.2.2:5050/pet-service$petImage',
+                            fit: BoxFit.cover,
+                          )
+                        : Container(color: Colors.grey),
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.7),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          // Nội dung chi tiết
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Tên pet với font lớn, màu xanh
-                  Center(
-                    child: Text(
-                      petName,
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Text(
+                        petName,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                          fontFamily: 'Roboto',
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 8),
-                  // Row hiển thị chip petGender và ngày sinh (dateOfBirth)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildInfoChip(
-                        petGender ? 'Male' : 'Female',
-                        petGender ? Icons.male : Icons.female,
-                        petGender ? Colors.blue : Colors.pink,
-                      ),
-                      SizedBox(width: 8),
-                      _buildInfoChip(
-                        formatDate(dateOfBirth),
-                        Icons.cake,
-                        Colors.blue,
-                      ),
-                    ],
-                  ),
-                  Divider(),
-                  _buildRowText(
-                    'Treatment',
-                    treatments.isNotEmpty
-                        ? treatments.map((t) => t['treatmentName']).join(", ")
-                        : 'No Treatments Found',
-                  ),
-                  Divider(),
-                  _buildRowText(
-                      'Performed By', petHealthBook!['performBy'] ?? ''),
-                  Divider(),
-                  _buildRowText(
-                      'Visit Date', formatDate(petHealthBook!['visitDate'])),
-                  Divider(),
-                  _buildRowText('Next Visit Date',
-                      formatDate(petHealthBook!['nextVisitDate'])),
-                  Divider(),
-                  _buildRowText(
-                    'Medicine',
-                    medicines.isNotEmpty
-                        ? medicines.map((m) => m['medicineName']).join(", ")
-                        : 'No Medicines Assigned',
-                  ),
-                  Divider(),
-                ],
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildInfoChip(
+                          petGender ? 'Male' : 'Female',
+                          petGender ? Icons.male : Icons.female,
+                          petGender ? Colors.blue : Colors.pink,
+                        ),
+                        SizedBox(width: 8),
+                        _buildInfoChip(
+                          formatDate(dateOfBirth),
+                          Icons.cake,
+                          Colors.blue,
+                        ),
+                      ],
+                    ),
+                    Divider(),
+                    _buildRowText(
+                      'Treatment',
+                      treatments.isNotEmpty
+                          ? treatments.map((t) => t['treatmentName']).join(", ")
+                          : 'No Treatments Found',
+                    ),
+                    Divider(),
+                    _buildRowText(
+                        'Performed By', petHealthBook!['performBy'] ?? ''),
+                    Divider(),
+                    _buildRowText(
+                        'Visit Date', formatDate(petHealthBook!['visitDate'])),
+                    Divider(),
+                    _buildRowText('Next Visit Date',
+                        formatDate(petHealthBook!['nextVisitDate'])),
+                    Divider(),
+                    _buildRowText(
+                      'Medicine',
+                      medicines.isNotEmpty
+                          ? medicines.map((m) => m['medicineName']).join(", ")
+                          : 'No Medicines Assigned',
+                    ),
+                    Divider(),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -259,7 +259,7 @@ function App() {
           <Route
             path="/camera"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <CameraCus />
               </ProtectedRoute>
             }
@@ -273,7 +273,7 @@ function App() {
             }
           />
           <Route
-            path="/addcamera "
+            path="/addcamera"
             element={
               <ProtectedRoute allowedRoles={["admin", "staff"]}>
                 <CreateCamera />
@@ -291,7 +291,7 @@ function App() {
           <Route
             path="/editcamera/:cameraId"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["admin", "staff"]}>
                 <EditCamera />
               </ProtectedRoute>
             }

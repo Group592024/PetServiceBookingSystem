@@ -1,9 +1,6 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:psbs_app_flutter/pages/Camera/camera.dart';
 import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
-import 'package:psbs_app_flutter/pages/PetHealthCare/pethealthcarelist_page.dart'
-    as list;
 import 'package:psbs_app_flutter/pages/home_page.dart';
 import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 import 'package:psbs_app_flutter/pages/route_generator.dart';
@@ -136,6 +133,16 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             onPressed: () {
               // Navigate to chat list
+              Navigator.pushNamed(
+                  context, '/notification'); // Navigate to ChatPage
+            },
+            icon:
+                const Icon(Icons.notifications, color: Colors.white, size: 28),
+            tooltip: 'Chat',
+          ),
+          IconButton(
+            onPressed: () {
+              // Navigate to chat list
               Navigator.pushNamed(context, '/chat'); // Navigate to ChatPage
             },
             icon: const Icon(Icons.messenger, color: Colors.white, size: 28),
@@ -152,12 +159,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              // } else if (value == 'camera') {
-              //   // 👉 Điều hướng sang trang xem camera
-              //   Navigator.push(
-              //     context,
-              //     // MaterialPageRoute(builder: (context) => CameraScreen()),
-              //   );
+              } else if (value == 'camera') {
+                // 👉 Điều hướng sang trang xem camera
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CameraScreen()),
+                );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
@@ -181,8 +188,8 @@ class _MyHomePageState extends State<MyHomePage> {
               PopupMenuItem(
                 value: 'camera',
                 child: ListTile(
-                  leading: const Icon(Icons.videocam, color: Colors.green),
-                  title: const Text('Xem Camera',
+                  leading: const Icon(Icons.videocam, color: Colors.blue),
+                  title: const Text('Camera',
                       style: TextStyle(color: Colors.black)),
                 ),
               ),
@@ -196,8 +203,7 @@ class _MyHomePageState extends State<MyHomePage> {
               PopupMenuItem(
                 value: 'room',
                 child: ListTile(
-                  leading:
-                      Icon(Icons.home, color: Colors.orange), 
+                  leading: Icon(Icons.home, color: Colors.orange),
                   title: Text('Rooms', style: TextStyle(color: Colors.black)),
                 ),
               ),

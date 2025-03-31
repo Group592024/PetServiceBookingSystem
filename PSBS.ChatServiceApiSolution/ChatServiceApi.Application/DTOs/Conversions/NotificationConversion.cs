@@ -68,8 +68,9 @@ namespace ChatServiceApi.Application.DTOs.Conversions
                   notificationBox.Notification.NotificationType.NotiName,
                   notificationBox.Notification.NotificationTitle,
                   notificationBox.Notification.NotificationContent,
-                  notificationBox.Notification.CreatedDate,
-                  notificationBox.IsDeleted
+                  notificationBox.CreatedDate,
+                  notificationBox.IsDeleted,
+                  notificationBox.IsRead
                     );
                 return (singleNotification, null);
             }
@@ -82,8 +83,9 @@ namespace ChatServiceApi.Application.DTOs.Conversions
                   p.Notification.NotificationType.NotiName,
                   p.Notification.NotificationTitle,
                   p.Notification.NotificationContent,
-                  p.Notification.CreatedDate,
-                  p.IsDeleted
+                  p.CreatedDate,
+                  p.IsDeleted,
+                  p.IsRead
                     )).ToList();
                 return (null, list);
             }

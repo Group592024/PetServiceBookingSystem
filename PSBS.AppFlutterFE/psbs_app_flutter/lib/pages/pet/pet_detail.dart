@@ -52,7 +52,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         headers['Authorization'] = 'Bearer $token';
       }
       final petResponse = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+   Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -67,7 +67,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
       final breedResponse = await http.get(
         Uri.parse(
-            'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
+        'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -143,7 +143,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
+   'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
                     fit: BoxFit.cover,
                   ),
                   Container(
@@ -596,7 +596,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
           if (token != null) 'Authorization': 'Bearer $token',
         };
         final response = await http.delete(
-          Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+     Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
           headers: headers,
         );
         final responseData = json.decode(response.body);

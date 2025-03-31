@@ -32,6 +32,6 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<Response> UpdateAccountPoint(Guid id, int point);
 
         Task<Response> RefundAccountPoint(Guid id, RedeemRequest model);
-
+        Task<Response> SendNotificationEmail(Guid accountId, NotificationMessage notificationMessage);
     }
 }

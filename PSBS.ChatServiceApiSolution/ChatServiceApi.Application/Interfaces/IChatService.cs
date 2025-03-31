@@ -18,5 +18,7 @@ namespace ChatServiceApi.Application.Interfaces
         Task<Response> InitiateSupportChatRoomAsync(Guid customerId);
         Task<Response> RequestNewSupporter(Guid chatRoomId);
         Task<Response> CheckIfAllSupportersLeftAndUnseen(Guid chatRoomId);
+        Task<int> CountUnreadChatsAsync(Guid userId);
+        Task<int> CountUnreadNotificationAsync(Guid userId);
     }
 }

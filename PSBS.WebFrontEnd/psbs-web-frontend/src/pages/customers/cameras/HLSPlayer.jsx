@@ -9,8 +9,10 @@ const HLSPlayer = ({ src }) => {
   useEffect(() => {
     if (videoRef.current) {
       if (player.current) {
-        player.current.dispose(); // Xóa player cũ
+        player.current.dispose();
       }
+
+      const token = sessionStorage.getItem("token");
 
       player.current = videojs(videoRef.current, {
         autoplay: true,
@@ -18,6 +20,17 @@ const HLSPlayer = ({ src }) => {
         responsive: true,
         fluid: true,
         sources: [{ src, type: 'application/x-mpegURL' }],
+        html5: {
+          vhs: {
+            withCredentials: true,
+            overrideNative: true,
+            xhr: {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          },
+        },
       });
     }
 
