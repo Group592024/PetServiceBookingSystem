@@ -27,7 +27,10 @@ const PetTypeList = () => {
       });
       const response = await fetchData.json();
 
-      const result = response.map((item) => ({
+      console.log("test ne nhe");
+      console.log(response);
+
+      const result = response.data.map((item) => ({
         id: item.petType_ID,
         ...item,
       }));

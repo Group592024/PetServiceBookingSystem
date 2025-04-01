@@ -179,6 +179,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             var serviceVariantDto = new CreateServiceVariantDTO
             {
                 serviceId = Guid.NewGuid(),
+                servicePrice = 100,
                 serviceContent = "Valid Service Variant"
             };
 
@@ -196,7 +197,6 @@ namespace UnitTest.FacilityServiceApi.Controllers
                 .Returns(Task.FromResult(expectedResponse));
 
             // Act
-            _controller.ModelState.Clear();
             var result = await _controller.CreateServiceVariant(serviceVariantDto);
 
             // Assert
@@ -245,7 +245,8 @@ namespace UnitTest.FacilityServiceApi.Controllers
             var serviceVariantDto = new CreateServiceVariantDTO
             {
                 serviceId = Guid.NewGuid(),
-                serviceContent = "New Variant"
+                serviceContent = "Valid Service Variant",
+                servicePrice = 100
             };
 
             A.CallTo(() => _service.GetByIdAsync(serviceVariantDto.serviceId))
@@ -362,7 +363,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             var serviceVariantId = Guid.NewGuid();
             var updateDto = new UpdateServiceVariantDTO
             {
-                servicePrice = -10, // Invalid price
+                servicePrice = -10,
                 serviceContent = "",
                 isDeleted = false
             };

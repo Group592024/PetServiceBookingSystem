@@ -47,7 +47,8 @@ const AddDiaryModal = ({ categories, open, onClose }) => {
   };
 
   const handleSave = async () => {
-    if (content === "") {
+    const sanitizedContent = content.replace(/<[^>]+>/g, "").trim();
+    if (!sanitizedContent) {
       return Swal.fire({
         icon: "error",
         title: "Error",
