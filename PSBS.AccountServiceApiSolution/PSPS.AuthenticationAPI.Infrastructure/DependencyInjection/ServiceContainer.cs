@@ -3,8 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSPS.AccountAPI.Application.Interfaces;
 using PSPS.AccountAPI.Infrastructure.Data;
+using PSPS.AccountAPI.Infrastructure.NotificationWorker;
+using PSPS.AccountAPI.Infrastructure.RabbitMessing;
 using PSPS.AccountAPI.Infrastructure.Repositories;
 using PSPS.SharedLibrary.DependencyInjection;
+using RabbitMQ.Client;
 
 
 namespace PSPS.AccountAPI.Infrastructure.DependencyInjection
@@ -19,8 +22,10 @@ namespace PSPS.AccountAPI.Infrastructure.DependencyInjection
             // Create Dependency Injection
             services.AddScoped<IAccount, AccountRepository>();
             services.AddScoped<IEmail, EmailRepository>();
-
-
+            services.AddSingleton<IConnection>(sp =>
+               new ConnectionFactory().CreateConnection());
+            services.AddScoped<RabbitMessageConsumer>();
+            services.AddHostedService<NotificationMessageWorker>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app) { 

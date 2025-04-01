@@ -10,6 +10,7 @@ namespace ChatServiceApi.Application.DTOs
      string NotificationTitle,
      string NotificationContent,
      DateTime CreatedDate,
-     bool IsDeleted
+     bool IsDeleted,
+     bool IsRead
         );
 }

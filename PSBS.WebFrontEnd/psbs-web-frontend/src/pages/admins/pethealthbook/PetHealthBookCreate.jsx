@@ -15,7 +15,7 @@ const PetHealthBookCreate = () => {
     healthBookId: "",
     bookingId: "",
     medicineId: [],
-    visitDate: null,
+    visitDate: new Date(),
     nextVisitDate: null,
     performBy: "",
     createdAt: "",
@@ -365,6 +365,7 @@ const PetHealthBookCreate = () => {
               onChange={(date) => setVisitDetails({ ...visitDetails, visitDate: date })}
               dateFormat="dd/MM/yyyy"
               className="w-full p-3 border rounded-md"
+              disabled
             />
           </div>
           <div className="mb-3">

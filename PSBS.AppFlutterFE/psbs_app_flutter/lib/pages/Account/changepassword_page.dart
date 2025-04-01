@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   final String accountId;
@@ -124,6 +125,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
   }
 
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+    );
+  }
+
   Future<void> _changePassword() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -153,49 +162,29 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       );
 
       if (response.statusCode == 200) {
-        _showAlert('Success', 'Password changed successfully!', () {
-          Navigator.pushReplacementNamed(context, '/home');
-        });
+        _showToast('Password changed successfully!');
+        Navigator.pushReplacementNamed(context, '/home');
       } else {
         final errorData = jsonDecode(response.body);
-        _showAlert(
-            'Error', errorData['message'] ?? 'Failed to change password', null);
+        _showToast(errorData['message'] ?? 'Failed to change password');
       }
     } catch (error) {
       print("Error change password: $error");
+      _showToast('An error occurred. Please try again.');
     }
   }
 
-  void _showAlert(String title, String message, VoidCallback? onConfirm) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (onConfirm != null) {
-                onConfirm();
-              }
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget buildPasswordField(String label, TextEditingController controller,
-      bool obscureText, VoidCallback toggleVisibility) {
+      bool isPasswordVisible, VoidCallback toggleVisibility) {
     return TextFormField(
       controller: controller,
-      obscureText: obscureText,
+      obscureText: !isPasswordVisible,
       decoration: InputDecoration(
         labelText: label,
         suffixIcon: IconButton(
-          icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+          icon: Icon(
+            isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+          ),
           onPressed: toggleVisibility,
         ),
         enabledBorder: UnderlineInputBorder(
@@ -208,6 +197,16 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please enter $label';
+        }
+        if (label == "New Password" || label == "Confirm Password") {
+          if (value.length < 6) {
+            return 'Password must be at least 6 characters';
+          }
+        }
+        if (label == "Confirm Password") {
+          if (value != _newPasswordController.text) {
+            return 'Passwords do not match';
+          }
         }
         return null;
       },
@@ -277,7 +276,6 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Hiển thị tên tài khoản (accountName)
                             Text(
                               account?['accountName'] ?? 'Your Account Name',
                               style: TextStyle(

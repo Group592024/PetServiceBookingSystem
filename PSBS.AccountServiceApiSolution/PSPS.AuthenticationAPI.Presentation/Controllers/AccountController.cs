@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
 using PSPS.AccountAPI.Infrastructure.Repositories;
@@ -203,5 +204,30 @@ namespace PSPS.Presentation.Controllers
             var result = await account.RefundAccountPoint(accountId, model);
             return result.Flag ? Ok(result) : BadRequest(result);
         }
+
+        [HttpPost("send-notification/{accountId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SendNotificationEmail(Guid accountId, [FromBody] NotificationMessage notificationMessage)
+        {
+            try
+            {         
+
+               var response = await account.SendNotificationEmail(accountId, notificationMessage);
+                if (response.Flag)
+                {
+                    return Ok(response);
+                }
+                else
+                {
+                return BadRequest(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception here
+                return StatusCode(500, new Response(false, "Cannot send email due to an error"));
+            }
+        }
     }
 }
+

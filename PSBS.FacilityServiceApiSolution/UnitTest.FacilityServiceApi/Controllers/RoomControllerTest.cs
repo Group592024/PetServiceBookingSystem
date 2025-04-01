@@ -380,7 +380,7 @@ public class RoomControllerTest
             roomId = roomId,
             roomName = "Room 101",
             roomTypeId = Guid.NewGuid(),
-            isDeleted = false
+            isDeleted = true
         };
 
         var successResponse = new Response(true, "Room hard deleted successfully");
@@ -432,7 +432,7 @@ public class RoomControllerTest
             roomId = roomId,
             roomName = "Room 101",
             roomTypeId = Guid.NewGuid(),
-            isDeleted = false
+            isDeleted = true
         };
 
         var failureResponse = new Response(false, "Cannot delete room because it has active bookings");

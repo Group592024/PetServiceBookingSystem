@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import Swal from "sweetalert2"; 
-import "./style.css";
-
+import Swal from "sweetalert2";
+import "./style.css"; // Make sure this path is correct
+import { NavLink } from "react-router-dom";
+import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
+import signalRService from "../../lib/ChatService";
 const NavbarCustomer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountName, setAccountName] = useState("Guest");
@@ -12,27 +14,81 @@ const NavbarCustomer = () => {
   );
   const [accountId, setAccountId] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [notificationDropdownVisible, setNotificationDropdownVisible] =
+    useState(false);
   const navigate = useNavigate();
+  const [notificationCount, setNotificationCount] = useState("0");
+  const intervalRef = useRef(null);
+  const isNotificationOpenRef = useRef(false);
+
+  // Create a ref to store the latest notification count from dropdown
+  const dropdownUnreadCountRef = useRef(0);
+  useEffect(() => {
+    const id = sessionStorage.getItem("accountId");
+
+    const handleNotificationCount = (value) => {
+      // Only update if dropdown is closed or we haven't received data from dropdown
+      if (!isNotificationOpenRef.current) {
+        setNotificationCount(value.unreadChats);
+      }
+    };
+
+    const fetchNotificationCount = () => {
+      if (id) {
+        signalRService.invoke("GetUnreadNotificationCount", id).catch(console.error);
+      }
+    };
+
+    // Initial fetch
+    fetchNotificationCount();
+
+    // Set up periodic refresh only when dropdown is closed
+    intervalRef.current = setInterval(fetchNotificationCount, 30000);
+
+    // Set up listener
+    signalRService.on("chatcount", handleNotificationCount);
+
+    return () => {
+      clearInterval(intervalRef.current);
+      signalRService.off("chatcount", handleNotificationCount);
+    };
+  }, []);
+
+  const toggleNotificationDropdown = () => {
+    const newState = !notificationDropdownVisible;
+    setNotificationDropdownVisible(newState);
+    isNotificationOpenRef.current = newState;
+
+    // When opening, use the dropdown's count
+    if (newState) {
+      setNotificationCount(dropdownUnreadCountRef.current.toString());
+    } else {
+      // When closing, fetch the latest count from SignalR
+      const id = sessionStorage.getItem("accountId");
+      if (id) {
+        signalRService.invoke("GetUnreadNotificationCount", id).catch(console.error);
+      }
+    }
+  };
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-  
+    // signalRService.on("notificationCount", handleNotificationCount);
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = jwt_decode(token);
       const { AccountName, AccountImage, AccountId } = decodedToken;
-  
+
       setAccountName(AccountName || "User");
       setAccountId(AccountId);
-  
       if (AccountImage) {
         fetch(
           `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
           {
-            method: 'GET',
+            method: "GET",
             headers: {
-              'Authorization': `Bearer ${token}`, 
-              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           }
         )
@@ -52,7 +108,6 @@ const NavbarCustomer = () => {
       setIsLoggedIn(false);
     }
   }, []);
-  
 
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
@@ -115,73 +170,117 @@ const NavbarCustomer = () => {
 
         <ul className="navbar-links">
           <li>
-            <Link to="/customer/services">
+            <NavLink
+              to="/customer/services"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-store-alt"></i>
               Service
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/bookings">
+            <NavLink
+              to="/bookings"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-home-heart"></i>
               Booking
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/camera">
-              <i className="bx bx-camera"></i>
-              Camera
-            </Link>
-          </li>
-          <li>
-            <Link to="/customer/pet">
+            <NavLink
+              to="/customer/pet"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bxs-dog"></i>
               Pet
-            </Link>
+            </NavLink>
           </li>
-          
+
           <li>
-            <Link to="/customer/gifts">
+            <NavLink
+              to="/customer/gifts"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-gift"></i>
               Gift
-            </Link>
+            </NavLink>
           </li>
           <li>
-            <Link to="/customer/vouchers">
+            <NavLink
+              to="/customer/vouchers"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
               <i className="bx bx-wallet"></i>
               Voucher
-            </Link>
+            </NavLink>
           </li>
         </ul>
       </div>
 
-      {/* Show Login button if not logged in, otherwise show profile */}
-      {!isLoggedIn ? (
-        <div>
-        <Link
-          to="/login"
-          className="login-button bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition duration-300 hover:opacity-80"
-        >
-          <i className="bx bx-log-in text-xl"></i> Login
-        </Link>
-      </div>
-      ) : (
-        <div className="navbar-profile" onClick={toggleDropdown}>
-          <img
-            src={accountImage}
-            alt="Profile Avatar"
-            className="profile-avatar"
-          />
-
-          {dropdownVisible && (
-            <div className="dropdown-menu">
-              <ul>
-                <li onClick={handleViewProfile}>View Profile</li>
-                <li onClick={handleLogout}>Logout</li>
-              </ul>
+      {/* Right side icons and profile */}
+      <div className="navbar-right">
+        {isLoggedIn && (
+          <>
+            <div className="notifications" onClick={toggleNotificationDropdown}>
+              <i className="bx bx-bell"></i>
+              <span className="count">{notificationCount}</span>
             </div>
-          )}
-        </div>
-      )}
+
+            <Link to="/chat/customer" className="notifications">
+              <i className="bx bx-message-square-dots"></i>
+            </Link>
+          </>
+        )}
+
+        {/* Show Login button if not logged in, otherwise show profile */}
+        {!isLoggedIn ? (
+          <Link
+            to="/login"
+            className="login-button bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-2 rounded-lg flex items-center gap-2 transition duration-300 hover:opacity-80"
+          >
+            <i className="bx bx-log-in text-xl"></i> Login
+          </Link>
+        ) : (
+          <div className="navbar-profile" onClick={toggleDropdown}>
+            <img
+              src={accountImage}
+              alt="Profile Avatar"
+              className="profile-avatar"
+            />
+
+            {dropdownVisible && (
+              <div className="dropdown-menu">
+                <ul>
+                  <li>{accountName || "User"}</li>
+                  <li onClick={handleViewProfile}>View Profile</li>
+                  <li onClick={handleLogout}>Logout</li>
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {notificationDropdownVisible && (
+          <NotificationsDropdown
+            onClose={() => setNotificationDropdownVisible(false)}
+            onUnreadCountChange={(count) => {
+              dropdownUnreadCountRef.current = count;
+              setNotificationCount(count.toString());
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 };

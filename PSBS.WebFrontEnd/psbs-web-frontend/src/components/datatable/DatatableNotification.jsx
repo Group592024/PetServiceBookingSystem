@@ -16,6 +16,7 @@ import { useState } from "react";
 import CreateNotificationModal from "../../pages/admins/notification/addNotiForm/addModal";
 import UpdateNotificationModal from "../../pages/admins/notification/updateNotification/updateModal";
 import SelectReceiverModal from "../../pages/admins/notification/pushNotification/PushModal";
+import NotificationDetailModal from "../../pages/admins/notification/detailNotiform/DetailNotification";
 const DatatableNotification = ({
   columns,
   rows,
@@ -30,6 +31,7 @@ const DatatableNotification = ({
   const [isEditModalOpen, setEditIsModalOpen] = useState(false);
   const [isPushModalOpen, setPushModalOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const handleCreateNotification = async (values) => {
     // Send the data to your API here
     try {
@@ -41,7 +43,8 @@ const DatatableNotification = ({
           icon: "success",
           confirmButtonText: "OK",
         });
-        setRows((prevRows) => [...prevRows, response.data]);
+        setRows((prevRows) => [response.data, ...prevRows]);
+        return true;
       } else {
         Swal.fire({
           title: "Error!",
@@ -53,6 +56,7 @@ const DatatableNotification = ({
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("Failed to submit data.");
+      throw error;
     }
   };
 
@@ -86,7 +90,37 @@ const DatatableNotification = ({
       toast.error("Failed to submit data.");
     }
   };
-  const handlePushNotification = async (values) => {};
+  const handlePushNotification = async (values) => {
+    console.log("push to update:", values);
+    try {
+      const response = await postData(`${apiPath}/push`, values);
+      if (response.flag) {
+        Swal.fire({
+          title: "Success!",
+          text: response.message,
+          icon: "success",
+          confirmButtonText: "OK",
+        });
+        setRows((prevRows) =>
+          prevRows.map((row) =>
+            row[rowId] === values[rowId] ? { ...row, ...response.data } : row
+          )
+        );
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: response.message,
+          icon: "error",
+          confirmButtonText: "OK",
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      toast.error("Failed to submit data.");
+      throw error;
+    }
+  };
   const actionColumn = [
     {
       field: "action",
@@ -150,22 +184,29 @@ const DatatableNotification = ({
             <IconButton
               aria-label="info"
               onClick={() => handleDetailOpen(params.row)}
+              title="Detail"
             >
               <InfoIcon color="info" />
             </IconButton>
             <IconButton
               aria-label="edit"
               onClick={() => handleEditOpen(params.row)}
+              title="Edit"
             >
               <EditIcon color="success" />
             </IconButton>
-            <IconButton aria-label="delete" onClick={handleDelete}>
+            <IconButton
+              aria-label="delete"
+              onClick={handleDelete}
+              title="Delete"
+            >
               <DeleteIcon color="error" />
             </IconButton>
             {!params.row.isPushed && (
               <IconButton
                 aria-label="push"
                 onClick={() => handlePush(params.row.notificationId)}
+                title="Push"
               >
                 <ArrowCircleUpIcon color="warning" />
               </IconButton>
@@ -188,7 +229,8 @@ const DatatableNotification = ({
     setPushModalOpen(true);
   };
   const handleDetailOpen = (row) => {
-    navigate(`${basePath}detail/${row[rowId]}`, { state: { rowData: row } });
+    setSelectedData(row);
+    setIsDetailModalOpen(true);
   };
   return (
     <div className="datatable">
@@ -209,10 +251,10 @@ const DatatableNotification = ({
         columns={columns.concat(actionColumn)}
         initialState={{
           pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
+            paginationModel: { page: 0, pageSize: 10 },
           },
         }}
-        pageSizeOptions={[5, 10]}
+        pageSizeOptions={[5, 10, 15, 20]}
       />
       <ToastContainer />
       <CreateNotificationModal
@@ -230,6 +272,12 @@ const DatatableNotification = ({
         open={isPushModalOpen}
         onClose={() => setPushModalOpen(false)}
         onConfirm={handlePushNotification}
+        initId={selectedData}
+      />
+      <NotificationDetailModal
+        open={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        notification={selectedData}
       />
     </div>
   );

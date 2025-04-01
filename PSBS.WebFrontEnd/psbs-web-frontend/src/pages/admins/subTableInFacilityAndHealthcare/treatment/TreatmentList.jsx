@@ -72,7 +72,7 @@ const TreatmentList = () => {
       ),
       renderCell: (params) => (
         <div style={{ textAlign: 'center', fontWeight: 'bold', color: params.value ? 'red' : 'green' }}>
-          {params.value ? 'Stopping' : 'Active'}
+          {params.value ? 'Inactive' : 'Active'}
         </div>
       ),
     },

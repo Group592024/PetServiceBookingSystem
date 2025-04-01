@@ -53,6 +53,22 @@ namespace FacilityServiceApi.Presentation.Controllers
             });
         }
 
+        [HttpGet("mail/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<BookingServiceItem>> GetBookingItemById(Guid id)
+        {
+            var bookingItems = await _context.bookingServiceItems.FirstOrDefaultAsync(i => i.BookingServiceItemId == id);
+            if (bookingItems is null)
+            {
+                return NotFound(new Response(false, "No item detected"));
+            }
+
+            return Ok(new Response(true, "Booking item retrieved successfully!")
+            {
+                Data = bookingItems
+            });
+        }
+
         // POST api/<BookingServiceItemsController>
         [HttpPost]
         [Authorize(Policy = "AdminOrStaffOrUser")]
