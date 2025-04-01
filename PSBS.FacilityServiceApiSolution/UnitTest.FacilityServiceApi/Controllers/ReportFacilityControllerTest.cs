@@ -134,20 +134,23 @@ namespace UnitTest.FacilityServiceApi.Controllers
         }
 
         [Fact]
-        public async Task GetRoomHistory_WhenRoomHistoriesExist_ReturnsOk()
+        public async Task GetRoomHistory_WhenRoomStatusExists_ReturnsOk()
         {
             // Arrange
-            var roomHistoryList = new List<RoomHistoryQuantityDTO>
-        {
-            new RoomHistoryQuantityDTO( "Deluxe", 10 ),
-            new RoomHistoryQuantityDTO ("Standard", 5 )
-        };
+            int year = 2024;
+            int month = 3;
 
-            A.CallTo(() => _report.GetRoomTypeQuantity(A<int?>._, A<int?>._, A<DateTime?>._, A<DateTime?>._))
+            var roomHistoryList = new List<RoomHistoryQuantityDTO>
+    {
+        new RoomHistoryQuantityDTO("Deluxe", 8),
+        new RoomHistoryQuantityDTO("Standard", 3)
+    };
+
+            A.CallTo(() => _report.GetRoomTypeQuantity(year, month, null, null))
                 .Returns(Task.FromResult<IEnumerable<RoomHistoryQuantityDTO>>(roomHistoryList));
 
             // Act
-            var result = await _controller.GetRoomHistory(null, null, null, null);
+            var result = await _controller.GetRoomHistory(year, month, null, null);
 
             // Assert
             var okResult = result.Result as OkObjectResult;
@@ -160,6 +163,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             response.Message.Should().Be("Room histories retrieved successfully");
             response.Data.Should().BeEquivalentTo(roomHistoryList);
         }
+
 
         [Fact]
         public async Task GetRoomHistory_WhenNoRoomHistoriesExist_ReturnsNotFound()
@@ -186,17 +190,20 @@ namespace UnitTest.FacilityServiceApi.Controllers
         public async Task GetBookingServiceItem_WhenItemsExist_ReturnsOk()
         {
             // Arrange
-            var serviceItems = new List<RoomHistoryQuantityDTO>
-        {
-            new RoomHistoryQuantityDTO("Service 1",15 ),
-            new RoomHistoryQuantityDTO ("Service 2", 8)
-        };
+            int year = 2024;
+            int month = 3;
 
-            A.CallTo(() => _report.GetServiceQuantity(A<int?>._, A<int?>._, A<DateTime?>._, A<DateTime?>._))
+            var serviceItems = new List<RoomHistoryQuantityDTO>
+    {
+        new RoomHistoryQuantityDTO("Service A", 20),
+        new RoomHistoryQuantityDTO("Service B", 10)
+    };
+
+            A.CallTo(() => _report.GetServiceQuantity(year, month, null, null))
                 .Returns(Task.FromResult<IEnumerable<RoomHistoryQuantityDTO>>(serviceItems));
 
             // Act
-            var result = await _controller.GetBookingServiceItem(null, null, null, null);
+            var result = await _controller.GetBookingServiceItem(year, month, null, null);
 
             // Assert
             var okResult = result.Result as OkObjectResult;
@@ -209,6 +216,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             response.Message.Should().Be("Booking service items retrieved successfully");
             response.Data.Should().BeEquivalentTo(serviceItems);
         }
+
 
         [Fact]
         public async Task GetBookingServiceItem_WhenNoItemsExist_ReturnsNotFound()
@@ -236,17 +244,20 @@ namespace UnitTest.FacilityServiceApi.Controllers
         {
             // Arrange
             var petId = Guid.NewGuid();
-            var petCounts = new List<PetCountDTO>
-        {
-            new PetCountDTO (Guid.NewGuid(), 3),
-            new PetCountDTO (Guid.NewGuid(), 5)
-        };
+            int year = 2024;
+            int month = 3;
 
-            A.CallTo(() => _report.GetAllBookingByPet(petId, A<int?>._, A<int?>._, A<DateTime?>._, A<DateTime?>._))
+            var petCounts = new List<PetCountDTO>
+    {
+        new PetCountDTO(Guid.NewGuid(), 4),
+        new PetCountDTO(Guid.NewGuid(), 6)
+    };
+
+            A.CallTo(() => _report.GetAllBookingByPet(petId, year, month, null, null))
                 .Returns(Task.FromResult<IEnumerable<PetCountDTO>>(petCounts));
 
             // Act
-            var result = await _controller.GetPetCount(petId, null, null, null, null);
+            var result = await _controller.GetPetCount(petId, year, month, null, null);
 
             // Assert
             var okResult = result.Result as OkObjectResult;
@@ -254,6 +265,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             okResult!.StatusCode.Should().Be(StatusCodes.Status200OK);
             okResult.Value.Should().BeEquivalentTo(petCounts);
         }
+
 
         [Fact]
         public async Task GetPetCount_WhenNoDataExists_ReturnsNotFound()
