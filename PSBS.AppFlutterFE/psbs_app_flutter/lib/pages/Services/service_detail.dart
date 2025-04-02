@@ -19,7 +19,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   bool showFullDescription = false;
 
   String get imageURL =>
-      'http://192.168.1.6:5023${detail['serviceImage'] ?? ''}';
+      'http://10.0.2.2:5023${detail['serviceImage'] ?? ''}';
 
   @override
   void initState() {
@@ -34,7 +34,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.get(
-        Uri.parse('http://192.168.1.6:5050/api/Service/${widget.serviceId}'),
+        Uri.parse('http://10.0.2.2:5050/api/Service/${widget.serviceId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -63,7 +63,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
       final token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse(
-            'http://192.168.1.6:5050/api/ServiceVariant/service/${widget.serviceId}?showAll=false'),
+            'http://10.0.2.2:5050/api/ServiceVariant/service/${widget.serviceId}?showAll=false'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",

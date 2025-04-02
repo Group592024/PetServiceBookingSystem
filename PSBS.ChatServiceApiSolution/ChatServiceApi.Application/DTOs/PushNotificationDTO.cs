@@ -8,6 +8,7 @@ namespace ChatServiceApi.Application.DTOs
     [Required]
     Guid notificationId,
     [Required]
-    List<ReceiverDTO> Receivers
+    List<ReceiverDTO> Receivers,
+    bool isEmail
         );
 }

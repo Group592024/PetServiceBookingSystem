@@ -141,7 +141,7 @@ const AdminPetDetail = () => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col">
             <Sidebar ref={sidebarRef} />
             <div className="content flex-1 overflow-hidden">
                 <Navbar sidebarRef={sidebarRef} />

@@ -47,7 +47,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
 
       final response = await http.get(
         Uri.parse(
-   'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
+            'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -94,7 +94,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final entries = data['data']?['data'];
-
+        print('co toi day ne');
         print(widget.petImage);
 
         setState(() {
@@ -151,7 +151,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final response = await http.delete(
-  Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
+        Uri.parse('http://10.0.2.2:5050/api/PetDiary/$diaryId'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -228,7 +228,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                'http://10.0.2.2:5010${widget.petImage}')
+                              'http://10.0.2.2:5010${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),

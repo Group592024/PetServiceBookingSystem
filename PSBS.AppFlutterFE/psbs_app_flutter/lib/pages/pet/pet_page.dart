@@ -561,7 +561,7 @@ class _CustomerPetListState extends State<PetPage> {
           ClipRRect(
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
             child: Image.network(
-       'http://10.0.2.2:5050/pet-service${pet.petImage}',
+              'http://10.0.2.2:5050/pet-service${pet.petImage}',
               height: 250,
               width: double.infinity,
               fit: BoxFit.cover,
@@ -818,7 +818,7 @@ class _CustomerPetListState extends State<PetPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   child: Image.network(
-                    'http://192.168.1.6:5050/pet-service${pet.petImage}',
+                    'http://10.0.2.2:5050/pet-service${pet.petImage}',
                     fit: BoxFit.cover,
                   ),
                 ),

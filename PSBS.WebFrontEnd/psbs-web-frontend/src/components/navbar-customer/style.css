@@ -1,177 +1,298 @@
 :root {
-    --light: #f6f6f9;
-    --primary: #1976D2;
-    --light-primary: #CFE8FF;
-    --grey: #eee;
-    --dark-grey: #AAAAAA;
-    --dark: #363949;
-    --danger: #D32F2F;
+  --light: #f6f6f9;
+  --primary: #1976D2;
+  --light-primary: #CFE8FF;
+  --grey: #eee;
+  --dark-grey: #AAAAAA;
+  --dark: #363949;
+  --danger: #D32F2F;
   --light-danger: #FECDD3;
-    --warning: #FBC02D;
-    --light-warning: #FFF2C6;
-    --success: #388E3C;
-    --light-success: #BBF7D0;
-  }
-  
-  .navbarCustomer {
-    height: 56px;
-    background: var(--light);
-    padding: 0 24px 0 0;
-    display: flex;
-    align-items: center;
-    grid-gap: 24px;
-    position: sticky;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-  }
-  
-  .navbarCustomer .logo {
-    font-size: 24px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    color: var(--primary);
-  }
-  
-  .navbarCustomer .logo .logo-name span {
-    color: var(--dark);
-  }
-  
-  .navbarCustomer .logo .bx {
-    font-size: 2.2rem;
-    margin-right: 5px;
-  }
-  
-  .navbarCustomer form {
-    width: 100%;
-    margin-right: 30px; /* Adds space between the search bar and profile avatar */
-  }
-  
-  .navbarCustomer form .form-input {
-    display: flex;
-    align-items: center;
-    height: 36px;
-  }
-  
-  .navbarCustomer form .form-input input {
-    flex-grow: 1;
-    padding: 0 16px;
-    height: 100%;
-    border: none;
-    background: var(--grey);
-    border-radius: 36px 0 0 36px;
-    outline: none;
-    color: var(--dark);
-    max-width: 250px; /* Reduces the width of the search bar */
-  }
-  
-  .navbarCustomer form .form-input button {
-    width: 80px;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: var(--primary);
-    color: var(--light);
-    font-size: 18px;
-    border: none;
-    outline: none;
-    border-radius: 0 36px 36px 0;
-    cursor: pointer;
-  }
-  
-  .navbar-central {
-    display: flex;
-    gap: 20px; /* Adds space between search bar and links */
-    align-items: center;
-    justify-content: center; /* This will center the search bar and links together */
-    flex-grow: 1;
-    margin-left: 20px;
-    margin-right: 20px;
-    /* Adds space between the logo and search bar */
-  }
-  
-  .navbar-links {
-    display: flex;
-    list-style: none;
-    gap: 20px;
-  }
-  
-  .navbar-links li a {
-    text-decoration: none;
-    color: #333;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    position: relative;
-  }
-  
-  .navbar-links li a i {
-    margin-right: 5px;
-  }
-  
-  .navbar-links li.active a {
-    color: var(--primary);
-    font-weight: bold;
-  }
-  
-  .navbar-links li.active a:after {
-    content: "";
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background-color: var(--primary);
-    bottom: -5px;
-    left: 0;
-  }
-  
-  .navbar-profile {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  
-  .profile-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    cursor: pointer;
-  }
-  
-  .dropdown-menu {
-    position: absolute;
-    top: 50px; /* Adjust based on avatar size and padding */
-    right: 0;
-    background-color: #fff;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    overflow: hidden;
-    width: 150px;
-    z-index: 1000;
-  }
-  
-  .dropdown-menu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .dropdown-menu ul li {
-    padding: 10px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 16px;
-    color: #333;
-  }
-  
-  .dropdown-menu ul li:hover {
-    background-color: var(--light-primary);
-  }
-  
-  .dropdown-menu ul li:active {
-    background-color: var(--primary);
-    color: #fff;
-  }
-  
+  --warning: #FBC02D;
+  --light-warning: #FFF2C6;
+  --success: #388E3C;
+  --light-success: #BBF7D0;
+}
+
+.navbarCustomer {
+  height: 56px;
+  background: var(--light);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  grid-gap: 24px;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navbarCustomer .logo {
+  font-size: 24px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+  text-decoration: none;
+  min-width: 120px;
+}
+
+.navbarCustomer .logo .logo-name span {
+  color: var(--dark);
+}
+
+.navbarCustomer .logo .bx {
+  font-size: 2.2rem;
+  margin-right: 5px;
+}
+
+.navbarCustomer form {
+  width: 100%;
+  margin-right: 30px;
+}
+
+.navbarCustomer form .form-input {
+  display: flex;
+  align-items: center;
+  height: 36px;
+}
+
+.navbarCustomer form .form-input input {
+  flex-grow: 1;
+  padding: 0 16px;
+  height: 100%;
+  border: none;
+  background: var(--grey);
+  border-radius: 36px 0 0 36px;
+  outline: none;
+  color: var(--dark);
+  max-width: 250px;
+  transition: all 0.3s ease;
+}
+
+.navbarCustomer form .form-input input:focus {
+  background: var(--light-primary);
+}
+
+.navbarCustomer form .form-input button {
+  width: 80px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--primary);
+  color: var(--light);
+  font-size: 18px;
+  border: none;
+  outline: none;
+  border-radius: 0 36px 36px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbarCustomer form .form-input button:hover {
+  background: #1565C0;
+}
+
+.navbar-central {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  position: relative;
+}
+
+/* Base link style */
+.navbar-links li a {
+  text-decoration: none;
+  color: var(--dark);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+/* NavLink specific styles */
+.navbar-links li a.nav-link {
+  /* All base link styles are inherited */
+}
+
+/* Active state */
+.navbar-links li a.nav-link.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.navbar-links li a.nav-link.active::after {
+  content: "";
+  position: absolute;
+  width: calc(100% - 24px);
+  height: 3px;
+  background-color: var(--primary);
+  bottom: -8px;
+  left: 12px;
+  border-radius: 3px 3px 0 0;
+}
+
+/* Hover state - applies to all links */
+.navbar-links li a:hover {
+  color: var(--primary);
+  background: var(--light-primary);
+}
+
+.navbar-links li a i {
+  margin-right: 5px;
+  font-size: 1.1rem;
+}
+
+/* Navbar Right Section */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Notification and Chat Icons */
+.notifications {
+  position: relative;
+  cursor: pointer;
+  color: var(--dark);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+.notifications:hover {
+  color: var(--primary);
+  background: var(--light-primary);
+}
+
+.notifications .count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: var(--danger);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+/* Profile Section */
+.navbar-profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.profile-avatar:hover {
+  border-color: var(--primary);
+}
+
+/* Dropdown Menu */
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 50px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.dropdown-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown-menu li {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.dropdown-menu li:first-child {
+  font-weight: 600;
+  border-bottom: 1px solid var(--grey);
+  cursor: default;
+  color: var(--dark);
+  background: var(--light);
+}
+
+.dropdown-menu li:not(:first-child):hover {
+  background-color: var(--light-primary);
+  color: var(--primary);
+}
+
+/* Login Button */
+.login-button {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Notification Dropdown */
+.notification-dropdown {
+  position: absolute;
+  right: 0;
+  top: 60px;
+  width: 350px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1001;
+}
+
+/* Boxicons - make sure this is imported */
+@import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');

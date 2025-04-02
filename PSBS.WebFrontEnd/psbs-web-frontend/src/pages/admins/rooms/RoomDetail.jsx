@@ -76,10 +76,7 @@ const RoomDetail = () => {
                 <main className="flex-1 overflow-auto p-6">
                     {/* Header */}
                     <div className="flex items-center mb-6 mx-auto w-full bg-white rounded-xl p-4 shadow-sm">
-                        <button 
-                            onClick={() => navigate(-1)} 
-                            className="hover:bg-gray-100 p-2 rounded-full transition-colors"
-                        >
+                        <button onClick={() => navigate(-1)} className="hover:bg-gray-100 p-2 rounded-full transition-all">
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                             </svg>
@@ -88,7 +85,7 @@ const RoomDetail = () => {
                             <h1 className="text-2xl font-bold text-gray-800">Room Detail</h1>
                         </div>
                     </div>
-    
+
                     <div className="bg-white p-8 rounded-xl shadow-lg">
                         <div className="flex flex-col lg:flex-row gap-8">
                             <div className="flex-1 space-y-6">
@@ -99,7 +96,7 @@ const RoomDetail = () => {
                                         <span className="text-gray-700">{detail.roomName}</span>
                                     </div>
                                 </div>
-    
+
                                 {/* Room Type */}
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Type:</label>
@@ -107,20 +104,20 @@ const RoomDetail = () => {
                                         <span className="text-gray-700">{roomTypeName}</span>
                                     </div>
                                 </div>
-    
+
                                 {/* Price */}
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Price:</label>
                                     <div className="flex-1 p-3 bg-gray-50 rounded-lg border border-gray-200">
                                         <span className="text-blue-600 font-medium">
-                                            {new Intl.NumberFormat('vi-VN', { 
-                                                style: 'currency', 
-                                                currency: 'VND' 
+                                            {new Intl.NumberFormat('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND'
                                             }).format(roomTypePrice)}
                                         </span>
                                     </div>
                                 </div>
-    
+
                                 {/* Description */}
                                 <div className="space-y-2">
                                     <label className="font-semibold text-gray-600">Description:</label>
@@ -128,33 +125,31 @@ const RoomDetail = () => {
                                         <p className="text-gray-700 whitespace-pre-wrap">{detail.description}</p>
                                     </div>
                                 </div>
-    
+
                                 {/* Status */}
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Status:</label>
-                                    <div className={`flex-1 p-3 rounded-lg font-medium ${
-                                        detail.status === 'In Use' ? 'bg-orange-50 text-orange-600 border border-orange-200' :
-                                        detail.status === 'Free' ? 'bg-green-50 text-green-600 border border-green-200' :
-                                        detail.status === 'Maintenance' ? 'bg-red-50 text-red-600 border border-red-200' :
-                                        'bg-gray-50 text-gray-600 border border-gray-200'
-                                    }`}>
+                                    <div className={`flex-1 p-3 rounded-lg font-medium ${detail.status === 'In Use' ? 'bg-orange-50 text-orange-600 border border-orange-200' :
+                                            detail.status === 'Free' ? 'bg-green-50 text-green-600 border border-green-200' :
+                                                detail.status === 'Maintenance' ? 'bg-red-50 text-red-600 border border-red-200' :
+                                                    'bg-gray-50 text-gray-600 border border-gray-200'
+                                        }`}>
                                         {detail.status || 'Unknown'}
                                     </div>
                                 </div>
-    
+
                                 {/* Available Status */}
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Available:</label>
-                                    <div className={`flex-1 p-3 rounded-lg font-medium ${
-                                        detail.isDeleted 
-                                            ? 'bg-red-50 text-red-600 border border-red-200' 
+                                    <div className={`flex-1 p-3 rounded-lg font-medium ${detail.isDeleted
+                                            ? 'bg-red-50 text-red-600 border border-red-200'
                                             : 'bg-green-50 text-green-600 border border-green-200'
-                                    }`}>
+                                        }`}>
                                         {detail.isDeleted ? 'Inactive' : 'Active'}
                                     </div>
                                 </div>
                             </div>
-    
+
                             {/* Image Section */}
                             <div className="lg:w-1/2 flex justify-center items-start">
                                 <div className="relative rounded-xl overflow-hidden shadow-lg">

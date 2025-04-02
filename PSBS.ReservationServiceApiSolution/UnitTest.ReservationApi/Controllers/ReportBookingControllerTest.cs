@@ -94,28 +94,29 @@ namespace UnitTest.ReservationApi.Controllers
         }
 
         [Fact]
-        public async Task GetIncome_ReturnsOk_WhenBookingTypesExist()
+        public async Task GetIncome_WithSpecificYearAndMonth_ReturnsOk()
         {
             // Arrange
-            var fakeBookingTypes = new List<ReportBookingTypeDTO>
-        {
-            new ReportBookingTypeDTO("Service", new List<AmountDTO>
-            {
-                new AmountDTO("January", 500),
-                new AmountDTO("February", 1000)
-            }),
-            new ReportBookingTypeDTO("Hotel", new List<AmountDTO>
-            {
-                new AmountDTO("January", 2000),
-                new AmountDTO("February", 1500)
-            })
-        };
+            int year = 2024;
+            int month = 3;
 
-            A.CallTo(() => _report.GetTotalIncomeByBookingTypeAsync(null, null, null, null))
+            var fakeBookingTypes = new List<ReportBookingTypeDTO>
+    {
+        new ReportBookingTypeDTO("Service", new List<AmountDTO>
+        {
+            new AmountDTO("March", 1200)
+        }),
+        new ReportBookingTypeDTO("Hotel", new List<AmountDTO>
+        {
+            new AmountDTO("March", 2500)
+        })
+    };
+
+            A.CallTo(() => _report.GetTotalIncomeByBookingTypeAsync(year, month, null, null))
                 .Returns(Task.FromResult<IEnumerable<ReportBookingTypeDTO>>(fakeBookingTypes));
 
             // Act
-            var result = await _controller.GetIncome(null, null, null, null);
+            var result = await _controller.GetIncome(year, month, null, null);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -125,6 +126,7 @@ namespace UnitTest.ReservationApi.Controllers
             response.Message.Should().Be("Booking type retrieved successfully!");
             response.Data.Should().BeEquivalentTo(fakeBookingTypes);
         }
+
 
     }
 }

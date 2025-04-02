@@ -180,9 +180,18 @@ namespace UnitTest.PetServiceApi.Controllers
         public async Task CreatePetDiary_DiaryCreatedSuccessfully_ReturnsOk()
         {
             // Arrange
-            var createDto = new CreatePetDiaryDTO { Category = "Health", Diary_Content = "Test content" };
+            var petId = Guid.NewGuid();
+            var createDto = new CreatePetDiaryDTO
+            {
+                Pet_ID = petId,
+                Category = "Health",
+                Diary_Content = "Test content"
+            };
+
+            var existingPet = new Pet { Pet_ID = petId };
             var response = new Response(true, "Diary created successfully");
 
+            A.CallTo(() => _pet.GetByIdAsync(petId)).Returns(Task.FromResult(existingPet));
             A.CallTo(() => _diary.CreateAsync(A<PetDiary>._)).Returns(Task.FromResult(response));
 
             // Act
@@ -192,8 +201,61 @@ namespace UnitTest.PetServiceApi.Controllers
             result.Result.Should().BeOfType<OkObjectResult>();
         }
 
+
         [Fact]
-        public async Task UpdatePetDiary_PetNotFound_ReturnsNotFound()
+        public async Task CreatePetDiary_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            var invalidDto = new CreatePetDiaryDTO();
+
+            _controller.ModelState.AddModelError("Category", "The Category field is required.");
+
+            // Act
+            var result = await _controller.CreatePetDiary(invalidDto);
+
+            // Assert
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task CreatePetDiary_PetNotFound_ReturnsNotFound()
+        {
+            // Arrange
+            var createDto = new CreatePetDiaryDTO
+            {
+                Pet_ID = Guid.NewGuid(),
+                Category = "Health",
+                Diary_Content = "Test content"
+            };
+
+            A.CallTo(() => _pet.GetByIdAsync(createDto.Pet_ID)).Returns(Task.FromResult<Pet>(null));
+
+            // Act
+            var result = await _controller.CreatePetDiary(createDto);
+
+            // Assert
+            result.Result.Should().BeOfType<NotFoundObjectResult>();
+        }
+
+        [Fact]
+        public async Task UpdatePetDiary_InvalidModel_ReturnsBadRequest()
+        {
+            // Arrange
+            var diaryId = Guid.NewGuid();
+            var updateDto = new UpdatePetDiaryDTO();
+
+            _controller.ModelState.AddModelError("Category", "Category is required");
+            _controller.ModelState.AddModelError("Diary_Content", "Diary content is required");
+
+            // Act
+            var result = await _controller.UpdatePetDiary(diaryId, updateDto);
+
+            // Assert
+            result.Result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task UpdatePetDiary_PetDiaryNotFound_ReturnsNotFound()
         {
             // Arrange
             var diaryId = Guid.NewGuid();
@@ -209,23 +271,47 @@ namespace UnitTest.PetServiceApi.Controllers
         }
 
         [Fact]
-        public async Task UpdatePetDiary_FailedToUpdate_ReturnsBadRequest()
+        public async Task UpdatePetDiary_Success_ReturnsOk()
         {
             // Arrange
             var diaryId = Guid.NewGuid();
-            var existingDiary = new PetDiary { Diary_ID = diaryId, Category = "Health", Diary_Content = "Content" };
-            var updateDto = new UpdatePetDiaryDTO { Category = "Updated", Diary_Content = "Updated content" };
-            var failedResponse = new Response(false, "Failed to update pet diary.");
+            var existingPetDiary = new PetDiary
+            {
+                Diary_ID = diaryId,
+                Pet_ID = Guid.NewGuid(),
+                Category = "Health",
+                Diary_Content = "Initial content"
+            };
 
-            A.CallTo(() => _diary.GetByIdAsync(diaryId)).Returns(Task.FromResult(existingDiary));
-            A.CallTo(() => _diary.UpdateAsync(A<PetDiary>._)).Returns(Task.FromResult(failedResponse));
+            var updateDto = new UpdatePetDiaryDTO
+            {
+                Category = "Updated Category",
+                Diary_Content = "Updated content"
+            };
+
+            var updatedEntity = new PetDiary
+            {
+                Diary_ID = diaryId,
+                Pet_ID = existingPetDiary.Pet_ID,
+                Category = updateDto.Category,
+                Diary_Content = updateDto.Diary_Content
+            };
+
+            var response = new Response(true, "Diary updated successfully");
+
+            A.CallTo(() => _diary.GetByIdAsync(diaryId)).Returns(Task.FromResult(existingPetDiary));
+            A.CallTo(() => _diary.UpdateAsync(A<PetDiary>._)).Returns(Task.FromResult(response));
 
             // Act
             var result = await _controller.UpdatePetDiary(diaryId, updateDto);
 
             // Assert
-            result.Result.Should().BeOfType<BadRequestObjectResult>();
+            result.Result.Should().BeOfType<OkObjectResult>();
+
+            var okResult = result.Result as OkObjectResult;
+            okResult!.Value.Should().BeEquivalentTo(response);
         }
+
 
         [Fact]
         public async Task DeletePetDiary_PetDiaryNotFound_ReturnsNotFound()

@@ -111,7 +111,11 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<Response>> CreatePetDiary([FromBody] CreatePetDiaryDTO pet)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new Response(false, "Validation Error") { Data = ModelState });
+
+            var existingPet = await _pet.GetByIdAsync(pet.Pet_ID);
+            if (existingPet == null)
+                return NotFound(new Response(false, $"Pet with GUID {pet.Pet_ID} not found or is deleted"));
 
             var getEntity = PetDiaryConversion.ToEntity(pet);
 
@@ -125,15 +129,15 @@ namespace PetApi.Presentation.Controllers
         {
             Console.WriteLine("pet " + pet);
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new Response(false, "Validation Error") { Data = ModelState });
 
-            var existingPet = await _diary.GetByIdAsync(id);
-            if (existingPet == null)
-                return NotFound($"Pet with ID {id} not found");
+            var existingPetDiary = await _diary.GetByIdAsync(id);
+            if (existingPetDiary == null)
+                return NotFound(new Response(false, $"Pet diary with GUID {id} not found or is deleted"));
 
             bool hasChanges =
-                existingPet.Diary_Content != pet.Diary_Content ||
-                existingPet.Category != pet.Category;
+                existingPetDiary.Diary_Content != pet.Diary_Content ||
+                existingPetDiary.Category != pet.Category;
 
             if (!hasChanges)
             {
@@ -143,7 +147,7 @@ namespace PetApi.Presentation.Controllers
             // Chuyển đổi và cập nhật
             var updatedEntity = PetDiaryConversion.ToEntity(pet);
             updatedEntity.Diary_ID = id;
-            updatedEntity.Pet_ID = existingPet.Pet_ID;
+            updatedEntity.Pet_ID = existingPetDiary.Pet_ID;
 
             var response = await _diary.UpdateAsync(updatedEntity);
 

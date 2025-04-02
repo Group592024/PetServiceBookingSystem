@@ -107,7 +107,7 @@ namespace UnitTest.FacilityServiceApi.Repositories
             result.Should().NotBeNull();
             result.Flag.Should().BeTrue();
             result.Message.Should().Be("ServiceType and related services soft deleted successfully.");
-            result.Data.Should().BeOfType<(ServiceTypeDTO, IEnumerable<ServiceTypeDTO>)>();
+            result.Data.Should().BeOfType<ServiceTypeDTO>();
 
             // Verify service type was soft deleted
             var deletedServiceType = await _context.ServiceType.FindAsync(serviceTypeId);

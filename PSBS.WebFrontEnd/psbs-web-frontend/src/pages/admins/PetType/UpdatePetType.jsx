@@ -88,9 +88,9 @@ const UpdatePetType = () => {
           },
         }).then((response) => response.json());
 
-        setPetType(data);
-        setSelectedOption(data.isDelete);
-        setImageDisplay(`http://localhost:5010${data.petType_Image}`);
+        setPetType(data.data);
+        setSelectedOption(data.data.isDelete);
+        setImageDisplay(`http://localhost:5010${data.data.petType_Image}`);
       } catch (error) {
         console.error("Failed fetching api", error);
         Swal.fire(
@@ -151,7 +151,7 @@ const UpdatePetType = () => {
         body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
 
       if (response.ok) {

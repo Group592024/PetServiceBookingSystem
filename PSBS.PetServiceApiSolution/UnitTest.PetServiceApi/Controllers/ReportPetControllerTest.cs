@@ -70,32 +70,39 @@ namespace UnitTest.PetServiceApi.Controllers
         public async Task GetPetCount_ReturnsOk_WhenPetBreedCountIsFound()
         {
             // Arrange
+            var fakeYear = 2024;
+            var fakeMonth = 3;
+            var fakeStartDate = new DateTime(2024, 3, 1);
+            var fakeEndDate = new DateTime(2024, 3, 31);
+
             var fakePetCountDto = new List<PetCountDTO>
-        {
-            new PetCountDTO (_validId, 5)
-        };
+    {
+        new PetCountDTO(_validId, 5)
+    };
 
             var fakeBreedCount = new Dictionary<string, int>
-        {
-            { "Labrador", 5 }
-        };
+    {
+        { "Labrador", 5 }
+    };
 
-            A.CallTo(() => _facilityApiClient.GetPetCount(_validId, _fakeToken, null, null, null, null))
+            A.CallTo(() => _facilityApiClient.GetPetCount(_validId, _fakeToken, fakeYear, fakeMonth, fakeStartDate, fakeEndDate))
                 .Returns(Task.FromResult<IEnumerable<PetCountDTO>>(fakePetCountDto));
 
             A.CallTo(() => _report.GetPetBreedByPetCoutDTO(fakePetCountDto))
                 .Returns(Task.FromResult(fakeBreedCount));
 
             // Act
-            var result = await _controller.getPetCount(_validId, null, null, null, null);
+            var result = await _controller.getPetCount(_validId, fakeYear, fakeMonth, fakeStartDate, fakeEndDate);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<Response>(okResult.Value);
+
             response.Flag.Should().BeTrue();
             response.Message.Should().Be("Pet breed counted successfully");
             response.Data.Should().BeEquivalentTo(fakeBreedCount);
         }
+
 
 
     }

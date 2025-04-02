@@ -36,8 +36,8 @@ const PetBreedDetail = () => {
                     });
 
                     const petTypeData = await petTypeResponse.json();
-                    if (petTypeData && petTypeData.petType_Name) {
-                        setPetTypeName(petTypeData.petType_Name);
+                    if (petTypeData.data && petTypeData.data.petType_Name) {
+                        setPetTypeName(petTypeData.data.petType_Name);
                     } else {
                         console.log("PetType data not found, setting as Unknown");
                         setPetTypeName("Unknown");

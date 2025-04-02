@@ -19,16 +19,15 @@ const EditCamera = () => {
     isDeleted: false,
   });
 
-  // Lấy dữ liệu camera từ API
   useEffect(() => {
     const fetchCamera = async () => {
       try {
-        const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
+        const token = sessionStorage.getItem("token"); 
         const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // Thêm token vào header
+            Authorization: `Bearer ${token}`,
           },
         });
         if (!response.ok) {
@@ -73,13 +72,13 @@ const EditCamera = () => {
       ...cameraDetails,
     };
     try {
-      const token = sessionStorage.getItem("token"); // Lấy token từ localStorage
+      const token = sessionStorage.getItem("token"); 
   
       const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Thêm token vào header
+          Authorization: `Bearer ${token}`, 
         },
         body: JSON.stringify(updatedCamera),
       });
@@ -119,6 +118,7 @@ const EditCamera = () => {
               onChange={handleChange}
               placeholder="Nhập Camera Type"
               className="w-full p-3 border rounded-md"
+              readOnly
             />
           </div>
           <div className="mb-3">
