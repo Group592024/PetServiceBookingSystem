@@ -97,7 +97,7 @@ namespace ChatServiceApi.Presentation.Controllers
             //var lists = NotificationConversion.GetUserIdsFromReceivers(createNotificationDTO.Receivers);
             if (notification is null )
             {
-                return Ok(new PSPS.SharedLibrary.Responses.Response(true, $"the notification data is not valid"));
+                return Ok(new PSPS.SharedLibrary.Responses.Response(false, $"the notification data is not valid"));
             }
 
             var response = await _notificationRepository.UpdateNotification(notification!);
@@ -106,7 +106,7 @@ namespace ChatServiceApi.Presentation.Controllers
         }
         [HttpDelete("{notificationBoxId}")]
         public async Task<IActionResult> DeleteUserNotification(Guid notificationBoxId)
-        {
+        {        
             var response = await _notificationRepository.DetelteNotification(notificationBoxId);
 
             return Ok(response);

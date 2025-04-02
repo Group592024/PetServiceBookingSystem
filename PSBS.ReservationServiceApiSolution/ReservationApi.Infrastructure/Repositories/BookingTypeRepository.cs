@@ -43,7 +43,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var bookingType = await GetByIdAsync(entity.BookingTypeId);
+                var bookingType = await context.BookingTypes.FindAsync(entity.BookingTypeId);
                 if (bookingType is null)
                 {
                     return new Response(false, $"{entity.BookingTypeName} not found");
@@ -61,7 +61,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     // Check if BookingStatusId is still referenced in Bookings table
                     bool isReferencedInBookings = await context.Bookings
-                        .AnyAsync(b => b.BookingStatusId == entity.BookingTypeId);
+                        .AnyAsync(b => b.BookingTypeId == entity.BookingTypeId);
 
                     if (isReferencedInBookings)
                     {
@@ -137,7 +137,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var bookingType = await GetByIdAsync(entity.BookingTypeId);
+                var bookingType = await context.BookingTypes.FindAsync(entity.BookingTypeId);
                 if (bookingType is null)
                 {
                     return new Response(false, $"{entity.BookingTypeName} not found");

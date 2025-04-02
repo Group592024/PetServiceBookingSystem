@@ -44,7 +44,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var bookingStatus = await GetByIdAsync(entity.BookingStatusId);
+                var bookingStatus = await context.BookingStatuses.FindAsync(entity.BookingStatusId);
                 if (bookingStatus is null)
                 {
                     return new Response(false, $"{entity.BookingStatusName} not found");
@@ -139,7 +139,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var bookingStatus = await GetByIdAsync(entity.BookingStatusId);
+                var bookingStatus = await context.BookingStatuses.FindAsync(entity.BookingStatusId);
                 if (bookingStatus is null)
                 {
                     return new Response(false, $"{entity.BookingStatusName} not found");
