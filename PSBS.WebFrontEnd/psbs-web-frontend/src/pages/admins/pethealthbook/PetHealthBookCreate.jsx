@@ -27,11 +27,11 @@ const PetHealthBookCreate = () => {
     isDeleted: false,
   });
   const [bookings, setBookings] = useState([]);
-  const [bookingCodeError, setBookingCodeError] = useState("");
   const [medicines, setMedicines] = useState([]);
   const [pets, setPets] = useState([]);
   const [treatments, setTreatments] = useState([]);
   const [selectedPet, setSelectedPet] = useState("");
+  const [filteredMedicines, setFilteredMedicines] = useState([]);
 
   useEffect(() => {
     if (bookingCodeFromUrl) {
@@ -41,6 +41,7 @@ const PetHealthBookCreate = () => {
       }));
     }
   }, [bookingCodeFromUrl]);
+
   useEffect(() => {
     if (token) {
       try {
@@ -67,6 +68,71 @@ const PetHealthBookCreate = () => {
       }));
     }
   }, []);
+
+  useEffect(() => {
+    const fetchTreatments = async () => {
+      try {
+        const response = await fetch("http://localhost:5050/api/Treatment", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch treatments");
+        const data = await response.json();
+        setTreatments(data.data || []);
+      } catch (error) {
+        console.error("Error fetching treatments:", error);
+      }
+    };
+
+    fetchTreatments();
+  }, [token]);
+  useEffect(() => {
+    fetch("http://localhost:5050/Bookings", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setBookings(data.data || []))
+      .catch((error) => console.error("Error fetching bookings:", error));
+  }, [token]);
+
+  useEffect(() => {
+    if (bookingCodeFromUrl) {
+      setVisitDetails((prevState) => ({
+        ...prevState,
+        bookingId: bookingCodeFromUrl,
+
+      }));
+      console.log("Pet details from API:", bookingCodeFromUrl);
+    }
+  }, [bookingCodeFromUrl]);
+  useEffect(() => {
+    const fetchMedicines = async () => {
+      try {
+        const response = await fetch("http://localhost:5050/Medicines", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) throw new Error("Failed to fetch medicines");
+        const data = await response.json();
+        setMedicines(data.data || []);
+      } catch (error) {
+        console.error("Error fetching medicines:", error);
+      }
+    };
+
+    fetchMedicines();
+  }, [token]);
+
   useEffect(() => {
     const fetchPetsFromQuery = async () => {
       if (!petIdsFromUrl) return;
@@ -102,50 +168,73 @@ const PetHealthBookCreate = () => {
     fetchPetsFromQuery();
   }, [petIdsFromUrl, token]);
 
-  const handleBookingCodeChange = (e) => {
-    const inputCode = e.target.value;
-    setVisitDetails({ ...visitDetails, bookingId: inputCode });
-    const selectedBooking = bookings.find((booking) => booking.bookingCode === inputCode);
-    if (!selectedBooking) {
-      setBookingCodeError("Incorrect Booking Code. Please check again!");
-    } else {
-      setBookingCodeError("");
-    }
-  };
-
   const handleCreate = async () => {
-    const selectedBooking = bookings.find(
-      (booking) => booking.bookingCode === visitDetails.bookingId
-    );
-    if (!selectedBooking) {
-      Swal.fire("Error", "Invalid Booking Code. Please check again.", "error");
-      return;
-    }
     try {
-      const response = await fetch("http://localhost:5050/api/BookingServiceItems/GetBookingServiceList", {
+      // Fetch bookings to validate the bookingCode
+      const bookingsResponse = await fetch("http://localhost:5050/Bookings", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) throw new Error("Failed to fetch booking service items.");
-      const bookingServiceData = await response.json();
-      console.log("Booking Service Items API response:", bookingServiceData);
-      const matchingServiceItem = bookingServiceData.data.find(
-        (item) => item.bookingId === selectedBooking.bookingId && item.petId === selectedPet
+  
+      if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
+      const bookingsData = await bookingsResponse.json();
+      const bookingsList = bookingsData.data || [];
+  
+      // Find the bookingId that matches the provided bookingCode
+      const matchingBooking = bookingsList.find(
+        (booking) => booking.bookingCode === visitDetails.bookingId
       );
-
-      if (!matchingServiceItem) {
-        Swal.fire("Error", "No matching Booking Service Item found.", "error");
+  
+      if (!matchingBooking) {
+        Swal.fire(
+          "Error",
+          `No matching Booking found for Booking Code: ${visitDetails.bookingId}`,
+          "error"
+        );
         return;
       }
+  
+      // Fetch booking service items to validate the bookingServiceItemId
+      const serviceResponse = await fetch(
+        "http://localhost:5050/api/BookingServiceItems/GetBookingServiceList",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!serviceResponse.ok) throw new Error("Failed to fetch booking service items.");
+      const bookingServiceData = await serviceResponse.json();
+  
+      // Find the matching booking service item
+      const matchingServiceItem = bookingServiceData.data.find(
+        (item) => item.bookingId === matchingBooking.bookingId && item.petId === selectedPet
+      );
+  
+      if (!matchingServiceItem) {
+        Swal.fire(
+          "Error",
+          `No matching Booking Service Item found for Booking ID: ${matchingBooking.bookingId} and Pet ID: ${selectedPet}`,
+          "error"
+        );
+        return;
+      }
+  
+      // Validate required fields
       if (!visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
         Swal.fire("Error", "Please fill all required fields", "error");
         return;
       }
+  
+      // Prepare data for creation
       const newVisitDetails = {
-        bookingId: selectedBooking.bookingId,
+        bookingId: matchingBooking.bookingId,
         bookingServiceItemId: matchingServiceItem.bookingServiceItemId,
         medicineIds: visitDetails.medicineId,
         visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
@@ -155,8 +244,10 @@ const PetHealthBookCreate = () => {
         updatedAt: new Date().toISOString(),
         isDeleted: visitDetails.isDeleted || false,
       };
+  
       console.log("Data sent to API:", newVisitDetails);
-
+  
+      // Send the create request
       const createResponse = await fetch("http://localhost:5050/api/PetHealthBook", {
         method: "POST",
         headers: {
@@ -165,6 +256,7 @@ const PetHealthBookCreate = () => {
         },
         body: JSON.stringify(newVisitDetails),
       });
+  
       if (!createResponse.ok) {
         const errorData = await createResponse.json();
         console.error("Error response from API:", errorData);
@@ -185,7 +277,6 @@ const PetHealthBookCreate = () => {
     }
   };
 
-  const [filteredMedicines, setFilteredMedicines] = useState([]);
   useEffect(() => {
     if (visitDetails.treatmentId) {
       const relatedMedicines = medicines.filter(
@@ -224,13 +315,9 @@ const PetHealthBookCreate = () => {
               type="text"
               className="w-full p-3 border rounded-md"
               value={visitDetails.bookingId}
-              onChange={handleBookingCodeChange}
               placeholder="Enter Booking Code"
               disabled
             />
-            {bookingCodeError && (
-              <p className="text-red-500 text-sm mt-1">{bookingCodeError}</p>
-            )}
           </div>
           {pets.length > 0 && (
             <div className="mb-3">
@@ -283,6 +370,7 @@ const PetHealthBookCreate = () => {
               }
               dateFormat="dd/MM/yyyy"
               className="w-full p-3 border rounded-md"
+              minDate={new Date()}
             />
           </div>
           <div className="mb-3">
