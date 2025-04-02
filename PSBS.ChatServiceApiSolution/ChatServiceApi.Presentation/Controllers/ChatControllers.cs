@@ -25,6 +25,11 @@ namespace ChatServiceApi.Presentation.Controllers
         [HttpPost("upload-image")]
         public async Task<IActionResult> UploadImage(IFormFile image)
         {
+            var allowedContentTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+            if (!allowedContentTypes.Contains(image.ContentType.ToLower()))
+            {
+                return BadRequest(new Response(false, "Invalid file type. Only image files are allowed."));
+            }
             // Call the repository's StoreImage method, passing the image and webRootPath
             var response = await _chatRepository.StoreImage(image, _webHostEnvironment.WebRootPath);
 

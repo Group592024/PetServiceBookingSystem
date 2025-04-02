@@ -43,7 +43,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var paymentType = await GetByIdAsync(entity.PaymentTypeId);
+                var paymentType = await context.PaymentTypes.FindAsync(entity.PaymentTypeId);
                 if (paymentType is null)
                 {
                     return new Response(false, $"{entity.PaymentTypeName} not found");
@@ -61,7 +61,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     // Check if paymentType is still referenced in Bookings table
                     bool isReferencedInBookings = await context.Bookings
-                        .AnyAsync(b => b.BookingStatusId == entity.PaymentTypeId);
+                        .AnyAsync(b => b.PaymentTypeId == entity.PaymentTypeId);
 
                     if (isReferencedInBookings)
                     {
@@ -137,7 +137,8 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var paymentType = await GetByIdAsync(entity.PaymentTypeId);
+                var paymentType = await context.PaymentTypes.FindAsync(entity.PaymentTypeId);
+       
                 if (paymentType is null)
                 {
                     return new Response(false, $"{entity.PaymentTypeName} not found");
