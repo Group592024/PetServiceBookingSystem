@@ -41,8 +41,8 @@ const Admin_Add_Booking = () => {
   } = useContext(BookingContext);
 
   const getToken = () => {
-    return sessionStorage.getItem('token');
-};
+    return sessionStorage.getItem("token");
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -94,9 +94,11 @@ const Admin_Add_Booking = () => {
     }
 
     if (activeStep === 1 && !formData.phone) {
-        if(!formData.name ||!formData.address ||!formData.paymentMethod)
-        alert("Please fill all input and select payment type before proceeding.");
-        return;
+      if (!formData.name || !formData.address || !formData.paymentMethod)
+        alert(
+          "Please fill all input and select payment type before proceeding."
+        );
+      return;
     }
     if (activeStep === 2 && selectedOption === "Room") {
       if (bookingRooms.length === 0) {
@@ -128,10 +130,10 @@ const Admin_Add_Booking = () => {
         // Check if start date is at least 1 hour from now
         if (selectedStartDateTime < fiveMinutesLater) {
           Swal.fire(
-                    "Failed!",
-                    `Booking start time must be at least 5 minutes from now.`,
-                    "error"
-                  );
+            "Failed!",
+            `Booking start time must be at least 5 minutes from now.`,
+            "error"
+          );
           return;
         }
 
@@ -176,11 +178,7 @@ const Admin_Add_Booking = () => {
 
       // Check if booking date is selected and valid
       if (!bookingServicesDate) {
-        Swal.fire(
-          "Failed!",
-          `Please select a booking date and time`,
-          "error"
-        );
+        Swal.fire("Failed!", `Please select a booking date and time`, "error");
         return;
       }
     }
@@ -227,11 +225,7 @@ const Admin_Add_Booking = () => {
           bookingServicesDate,
         };
       } else {
-        Swal.fire(
-          "Failed!",
-          `Invalid booking type selected`,
-          "error"
-        );
+        Swal.fire("Failed!", `Invalid booking type selected`, "error");
         return;
       }
 
@@ -264,7 +258,7 @@ const Admin_Add_Booking = () => {
             const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
             )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback/admin`;
-            
+
             console.log("VNPay URL:", vnpayUrl);
 
             const vnpayResponse = await fetch(vnpayUrl, {
@@ -274,20 +268,24 @@ const Admin_Add_Booking = () => {
 
             const vnpayResult = await vnpayResponse.text();
             console.log("VNPay API Response:", vnpayResult);
-            
+
             if (vnpayResult.startsWith("http")) {
-              window.location.href = vnpayResult;
+              window.location.href = vnpayResult; 
               return;
             } else {
               alert("VNPay payment failed!");
             }
           }
           window.location.href = "/admin/bookings";
-        } else{
-          Swal.fire("Failed!", result.message || "Could not create booking.", "error");
+        } else {
+          Swal.fire(
+            "Failed!",
+            result.message || "Could not create booking.",
+            "error"
+          );
         }
       } catch (error) {
-          Swal.fire("Error!", "Failed to confirm booking", "error");
+        Swal.fire("Error!", "Failed to confirm booking", "error");
       }
     } else {
       setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));

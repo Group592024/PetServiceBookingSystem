@@ -1,4 +1,14 @@
 import React, { useEffect, useState } from "react";
+import { 
+  TextField,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+  Divider,
+  Checkbox,
+  FormControlLabel
+} from "@mui/material";
 
 const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
   const [rooms, setRooms] = useState([]);
@@ -15,70 +25,27 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     camera: false,
   });
 
-  const getToken = () => {
-    return sessionStorage.getItem('token');
-};
+  const getToken = () => sessionStorage.getItem('token');
 
-  // Fetch available rooms and pets
-  // useEffect(() => {
-  //   const fetchRooms = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:5023/api/Room/available");
-  //       const data = await response.json();
-  //       if (data.flag) {
-  //         setRooms(data.data);
-  //       } else {
-  //         setError("Failed to fetch rooms.");
-  //       }
-  //     } catch (err) {
-  //       setError("Error fetching rooms.");
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   const fetchPets = async () => {
-  //     const fakePetsData = [
-  //       { petId: "1BFCD3F7-27AD-4415-9B1A-56F0248564E5", petName: "Max" },
-  //       { petId: "6AE2F8F6-5502-4CB2-A6CC-86B1A3142BF3", petName: "Buddy" },
-  //       { petId: "1EA82E00-00E8-4E28-AD68-C858B4D44888", petName: "Bella" },
-  //     ];
-  //     setPets(fakePetsData);
-  //   };
-  //   fetchRooms();
-  //   fetchPets();
-  // }, []);
+  // [Keep all your existing useEffect hooks and logic exactly as is]
   useEffect(() => {
     const fetchRoomsAndPets = async () => {
       try {
-        // Fetch rooms
-        const roomResponse = await fetch("http://localhost:5050/api/Room/available",
-          {
-            headers: {
-              Authorization: `Bearer ${getToken()}`,
-            },
-          });
+        const roomResponse = await fetch("http://localhost:5050/api/Room/available", {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
         const roomData = await roomResponse.json();
-        if (roomData.flag) {
-          setRooms(roomData.data);
-        } else {
-          setError("Failed to fetch rooms.");
-        }
+        if (roomData.flag) setRooms(roomData.data);
+        else setError("Failed to fetch rooms.");
 
-        // Fetch pets (only if cusId exists)
         if (data.cusId) {
-          const petResponse = await fetch(`http://localhost:5050/api/pet/available/${data.cusId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${getToken()}`,
-              },
-            });
+          const petResponse = await fetch(
+            `http://localhost:5050/api/pet/available/${data.cusId}`,
+            { headers: { Authorization: `Bearer ${getToken()}` } }
+          );
           const petData = await petResponse.json();
-          if (petData.flag && Array.isArray(petData.data)) {
-            setPets(petData.data);
-          } else {
-            setError("Failed to fetch pets.");
-          }
+          if (petData.flag) setPets(petData.data);
+          else setError("Failed to fetch pets.");
         }
       } catch (err) {
         setError("Error fetching data.");
@@ -86,30 +53,22 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
         setIsLoading(false);
       }
     };
-
     fetchRoomsAndPets();
-  }, [formData.cusId]);
+  }, [data.cusId]);
 
-
-  // Fetch room type details when a room is selected
   useEffect(() => {
     if (formData.room) {
       const selectedRoom = rooms.find((room) => room.roomId === formData.room);
       if (selectedRoom) {
         const fetchRoomType = async () => {
           try {
-            const response = await fetch(`http://localhost:5050/api/RoomType/${selectedRoom.roomTypeId}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${getToken()}`,
-                },
-              });
+            const response = await fetch(
+              `http://localhost:5050/api/RoomType/${selectedRoom.roomTypeId}`,
+              { headers: { Authorization: `Bearer ${getToken()}` } }
+            );
             const data = await response.json();
-            if (data.flag && data.data) {
-              setSelectedRoomType(data.data);
-            } else {
-              setError("Failed to fetch room type.");
-            }
+            if (data.flag && data.data) setSelectedRoomType(data.data);
+            else setError("Failed to fetch room type.");
           } catch (err) {
             setError("Error fetching room type.");
           }
@@ -119,42 +78,25 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     }
   }, [formData.room, rooms]);
 
-  // Recalculate price whenever formData or selectedRoomType changes
   useEffect(() => {
     if (formData.start && formData.end && selectedRoomType) {
       const startDate = new Date(formData.start);
       const endDate = new Date(formData.end);
-
       if (startDate >= endDate) {
         setError("End date must be after start date.");
         return;
       }
-
       setError(null);
-
       const daysDifference = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
       let totalPrice = selectedRoomType.price * daysDifference;
-
-      // Add 50,000 VND if camera is selected
-      if (formData.camera) {
-      totalPrice += 50000;
-      }
-
-      setFormData((prevData) => ({
-        ...prevData,
-        price: totalPrice,
-      }));
-  
-      onBookingDataChange({ ...formData, price: totalPrice }); 
-
-      // Update formData with the new price
-      // const updatedData = { ...formData, price: totalPrice };
-      // setFormData(updatedData);
-      // onBookingDataChange(updatedData); // Notify parent of the change
+      if (formData.camera) totalPrice += 50000;
+      
+      const updatedData = { ...formData, price: totalPrice };
+      setFormData(updatedData);
+      onBookingDataChange(updatedData);
     }
   }, [formData.start, formData.end, selectedRoomType, formData.camera]);
 
-  // Handle input changes
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     const updatedData = {
@@ -162,112 +104,115 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
       [name]: type === "checkbox" ? checked : value,
     };
     setFormData(updatedData);
-    onBookingDataChange(updatedData); // Notify parent of the change
+    onBookingDataChange(updatedData);
   };
 
-  // Get current date and time for min attribute
   const now = new Date().toISOString().slice(0, 16);
-
-  // Find the selected pet's name
-  const selectedPet = pets.find(pet => pet.petId === formData.pet);
-  const petName = selectedPet ? selectedPet.petName : "Loading...";
+  const selectedPet = pets.find(p => p.petId === formData.pet);
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Room Selection */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Room</label>
-          <select
+    <Box sx={{ 
+      border: '1px solid #ddd', 
+      borderRadius: 2, 
+      p: 2, 
+      mb: 2,
+      backgroundColor: '#f9f9f9'
+    }}>
+      <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">Room</Typography>
+          <Select
             name="room"
             value={formData.room}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            fullWidth
+            size="small"
             disabled={isLoading}
           >
-            <option value="">Select a room</option>
-            {rooms.map((room) => (
-              <option key={room.roomId} value={room.roomId}>
+            <MenuItem value="">Select room</MenuItem>
+            {rooms.map(room => (
+              <MenuItem key={room.roomId} value={room.roomId}>
                 {room.roomName} - {room.description}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
-
-        {/* Pet Selection */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Pet</label>
-          <select
+          </Select>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">Pet</Typography>
+          <Select
             name="pet"
             value={formData.pet}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            fullWidth
+            size="small"
           >
-            <option value="">Select a pet</option>
-            {pets.map((pet) => (
-              <option key={pet.petId} value={pet.petId}>
+            <MenuItem value="">Select pet</MenuItem>
+            {pets.map(pet => (
+              <MenuItem key={pet.petId} value={pet.petId}>
                 {pet.petName}
-              </option>
+              </MenuItem>
             ))}
-          </select>
-        </div>
+          </Select>
+        </Box>
+      </Box>
 
-        {/* Start Time */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Start</label>
-          <input
+      <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">Start</Typography>
+          <TextField
             type="datetime-local"
             name="start"
             value={formData.start}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            fullWidth
+            size="small"
+            InputLabelProps={{ shrink: true }}
             min={now}
           />
-        </div>
-
-        {/* End Time */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">End</label>
-          <input
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">End</Typography>
+          <TextField
             type="datetime-local"
             name="end"
             value={formData.end}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+            fullWidth
+            size="small"
+            InputLabelProps={{ shrink: true }}
             min={now}
           />
-        </div>
+        </Box>
+      </Box>
 
-        {/* Price (Read-Only) */}
-        <div className="col-span-2">
-          <label className="block text-gray-700 font-semibold mb-2">Total Price</label>
-          <input
-            type="text"
-            name="price"
-            value={formData.price ? `${formData.price.toLocaleString()} VND` : "N/A"}
-            readOnly
-            className="w-full p-3 border border-gray-300 rounded-md bg-gray-200 text-gray-500"
+      <FormControlLabel
+        control={
+          <Checkbox
+            name="camera"
+            checked={formData.camera}
+            onChange={handleChange}
+            size="small"
           />
-        </div>
+        }
+        label="Camera (+50,000 VND)"
+        sx={{ mb: 2 }}
+      />
 
-        {/* Camera Checkbox */}
-        <div className="col-span-2">
-          <label className="inline-flex items-center text-gray-700 font-semibold">
-            <input
-              type="checkbox"
-              name="camera"
-              checked={formData.camera}
-              onChange={handleChange}
-              className="form-checkbox h-5 w-5 text-blue-500 transition-all"
-            />
-            <span className="ml-2">Camera</span>
-          </label>
-        </div>
-      </div>
+      <Divider sx={{ my: 1 }} />
 
-      {/* Error message */}
-      {error && <div className="text-red-500 mt-2">{error}</div>}
-    </div>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>Price:</Typography>
+        <Typography fontWeight="bold">
+          {formData.price?.toLocaleString() || "0"} VND
+        </Typography>
+      </Box>
+
+      {error && (
+        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+          {error}
+        </Typography>
+      )}
+    </Box>
   );
 };
 

@@ -825,7 +825,7 @@ namespace ReservationApi.Presentation.Controllers
                     BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
                     CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
                     Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
-                    Language = DisplayLanguage.Vietnamese // Tùy chọn. Mặc định là tiếng Việt
+                    Language = DisplayLanguage.Vietnamese,
                 };
                 var paymentUrl = vnpay.GetPaymentUrl(request);
 
@@ -903,8 +903,7 @@ namespace ReservationApi.Presentation.Controllers
                     return Redirect("http://localhost:3000/bookings?status=error");
                 }
             }
-
-            return Redirect("http://localhost:3000/bookings?status=notfound");
+            return Ok(new { status = "notfound" });
         }
 
         [HttpGet("Vnpay/Callback/admin")]

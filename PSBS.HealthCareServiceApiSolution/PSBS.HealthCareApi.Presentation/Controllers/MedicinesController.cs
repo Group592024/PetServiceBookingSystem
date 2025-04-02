@@ -73,7 +73,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
             }
 
             var treatment = await _context.Treatments.FirstOrDefaultAsync(t => t.treatmentId == medicine.treatmentId && !t.isDeleted);
-            MedicineDetailDTO detailDTO = new MedicineDetailDTO(medicine.medicineId, treatment.treatmentName, medicine.medicineName, medicine.medicineImage);
+            MedicineDetailDTO detailDTO = new MedicineDetailDTO(medicine.medicineId, treatment.treatmentName, medicine.medicineName, medicine.medicineImage, medicine.isDeleted);
             return Ok(new Response(true, "The medicine retrieved successfully")
             {
                 Data = detailDTO
@@ -102,6 +102,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
         public async Task<ActionResult<Response>> CreateMedicine([FromForm] MedicineDTO creattingMedicine)
         {
             ModelState.Remove(nameof(MedicineDTO.medicineId));
+            ModelState.Remove(nameof(MedicineDTO.medicineStatus));
             if (creattingMedicine.imageFile == null)
             {
                 ModelState.AddModelError("imageFile", "Please upload an image for medicine");
@@ -215,7 +216,7 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                     System.IO.File.Delete(oldFilePath);
                 }
             }
-            return response.Flag ? response : response;
+            return response.Flag ? Ok(response) : BadRequest(response);
         }
     }
 }

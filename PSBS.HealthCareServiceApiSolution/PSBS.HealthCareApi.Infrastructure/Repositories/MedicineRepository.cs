@@ -46,12 +46,12 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                     var medicine = await GetByIdAsync(entity.medicineId);
                     if (medicine == null)
                     {
-                        return new Response(false, "Medicine không tồn tại");
+                        return new Response(false, "Medicine does not exist!");
                     }
                     medicine.isDeleted = true;
                     context.Medicines.Update(medicine);
                     await context.SaveChangesAsync();
-                    return new Response(true, "Medicine đã được vô hiệu hóa thành công");
+                    return new Response(true, "Medicine is inactive successfully!");
                 }
 
                 var existUsingMedicine = await context.PetHealthBooks
@@ -60,17 +60,17 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
 
                 if (existUsingMedicine != null)
                 {
-                    return new Response(false, "Medicine đang được sử dụng trong một Health Book.");
+                    return new Response(false, "Medicine used in healthbook!");
                 }
 
                 // Nếu không còn sử dụng, tiến hành xóa Medicine
                 context.Medicines.Remove(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, "Medicine đã được xóa thành công.");
+                return new Response(true, "Medicine deleted successfully!");
             }
             catch (Exception ex)
             {
-                return new Response(false, $"Lỗi xảy ra khi xóa Medicine: {ex.Message}");
+                return new Response(false, $"Exception Medicine: {ex.Message}");
             }
         }
 
@@ -144,6 +144,7 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
                 existingMedicine.treatmentId = entity.treatmentId;
                 existingMedicine.medicineName = entity.medicineName;
                 existingMedicine.medicineImage = entity.medicineImage;
+                existingMedicine.isDeleted = entity.isDeleted;
                 context.Entry(existingMedicine).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 return new Response(true, " The medicine is updated successfully");

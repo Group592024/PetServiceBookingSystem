@@ -8,6 +8,7 @@ import BookingConfirmStep from "../../../components/Booking/add-form/BookingConf
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import { BookingContext } from "../../../components/Booking/add-form/BookingContext";
 import jwtDecode from "jwt-decode";
+import Swal from "sweetalert2";
 
 const steps = [
   "Booking Type",
@@ -87,13 +88,17 @@ const AddBooking = () => {
 
   const handleNext = async () => {
     if (activeStep === 0 && !selectedOption) {
-      alert("Please select a booking type before proceeding.");
+      Swal.fire(
+        "Failed!",
+        `Please select a booking type before proceeding.`,
+        "error"
+      );
       return;
     }
 
     if (activeStep === 1 && selectedOption === "Room") {
       if (bookingRooms.length === 0) {
-        alert("Please add at least one booking room.");
+        Swal.fire("Failed!", `Please add at least one booking room.`, "error");
         return;
       }
       // Validate each booking room
@@ -104,7 +109,11 @@ const AddBooking = () => {
           !roomData.start ||
           !roomData.end
         ) {
-          alert("Please fill in all fields for each booking room.");
+          Swal.fire(
+            "Failed!",
+            `Please fill in all fields for each booking room.`,
+            "error"
+          );
           return;
         }
 
@@ -120,13 +129,21 @@ const AddBooking = () => {
 
         // Check if start date is at least 1 hour from now
         if (selectedStartDateTime < oneHourLater) {
-          alert("Booking start time must be at least 1 hour from now.");
+          Swal.fire(
+            "Failed!",
+            `Booking start time must be at least 1 hour from now.`,
+            "error"
+          );
           return;
         }
 
         // Check if end time is after the start time
         if (selectedStartDateTime >= selectedEndDateTime) {
-          alert("Booking end time must be after the start time.");
+          Swal.fire(
+            "Failed!",
+            `Booking end time must be after the start time.`,
+            "error"
+          );
           return;
         }
       }
@@ -134,7 +151,11 @@ const AddBooking = () => {
 
     if (activeStep === 1 && selectedOption === "Service") {
       if (bookingServices.length === 0) {
-        alert("Please add at least one booking service.");
+        Swal.fire(
+          "Failed!",
+          `Please add at least one booking service.`,
+          "error"
+        );
         return;
       }
 
@@ -146,14 +167,18 @@ const AddBooking = () => {
           serviceData.price <= 0 ||
           !serviceData.serviceVariant
         ) {
-          alert("Please fill in all fields for each booking service.");
+          Swal.fire(
+            "Failed!",
+            `Please fill in all fields for each booking service.`,
+            "error"
+          );
           return;
         }
       }
 
       // Check if booking date is selected and valid
       if (!bookingServicesDate) {
-        alert("Please select a booking date and time.");
+        Swal.fire("Failed!", `Please select a booking date and time.`, "error");
         return;
       }
 
@@ -161,13 +186,21 @@ const AddBooking = () => {
       const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000); // Current time + 1 hour
       const selectedDateTime = new Date(bookingServicesDate);
       if (selectedDateTime < oneHourLater) {
-        alert("Booking date and time must be at least 1 hour from now.");
+        Swal.fire(
+          "Failed!",
+          `Booking date and time must be at least 1 hour from now.`,
+          "error"
+        );
         return;
       }
     }
 
     if (activeStep === 2 && !formData.paymentMethod) {
-      alert("Please select a payment type before proceeding.");
+      Swal.fire(
+        "Failed!",
+        `Please select a payment type before proceeding.`,
+        "error"
+      );
       return;
     }
 
@@ -214,12 +247,11 @@ const AddBooking = () => {
           bookingServicesDate,
         };
       } else {
-        alert("Invalid booking type selected.");
+        Swal.fire("Failed!", `Invalid booking type selected.`, "error");
         return;
       }
 
-      console.log("Request Payload:", JSON.stringify(requestData, null, 2)); 
-      alert(requestData);
+      console.log("Request Payload:", JSON.stringify(requestData, null, 2));
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -263,7 +295,7 @@ const AddBooking = () => {
               window.location.href = vnpayResult; // Redirect to VNPay
               return;
             } else {
-              alert("VNPay payment failed!");
+              Swal.fire("Failed!", `VNPay payment failed!`, "error");
             }
           }
           window.location.href = "/bookings";
@@ -272,7 +304,7 @@ const AddBooking = () => {
         }
       } catch (error) {
         console.error("Error submitting booking:", error);
-        alert("Failed to confirm booking.");
+        Swal.fire("Failed!", `Failed to confirm booking.`, "error");
       }
     } else {
       setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));
