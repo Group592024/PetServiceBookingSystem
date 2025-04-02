@@ -13,6 +13,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs
       [Required] Guid treatmentId,
       [Required] string medicineName,
       string? medicineImage,
-      IFormFile? imageFile
+      IFormFile? imageFile,
+      bool medicineStatus
     );
 }

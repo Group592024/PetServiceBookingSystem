@@ -11,6 +11,7 @@ namespace PSBS.HealthCareApi.Application.DTOs.MedicinesDTOs
         Guid medicineId,
         string treatmentName,
         string medicineName,
-        string? medicineImage
+        string? medicineImage,
+        bool medicineStatus
     );
 }

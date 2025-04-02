@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace FacilityServiceApi.Infrastructure.Repositories
 {
-    internal class RoomHistoryRepository(FacilityServiceDbContext context) : IRoomHistory
+    public class RoomHistoryRepository(FacilityServiceDbContext context) : IRoomHistory
     {
         public async Task<Response> CreateAsync(RoomHistory entity)
         {

@@ -2,11 +2,26 @@ import React, { useState, useEffect } from "react";
 import BookingServiceChoice from "./BookingServiceChoice";
 import { useBookingContext } from "./BookingContext";
 import axios from "axios";
-import { TextField, MenuItem, Checkbox, FormControlLabel, Button, FormGroup } from "@mui/material";
+import {
+  TextField,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  FormGroup,
+  Card,
+  CardContent,
+  Typography,
+  Divider,
+  Box,
+  Grid,
+  Paper,
+} from "@mui/material";
+import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 
 const BookingServiceForm = () => {
   const {
-    formData, 
+    formData,
     setFormData,
     bookingServices,
     setbookingServices,
@@ -23,7 +38,7 @@ const BookingServiceForm = () => {
   } = useBookingContext();
 
   const getToken = () => {
-    return sessionStorage.getItem('token');
+    return sessionStorage.getItem("token");
   };
 
   const [services, setServices] = useState([]);
@@ -39,12 +54,11 @@ const BookingServiceForm = () => {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch("http://localhost:5050/api/Service",
-          {
-            headers: {
-              Authorization: `Bearer ${getToken()}`,
-            },
-          });
+        const response = await fetch("http://localhost:5050/api/Service", {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
         const result = await response.json();
         if (result.flag) {
           setServices(result.data);
@@ -62,12 +76,14 @@ const BookingServiceForm = () => {
     const fetchPets = async () => {
       if (formData.cusId) {
         try {
-          const response = await fetch(`http://localhost:5050/api/pet/available/${formData.cusId}`,
+          const response = await fetch(
+            `http://localhost:5050/api/pet/available/${formData.cusId}`,
             {
               headers: {
                 Authorization: `Bearer ${getToken()}`,
               },
-            });
+            }
+          );
           const result = await response.json();
           if (result.flag) {
             setPets(result.data);
@@ -83,12 +99,14 @@ const BookingServiceForm = () => {
   useEffect(() => {
     const fetchVouchers = async () => {
       try {
-        const response = await axios.get("http://localhost:5050/api/Voucher/valid-voucher",
+        const response = await axios.get(
+          "http://localhost:5050/api/Voucher/valid-voucher",
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
             },
-          });
+          }
+        );
         if (response.data.flag && response.data.data) {
           setVouchers(response.data.data);
         }
@@ -100,7 +118,10 @@ const BookingServiceForm = () => {
   }, []);
 
   useEffect(() => {
-    const updatedTotalPrice = bookingServices.reduce((acc, service) => acc + (service.price || 0), 0);
+    const updatedTotalPrice = bookingServices.reduce(
+      (acc, service) => acc + (service.price || 0),
+      0
+    );
     setTotalPrice(updatedTotalPrice);
   }, [bookingServices, setTotalPrice]);
 
@@ -108,13 +129,19 @@ const BookingServiceForm = () => {
     const selectedVoucher = vouchers.find((v) => v.voucherId === voucherId);
     if (selectedVoucher) {
       if (totalPrice >= selectedVoucher.voucherMinimumSpend) {
-        const discountAmount = (totalPrice * selectedVoucher.voucherDiscount) / 100;
-        const appliedDiscount = Math.min(discountAmount, selectedVoucher.voucherMaximum);
+        const discountAmount =
+          (totalPrice * selectedVoucher.voucherDiscount) / 100;
+        const appliedDiscount = Math.min(
+          discountAmount,
+          selectedVoucher.voucherMaximum
+        );
         setFinalDiscount(appliedDiscount);
         setDiscountedPrice(totalPrice - appliedDiscount);
         setVoucherError("");
       } else {
-        setVoucherError(`Minimum spend required: ${selectedVoucher.voucherMinimumSpend.toLocaleString()} VND`);
+        setVoucherError(
+          `Minimum spend required: ${selectedVoucher.voucherMinimumSpend.toLocaleString()} VND`
+        );
         setFinalDiscount(0);
         setDiscountedPrice(totalPrice);
       }
@@ -123,7 +150,7 @@ const BookingServiceForm = () => {
       setDiscountedPrice(totalPrice);
     }
   }, [voucherId, totalPrice, vouchers, setFinalDiscount, setDiscountedPrice]);
-  
+
   useEffect(() => {
     const now = new Date().toISOString().slice(0, 16);
     setMinDateTime(now);
@@ -140,15 +167,15 @@ const BookingServiceForm = () => {
     if (serviceId === "all") {
       setSelectAllServices(!selectAllServices);
       if (!selectAllServices) {
-        setSelectedServices(services.map(s => s.serviceId));
+        setSelectedServices(services.map((s) => s.serviceId));
       } else {
         setSelectedServices([]);
       }
     } else {
       setSelectAllServices(false);
-      setSelectedServices(prev => 
-        prev.includes(serviceId) 
-          ? prev.filter(id => id !== serviceId)
+      setSelectedServices((prev) =>
+        prev.includes(serviceId)
+          ? prev.filter((id) => id !== serviceId)
           : [...prev, serviceId]
       );
     }
@@ -158,15 +185,15 @@ const BookingServiceForm = () => {
     if (petId === "all") {
       setSelectAllPets(!selectAllPets);
       if (!selectAllPets) {
-        setSelectedPets(pets.map(p => p.petId));
+        setSelectedPets(pets.map((p) => p.petId));
       } else {
         setSelectedPets([]);
       }
     } else {
       setSelectAllPets(false);
-      setSelectedPets(prev => 
-        prev.includes(petId) 
-          ? prev.filter(id => id !== petId)
+      setSelectedPets((prev) =>
+        prev.includes(petId)
+          ? prev.filter((id) => id !== petId)
           : [...prev, petId]
       );
     }
@@ -174,51 +201,55 @@ const BookingServiceForm = () => {
 
   const handleCreateBookingServices = () => {
     const newBookingServices = [];
-    
+
     // If "All" is selected for both services and pets
     if (selectAllServices && selectAllPets) {
-      services.forEach(service => {
-        pets.forEach(pet => {
+      services.forEach((service) => {
+        pets.forEach((pet) => {
           newBookingServices.push({
             service: service.serviceId,
             pet: pet.petId,
-            price: 0
+            price: 0, // Initialize to 0, will be updated when variant is selected
+            serviceVariant: null, // Initialize as null
           });
         });
       });
     }
     // If "All" is selected for services only
     else if (selectAllServices) {
-      services.forEach(service => {
-        selectedPets.forEach(petId => {
+      services.forEach((service) => {
+        selectedPets.forEach((petId) => {
           newBookingServices.push({
             service: service.serviceId,
             pet: petId,
-            price: 0
+            price: 0,
+            serviceVariant: null,
           });
         });
       });
     }
     // If "All" is selected for pets only
     else if (selectAllPets) {
-      selectedServices.forEach(serviceId => {
-        pets.forEach(pet => {
+      selectedServices.forEach((serviceId) => {
+        pets.forEach((pet) => {
           newBookingServices.push({
             service: serviceId,
             pet: pet.petId,
-            price: 0
+            price: 0,
+            serviceVariant: null,
           });
         });
       });
     }
     // If specific services and pets are selected
     else {
-      selectedServices.forEach(serviceId => {
-        selectedPets.forEach(petId => {
+      selectedServices.forEach((serviceId) => {
+        selectedPets.forEach((petId) => {
           newBookingServices.push({
             service: serviceId,
             pet: petId,
-            price: 0
+            price: 0,
+            serviceVariant: null,
           });
         });
       });
@@ -228,138 +259,252 @@ const BookingServiceForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <div className="text-center mb-6">
-        <h2 className="text-lg font-semibold">Choose Service</h2>
-        <p>Select the services and pets you want to book.</p>
-      </div>
+    <Paper elevation={3} sx={{ maxWidth: 800, mx: "auto", p: 4, my: 4 }}>
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Book Services
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Select services and pets for your booking
+        </Typography>
+      </Box>
 
-      <div className="mb-4">
-        <label className="block text-gray-700 font-semibold mb-2">Booking Date & Time</label>
-        <input
-          type="datetime-local"
-          value={bookingServicesDate}
-          onChange={handleDateChange}
-          min={minDateTime}
-          className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
-      </div>
+      {/* Date & Time Selection */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Booking Date & Time
+          </Typography>
+          <TextField
+            type="datetime-local"
+            value={bookingServicesDate}
+            onChange={handleDateChange}
+            min={minDateTime}
+            fullWidth
+            InputLabelProps={{ shrink: true }}
+          />
+        </CardContent>
+      </Card>
 
       {/* Services Selection */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">Select Services</h3>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectAllServices}
-                onChange={() => handleServiceSelect("all")}
-                color="primary"
-              />
-            }
-            label="All Services"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-            {services.map((service) => (
-              <FormControlLabel
-                key={service.serviceId}
-                control={
-                  <Checkbox
-                    checked={selectedServices.includes(service.serviceId)}
-                    onChange={() => handleServiceSelect(service.serviceId)}
-                    color="primary"
-                    disabled={selectAllServices}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Select Services
+          </Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectAllServices}
+                  onChange={() => handleServiceSelect("all")}
+                  color="primary"
+                />
+              }
+              label="All Services"
+            />
+            <Grid container spacing={2} sx={{ ml: 1 }}>
+              {services.map((service) => (
+                <Grid item xs={12} sm={6} key={service.serviceId}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedServices.includes(service.serviceId)}
+                        onChange={() => handleServiceSelect(service.serviceId)}
+                        color="primary"
+                        disabled={selectAllServices}
+                      />
+                    }
+                    label={service.serviceName}
                   />
-                }
-                label={service.serviceName}
-              />
-            ))}
-          </div>
-        </FormGroup>
-      </div>
+                </Grid>
+              ))}
+            </Grid>
+          </FormGroup>
+        </CardContent>
+      </Card>
 
       {/* Pets Selection */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">Select Pets</h3>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectAllPets}
-                onChange={() => handlePetSelect("all")}
-                color="primary"
-              />
-            }
-            label="All Pets"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-            {pets.map((pet) => (
-              <FormControlLabel
-                key={pet.petId}
-                control={
-                  <Checkbox
-                    checked={selectedPets.includes(pet.petId)}
-                    onChange={() => handlePetSelect(pet.petId)}
-                    color="primary"
-                    disabled={selectAllPets}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Select Pets
+          </Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectAllPets}
+                  onChange={() => handlePetSelect("all")}
+                  color="primary"
+                />
+              }
+              label="All Pets"
+            />
+            <Grid container spacing={2} sx={{ ml: 1 }}>
+              {pets.map((pet) => (
+                <Grid item xs={12} sm={6} key={pet.petId}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedPets.includes(pet.petId)}
+                        onChange={() => handlePetSelect(pet.petId)}
+                        color="primary"
+                        disabled={selectAllPets}
+                      />
+                    }
+                    label={pet.petName}
                   />
-                }
-                label={pet.petName}
-              />
-            ))}
-          </div>
-        </FormGroup>
-      </div>
+                </Grid>
+              ))}
+            </Grid>
+          </FormGroup>
+        </CardContent>
+      </Card>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleCreateBookingServices}
-        disabled={(!selectAllServices && selectedServices.length === 0) || (!selectAllPets && selectedPets.length === 0)}
-        className="mb-6"
-      >
-        Create Booking Services
-      </Button>
+      {/* Create Booking Button */}
+      <Box textAlign="center" mb={4}>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<AddCircleOutline />}
+          onClick={handleCreateBookingServices}
+          disabled={
+            (!selectAllServices && selectedServices.length === 0) ||
+            (!selectAllPets && selectedPets.length === 0)
+          }
+          sx={{ px: 4, py: 1.5 }}
+        >
+          Create Booking Services
+        </Button>
+      </Box>
 
+      {/* Selected Services */}
       {bookingServices.map((serviceData, index) => (
-        <div key={index} className="relative mb-6">
-          <BookingServiceChoice
-            data={formData}
-            formData={serviceData}
-            handleChange={(e) => {
-              const { name, value } = e.target;
-              const updatedServices = [...bookingServices];
-              updatedServices[index][name] = value;
-              setbookingServices(updatedServices);
-            }}
-            services={services}
-          />
-          <button onClick={() => setbookingServices(bookingServices.filter((_, i) => i !== index))} className="absolute top-0 right-0 mt-2 mr-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600">
-            ✕
-          </button>
-        </div>
+        <Card
+          key={index}
+          variant="outlined"
+          sx={{ mb: 3, position: "relative" }}
+        >
+          <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+            <Button
+              size="small"
+              color="error"
+              startIcon={<DeleteOutline />}
+              onClick={() =>
+                setbookingServices(
+                  bookingServices.filter((_, i) => i !== index)
+                )
+              }
+            >
+              Remove
+            </Button>
+          </Box>
+          <CardContent sx={{ pt: 6 }}>
+            <BookingServiceChoice
+              data={formData}
+              formData={serviceData}
+              handleChange={(e) => {
+                const { name, value } = e.target;
+                const updatedServices = [...bookingServices];
+                updatedServices[index][name] = value;
+                setbookingServices(updatedServices);
+              }}
+              services={services}
+            />
+          </CardContent>
+        </Card>
       ))}
 
-      <TextField select label="Select a Voucher" value={voucherId} onChange={(e) => setVoucherId(e.target.value)} fullWidth>
-        <MenuItem value="">None</MenuItem>
-        {vouchers.map((voucher) => (
-          <MenuItem key={voucher.voucherId} value={voucher.voucherId}>
-            {voucher.voucherName} - {voucher.voucherCode} ({voucher.voucherDiscount}% Off, Max {voucher.voucherMaximum.toLocaleString()} VND)
-          </MenuItem>
-        ))}
-      </TextField>
-      {voucherError && <p className="text-red-500 mt-2">{voucherError}</p>}
+      {/* Voucher Selection */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Apply Voucher
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="Select a Voucher"
+            value={voucherId}
+            onChange={(e) => setVoucherId(e.target.value)}
+            variant="outlined"
+          >
+            <MenuItem value="">None</MenuItem>
+            {vouchers.map((voucher) => (
+              <MenuItem key={voucher.voucherId} value={voucher.voucherId}>
+                {voucher.voucherName} - {voucher.voucherCode} (
+                {voucher.voucherDiscount}% Off, Max{" "}
+                {voucher.voucherMaximum.toLocaleString()} VND)
+              </MenuItem>
+            ))}
+          </TextField>
+          {voucherError && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {voucherError}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
 
-      <div className="mt-6 text-lg font-semibold">
-        <p>Original Price: <span className="text-gray-700">{totalPrice.toLocaleString()} VND</span></p>
-        {finalDiscount > 0 && (
-          <p className="text-green-600">
-            Discount ({vouchers.find((v) => v.voucherId === voucherId)?.voucherDiscount}%): -{finalDiscount.toLocaleString()} VND
-          </p>
-        )}
-        <p>Total Price: <span className="text-blue-600">{discountedPrice.toLocaleString()} VND</span></p>
-      </div>
-    </div>
+      {/* Price Summary */}
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Order Summary
+          </Typography>
+          <Box sx={{ mb: 1 }}>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <Typography>Original Price:</Typography>
+              </Grid>
+              <Grid item>
+                <Typography>{totalPrice.toLocaleString()} VND</Typography>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {finalDiscount > 0 && (
+            <Box sx={{ mb: 1 }}>
+              <Grid container justifyContent="space-between">
+                <Grid item>
+                  <Typography color="success.main">
+                    Discount (
+                    {
+                      vouchers.find((v) => v.voucherId === voucherId)
+                        ?.voucherDiscount
+                    }
+                    %):
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography color="success.main">
+                    -{finalDiscount.toLocaleString()} VND
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <Typography variant="h6" fontWeight="bold">
+                  Total Price:
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" color="primary" fontWeight="bold">
+                  {discountedPrice.toLocaleString()} VND
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
+        </CardContent>
+      </Card>
+    </Paper>
   );
 };
 

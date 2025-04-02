@@ -1,147 +1,129 @@
 import React, { useState, useEffect } from "react";
-import { FormControl, InputLabel, Select, MenuItem, TextField } from "@mui/material";
+import { 
+  TextField,
+  Select,
+  MenuItem,
+  Box,
+  Typography,
+  Divider
+} from "@mui/material";
 
 const BookingServiceChoice = ({ formData, handleChange, services, data }) => {
   const [serviceVariants, setServiceVariants] = useState([]);
   const [pets, setPets] = useState([]);
-  const [error, setError] = useState("");
-  const getToken = () => {
-    return sessionStorage.getItem('token');
-  };
 
-  // Fetch service variants when a service is selected
+  const getToken = () => sessionStorage.getItem('token');
+
+  // Fetch service variants
   useEffect(() => {
     if (formData.service) {
-      const fetchServiceVariants = async () => {
+      const fetchData = async () => {
         try {
-          const response = await fetch(`http://localhost:5050/api/ServiceVariant/service/${formData.service}`,
-            {
-              headers: {
-                Authorization: `Bearer ${getToken()}`,
-              },
-            });
+          const response = await fetch(
+            `http://localhost:5050/api/ServiceVariant/service/${formData.service}`,
+            { headers: { Authorization: `Bearer ${getToken()}` } }
+          );
           const result = await response.json();
-
           if (result.flag) {
             setServiceVariants(result.data);
-          } else {
-            console.error("Failed to fetch service variants:", result.message);
-            setServiceVariants([]);
+            // Auto-select first variant
+            if (result.data.length > 0 && !formData.serviceVariant) {
+              const first = result.data[0];
+              handleChange({ target: { name: "serviceVariant", value: first.serviceVariantId } });
+              handleChange({ target: { name: "price", value: first.servicePrice } });
+            }
           }
         } catch (error) {
-          console.error("Error fetching service variants:", error);
-          setServiceVariants([]);
+          console.error("Error:", error);
         }
       };
-
-      fetchServiceVariants();
+      fetchData();
     }
   }, [formData.service]);
 
+  // Fetch pets
   useEffect(() => {
-    const fetchPets = async () => {
-      if (data.cusId) {
+    if (data.cusId) {
+      const fetchData = async () => {
         try {
-          const petResponse = await fetch(`http://localhost:5050/api/pet/available/${data.cusId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${getToken()}`,
-              },
-            });
-          const petData = await petResponse.json();
-          if (petData.flag && Array.isArray(petData.data)) {
-            setPets(petData.data);
-          } else {
-            console.error("Failed to fetch pets.");
-            setError("Failed to fetch pets.");
-          }
+          const response = await fetch(
+            `http://localhost:5050/api/pet/available/${data.cusId}`,
+            { headers: { Authorization: `Bearer ${getToken()}` } }
+          );
+          const result = await response.json();
+          if (result.flag) setPets(result.data);
         } catch (error) {
-          console.error("Error fetching pets:", error);
-          setError("Error fetching pets.");
+          console.error("Error:", error);
         }
-      }
-    };
+      };
+      fetchData();
+    }
+  }, [data.cusId]);
 
-    fetchPets();
-  }, [data.cusId, formData.service]);
-
-  // Get the selected service name
   const selectedService = services.find(s => s.serviceId === formData.service);
   const selectedPet = pets.find(p => p.petId === formData.pet);
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Service Display */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Service</label>
+    <Box sx={{ 
+      border: '1px solid #ddd', 
+      borderRadius: 2, 
+      p: 2, 
+      mb: 2,
+      backgroundColor: '#f9f9f9'
+    }}>
+      <Box sx={{ display: 'flex', gap: 3, mb: 2 }}>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">Service</Typography>
           <TextField
-            value={selectedService ? selectedService.serviceName : ""}
+            value={selectedService?.serviceName || ""}
             fullWidth
+            size="small"
             disabled
-            className="bg-white"
           />
-        </div>
-
-        {/* Pet Display */}
-        <div>
-          <label className="block text-gray-700 font-semibold mb-2">Pet</label>
+        </Box>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant="subtitle2">Pet</Typography>
           <TextField
-            value={selectedPet ? selectedPet.petName : ""}
+            value={selectedPet?.petName || ""}
             fullWidth
+            size="small"
             disabled
-            className="bg-white"
           />
-        </div>
+        </Box>
+      </Box>
 
-        {/* Service Variant Selection */}
-        {serviceVariants.length > 0 && (
-          <div className="col-span-2">
-            <FormControl fullWidth>
-              <InputLabel>Service Variant</InputLabel>
-              <Select
-                value={formData.serviceVariant || ""}
-                onChange={(e) => {
-                  const selectedVariant = serviceVariants.find(
-                    (variant) => variant.serviceVariantId === e.target.value
-                  );
-                  handleChange({
-                    target: {
-                      name: "serviceVariant",
-                      value: e.target.value,
-                    },
-                  });
-                  handleChange({
-                    target: {
-                      name: "price",
-                      value: selectedVariant ? selectedVariant.servicePrice : 0,
-                    },
-                  });
-                }}
-                label="Service Variant"
-              >
-                {serviceVariants.map((variant) => (
-                  <MenuItem key={variant.serviceVariantId} value={variant.serviceVariantId}>
-                    {variant.serviceContent} - {variant.servicePrice.toLocaleString()} VND
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
-        )}
-
-        {/* Price Display */}
-        <div className="col-span-2">
-          <label className="block text-gray-700 font-semibold mb-2">Price</label>
-          <TextField
-            value={formData.price ? `${formData.price.toLocaleString()} VND` : ""}
+      {serviceVariants.length > 0 && (
+        <>
+          <Typography variant="subtitle2">Variant</Typography>
+          <Select
+            value={formData.serviceVariant || ""}
+            onChange={(e) => {
+              const variant = serviceVariants.find(v => v.serviceVariantId === e.target.value);
+              handleChange({ target: { name: "serviceVariant", value: e.target.value } });
+              handleChange({ target: { name: "price", value: variant?.servicePrice || 0 } });
+            }}
             fullWidth
-            disabled
-            className="bg-white"
-          />
-        </div>
-      </div>
-    </div>
+            size="small"
+            sx={{ mb: 2 }}
+          >
+            {serviceVariants.map((v) => (
+              <MenuItem key={v.serviceVariantId} value={v.serviceVariantId}>
+                {v.serviceContent} ({v.servicePrice.toLocaleString()} VND)
+              </MenuItem>
+            ))}
+          </Select>
+        </>
+      )}
+
+      <Divider sx={{ my: 1 }} />
+
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography>Price:</Typography>
+        <Typography fontWeight="bold">
+          {formData.price?.toLocaleString() || "0"} VND
+        </Typography>
+      </Box>
+    </Box>
   );
 };
 
