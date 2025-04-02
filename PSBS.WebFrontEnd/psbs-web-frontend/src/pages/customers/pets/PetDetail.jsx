@@ -152,9 +152,15 @@ const CustomerPetDetail = () => {
       <div className='container mx-auto p-6'>
         {/* Enhanced Header */}
         <div className='flex flex-col sm:flex-row justify-between items-center mb-8 bg-white p-6 rounded-2xl shadow-sm'>
-          <h1 className='text-3xl font-bold text-gray-800 mb-4 sm:mb-0'>
-            Pet Profile
-          </h1>
+          <div className="flex items-center">
+            <button onClick={() => navigate(-1)}
+              className="hover:bg-indigo-100 p-3 rounded-xl transition-all">
+              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-4xl font-bold text-indigo-900 ml-6">Pet Profile</h1>
+          </div>
           <button
             onClick={() => navigate('/customer/pet/add')}
             className='bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
@@ -186,8 +192,8 @@ const CustomerPetDetail = () => {
                     <h1 className='text-3xl font-bold text-gray-800'>{pet.petName}</h1>
                     <div className='flex justify-center gap-4'>
                       <span className={`px-4 py-2 rounded-lg font-medium ${pet.petGender
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'bg-pink-50 text-pink-600'
+                        ? 'bg-blue-50 text-blue-600'
+                        : 'bg-pink-50 text-pink-600'
                         }`}>
                         {pet.petGender ? '♂ Male' : '♀ Female'}
                       </span>
