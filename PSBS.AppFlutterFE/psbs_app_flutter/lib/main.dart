@@ -159,12 +159,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              } else if (value == 'camera') {
-                // 👉 Điều hướng sang trang xem camera
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => CameraScreen()),
-                );
+              // } else if (value == 'camera') {
+              //   // 👉 Điều hướng sang trang xem camera
+              //   Navigator.push(
+              //     context,
+              //     MaterialPageRoute(builder: (context) => CameraScreen()),
+              //   );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,

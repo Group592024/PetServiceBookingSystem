@@ -80,8 +80,8 @@ var app = builder.Build();
 //}
 
 // Lấy đường dẫn HLS từ cấu hình
-var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
-var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+// var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+// var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
 
 // Cấu hình Static Files cho Images
 app.UseStaticFiles(new StaticFileOptions
