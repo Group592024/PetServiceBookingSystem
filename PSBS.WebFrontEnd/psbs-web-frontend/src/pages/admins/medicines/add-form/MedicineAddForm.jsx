@@ -75,6 +75,7 @@ function MedicineAddForm() {
     formData.append("medicineName", medicineName);
     formData.append("treatmentId", treatmentFor.id);
     formData.append("imageFile", document.getElementById("fileInput").files[0]);
+    formData.append("medicineStatus", false);
 
     try {
       const response = await fetch("http://localhost:5050/Medicines", {

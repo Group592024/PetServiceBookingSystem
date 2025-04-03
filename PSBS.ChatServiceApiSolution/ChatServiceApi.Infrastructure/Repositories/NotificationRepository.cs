@@ -4,6 +4,7 @@ using ChatServiceApi.Application.Interfaces;
 using ChatServiceApi.Domain.Entities;
 using ChatServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Polly;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 
@@ -41,7 +42,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             }
         }
 
-        public async Task<Response> PushNotification(Guid notificationId, List<Guid> guids)
+        public async Task<Response> PushNotificationUsers(Guid notificationId)
         {
             try
             {
@@ -53,20 +54,16 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 else
                 {
                     currentNotification.IsPushed = true;
-                    context.Notifications.Update(currentNotification);
-                    foreach (var guid in guids)
-                    {
-                        var notiBox = new NotificationBox
-                        {
-                            NotificationId = currentNotification.NotificationId,
-                            UserId = guid,
-                            IsDeleted = false,
-                        };
-                        context.NotificationBoxes.Add(notiBox);
-                    }
-
+                    context.Notifications.Update(currentNotification);                
                     await context.SaveChangesAsync();
-                    return new Response(true, $"the notification pushed successfully");
+                    // Fetch the updated notification with NotificationType included
+                    var updatedNotification = await context.Notifications
+                        .Include(n => n.NotificationType)
+                        .FirstOrDefaultAsync(n => n.NotificationId == currentNotification.NotificationId);
+
+                    var (noti, _) = NotificationConversion.FromEntity(updatedNotification!, null);
+
+                    return new Response(true, "Notification pushed successfully") { Data = noti };
                 }
             }
             catch (Exception ex)
@@ -131,7 +128,7 @@ namespace ChatServiceApi.Infrastructure.Repositories
             .Include(nb => nb.Notification)
             .ThenInclude(n => n.NotificationType) 
             .Where(nb => nb.UserId == userId && !nb.IsDeleted)
-            .OrderByDescending(nb => nb.Notification.CreatedDate)
+            .OrderByDescending(nb => nb.CreatedDate)
             .ToListAsync();
         }
 
@@ -175,6 +172,8 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 }
 
                 // Update the existing entity
+            notification.IsPushed = existingNoti.IsPushed;
+            notification.CreatedDate = existingNoti.CreatedDate;
                 context.Entry(existingNoti).CurrentValues.SetValues(notification);
                 await context.SaveChangesAsync();
 
@@ -191,6 +190,127 @@ namespace ChatServiceApi.Infrastructure.Repositories
             {
                 LogExceptions.LogException(ex);
                 return new Response(false, "Error occurred updating notification");
+            }
+        }
+
+        public async Task<Response> SetNotificationIsRead(Guid notificationBoxId)
+        {
+            try
+            {
+                var notification = await context.NotificationBoxes
+                    .Include(nb => nb.Notification)
+                    .ThenInclude(n => n.NotificationType)
+                    .FirstOrDefaultAsync(n => n.NotiBoxId == notificationBoxId);
+                if (notification is null)
+                {
+                    return new Response(false, $"the notification does not exist");
+                }
+                notification.IsRead = true;
+                var current = context.Update(notification).Entity;
+                await context.SaveChangesAsync();
+                var (noti, list) = NotificationConversion.FromEntityToUserNoti(current, null);
+                return new Response(true, $"the notification is update to isRead successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                // display scary-free message to the client
+                return new Response(false, "Error occured updating the notification");
+            }
+        }
+        public async Task<Response> PushSingleNotification(Guid notificationId, Guid guid)
+        {
+            try
+            {
+                var currentNotification = await context.Notifications.FindAsync(notificationId);
+                if (currentNotification == null)
+                {
+                    return new Response(false, $"the notification does not exist");
+                }
+                else
+                {
+                    currentNotification.IsPushed = true;
+                    context.Notifications.Update(currentNotification);
+                    
+                        var notiBox = new NotificationBox
+                        {
+                            NotificationId = currentNotification.NotificationId,
+                            UserId = guid,
+                            IsDeleted = false,
+                            IsRead = false,
+                            CreatedDate = DateTime.Now,
+                        };
+                        context.NotificationBoxes.Add(notiBox);
+                    
+
+                    await context.SaveChangesAsync();
+                    // Fetch the updated notification with NotificationType included
+                    var updatedNotification = await context.Notifications
+                        .Include(n => n.NotificationType)
+                        .FirstOrDefaultAsync(n => n.NotificationId == currentNotification.NotificationId);
+
+                    var (noti, _) = NotificationConversion.FromEntity(updatedNotification!, null);
+
+                    return new Response(true, "Notification pushed successfully") { Data = noti };
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                // display scary-free message to the client
+                return new Response(false, "Error occured pushing the notification");
+            }
+        }
+        public async Task<int> CountUnreadNotificationsAsync(Guid userId)
+        {
+            return await context.NotificationBoxes
+                .Where(nb => nb.UserId == userId &&
+                            !nb.IsRead &&
+                            !nb.IsDeleted)
+                .CountAsync();
+        }
+
+        public async Task<Notification> GetNotificationById(Guid notificationId)
+        {
+            return await context.Notifications.FindAsync(notificationId);
+        }
+
+        public async Task<Response> CreateHealthBookNotification(Guid userId, Notification notification)
+        {
+            try
+            {
+                context.Notifications.Add(notification);
+                await context.SaveChangesAsync();
+
+                // Fetch the Notification with NotificationType included
+                var createdNotification = await context.Notifications
+                    .Include(n => n.NotificationType)
+                    .FirstOrDefaultAsync(n => n.NotificationId == notification.NotificationId);
+
+                if (createdNotification != null)
+                {
+                    var (noti, _) = NotificationConversion.FromEntity(createdNotification, null);
+                    var notibox = new NotificationBox
+                    {
+                        NotificationId = createdNotification.NotificationId,
+                        CreatedDate = DateTime.Now,
+                        IsDeleted = false,
+                        IsRead = false,
+                        UserId = userId,
+                    };
+                    context.NotificationBoxes.Add(notibox);
+                    await context.SaveChangesAsync();
+                    return new Response(true, "Notification added successfully") { Data = noti };
+                }
+                else
+                {
+                    return new Response(false, "Failed to add notification"); // Corrected to false
+                }
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred adding new notification");
             }
         }
     }

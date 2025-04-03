@@ -1,7 +1,23 @@
 import React, { useEffect, useState } from "react";
 import BookingRoomChoose from "./BookingRoomChoose";
 import { useBookingContext } from "./BookingContext";
-import { TextField, MenuItem, Checkbox, FormControlLabel, Button, FormGroup, Alert } from "@mui/material";
+import {
+  TextField,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
+  Button,
+  FormGroup,
+  Card,
+  CardContent,
+  Typography,
+  Divider,
+  Box,
+  Grid,
+  Paper,
+  Alert,
+} from "@mui/material";
+import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 import axios from "axios";
 
 const BookingRoomForm = () => {
@@ -34,6 +50,7 @@ const BookingRoomForm = () => {
   const [selectAllPets, setSelectAllPets] = useState(false);
   const [error, setError] = useState("");
   const [petNames, setPetNames] = useState({});
+  const [roomTypes, setRoomTypes] = useState({});
 
   // Fetch rooms from API
   useEffect(() => {
@@ -54,6 +71,41 @@ const BookingRoomForm = () => {
       }
     };
     fetchRooms();
+  }, []);
+  // Fetch rooms and their prices
+  useEffect(() => {
+    const fetchRoomsAndPrices = async () => {
+      try {
+        // Fetch available rooms
+        const roomResponse = await fetch("http://localhost:5050/api/Room/available", {
+          headers: { Authorization: `Bearer ${getToken()}` }
+        });
+        const roomData = await roomResponse.json();
+        
+        if (roomData.flag) {
+          setRooms(roomData.data);
+          
+          // Fetch prices for each room type
+          const types = {};
+          for (const room of roomData.data) {
+            if (!types[room.roomTypeId]) {
+              const typeResponse = await fetch(
+                `http://localhost:5050/api/RoomType/${room.roomTypeId}`,
+                { headers: { Authorization: `Bearer ${getToken()}` } }
+              );
+              const typeData = await typeResponse.json();
+              if (typeData.flag) {
+                types[room.roomTypeId] = typeData.data.price;
+              }
+            }
+          }
+          setRoomTypes(types);
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
+    };
+    fetchRoomsAndPrices();
   }, []);
 
   // Fetch pets from API
@@ -258,145 +310,237 @@ const BookingRoomForm = () => {
   }, [voucherId, totalPrice, vouchers, setFinalDiscount, setDiscountedPrice]);
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Room Booking Details</h2>
+    <Paper elevation={3} sx={{ maxWidth: 800, mx: "auto", p: 4, my: 4 }}>
+      <Box textAlign="center" mb={4}>
+        <Typography variant="h5" fontWeight="bold" gutterBottom>
+          Book Rooms
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Select rooms and pets for your booking
+        </Typography>
+      </Box>
 
-      {/* Rooms Selection */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">Select Rooms</h3>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectAllRooms}
-                onChange={() => handleRoomSelect("all")}
-                color="primary"
-              />
-            }
-            label="All Rooms"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-            {rooms.map((room) => (
-              <FormControlLabel
-                key={room.roomId}
-                control={
-                  <Checkbox
-                    checked={selectedRooms.includes(room.roomId)}
-                    onChange={() => handleRoomSelect(room.roomId)}
-                    color="primary"
-                    disabled={selectAllRooms}
+      {/* Modified Rooms Selection section */}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Select Rooms
+          </Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectAllRooms}
+                  onChange={() => handleRoomSelect("all")}
+                  color="primary"
+                />
+              }
+              label="All Rooms"
+            />
+            <Grid container spacing={2} sx={{ ml: 1 }}>
+              {rooms.map((room) => (
+                <Grid item xs={12} sm={6} key={room.roomId}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedRooms.includes(room.roomId)}
+                        onChange={() => handleRoomSelect(room.roomId)}
+                        color="primary"
+                        disabled={selectAllRooms}
+                      />
+                    }
+                    label={`${room.roomName} - ${roomTypes[room.roomTypeId]?.toLocaleString() || '0'} VND`}
                   />
-                }
-                label={`${room.roomName} - ${room.description}`}
-              />
-            ))}
-          </div>
-        </FormGroup>
-      </div>
+                </Grid>
+              ))}
+            </Grid>
+          </FormGroup>
+        </CardContent>
+      </Card>
+
 
       {/* Pets Selection */}
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold mb-3">Select Pets</h3>
-        <FormGroup>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={selectAllPets}
-                onChange={() => handlePetSelect("all")}
-                color="primary"
-              />
-            }
-            label="All Pets"
-          />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ml-4">
-            {pets.map((pet) => (
-              <FormControlLabel
-                key={pet.petId}
-                control={
-                  <Checkbox
-                    checked={selectedPets.includes(pet.petId)}
-                    onChange={() => handlePetSelect(pet.petId)}
-                    color="primary"
-                    disabled={selectAllPets}
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Select Pets
+          </Typography>
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={selectAllPets}
+                  onChange={() => handlePetSelect("all")}
+                  color="primary"
+                />
+              }
+              label="All Pets"
+            />
+            <Grid container spacing={2} sx={{ ml: 1 }}>
+              {pets.map((pet) => (
+                <Grid item xs={12} sm={6} key={pet.petId}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedPets.includes(pet.petId)}
+                        onChange={() => handlePetSelect(pet.petId)}
+                        color="primary"
+                        disabled={selectAllPets}
+                      />
+                    }
+                    label={pet.petName}
                   />
-                }
-                label={pet.petName}
-              />
-            ))}
-          </div>
-        </FormGroup>
-      </div>
+                </Grid>
+              ))}
+            </Grid>
+          </FormGroup>
+        </CardContent>
+      </Card>
 
       {error && (
-        <Alert severity="error" className="mb-4">
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleCreateBookingRooms}
-        disabled={(!selectAllRooms && selectedRooms.length === 0) || (!selectAllPets && selectedPets.length === 0)}
-        className="mb-6"
-      >
-        Create Booking Rooms
-      </Button>
+      {/* Create Booking Button */}
+      <Box textAlign="center" mb={4}>
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<AddCircleOutline />}
+          onClick={handleCreateBookingRooms}
+          disabled={
+            (!selectAllRooms && selectedRooms.length === 0) ||
+            (!selectAllPets && selectedPets.length === 0)
+          }
+          sx={{ px: 4, py: 1.5 }}
+        >
+          Create Booking Rooms
+        </Button>
+      </Box>
 
+      {/* Selected Rooms */}
       {bookingRooms.map((roomData, index) => (
-        <div key={index} className="relative">
-          <BookingRoomChoose
-            bookingData={{
-              ...roomData,
-              petName: petNames[roomData.pet] || "Loading..."
-            }}
-            data={formData}
-            onBookingDataChange={(newData) => {
-              const updatedRooms = [...bookingRooms];
-              updatedRooms[index] = newData;
-              setBookingRooms(updatedRooms);
-            }}
-          />
-          <button
-            onClick={() => setBookingRooms(bookingRooms.filter((_, i) => i !== index))}
-            className="absolute top-0 right-0 mt-2 mr-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
-          >
-            ✕
-          </button>
-        </div>
+        <Card
+          key={index}
+          variant="outlined"
+          sx={{ mb: 3, position: "relative" }}
+        >
+          <Box sx={{ position: "absolute", top: 8, right: 8 }}>
+            <Button
+              size="small"
+              color="error"
+              startIcon={<DeleteOutline />}
+              onClick={() =>
+                setBookingRooms(bookingRooms.filter((_, i) => i !== index))
+              }
+            >
+              Remove
+            </Button>
+          </Box>
+          <CardContent sx={{ pt: 6 }}>
+            <BookingRoomChoose
+              bookingData={{
+                ...roomData,
+                petName: petNames[roomData.pet] || "Loading..."
+              }}
+              data={formData}
+              onBookingDataChange={(newData) => {
+                const updatedRooms = [...bookingRooms];
+                updatedRooms[index] = newData;
+                setBookingRooms(updatedRooms);
+              }}
+            />
+          </CardContent>
+        </Card>
       ))}
 
       {/* Voucher Selection */}
-      <div className="mt-4">
-        <TextField
-          name="selectedVoucher"
-          label="Select a Voucher"
-          select
-          value={voucherId}
-          onChange={(e) => setVoucherId(e.target.value)}
-          fullWidth
-        >
-          <MenuItem value="">None</MenuItem>
-          {vouchers.map((voucher) => (
-            <MenuItem key={voucher.voucherId} value={voucher.voucherId}>
-              {voucher.voucherName} - {voucher.voucherCode} ({voucher.voucherDiscount}% Off, Max {voucher.voucherMaximum.toLocaleString()} VND)
-            </MenuItem>
-          ))}
-        </TextField>
-        {voucherError && <p className="text-red-500 mt-2">{voucherError}</p>}
-      </div>
+      <Card variant="outlined" sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Apply Voucher
+          </Typography>
+          <TextField
+            select
+            fullWidth
+            label="Select a Voucher"
+            value={voucherId}
+            onChange={(e) => setVoucherId(e.target.value)}
+            variant="outlined"
+          >
+            <MenuItem value="">None</MenuItem>
+            {vouchers.map((voucher) => (
+              <MenuItem key={voucher.voucherId} value={voucher.voucherId}>
+                {voucher.voucherName} - {voucher.voucherCode} (
+                {voucher.voucherDiscount}% Off, Max{" "}
+                {voucher.voucherMaximum.toLocaleString()} VND)
+              </MenuItem>
+            ))}
+          </TextField>
+          {voucherError && (
+            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+              {voucherError}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Price Calculation */}
-      <div className="mt-6 text-lg font-semibold">
-        <p>Original Price: <span className="text-gray-700">{totalPrice.toLocaleString()} VND</span></p>
-        {finalDiscount > 0 && (
-          <p className="text-green-600">
-            Discount ({vouchers.find((v) => v.voucherId === voucherId)?.voucherDiscount}%): -{finalDiscount.toLocaleString()} VND
-          </p>
-        )}
-        <p>Total Price: <span className="text-blue-600">{discountedPrice.toLocaleString()} VND</span></p>
-      </div>
-    </div>
+      {/* Price Summary */}
+      <Card variant="outlined">
+        <CardContent>
+          <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+            Order Summary
+          </Typography>
+          <Box sx={{ mb: 1 }}>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <Typography>Original Price:</Typography>
+              </Grid>
+              <Grid item>
+                <Typography>{totalPrice.toLocaleString()} VND</Typography>
+              </Grid>
+            </Grid>
+          </Box>
+
+          {finalDiscount > 0 && (
+            <Box sx={{ mb: 1 }}>
+              <Grid container justifyContent="space-between">
+                <Grid item>
+                  <Typography color="success.main">
+                    Discount (
+                    {vouchers.find((v) => v.voucherId === voucherId)?.voucherDiscount}%):
+                  </Typography>
+                </Grid>
+                <Grid item>
+                  <Typography color="success.main">
+                    -{finalDiscount.toLocaleString()} VND
+                  </Typography>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Grid container justifyContent="space-between">
+              <Grid item>
+                <Typography variant="h6" fontWeight="bold">
+                  Total Price:
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography variant="h6" color="primary" fontWeight="bold">
+                  {discountedPrice.toLocaleString()} VND
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
+        </CardContent>
+      </Card>
+    </Paper>
   );
 };
 

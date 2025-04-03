@@ -14,10 +14,12 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
     public class PetHealthBookController : ControllerBase
     {
         private readonly IPetHealthBook petHealthBookInterface;
+        private readonly IFetchHealthBookDetail fetchHealthBookDetail;
 
-        public PetHealthBookController(IPetHealthBook petHealthBookInterface)
+        public PetHealthBookController(IPetHealthBook petHealthBookInterface, IFetchHealthBookDetail fetchHealthBookDetail)
         {
             this.petHealthBookInterface = petHealthBookInterface;
+            this.fetchHealthBookDetail = fetchHealthBookDetail;
         }
 
         // GET api/petHealthBooks
@@ -35,6 +37,22 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
                 return list!.Any()
                     ? Ok(new Response(true, "PetHealthBooks retrieved successfully") { Data = list })
                     : NotFound(new Response(false, "No PetHealthBooks found"));
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return StatusCode(500, new Response(false, $"An error occurred: {ex.Message}"));
+            }
+        }
+        [HttpGet("huhu")]
+        [AllowAnonymous]
+        public async Task<ActionResult> GetDetailPetHealth()
+        {
+            try
+            {
+                var petHealthBooks = await petHealthBookInterface.GetAllAsync();
+                var result = await fetchHealthBookDetail.FetchHealthBookDetailList(petHealthBooks);
+                return Ok(new Response(true, "Success") { Data = result });
             }
             catch (Exception ex)
             {

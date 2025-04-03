@@ -24,8 +24,7 @@ const PetTypeDetail = () => {
             },
           }
         ).then((response) => response.json());
-        console.log(response);
-        setDetail(response);
+        setDetail(response.data);
       } catch (error) {
         console.error("Failed fetching data: ", error);
       }

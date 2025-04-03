@@ -372,6 +372,17 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 return new Response(false, "Internal server error.");
             }
         }
+
+        public async Task<int> CountUnreadChatsAsync(Guid userId)
+        {
+            return await _context.RoomParticipants
+                .Where(rp => rp.UserId == userId &&
+                            !rp.IsLeave &&
+                            !rp.IsSeen &&
+                            _context.ChatRooms.Any(cr => cr.ChatRoomId == rp.ChatRoomId &&
+                                                        cr.ChatMessages.Any()))
+                .CountAsync();
+        }
     }
 
 }

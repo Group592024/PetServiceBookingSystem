@@ -83,10 +83,17 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                         context.Service.Update(service);
                         service.updateAt = DateTime.Now;
                     }
-                    var result = ServiceTypeConversion.FromEntity(serviceType, null);
-
                     await context.SaveChangesAsync();
-                    return new Response(true, "ServiceType and related services soft deleted successfully.") { Data = result };
+                    var serviceTypeDto = new ServiceTypeDTO
+                    {
+                        serviceTypeId = serviceType.serviceTypeId,
+                        typeName = serviceType.typeName,
+                        description = serviceType.description,
+                        createAt = serviceType.createAt,
+                        updateAt = serviceType.updateAt,
+                        isDeleted = serviceType.isDeleted
+                    };
+                    return new Response(true, "ServiceType and related services soft deleted successfully.") { Data = serviceTypeDto };
                 }
             }
             catch (Exception ex)

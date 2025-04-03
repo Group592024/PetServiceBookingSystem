@@ -257,27 +257,7 @@ body {
   cursor: pointer;
 }
 
-.content .nav .notifications {
-  font-size: 20px;
-  position: relative;
-}
 
-.content .nav .notifications .count {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 20px;
-  height: 20px;
-  background: var(--danger);
-  border-radius: 50%;
-  color: var(--light);
-  border: 2px solid var(--light);
-  font-weight: 700;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
 .content .nav .profile img {
   width: 36px;

@@ -8,9 +8,43 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Typography,
+  Divider,
+  Paper,
+  Stack,
+  Chip,
+  FormHelperText,
+  Switch,
+  FormControlLabel,
+  Grow,
+  Slide,
+  Fade,
+  Zoom,
+  styled,
 } from "@mui/material";
+import { Close, Save, Edit, CircleNotifications } from "@mui/icons-material";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { keyframes } from "@emotion/react";
+
+// Custom pulse animation
+const pulse = keyframes`
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+`;
+
+// Styled components with animations
+const AnimatedPaper = styled(Paper)(({ theme }) => ({
+  animation: `${pulse} 0.5s ${theme.transitions.easing.easeInOut}`,
+}));
+
+const BounceButton = styled(Button)(({ theme }) => ({
+  transition: "transform 0.2s",
+  "&:hover": {
+    transform: "translateY(-2px)",
+  },
+}));
 
 const UpdateNotificationModal = ({
   open,
@@ -23,20 +57,24 @@ const UpdateNotificationModal = ({
     { notiTypeId: "22222222-2222-2222-2222-222222222222", NotiName: "Booking" },
     { notiTypeId: "33333333-3333-3333-3333-333333333333", NotiName: "Other" },
   ]);
-  // **Validation Schema**
+
+  const [animateIn, setAnimateIn] = useState(true);
+
   const validationSchema = Yup.object().shape({
     notiTypeId: Yup.string().required("Notification Type is required"),
-    notificationTitle: Yup.string().required("Title is required"),
-    notificationContent: Yup.string().required("Content is required"),
+    notificationTitle: Yup.string()
+      .required("Title is required")
+      .max(100, "Title must be at most 100 characters"),
+    notificationContent: Yup.string()
+      .required("Content is required")
+      .max(1000, "Content must be at most 1000 characters"),
     isDeleted: Yup.boolean().required("Status is required"),
   });
 
-  // Ensure initialNotification is valid
   const safeNotification = initialNotification || {};
 
-  // Initial Values - Mapping `notiTypeName` to `notiTypeId`
   const initialValues = {
-    notificationId: safeNotification.notificationId || "", // Store it but don't display
+    notificationId: safeNotification.notificationId || "",
     notiTypeId:
       notificationTypes.find(
         (type) => type.NotiName === safeNotification.notiTypeName
@@ -46,125 +84,271 @@ const UpdateNotificationModal = ({
     isDeleted: safeNotification.isDeleted ?? false,
   };
 
-  // **Submit Handler**
   const handleSubmit = (values, { resetForm }) => {
-    onUpdate({
-      ...values,
-      notificationId: initialNotification?.notificationId,
-    });
-    resetForm();
-    onClose();
+    setAnimateIn(false);
+    setTimeout(() => {
+      onUpdate({
+        ...values,
+        notificationId: initialNotification?.notificationId,
+      });
+      resetForm();
+      onClose();
+      setAnimateIn(true);
+    }, 300);
   };
 
   return (
     <Modal
       open={open}
       onClose={onClose}
-      className="flex items-center justify-center"
+      closeAfterTransition
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <Box className="bg-white p-6 rounded-lg shadow-xl w-96">
-        <h2 className="text-lg font-semibold mb-4">Update Notification</h2>
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={handleSubmit}
+      <Grow in={open} timeout={300}>
+        <Box
+          sx={{
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            borderRadius: 2,
+            outline: "none",
+            width: { xs: "90%", sm: "80%", md: "600px" },
+          }}
         >
-          {({ errors, touched, values, handleChange }) => (
-            <Form className="space-y-4">
-              {/* Notification Type */}
-              <FormControl fullWidth>
-                <InputLabel id="notiTypeId-label" shrink>
-                  Notification Type
-                </InputLabel>
-                <Select
-                  labelId="notiTypeId-label"
-                  id="notiTypeId"
-                  name="notiTypeId"
-                  value={values.notiTypeId}
-                  onChange={handleChange}
-                  className="!text-black"
-                  label="Notification Type"
-                >
-                  {notificationTypes.map((type) => (
-                    <MenuItem key={type.notiTypeId} value={type.notiTypeId}>
-                      {type.NotiName}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <ErrorMessage
-                  name="notiTypeId"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </FormControl>
+          <Slide direction="up" in={animateIn} mountOnEnter unmountOnExit>
+            <AnimatedPaper elevation={10} sx={{ p: 3, borderRadius: 3 }}>
+              {/* Header with icon animation */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6" component="h2" fontWeight="bold">
+                  <Zoom in={animateIn} style={{ transitionDelay: "100ms" }}>
+                    <CircleNotifications
+                      color="primary"
+                      sx={{
+                        verticalAlign: "middle",
+                        mr: 1,
+                        animation: `${pulse} 2s infinite`,
+                      }}
+                    />
+                  </Zoom>
+                  <Fade in={animateIn} style={{ transitionDelay: "200ms" }}>
+                    <span>Update Notification</span>
+                  </Fade>
+                </Typography>
+                <Zoom in={animateIn} style={{ transitionDelay: "300ms" }}>
+                  <Button onClick={onClose} size="small" sx={{ minWidth: 0 }}>
+                    <Close />
+                  </Button>
+                </Zoom>
+              </Box>
 
-              {/* Notification Title */}
-              <Field
-                as={TextField}
-                label="Notification Title"
-                name="notificationTitle"
-                fullWidth
-                margin="normal"
-                error={touched.notificationTitle && !!errors.notificationTitle}
-                helperText={
-                  touched.notificationTitle && errors.notificationTitle
-                }
-                className="!text-black"
-              />
+              <Divider sx={{ my: 2 }} />
 
-              {/* Notification Content */}
-              <Field
-                as={TextField}
-                label="Notification Content"
-                name="notificationContent"
-                fullWidth
-                multiline
-                rows={4}
-                margin="normal"
-                error={
-                  touched.notificationContent && !!errors.notificationContent
-                }
-                helperText={
-                  touched.notificationContent && errors.notificationContent
-                }
-                className="!text-black"
-              />
+              <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={handleSubmit}
+              >
+                {({ errors, touched, values, handleChange, handleBlur }) => (
+                  <Form>
+                    <Stack spacing={3}>
+                      {/* Notification Type with fade animation */}
+                      <Fade in={animateIn} style={{ transitionDelay: "400ms" }}>
+                        <FormControl
+                          fullWidth
+                          error={touched.notiTypeId && !!errors.notiTypeId}
+                        >
+                          <InputLabel id="notiTypeId-label">
+                            Notification Type *
+                          </InputLabel>
+                          <Select
+                            labelId="notiTypeId-label"
+                            id="notiTypeId"
+                            name="notiTypeId"
+                            value={values.notiTypeId}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            label="Notification Type *"
+                          >
+                            {notificationTypes.map((type, index) => (
+                              <MenuItem
+                                key={type.notiTypeId}
+                                value={type.notiTypeId}
+                                sx={{
+                                  transition: "all 0.3s",
+                                  "&:hover": {
+                                    backgroundColor: "primary.light",
+                                    transform: "translateX(5px)",
+                                  },
+                                }}
+                              >
+                                {type.NotiName}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <FormHelperText>
+                            {touched.notiTypeId && errors.notiTypeId}
+                          </FormHelperText>
+                        </FormControl>
+                      </Fade>
 
-              {/* Is Deleted */}
-              <FormControl fullWidth>
-                <InputLabel id="isDeleted-label" shrink>
-                  Status
-                </InputLabel>
-                <Select
-                  labelId="isDeleted-label"
-                  id="isDeleted"
-                  name="isDeleted"
-                  value={values.isDeleted}
-                  onChange={handleChange}
-                  className="!text-black"
-                  label="Status"
-                >
-                  <MenuItem value={false}>Active</MenuItem>
-                  <MenuItem value={true}>Inactive</MenuItem>
-                </Select>
-                <ErrorMessage
-                  name="isDeleted"
-                  component="div"
-                  className="text-red-500 text-sm mt-1"
-                />
-              </FormControl>
+                      {/* Notification Title with slide animation */}
+                      <Slide
+                        direction="right"
+                        in={animateIn}
+                        style={{ transitionDelay: "500ms" }}
+                      >
+                        <div>
+                          <Field
+                            as={TextField}
+                            label="Notification Title *"
+                            name="notificationTitle"
+                            fullWidth
+                            variant="outlined"
+                            error={
+                              touched.notificationTitle &&
+                              !!errors.notificationTitle
+                            }
+                            inputProps={{
+                              maxLength: 100,
+                            }}
+                            FormHelperTextProps={{
+                              sx: {
+                                display: "flex",
+                                justifyContent: "space-between",
+                              },
+                            }}
+                            helperText={
+                              <>
+                                {touched.notificationTitle &&
+                                  errors.notificationTitle}
+                                <span>
+                                  {values.notificationTitle.length}/100
+                                </span>
+                              </>
+                            }
+                          />
+                        </div>
+                      </Slide>
 
-              {/* Buttons */}
-              <div className="flex justify-between mt-4">
-                <Button onClick={onClose}>Back</Button>
-                <Button type="submit" variant="contained" color="primary">
-                  Confirm
-                </Button>
-              </div>
-            </Form>
-          )}
-        </Formik>
-      </Box>
+                      {/* Notification Content with slide animation */}
+                      <Slide
+                        direction="left"
+                        in={animateIn}
+                        style={{ transitionDelay: "600ms" }}
+                      >
+                        <div>
+                          <Field
+                            as={TextField}
+                            label="Notification Content *"
+                            name="notificationContent"
+                            fullWidth
+                            multiline
+                            rows={4}
+                            variant="outlined"
+                            error={
+                              touched.notificationContent &&
+                              !!errors.notificationContent
+                            }
+                            inputProps={{
+                              maxLength: 1000,
+                            }}
+                            FormHelperTextProps={{
+                              sx: {
+                                display: "flex",
+                                justifyContent: "space-between",
+                              },
+                            }}
+                            helperText={
+                              <>
+                                {touched.notificationContent &&
+                                  errors.notificationContent}
+                                <span>
+                                  {values.notificationContent.length}/1000
+                                </span>
+                              </>
+                            }
+                          />
+                        </div>
+                      </Slide>
+
+                      {/* Status with grow animation */}
+                      <Grow in={animateIn} style={{ transitionDelay: "700ms" }}>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                name="isDeleted"
+                                checked={values.isDeleted}
+                                onChange={handleChange}
+                                color={values.isDeleted ? "error" : "success"}
+                              />
+                            }
+                            label={
+                              <Box
+                                sx={{ display: "flex", alignItems: "center" }}
+                              >
+                                Status:
+                                <Chip
+                                  label={
+                                    values.isDeleted ? "Inactive" : "Active"
+                                  }
+                                  color={values.isDeleted ? "error" : "success"}
+                                  size="small"
+                                  sx={{ ml: 1 }}
+                                />
+                              </Box>
+                            }
+                          />
+                        </Box>
+                      </Grow>
+
+                      <Divider sx={{ my: 1 }} />
+
+                      {/* Buttons with bounce animation */}
+                      <Fade in={animateIn} style={{ transitionDelay: "800ms" }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <BounceButton
+                            onClick={onClose}
+                            variant="outlined"
+                            color="inherit"
+                            sx={{ px: 4 }}
+                          >
+                            Cancel
+                          </BounceButton>
+                          <BounceButton
+                            type="submit"
+                            variant="contained"
+                            color="primary"
+                            endIcon={<Save />}
+                            sx={{ px: 4 }}
+                          >
+                            Update Notification
+                          </BounceButton>
+                        </Box>
+                      </Fade>
+                    </Stack>
+                  </Form>
+                )}
+              </Formik>
+            </AnimatedPaper>
+          </Slide>
+        </Box>
+      </Grow>
     </Modal>
   );
 };

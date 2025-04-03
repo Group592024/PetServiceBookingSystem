@@ -14,19 +14,21 @@ function MedicineUpdateForm() {
   const [treatmentOptions, setTreatmentOptions] = useState([]);
   const [errors, setErrors] = useState({ medicineName: "", treatmentFor: "" }); // Error state for validation
   const { medicineId } = useParams();
+  const [medicineStatus, setMedicineStatus] = useState(null);
   console.log("Medicine ID:", medicineId);
 
   const getToken = () => {
-    return sessionStorage.getItem('token');
+    return sessionStorage.getItem("token");
   };
 
   const fetchData = async () => {
     try {
       const treatmentsResponse = await fetch(
-        "http://localhost:5050/api/Treatment/available", {
+        "http://localhost:5050/api/Treatment/available",
+        {
           headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
+            Authorization: `Bearer ${getToken()}`,
+          },
         }
       );
       const treatmentsResult = await treatmentsResponse.json();
@@ -41,10 +43,11 @@ function MedicineUpdateForm() {
         );
 
         const medicineResponse = await fetch(
-          `http://localhost:5050/Medicines/all-data/${medicineId}`, {
+          `http://localhost:5050/Medicines/all-data/${medicineId}`,
+          {
             headers: {
-              Authorization: `Bearer ${getToken()}`
-            }
+              Authorization: `Bearer ${getToken()}`,
+            },
           }
         );
         const medicineResult = await medicineResponse.json();
@@ -52,6 +55,7 @@ function MedicineUpdateForm() {
         if (medicineResponse.ok && medicineResult.flag) {
           const medicine = medicineResult.data;
           setMedicineName(medicine.medicineName);
+          setMedicineStatus(medicine.medicineStatus);
 
           const selectedTreatment = treatments.find(
             (treatment) => treatment.treatmentId === medicine.treatmentId
@@ -69,8 +73,8 @@ function MedicineUpdateForm() {
           if (medicine.medicineImage) {
             setImage(`http://localhost:5003${medicine.medicineImage}`, {
               headers: {
-                Authorization: `Bearer ${getToken()}`
-              }
+                Authorization: `Bearer ${getToken()}`,
+              },
             });
           }
         } else {
@@ -116,6 +120,8 @@ function MedicineUpdateForm() {
     formData.append("medicineId", medicineId);
     formData.append("medicineName", medicineName);
     formData.append("treatmentId", treatmentFor.id);
+    formData.append("medicineStatus", medicineStatus);
+
 
     if (image && typeof image === "string") {
       formData.append("medicineImage", image);
@@ -130,9 +136,9 @@ function MedicineUpdateForm() {
 
     try {
       const response = await fetch("http://localhost:5050/Medicines", {
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          },
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
         method: "PUT",
         body: formData,
       });
@@ -156,8 +162,11 @@ function MedicineUpdateForm() {
     if (file && file.type.startsWith("image/")) {
       setImage(file);
     } else {
-      setErrors((prevErrors) => ({ ...prevErrors, image: "Please select a valid image file." }));
-        setImage(null);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        image: "Please select a valid image file.",
+      }));
+      setImage(null);
     }
   };
 
@@ -168,15 +177,18 @@ function MedicineUpdateForm() {
   const handleInputChange = (event) => {
     setMedicineName(event.target.value);
     if (event.target.value) {
-      setErrors({ ...errors, medicineName: "" }); 
+      setErrors({ ...errors, medicineName: "" });
     }
   };
 
   const handleTreatmentChange = (event, newValue) => {
     setTreatmentFor(newValue);
     if (newValue && newValue.id) {
-      setErrors({ ...errors, treatmentFor: "" }); 
+      setErrors({ ...errors, treatmentFor: "" });
     }
+  };
+  const handleMedicineStatusChange = (event, newValue) => {
+    setMedicineStatus(newValue.value);
   };
 
   return (
@@ -223,6 +235,35 @@ function MedicineUpdateForm() {
                     fullWidth
                   />
                 </div>
+                <div className="mb-6">
+                  <Autocomplete
+                    value={
+                      medicineStatus !== null
+                        ? {
+                            label: medicineStatus ? "Inactive" : "Active",
+                            value: medicineStatus,
+                          }
+                        : null
+                    }
+                    onChange={handleMedicineStatusChange}
+                    options={[
+                      { label: "Inactive", value: true },
+                      { label: "Active", value: false },
+                    ]}
+                    getOptionLabel={(option) => option.label}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Medicine Status"
+                        variant="outlined"
+                        className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                        error={!!errors.medicineStatus}
+                        helperText={errors.medicineStatus}
+                      />
+                    )}
+                    fullWidth
+                  />
+                </div>
 
                 <div className="mb-6">
                   <input
@@ -233,8 +274,8 @@ function MedicineUpdateForm() {
                     className="bg-gray-50 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 w-full p-2.5"
                   />
                   {errors.image && (
-              <p className="text-sm text-red-500 mt-2">{errors.image}</p>
-            )}
+                    <p className="text-sm text-red-500 mt-2">{errors.image}</p>
+                  )}
                 </div>
 
                 <div className="flex justify-around">

@@ -346,5 +346,147 @@ namespace UnitTest.RewardServiceApi.Controllers
             notFoundResult.Should().NotBeNull();
             notFoundResult!.StatusCode.Should().Be(StatusCodes.Status404NotFound);
         }
+
+
+        [Fact]
+        public async Task CreateVoucher_ValidQuantity_ReturnOK()
+        {
+            // Arrange
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, 5, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            A.CallTo(() => voucherInterface.CreateAsync(A<Voucher>._)).Returns(new Response(true, "Voucher created"));
+            voucherController.ModelState.Clear();
+
+            // Act
+            var result = await voucherController.CreateVoucher(voucherDto);
+
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            okResult.Should().NotBeNull();
+            okResult!.StatusCode.Should().Be(StatusCodes.Status200OK);
+        }
+
+        [Fact]
+        public async Task CreateVoucher_QuantityZero_ReturnOK()
+        {
+            // Arrange
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 0, 5, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            A.CallTo(() => voucherInterface.CreateAsync(A<Voucher>._)).Returns(new Response(true, "Voucher created"));
+            voucherController.ModelState.Clear();
+
+            // Act
+            var result = await voucherController.CreateVoucher(voucherDto);
+
+            // Assert
+            var okResult = result.Result as OkObjectResult;
+            okResult.Should().NotBeNull();
+            okResult!.StatusCode.Should().Be(StatusCodes.Status200OK);
+        }
+
+        [Fact]
+        public async Task CreateVoucher_NegativeQuantity_ReturnBadRequest()
+        {
+            // Arrange
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", -2242, 5, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+
+            // Act
+            var result = await voucherController.CreateVoucher(voucherDto);
+
+            // Assert
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            
+      
+        }
+
+
+        [Fact]
+        public async Task CreateVoucher_MissingVoucherName_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), null, "Test Desc", 10, 5, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+           
+        }
+
+        [Fact]
+        public async Task CreateVoucher_MissingVoucherDescription_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", null, 10, 5, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+           
+        }
+
+        [Fact]
+        public async Task CreateVoucher_NegativeVoucherDiscount_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, -1, 100, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+          
+        }
+
+        [Fact]
+        public async Task CreateVoucher_NegativeVoucherMaximum_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, 5, -1, 50, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+           
+        }
+
+        [Fact]
+        public async Task CreateVoucher_NegativeVoucherMinimumSpend_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, 5, 100, -1, "TestCode", DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+       
+        }
+
+        [Fact]
+        public async Task CreateVoucher_MissingVoucherCode_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, 5, 100, 50, null, DateTime.Now, DateTime.Now.AddDays(7), true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+           
+        }
+
+        [Fact]
+        public async Task CreateVoucher_EndDateBeforeStartDate_ReturnBadRequest()
+        {
+            var voucherDto = new VoucherDTO(Guid.NewGuid(), "Test Voucher", "Test Desc", 10, 5, 100, 50, "TestCode", DateTime.Now.AddDays(7), DateTime.Now, true, false);
+            voucherController.ModelState.Clear();
+            var result = await voucherController.CreateVoucher(voucherDto);
+            var badRequestResult = result.Result as BadRequestObjectResult;
+            badRequestResult.Should().NotBeNull();
+            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+           
+        }
+
+     
+    
+
     }
 }

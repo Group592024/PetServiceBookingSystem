@@ -130,7 +130,7 @@ const EditableModal = ({
                       readOnly={field.disabled || view}
                       style={{ color: formValues[field.name] ? 'red' : 'green' }}
                     >
-                      <MenuItem value={true} style={{ color: 'red' }}>Stopping</MenuItem>
+                      <MenuItem value={true} style={{ color: 'red' }}>Inactive</MenuItem>
                       <MenuItem value={false} style={{ color: 'green' }}>Active</MenuItem>
                     </Select>
                   </FormControl>
