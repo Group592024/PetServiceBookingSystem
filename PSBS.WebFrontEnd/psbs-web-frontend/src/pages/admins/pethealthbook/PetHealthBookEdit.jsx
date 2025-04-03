@@ -250,6 +250,7 @@ const PetHealthBookEdit = () => {
               onChange={(date) => setVisitDetails({ ...visitDetails, visitDate: date })}
               dateFormat="dd/MM/yyyy"
               className="w-full p-3 border rounded-md"
+              disabled
             />
           </div>
           <div className="mb-3">
@@ -259,6 +260,7 @@ const PetHealthBookEdit = () => {
               onChange={(date) => setVisitDetails({ ...visitDetails, nextVisitDate: date })}
               dateFormat="dd/MM/yyyy"
               className="w-full p-3 border rounded-md"
+              minDate={new Date()}
             />
           </div>
           <div className="mb-3">

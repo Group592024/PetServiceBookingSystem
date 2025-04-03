@@ -167,7 +167,7 @@ const PetHealthBookListCus = () => {
                             relevantMedicines.length > 0
                               ? relevantMedicines.map((m) => m.medicineName).join(", ")
                               : "No Medicine";
-                          const isDone = moment(health.nextVisitDate).isAfter(moment(), "day");
+                          const isDone = moment(health.nextVisitDate).isSameOrBefore(moment(), "day");
                           const status = isDone ? "Done" : "Pending";
                           const statusColor = isDone ? "text-green-500" : "text-red-500";
 

@@ -200,5 +200,29 @@ namespace FacilityServiceApi.Presentation.Controllers
 
             }
         }
+        [HttpGet("all")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<ServiceVariantDTO>>> GetAllServiceVariants()
+        {
+            try
+            {
+                var serviceVariants = await _serviceVariant.GetAllAsync(); 
+                if (serviceVariants == null || !serviceVariants.Any())
+                {
+                    return NotFound(new Response(false, "No service variants found"));
+                }
+
+                var (_, serviceVariantDtos) = ServiceVariantConversion.FromEntity(null!, serviceVariants.ToList());
+                return Ok(new Response(true, "Service variants retrieved successfully")
+                {
+                    Data = serviceVariantDtos
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new Response(false, "Error occurred retrieving service variants"));
+            }
+        }
+
     }
 }

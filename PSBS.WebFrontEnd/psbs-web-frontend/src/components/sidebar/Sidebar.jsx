@@ -1,17 +1,37 @@
 import React, { forwardRef, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import jwtDecode from "jwt-decode";
 import "./index.js";
 
 const Sidebar = forwardRef((_, ref) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const token = sessionStorage.getItem("token");
+
+  let isAdmin = false;
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      const role =
+        decodedToken.role ||
+        decodedToken.roleid ||
+        decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      if (role && role.toLowerCase() === "admin") {
+        isAdmin = true;
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }
+
+
   useEffect(() => {
     const isClosed = localStorage.getItem("sidebarClosed") === "true";
     if (isClosed && ref.current) {
       ref.current.classList.add("close");
     }
-  }, []);
+  }, [ref]);
 
   const handleLogout = () => {
     Swal.fire({
@@ -52,9 +72,7 @@ const Sidebar = forwardRef((_, ref) => {
       </a>
 
       <ul className="side-menu">
-        <li
-          className={location.pathname.startsWith("/dashboard") ? "active" : ""}
-        >
+        <li className={location.pathname.startsWith("/dashboard") ? "active" : ""}>
           <Link to="/dashboard">
             <i className="bx bxs-dashboard"></i>
             Dashboard
@@ -68,19 +86,13 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
 
-        <li
-          className={
-            location.pathname.startsWith("/admin/bookings/") ? "active" : ""
-          }
-        >
+        <li className={location.pathname.startsWith("/admin/bookings/") ? "active" : ""}>
           <Link to="/admin/bookings/">
-          <i class='bx bxs-book-content'></i>
+            <i className="bx bxs-book-content"></i>
             Booking
           </Link>
         </li>
-        <li
-          className={location.pathname.startsWith("/service") ? "active" : ""}
-        >
+        <li className={location.pathname.startsWith("/service") ? "active" : ""}>
           <Link to="/service">
             <i className="bx bx-store-alt"></i>
             Service
@@ -92,9 +104,7 @@ const Sidebar = forwardRef((_, ref) => {
             Pet
           </Link>
         </li>
-        <li
-          className={location.pathname.startsWith("/account") ? "active" : ""}
-        >
+        <li className={location.pathname.startsWith("/account") ? "active" : ""}>
           <Link to="/account">
             <i className="bx bxs-user-account"></i>
             Accounts
@@ -106,21 +116,15 @@ const Sidebar = forwardRef((_, ref) => {
             Room
           </Link>
         </li>
-        <li
-          className={
-            /^\/cameralist(\/|$)/.test(location.pathname) ? "active" : ""
-          }
-        >
-          <Link to="/cameralist">
-            <i className="bx bxs-camera"></i>
-            Camera
-          </Link>
-        </li>
-        <li
-          className={
-            /^\/pethealthbook(\/|$)/.test(location.pathname) ? "active" : ""
-          }
-        >
+        {isAdmin && (
+          <li className={/^\/cameralist(\/|$)/.test(location.pathname) ? "active" : ""}>
+            <Link to="/cameralist">
+              <i className="bx bxs-camera"></i>
+              Camera
+            </Link>
+          </li>
+        )}
+        <li className={/^\/pethealthbook(\/|$)/.test(location.pathname) ? "active" : ""}>
           <Link to="/pethealthbook">
             <i className="bx bxs-capsule"></i>
             PetHealthBook
@@ -132,24 +136,21 @@ const Sidebar = forwardRef((_, ref) => {
             Gift
           </Link>
         </li>
-        <li
-          className={location.pathname.startsWith("/vouchers") ? "active" : ""}
-        >
+        <li className={location.pathname.startsWith("/vouchers") ? "active" : ""}>
           <Link to="/vouchers">
             <i className="bx bxs-coupon"></i>
             Voucher
           </Link>
         </li>
-        <li
-          className={location.pathname.startsWith("/notification") ? "active" : ""}
-        >
+        <li className={location.pathname.startsWith("/notification") ? "active" : ""}>
           <Link to="/notification">
-          <i class='bx bx-bell'></i>
+            <i className="bx bx-bell"></i>
             Notification
           </Link>
         </li>
       </ul>
 
+      {/* Có thể thêm mục Logout nếu cần */}
       {/* <ul className="side-menu">
         <li>
           <a href="#" className="logout" onClick={handleLogout}>
