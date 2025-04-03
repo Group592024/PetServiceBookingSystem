@@ -10,6 +10,8 @@ const CustomerRoomList = () => {
     const [rooms, setRooms] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedFilters, setSelectedFilters] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -20,7 +22,7 @@ const CustomerRoomList = () => {
                     fetch('http://localhost:5050/api/Room/available', {
                         headers: { "Authorization": `Bearer ${token}` }
                     }),
-                    fetch('http://localhost:5050/api/RoomType', {
+                    fetch('http://localhost:5050/api/RoomType/available', {
                         headers: { "Authorization": `Bearer ${token}` }
                     })
                 ]);
@@ -46,6 +48,22 @@ const CustomerRoomList = () => {
         fetchData();
     }, []);
 
+    const filteredRooms = rooms.filter((room) => {
+        const matchesSearchTerm = room.roomName.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRoomType = selectedFilters.roomType ? room.roomTypeId === selectedFilters.roomType : true;
+
+        const roomType = roomTypes.find(type => type.roomTypeId === room.roomTypeId);
+        const roomPrice = roomType ? roomType.price : 0;
+
+        const matchesPrice = selectedFilters.price
+            ? (selectedFilters.price === 'Low' ? roomPrice < 100000
+                : selectedFilters.price === 'Medium' ? roomPrice >= 100000 && roomPrice <= 200000
+                    : roomPrice > 200000)
+            : true;
+
+        return matchesSearchTerm && matchesRoomType && matchesPrice;
+    });
+
     const getRoomTypeName = (roomTypeId) => {
         const roomType = roomTypes.find(type => type.roomTypeId === roomTypeId);
         return roomType ? roomType.name : 'Unknown';
@@ -53,7 +71,22 @@ const CustomerRoomList = () => {
 
     const getRoomTypePrice = (roomTypeId) => {
         const roomType = roomTypes.find(type => type.roomTypeId === roomTypeId);
-        return roomType ? `${roomType.price} VND` : 'N/A';
+        if (roomType) {
+            const roomTypePrice = roomType.price;
+            return (
+                <div>
+                    <p>
+                        {new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND',
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 3
+                        }).format(roomTypePrice)}
+                    </p>
+                </div>
+            );
+        }
+        return <div>N/A</div>;
     };
 
     return (
@@ -71,13 +104,86 @@ const CustomerRoomList = () => {
                     <div className="h-1.5 w-40 bg-gradient-to-r from-yellow-400 to-yellow-600 mx-auto mt-6 rounded-full"></div>
                 </div>
 
+                {/* Search and Filter Section */}
+                <div className="mb-8 flex flex-col sm:flex-row justify-between items-center sm:space-x-6 space-y-4 sm:space-y-0">
+                    {/* Search Box */}
+                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Search by room name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
+                        />
+                        {/* Search Icon */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+
+                    {/* Filter by Room Type */}
+                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                        <select
+                            value={selectedFilters.roomType || ''}
+                            onChange={(e) => setSelectedFilters((prev) => ({ ...prev, roomType: e.target.value }))}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
+                        >
+                            <option value="">Select Room Type</option>
+                            {roomTypes.map((type) => (
+                                <option key={type.roomTypeId} value={type.roomTypeId}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Filter by Price */}
+                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                        <select
+                            value={selectedFilters.price || ''}
+                            onChange={(e) => setSelectedFilters((prev) => ({ ...prev, price: e.target.value }))}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
+                        >
+                            <option value="">Select Price Range</option>
+                            <option value="Low">Under 100.000</option>
+                            <option value="Medium">100.000 - 200.000</option>
+                            <option value="High">Over 200.000</option>
+                        </select>
+                    </div>
+
+                    {/* Clear Button */}
+                    <div>
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setSelectedFilters({ roomType: '', price: '' });
+                            }}
+                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all ease-in-out"
+                        >
+                            Clear Filter
+                        </button>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <CircularProgress />
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-                        {rooms.map((room) => (
+                        {filteredRooms.map((room) => (
                             <div
                                 key={room.roomId}
                                 className="bg-white rounded-3xl overflow-hidden group transition-all duration-300 
@@ -117,7 +223,7 @@ const CustomerRoomList = () => {
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm text-gray-500 mb-1">Price per night</p>
+                                            <p className="text-sm text-gray-500 mb-1">Price</p>
                                             <span className="text-2xl font-bold text-green-600">
                                                 {getRoomTypePrice(room.roomTypeId)}
                                             </span>
@@ -164,7 +270,7 @@ const CustomerRoomList = () => {
                 )}
 
                 {/* Empty State */}
-                {!loading && rooms.length === 0 && (
+                {!loading && filteredRooms.length === 0 && (
                     <div className="text-center py-16">
                         <div className="bg-white rounded-2xl p-8 max-w-md mx-auto shadow-sm">
                             <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

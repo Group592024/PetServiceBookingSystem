@@ -8,6 +8,8 @@ const CustomerPetList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const [filteredPets, setFilteredPets] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
     const fetchPets = async () => {
         try {
@@ -38,6 +40,12 @@ const CustomerPetList = () => {
     useEffect(() => {
         fetchPets();
     }, []);
+
+    useEffect(() => {
+        setFilteredPets(
+            pets.filter(pet => pet.petName && pet.petName.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [searchTerm, pets]);
 
     const handleDelete = (petId) => {
         Swal.fire({
@@ -122,6 +130,32 @@ const CustomerPetList = () => {
                             Manage and view all your beloved pets in one place
                         </p>
                     </div>
+                    {/* Search Input */}
+                    <div className="relative w-full max-w-xs sm:max-w-md">
+                        <input
+                            type="text"
+                            placeholder="Search pets by name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md transition-all"
+                        />
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    {/* Add New Pet Button */}
                     <button
                         onClick={() => navigate('add')}
                         className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 
@@ -134,80 +168,78 @@ const CustomerPetList = () => {
                         Add New Pet
                     </button>
                 </div>
-
                 {/* Pet Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {pets.map((pet) => (
-                        <div
-                            key={pet.petId}
-                            className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
-                        >
-                            {/* Image Container */}
-                            <div className="relative h-72 overflow-hidden">
-                                <img
-                                    src={`http://localhost:5050/pet-service${pet.petImage}`}
-                                    alt={pet.petName}
-                                    className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                                <h2 className="absolute bottom-4 left-6 text-2xl font-bold text-white">
-                                    {pet.petName}
-                                </h2>
-                            </div>
-
-                            {/* Pet Info */}
-                            <div className="p-6">
-                                <div className="flex items-center gap-2 text-gray-600 mb-6">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <span>
-                                        Born: {new Date(pet.dateOfBirth).toLocaleDateString('en-GB', {
-                                            day: '2-digit',
-                                            month: 'short',
-                                            year: 'numeric'
-                                        })}
-                                    </span>
+                {filteredPets.length === 0 ? (
+                    <div className="text-center text-gray-600 text-lg font-semibold">
+                        No pets found. Try searching with a different keyword.
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {filteredPets.map((pet) => (
+                            <div key={pet.petId} className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+                                <div className="relative h-72 overflow-hidden">
+                                    <img
+                                        src={`http://localhost:5050/pet-service${pet.petImage}`}
+                                        alt={pet.petName}
+                                        className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                    <h2 className="absolute bottom-4 left-6 text-2xl font-bold text-white">{pet.petName}</h2>
                                 </div>
 
-                                {/* Action Buttons */}
-                                <div className="flex justify-between items-center border-t pt-4">
-                                    <button
-                                        onClick={() => navigate(`${pet.petId}`)}
-                                        className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors"
-                                    >
+                                {/* Pet Info */}
+                                <div className="p-6">
+                                    <div className="flex items-center gap-2 text-gray-600 mb-6">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
-                                        View
-                                    </button>
+                                        <span>
+                                            Born: {new Date(pet.dateOfBirth).toLocaleDateString('en-GB', {
+                                                day: '2-digit',
+                                                month: 'short',
+                                                year: 'numeric'
+                                            })}
+                                        </span>
+                                    </div>
 
-                                    <button
-                                        onClick={() => navigate(`edit/${pet.petId}`)}
-                                        className="flex items-center gap-2 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                        </svg>
-                                        Edit
-                                    </button>
+                                    {/* Action Buttons */}
+                                    <div className="flex justify-between items-center border-t pt-4">
+                                        <button
+                                            onClick={() => navigate(`${pet.petId}`)}
+                                            className="flex items-center gap-2 text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                            View
+                                        </button>
 
-                                    <button
-                                        onClick={() => handleDelete(pet.petId)}
-                                        className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        Delete
-                                    </button>
+                                        <button
+                                            onClick={() => navigate(`edit/${pet.petId}`)}
+                                            className="flex items-center gap-2 text-green-600 hover:bg-green-50 px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                            Edit
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDelete(pet.petId)}
+                                            className="flex items-center gap-2 text-red-600 hover:bg-red-50 px-4 py-2 rounded-lg transition-colors"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                            Delete
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-
+                        ))}
+                    </div>
+                )}
                 {/* Empty State */}
                 {pets.length === 0 && (
                     <div className="text-center py-12">
@@ -229,6 +261,7 @@ const CustomerPetList = () => {
             </div>
         </div>
     );
+
 };
 
 export default CustomerPetList;

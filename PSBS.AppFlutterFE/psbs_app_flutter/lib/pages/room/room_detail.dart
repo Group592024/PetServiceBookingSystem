@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 class CustomerRoomDetail extends StatefulWidget {
   final String roomId;
@@ -18,6 +19,21 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
   Map<String, dynamic> detail = {};
   String roomTypeName = '';
   String roomTypePrice = '';
+
+  final currencyFormatter = NumberFormat.currency(
+    locale: 'vi_VN',
+    symbol: '₫',
+    decimalDigits: 3,
+  );
+
+  String formatCurrency(num value) {
+    if (value == value.toInt()) {
+      return NumberFormat.currency(
+              locale: 'vi_VN', symbol: '₫', decimalDigits: 0)
+          .format(value);
+    }
+    return currencyFormatter.format(value);
+  }
 
   @override
   void initState() {
@@ -73,6 +89,11 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
         loading = false;
       });
     }
+  }
+
+  String getRoomTypePrice() {
+    num price = num.tryParse(roomTypePrice) ?? 0;
+    return formatCurrency(price);
   }
 
   @override
@@ -233,11 +254,11 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                                       ),
                                       SizedBox(height: 4),
                                       Text(
-                                        '$roomTypePrice VND',
+                                        getRoomTypePrice(),
                                         style: TextStyle(
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold,
-                                          color: Colors.blue.shade900,
+                                          color: Colors.green,
                                         ),
                                       ),
                                     ],
@@ -249,7 +270,7 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
 
                             // Description Section
                             Container(
-                              width: double.infinity, // Đảm bảo full width
+                              width: double.infinity,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -263,8 +284,7 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                                   ),
                                   SizedBox(height: 12),
                                   Container(
-                                    width:
-                                        double.infinity, // Đảm bảo full width
+                                    width: double.infinity,
                                     padding: EdgeInsets.all(16),
                                     decoration: BoxDecoration(
                                       color: Colors.grey.shade50,
