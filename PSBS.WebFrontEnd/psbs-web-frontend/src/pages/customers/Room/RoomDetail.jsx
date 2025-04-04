@@ -106,11 +106,13 @@ const CustomerRoomDetail = () => {
                                 <div className="mb-8 pb-8 border-b border-gray-100">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-gray-500 mb-1">Price per night</p>
-                                            <p className="text-3xl font-bold text-gray-800">
+                                            <p className="text-gray-500 mb-1">Price</p>
+                                            <p className="text-3xl font-bold text-green-600">
                                                 {new Intl.NumberFormat('vi-VN', {
                                                     style: 'currency',
-                                                    currency: 'VND'
+                                                    currency: 'VND',
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 3
                                                 }).format(roomTypePrice)}
                                             </p>
                                         </div>

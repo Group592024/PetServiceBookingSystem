@@ -22,11 +22,32 @@ class _CustomerPetListState extends State<PetPage> {
   late String userId;
   bool isGridView = false;
 
+  List<Pet> allPets = [];
+  List<Pet> filteredPets = [];
+  TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     pets = fetchPets();
     _loadAccountId();
+    searchController.addListener(_filterPets);
+  }
+
+  void _filterPets() {
+    if (allPets.isEmpty) return;
+
+    setState(() {
+      if (searchController.text.isEmpty) {
+        filteredPets = List.from(allPets);
+      } else {
+        filteredPets = allPets
+            .where((pet) => pet.petName
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase()))
+            .toList();
+      }
+    });
   }
 
   Future<void> _loadAccountId() async {
@@ -54,16 +75,20 @@ class _CustomerPetListState extends State<PetPage> {
         },
       );
 
-      print(response.statusCode);
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        print(responseData);
+
         if (responseData['flag']) {
           List<dynamic> petList = responseData['data'];
-          return petList
+          List<Pet> fetchedPets = petList
               .map((json) => Pet.fromJson(json))
               .where((pet) => !pet.isDelete)
               .toList();
+
+          allPets = fetchedPets;
+          filteredPets = fetchedPets;
+
+          return fetchedPets;
         } else {
           return [];
         }
@@ -454,6 +479,54 @@ class _CustomerPetListState extends State<PetPage> {
   }
 
   @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  Widget _buildNoPetsFoundState() {
+    return Container(
+      padding: EdgeInsets.all(32),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.search_off,
+              size: 72,
+              color: Colors.blue,
+            ),
+          ),
+          SizedBox(height: 24),
+          Text(
+            "No Pets Found",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(height: 12),
+          Text(
+            "We couldn't find any pets matching your search.",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
@@ -472,26 +545,62 @@ class _CustomerPetListState extends State<PetPage> {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Column(
                   children: [
-                    Text(
-                      'My Pets',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'My Pets',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade800,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            setState(() {
+                              isGridView = !isGridView;
+                            });
+                          },
+                          icon: Icon(
+                            isGridView ? Icons.grid_view : Icons.view_list,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isGridView = !isGridView;
-                        });
-                      },
-                      icon: Icon(
-                        isGridView ? Icons.grid_view : Icons.view_list,
-                        color: Colors.blue,
+
+                    // Search bar
+                    SizedBox(height: 16),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.2),
+                            spreadRadius: 1,
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: searchController,
+                        decoration: InputDecoration(
+                          hintText: 'Search pets by name...',
+                          prefixIcon: Icon(
+                            Icons.search,
+                            color: Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                            vertical: 15,
+                            horizontal: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -510,20 +619,22 @@ class _CustomerPetListState extends State<PetPage> {
                     return _buildEmptyState();
                   } else {
                     return isGridView
-                        ? _buildGridView(snapshot.data!)
+                        ? _buildGridView(filteredPets)
                         : Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
-                            child: Column(
-                              children: snapshot.data!
-                                  .map((pet) => _buildPetCard(pet))
-                                  .toList(),
-                            ),
+                            child: filteredPets.isEmpty
+                                ? _buildNoPetsFoundState()
+                                : Column(
+                                    children: filteredPets
+                                        .map((pet) => _buildPetCard(pet))
+                                        .toList(),
+                                  ),
                           );
                   }
                 },
               ),
-            ),
+            )
           ],
         ),
       ),
@@ -784,6 +895,10 @@ class _CustomerPetListState extends State<PetPage> {
   }
 
   Widget _buildGridView(List<Pet> pets) {
+    if (pets.isEmpty) {
+      return _buildNoPetsFoundState();
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),

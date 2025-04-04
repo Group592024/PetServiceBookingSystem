@@ -123,7 +123,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("available")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<RoomTypeDTO>>> GetAvailableRoomTypes()
         {
             var roomtypes = await _roomType.ListAvailableRoomTypeAsync();
