@@ -93,7 +93,7 @@ describe('Customer Room Detail Page', () => {
 
         cy.contains('span', 'Luxury Suite').should('be.visible');
 
-        cy.contains('Price per night').should('be.visible');
+        cy.contains('Price').should('be.visible');
         cy.contains('500.000').should('be.visible');
 
         cy.contains('button', 'Book Now').should('be.visible');

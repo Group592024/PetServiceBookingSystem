@@ -82,7 +82,7 @@ describe('Customer Pet List Page', () => {
           }));
         }
       },
-      timeout: 30000 
+      timeout: 30000
     });
 
     cy.get('.grid', { timeout: 20000 }).should('exist');
@@ -98,6 +98,25 @@ describe('Customer Pet List Page', () => {
 
     cy.viewport(1280, 800);
     cy.contains('Your Pet Collection').should('be.visible');
+  });
+
+  it('should filter pets by name when searching', () => {
+    cy.get('input[placeholder="Search pets by name..."]').type('Flu');
+    cy.get('.grid > *').should('have.length', 1);
+    cy.contains('Fluffy').should('be.visible');
+    cy.contains('Whiskers').should('not.exist');
+  });
+
+  it('should show no pets if name does not match', () => {
+    cy.get('input[placeholder="Search pets by name..."]').type('NotExist');
+    cy.get('.grid > *').should('have.length', 0);
+  });
+
+  it('should restore full list after clearing search', () => {
+    cy.get('input[placeholder="Search pets by name..."]').type('Whiskers');
+    cy.get('.grid > *').should('have.length', 1);
+    cy.get('input[placeholder="Search pets by name..."]').clear();
+    cy.get('.grid > *').should('have.length', 2);
   });
 
   it('should display the customer pet list correctly', () => {
