@@ -60,7 +60,7 @@ describe('Customer Room List Page', () => {
       }
     }).as('getRooms');
 
-    cy.intercept('GET', '**/api/RoomType', {
+    cy.intercept('GET', '**/api/RoomType/available', {
       statusCode: 200,
       body: {
         data: [
@@ -94,7 +94,7 @@ describe('Customer Room List Page', () => {
           }));
         }
       },
-      timeout: 30000 
+      timeout: 30000
     });
 
     cy.get('h1', { timeout: 20000 }).contains('Luxury Pet Rooms').should('be.visible');
@@ -108,21 +108,21 @@ describe('Customer Room List Page', () => {
 
     cy.contains('Luxury Suite 101').should('be.visible');
     cy.contains('Luxury Suite').should('be.visible');
-    cy.contains('500000 VND').should('be.visible');
+    cy.contains('500.000 ₫').should('be.visible');
     cy.contains('Free').should('be.visible')
       .should('have.css', 'background-color')
       .and('match', /rgb\(34,\s*197,\s*94\)|rgb\(16,\s*185,\s*129\)/);
 
     cy.contains('Premium Suite 202').should('be.visible');
     cy.contains('Premium Suite').should('be.visible');
-    cy.contains('350000 VND').should('be.visible');
+    cy.contains('350.000 ₫').should('be.visible');
     cy.contains('In Use').should('be.visible')
       .should('have.css', 'background-color')
       .and('match', /rgb\(249,\s*115,\s*22\)|rgb\(234,\s*88,\s*12\)/);
 
     cy.contains('Deluxe Suite 303').should('be.visible');
     cy.contains('Deluxe Suite').should('be.visible');
-    cy.contains('250000 VND').should('be.visible');
+    cy.contains('250.000 ₫').should('be.visible');
     cy.contains('Maintenance').should('be.visible')
       .should('have.css', 'background-color')
       .and('match', /rgb\(239,\s*68,\s*68\)|rgb\(220,\s*38,\s*38\)/);
@@ -130,6 +130,54 @@ describe('Customer Room List Page', () => {
     cy.contains('Premium Care').should('be.visible');
     cy.contains('24/7 Support').should('be.visible');
     cy.contains('View Details').should('have.length', 1);
+  });
+
+  it('should filter rooms by selected room type', () => {
+    cy.get('select').eq(0).select('Premium Suite');
+    cy.get('.grid').children().should('have.length', 1);
+    cy.contains('Premium Suite 202').should('be.visible');
+  });
+
+  it('should show no rooms for price range Low (<100.000)', () => {
+    cy.get('select').eq(1).select('Under 100.000');
+    cy.get('.grid').children().should('have.length', 0);
+  });
+
+  it('should show no rooms for price range Medium (100.000 - 200.000)', () => {
+    cy.get('select').eq(1).select('100.000 - 200.000');
+    cy.get('.grid').children().should('have.length', 0);
+  });
+
+  it('should filter rooms with price over 200.000', () => {
+    cy.get('select').eq(1).select('Over 200.000');
+    cy.get('.grid').children().should('have.length', 3);
+  });
+
+  it('should search rooms by name', () => {
+    cy.get('input[type="text"]').type('Deluxe');
+    cy.get('.grid').children().should('have.length', 1);
+    cy.contains('Deluxe Suite 303').should('be.visible');
+  });
+
+  it('should filter and search rooms correctly', () => {
+    cy.get('input[type="text"]').type('Suite');
+    cy.get('select').eq(0).select('Luxury Suite');
+    cy.get('select').eq(1).select('Over 200.000');
+    cy.get('.grid').children().should('have.length', 1);
+    cy.contains('Luxury Suite 101').should('be.visible');
+  });
+
+  it('should clear all filters and show all rooms', () => {
+    cy.get('input[type="text"]').type('Premium');
+    cy.get('select').eq(0).select('Premium Suite');
+    cy.get('select').eq(1).select('Over 200.000');
+
+    cy.contains('button', 'Clear Filter').click();
+
+    cy.get('input[type="text"]').should('have.value', '');
+    cy.get('select').eq(0).should('have.value', '');
+    cy.get('select').eq(1).should('have.value', '');
+    cy.get('.grid').children().should('have.length', 3);
   });
 
   it('should navigate to room details page when clicking View Details', () => {
@@ -173,7 +221,7 @@ describe('Customer Room List Page', () => {
   });
 
   it('should handle API error when fetching room types', () => {
-    cy.intercept('GET', '**/api/RoomType', {
+    cy.intercept('GET', '**/api/RoomType/available', {
       statusCode: 500,
       body: {
         message: 'Internal server error'
