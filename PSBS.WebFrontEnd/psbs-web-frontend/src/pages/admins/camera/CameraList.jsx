@@ -18,7 +18,7 @@ const CameraList = () => {
 
   const getHeaders = () => {
     const token = sessionStorage.getItem("token");
-    console.log("Token:", token); // Log token
+    console.log("Token:", token); 
     return {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`
