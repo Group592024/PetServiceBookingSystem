@@ -184,7 +184,7 @@ function App() {
           />
 
           <Route
-            path="/detailAd/:healthBookId"
+            path="/pethealthbook/detail/:healthBookId"
             element={
               <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
                 <PetHealthBookDetailAdmin />
@@ -192,7 +192,7 @@ function App() {
             }
           />
           <Route
-            path="/listAd/:petId/:accountId"
+            path="/pethealthbook/list/:petId/:accountId"
             element={
               <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
                 <PetHealthBookListAdmin />

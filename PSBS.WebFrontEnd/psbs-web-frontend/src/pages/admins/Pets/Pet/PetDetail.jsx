@@ -262,7 +262,7 @@ const AdminPetDetail = () => {
                                     label="Health Book"
                                     icon="💊"
                                     className="bg-emerald-500 hover:bg-emerald-600 shadow-lg shadow-emerald-200"
-                                    onClick={() => navigate(`/listAd/${pet.petId}/${pet.accountId}`)}
+                                    onClick={() => navigate(`/pethealthbook/list/${pet.petId}/${pet.accountId}`)}
                                 />
                                 <ActionButton
                                     label="Edit Pet"
