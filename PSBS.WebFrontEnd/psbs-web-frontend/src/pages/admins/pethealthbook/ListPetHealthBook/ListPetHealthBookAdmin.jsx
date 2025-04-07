@@ -293,7 +293,7 @@ const PetHealthBookListAdmin = () => {
                                                                                         </div>
                                                                                         <div className="md:col-span-1 flex justify-end">
                                                                                             <Link
-                                                                                                to={`/detailAd/${health.healthBookId}`}
+                                                                                                to={`/pethealthbook/detail/${health.healthBookId}`}
                                                                                                 className="inline-flex items-center justify-center p-2 rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                                                                                             >
                                                                                                 <VisibilityIcon fontSize="small" />

@@ -377,10 +377,13 @@ const PetHealthBookList = () => {
       <div className="content h-full">
         <Navbar sidebarRef={sidebarRef} />
         <main className="flex-1">
-          <div className="p-4 bg-white shadow-md rounded-md h-full">
-            <h2 className="mb-4 text-xl font-bold">Health Book List</h2>
-            <div style={{ height: "calc(100% - 80px)", width: "100%" }}>
-              <DataGrid
+          <div className="listContainer">
+        
+            <div className="datatable">
+            <div className="datatableTitle">
+            Health Book List
+              </div>
+               <DataGrid
                 rows={filteredPets
                   .sort((a, b) => a.accountIsDeleted - b.accountIsDeleted)
                   .map((acc, index) => ({ ...acc, id: index + 1 }))}
@@ -393,6 +396,7 @@ const PetHealthBookList = () => {
                 getRowId={(row) => row.healthBookId}
               />
             </div>
+           
           </div>
         </main>
       </div>

@@ -70,6 +70,7 @@ const AdminBookingDatatable = () => {
             const bookingsData = bookingsResponse.data.data;
             const bookingServiceData = bookingServiceResponse.data.data;
             const serviceVariantData = serviceVariantResponse.data.data;
+           
             const servicesData = servicesResponse.data.data;
             const updatedBookings = await Promise.all(
                 bookingsData.map(async (booking) => {
@@ -111,26 +112,56 @@ const AdminBookingDatatable = () => {
 
                             return service.name || service.serviceName || "Unknown";
                         });
+                        console.log(serviceNames);
                         const joinedServiceNames = serviceNames.join(", ") || "Unknown";
 
-                        const healthBookingItems = bookingItems.filter((bItem) => {
+                       // Debug: Log all serviceTypeIds to check what's available
+console.log("Available serviceTypeIds:", servicesData.map(s => s.serviceTypeId));
+
+const healthBookingItems = bookingItems.filter((bItem) => {
+    const variant = serviceVariantData.find(
+        (v) => v.serviceVariantId === bItem.serviceVariantId
+    );
+    if (!variant) return false;
+    
+    const service = servicesData.find(
+        (s) => s.serviceId === variant.serviceId
+    );
+    if (!service) return false;
+    
+    // Debug: Log each service and its type ID for inspection
+    console.log(`Service: ${service.serviceName}, TypeID: ${service.serviceTypeId}`);
+    
+    // Check if the service has the specific serviceTypeId
+    // Using lowercase for case-insensitive comparison
+    return service.serviceTypeId.toLowerCase() === "2e9e9b22-81f8-4cda-900c-5e47d0849b67".toLowerCase();
+});
+
+console.log("Health booking items:", healthBookingItems);
+const petIds = healthBookingItems.map((bItem) => bItem.petId);
+console.log("Pet IDs from health bookings:", petIds);
+const uniquePetIds = Array.from(new Set(petIds));
+console.log("Unique pet IDs:", uniquePetIds);
+                        const isMedicalBooking = bookingItems.some(bookingItem => {
+                            // Find the service variant for this booking item
                             const variant = serviceVariantData.find(
-                                (v) => v.serviceVariantId === bItem.serviceVariantId
+                                v => v.serviceVariantId === bookingItem.serviceVariantId
                             );
                             if (!variant) return false;
-
+                            
+                            // Find the service for this variant
                             const service = servicesData.find(
-                                (s) => s.serviceId === variant.serviceId
+                                s => s.serviceId === variant.serviceId
                             );
                             if (!service) return false;
-
-                            return service.name?.toLowerCase().includes("health") ||
-                                service.serviceName?.toLowerCase().includes("health");
+                            
+                            // Check if the service has the specific serviceTypeId
+                            // Note: Using lowercase for case-insensitive comparison
+                            return service.serviceTypeId.toLowerCase() === "2e9e9b22-81f8-4cda-900c-5e47d0849b67".toLowerCase();
                         });
-
-                        const petIds = healthBookingItems.map((bItem) => bItem.petId);
-                        const uniquePetIds = Array.from(new Set(petIds));
-
+            
+                        // For debugging
+                        console.log(`Booking ${booking.bookingCode} isMedicalBooking: ${isMedicalBooking}`);
                         return {
                             ...booking,
                             customerName,
@@ -138,6 +169,7 @@ const AdminBookingDatatable = () => {
                             bookingTypeName,
                             serviceName: joinedServiceNames,
                             petIds: uniquePetIds.join(","),
+                            isMedicalBooking
                         };
                     } catch (error) {
                         console.error("Error fetching additional details:", error);
@@ -268,7 +300,7 @@ const AdminBookingDatatable = () => {
                                 </svg>
                             </Link>
                         </div>
-                        {params.row.serviceName.includes("Health") && params.row.petIds && (
+                        {params.row.isMedicalBooking && params.row.petIds && (
                             <div className="w-8 h-8 flex items-center justify-center">
                                 <Link
                                     to={`/add?bookingCode=${params.row.bookingCode}&petIds=${params.row.petIds}`}
@@ -309,7 +341,7 @@ const AdminBookingDatatable = () => {
     ];
 
     const bookingsRows = bookings.map((booking) => ({ ...booking }));
-
+console.log(bookingsRows);
     if (loading) {
         return (
             <div className="flex items-center justify-center h-svh">
@@ -321,7 +353,7 @@ const AdminBookingDatatable = () => {
     }
 
     return (
-        <div className="Datatable">
+        <div className="datatable">
             <Box
                 sx={{
                     height: 400,
