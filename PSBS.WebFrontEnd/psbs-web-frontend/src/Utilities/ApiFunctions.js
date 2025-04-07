@@ -11,14 +11,24 @@ const getToken = () => {
 // Helper function to handle common error cases
 const handleCommonErrors = (error) => {
   if (error.response) {
-    Swal.fire({
-      title: "Error!",
-      text:
-        error.response.data.message ||
-        "An error occurred while making the request.",
-      icon: "error",
-      confirmButtonText: "OK",
-    });
+    // Handle 502 Bad Gateway error specifically
+    if (error.response.status === 502) {
+      Swal.fire({
+        title: "Service Unavailable",
+        text: "Our service is down. Please contact admin for more information.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    } else {
+      Swal.fire({
+        title: "Error!",
+        text:
+          error.response.data.message ||
+          "An error occurred while making the request.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    }
   } else if (error.request) {
     Swal.fire({
       title: "Error!",
