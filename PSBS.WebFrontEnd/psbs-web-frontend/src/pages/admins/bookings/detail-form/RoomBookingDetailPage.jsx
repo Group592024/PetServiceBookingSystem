@@ -30,15 +30,15 @@ const RoomBookingDetailPage = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${getToken()}`
-        }
+          Authorization: `Bearer ${getToken()}`,
+        },
       });
 
       const data = await response.json();
       if (data.flag) {
-        setPetNames(prev => ({
+        setPetNames((prev) => ({
           ...prev,
-          [petId]: data.data.petName
+          [petId]: data.data.petName,
         }));
       }
     } catch (error) {
@@ -60,8 +60,8 @@ const RoomBookingDetailPage = () => {
 
       if (response.data.flag) {
         // Update the local state
-        setRoomHistory(prevHistory =>
-          prevHistory.map(history =>
+        setRoomHistory((prevHistory) =>
+          prevHistory.map((history) =>
             history.roomHistoryId === historyId
               ? { ...history, status: newStatus }
               : history
@@ -70,7 +70,7 @@ const RoomBookingDetailPage = () => {
 
         // Check if all room histories are checked out
         const allCheckedOut = roomHistory.every(
-          history => history.status === "Check out"
+          (history) => history.status === "Check out"
         );
 
         if (allCheckedOut && bookingStatusName === "Checked in") {
@@ -79,7 +79,11 @@ const RoomBookingDetailPage = () => {
 
         Swal.fire("Success!", "Room status updated successfully.", "success");
       } else {
-        Swal.fire("Error!", response.data.message || "Failed to update status.", "error");
+        Swal.fire(
+          "Error!",
+          response.data.message || "Failed to update status.",
+          "error"
+        );
       }
     } catch (error) {
       Swal.fire("Error!", "Failed to update room status.", "error");
@@ -144,7 +148,7 @@ const RoomBookingDetailPage = () => {
         setRoomHistory(historyResponse.data.data);
 
         // Fetch pet names for all room histories
-        historyResponse.data.data.forEach(history => {
+        historyResponse.data.data.forEach((history) => {
           fetchPetName(history.petId);
         });
 
@@ -273,6 +277,61 @@ const RoomBookingDetailPage = () => {
       }
     }
   };
+  const handleCameraSettings = (roomHistoryId) => {
+    // Find the specific room history
+    const roomHistoryItem = roomHistory.find(
+      (item) => item.roomHistoryId === roomHistoryId
+    );
+
+    if (!roomHistoryItem) return;
+
+    Swal.fire({
+      title: "Camera Settings",
+      html: `
+        <div class="text-left">
+          <p class="mb-2"><strong>Room:</strong> ${roomName}</p>
+          <p class="mb-2"><strong>Pet:</strong> ${
+            petNames[roomHistoryItem.petId] || "Unknown"
+          }</p>
+          <p class="mb-4"><strong>Camera ID:</strong> ${
+            roomHistoryItem.cameraId || "Not assigned"
+          }</p>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Camera Configuration</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Default View</option>
+                <option>Night Vision</option>
+                <option>Wide Angle</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Recording Settings</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Continuous</option>
+                <option>Motion Activated</option>
+                <option>Scheduled</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Save Settings",
+      cancelButtonText: "Cancel",
+      focusConfirm: false,
+      preConfirm: () => {
+        // Here you would typically save the settings to your backend
+        return Promise.resolve();
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Saved!", "Camera settings have been updated.", "success");
+      }
+    });
+  };
 
   if (loading)
     return (
@@ -286,13 +345,13 @@ const RoomBookingDetailPage = () => {
       <Sidebar ref={sidebarRef} />
       <div className="content">
         <Navbar sidebarRef={sidebarRef} />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="container mx-auto p-4"
         >
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -309,8 +368,10 @@ const RoomBookingDetailPage = () => {
             <BookingRoomStatus bookingStatus={bookingStatusName} />
           </motion.div>
 
-          {["Pending", "Confirmed", "Checked in"].includes(bookingStatusName) && (
-            <motion.div 
+          {["Pending", "Confirmed", "Checked in"].includes(
+            bookingStatusName
+          ) && (
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
@@ -318,12 +379,18 @@ const RoomBookingDetailPage = () => {
             >
               <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700 font-semibold text-lg">Current Status:</span>
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                    bookingStatusName === "Checked out" ? "bg-green-100 text-green-800" :
-                    bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                    "bg-blue-100 text-blue-800"
-                  }`}>
+                  <span className="text-gray-700 font-semibold text-lg">
+                    Current Status:
+                  </span>
+                  <span
+                    className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                      bookingStatusName === "Checked out"
+                        ? "bg-green-100 text-green-800"
+                        : bookingStatusName === "Cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-blue-100 text-blue-800"
+                    }`}
+                  >
                     {bookingStatusName}
                   </span>
                 </div>
@@ -333,8 +400,17 @@ const RoomBookingDetailPage = () => {
                   className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3"
                 >
                   <span className="text-lg">Move to Next Status</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-6 w-6"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                 </button>
               </div>
@@ -342,7 +418,7 @@ const RoomBookingDetailPage = () => {
           )}
 
           {booking && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -351,30 +427,44 @@ const RoomBookingDetailPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <p className="text-lg">
-                    <span className="font-semibold text-gray-700">Booking Code:</span>{" "}
+                    <span className="font-semibold text-gray-700">
+                      Booking Code:
+                    </span>{" "}
                     <span className="text-blue-600">{booking.bookingCode}</span>
                   </p>
                   <p className="text-lg">
-                    <span className="font-semibold text-gray-700">Account Name:</span>{" "}
+                    <span className="font-semibold text-gray-700">
+                      Account Name:
+                    </span>{" "}
                     <span className="text-gray-800">{accountName}</span>
                   </p>
                   <p className="text-lg">
-                    <span className="font-semibold text-gray-700">Payment Type:</span>{" "}
+                    <span className="font-semibold text-gray-700">
+                      Payment Type:
+                    </span>{" "}
                     <span className="text-gray-800">{paymentTypeName}</span>
                   </p>
                 </div>
                 <div className="space-y-4">
                   <p className="text-lg">
-                    <span className="font-semibold text-gray-700">Total Amount:</span>{" "}
-                    <span className="text-green-600 font-bold">{booking.totalAmount.toLocaleString()} VND</span>
+                    <span className="font-semibold text-gray-700">
+                      Total Amount:
+                    </span>{" "}
+                    <span className="text-green-600 font-bold">
+                      {booking.totalAmount.toLocaleString()} VND
+                    </span>
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      bookingStatusName === "Checked out" ? "bg-green-100 text-green-800" :
-                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                      "bg-blue-100 text-blue-800"
-                    }`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                        bookingStatusName === "Checked out"
+                          ? "bg-green-100 text-green-800"
+                          : bookingStatusName === "Cancelled"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
                       {bookingStatusName}
                     </span>
                   </p>
@@ -382,27 +472,39 @@ const RoomBookingDetailPage = () => {
               </div>
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <p className="text-lg">
-                  <span className="font-semibold text-gray-700">Booking Date:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    Booking Date:
+                  </span>{" "}
                   <span className="text-gray-800">
-                    {new Date(booking.bookingDate).toLocaleString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false
-                    }).replace(',', '')}
+                    {new Date(booking.bookingDate)
+                      .toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })
+                      .replace(",", "")}
                   </span>
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Notes:</span>{" "}
-                  <span className="text-gray-800">{booking.notes || "No notes"}</span>
+                  <span className="text-gray-800">
+                    {booking.notes || "No notes"}
+                  </span>
                 </p>
                 <p className="text-lg mt-2">
-                  <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <span className="font-semibold text-gray-700">
+                    Payment Status:
+                  </span>{" "}
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      booking.isPaid
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
@@ -410,7 +512,7 @@ const RoomBookingDetailPage = () => {
             </motion.div>
           )}
 
-          <motion.h3 
+          <motion.h3
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -420,7 +522,7 @@ const RoomBookingDetailPage = () => {
           </motion.h3>
 
           {roomHistory.length > 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
@@ -432,9 +534,40 @@ const RoomBookingDetailPage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                  className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative" // Added relative positioning
                 >
-                  <h4 className="text-xl font-semibold text-gray-800 mb-4">Room Booking #{index + 1}</h4>
+                  {/* Camera booking indicator and button */}
+                  {history.bookingCamera && (
+                    <div className="absolute top-4 right-4 flex items-center space-x-2">
+                      <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
+                        Camera
+                      </span>
+                      <button
+                        onClick={() =>
+                          handleCameraSettings(history.roomHistoryId)
+                        }
+                        className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
+                        title="Camera Settings"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+
+                  <h4 className="text-xl font-semibold text-gray-800 mb-4">
+                    Room Booking #{index + 1}
+                  </h4>
                   <div className="space-y-3">
                     <p className="text-gray-700">
                       <span className="font-semibold">Room Name:</span>{" "}
@@ -446,49 +579,84 @@ const RoomBookingDetailPage = () => {
                         {petNames[history.petId] || "Loading..."}
                       </span>
                     </p>
+                    {/* Add camera status to the info section */}
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Camera:</span>{" "}
+                      <span
+                        className={
+                          history.bookingCamera
+                            ? "text-green-600"
+                            : "text-gray-600"
+                        }
+                      >
+                        {history.bookingCamera ? "Included" : "Not included"}
+                      </span>
+                    </p>
                     <div className="bg-gray-50 p-3 rounded-lg">
                       <p className="text-gray-700">
                         <span className="font-semibold">Booking Period:</span>{" "}
                         <span className="text-gray-800">
-                          {new Date(history.bookingStartDate).toLocaleDateString()} - {new Date(history.bookingEndDate).toLocaleDateString()}
+                          {new Date(
+                            history.bookingStartDate
+                          ).toLocaleDateString()}{" "}
+                          -{" "}
+                          {new Date(
+                            history.bookingEndDate
+                          ).toLocaleDateString()}
                         </span>
                       </p>
                       <p className="text-gray-700 mt-1">
                         <span className="font-semibold">Check-in:</span>{" "}
                         <span className="text-gray-800">
-                          {new Date(history.checkInDate).toLocaleDateString()}
+                          {history.checkInDate
+                            ? new Date(history.checkInDate).toLocaleDateString()
+                            : "Not checked in"}
                         </span>
                       </p>
                       <p className="text-gray-700 mt-1">
                         <span className="font-semibold">Check-out:</span>{" "}
                         <span className="text-gray-800">
-                          {new Date(history.checkOutDate).toLocaleDateString()}
+                          {history.checkOutDate
+                            ? new Date(
+                                history.checkOutDate
+                              ).toLocaleDateString()
+                            : "Not checked out"}
                         </span>
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        history.status === "Check out" ? "bg-green-100 text-green-800" :
-                        history.status === "Check in" ? "bg-blue-100 text-blue-800" :
-                        "bg-yellow-100 text-yellow-800"
-                      }`}>
+                      <span
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          history.status === "Check out"
+                            ? "bg-green-100 text-green-800"
+                            : history.status === "Check in"
+                            ? "bg-blue-100 text-blue-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
                         {history.status}
                       </span>
-                      {bookingStatusName === "Checked in" && history.status !== "Check out" && (
-                        <button
-                          onClick={() => updateRoomHistoryStatus(history.roomHistoryId, "Check out")}
-                          className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
-                        >
-                          Check Out
-                        </button>
-                      )}
+                      {bookingStatusName === "Checked in" &&
+                        history.status !== "Check out" && (
+                          <button
+                            onClick={() =>
+                              updateRoomHistoryStatus(
+                                history.roomHistoryId,
+                                "Check out"
+                              )
+                            }
+                            className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
+                          >
+                            Check Out
+                          </button>
+                        )}
                     </div>
                   </div>
                 </motion.div>
               ))}
             </motion.div>
           ) : (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.8 }}
@@ -498,8 +666,9 @@ const RoomBookingDetailPage = () => {
             </motion.p>
           )}
 
-          {(bookingStatusName === "Pending" || bookingStatusName === "Confirmed") && (
-            <motion.div 
+          {(bookingStatusName === "Pending" ||
+            bookingStatusName === "Confirmed") && (
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}

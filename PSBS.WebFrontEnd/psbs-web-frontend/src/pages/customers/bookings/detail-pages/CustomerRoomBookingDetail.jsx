@@ -17,6 +17,7 @@ const CustomerRoomBookingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
+  const [allDataLoaded, setAllDataLoaded] = useState(false);
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -113,22 +114,28 @@ const CustomerRoomBookingDetail = () => {
         setRoomHistory(historyResponse.data.data);
 
         // Fetch pet names for all room histories
-        historyResponse.data.data.forEach((history) => {
-          fetchPetName(history.petId);
-        });
+        const petFetchPromises = historyResponse.data.data.map((history) => 
+          fetchPetName(history.petId)
+        );
 
         const roomId = historyResponse.data.data[0]?.roomId;
+        let roomPromise = Promise.resolve();
         if (roomId) {
-          const roomResponse = await axios.get(
+          roomPromise = axios.get(
             `http://localhost:5050/api/Room/${roomId}`,
             {
               headers: {
                 Authorization: `Bearer ${getToken()}`,
               },
             }
-          );
-          setRoomName(roomResponse.data?.data?.roomName || "Unknown");
+          ).then(roomResponse => {
+            setRoomName(roomResponse.data?.data?.roomName || "Unknown");
+          });
         }
+
+        // Wait for all data to be loaded
+        await Promise.all([...petFetchPromises, roomPromise]);
+        setAllDataLoaded(true);
       } catch (err) {
         setError("Failed to fetch booking details or related data");
       } finally {
@@ -192,6 +199,66 @@ const CustomerRoomBookingDetail = () => {
     });
   };
 
+  const handleCameraSettings = (roomHistoryId) => {
+    const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
+    if (!room) return;
+
+    Swal.fire({
+      title: "Camera Settings",
+      html: `
+        <div class="text-left">
+          <div class="mb-4">
+            <p class="font-semibold">Room: <span class="font-normal">${roomName}</span></p>
+            <p class="font-semibold">Pet: <span class="font-normal">${
+              petNames[room.petId] || "Unknown"
+            }</span></p>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Standard</option>
+                <option>Night Vision</option>
+                <option>Wide Angle</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Recording</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Continuous</option>
+                <option>Motion Activated</option>
+                <option>Disabled</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Quality</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>High (1080p)</option>
+                <option>Medium (720p)</option>
+                <option>Low (480p)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Save Settings",
+      cancelButtonText: "Cancel",
+      focusConfirm: false,
+      preConfirm: () => {
+        // Here you would typically save the settings to your backend
+        return Promise.resolve();
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Saved!", "Camera settings have been updated.", "success");
+      }
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -246,21 +313,29 @@ const CustomerRoomBookingDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <p className="text-lg">
-                  <span className="font-semibold text-gray-700">Booking Code:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    Booking Code:
+                  </span>{" "}
                   <span className="text-blue-600">{booking.bookingCode}</span>
                 </p>
                 <p className="text-lg">
-                  <span className="font-semibold text-gray-700">Account Name:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    Account Name:
+                  </span>{" "}
                   <span className="text-gray-800">{accountName}</span>
                 </p>
                 <p className="text-lg">
-                  <span className="font-semibold text-gray-700">Payment Type:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    Payment Type:
+                  </span>{" "}
                   <span className="text-gray-800">{paymentTypeName}</span>
                 </p>
               </div>
               <div className="space-y-4">
                 <p className="text-lg">
-                  <span className="font-semibold text-gray-700">Total Amount:</span>{" "}
+                  <span className="font-semibold text-gray-700">
+                    Total Amount:
+                  </span>{" "}
                   <span className="text-green-600 font-bold">
                     {booking.totalAmount.toLocaleString()} VND
                   </span>
@@ -283,7 +358,9 @@ const CustomerRoomBookingDetail = () => {
             </div>
             <div className="mt-6 pt-6 border-t border-gray-200">
               <p className="text-lg">
-                <span className="font-semibold text-gray-700">Booking Date:</span>{" "}
+                <span className="font-semibold text-gray-700">
+                  Booking Date:
+                </span>{" "}
                 <span className="text-gray-800">
                   {formatDate(booking.bookingDate)}
                 </span>
@@ -295,7 +372,9 @@ const CustomerRoomBookingDetail = () => {
                 </span>
               </p>
               <p className="text-lg mt-2">
-                <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
+                <span className="font-semibold text-gray-700">
+                  Payment Status:
+                </span>{" "}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${
                     booking.isPaid
@@ -319,7 +398,20 @@ const CustomerRoomBookingDetail = () => {
           Room Bookings
         </motion.h3>
 
-        {roomHistory.length > 0 ? (
+        {!allDataLoaded ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((_, index) => (
+              <div key={index} className="p-6 bg-white rounded-xl shadow-lg">
+                <div className="animate-pulse space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-20 bg-gray-200 rounded"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : roomHistory.length > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -332,8 +424,35 @@ const CustomerRoomBookingDetail = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
-                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative"
               >
+                {history.bookingCamera && history.status === "Checked in" && bookingStatusName === "Checked in"&& (
+                  <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
+                      Camera
+                    </span>
+                    <button
+                      onClick={() =>
+                        handleCameraSettings(history.roomHistoryId)
+                      }
+                      className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
+                      title="Camera Settings"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <h4 className="text-xl font-semibold text-gray-800 mb-4">
                   Room Booking #{index + 1}
                 </h4>
@@ -345,7 +464,7 @@ const CustomerRoomBookingDetail = () => {
                   <p className="text-gray-700">
                     <span className="font-semibold">Pet:</span>{" "}
                     <span className="text-gray-800">
-                      {petNames[history.petId] || "Loading..."}
+                      {petNames[history.petId] || "Unknown"}
                     </span>
                   </p>
                   <div className="bg-gray-50 p-3 rounded-lg">
@@ -366,6 +485,18 @@ const CustomerRoomBookingDetail = () => {
                       <span className="font-semibold">Check-out:</span>{" "}
                       <span className="text-gray-800">
                         {formatDate(history.checkOutDate)}
+                      </span>
+                    </p>
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Camera:</span>{" "}
+                      <span
+                        className={
+                          history.bookingCamera
+                            ? "text-green-600"
+                            : "text-gray-600"
+                        }
+                      >
+                        {history.bookingCamera ? "Included" : "Not included"}
                       </span>
                     </p>
                   </div>
