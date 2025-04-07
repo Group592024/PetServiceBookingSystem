@@ -74,6 +74,8 @@ import PetHealthBookDetail from "./pages/admins/pethealthbook/PetHealthBookDetai
 import PetHealthBookCreate from "./pages/admins/pethealthbook/PetHealthBookCreate";
 import PetHealthBookEdit from "./pages/admins/pethealthbook/PetHealthBookEdit";
 import ReportBookingPage from "./pages/admins/reports/ReportBookingPage";
+import PetHealthBookListAdmin from "./pages/admins/pethealthbook/ListPetHealthBook/ListPetHealthBookAdmin";
+import PetHealthBookDetailAdmin from "./pages/admins/pethealthbook/ListPetHealthBook/DetailPetHealthBookAdmin";
 import CameraList from "./pages/admins/camera/CameraList";
 import CreateCamera from "./pages/admins/camera/CreateCamera";
 import CameraDetail from "./pages/admins/camera/CameraDetail";
@@ -167,7 +169,7 @@ function App() {
           <Route
             path="/detailcus/:healthBookId"
             element={
-              <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
+              <ProtectedRoute allowedRoles={["user"]}>
                 <PetHealthBookDetailCus />
               </ProtectedRoute>
             }
@@ -177,6 +179,23 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["user"]}>
                 <PetHealthBookListCus />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/detailAd/:healthBookId"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
+                <PetHealthBookDetailAdmin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/listAd/:petId/:accountId"
+            element={
+              <ProtectedRoute allowedRoles={["admin", "staff", "user"]}>
+                <PetHealthBookListAdmin />
               </ProtectedRoute>
             }
           />

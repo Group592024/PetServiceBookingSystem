@@ -121,7 +121,7 @@ namespace VoucherApi.Infrastructure.Repositories
         {
             try
             {
-                var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id && !g.GiftStatus);
+                var gift = await context.Gifts.FirstOrDefaultAsync(g => g.GiftId == id);
                 return gift != null ? gift : null!;
             }
             catch (Exception ex)

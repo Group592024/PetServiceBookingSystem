@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class First : Migration
+    public partial class _001 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

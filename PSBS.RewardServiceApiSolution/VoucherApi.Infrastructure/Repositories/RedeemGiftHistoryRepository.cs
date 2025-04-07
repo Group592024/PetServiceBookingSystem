@@ -24,12 +24,10 @@ namespace VoucherApi.Infrastructure.Repositories
                     return new Response(false, "The gift is out of stock");
                 }
 
-
-
                 gift.GiftQuantity--; // Decrease gift quantity by 1
                 if(gift.GiftQuantity <= 0)
                 {
-                    gift.GiftStatus = false;
+                    gift.GiftStatus = true;
                 }
                 if (gift.GiftCode != null)
                 {
@@ -47,8 +45,6 @@ namespace VoucherApi.Infrastructure.Repositories
 
                 return new Response(false, "Cannot redeem this gift, an error ocurr");
             }
-            
-
             
         }
 
@@ -127,11 +123,37 @@ namespace VoucherApi.Infrastructure.Repositories
         }
 
         public async Task<Response> CustomerCancelRedeem(Guid redeemId)
-
+{
+    try
+    {
+        Response response = await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
+        
+        if (response.Flag)
         {
-            Response response =  await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
-            return response;
+            var redeemHistory = await _context.RedeemGiftHistories
+                .FirstOrDefaultAsync(rh => rh.RedeemHistoryId == redeemId);
 
+            if (redeemHistory != null)
+            {
+                var gift = await _context.Gifts
+                    .FirstOrDefaultAsync(g => g.GiftId == redeemHistory.GiftId);
+
+                if (gift != null)
+                {
+                    gift.GiftQuantity += 1; 
+                    gift.GiftStatus = false;
+                    _context.Gifts.Update(gift);
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
+
+        return response;  
+    }
+    catch (Exception ex)
+    {
+        return new Response { Flag = false, Message = $"Error occurred: {ex.Message}" };
+    }
+}
     }
 }
