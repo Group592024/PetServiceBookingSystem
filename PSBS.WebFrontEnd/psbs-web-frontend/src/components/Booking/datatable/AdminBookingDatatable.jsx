@@ -239,7 +239,7 @@ const AdminBookingDatatable = () => {
             headerAlign: "center",
             renderCell: (params) => {
                 const detailPage =
-                    params.row.serviceTypeName === "Hotel"
+                    params.row.bookingTypeName === "Hotel"
                         ? "RoomBookingDetailPage"
                         : "ServiceBookingDetailPage";
                 return (
