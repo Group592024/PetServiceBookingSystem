@@ -128,7 +128,7 @@ namespace VoucherApi.Presentation.Controllers
 
         // PUT api/<GiftsController>/5
         [HttpPut]
-        [Authorize(Policy = "AdminOrStaff")]
+        [Authorize(Policy = "AdminOrStaffOrCustomer")]
         public async Task<ActionResult<Response>> UpdateGift([FromForm] UpdateGiftDTO updateGift)
         {
             if(updateGift.giftId == Guid.Empty)

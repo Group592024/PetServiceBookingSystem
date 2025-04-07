@@ -12,8 +12,8 @@ using PSBS.HealthCareApi.Infrastructure.Data;
 namespace PSBS.HealthCareApi.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20250304153005_First")]
-    partial class First
+    [Migration("20250407053917_001")]
+    partial class _001
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
