@@ -72,6 +72,7 @@ const AdminBookingDatatable = () => {
             const serviceVariantData = serviceVariantResponse.data.data;
            
             const servicesData = servicesResponse.data.data;
+            console.log("Service Data:", servicesData);
             const updatedBookings = await Promise.all(
                 bookingsData.map(async (booking) => {
                     try {
@@ -116,7 +117,7 @@ const AdminBookingDatatable = () => {
                         const joinedServiceNames = serviceNames.join(", ") || "Unknown";
 
                        // Debug: Log all serviceTypeIds to check what's available
-console.log("Available serviceTypeIds:", servicesData.map(s => s.serviceTypeId));
+console.log("Available serviceTypeIds:", servicesData.map(s => s.serviceType.serviceTypeId));
 
 const healthBookingItems = bookingItems.filter((bItem) => {
     const variant = serviceVariantData.find(
@@ -134,14 +135,12 @@ const healthBookingItems = bookingItems.filter((bItem) => {
     
     // Check if the service has the specific serviceTypeId
     // Using lowercase for case-insensitive comparison
-    return service.serviceTypeId.toLowerCase() === "2e9e9b22-81f8-4cda-900c-5e47d0849b67".toLowerCase();
+    return service.serviceTypeId.toLowerCase() === "2e9e9b22-81f8-4cda-900c-5e47d0849b67".toLowerCase() ;
 });
 
 console.log("Health booking items:", healthBookingItems);
 const petIds = healthBookingItems.map((bItem) => bItem.petId);
-console.log("Pet IDs from health bookings:", petIds);
 const uniquePetIds = Array.from(new Set(petIds));
-console.log("Unique pet IDs:", uniquePetIds);
                         const isMedicalBooking = bookingItems.some(bookingItem => {
                             // Find the service variant for this booking item
                             const variant = serviceVariantData.find(
