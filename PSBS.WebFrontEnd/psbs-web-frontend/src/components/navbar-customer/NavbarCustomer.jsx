@@ -216,13 +216,13 @@ const NavbarCustomer = () => {
           </li>
           <li>
             <NavLink
-              to="/customer/vouchers"
+              to="/customerroom"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
             >
-              <i className="bx bx-wallet"></i>
-              Voucher
+            <i class='bx bx-home-circle' ></i>
+              Room
             </NavLink>
           </li>
         </ul>

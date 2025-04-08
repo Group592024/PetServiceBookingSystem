@@ -165,6 +165,75 @@ Cypress.Commands.add("createTestVoucher", (code, name) => {
     }
   });
 });
+
+
+
+Cypress.Commands.add("deleteNotification", (notificationTitle) => {
+  cy.visit("http://localhost:3000/notification");
+  cy.wait(2000); // Wait for the page to load completely
+  
+  // Check if the notification exists before trying to delete it
+  cy.get("body").then(($body) => {
+    // Check if the notification title exists in the table
+    if ($body.text().includes(notificationTitle)) {
+      // Find the row containing the notification title
+      cy.contains(".MuiDataGrid-cell", notificationTitle)
+        .parents(".MuiDataGrid-row")
+        .within(() => {
+          // Within this row, find the delete button
+          cy.get('button[aria-label="delete"]').click({force: true});
+        });
+      
+      // Handle the confirmation dialog - "Are you sure?"
+      cy.get(".swal2-title").should("contain", "Are you sure?");
+      cy.get(".swal2-confirm").contains("Yes, delete it!").click();
+      
+      // Now wait for the success message or any response after deletion
+      cy.wait(1000);
+      
+      // Check if there's any SweetAlert dialog and close it
+      cy.get("body").then(($body) => {
+        if ($body.find(".swal2-container").length > 0) {
+          cy.get(".swal2-confirm").click({force: true});
+        }
+      });
+      
+      // Wait for UI to update
+      cy.wait(2000);
+      
+      // Check if notification still exists for second deletion
+      cy.get("body").then(($updatedBody) => {
+        if ($updatedBody.text().includes(notificationTitle)) {
+          cy.log(`Notification "${notificationTitle}" still exists, attempting second deletion`);
+          
+          // Second deletion attempt
+          cy.contains(".MuiDataGrid-cell", notificationTitle)
+            .parents(".MuiDataGrid-row")
+            .within(() => {
+              cy.get('button[aria-label="delete"]').click({force: true});
+            });
+          
+          // Handle the second confirmation dialog
+          cy.get(".swal2-title").should("contain", "Are you sure?");
+          cy.get(".swal2-confirm").contains("Yes, delete it!").click();
+          
+          // Close any resulting dialog
+          cy.wait(1000);
+          cy.get("body").then(($body) => {
+            if ($body.find(".swal2-container").length > 0) {
+              cy.get(".swal2-confirm").click({force: true});
+            }
+          });
+        } else {
+          cy.log(`Notification "${notificationTitle}" was fully deleted on first attempt`);
+        }
+      });
+    } else {
+      cy.log(`Notification "${notificationTitle}" not found in the table - no need to delete`);
+    }
+  });
+});
+
 //
 // -- This is a child command --
 // Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
