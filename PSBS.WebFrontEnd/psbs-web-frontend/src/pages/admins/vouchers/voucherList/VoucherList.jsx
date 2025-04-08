@@ -23,7 +23,20 @@ const VoucherList = () => {
 
   // Temporary data
   const columns = [
-    { field: "id", headerName: "ID", width: 100 },
+    {
+      field: "serialNumber",
+      headerName: "No.",
+      headerAlign: "center",
+      align: "center",
+      width: 50,
+      renderCell: (params) => {
+        // Find the index of the current row in the rows array
+        const rowIndex = rows.findIndex(
+          (row) => row.voucherId === params.row.voucherId
+        );
+        return rowIndex + 1;
+      },
+    },
     {
       field: "voucherName",
       headerName: "Voucher Name",

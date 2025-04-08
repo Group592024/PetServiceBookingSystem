@@ -266,13 +266,14 @@ const PetDiaryListPage = () => {
           </div>
         </>
       )}
-      {Array.isArray(categories) && categories.length > 0 && (
+     {addModalOpen && (
         <AddDiaryModal
-          categories={categories}
+          categories={categories || []}
           open={addModalOpen}
           onClose={handleCloseAddModal}
         />
       )}
+
       <ToastContainer />
     </div>
   );
