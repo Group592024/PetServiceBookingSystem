@@ -105,7 +105,9 @@ const ServiceListPage = () => {
 
       {/* Service Section */}
       <div className="flex justify-center p-5">
-        <p className="text-3xl font-bold">Services For Your Pets</p>
+        <p className="text-3xl font-bold" data-testid="test-ne">
+          Services For Your Pets
+        </p>
       </div>
       <ServiceCardList data={data} />
     </div>

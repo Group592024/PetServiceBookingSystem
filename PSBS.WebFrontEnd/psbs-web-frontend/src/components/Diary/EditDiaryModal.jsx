@@ -5,9 +5,11 @@ import sampleImage from "../../assets/sampleUploadImage.jpg";
 import JoditEditor from "jodit-react";
 import Swal from "sweetalert2";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { useParams } from "react-router-dom";
 
 const EditDiaryModal = ({ open, onClose, diary }) => {
   console.log(diary);
+  const { petId } = useParams();
   const petInfo = JSON.parse(localStorage.getItem("petInfo"));
 
   const editor = useRef(null);
@@ -52,11 +54,21 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
 
   // Edit diary processing
   const handleSave = async () => {
-    if (content === "") {
+    const sanitizedContent = content.replace(/<[^>]+>/g, "").trim();
+    console.log(sanitizedContent);
+    if (!sanitizedContent) {
       return Swal.fire({
         icon: "error",
         title: "Error",
         text: "The content can not be empty!",
+      });
+    }
+
+    if (!selectedCategory) {
+      return Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "The category can not be empty!",
       });
     }
 
@@ -72,7 +84,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            pet_ID: petInfo.petId,
+            pet_ID: petId,
             diary_Content: content,
             category: selectedCategory,
           }),
@@ -84,7 +96,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: `Failed to create pet diary: ${errorMessage?.message}`,
+          text: `Failed to update pet diary: ${errorMessage?.message}`,
         });
         return;
       }
@@ -101,6 +113,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
       setContent("");
       onClose();
     } catch (error) {
+      console.log(error);
       Swal.fire({
         icon: "error",
         title: "Error",
@@ -115,7 +128,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
     try {
       const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        `http://localhost:5050/api/PetDiary/categories/${petInfo?.petId}`,
+        `http://localhost:5050/api/PetDiary/categories/${petId}`,
         {
           method: "GET",
           headers: {
@@ -145,7 +158,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} data-testid="edit-diary-modal">
       <div>
         <Stack
           spacing={4}
@@ -171,6 +184,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
 
           <div className="flex justify-start">
             <Autocomplete
+              data-testid="category-select"
               options={categories}
               getOptionLabel={(option) => option}
               value={selectedCategory}

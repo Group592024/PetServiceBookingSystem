@@ -1,10 +1,8 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.DependencyInjection;
 using FacilityServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
-using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +31,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalhost3000", policyBuilder =>
     {
         policyBuilder
-            .WithOrigins("http://localhost:3000")  
+            .WithOrigins("http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -80,8 +78,9 @@ var app = builder.Build();
 //}
 
 // Lấy đường dẫn HLS từ cấu hình
-// var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
-// var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+//var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
+//var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+
 
 // Cấu hình Static Files cho Images
 app.UseStaticFiles(new StaticFileOptions

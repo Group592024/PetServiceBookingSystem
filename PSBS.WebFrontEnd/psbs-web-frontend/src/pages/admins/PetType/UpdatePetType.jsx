@@ -192,6 +192,7 @@ const UpdatePetType = () => {
                 <div>
                   <p className="font-semibold text-2xl ">Pet Type Name:</p>
                   <TextField
+                  data-testid="petType-name-input"
                     type="text"
                     value={petType.petType_Name}
                     sx={{
@@ -218,6 +219,7 @@ const UpdatePetType = () => {
                     Pet Type Description:
                   </p>
                   <TextField
+                    data-testid="petType-description-input"
                     type="text"
                     sx={{
                       borderRadius: "10px",
@@ -251,6 +253,7 @@ const UpdatePetType = () => {
                   <div>
                     <label>
                       <input
+                        data-testid="petType-isDelete-false"
                         type="radio"
                         name="petTypeStatus"
                         value="false"
@@ -263,6 +266,7 @@ const UpdatePetType = () => {
                   <div>
                     <label>
                       <input
+                        data-testid="petType-isDelete-true"
                         type="radio"
                         name="petTypeStatus"
                         value="true"
