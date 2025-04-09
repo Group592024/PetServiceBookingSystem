@@ -84,11 +84,10 @@ const AddVariantModal = ({
           "Service Variant Added Successfully!",
           "success"
         );
-        
-        navigate(`/service/${localStorage.getItem('serviceId')}`)
+
+        navigate(`/service/${id}`);
         localStorage.removeItem("serviceId");
         window.location.reload();
-        
       } else {
         console.error("Failed create");
         Swal.fire(
@@ -110,6 +109,7 @@ const AddVariantModal = ({
   return (
     <div>
       <Modal
+        data-testid="add-variant-modal"
         open={open}
         onClose={handleClose}
         slotProps={{
@@ -144,6 +144,7 @@ const AddVariantModal = ({
                   <div>
                     <p className="font-semibold text-2xl ">Service Content:</p>
                     <TextField
+                      data-testid="variant-content-input"
                       type="text"
                       value={variant.serviceContent}
                       multiline
@@ -172,6 +173,7 @@ const AddVariantModal = ({
                   <div>
                     <p className="font-semibold text-2xl ">Service Price:</p>
                     <TextField
+                      data-testid="variant-price-input"
                       type="text"
                       sx={{
                         borderRadius: "10px",
@@ -199,6 +201,7 @@ const AddVariantModal = ({
 
                   <div className="flex justify-between">
                     <button
+                      data-testid="submit-button-variant"
                       type="submit"
                       className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
                   hover:bg-customLightPrimary hover:text-customPrimary"

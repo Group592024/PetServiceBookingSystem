@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Sidebar from '../../../components/sidebar/Sidebar';
-import Navbar from '../../../components/navbar/Navbar';
-import { useNavigate, useParams } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import { MenuItem, TextField, Select } from '@mui/material';
+import React, { useEffect, useRef, useState } from "react";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
+import { MenuItem, TextField, Select } from "@mui/material";
 
 const UpdateService = () => {
   //set state
@@ -11,9 +11,9 @@ const UpdateService = () => {
   const { id } = useParams();
   const sidebarRef = useRef(null);
   const [service, setService] = useState({
-    serviceTypeId: '',
-    serviceName: '',
-    serviceDescription: '',
+    serviceTypeId: "",
+    serviceName: "",
+    serviceDescription: "",
     serviceImage: null,
   });
   const [selectedOption, setSelectedOption] = useState(service.isDeleted);
@@ -39,7 +39,7 @@ const UpdateService = () => {
     try {
       const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5050/api/Service/serviceTypes',
+        "http://localhost:5050/api/Service/serviceTypes",
         {
           method: "GET",
           headers: {
@@ -64,7 +64,7 @@ const UpdateService = () => {
         setServiceType(result);
       }
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -76,20 +76,20 @@ const UpdateService = () => {
   const handleImageChange = (event) => {
     const fileImage = event.target.files[0];
 
-    console.log('file ne:', event.target.files);
+    console.log("file ne:", event.target.files);
 
     if (fileImage) {
       console.log(fileImage.type);
 
       const validImageTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
       ];
       if (!validImageTypes.includes(fileImage.type)) {
         Swal.fire({
-          title: 'Only accept image files!',
+          title: "Only accept image files!",
           showClass: {
             popup: `
             animate__animated
@@ -105,7 +105,7 @@ const UpdateService = () => {
           `,
           },
         });
-        event.target.value = '';
+        event.target.value = "";
         return;
       } else {
         const tmpUrl = URL.createObjectURL(fileImage);
@@ -117,7 +117,7 @@ const UpdateService = () => {
       }
     }
 
-    event.target.value = '';
+    event.target.value = "";
   };
 
   //api fill data
@@ -136,17 +136,17 @@ const UpdateService = () => {
           }
         );
 
-        const data=await response.json();
+        const data = await response.json();
 
         setService(data.data);
         setSelectedOption(data.data.isDeleted);
         setImageDisplay(`http://localhost:5023${data.data.serviceImage}`);
       } catch (error) {
-        console.error('Failed fetching api', error);
+        console.error("Failed fetching api", error);
         Swal.fire(
-          'Update Service',
-          'Failed to load the service data!',
-          'error'
+          "Update Service",
+          "Failed to load the service data!",
+          "error"
         );
       }
     };
@@ -155,7 +155,7 @@ const UpdateService = () => {
   }, []);
 
   const handleOptionChange = (event) => {
-    setSelectedOption(event.target.value === 'true');
+    setSelectedOption(event.target.value === "true");
   };
 
   console.log(selectedOption);
@@ -163,43 +163,42 @@ const UpdateService = () => {
 
   //validate
   const handleSubmit = async (event) => {
-  
     //api update
     const formData = new FormData();
-    formData.append('serviceTypeId', service.serviceTypeId);
-    formData.append('serviceName', service.serviceName);
-    formData.append('serviceDescription', service.serviceDescription);
-    formData.append('imageFile', service.serviceImage);
-    formData.append('isDeleted', selectedOption);
+    formData.append("serviceTypeId", service.serviceTypeId);
+    formData.append("serviceName", service.serviceName);
+    formData.append("serviceDescription", service.serviceDescription);
+    formData.append("imageFile", service.serviceImage);
+    formData.append("isDeleted", selectedOption);
 
     try {
       const token = sessionStorage.getItem("token");
       const response = await fetch(`http://localhost:5050/api/Service/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
 
       if (response.ok) {
-        Swal.fire('Update Service', 'Service Updated Successfully!', 'success');
-        navigate('/service');
-        console.log('Update successfully');
+        Swal.fire("Update Service", "Service Updated Successfully!", "success");
+        navigate("/service");
+        console.log("Update successfully");
       } else {
-        console.error('Failed update');
-        Swal.fire('Update Service', 'Failed to update service!', 'error');
-        navigate('/service');
-        console.log('Update successfully');
+        console.error("Failed update");
+        Swal.fire("Update Service", "Failed to update service!", "error");
+        navigate("/service");
+        console.log("Update successfully");
       }
     } catch (error) {
-      console.error('Failed fetching api', error);
-      Swal.fire('Update Service', 'Failed to update service!', 'error');
+      console.error("Failed fetching api", error);
+      Swal.fire("Update Service", "Failed to update service!", "error");
     }
   };
 
   const handleUpdate = (e) => {
-    if (service.serviceName == '' && service.serviceDescription == '') {
+    if (service.serviceName == "" && service.serviceDescription == "") {
       setError({
         description: true,
         name: true,
@@ -207,7 +206,7 @@ const UpdateService = () => {
       return;
     }
 
-    if (service.serviceName == '') {
+    if (service.serviceName == "") {
       setError((prev) => ({
         ...prev,
         name: true,
@@ -215,7 +214,7 @@ const UpdateService = () => {
       return;
     }
 
-    if (service.serviceDescription == '') {
+    if (service.serviceDescription == "") {
       setError((prev) => ({
         ...prev,
         description: true,
@@ -224,14 +223,14 @@ const UpdateService = () => {
     }
 
     Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you want to update this item? This action may change the booking information associated with this service.',
-      icon: 'warning',
+      title: "Are you sure?",
+      text: "Do you want to update this item? This action may change the booking information associated with this service.",
+      icon: "warning",
       showCancelButton: true,
-      confirmButtonText: 'Continue to Update',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
+      confirmButtonText: "Continue to Update",
+      cancelButtonText: "Cancel",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
     }).then(async (result) => {
       if (result.isConfirmed) {
         await handleSubmit(e);
@@ -243,29 +242,30 @@ const UpdateService = () => {
   return (
     <div>
       <Sidebar ref={sidebarRef} />
-      <div class='content'>
+      <div class="content">
         <Navbar sidebarRef={sidebarRef} />
         <main>
-          <div className='header'>
-            <div className='left flex justify-center w-full'>
-              <h1 className=''>Update Service</h1>
+          <div className="header">
+            <div className="left flex justify-center w-full">
+              <h1 className="">Update Service</h1>
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
-              <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
+            <div className="p-10 bg-customLightPrimary rounded-lg flex justify-between">
+              <div className="p-10 w-1/2 bg-customLight rounded-3xl">
                 <div>
-                  <p className='font-semibold text-2xl '>Service Name:</p>
+                  <p className="font-semibold text-2xl ">Service Name:</p>
                   <TextField
-                    type='text'
+                    data-testid="name-input-service"
+                    type="text"
                     value={service.serviceName}
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
-                    className=' rounded-3xl p-3 m-10 w-full'
+                    className=" rounded-3xl p-3 m-10 w-full"
                     onChange={(e) => {
                       setService((prev) => ({
                         ...prev,
@@ -277,14 +277,14 @@ const UpdateService = () => {
                       }));
                     }}
                     error={error.name}
-                    helperText={error.name ? 'Service Name is required.' : ''}
+                    helperText={error.name ? "Service Name is required." : ""}
                   />
                 </div>
 
                 <div>
-                  <p className='font-semibold text-2xl '>Service Type:</p>
+                  <p className="font-semibold text-2xl ">Service Type:</p>
                   <Select
-                    labelId='demo-simple-select-label'
+                    labelId="demo-simple-select-label"
                     value={service.serviceTypeId}
                     onChange={(e) => {
                       setService((prev) => ({
@@ -294,9 +294,9 @@ const UpdateService = () => {
                     }}
                     fullWidth
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
                   >
                     {serviceType.map((item, index) => (
@@ -311,20 +311,21 @@ const UpdateService = () => {
                 </div>
 
                 <div>
-                  <p className='font-semibold text-2xl '>
+                  <p className="font-semibold text-2xl ">
                     Service Description:
                   </p>
                   <TextField
-                    type='text'
+                    data-testid="description-input-service"
+                    type="text"
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
                     multiline
-                    className='rounded-3xl p-3 m-5
-                    w-full resize-none'
-                    rows='7'
+                    className="rounded-3xl p-3 m-5
+                    w-full resize-none"
+                    rows="7"
                     value={service.serviceDescription}
                     onChange={(e) => {
                       setService((prev) => ({
@@ -339,19 +340,19 @@ const UpdateService = () => {
                     error={error.description}
                     helperText={
                       error.description
-                        ? 'Service Description is required.'
-                        : ''
+                        ? "Service Description is required."
+                        : ""
                     }
                   />
                 </div>
-                <div className='p-5 '>
-                  <p className='font-semibold text-2xl '>Service Status:</p>
+                <div className="p-5 ">
+                  <p className="font-semibold text-2xl ">Service Status:</p>
                   <div>
                     <label>
                       <input
-                        type='radio'
-                        name='serviceStatus'
-                        value='false'
+                        type="radio"
+                        name="serviceStatus"
+                        value="false"
                         checked={selectedOption === false}
                         onChange={handleOptionChange}
                       />
@@ -361,9 +362,9 @@ const UpdateService = () => {
                   <div>
                     <label>
                       <input
-                        type='radio'
-                        name='serviceStatus'
-                        value='true'
+                        type="radio"
+                        name="serviceStatus"
+                        value="true"
                         checked={selectedOption === true}
                         onChange={handleOptionChange}
                       />
@@ -372,11 +373,12 @@ const UpdateService = () => {
                   </div>
                 </div>
 
-                <div className='flex justify-between'>
+                <div className="flex justify-between">
                   <button
-                    type='submit'
-                    className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
-                  hover:bg-customLightPrimary hover:text-customPrimary'
+                    data-testid="update-button-service"
+                    type="submit"
+                    className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                  hover:bg-customLightPrimary hover:text-customPrimary"
                     onClick={(e) => {
                       e.preventDefault();
                       handleUpdate(e);
@@ -386,30 +388,30 @@ const UpdateService = () => {
                   </button>
 
                   <button
-                    className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
-                  hover:bg-customPrimary hover:text-customLightPrimary'
+                    className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
+                  hover:bg-customPrimary hover:text-customLightPrimary"
                     onClick={(e) => {
                       e.preventDefault();
-                      navigate('/service');
+                      navigate("/service");
                     }}
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-              <div className='w-1/2 flex justify-center items-center'>
+              <div className="w-1/2 flex justify-center items-center">
                 <img
-                  className='w-3/4 rounded-3xl'
+                  className="w-3/4 rounded-3xl"
                   src={imageDisplay}
-                  alt='sampleImage'
-                  onClick={(e) => document.getElementById('inputFile').click()}
+                  alt="sampleImage"
+                  onClick={(e) => document.getElementById("inputFile").click()}
                 />
                 <input
-                  type='file'
-                  accept='image/*'
-                  id='inputFile'
+                  type="file"
+                  accept="image/*"
+                  id="inputFile"
                   onChange={(e) => handleImageChange(e)}
-                  className='hidden'
+                  className="hidden"
                 />
               </div>
             </div>

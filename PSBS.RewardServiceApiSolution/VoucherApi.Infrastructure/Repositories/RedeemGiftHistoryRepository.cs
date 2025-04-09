@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
@@ -124,31 +125,40 @@ namespace VoucherApi.Infrastructure.Repositories
 
         public async Task<Response> CustomerCancelRedeem(Guid redeemId)
 {
+            LogExceptions.LogToConsole("Chay trong ham ne cau oi hahah");
     try
     {
-        Response response = await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
-        
-        if (response.Flag)
-        {
-            var redeemHistory = await _context.RedeemGiftHistories
-                .FirstOrDefaultAsync(rh => rh.RedeemHistoryId == redeemId);
+                var redeemHistory = await _context.RedeemGiftHistories.FindAsync(redeemId);
 
-            if (redeemHistory != null)
-            {
-                var gift = await _context.Gifts
-                    .FirstOrDefaultAsync(g => g.GiftId == redeemHistory.GiftId);
-
-                if (gift != null)
+                if (redeemHistory == null)
                 {
-                    gift.GiftQuantity += 1; 
-                    gift.GiftStatus = false;
-                    _context.Gifts.Update(gift);
-                    await _context.SaveChangesAsync();
+                    return new Response(false, "Redeem history not found.");
                 }
-            }
-        }
+                if(redeemHistory.ReddeemStautsId == Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"))
+                {
+                    return new Response(false, "Redeem history is now in the cancle state");
+                }
+                if (redeemHistory.ReddeemStautsId == Guid.Parse("33b84495-c2a6-4b3e-98ca-f13d9c150946"))
+                {
+                    return new Response(false, "Redeem history is now in the picked up state");
+                }
 
-        return response;  
+                var gift = await _context.Gifts.FindAsync(redeemHistory.GiftId);                 
+                if(gift == null)
+                {
+                    return new Response(false, "The Gift cannot be found.");
+                }
+               
+                    var currentQuantity = gift.GiftQuantity;
+                    gift.GiftQuantity = 1 + currentQuantity;
+                    gift.GiftStatus = false;
+                    redeemHistory.ReddeemStautsId = Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9");
+                    _context.Gifts.Update(gift);
+                    _context.RedeemGiftHistories.Update(redeemHistory);
+                    await _context.SaveChangesAsync();
+                  
+                
+                return new Response(true, "The Redeemption is successfully cancelled");  
     }
     catch (Exception ex)
     {

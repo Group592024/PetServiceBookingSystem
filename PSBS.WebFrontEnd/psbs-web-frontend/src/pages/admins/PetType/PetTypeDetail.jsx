@@ -32,8 +32,6 @@ const PetTypeDetail = () => {
     if (id) fetchDetail();
   }, [id]);
 
-  const imageURL = `http://localhost:5010${detail.petType_Image}`;
-
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -54,7 +52,7 @@ const PetTypeDetail = () => {
                   type="text"
                   className="bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold"
                 >
-                  {detail.petType_Name}
+                  {detail?.petType_Name}
                 </p>
               </div>
               <div>
@@ -63,15 +61,19 @@ const PetTypeDetail = () => {
                   type="text"
                   className="bg-customGrey rounded-3xl p-3 m-5 w-full shadow-lg text-xl font-semibold"
                 >
-                  {detail.petType_Description}
+                  {detail?.petType_Description}
                 </p>
               </div>
             </div>
             <div className="w-1/2 flex justify-center items-center">
               <img
                 className="w-3/4 rounded-3xl"
-                src={imageURL}
-                alt={detail.petType_Name}
+                src={
+                  detail?.petType_Image
+                    ? `http://localhost:5010${detail?.petType_Image}`
+                    : "/default-image.jpg"
+                }
+                alt={detail?.petType_Name}
               />
             </div>
           </div>

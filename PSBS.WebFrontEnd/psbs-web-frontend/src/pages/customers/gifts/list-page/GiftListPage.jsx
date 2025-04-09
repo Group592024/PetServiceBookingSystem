@@ -73,6 +73,14 @@ const GiftListPage = () => {
           <h1 className="text-4xl font-bold text-blue-800">
             Gift List
           </h1>
+        <div className="flex items-center gap-2">
+        <button
+            onClick={() => navigate('/customer/vouchers')}
+            className="flex items-center gap-2 px-6 py-3 text-lg bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          >
+       <i class='bx bx-gift'></i>
+            Voucher
+          </button>
           <button
             onClick={() => navigate('/customer/redeemHistory')}
             className="flex items-center gap-2 px-6 py-3 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
@@ -91,6 +99,7 @@ const GiftListPage = () => {
             </svg>
             History
           </button>
+        </div>
         </motion.div>
         <motion.div 
           initial={{ opacity: 0 }}

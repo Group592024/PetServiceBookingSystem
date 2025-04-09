@@ -72,6 +72,7 @@ const AdminBookingDatatable = () => {
             const serviceVariantData = serviceVariantResponse.data.data;
 
             const servicesData = servicesResponse.data.data;
+            console.log("Service Data:", servicesData);
             const updatedBookings = await Promise.all(
                 bookingsData.map(async (booking) => {
                     try {
@@ -115,6 +116,7 @@ const AdminBookingDatatable = () => {
                         console.log(serviceNames);
                         const joinedServiceNames = serviceNames.join(", ") || "Unknown";
 
+
                         // Debug: Log all serviceTypeIds to check what's available
                         console.log("Available serviceTypeIds:", servicesData.map(s => s.serviceTypeId));
 
@@ -142,6 +144,7 @@ const AdminBookingDatatable = () => {
                         console.log("Pet IDs from health bookings:", petIds);
                         const uniquePetIds = Array.from(new Set(petIds));
                         console.log("Unique pet IDs:", uniquePetIds);
+
                         const isMedicalBooking = bookingItems.some(bookingItem => {
                             // Find the service variant for this booking item
                             const variant = serviceVariantData.find(

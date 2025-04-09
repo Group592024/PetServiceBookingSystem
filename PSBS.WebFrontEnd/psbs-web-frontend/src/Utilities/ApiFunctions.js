@@ -58,6 +58,7 @@ const handleResponseWithToken = (response) => {
       icon: "error",
       confirmButtonText: "OK",
     });
+    return response.data;
   }
 };
 

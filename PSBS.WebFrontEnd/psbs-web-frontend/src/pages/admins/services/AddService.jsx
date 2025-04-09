@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import Sidebar from '../../../components/sidebar/Sidebar';
-import Navbar from '../../../components/navbar/Navbar';
-import sampleImage from '../../../assets/sampleUploadImage.jpg';
-import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom';
-import { MenuItem, TextField, Select } from '@mui/material';
-import AddVariantModal from '../../../components/services/AddVariantModal';
+import React, { useEffect, useRef, useState } from "react";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
+import sampleImage from "../../../assets/sampleUploadImage.jpg";
+import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
+import { MenuItem, TextField, Select } from "@mui/material";
+import AddVariantModal from "../../../components/services/AddVariantModal";
 
 const AddService = () => {
   const navigate = useNavigate();
@@ -13,9 +13,9 @@ const AddService = () => {
   const [tmpImage, setTmpImage] = useState(sampleImage);
   const [open, setOpen] = useState(false);
   const [service, setService] = useState({
-    serviceTypeId: '',
-    serviceName: '',
-    serviceDescription: '',
+    serviceTypeId: "",
+    serviceName: "",
+    serviceDescription: "",
     selectedImage: null,
   });
 
@@ -30,7 +30,7 @@ const AddService = () => {
     try {
       const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        'http://localhost:5050/api/Service/serviceTypes',
+        "http://localhost:5050/api/Service/serviceTypes",
         {
           method: "GET",
           headers: {
@@ -55,7 +55,7 @@ const AddService = () => {
         setServiceType(result);
       }
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.error("Error fetching data: ", error);
     }
   };
 
@@ -68,14 +68,14 @@ const AddService = () => {
 
     if (fileImage) {
       const validImageTypes = [
-        'image/jpeg',
-        'image/png',
-        'image/gif',
-        'image/webp',
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
       ];
       if (!validImageTypes.includes(fileImage.type)) {
         Swal.fire({
-          title: 'Only accept image files!',
+          title: "Only accept image files!",
           showClass: {
             popup: `
                  animate__animated
@@ -91,7 +91,7 @@ const AddService = () => {
                `,
           },
         });
-        event.target.value = '';
+        event.target.value = "";
         return;
       } else {
         const tmpUrl = URL.createObjectURL(fileImage);
@@ -102,15 +102,13 @@ const AddService = () => {
         setTmpImage(tmpUrl);
       }
     }
-    event.target.value = '';
+    event.target.value = "";
   };
-
- 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (service.serviceName == '' && service.serviceDescription == '') {
+    if (service.serviceName == "" && service.serviceDescription == "") {
       setError({
         description: true,
         name: true,
@@ -118,7 +116,7 @@ const AddService = () => {
       return;
     }
 
-    if (service.serviceName == '') {
+    if (service.serviceName == "") {
       setError((prev) => ({
         ...prev,
         name: true,
@@ -126,7 +124,7 @@ const AddService = () => {
       return;
     }
 
-    if (service.serviceDescription == '') {
+    if (service.serviceDescription == "") {
       setError((prev) => ({
         ...prev,
         description: true,
@@ -136,7 +134,7 @@ const AddService = () => {
 
     if (service.selectedImage == null) {
       Swal.fire({
-        title: 'Service Image is required!',
+        title: "Service Image is required!",
         showClass: {
           popup: `
                  animate__animated
@@ -156,85 +154,85 @@ const AddService = () => {
     }
 
     const formData = new FormData();
-    formData.append('serviceTypeId', service.serviceTypeId);
-    formData.append('serviceName', service.serviceName);
-    formData.append('serviceDescription', service.serviceDescription);
-    formData.append('imageFile', service.selectedImage);
+    formData.append("serviceTypeId", service.serviceTypeId);
+    formData.append("serviceName", service.serviceName);
+    formData.append("serviceDescription", service.serviceDescription);
+    formData.append("imageFile", service.selectedImage);
 
     try {
       const token = sessionStorage.getItem("token");
-      const response = await fetch('http://localhost:5050/api/Service', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5050/api/Service", {
+        method: "POST",
         body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
-        }
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem('serviceId', data.data.serviceId);
+        localStorage.setItem("serviceId", data.data.serviceId);
 
         setService({
-          serviceTypeId: '',
-          serviceName: '',
-          serviceDescription: '',
+          serviceTypeId: "",
+          serviceName: "",
+          serviceDescription: "",
           selectedImage: null,
         });
 
         Swal.fire(
-          'Add New Service',
-          'Service Added Successfully! Now you should add at least one service variant for this service!',
-          'success'
+          "Add New Service",
+          "Service Added Successfully! Now you should add at least one service variant for this service!",
+          "success"
         );
 
         //hien popup add variant
 
         setOpen(true);
       } else {
-        Swal.fire('Add New Service', 'Failed To Add Service!', 'error');
-        navigate('/petType/add');
-        console.error('Failed create');
+        Swal.fire("Add New Service", "Failed To Add Service!", "error");
+        navigate("/service/add");
+        console.error("Failed create");
       }
     } catch (error) {
-      console.error('Failed fetching api', error);
-      Swal.fire('Add New Service', 'Failed To Add Service!', 'error');
-      navigate('/petType/add');
-      console.error('Failed create');
+      console.error("Failed fetching api", error);
+      Swal.fire("Add New Service", "Failed To Add Service!", "error");
+      navigate("/service/add");
+      console.error("Failed create");
     }
   };
 
   return (
     <div>
       <Sidebar ref={sidebarRef} />
-      <div class='content'>
+      <div class="content">
         <Navbar sidebarRef={sidebarRef} />
         <AddVariantModal
-          id={localStorage.getItem('serviceId')}
+          id={localStorage.getItem("serviceId")}
           open={open}
           handleClose={setOpen}
           disableBackdrop={true}
         />
         <main>
-          <div className='header'>
-            <div className='left flex justify-center w-full'>
-              <h1 className=''>Add New Service</h1>
+          <div className="header">
+            <div className="left flex justify-center w-full">
+              <h1 className="">Add New Service</h1>
             </div>
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div className='p-10 bg-customLightPrimary rounded-lg flex justify-between'>
-              <div className='p-10 w-1/2 bg-customLight rounded-3xl'>
+            <div className="p-10 bg-customLightPrimary rounded-lg flex justify-between">
+              <div className="p-10 w-1/2 bg-customLight rounded-3xl">
                 <div>
-                  <p className='font-semibold text-2xl '>Service Name:</p>
+                  <p className="font-semibold text-2xl ">Service Name:</p>
                   <TextField
-                    type='text'
+                    type="text"
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
-                    className=' rounded-3xl p-3 m-10 w-full'
+                    className=" rounded-3xl p-3 m-10 w-full"
                     onChange={(e) => {
                       setService((prev) => ({
                         ...prev,
@@ -246,14 +244,14 @@ const AddService = () => {
                       }));
                     }}
                     error={error.name}
-                    helperText={error.name ? 'Service Name is required.' : ''}
+                    helperText={error.name ? "Service Name is required." : ""}
                   />
                 </div>
 
                 <div>
-                  <p className='font-semibold text-2xl '>Service Type:</p>
+                  <p className="font-semibold text-2xl ">Service Type:</p>
                   <Select
-                    labelId='demo-simple-select-label'
+                    labelId="demo-simple-select-label"
                     value={service.serviceTypeId}
                     onChange={(e) => {
                       setService((prev) => ({
@@ -263,9 +261,9 @@ const AddService = () => {
                     }}
                     fullWidth
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
                   >
                     {serviceType.map((item, index) => (
@@ -280,20 +278,21 @@ const AddService = () => {
                 </div>
 
                 <div>
-                  <p className='font-semibold text-2xl '>
+                  <p className="font-semibold text-2xl ">
                     Service Description:
                   </p>
                   <TextField
-                    type='text'
+                    data-testid="description-textarea-service"
+                    type="text"
                     sx={{
-                      borderRadius: '10px',
-                      marginBottom: '20px',
-                      marginTop: '20px',
+                      borderRadius: "10px",
+                      marginBottom: "20px",
+                      marginTop: "20px",
                     }}
                     multiline
-                    className='rounded-3xl p-3 m-5
-                    w-full resize-none'
-                    rows='7'
+                    className="rounded-3xl p-3 m-5
+                    w-full resize-none"
+                    rows="7"
                     onChange={(e) => {
                       setService((prev) => ({
                         ...prev,
@@ -307,46 +306,49 @@ const AddService = () => {
                     error={error.description}
                     helperText={
                       error.description
-                        ? 'Service Description is required.'
-                        : ''
+                        ? "Service Description is required."
+                        : ""
                     }
                   />
                 </div>
 
-                <div className='flex justify-between'>
+                <div className="flex justify-between">
                   <button
-                    type='submit'
-                    className='bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
-                  hover:bg-customLightPrimary hover:text-customPrimary'
+                    data-testid="save-button-service"
+                    type="submit"
+                    className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
+                  hover:bg-customLightPrimary hover:text-customPrimary"
                   >
                     Save
                   </button>
 
                   <button
-                    className='bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
-                  hover:bg-customPrimary hover:text-customLightPrimary'
+                    data-testid="cancel-button-service"
+                    className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
+                  hover:bg-customPrimary hover:text-customLightPrimary"
                     onClick={(e) => {
                       e.preventDefault();
-                      navigate('/service');
+                      navigate("/service");
                     }}
                   >
                     Cancel
                   </button>
                 </div>
               </div>
-              <div className='w-1/2 flex justify-center items-center'>
+              <div className="w-1/2 flex justify-center items-center">
                 <img
-                  className='w-3/4 rounded-3xl'
+                  data-testid="image-button-service"
+                  className="w-3/4 rounded-3xl"
                   src={tmpImage}
-                  alt='sampleImage'
-                  onClick={(e) => document.getElementById('inputFile').click()}
+                  alt="sampleImage"
+                  onClick={(e) => document.getElementById("inputFile").click()}
                 />
                 <input
-                  type='file'
-                  accept='image/*'
-                  id='inputFile'
+                  type="file"
+                  accept="image/*"
+                  id="inputFile"
                   onChange={(e) => handleImageChange(e)}
-                  className='hidden'
+                  className="hidden"
                 />
               </div>
             </div>
