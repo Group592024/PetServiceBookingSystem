@@ -11,13 +11,13 @@ import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import { deleteData, postData, updateData } from "../../Utilities/ApiFunctions";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import CreateNotificationModal from "../../pages/admins/notification/addNotiForm/addModal";
-import UpdateNotificationModal from "../../pages/admins/notification/updateNotification/updateModal";
-import SelectReceiverModal from "../../pages/admins/notification/pushNotification/PushModal";
-import NotificationDetailModal from "../../pages/admins/notification/detailNotiform/DetailNotification";
-const DatatableNotification = ({
+import CameraDetailModal from "../../pages/admins/camfeed/camDetail/CamDetail";
+import UpdateCameraModal from "../../pages/admins/camfeed/camEdit/CamEdit";
+import CreateCameraModal from "../../pages/admins/camfeed/camAdd/CamAdd";
+import CameraModal from "../../pages/admins/camfeed/videoFeed/VideoFeed";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+const DatatableCamera = ({
   columns,
   rows,
   apiPath,
@@ -31,7 +31,8 @@ const DatatableNotification = ({
   const [selectedData, setSelectedData] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const handleCreateNotification = async (values) => {
-    // Send the data to your API here
+    console.log("Notification to update:", values);
+ 
     try {
       const response = await postData(`${apiPath}`, values);
       if (response.flag) {
@@ -60,9 +61,9 @@ const DatatableNotification = ({
 
   const handleUpdateNotification = async (values) => {
     console.log("Notification to update:", values);
-    // Send the data to your API here
+  
     try {
-      const response = await updateData(`${apiPath}`, values);
+      const response = await updateData(`${apiPath}/`+values.cameraId, values);
       if (response.flag) {
         Swal.fire({
           title: "Success!",
@@ -75,6 +76,7 @@ const DatatableNotification = ({
             row[rowId] === values[rowId] ? { ...row, ...response.data } : row
           )
         );
+        return response; 
       } else {
         Swal.fire({
           title: "Error!",
@@ -82,10 +84,12 @@ const DatatableNotification = ({
           icon: "error",
           confirmButtonText: "OK",
         });
+        return response; 
       }
     } catch (error) {
       console.error("Error submitting data:", error);
       toast.error("Failed to submit data.");
+      throw error;
     }
   };
   const handlePushNotification = async (values) => {
@@ -169,7 +173,7 @@ const DatatableNotification = ({
                     );
                   }
                 } else {
-                  toast.error("Failed to delete user.");
+                  toast.error("Failed to delete the camera.");
                 }
               } catch (error) {
                 toast.error("An error occurred while deleting.");
@@ -200,15 +204,15 @@ const DatatableNotification = ({
             >
               <DeleteIcon color="error" />
             </IconButton>
-            {!params.row.isPushed && (
+        
               <IconButton
                 aria-label="push"
-                onClick={() => handlePush(params.row.notificationId)}
-                title="Push"
+                onClick={() => handlePush(params.row.cameraId)}
+                title="Video"
               >
-                <ArrowCircleUpIcon color="warning" />
+                <VisibilityIcon color="warning" />
               </IconButton>
-            )}
+          
           </div>
         );
       },
@@ -224,6 +228,8 @@ const DatatableNotification = ({
   };
   const handlePush = (row) => {
     setSelectedData(row);
+    console.log("row", row);
+    console.log("daya", selectedData);
     setPushModalOpen(true);
   };
   const handleDetailOpen = (row) => {
@@ -255,30 +261,25 @@ const DatatableNotification = ({
         pageSizeOptions={[5, 10, 15, 20]}
       />
       <ToastContainer />
-      <CreateNotificationModal
+      <CreateCameraModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreate={handleCreateNotification}
       />
-      <UpdateNotificationModal
+      <UpdateCameraModal
         open={isEditModalOpen}
         onClose={() => setEditIsModalOpen(false)}
         onUpdate={handleUpdateNotification}
-        initialNotification={selectedData}
+        initialCamera={selectedData}
       />
-      <SelectReceiverModal
-        open={isPushModalOpen}
-        onClose={() => setPushModalOpen(false)}
-        onConfirm={handlePushNotification}
-        initId={selectedData}
+      <CameraDetailModal
+       open={isDetailModalOpen}
+       onClose={() => setIsDetailModalOpen(false)}
+       camera={selectedData} 
       />
-      <NotificationDetailModal
-        open={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        notification={selectedData}
-      />
+     <CameraModal cameraId={selectedData} onClose={() => setPushModalOpen(false)} open={isPushModalOpen} />
     </div>
   );
 };
 
-export default DatatableNotification;
+export default DatatableCamera;

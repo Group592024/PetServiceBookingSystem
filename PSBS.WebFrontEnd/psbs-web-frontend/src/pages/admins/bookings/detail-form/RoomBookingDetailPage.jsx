@@ -6,6 +6,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
 import { motion } from "framer-motion";
+import AssignCamera from "../../camfeed/assignCamera/AssignCamera";
 
 const RoomBookingDetailPage = () => {
   const sidebarRef = useRef(null);
@@ -19,7 +20,8 @@ const RoomBookingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
-
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [selectedRoomHistoryId, setSelectedRoomHistoryId] = useState(null);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -45,7 +47,15 @@ const RoomBookingDetailPage = () => {
       console.error("Error fetching pet name:", error);
     }
   };
-
+  const handleOpenAssignModal = (roomHistoryId) => {
+    setSelectedRoomHistoryId(roomHistoryId);
+    setAssignModalOpen(true);
+  };
+  
+  const handleAssignSuccess = () => {
+    // Refresh data or show success message
+    // For example: fetchRoomHistories();
+  };
   const updateRoomHistoryStatus = async (historyId, newStatus) => {
     try {
       const response = await axios.put(
@@ -277,61 +287,7 @@ const RoomBookingDetailPage = () => {
       }
     }
   };
-  const handleCameraSettings = (roomHistoryId) => {
-    // Find the specific room history
-    const roomHistoryItem = roomHistory.find(
-      (item) => item.roomHistoryId === roomHistoryId
-    );
 
-    if (!roomHistoryItem) return;
-
-    Swal.fire({
-      title: "Camera Settings",
-      html: `
-        <div class="text-left">
-          <p class="mb-2"><strong>Room:</strong> ${roomName}</p>
-          <p class="mb-2"><strong>Pet:</strong> ${
-            petNames[roomHistoryItem.petId] || "Unknown"
-          }</p>
-          <p class="mb-4"><strong>Camera ID:</strong> ${
-            roomHistoryItem.cameraId || "Not assigned"
-          }</p>
-          
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Camera Configuration</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Default View</option>
-                <option>Night Vision</option>
-                <option>Wide Angle</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Recording Settings</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Continuous</option>
-                <option>Motion Activated</option>
-                <option>Scheduled</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Save Settings",
-      cancelButtonText: "Cancel",
-      focusConfirm: false,
-      preConfirm: () => {
-        // Here you would typically save the settings to your backend
-        return Promise.resolve();
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Saved!", "Camera settings have been updated.", "success");
-      }
-    });
-  };
 
   if (loading)
     return (
@@ -544,7 +500,7 @@ const RoomBookingDetailPage = () => {
                       </span>
                       <button
                         onClick={() =>
-                          handleCameraSettings(history.roomHistoryId)
+                          handleOpenAssignModal (history.roomHistoryId)
                         }
                         className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
                         title="Camera Settings"
@@ -684,6 +640,12 @@ const RoomBookingDetailPage = () => {
           )}
         </motion.div>
       </div>
+      <AssignCamera 
+  open={assignModalOpen}
+  onClose={() => setAssignModalOpen(false)}
+  roomHistoryId={selectedRoomHistoryId}
+  onSuccess={handleAssignSuccess}
+/>
     </div>
   );
 };

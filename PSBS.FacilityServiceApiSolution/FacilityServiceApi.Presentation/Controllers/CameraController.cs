@@ -1,4 +1,5 @@
 
+using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Repositories;
@@ -102,6 +103,51 @@ namespace FacilityServiceApi.Presentation.Controllers
             var camera = await _camera.GetByIdAsync(id);
             return camera != null ? Ok(camera) : NotFound(new { message = "Camera not found" });
         }
+
+        [HttpGet]
+        [Authorize(Policy = "AdminOrStaff")]
+
+        public async Task<IActionResult> GetAllCameras()
+        {
+            var cameras = await _camera.GetAllAsync();
+           
+            return Ok(new Response(true, "The cameralist is retrieved sucessfully") { Data = cameras});
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "AdminOrStaff")]
+
+        public async Task<IActionResult> CreateCam([FromBody] Camera camera)
+        {
+            var response = await _camera.CreateAsync(camera);
+            return response.Flag ? Ok(response) : BadRequest(response);
+        }
+        [HttpPut]
+        [Authorize(Policy = "AdminOrStaff")]
+        public async Task<IActionResult> UpdateCam(Guid id, [FromBody] Camera camera)
+        {
+            if (id != camera.cameraId)
+            {
+                return BadRequest(new Response(false, "Camera ID mismatch"));
+            }
+
+            var response = await _camera.UpdateAsync(camera);
+            return response.Flag ? Ok(response) : BadRequest(response);
+        }
+
+        [HttpPut("assign")]
+        [Authorize(Policy = "AdminOrStaff")]
+        public async Task<IActionResult> AssignCam(AssignCameraDTO assignCameraDTO)
+        {
+            if (assignCameraDTO is null)
+            {
+                return BadRequest(new Response(false, "The data is null"));
+            }
+
+            var response = await _camera.AssignCamera(assignCameraDTO);
+            return Ok(response);
+        }
+
     }
 
 }
