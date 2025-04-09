@@ -19,6 +19,7 @@ const RoomBookingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -48,9 +49,21 @@ const RoomBookingDetailPage = () => {
 
   const updateRoomHistoryStatus = async (historyId, newStatus) => {
     try {
+      const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to check out this room?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, check out!'
+      });
+
+      if (!result.isConfirmed) return;
+
       const response = await axios.put(
-        `http://localhost:5050/api/RoomHistory/update-status/${historyId}`,
-        { status: newStatus },
+        `http://localhost:5050/api/RoomHistories/Checkout?roomHistoryId=${historyId}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,
@@ -59,34 +72,33 @@ const RoomBookingDetailPage = () => {
       );
 
       if (response.data.flag) {
-        // Update the local state
-        setRoomHistory((prevHistory) =>
-          prevHistory.map((history) =>
-            history.roomHistoryId === historyId
-              ? { ...history, status: newStatus }
-              : history
-          )
+        // Update local state with check out date
+        const updatedHistory = roomHistory.map(history =>
+          history.roomHistoryId === historyId
+            ? {
+              ...history,
+              status: "Checked out",
+              checkOutDate: new Date().toISOString()
+            }
+            : history
         );
 
-        // Check if all room histories are checked out
-        const allCheckedOut = roomHistory.every(
-          (history) => history.status === "Check out"
+        setRoomHistory(updatedHistory);
+
+        await Swal.fire(
+          'Success!',
+          response.data.message || 'Room checked out successfully',
+          'success'
         );
-
-        if (allCheckedOut && bookingStatusName === "Checked in") {
-          handleNextStatus();
-        }
-
-        Swal.fire("Success!", "Room status updated successfully.", "success");
       } else {
-        Swal.fire(
-          "Error!",
-          response.data.message || "Failed to update status.",
-          "error"
-        );
+        throw new Error(response.data.message || 'Failed to check out room');
       }
     } catch (error) {
-      Swal.fire("Error!", "Failed to update room status.", "error");
+      await Swal.fire(
+        'Error!',
+        error.response?.data?.message || error.message || 'Failed to check out room',
+        'error'
+      );
     }
   };
 
@@ -229,17 +241,39 @@ const RoomBookingDetailPage = () => {
     const statusOrder = ["Pending", "Confirmed", "Checked in", "Checked out"];
     const currentIndex = statusOrder.indexOf(bookingStatusName);
 
-    if (currentIndex === -1 || bookingStatusName === "Cancelled") return; // Do nothing if cancelled or unknown status
+    if (currentIndex === -1 || bookingStatusName === "Cancelled") return;
 
     const nextStatus = statusOrder[currentIndex + 1];
 
     try {
-      console.log(bookingId);
+      setStatusLoading(true);
+      // Check if user not paid when VNPay they not Checked in
+      if (nextStatus === "Checked in") {
+        if (!booking.isPaid && paymentTypeName === "VNPay") {
+          await Swal.fire(
+            "Cannot proceed",
+            "You need to pay the bill before changing status",
+            "warning"
+          );
+          return;
+        }
+      }
+      // Check if all rooms are checked out when moving to "Checked out"
+      if (nextStatus === "Checked out") {
+        const allCheckedOut = roomHistory.every(h => h.status === "Checked out");
+        if (!allCheckedOut) {
+          await Swal.fire(
+            "Cannot proceed",
+            "All rooms must be checked out before completing the booking",
+            "warning"
+          );
+          return;
+        }
+      }
+
       const response = await axios.put(
         `http://localhost:5115/Bookings/updateRoomStatus/${bookingId}`,
-        {
-          status: nextStatus,
-        },
+        { status: nextStatus },
         {
           headers: {
             Authorization: `Bearer ${getToken()}`,
@@ -248,35 +282,37 @@ const RoomBookingDetailPage = () => {
       );
 
       if (response.data.flag) {
+        // If moving to "Checked in", update check-in dates
+        if (nextStatus === "Checked in") {
+          const updatedHistory = roomHistory.map(history => ({
+            ...history,
+            checkInDate: new Date().toISOString(),
+            status: "Checked in"
+          }));
+
+          setRoomHistory(updatedHistory);
+        }
+
         setBookingStatusName(nextStatus);
-        Swal.fire(
+        await Swal.fire(
           "Success!",
           `Booking status updated to ${nextStatus}.`,
           "success"
         );
       } else {
-        Swal.fire(
-          "Failed!",
-          response.data.message || "Could not update status.",
-          "error"
-        );
+        throw new Error(response.data.message || "Could not update status");
       }
     } catch (error) {
-      if (error.response) {
-        Swal.fire(
-          "Failed!",
-          error.response.data.message || "Could not update status.",
-          "error"
-        );
-      } else {
-        Swal.fire(
-          "Error!",
-          "An error occurred while updating the status.",
-          "error"
-        );
-      }
+      await Swal.fire(
+        "Failed!",
+        error.response?.data?.message || error.message || "Could not update status.",
+        "error"
+      );
+    } finally {
+      setStatusLoading(false); // End loading
     }
   };
+
   const handleCameraSettings = (roomHistoryId) => {
     // Find the specific room history
     const roomHistoryItem = roomHistory.find(
@@ -290,12 +326,10 @@ const RoomBookingDetailPage = () => {
       html: `
         <div class="text-left">
           <p class="mb-2"><strong>Room:</strong> ${roomName}</p>
-          <p class="mb-2"><strong>Pet:</strong> ${
-            petNames[roomHistoryItem.petId] || "Unknown"
-          }</p>
-          <p class="mb-4"><strong>Camera ID:</strong> ${
-            roomHistoryItem.cameraId || "Not assigned"
-          }</p>
+          <p class="mb-2"><strong>Pet:</strong> ${petNames[roomHistoryItem.petId] || "Unknown"
+        }</p>
+          <p class="mb-4"><strong>Camera ID:</strong> ${roomHistoryItem.cameraId || "Not assigned"
+        }</p>
           
           <div class="space-y-3">
             <div>
@@ -331,6 +365,43 @@ const RoomBookingDetailPage = () => {
         Swal.fire("Saved!", "Camera settings have been updated.", "success");
       }
     });
+  };
+  const handleVNPayPayment = async () => {
+    try {
+      if (!booking) return;
+
+      // Get current path to redirect back after payment
+      const currentPath = window.location.pathname;
+
+      // Create description with booking code and path
+      const description = JSON.stringify({
+        bookingCode: booking.bookingCode.trim(),
+        redirectPath: currentPath
+      });
+
+      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+        booking.totalAmount
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+
+      const vnpayResponse = await fetch(vnpayUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      const vnpayResult = await vnpayResponse.text();
+
+      if (vnpayResult.startsWith("http")) {
+        window.location.href = vnpayResult;
+      } else {
+        throw new Error("VNPay payment initiation failed");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      Swal.fire("Error!", "An error occurred while processing payment.", "error");
+    }
   };
 
   if (loading)
@@ -371,51 +442,63 @@ const RoomBookingDetailPage = () => {
           {["Pending", "Confirmed", "Checked in"].includes(
             bookingStatusName
           ) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 mb-8 text-center"
-            >
-              <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700 font-semibold text-lg">
-                    Current Status:
-                  </span>
-                  <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                      bookingStatusName === "Checked out"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-8 mb-8 text-center"
+              >
+                <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-gray-700 font-semibold text-lg">
+                      Current Status:
+                    </span>
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${bookingStatusName === "Checked out"
                         ? "bg-green-100 text-green-800"
                         : bookingStatusName === "Cancelled"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
+                        }`}
+                    >
+                      {bookingStatusName}
+                    </span>
+                  </div>
+                  <div className="h-8 w-px bg-gray-300 mx-2"></div>
+                  <button
+                    onClick={handleNextStatus}
+                    disabled={statusLoading}
+                    className={`px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3 ${statusLoading ? "opacity-50 cursor-not-allowed" : "hover:from-blue-600 hover:to-blue-700"
+                      }`}
                   >
-                    {bookingStatusName}
-                  </span>
+                    {statusLoading ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                          {/* Loading spinner icon */}
+                        </svg>
+                        Processing...
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-lg">Move to Next Status</span>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </>
+                    )}
+                  </button>
                 </div>
-                <div className="h-8 w-px bg-gray-300 mx-2"></div>
-                <button
-                  onClick={handleNextStatus}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3"
-                >
-                  <span className="text-lg">Move to Next Status</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
           {booking && (
             <motion.div
@@ -457,13 +540,12 @@ const RoomBookingDetailPage = () => {
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        bookingStatusName === "Checked out"
-                          ? "bg-green-100 text-green-800"
-                          : bookingStatusName === "Cancelled"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Checked out"
+                        ? "bg-green-100 text-green-800"
+                        : bookingStatusName === "Cancelled"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
-                      }`}
+                        }`}
                     >
                       {bookingStatusName}
                     </span>
@@ -499,11 +581,10 @@ const RoomBookingDetailPage = () => {
                     Payment Status:
                   </span>{" "}
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      booking.isPaid
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                      }`}
                   >
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
@@ -598,18 +679,39 @@ const RoomBookingDetailPage = () => {
                         <span className="text-gray-800">
                           {new Date(
                             history.bookingStartDate
-                          ).toLocaleDateString()}{" "}
+                          ).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}{" "}
                           -{" "}
                           {new Date(
                             history.bookingEndDate
-                          ).toLocaleDateString()}
+                          ).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: false,
+                          })}
                         </span>
                       </p>
                       <p className="text-gray-700 mt-1">
                         <span className="font-semibold">Check-in:</span>{" "}
                         <span className="text-gray-800">
                           {history.checkInDate
-                            ? new Date(history.checkInDate).toLocaleDateString()
+                            ? new Date(history.checkInDate).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })
                             : "Not checked in"}
                         </span>
                       </p>
@@ -618,31 +720,37 @@ const RoomBookingDetailPage = () => {
                         <span className="text-gray-800">
                           {history.checkOutDate
                             ? new Date(
-                                history.checkOutDate
-                              ).toLocaleDateString()
+                              history.checkOutDate
+                            ).toLocaleDateString("en-GB", {
+                              day: "2-digit",
+                              month: "2-digit",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: false,
+                            })
                             : "Not checked out"}
                         </span>
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          history.status === "Check out"
-                            ? "bg-green-100 text-green-800"
-                            : history.status === "Check in"
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Checked out"
+                          ? "bg-green-100 text-green-800"
+                          : history.status === "Checked in"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-yellow-100 text-yellow-800"
-                        }`}
+                          }`}
                       >
                         {history.status}
                       </span>
                       {bookingStatusName === "Checked in" &&
-                        history.status !== "Check out" && (
+                        history.status !== "Checked out" && (
                           <button
                             onClick={() =>
                               updateRoomHistoryStatus(
                                 history.roomHistoryId,
-                                "Check out"
+                                "Checked out"
                               )
                             }
                             className="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-700 transition duration-300"
@@ -668,20 +776,30 @@ const RoomBookingDetailPage = () => {
 
           {(bookingStatusName === "Pending" ||
             bookingStatusName === "Confirmed") && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
-              className="mt-8 text-center"
-            >
-              <button
-                onClick={handleCancelBooking}
-                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                className="mt-8 text-center space-x-4"
               >
-                Cancel Booking
-              </button>
-            </motion.div>
-          )}
+                {!booking.isPaid &&
+                  paymentTypeName === "VNPay" &&
+                  (
+                    <button
+                      onClick={handleVNPayPayment}
+                      className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                    >
+                      Pay with VNPAY
+                    </button>
+                  )}
+                <button
+                  onClick={handleCancelBooking}
+                  className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                >
+                  Cancel Booking
+                </button>
+              </motion.div>
+            )}
         </motion.div>
       </div>
     </div>
