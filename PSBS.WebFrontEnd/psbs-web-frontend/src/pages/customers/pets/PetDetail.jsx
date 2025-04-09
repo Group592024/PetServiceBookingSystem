@@ -125,7 +125,7 @@ const CustomerPetDetail = () => {
         <div role='status'>
           <svg
             aria-hidden='true'
-            className='inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600'
+            className='inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600'
             viewBox='0 0 100 101'
             fill='none'
             xmlns='http://www.w3.org/2000/svg'
@@ -287,7 +287,7 @@ const CustomerPetDetail = () => {
             </button>
             <button
               onClick={() => navigate(`/list/${pet.petId}`)}
-              className='bg-gradient-to-r from-purple-200 to-purple-300 hover:from-purple-300 hover:to-purple-400
+              className='bg-gradient-to-r from-blue-200 to-blue-300 hover:from-blue-300 hover:to-blue-400
                  p-8 rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl
                  transform hover:-translate-y-1 group h-[250px]'
             >
