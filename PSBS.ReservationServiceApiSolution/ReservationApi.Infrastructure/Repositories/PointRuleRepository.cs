@@ -51,7 +51,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var pointRule = await GetByIdAsync(entity.PointRuleId);
+                var pointRule = await context.PointRules.FindAsync(entity.PointRuleId);
                 if (pointRule is null)
                 {
                     return new Response(false, $"{entity.PointRuleRatio} not found");
@@ -69,7 +69,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     // Check if BookingStatusId is still referenced in Bookings table
                     bool isReferencedInBookings = await context.Bookings
-                        .AnyAsync(b => b.BookingStatusId == entity.PointRuleId);
+                        .AnyAsync(b => b.PointRuleId == entity.PointRuleId);
 
                     if (isReferencedInBookings)
                     {
@@ -161,7 +161,8 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                var pointRule = await GetByIdAsync(entity.PointRuleId);
+                var pointRule = await context.PointRules.FindAsync(entity.PointRuleId);
+                
                 if (pointRule is null)
                 {
                     return new Response(false, $"{entity.PointRuleRatio} not found");

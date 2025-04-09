@@ -9,7 +9,7 @@ namespace ChatServiceApi.Presentation.Hubs
 {
     public class ChatHub : Hub
     {
-        private static readonly ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
+        public static readonly ConcurrentDictionary<string, string> _connections = new ConcurrentDictionary<string, string>();
         private readonly IChatService _chatService;
 
         public ChatHub(IChatService chatService)
@@ -127,7 +127,10 @@ namespace ChatServiceApi.Presentation.Hubs
                 throw;
             }
         }
-
+        public async Task<List<ChatUserDTO>> GetPendingSupportRequests()
+        {
+            return await _chatService.GetPendingSupportRequestsAsync(); // Call the service method
+        }
         public async Task CreateChatRoom(Guid senderId, Guid receiverId)
         {
             try
@@ -219,10 +222,6 @@ namespace ChatServiceApi.Presentation.Hubs
             }
         }
 
-        public async Task<List<ChatUserDTO>> GetPendingSupportRequests()
-        {
-            return await _chatService.GetPendingSupportRequestsAsync(); // Call the service method
-        }
 
         public async Task CreateSupportChatRoom(Guid customerId)
         {

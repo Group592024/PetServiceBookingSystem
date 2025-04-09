@@ -266,6 +266,7 @@ const AccountList = () => {
             </IconButton>
           </Link>
           <IconButton
+            aria-label="Delete"
             color="error"
             onClick={() =>
               handleDelete(params.row.accountId, params.row.accountName, params.row.accountIsDeleted)
@@ -273,6 +274,7 @@ const AccountList = () => {
           >
             <DeleteIcon />
           </IconButton>
+
         </div>
       ),
     },
@@ -382,6 +384,7 @@ const AccountList = () => {
               fullWidth
               value={accountEmail}
               onChange={(e) => setAccountEmail(e.target.value)}
+              inputProps={{ "data-cy": "email-input" }}  // Gán thuộc tính data-cy cho input
               InputProps={{
                 style: { borderRadius: "8px", background: "#F8F9FA" },
               }}
@@ -392,13 +395,14 @@ const AccountList = () => {
               fullWidth
               value={accountPhoneNumber}
               onChange={(e) => setAccountPhoneNumber(e.target.value)}
+              inputProps={{ "data-cy": "phone-input" }}  // Gán thuộc tính data-cy cho input
               InputProps={{
                 style: { borderRadius: "8px", background: "#F8F9FA" },
               }}
             />
           </Box>
-
         </DialogContent>
+
         <DialogActions sx={{ pb: 2, px: 3 }}>
           <Button
             onClick={() => setOpenDialog(false)}

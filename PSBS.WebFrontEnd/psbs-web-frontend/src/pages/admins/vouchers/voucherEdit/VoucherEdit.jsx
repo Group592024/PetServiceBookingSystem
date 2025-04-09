@@ -2,31 +2,55 @@ import React, { useRef, useState, useEffect } from "react";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import EditableDiv from "../../../../components/reuseableForm/ReuseableForm";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import {
   validateNonNegativeInteger,
   validateVoucherDiscount,
   validateVoucherStartDate,
   validateVoucherEndDate,
 } from "../../../../Utilities/ValidationFunctions";
-import { updateData } from "../../../../Utilities/ApiFunctions";
+import { updateData, getData } from "../../../../Utilities/ApiFunctions";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+
 const VoucherEdit = () => {
   const sidebarRef = useRef(null);
   const location = useLocation();
-  const [formData, setFormData] = useState();
+  const { voucherId } = useParams(); // Get the id from URL params
+  const [formData, setFormData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+
   useEffect(() => {
+    const fetchVoucher = async (voucherId) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await getData(`api/Voucher/${voucherId}`);
+        if (response.flag) {
+          setFormData(response.data);
+        } else {
+          setError(response.message || "Voucher not found");
+        }
+      } catch (error) {
+        console.error("Error fetching voucher:", error);
+        setError("Error fetching voucher details. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const initialData = location.state?.rowData || null;
     if (initialData !== null) {
       setFormData(initialData);
+    } else if (voucherId) {
+      fetchVoucher(voucherId);
     } else {
-      // Fetch data based on the ID or handle the null case as needed
-      // For example, you could call a fetch function here to get data from an API
+      setError("No voucher ID provided");
     }
-  }, [location.state?.rowData]);
+  }, [location.state?.rowData, voucherId]);
 
   const model = [
     { name: "id", label: "ID", type: "string", disabled: true, pass: true },
@@ -120,8 +144,6 @@ const VoucherEdit = () => {
   ];
 
   const handleEditSubmit = async (data) => {
-    console.log("Edited Data:", data);
-    // API call or other handling logic for updated data
     try {
       const response = await updateData(`api/Voucher`, data);
       if (response.flag) {
@@ -145,6 +167,7 @@ const VoucherEdit = () => {
       toast.error("Failed to submit data.");
     }
   };
+
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -152,13 +175,52 @@ const VoucherEdit = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main>
           <div>
-            <EditableDiv
-              onSubmit={handleEditSubmit}
-              fields={model}
-              title="Edit Voucher"
-              initialData={formData}
-              view={false}
-            />
+            {loading ? (
+              <div className="flex justify-center items-center h-[300px] w-full">
+                <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
+                  <div className="mb-4">
+                    <i className="fas fa-circle-notch fa-spin text-3xl text-blue-500"></i>
+                  </div>
+                  <p className="text-blue-700 font-medium text-lg">
+                    Loading voucher details...
+                  </p>
+                </div>
+              </div>
+            ) : error ? (
+              <div className="flex justify-center items-center h-[300px] w-full">
+                <div className="bg-red-50 p-6 rounded-lg shadow-md text-center max-w-md w-full border border-red-100">
+                  <div className="text-red-600 text-4xl mb-4">
+                    <i className="fas fa-exclamation-circle"></i>
+                  </div>
+                  <p className="text-red-700 font-medium text-lg mb-2">
+                    Unable to load voucher
+                  </p>
+                  <p className="text-red-500 text-sm">{error}</p>
+                </div>
+              </div>
+            ) : formData ? (
+              <EditableDiv
+                onSubmit={handleEditSubmit}
+                fields={model}
+                title="Edit Voucher"
+                initialData={formData}
+                view={false}
+              />
+            ) : (
+              <div className="flex justify-center items-center h-[300px] w-full">
+                <div className="bg-gray-50 p-6 rounded-lg shadow-md text-center max-w-md w-full border border-gray-200">
+                  <div className="text-gray-500 text-4xl mb-4">
+                    <i className="fas fa-search"></i>
+                  </div>
+                  <p className="text-gray-700 font-medium text-lg mb-2">
+                    No voucher found
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    The requested voucher information is not available
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>

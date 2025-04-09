@@ -1,5 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import { BookingContext } from "./BookingContext";
+import {
+  Box,
+  Typography,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  Chip
+} from "@mui/material";
 
 const BookingConfirmStep = ({ formData, selectedOption }) => {
   const { bookingRooms, bookingServices,bookingServicesDate, voucherId, totalPrice, discountedPrice, finalDiscount } = useContext(BookingContext);
@@ -217,76 +227,156 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-      <h2 className="text-2xl font-semibold text-center mb-6">Confirm Booking</h2>
+    <Paper elevation={0} sx={{ maxWidth: 800, mx: 'auto', p: 4 }}>
+      <Typography variant="h5" align="center" gutterBottom>
+        Booking Confirmation
+      </Typography>
 
-      {/* User Information */}
-      <div className="space-y-4 mb-6">
-        <p className="text-lg"><strong>Name:</strong> {formData.name}</p>
-        <p className="text-lg"><strong>Phone:</strong> {formData.phone}</p>
-        <p className="text-lg"><strong>Address:</strong> {formData.address}</p>
-        <p className="text-lg"><strong>Note:</strong> {formData.note || "None"}</p>
-        <p className="text-lg"><strong>Payment Method:</strong> {paymentTypeName || "Loading..."}</p>
+      {/* Customer Information */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Customer Details
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <List dense>
+          <ListItem>
+            <ListItemText primary="Name" secondary={formData.name || "Not provided"} />
+          </ListItem>
+          <ListItem>
+            <ListItemText primary="Phone" secondary={formData.phone || "Not provided"} />
+          </ListItem>
+          <ListItem>
+            <ListItemText primary="Address" secondary={formData.address || "Not provided"} />
+          </ListItem>
+          <ListItem>
+            <ListItemText primary="Payment Method" secondary={paymentTypeName || "Loading..."} />
+          </ListItem>
+          {formData.note && (
+            <ListItem>
+              <ListItemText primary="Special Notes" secondary={formData.note} />
+            </ListItem>
+          )}
+        </List>
+      </Box>
 
-        {/* Display Selected Voucher */}
-        {voucherDetails && (
-          <div className="p-4 bg-gray-100 rounded-lg">
-            <h3 className="text-lg font-medium">Voucher Applied:</h3>
-            <p><strong>Name:</strong> {voucherDetails.voucherName}</p>
-            <p><strong>Discount:</strong> {voucherDetails.voucherDiscount}%</p>
-            <p><strong>Code:</strong> {voucherDetails.voucherCode}</p>
-            <p><strong>Valid Until:</strong> {formatDateTime(voucherDetails.voucherEndDate)}</p>
-          </div>
-        )}
-      </div>
+      {/* Voucher Information */}
+      {voucherDetails && (
+        <Box sx={{ mb: 4, p: 2, border: '1px solid #eee', borderRadius: 1 }}>
+          <Typography variant="subtitle1" gutterBottom>
+            Voucher Applied
+          </Typography>
+          <List dense>
+            <ListItem>
+              <ListItemText primary="Voucher Name" secondary={voucherDetails.voucherName} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Discount" secondary={`${voucherDetails.voucherDiscount}%`} />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="Valid Until" secondary={formatDateTime(voucherDetails.voucherEndDate)} />
+            </ListItem>
+          </List>
+        </Box>
+      )}
 
-      {/* Dynamically Rendered Services or Rooms */}
-      <div className="space-y-4">
-        <h3 className="text-xl font-medium mb-4">
-          {selectedOption === "Room" ? "Rooms Selected" : "Services Selected"}
-        </h3>
-
-        {selectedOption === "Room" && bookingRooms.length > 0 ? (
-          <ul className="list-disc pl-5 space-y-4">
-            {bookingRooms.map((room, index) => (
-              <li key={index} className="text-lg border p-4 rounded-lg bg-gray-100">
-                <p><strong>Room:</strong> {roomNames[room.room] || "Loading..."}</p>
-                <p><strong>Pet:</strong> {petNames[room.pet] || "Loading..."}</p>
-                <p><strong>Start Date & Time:</strong> {formatDateTime(room.start)}</p>
-                <p><strong>End Date & Time:</strong> {formatDateTime(room.end)}</p>
-                <p><strong>Price:</strong> {room.price.toLocaleString()} VND</p>
-                <p><strong>Camera:</strong> {room.camera ? "Yes" : "No"}</p>
-              </li>
-            ))}
-          </ul>
-        ) : selectedOption === "Service" && bookingServices.length > 0 ? (
-          <ul className="list-disc pl-5 space-y-4">
-            <p><strong>Booking Date:</strong> {formatDateTime(bookingServicesDate)}</p>
-            {bookingServices.map((service, index) => (
-              <li key={index} className="text-lg border p-4 rounded-lg bg-gray-100">
-                <p><strong>Service:</strong> {serviceNames[service.service] || "Loading..."}</p>
-                <p><strong>Service variant:</strong> {serviceVariantNames[service.serviceVariant] || "Loading..."}</p>
-                <p><strong>Pet:</strong> {petNames[service.pet] || "Loading..."}</p>
-                <p><strong>Price:</strong> {service.price.toLocaleString()} VND</p>
-              </li>
-            ))}
-          </ul>
+      {/* Booking Details */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          {selectedOption === "Room" ? "Room Booking Details" : "Service Booking Details"}
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        
+        {selectedOption === "Room" ? (
+          bookingRooms.length > 0 ? (
+            <List>
+              {bookingRooms.map((room, index) => (
+                <ListItem key={index} sx={{ mb: 2, border: '1px solid #eee', borderRadius: 1 }}>
+                  <ListItemText
+                    primary={roomNames[room.room] || "Loading room..."}
+                    secondary={
+                      <>
+                        <Typography component="span" display="block">
+                          Pet: {petNames[room.pet] || "Loading..."}
+                        </Typography>
+                        <Typography component="span" display="block">
+                          {formatDateTime(room.start)} to {formatDateTime(room.end)}
+                        </Typography>
+                        <Typography component="span" display="block">
+                          Camera: {room.camera ? "Yes" : "No"}
+                        </Typography>
+                        <Typography component="span" display="block" fontWeight="bold">
+                          {room.price.toLocaleString()} VND
+                        </Typography>
+                      </>
+                    }
+                  />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            <Typography color="text.secondary">No rooms selected</Typography>
+          )
         ) : (
-          <p className="text-lg text-red-500">No {selectedOption === "Room" ? "rooms" : "services"} selected.</p>
+          <>
+            <Typography variant="body1" gutterBottom>
+              Booking Date: {formatDateTime(bookingServicesDate)}
+            </Typography>
+            {bookingServices.length > 0 ? (
+              <List>
+                {bookingServices.map((service, index) => (
+                  <ListItem key={index} sx={{ mb: 2, border: '1px solid #eee', borderRadius: 1 }}>
+                    <ListItemText
+                      primary={serviceNames[service.service] || "Loading service..."}
+                      secondary={
+                        <>
+                          <Typography component="span" display="block">
+                            Variant: {serviceVariantNames[service.serviceVariant] || "Standard"}
+                          </Typography>
+                          <Typography component="span" display="block">
+                            Pet: {petNames[service.pet] || "Loading..."}
+                          </Typography>
+                          <Typography component="span" display="block" fontWeight="bold">
+                            {service.price.toLocaleString()} VND
+                          </Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography color="text.secondary">No services selected</Typography>
+            )}
+          </>
         )}
-      </div>
+      </Box>
 
-      {/* Total Price Section */}
-      <div className="mt-6 text-lg font-semibold">
-        <p>Original Price: <span className="text-gray-700">{totalPrice.toLocaleString()} VND</span></p>
-        {finalDiscount > 0 && (
-          <p className="text-green-600">
-            Discount Applied: -{finalDiscount.toLocaleString()} VND
-          </p>
-        )}
-        <p className="text-blue-600">Total Price After Discount: {discountedPrice.toLocaleString()} VND</p>
-      </div>
-    </div>
+      {/* Price Summary */}
+      <Box sx={{ mt: 4, p: 2, backgroundColor: '#f9f9f9', borderRadius: 1 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          Payment Summary
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+        <List dense>
+          <ListItem>
+            <ListItemText primary="Subtotal" />
+            <Typography>{totalPrice.toLocaleString()} VND</Typography>
+          </ListItem>
+          {finalDiscount > 0 && (
+            <ListItem>
+              <ListItemText primary="Discount" />
+              <Typography color="success.main">-{finalDiscount.toLocaleString()} VND</Typography>
+            </ListItem>
+          )}
+          <ListItem>
+            <ListItemText primary="Total Amount" />
+            <Typography variant="h6" fontWeight="bold">
+              {discountedPrice.toLocaleString()} VND
+            </Typography>
+          </ListItem>
+        </List>
+      </Box>
+    </Paper>
   );
 };
 

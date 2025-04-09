@@ -99,6 +99,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
                   <FormControl fullWidth margin="normal" variant="outlined">
                     <InputLabel htmlFor={field.name}>{field.label}</InputLabel>
                     <Select
+                      inputProps={{ "data-testid": field.name }}
                       id={field.name}
                       name={field.name}
                       value={
@@ -116,6 +117,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
                   </FormControl>
                 ) : field.type === "Date" ? (
                   <TextField
+                    id={field.name}
                     fullWidth
                     margin="normal"
                     label={field.label}
@@ -133,6 +135,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
                   />
                 ) : field.type === "integer" ? (
                   <TextField
+                    id={field.name}
                     fullWidth
                     margin="normal"
                     label={field.label}
@@ -153,6 +156,7 @@ const EditableDiv = ({ onSubmit, fields, title, initialData, view }) => {
                   />
                 ) : (
                   <TextField
+                    id={field.name}
                     fullWidth
                     margin="normal"
                     label={field.label}

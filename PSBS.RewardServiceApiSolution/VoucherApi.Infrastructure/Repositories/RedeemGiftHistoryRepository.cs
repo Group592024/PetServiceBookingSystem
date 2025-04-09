@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
@@ -24,12 +25,10 @@ namespace VoucherApi.Infrastructure.Repositories
                     return new Response(false, "The gift is out of stock");
                 }
 
-
-
                 gift.GiftQuantity--; // Decrease gift quantity by 1
                 if(gift.GiftQuantity <= 0)
                 {
-                    gift.GiftStatus = false;
+                    gift.GiftStatus = true;
                 }
                 if (gift.GiftCode != null)
                 {
@@ -47,8 +46,6 @@ namespace VoucherApi.Infrastructure.Repositories
 
                 return new Response(false, "Cannot redeem this gift, an error ocurr");
             }
-            
-
             
         }
 
@@ -127,11 +124,46 @@ namespace VoucherApi.Infrastructure.Repositories
         }
 
         public async Task<Response> CustomerCancelRedeem(Guid redeemId)
+{
+            LogExceptions.LogToConsole("Chay trong ham ne cau oi hahah");
+    try
+    {
+                var redeemHistory = await _context.RedeemGiftHistories.FindAsync(redeemId);
 
-        {
-            Response response =  await UpdateRedeemStatus(redeemId, Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"));
-            return response;
+                if (redeemHistory == null)
+                {
+                    return new Response(false, "Redeem history not found.");
+                }
+                if(redeemHistory.ReddeemStautsId == Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"))
+                {
+                    return new Response(false, "Redeem history is now in the cancle state");
+                }
+                if (redeemHistory.ReddeemStautsId == Guid.Parse("33b84495-c2a6-4b3e-98ca-f13d9c150946"))
+                {
+                    return new Response(false, "Redeem history is now in the picked up state");
+                }
 
-        }
+                var gift = await _context.Gifts.FindAsync(redeemHistory.GiftId);                 
+                if(gift == null)
+                {
+                    return new Response(false, "The Gift cannot be found.");
+                }
+               
+                    var currentQuantity = gift.GiftQuantity;
+                    gift.GiftQuantity = 1 + currentQuantity;
+                    gift.GiftStatus = false;
+                    redeemHistory.ReddeemStautsId = Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9");
+                    _context.Gifts.Update(gift);
+                    _context.RedeemGiftHistories.Update(redeemHistory);
+                    await _context.SaveChangesAsync();
+                  
+                
+                return new Response(true, "The Redeemption is successfully cancelled");  
+    }
+    catch (Exception ex)
+    {
+        return new Response { Flag = false, Message = $"Error occurred: {ex.Message}" };
+    }
+}
     }
 }

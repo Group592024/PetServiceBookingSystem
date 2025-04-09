@@ -110,7 +110,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
 
       final response = await http.post(
-  Uri.parse('http://192.168.1.2:5050/api/PetDiary/categories'),
+  Uri.parse('http://10.0.2.2:5050/api/PetDiary/categories'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -164,7 +164,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       print("petid nè: " + widget.petId);
       final response = await http.get(
         Uri.parse(
-     'http://192.168.1.2:5050/api/PetDiary/categories/${widget.petId}'),
+     'http://10.0.2.2:5050/api/PetDiary/categories/${widget.petId}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -405,7 +405,7 @@ class _PetDiaryUpdatePageState extends State<PetDiaryUpdatePage> {
       final token = prefs.getString('token') ?? '';
       final response = await http.put(
         Uri.parse(
-  'http://192.168.1.2:5050/api/PetDiary/${widget.diary['diary_ID']}'),
+  'http://10.0.2.2:5050/api/PetDiary/${widget.diary['diary_ID']}'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",

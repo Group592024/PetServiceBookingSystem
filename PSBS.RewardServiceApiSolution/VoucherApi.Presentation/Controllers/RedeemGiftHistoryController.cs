@@ -43,7 +43,7 @@ namespace VoucherApi.Presentation.Controllers
         }
         [HttpGet("redeemhistory/app/{accountId}")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
-        public async Task<IActionResult> GetCustomerRedeemList(Guid accountId)
+        public async Task<IActionResult> GetCustomerRedeemListApp(Guid accountId)
         {
             var history = await _redeemGiftHistory.GetCustomerRedeemHistory(accountId);
 

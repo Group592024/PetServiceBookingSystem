@@ -36,7 +36,7 @@ namespace ReservationApi.Presentation.Controllers
         var bookingStatus = await bookingStatusInterface.GetByIdAsync(id);
         if (bookingStatus is null)
         {
-            return NotFound(new Response(false, "BookingStatus requested not found ne"));
+            return NotFound(new Response(false, "BookingStatus requested not found"));
         }
         // convert from entity to DTO and return
         var (_bookingStatus, _) = BookingStatusConversion.FromEntity(bookingStatus, null!);

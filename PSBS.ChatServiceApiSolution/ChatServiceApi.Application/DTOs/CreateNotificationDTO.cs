@@ -12,7 +12,7 @@ namespace ChatServiceApi.Application.DTOs
      string NotificationTitle,
     [Required]
      string NotificationContent
-    
-        );
 
+        );
+   
 }
