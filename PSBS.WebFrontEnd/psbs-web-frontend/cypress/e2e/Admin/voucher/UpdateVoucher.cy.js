@@ -5,7 +5,7 @@ describe("Update Voucher E2E Tests", () => {
   const updatedVoucherCode = "TESTUpdate10000";
 
   before(() => {
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
 
     // Create a test voucher if it doesn't exist
     cy.visit("http://localhost:3000/vouchers");
@@ -51,7 +51,7 @@ describe("Update Voucher E2E Tests", () => {
   });
 
   beforeEach(() => {
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
   });
 

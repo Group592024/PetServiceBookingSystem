@@ -4,8 +4,8 @@ describe("Voucher Detail View Tests", () => {
   const voucherName = "Detail Test Voucher";
 
   before(() => {
-    // Login first
-    cy.login("user6@example.com", "123456");
+    // loginByHien first
+    cy.loginByHien("user6@example.com", "123456");
 
     // Create voucher through UI
     cy.visit("http://localhost:3000/vouchers");
@@ -62,7 +62,7 @@ describe("Voucher Detail View Tests", () => {
   });
 
   beforeEach(() => {
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
   });
   after(() => {

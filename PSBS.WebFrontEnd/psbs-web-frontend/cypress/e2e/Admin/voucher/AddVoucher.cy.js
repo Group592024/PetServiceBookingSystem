@@ -2,12 +2,12 @@ describe("Create Voucher E2E Tests", () => {
   const testVoucherCode = "TEST10000";
   const testVoucherName = "Test Voucher NhaNha";
   before(() => {
-    cy.login("user6@example.com", "123456"); // login function defined in commands
+    cy.loginByHien("user6@example.com", "123456"); // loginByHien function defined in commands
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
   });

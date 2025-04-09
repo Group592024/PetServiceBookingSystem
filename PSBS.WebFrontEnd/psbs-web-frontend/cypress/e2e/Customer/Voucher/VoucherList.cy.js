@@ -1,12 +1,12 @@
 describe("Customer Voucher List E2E Tests", () => {
   before(() => {
-    // Login once before all tests
-    cy.login("431straight@ptct.net", "123456");
+    // loginByHien once before all tests
+    cy.loginByHien("431straight@ptct.net", "123456");
   });
 
   beforeEach(() => {
     cy.restoreLocalStorage();
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
     cy.visit("http://localhost:3000/customer/vouchers");
   });
 
