@@ -163,6 +163,7 @@ const AddPetType = () => {
                   <p className="font-semibold text-2xl ">Pet Type Name:</p>
                   <TextField
                     type="text"
+                    data-testid="name-input"
                     sx={{
                       borderRadius: "10px",
                       margin: "20px",
@@ -185,6 +186,7 @@ const AddPetType = () => {
                   </p>
                   <TextField
                     type="text"
+                    data-testid="description-input"
                     sx={{
                       borderRadius: "10px",
                       margin: "20px",
@@ -211,6 +213,7 @@ const AddPetType = () => {
 
                 <div className="flex justify-between">
                   <button
+                    data-testid="submit-button"
                     type="submit"
                     className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
                   hover:bg-customLightPrimary hover:text-customPrimary"
@@ -219,6 +222,7 @@ const AddPetType = () => {
                   </button>
 
                   <button
+                    data-testid="cancel-button"
                     className="bg-customLightPrimary py-5 px-20 rounded-3xl text-customPrimary text-xl font-semibold 
                   hover:bg-customPrimary hover:text-customLightPrimary"
                     onClick={(e) => {
@@ -239,6 +243,7 @@ const AddPetType = () => {
                 />
                 <input
                   type="file"
+                  data-testid="pet-type-file-input"
                   accept="image/*"
                   id="inputFile"
                   onChange={(e) => handleImageChange(e)}

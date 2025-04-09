@@ -253,11 +253,18 @@ const Admin_Add_Booking = () => {
               OrderType: "billpayment",
               OrderDescription: bookingCode.trim(),
             });
+            // Get current path to redirect back after payment
+            const currentPath = "/admin/bookings";
+            // Create description with booking code and path
+            const description = JSON.stringify({
+              bookingCode: bookingCode.trim(),
+              redirectPath: currentPath
+            });
 
             console.log("BookingCode Response:", bookingCode);
             const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
-            )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback/admin`;
+            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
 
             console.log("VNPay URL:", vnpayUrl);
 
@@ -270,7 +277,7 @@ const Admin_Add_Booking = () => {
             console.log("VNPay API Response:", vnpayResult);
 
             if (vnpayResult.startsWith("http")) {
-              window.location.href = vnpayResult; 
+              window.location.href = vnpayResult;
               return;
             } else {
               alert("VNPay payment failed!");

@@ -18,7 +18,9 @@ const ServiceBookingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
-  const [serviceInfo, setServiceInfo] = useState({}); // Stores both service and variant info
+  const [serviceInfo, setServiceInfo] = useState({});
+  const [statusLoading, setStatusLoading] = useState(false);
+
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -74,7 +76,7 @@ const ServiceBookingDetailPage = () => {
 
         if (serviceResponse.data.flag) {
           const serviceData = serviceResponse.data.data;
-          
+
           // Store both service and variant info
           setServiceInfo(prev => ({
             ...prev,
@@ -154,7 +156,7 @@ const ServiceBookingDetailPage = () => {
 
         if (itemsResponse.data && itemsResponse.data.data.length > 0) {
           setServiceItems(itemsResponse.data.data);
-          
+
           // Fetch details for each item
           itemsResponse.data.data.forEach(item => {
             fetchPetName(item.petId);
@@ -211,11 +213,25 @@ const ServiceBookingDetailPage = () => {
     const statusOrder = ["Pending", "Confirmed", "Processing", "Completed"];
     const currentIndex = statusOrder.indexOf(bookingStatusName);
 
-    if (currentIndex === -1 || bookingStatusName === "Cancelled") return; // Do nothing if cancelled or unknown status
+    if (currentIndex === -1 || bookingStatusName === "Cancelled") return;
 
     const nextStatus = statusOrder[currentIndex + 1];
 
+    // Check if trying to move to "Processing" with unpaid VNPay
+    if (nextStatus === "Processing" &&
+      paymentTypeName === "VNPay" &&
+      !booking.isPaid) {
+      await Swal.fire(
+        "Payment Required",
+        "VNPay payment must be completed before processing the service.",
+        "warning"
+      );
+      return;
+    }
+
     try {
+      setStatusLoading(true); // Start loading
+
       const response = await axios.put(
         `http://localhost:5115/Bookings/updateServiceStatus/${bookingId}`,
         {
@@ -230,24 +246,60 @@ const ServiceBookingDetailPage = () => {
 
       if (response.data.flag) {
         setBookingStatusName(nextStatus);
-        Swal.fire(
+        await Swal.fire(
           "Success!",
           `Booking status updated to ${nextStatus}.`,
           "success"
         );
       } else {
-        Swal.fire(
-          "Failed!",
-          response.data.message || "Could not update status.",
-          "error"
-        );
+        throw new Error(response.data.message || "Could not update status");
       }
     } catch (error) {
-      Swal.fire(
+      await Swal.fire(
         "Error!",
-        "An error occurred while updating the status.",
+        error.response?.data?.message || error.message || "An error occurred while updating the status.",
         "error"
       );
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  const handleVNPayPayment = async () => {
+    try {
+      if (!booking) return;
+  
+      // Get current path to redirect back after payment
+      const currentPath = window.location.pathname; 
+  
+      // Create description with booking code and path
+      const description = JSON.stringify({
+        bookingCode: booking.bookingCode.trim(),
+        redirectPath: currentPath
+      });
+  
+      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+        booking.totalAmount
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+  
+      const vnpayResponse = await fetch(vnpayUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+  
+      const vnpayResult = await vnpayResponse.text();
+      
+      if (vnpayResult.startsWith("http")) {
+        window.location.href = vnpayResult; 
+      } else {
+        throw new Error("VNPay payment initiation failed");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      Swal.fire("Error!", "An error occurred while processing payment.", "error");
     }
   };
 
@@ -264,13 +316,13 @@ const ServiceBookingDetailPage = () => {
       <Sidebar ref={sidebarRef} />
       <div className="content">
         <Navbar sidebarRef={sidebarRef} />
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="container mx-auto p-4"
         >
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -278,7 +330,7 @@ const ServiceBookingDetailPage = () => {
           >
             Service Booking Details
           </motion.h2>
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -288,7 +340,7 @@ const ServiceBookingDetailPage = () => {
           </motion.div>
 
           {["Pending", "Confirmed", "Processing"].includes(bookingStatusName) && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
@@ -297,30 +349,53 @@ const ServiceBookingDetailPage = () => {
               <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-700 font-semibold text-lg">Current Status:</span>
-                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                    bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                    bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                    "bg-blue-100 text-blue-800"
-                  }`}>
+                  <span className={`px-4 py-2 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
+                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                        "bg-blue-100 text-blue-800"
+                    }`}>
                     {bookingStatusName}
                   </span>
                 </div>
                 <div className="h-8 w-px bg-gray-300 mx-2"></div>
                 <button
                   onClick={handleNextStatus}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3"
+                  disabled={statusLoading}
+                  className={`px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3 ${statusLoading ? "opacity-50 cursor-not-allowed" : "hover:from-blue-600 hover:to-blue-700"
+                    }`}
                 >
-                  <span className="text-lg">Move to Next Status</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
+                  {statusLoading ? (
+                    <span className="flex items-center">
+                      <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                        {/* Loading spinner icon */}
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </span>
+                  ) : (
+                    <>
+                      <span className="text-lg">Move to Next Status</span>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
           )}
 
           {booking && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -348,11 +423,10 @@ const ServiceBookingDetailPage = () => {
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                      "bg-blue-100 text-blue-800"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
+                        bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                          "bg-blue-100 text-blue-800"
+                      }`}>
                       {bookingStatusName}
                     </span>
                   </p>
@@ -378,9 +452,8 @@ const ServiceBookingDetailPage = () => {
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                    }`}>
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
@@ -388,7 +461,7 @@ const ServiceBookingDetailPage = () => {
             </motion.div>
           )}
 
-          <motion.h3 
+          <motion.h3
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -398,7 +471,7 @@ const ServiceBookingDetailPage = () => {
           </motion.h3>
 
           {serviceItems.length > 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
@@ -463,7 +536,7 @@ const ServiceBookingDetailPage = () => {
               ))}
             </motion.div>
           ) : (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.8 }}
@@ -474,12 +547,22 @@ const ServiceBookingDetailPage = () => {
           )}
 
           {(bookingStatusName === "Pending" || bookingStatusName === "Confirmed") && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
-              className="mt-8 text-center"
+              className="mt-8 text-center space-x-4"
             >
+              {!booking.isPaid &&
+                paymentTypeName === "VNPay" &&
+                (
+                  <button
+                    onClick={handleVNPayPayment}
+                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                  >
+                    Pay with VNPAY
+                  </button>
+                )}
               <button
                 onClick={handleCancelBooking}
                 className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"

@@ -274,12 +274,19 @@ const AddBooking = () => {
               OrderType: "billpayment",
               OrderDescription: bookingCode.trim(),
             });
+            // Get current path to redirect back after payment
+            const currentPath = "/bookings";
+            // Create description with booking code and path
+            const description = JSON.stringify({
+              bookingCode: bookingCode.trim(),
+              redirectPath: currentPath
+            });
 
             console.log("BookingCode Response:", bookingCode);
 
             const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
-            )}&description=${bookingCode.trim()}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
 
             console.log("VNPay URL:", vnpayUrl);
 
