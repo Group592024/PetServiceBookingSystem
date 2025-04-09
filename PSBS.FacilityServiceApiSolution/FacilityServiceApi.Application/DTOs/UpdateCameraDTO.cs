@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FacilityServiceApi.Infrastructure.DependencyInjection
+namespace FacilityServiceApi.Application.DTOs
 {
-    internal class FfmpegBackgroundService
+    public class UpdateCameraDTO
     {
+        public Guid cameraId { get; set; }
     }
 }

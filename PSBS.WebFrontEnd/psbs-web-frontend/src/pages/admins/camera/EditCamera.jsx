@@ -13,7 +13,7 @@ const EditCamera = () => {
     cameraId: "",
     cameraType: "",
     cameraCode: "",
-    cameraStatus: "",
+    cameraStatus: "Active",
     rtspUrl: "",
     cameraAddress: "",
     isDeleted: false,
@@ -22,7 +22,7 @@ const EditCamera = () => {
   useEffect(() => {
     const fetchCamera = async () => {
       try {
-        const token = sessionStorage.getItem("token"); 
+        const token = sessionStorage.getItem("token");
         const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
           method: "GET",
           headers: {
@@ -31,14 +31,14 @@ const EditCamera = () => {
           },
         });
         if (!response.ok) {
-          throw new Error("Không thể tải dữ liệu camera");
+          throw new Error("Unable to load camera data");
         }
         const data = await response.json();
         const camera = data.data || data;
         setCameraDetails(camera);
       } catch (error) {
         console.error("Error fetching camera:", error);
-        Swal.fire("Error", "Không thể tải dữ liệu camera", "error");
+        Swal.fire("Error", "Unable to load camera data", "error");
       }
     };
     fetchCamera();
@@ -60,7 +60,7 @@ const EditCamera = () => {
       !cameraDetails.rtspUrl ||
       !cameraDetails.cameraAddress
     ) {
-      Swal.fire("Error", "Vui lòng điền đầy đủ các trường bắt buộc", "error");
+      Swal.fire("Error", "Please fill in all required fields", "error");
       return false;
     }
     return true;
@@ -72,29 +72,29 @@ const EditCamera = () => {
       ...cameraDetails,
     };
     try {
-      const token = sessionStorage.getItem("token"); 
-  
+      const token = sessionStorage.getItem("token");
+
       const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updatedCamera),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
-        Swal.fire("Error", errorData.message || "Cập nhật dữ liệu thất bại", "error");
+        Swal.fire("Error", errorData.message || "Update failed", "error");
         return;
       }
-  
-      Swal.fire("Success", "Camera cập nhật thành công!", "success").then(() => {
+
+      Swal.fire("Success", "Camera updated successfully!", "success").then(() => {
         navigate(-1);
       });
     } catch (error) {
       console.error("Error updating camera:", error);
-      Swal.fire("Error", "Cập nhật dữ liệu thất bại. Vui lòng thử lại sau.", "error");
+      Swal.fire("Error", "Update failed. Please try again later.", "error");
     }
   };
 
@@ -116,32 +116,33 @@ const EditCamera = () => {
               name="cameraType"
               value={cameraDetails.cameraType}
               onChange={handleChange}
-              placeholder="Nhập Camera Type"
+              placeholder="Enter Camera Type"
               className="w-full p-3 border rounded-md"
               readOnly
             />
           </div>
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Camera Code</label>
+            <label className="block text-sm font-medium mb-1">Camera Name</label>
             <input
               type="text"
               name="cameraCode"
               value={cameraDetails.cameraCode}
               onChange={handleChange}
-              placeholder="Nhập Camera Code"
+              placeholder="Enter Camera Name"
               className="w-full p-3 border rounded-md"
             />
           </div>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Camera Status</label>
-            <input
-              type="text"
+            <select
               name="cameraStatus"
               value={cameraDetails.cameraStatus}
               onChange={handleChange}
-              placeholder="Nhập Camera Status"
               className="w-full p-3 border rounded-md"
-            />
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           </div>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">RTSP URL</label>
@@ -150,7 +151,7 @@ const EditCamera = () => {
               name="rtspUrl"
               value={cameraDetails.rtspUrl}
               onChange={handleChange}
-              placeholder="Nhập RTSP URL"
+              placeholder="Enter RTSP URL"
               className="w-full p-3 border rounded-md"
             />
           </div>
@@ -161,7 +162,7 @@ const EditCamera = () => {
               name="cameraAddress"
               value={cameraDetails.cameraAddress}
               onChange={handleChange}
-              placeholder="Nhập Camera Address"
+              placeholder="Enter Camera Address"
               className="w-full p-3 border rounded-md"
             />
           </div>

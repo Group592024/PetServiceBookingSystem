@@ -16,5 +16,7 @@ namespace FacilityServiceApi.Application.Interfaces
         Task<IEnumerable<RoomHistory>> GetAllAsync();
         Task<IEnumerable<RoomHistory>> GetRoomHistoryByBookingId(Guid id);
         Task<RoomHistory> GetByIdAsync(Guid id);
+        Task<Response> UpdateCameraAsync(Guid roomHistoryId, Guid cameraId);
+
     }
 }

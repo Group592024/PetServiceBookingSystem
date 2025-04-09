@@ -45,7 +45,7 @@ namespace FacilityServiceApi.Infrastructure.Data
             modelBuilder.Entity<RoomHistory>()
              .HasOne(p => p.Camera)
              .WithMany(c => c.RoomHistories)
-             .HasForeignKey(r => r.CameraId);
+             .HasForeignKey(r => r.cameraId);
 
             // Seed data for RoomType
             modelBuilder.Entity<RoomType>().HasData(

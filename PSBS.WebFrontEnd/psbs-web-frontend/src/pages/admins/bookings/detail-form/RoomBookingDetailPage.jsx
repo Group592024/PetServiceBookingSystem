@@ -19,11 +19,36 @@ const RoomBookingDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
+  const [cameraList, setCameraList] = useState([]);
+
 
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        const token = sessionStorage.getItem("token");
+        const response = await fetch("http://localhost:5050/api/Camera/all", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch cameras");
+        }
+        const data = await response.json();
+        setCameraList(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching camera list:", error);
+        Swal.fire("Error", "Failed to load camera list", "error");
+      }
+    };
 
+    fetchCameras();
+  }, []);
   const fetchPetName = async (petId) => {
     try {
       const response = await fetch(`http://localhost:5050/api/pet/${petId}`, {
@@ -89,7 +114,33 @@ const RoomBookingDetailPage = () => {
       Swal.fire("Error!", "Failed to update room status.", "error");
     }
   };
+  const updateRoomHistoryCamera = async (historyId, cameraId) => {
+    try {
+      const response = await axios.put(
+        `http://localhost:5023/api/RoomHistories/update-camera/${historyId}`,
+        { cameraId },
+        {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        }
+      );
 
+      if (response.data.flag) {
+        // cập nhật state để UI phản ánh ngay 
+        setRoomHistory(prev =>
+          prev.map(h =>
+            h.roomHistoryId === historyId
+              ? { ...h, bookingCamera: true, cameraId }
+              : h
+          )
+        );
+        Swal.fire("Success!", "Cập nhật camera thành công.", "success");
+      } else {
+        Swal.fire("Error!", response.data.message || "Cập nhật camera thất bại.", "error");
+      }
+    } catch (err) {
+      Swal.fire("Error!", "Có lỗi khi cập nhật camera.", "error");
+    }
+  };
   useEffect(() => {
     const fetchBookingDetails = async () => {
       try {
@@ -278,60 +329,52 @@ const RoomBookingDetailPage = () => {
     }
   };
   const handleCameraSettings = (roomHistoryId) => {
-    // Find the specific room history
     const roomHistoryItem = roomHistory.find(
       (item) => item.roomHistoryId === roomHistoryId
     );
-
     if (!roomHistoryItem) return;
+
+    const cameraOptionsHtml = cameraList
+      .map(
+        (cam) =>
+          `<option value="${cam.cameraId}">${cam.cameraCode} - ${cam.cameraType}</option>`
+      )
+      .join("");
 
     Swal.fire({
       title: "Camera Settings",
       html: `
         <div class="text-left">
           <p class="mb-2"><strong>Room:</strong> ${roomName}</p>
-          <p class="mb-2"><strong>Pet:</strong> ${
-            petNames[roomHistoryItem.petId] || "Unknown"
-          }</p>
-          <p class="mb-4"><strong>Camera ID:</strong> ${
-            roomHistoryItem.cameraId || "Not assigned"
-          }</p>
-          
-          <div class="space-y-3">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Camera Configuration</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Default View</option>
-                <option>Night Vision</option>
-                <option>Wide Angle</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Recording Settings</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Continuous</option>
-                <option>Motion Activated</option>
-                <option>Scheduled</option>
-              </select>
-            </div>
+          <p class="mb-2"><strong>Pet:</strong> ${petNames[roomHistoryItem.petId] || "Unknown"}</p>
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Select Camera</label>
+            <select id="cameraSelect" class="w-full border border-gray-300 rounded-md px-3 py-2">
+              <option value="">-- Choose a camera --</option>
+              ${cameraOptionsHtml}
+            </select>
           </div>
         </div>
       `,
       showCancelButton: true,
       confirmButtonText: "Save Settings",
       cancelButtonText: "Cancel",
-      focusConfirm: false,
       preConfirm: () => {
-        // Here you would typically save the settings to your backend
-        return Promise.resolve();
+        const selectedCameraId = document.getElementById("cameraSelect").value;
+        if (!selectedCameraId) {
+          Swal.showValidationMessage("Please select a camera");
+        }
+        return selectedCameraId;
       },
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire("Saved!", "Camera settings have been updated.", "success");
+        const selectedCameraId = result.value;
+        await updateRoomHistoryCamera(roomHistoryItem.roomHistoryId, selectedCameraId);
       }
     });
   };
+
+
 
   if (loading)
     return (
@@ -371,51 +414,50 @@ const RoomBookingDetailPage = () => {
           {["Pending", "Confirmed", "Checked in"].includes(
             bookingStatusName
           ) && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-              className="mt-8 mb-8 text-center"
-            >
-              <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
-                <div className="flex items-center space-x-4">
-                  <span className="text-gray-700 font-semibold text-lg">
-                    Current Status:
-                  </span>
-                  <span
-                    className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                      bookingStatusName === "Checked out"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="mt-8 mb-8 text-center"
+              >
+                <div className="inline-flex items-center space-x-6 bg-white p-6 rounded-xl shadow-lg">
+                  <div className="flex items-center space-x-4">
+                    <span className="text-gray-700 font-semibold text-lg">
+                      Current Status:
+                    </span>
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold ${bookingStatusName === "Checked out"
                         ? "bg-green-100 text-green-800"
                         : bookingStatusName === "Cancelled"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-blue-100 text-blue-800"
-                    }`}
+                          ? "bg-red-100 text-red-800"
+                          : "bg-blue-100 text-blue-800"
+                        }`}
+                    >
+                      {bookingStatusName}
+                    </span>
+                  </div>
+                  <div className="h-8 w-px bg-gray-300 mx-2"></div>
+                  <button
+                    onClick={handleNextStatus}
+                    className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3"
                   >
-                    {bookingStatusName}
-                  </span>
+                    <span className="text-lg">Move to Next Status</span>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
-                <div className="h-8 w-px bg-gray-300 mx-2"></div>
-                <button
-                  onClick={handleNextStatus}
-                  className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-lg shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center space-x-3"
-                >
-                  <span className="text-lg">Move to Next Status</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-6 w-6"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
 
           {booking && (
             <motion.div
@@ -457,13 +499,12 @@ const RoomBookingDetailPage = () => {
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        bookingStatusName === "Checked out"
-                          ? "bg-green-100 text-green-800"
-                          : bookingStatusName === "Cancelled"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Checked out"
+                        ? "bg-green-100 text-green-800"
+                        : bookingStatusName === "Cancelled"
                           ? "bg-red-100 text-red-800"
                           : "bg-blue-100 text-blue-800"
-                      }`}
+                        }`}
                     >
                       {bookingStatusName}
                     </span>
@@ -499,11 +540,10 @@ const RoomBookingDetailPage = () => {
                     Payment Status:
                   </span>{" "}
                   <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      booking.isPaid
-                        ? "bg-green-100 text-green-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                      }`}
                   >
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
@@ -536,7 +576,6 @@ const RoomBookingDetailPage = () => {
                   transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                   className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative" // Added relative positioning
                 >
-                  {/* Camera booking indicator and button */}
                   {history.bookingCamera && (
                     <div className="absolute top-4 right-4 flex items-center space-x-2">
                       <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
@@ -618,21 +657,20 @@ const RoomBookingDetailPage = () => {
                         <span className="text-gray-800">
                           {history.checkOutDate
                             ? new Date(
-                                history.checkOutDate
-                              ).toLocaleDateString()
+                              history.checkOutDate
+                            ).toLocaleDateString()
                             : "Not checked out"}
                         </span>
                       </p>
                     </div>
                     <div className="flex items-center justify-between">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          history.status === "Check out"
-                            ? "bg-green-100 text-green-800"
-                            : history.status === "Check in"
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Check out"
+                          ? "bg-green-100 text-green-800"
+                          : history.status === "Check in"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-yellow-100 text-yellow-800"
-                        }`}
+                          }`}
                       >
                         {history.status}
                       </span>
@@ -668,20 +706,20 @@ const RoomBookingDetailPage = () => {
 
           {(bookingStatusName === "Pending" ||
             bookingStatusName === "Confirmed") && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
-              className="mt-8 text-center"
-            >
-              <button
-                onClick={handleCancelBooking}
-                className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.9 }}
+                className="mt-8 text-center"
               >
-                Cancel Booking
-              </button>
-            </motion.div>
-          )}
+                <button
+                  onClick={handleCancelBooking}
+                  className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                >
+                  Cancel Booking
+                </button>
+              </motion.div>
+            )}
         </motion.div>
       </div>
     </div>
