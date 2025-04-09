@@ -172,7 +172,10 @@ const PetDiaryListPage = () => {
                     to={"add"}
                     className="m-auto flex justify-center items-center gap-1 text-center rounded-xl hover:scale-110
                      bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
-                    onClick={() => setAddModalOpen(true)}
+                    onClick={() => {
+                      setAddModalOpen(true);
+                      console.log(addModalOpen);
+                    }}
                   >
                     <AddCircleOutlineIcon /> New Post
                   </button>
@@ -266,9 +269,9 @@ const PetDiaryListPage = () => {
           </div>
         </>
       )}
-      {Array.isArray(categories) && categories.length > 0 && (
+      {addModalOpen && (
         <AddDiaryModal
-          categories={categories}
+          categories={categories || []}
           open={addModalOpen}
           onClose={handleCloseAddModal}
         />

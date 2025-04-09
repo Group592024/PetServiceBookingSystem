@@ -131,6 +131,7 @@ const PetTypeList = () => {
         <div style={{ display: "flex", gap: "8px" }}>
           <IconButton
             color="primary"
+            data-testid="info-icon-button"
             onClick={() => navigate(`/petType/${params.row.id}`)}
           >
             <InfoIcon />
@@ -138,6 +139,7 @@ const PetTypeList = () => {
 
           {/* Edit Button */}
           <IconButton
+            data-testid="edit-icon-button"
             color="success"
             onClick={() => navigate(`/petType/edit/${params.row.id}`)}
           >
@@ -145,7 +147,11 @@ const PetTypeList = () => {
           </IconButton>
 
           {/* Delete Button */}
-          <IconButton color="error" onClick={() => handleDelete(params.row.id)}>
+          <IconButton
+            data-testid="delete-icon-button"
+            color="error"
+            onClick={() => handleDelete(params.row.id)}
+          >
             <DeleteIcon />
           </IconButton>
         </div>
