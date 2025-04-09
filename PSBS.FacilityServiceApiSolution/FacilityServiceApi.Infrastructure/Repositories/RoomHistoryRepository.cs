@@ -14,6 +14,33 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 {
     public class RoomHistoryRepository(FacilityServiceDbContext context) : IRoomHistory
     {
+        public async Task<Response> CheckoutRoomHistory(Guid roomHistoryId)
+        {
+            try
+            {
+                var existingEntity = await context.RoomHistories
+                    .FirstOrDefaultAsync(r => r.RoomHistoryId == roomHistoryId);
+
+                if (existingEntity == null) // Fixed condition (removed the incorrect check)
+                {
+                    return new Response(false, "Room history not found");
+                }
+
+                existingEntity.CheckOutDate = DateTime.Now;
+                existingEntity.Status = "Checked out";
+
+                context.RoomHistories.Update(existingEntity);
+                await context.SaveChangesAsync();
+
+                return new Response(true, "Checked out room history successfully");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred while checking out room history");
+            }
+        }
+
         public async Task<Response> CreateAsync(RoomHistory entity)
         {
             try
@@ -43,9 +70,23 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             return roomHistories;
         }
 
-        public Task<RoomHistory> GetByIdAsync(Guid id)
+        public async Task<RoomHistory> GetByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var roomHistory = await context.RoomHistories.FindAsync(id);
+                if (roomHistory == null)
+                {
+                    LogExceptions.LogException(new Exception($"Room History with ID {id} not found"));
+                    return null;
+                }
+                return roomHistory;
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred retrieving room History");
+            }
         }
 
         public async Task<IEnumerable<RoomHistory>> GetRoomHistoryByBookingId(Guid id)
@@ -65,7 +106,6 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 }
                 existingEntity.Status = entity.Status;
                 existingEntity.CheckInDate = entity.CheckInDate;
-                existingEntity.CheckOutDate = entity.CheckOutDate;
                 var currentEntity = context.RoomHistories.Update(existingEntity).Entity;
                 await context.SaveChangesAsync();
                 return new Response(true, "Update room history successfully");

@@ -212,7 +212,6 @@ const CustomerBookingDatatable = () => {
           disableRowSelectionOnClick
         />
       </Box>
-      <ToastContainer />
     </div>
   );
 };
