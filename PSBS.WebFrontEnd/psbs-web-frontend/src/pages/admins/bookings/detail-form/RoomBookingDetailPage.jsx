@@ -20,6 +20,7 @@ const RoomBookingDetailPage = () => {
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
   const [statusLoading, setStatusLoading] = useState(false);
+  const [voucherDetails, setVoucherDetails] = useState(null);
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -114,6 +115,12 @@ const RoomBookingDetailPage = () => {
           }
         );
         setBooking(bookingResponse.data.data);
+
+        // Fetch voucher details if voucherId exists
+        if (bookingResponse.data.data.voucherId &&
+          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
+          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
+        }
 
         const paymentResponse = await axios.get(
           `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
@@ -310,6 +317,25 @@ const RoomBookingDetailPage = () => {
       );
     } finally {
       setStatusLoading(false); // End loading
+    }
+  };
+
+  const fetchVoucherDetails = async (voucherId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/${voucherId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        setVoucherDetails(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
     }
   };
 
@@ -589,6 +615,30 @@ const RoomBookingDetailPage = () => {
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
+
+                {voucherDetails && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Voucher Name:</span>{" "}
+                          <span className="text-blue-600">{voucherDetails.voucherName}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Code:</span>{" "}
+                          <span className="text-gray-800">{voucherDetails.voucherCode}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Discount:</span>{" "}
+                          <span className="text-green-600">
+                            {voucherDetails.voucherDiscount}% (Max {voucherDetails.voucherMaximum.toLocaleString()} VND)
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

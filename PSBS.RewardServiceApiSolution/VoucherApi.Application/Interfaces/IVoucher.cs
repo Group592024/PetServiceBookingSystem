@@ -9,5 +9,6 @@ namespace VoucherApi.Application.Interfaces
         Task<IEnumerable<Voucher>> GetAllForCustomer();
         Task<Response> MinusVoucherQuanitty(Guid id);
         Task<IEnumerable<Voucher>> GetValidVoucherForCustomer();
+        Task<Voucher> GetVoucherByVoucherCode(string voucherCode);
     }
 }

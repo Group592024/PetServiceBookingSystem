@@ -16,6 +16,7 @@ import {
   Box,
   Grid,
   Paper,
+  Alert,
 } from "@mui/material";
 import { AddCircleOutline, DeleteOutline } from "@mui/icons-material";
 
@@ -50,6 +51,9 @@ const BookingServiceForm = () => {
   const [pets, setPets] = useState([]);
   const [selectAllServices, setSelectAllServices] = useState(false);
   const [selectAllPets, setSelectAllPets] = useState(false);
+  const [voucherSearchCode, setVoucherSearchCode] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -258,6 +262,47 @@ const BookingServiceForm = () => {
     setbookingServices(newBookingServices);
   };
 
+  const handleSearchVoucher = async () => {
+    if (!voucherSearchCode.trim()) {
+      setSearchError("Please enter a voucher code");
+      return;
+    }
+
+    setSearchLoading(true);
+    setSearchError("");
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/search-gift-code?voucherCode=${voucherSearchCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        // Check if this voucher is already in our list
+        const existingVoucher = vouchers.find(v => v.voucherId === response.data.data.voucherId);
+
+        if (!existingVoucher) {
+          // Add the found voucher to our list
+          setVouchers([...vouchers, response.data.data]);
+        }
+
+        // Set the selected voucher
+        setVoucherId(response.data.data.voucherId);
+      } else {
+        setSearchError(response.data.message || "Voucher not found");
+      }
+    } catch (error) {
+      console.error("Error searching voucher:", error);
+      setSearchError(error.response?.data?.message || "Error searching voucher");
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
   return (
     <Paper elevation={3} sx={{ maxWidth: 800, mx: "auto", p: 4, my: 4 }}>
       <Box textAlign="center" mb={4}>
@@ -422,6 +467,36 @@ const BookingServiceForm = () => {
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             Apply Voucher
           </Typography>
+
+          {/* Voucher Search Section */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Search Voucher by Code"
+              value={voucherSearchCode}
+              onChange={(e) => setVoucherSearchCode(e.target.value)}
+              variant="outlined"
+              disabled={searchLoading}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearchVoucher}
+              disabled={searchLoading || !voucherSearchCode.trim()}
+            >
+              {searchLoading ? "Searching..." : "Apply Voucher"}
+            </Button>
+          </Box>
+
+          {searchError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {searchError}
+            </Alert>
+          )}
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Or select from available vouchers:
+          </Typography>
+
           <TextField
             select
             fullWidth
@@ -439,6 +514,7 @@ const BookingServiceForm = () => {
               </MenuItem>
             ))}
           </TextField>
+
           {voucherError && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>
               {voucherError}
