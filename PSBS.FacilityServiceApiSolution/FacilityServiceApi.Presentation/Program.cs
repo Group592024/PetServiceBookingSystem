@@ -67,7 +67,7 @@ var app = builder.Build();
 
 // Khởi động FfmpegService (với kiểm tra lỗi)
 //var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-//Process? ffmpegProcess = null;
+Process? ffmpegProcess = null;
 //try
 //{
 //    ffmpegProcess = ffmpegService.StartFfmpegConversion();
@@ -77,9 +77,8 @@ var app = builder.Build();
 //    Console.WriteLine($"Error starting FfmpegService: {ex.Message}");
 //}
 
-// Lấy đường dẫn HLS từ cấu hình
-//var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
-//var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+ var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"] ;
+var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
 
 
 // Cấu hình Static Files cho Images
@@ -90,22 +89,22 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 // Cấu hình Static Files cho HLS với header CORS đúng
-// app.UseStaticFiles(new StaticFileOptions
-// {
-//     FileProvider = hlsFileProvider,
-//     RequestPath = "/hls",
-//     ServeUnknownFileTypes = true,
-//     DefaultContentType = "application/vnd.apple.mpegurl",
-//     OnPrepareResponse = ctx =>
-//     {
-//         // Thay vì "*" thì chỉ định origin cụ thể và cho phép credentials
-//         ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
-//         ctx.Context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
-//         ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
-//         ctx.Context.Response.Headers.Append("Pragma", "no-cache");
-//         ctx.Context.Response.Headers.Append("Expires", "0");
-//     }
-// });
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = hlsFileProvider,
+    RequestPath = "/hls",
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "application/vnd.apple.mpegurl",
+    OnPrepareResponse = ctx =>
+    {
+        // Thay vì "*" thì chỉ định origin cụ thể và cho phép credentials
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "http://localhost:3000");
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Credentials", "true");
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+        ctx.Context.Response.Headers.Append("Expires", "0");
+    }
+});
 
 // Xử lý exception
 if (app.Environment.IsDevelopment())

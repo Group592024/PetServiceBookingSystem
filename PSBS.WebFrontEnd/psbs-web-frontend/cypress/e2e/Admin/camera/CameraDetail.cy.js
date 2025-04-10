@@ -29,7 +29,7 @@ describe('Camera Detail Page', () => {
         },
       });
   
-      cy.contains("Đang tải...").should("be.visible");
+      cy.contains("Loading...").should("be.visible");
       cy.wait("@getCameraDetail");
       cy.contains("Camera Detail").should("be.visible");
       cy.get('input[disabled]').should("have.length", 6);

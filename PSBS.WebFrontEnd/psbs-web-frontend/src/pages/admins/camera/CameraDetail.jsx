@@ -16,7 +16,7 @@ const CameraDetail = () => {
             try {
                 const token = sessionStorage.getItem("token"); 
                 if (!token) {
-                    throw new Error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+                    throw new Error("Token not found. Please log in again.");
                 }
     
                 const response = await fetch(`http://localhost:5050/api/Camera/${cameraId}`, {
@@ -28,14 +28,14 @@ const CameraDetail = () => {
                 });
     
                 if (!response.ok) {
-                    throw new Error("Không thể tải dữ liệu camera.");
+                    throw new Error("Unable to fetch camera data.");
                 }
     
                 const data = await response.json();
                 setCameraDetail(data.data || data);
             } catch (error) {
                 console.error("Error fetching camera detail:", error);
-                Swal.fire("Error", "Không thể tải dữ liệu camera. Vui lòng thử lại sau.", "error");
+                Swal.fire("Error", "Unable to fetch camera data. Please try again later.", "error");
             }
         };
     
@@ -48,7 +48,7 @@ const CameraDetail = () => {
     };
 
     if (!cameraDetail) {
-        return <div>Đang tải...</div>;
+        return <div>Loading...</div>;
     }
 
     const { cameraType, cameraCode, cameraStatus, rtspUrl, cameraAddress, isDeleted } = cameraDetail;
@@ -72,7 +72,7 @@ const CameraDetail = () => {
                                 />
                             </div>
                             <div className="mb-3">
-                                <label className="block text-sm font-bold mb-1">Camera Code</label>
+                                <label className="block text-sm font-bold mb-1">Camera Name</label>
                                 <input
                                     type="text"
                                     value={cameraCode}

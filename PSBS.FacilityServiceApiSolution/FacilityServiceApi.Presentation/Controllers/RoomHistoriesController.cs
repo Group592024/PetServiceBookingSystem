@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.PSBSLogs;
+using FacilityServiceApi.Application.DTOs;
 using PSPS.SharedLibrary.Responses;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -139,6 +140,43 @@ namespace FacilityServiceApi.Presentation.Controllers
                 return StatusCode(500, new Response(false, "An unexpected error occurred"));
             }
         }
+    [HttpGet("GetAll")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<Response>> GetAllRoomHistories()
+        {
+            try
+            {
+                var allHistories = await roomHistoryInterface.GetAllAsync();
+
+                if (allHistories == null || !allHistories.Any())
+                {
+                    return NotFound(new Response(false, "No Room Histories found"));
+                }
+
+                return Ok(new Response(true, "Room Histories retrieved successfully!")
+                {
+                    Data = allHistories
+                });
+            }
+            catch (System.Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return StatusCode(500, new Response(false, "Error occurred retrieving Room Histories"));
+            }
+        }
+        [HttpPut("update-camera/{id}")]
+        [Authorize(Policy = "AdminOrStaff")]
+        public async Task<ActionResult<Response>> UpdateCamera(Guid id, [FromBody] UpdateCameraDTO dto)
+        {
+            if (dto.cameraId == null || dto.cameraId == Guid.Empty)
+            {
+                return BadRequest(new Response(false, "CameraId is required"));
+            }
+
+            var response = await roomHistoryInterface.UpdateCameraAsync(id, dto.cameraId);
+            return response.Flag ? Ok(response) : BadRequest(response);
+        }
+
 
     }
 }
