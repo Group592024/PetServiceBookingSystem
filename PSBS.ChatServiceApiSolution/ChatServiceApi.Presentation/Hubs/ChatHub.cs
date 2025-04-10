@@ -127,7 +127,10 @@ namespace ChatServiceApi.Presentation.Hubs
                 throw;
             }
         }
-
+        public async Task<List<ChatUserDTO>> GetPendingSupportRequests()
+        {
+            return await _chatService.GetPendingSupportRequestsAsync(); // Call the service method
+        }
         public async Task CreateChatRoom(Guid senderId, Guid receiverId)
         {
             try

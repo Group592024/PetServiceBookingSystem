@@ -2,30 +2,49 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import { DataGrid } from "@mui/x-data-grid";
-import { Box, CircularProgress, Button,Chip } from "@mui/material";
+import { 
+  Box, 
+  CircularProgress, 
+  Button, 
+  Chip, 
+  Typography, 
+  Paper, 
+  Container,
+  Card,
+  CardContent,
+  useTheme,
+  alpha,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
 import Swal from "sweetalert2";
+import HistoryIcon from '@mui/icons-material/History';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 const CustomerRedeemHistory = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const accountId = sessionStorage.getItem("accountId");
   const token = sessionStorage.getItem("token");
+  const theme = useTheme();
+  
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   };
+  
   useEffect(() => {
     const fetchHistory = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5050/redeemhistory/${accountId}`,config
+          `http://localhost:5050/redeemhistory/${accountId}`, config
         );
         if (response.data.flag) {
           const formattedData = await Promise.all(
             response.data.data.map(async (item) => {
               const giftResponse = await axios.get(
-                `http://localhost:5050/Gifts/detail/${item.giftId}`,config
+                `http://localhost:5050/Gifts/detail/${item.giftId}`, config
               );
               return {
                 id: item.redeemHistoryId,
@@ -38,6 +57,12 @@ const CustomerRedeemHistory = () => {
         }
       } catch (error) {
         console.log("Error fetching history:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: 'Failed to load redemption history!',
+          confirmButtonColor: '#1976d2',
+        });
       } finally {
         setLoading(false);
       }
@@ -51,36 +76,41 @@ const CustomerRedeemHistory = () => {
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
+      confirmButtonColor: "#1976d2",
+      cancelButtonColor: "#d32f2f",
       confirmButtonText: "Yes, cancel it!",
+      background: '#ffffff',
+      customClass: {
+        title: 'swal-title',
+        content: 'swal-text'
+      }
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           const responseCancel = await axios.put(
             `http://localhost:5050/api/Account/refundPoint?accountId=${accountId}`,
             {
-
               giftId: redeemHistoryId,
               requiredPoints: point,
-            },config
+            }, config
           );
           if (responseCancel.data.flag) {
-            Swal.fire(
-              "Cancelled!",
-              "Your redemption has been cancelled.",
-              "success"
-            );
+            Swal.fire({
+              title: "Cancelled!",
+              text: "Your redemption has been cancelled.",
+              icon: "success",
+              confirmButtonColor: '#1976d2',
+            });
           }
           // Refresh the history after cancellation
           const response = await axios.get(
-            `http://localhost:5050/redeemhistory/${accountId}`,config
+            `http://localhost:5050/redeemhistory/${accountId}`, config
           );
           if (response.data.flag) {
             const formattedData = await Promise.all(
               response.data.data.map(async (item) => {
                 const giftResponse = await axios.get(
-                  `http://localhost:5050/Gifts/detail/${item.giftId}`,config
+                  `http://localhost:5050/Gifts/detail/${item.giftId}`, config
                 );
                 return {
                   id: item.redeemHistoryId,
@@ -93,11 +123,17 @@ const CustomerRedeemHistory = () => {
           }
         } catch (error) {
           console.error("Error cancelling redeem:", error);
-          Swal.fire("Error!", "Failed to cancel redemption.", "error");
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to cancel redemption.",
+            icon: "error",
+            confirmButtonColor: '#1976d2',
+          });
         }
       }
     });
   };
+  
   const statusMapping = {
     "1509e4e6-e1ec-42a4-9301-05131dd498e4": {
       label: "Redeemed",
@@ -112,6 +148,7 @@ const CustomerRedeemHistory = () => {
       color: "error", // Red
     },
   };
+  
   const columns = [
     {
       field: "index",
@@ -120,23 +157,25 @@ const CustomerRedeemHistory = () => {
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>No.</div>
+        <Typography variant="subtitle2" fontWeight="bold">No.</Typography>
       ),
       renderCell: (params) => {
         const index = history.findIndex((row) => row.id === params.row.id);
-        return <div>{index + 1}</div>;
+        return <Typography variant="body2">{index + 1}</Typography>;
       },
     },
     {
       field: "giftName",
       headerName: "Gift Name",
-      flex: 1,
+      flex: 1.5,
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Gift Name</div>
+        <Typography variant="subtitle2" fontWeight="bold">Gift Name</Typography>
       ),
-      renderCell: (params) => params.row.gift?.giftName || "N/A",
+      renderCell: (params) => (
+        <Typography variant="body2">{params.row.gift?.giftName || "N/A"}</Typography>
+      ),
     },
     {
       field: "giftCode",
@@ -145,9 +184,13 @@ const CustomerRedeemHistory = () => {
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Gift Code</div>
+        <Typography variant="subtitle2" fontWeight="bold">Gift Code</Typography>
       ),
-      renderCell: (params) => params.row.gift?.giftCode || "N/A",
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontFamily: 'monospace', fontWeight: 'medium' }}>
+          {params.row.gift?.giftCode || "N/A"}
+        </Typography>
+      ),
     },
     {
       field: "redeemPoint",
@@ -156,31 +199,42 @@ const CustomerRedeemHistory = () => {
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>
-          Gift Point
-        </div>
+        <Typography variant="subtitle2" fontWeight="bold">Gift Point</Typography>
+      ),
+      renderCell: (params) => (
+        <Chip 
+          label={params.row.redeemPoint} 
+          size="small" 
+          sx={{ 
+            backgroundColor: alpha(theme.palette.primary.main, 0.1),
+            color: theme.palette.primary.dark,
+            fontWeight: 'bold'
+          }}
+        />
       ),
     },
     {
       field: "redeemDate",
       headerName: "Redeem Date",
-      flex: 1,
+      flex: 1.5,
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>
-          Redeem Date
-        </div>
+        <Typography variant="subtitle2" fontWeight="bold">Redeem Date</Typography>
       ),
       renderCell: (params) => {
         const date = new Date(params.row.redeemDate + "Z");
-        return date.toLocaleString("en-GB", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        });
+        return (
+          <Typography variant="body2">
+            {date.toLocaleString("en-GB", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Typography>
+        );
       },
     },
     {
@@ -188,8 +242,9 @@ const CustomerRedeemHistory = () => {
       headerName: "Status",
       flex: 1,
       headerAlign: "center",
-      align: "center", renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Status</div>
+      align: "center", 
+      renderHeader: () => (
+        <Typography variant="subtitle2" fontWeight="bold">Status</Typography>
       ),
       renderCell: (params) => {
         const status = statusMapping[params.row.redeemStatusId] || {
@@ -197,7 +252,17 @@ const CustomerRedeemHistory = () => {
           color: "default",
         };
   
-        return <Chip  size="small" color={status.color} label={status.label} />;
+        return (
+          <Chip 
+            size="small" 
+            color={status.color} 
+            label={status.label}
+            sx={{ 
+              fontWeight: 'medium',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+            }} 
+          />
+        );
       },
     },
     {
@@ -207,70 +272,146 @@ const CustomerRedeemHistory = () => {
       headerAlign: "center",
       align: "center",
       renderHeader: () => (
-        <div style={{ fontWeight: "bold", textAlign: "center" }}>Actions</div>
+        <Typography variant="subtitle2" fontWeight="bold" >Actions</Typography>
       ),
-      renderCell: (params) => (
-        <Button
-          variant="outlined"
-          color="error"
-          size="small"
-          onClick={() =>
-            handleCancelRedeem(
-              params.row.redeemHistoryId,
-              params.row.redeemPoint
-            )
-          }
-        >
-          Cancel
-        </Button>
-      ),
+      renderCell: (params) => {
+        // Only show cancel button for redeemed items that haven't been picked up or cancelled
+        const isRedeemed = params.row.redeemStatusId === "1509e4e6-e1ec-42a4-9301-05131dd498e4";
+        
+        return isRedeemed ? (
+          <Tooltip title="Cancel redemption">
+            <IconButton
+              color="error"
+              size="small"
+              onClick={() =>
+                handleCancelRedeem(
+                  params.row.redeemHistoryId,
+                  params.row.redeemPoint
+                )
+              }
+              sx={{ 
+                '&:hover': {
+                  backgroundColor: alpha(theme.palette.error.main, 0.1),
+                }
+              }}
+            >
+              <CancelIcon />
+            </IconButton>
+          </Tooltip>
+        ) : (
+          <Typography variant="body2" color="text.secondary">No actions</Typography>
+        );
+      },
     },
   ];
 
   return (
-    <div>
+    <div style={{ backgroundColor: '#f5f8fb', minHeight: '100vh' }}>
       <NavbarCustomer />
-      <div className="p-6">
-        <div className="header">
-          <div className="left">
-            <h2 className="text-2xl font-bold mb-4">Your Redemption History</h2>
-          </div>
-        </div>
-        <Box
-          sx={{
-            height: 400,
-            width: "100%",
-            "& .MuiDataGrid-root": { backgroundColor: "#f9f9f9" },
-            "& .MuiDataGrid-row": { backgroundColor: "#f4f4f4" },
-            "& .MuiDataGrid-row.Mui-selected": {
-              backgroundColor: "#c8f6e9 !important",
-            },
-            "& .MuiDataGrid-footerContainer": { backgroundColor: "#9f9f9f" },
-            "& .MuiPaginationItem-root": {
-              backgroundColor: "#b3f2ed",
-              color: "#3f3f3f",
-            },
-            "& .MuiPaginationItem-root:hover": { backgroundColor: "#ede4e2" },
+      <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Card 
+          elevation={3} 
+          sx={{ 
+            borderRadius: '16px', 
+            overflow: 'hidden',
+            border: '1px solid',
+            borderColor: alpha(theme.palette.primary.main, 0.1)
           }}
         >
-          {loading ? (
-            <div style={{ textAlign: "center" }}>
-              <CircularProgress />
-            </div>
-          ) : (
-            <DataGrid
-              columns={columns}
-              rows={history}
-              initialState={{
-                pagination: {
-                  paginationModel: { page: 0, pageSize: 5 },
-                },
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+              <HistoryIcon 
+                sx={{ 
+                  fontSize: 32, 
+                  color: theme.palette.primary.main, 
+                  mr: 2 
+                }} 
+              />
+              <Typography 
+                variant="h5" 
+                component="h1" 
+                fontWeight="bold"
+                color="primary.dark"
+              >
+                Your Redemption History
+              </Typography>
+            </Box>
+            
+            <Paper 
+              elevation={0} 
+              sx={{ 
+                borderRadius: '12px', 
+                overflow: 'hidden',
+                border: '1px solid',
+                borderColor: alpha(theme.palette.primary.main, 0.1)
               }}
-              pageSizeOptions={[5, 10, 20]}
-            />
-          )}
-        </Box>
-      </div>
+            >
+              <Box sx={{ height: 500, width: "100%" }}>
+                {loading ? (
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center',
+                      height: '100%' 
+                    }}
+                  >
+                    <CircularProgress color="primary" />
+                  </Box>
+                ) : (
+                  <DataGrid
+                    columns={columns}
+                    rows={history}
+                    initialState={{
+                      pagination: {
+                        paginationModel: { page: 0, pageSize: 5 },
+                      },
+                      sorting: {
+                        sortModel: [{ field: 'redeemDate', sort: 'desc' }],
+                      },
+                    }}
+                    pageSizeOptions={[5, 10, 20]}
+                    disableRowSelectionOnClick
+                    sx={{
+                      border: 'none',
+                      '& .MuiDataGrid-columnHeaders': {
+                       backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                        color: theme.palette.primary.dark,
+                      },
+                      '& .MuiDataGrid-cell': {
+                        borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      },
+                      '& .MuiDataGrid-cellContent': {
+                        width: '100%',
+                        textAlign: 'center',
+                      },
+                      '& .MuiDataGrid-row:hover': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                      },
+                      '& .MuiDataGrid-row.Mui-selected': {
+                        backgroundColor: `${alpha(theme.palette.primary.main, 0.1)} !important`,
+                      },
+                      '& .MuiDataGrid-footerContainer': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.05),
+                        borderTop: `1px solid ${alpha(theme.palette.primary.main, 0.1)}`,
+                      },
+                      '& .MuiTablePagination-root': {
+                        color: theme.palette.primary.dark,
+                      },
+                      '& .MuiButtonBase-root.MuiIconButton-root': {
+                        color: theme.palette.primary.main,
+                      },
+                    }}
+                  />
+                )}
+              </Box>
+            </Paper>
+          </CardContent>
+        </Card>
+      </Container>
     </div>
   );
 };

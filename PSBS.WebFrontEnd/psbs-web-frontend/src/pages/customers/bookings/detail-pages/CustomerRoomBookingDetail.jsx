@@ -5,8 +5,6 @@ import Swal from "sweetalert2";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
 import { motion } from "framer-motion";
-import CameraCus from "../../cameras/CameraCus";
-import { X } from "lucide-react"; // Icon đóng modal
 
 const CustomerRoomBookingDetail = () => {
   const { bookingId } = useParams();
@@ -21,11 +19,9 @@ const CustomerRoomBookingDetail = () => {
   const [petNames, setPetNames] = useState({});
   const [allDataLoaded, setAllDataLoaded] = useState(false);
 
-  // State để quản lý popup xem camera
-  const [showCameraModal, setShowCameraModal] = useState(false);
-  const [selectedCameraCode, setSelectedCameraCode] = useState("");
-
-  const getToken = () => sessionStorage.getItem("token");
+  const getToken = () => {
+    return sessionStorage.getItem("token");
+  };
 
   const fetchPetName = async (petId) => {
     try {
@@ -150,25 +146,6 @@ const CustomerRoomBookingDetail = () => {
     fetchBookingDetails();
   }, [bookingId]);
 
-  const handleViewCamera = async (cameraId) => {
-    if (!cameraId) return;
-    try {
-      const res = await axios.get(
-        `http://localhost:5050/api/Camera/${cameraId}`,
-        {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        }
-      );
-      // Giả sử response chứa cameraCode
-      const code = res.data.cameraCode;
-      setSelectedCameraCode(code);
-      setShowCameraModal(true);
-    } catch (err) {
-      console.error("Error fetching cameraCode:", err);
-      Swal.fire("Error", "Không lấy được thông tin camera.", "error");
-    }
-  };
-
   const handleCancelBooking = async () => {
     Swal.fire({
       title: "Are you sure?",
@@ -220,6 +197,105 @@ const CustomerRoomBookingDetail = () => {
         }
       }
     });
+  };
+
+  const handleCameraSettings = (roomHistoryId) => {
+    const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
+    if (!room) return;
+
+    Swal.fire({
+      title: "Camera Settings",
+      html: `
+        <div class="text-left">
+          <div class="mb-4">
+            <p class="font-semibold">Room: <span class="font-normal">${roomName}</span></p>
+            <p class="font-semibold">Pet: <span class="font-normal">${petNames[room.petId] || "Unknown"
+        }</span></p>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Standard</option>
+                <option>Night Vision</option>
+                <option>Wide Angle</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Recording</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>Continuous</option>
+                <option>Motion Activated</option>
+                <option>Disabled</option>
+              </select>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Quality</label>
+              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
+                <option>High (1080p)</option>
+                <option>Medium (720p)</option>
+                <option>Low (480p)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Save Settings",
+      cancelButtonText: "Cancel",
+      focusConfirm: false,
+      preConfirm: () => {
+        // Here you would typically save the settings to your backend
+        return Promise.resolve();
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Saved!", "Camera settings have been updated.", "success");
+      }
+    });
+  };
+
+  const handleVNPayPayment = async () => {
+    try {
+      if (!booking) return;
+      // Get current path to redirect back after payment
+      const currentPath = window.location.pathname;
+
+      // Create description with booking code and path
+      const description = JSON.stringify({
+        bookingCode: booking.bookingCode.trim(),
+        redirectPath: currentPath
+      });
+
+      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+        booking.totalAmount
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+
+      console.log("VNPay URL:", vnpayUrl);
+
+      const vnpayResponse = await fetch(vnpayUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      const vnpayResult = await vnpayResponse.text();
+      console.log("VNPay API Response:", vnpayResult);
+
+      if (vnpayResult.startsWith("http")) {
+        window.location.href = vnpayResult; // Redirect to VNPay
+      } else {
+        Swal.fire("Failed!", "VNPay payment failed!", "error");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      Swal.fire("Error!", "An error occurred while processing payment.", "error");
+    }
   };
 
   if (loading) {
@@ -307,10 +383,10 @@ const CustomerRoomBookingDetail = () => {
                   <span className="font-semibold text-gray-700">Status:</span>{" "}
                   <span
                     className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Checked out"
-                        ? "bg-green-100 text-green-800"
-                        : bookingStatusName === "Cancelled"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-blue-100 text-blue-800"
+                      ? "bg-green-100 text-green-800"
+                      : bookingStatusName === "Cancelled"
+                        ? "bg-red-100 text-red-800"
+                        : "bg-blue-100 text-blue-800"
                       }`}
                   >
                     {bookingStatusName}
@@ -339,8 +415,8 @@ const CustomerRoomBookingDetail = () => {
                 </span>{" "}
                 <span
                   className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid
-                      ? "bg-green-100 text-green-800"
-                      : "bg-yellow-100 text-yellow-800"
+                    ? "bg-green-100 text-green-800"
+                    : "bg-yellow-100 text-yellow-800"
                     }`}
                 >
                   {booking.isPaid ? "Paid" : "Pending"}
@@ -387,19 +463,33 @@ const CustomerRoomBookingDetail = () => {
                 transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
                 className="p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 relative"
               >
-                {history.bookingCamera &&
-                  history.status === "Checked in" &&
-                  bookingStatusName === "Checked in" && (
-                    <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
-                      <button
-                        className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
-                        title="View Camera"
-                        onClick={() => handleViewCamera(history.cameraId)}
+                {history.bookingCamera && history.status === "Checked in" && bookingStatusName === "Checked in" && (
+                  <div className="absolute top-4 right-4 flex items-center space-x-2 z-10">
+                    <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
+                      Camera
+                    </span>
+                    <button
+                      onClick={() =>
+                        handleCameraSettings(history.roomHistoryId)
+                      }
+                      className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
+                      title="Camera Settings"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
                       >
-                        <span className="text-2xl">📹</span>
-                      </button>
-                    </div>
-                  )}
+                        <path
+                          fillRule="evenodd"
+                          d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                )}
                 <h4 className="text-xl font-semibold text-gray-800 mb-4">
                   Room Booking #{index + 1}
                 </h4>
@@ -443,19 +533,17 @@ const CustomerRoomBookingDetail = () => {
                             : "text-gray-600"
                         }
                       >
-                        {history.bookingCamera
-                          ? "Included"
-                          : "Not included"}
+                        {history.bookingCamera ? "Included" : "Not included"}
                       </span>
                     </p>
                   </div>
                   <div className="flex items-center">
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Check out"
-                          ? "bg-green-100 text-green-800"
-                          : history.status === "Check in"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
+                        ? "bg-green-100 text-green-800"
+                        : history.status === "Check in"
+                          ? "bg-blue-100 text-blue-800"
+                          : "bg-yellow-100 text-yellow-800"
                         }`}
                     >
                       {history.status}
@@ -482,8 +570,18 @@ const CustomerRoomBookingDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
-              className="mt-8 text-center"
+              className="mt-8 text-center space-x-4"
             >
+              {!booking.isPaid &&
+                paymentTypeName === "VNPay" &&
+                (
+                  <button
+                    onClick={handleVNPayPayment}
+                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                  >
+                    Pay with VNPAY
+                  </button>
+                )}
               <button
                 onClick={handleCancelBooking}
                 className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
@@ -493,23 +591,6 @@ const CustomerRoomBookingDetail = () => {
             </motion.div>
           )}
       </motion.div>
-
-      {/* Modal hiển thị camera khi nhấn View */}
-      {showCameraModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative bg-white rounded-lg shadow-lg max-w-3xl w-full p-4">
-            <button
-              onClick={() => setShowCameraModal(false)}
-              className="absolute top-2 right-2 text-gray-700 hover:text-gray-900"
-              title="Đóng"
-            >
-              <X className="w-6 h-6" />
-            </button>
-            {/* Render CameraCus với initialCameraCode lấy từ state */}
-            <CameraCus initialCameraCode={selectedCameraCode} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };

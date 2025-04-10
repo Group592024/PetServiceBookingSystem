@@ -72,7 +72,7 @@ const CustomerServiceBookingDetail = () => {
 
         if (serviceResponse.data.flag) {
           const serviceData = serviceResponse.data.data;
-          
+
           // Store both service and variant info
           setServiceInfo(prev => ({
             ...prev,
@@ -158,7 +158,7 @@ const CustomerServiceBookingDetail = () => {
         if (itemsResponse.data && itemsResponse.data.data.length > 0) {
           const items = itemsResponse.data.data;
           setServiceItems(items);
-          
+
           // Fetch details for each item
           items.forEach(item => {
             fetchPetName(item.petId);
@@ -211,6 +211,45 @@ const CustomerServiceBookingDetail = () => {
       }
     });
   };
+  const handleVNPayPayment = async () => {
+    try {
+      if (!booking) return;
+      // Get current path to redirect back after payment
+      const currentPath = window.location.pathname;
+
+      // Create description with booking code and path
+      const description = JSON.stringify({
+        bookingCode: booking.bookingCode.trim(),
+        redirectPath: currentPath
+      });
+
+      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+        booking.totalAmount
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+
+      console.log("VNPay URL:", vnpayUrl);
+
+      const vnpayResponse = await fetch(vnpayUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+        },
+      });
+
+      const vnpayResult = await vnpayResponse.text();
+      console.log("VNPay API Response:", vnpayResult);
+
+      if (vnpayResult.startsWith("http")) {
+        window.location.href = vnpayResult; // Redirect to VNPay
+      } else {
+        Swal.fire("Failed!", "VNPay payment failed!", "error");
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+      Swal.fire("Error!", "An error occurred while processing payment.", "error");
+    }
+  };
 
   if (loading)
     return (
@@ -224,13 +263,13 @@ const CustomerServiceBookingDetail = () => {
     <div className="min-h-screen bg-gray-50">
       <NavbarCustomer />
       <div>
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="container mx-auto p-4"
         >
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
@@ -238,7 +277,7 @@ const CustomerServiceBookingDetail = () => {
           >
             Service Booking Details
           </motion.h2>
-          
+
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -248,7 +287,7 @@ const CustomerServiceBookingDetail = () => {
           </motion.div>
 
           {booking && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.5 }}
@@ -276,11 +315,10 @@ const CustomerServiceBookingDetail = () => {
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
-                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                      bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
+                    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
                       bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                      "bg-blue-100 text-blue-800"
-                    }`}>
+                        "bg-blue-100 text-blue-800"
+                      }`}>
                       {bookingStatusName}
                     </span>
                   </p>
@@ -306,9 +344,8 @@ const CustomerServiceBookingDetail = () => {
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                    }`}>
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
@@ -316,7 +353,7 @@ const CustomerServiceBookingDetail = () => {
             </motion.div>
           )}
 
-          <motion.h3 
+          <motion.h3
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
@@ -326,7 +363,7 @@ const CustomerServiceBookingDetail = () => {
           </motion.h3>
 
           {serviceItems.length > 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.7 }}
@@ -391,7 +428,7 @@ const CustomerServiceBookingDetail = () => {
               ))}
             </motion.div>
           ) : (
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.8 }}
@@ -402,12 +439,22 @@ const CustomerServiceBookingDetail = () => {
           )}
 
           {(bookingStatusName === "Pending" || bookingStatusName === "Confirmed") && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.9 }}
-              className="mt-8 text-center"
+              className="mt-8 text-center space-x-4"
             >
+              {!booking.isPaid &&
+                paymentTypeName === "VNPay" &&
+                (
+                  <button
+                    onClick={handleVNPayPayment}
+                    className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-lg hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
+                  >
+                    Pay with VNPAY
+                  </button>
+                )}
               <button
                 onClick={handleCancelBooking}
                 className="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-lg hover:bg-red-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl"

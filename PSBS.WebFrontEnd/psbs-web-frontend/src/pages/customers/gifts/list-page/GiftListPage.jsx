@@ -36,11 +36,11 @@ const GiftListPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-svh bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="flex items-center justify-center h-svh bg-gradient-to-br from-blue-50 to-cyan-50">
         <div role="status">
           <svg
             aria-hidden="true"
-            className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
+            className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,7 @@ const GiftListPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
       <NavbarCustomer />
       <div className="container mx-auto px-4 py-8">
         <motion.div 
@@ -70,12 +70,20 @@ const GiftListPage = () => {
           transition={{ duration: 0.5 }}
           className="flex justify-between items-center mb-8"
         >
-          <h1 className="text-4xl font-bold text-purple-800">
+          <h1 className="text-4xl font-bold text-blue-800">
             Gift List
           </h1>
+        <div className="flex items-center gap-2">
+        <button
+            onClick={() => navigate('/customer/vouchers')}
+            className="flex items-center gap-2 px-6 py-3 text-lg bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+          >
+       <i class='bx bx-gift'></i>
+            Voucher
+          </button>
           <button
             onClick={() => navigate('/customer/redeemHistory')}
-            className="flex items-center gap-2 px-6 py-3 text-lg bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
+            className="flex items-center gap-2 px-6 py-3 text-lg bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -91,6 +99,7 @@ const GiftListPage = () => {
             </svg>
             History
           </button>
+        </div>
         </motion.div>
         <motion.div 
           initial={{ opacity: 0 }}
@@ -106,7 +115,7 @@ const GiftListPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group bg-white border border-purple-100 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden"
+                className="group bg-white border border-blue-100 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer overflow-hidden"
                 onClick={() => navigate(`/customer/gifts/detail/${gift.giftId}`)}
               >
                 {/* Gift image container with overlay */}
@@ -122,7 +131,7 @@ const GiftListPage = () => {
                 {/* Gift content */}
                 <div className="p-6">
                   {/* Gift name with hover effect */}
-                  <h2 className="text-xl font-semibold text-purple-800 text-center mb-3 group-hover:text-purple-600 transition-colors duration-300">
+                  <h2 className="text-xl font-semibold text-blue-800 text-center mb-3 group-hover:text-blue-600 transition-colors duration-300">
                     {gift.giftName}
                   </h2>
 
@@ -135,11 +144,11 @@ const GiftListPage = () => {
                   </div>
 
                   {/* Gift points with enhanced styling */}
-                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-purple-100">
+                  <div className="flex justify-between items-center mt-4 pt-4 border-t border-blue-100">
                     <span className="text-sm font-medium text-gray-500">
                       Available Points
                     </span>
-                    <span className="text-sm font-bold text-purple-600 bg-purple-50 px-4 py-1.5 rounded-full shadow-sm group-hover:shadow-md transition-shadow duration-300">
+                    <span className="text-sm font-bold text-blue-600 bg-blue-70 px-4 py-1.5 rounded-full shadow-sm group-hover:shadow-md transition-shadow duration-300">
                       {gift.giftPoint}
                     </span>
                   </div>
@@ -148,7 +157,7 @@ const GiftListPage = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full mt-4 py-2 px-4 bg-purple-50 text-purple-600 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-purple-100"
+                    className="w-full mt-4 py-2 px-4 bg-blue-70 text-blue-600 rounded-lg font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-blue-100"
                   >
                     View Details
                   </motion.button>

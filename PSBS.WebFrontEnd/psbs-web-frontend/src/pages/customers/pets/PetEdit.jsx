@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
 import Swal from 'sweetalert2';
+import { motion } from 'framer-motion';
+import { FaPaw, FaCalendarAlt, FaMars, FaVenus, FaCamera, FaEdit } from 'react-icons/fa';
 
 const CustomerPetEdit = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    console.log(id);
     const [imagePreview, setImagePreview] = useState(null);
     const [petTypes, setPetTypes] = useState([]);
     const [breeds, setBreeds] = useState([]);
     const [errors, setErrors] = useState({});
     const [hasInteractedWithImage, setHasInteractedWithImage] = useState(false);
     const [oldPetImage, setOldPetImage] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [pet, setPet] = useState({
         petName: '',
         petGender: true,
@@ -25,6 +27,7 @@ const CustomerPetEdit = () => {
         petNote: '',
         petImage: null
     });
+
     useEffect(() => {
         const fetchPetData = async () => {
             try {
@@ -36,7 +39,6 @@ const CustomerPetEdit = () => {
                         "Authorization": `Bearer ${token}`
                     }
                 });
-
                 const data = await response.json();
                 if (data.flag) {
                     const petData = data.data;
@@ -48,9 +50,6 @@ const CustomerPetEdit = () => {
                     });
                     setImagePreview(petData.petImage ? `http://localhost:5050/pet-service${petData.petImage}` : null);
                     setOldPetImage(petData.petImage);
-                    console.log('Pet Type ID:', petData.petTypeId);
-                    console.log('Pet Breed ID:', petData.petBreedId);
-                    console.log('Current Pet State:', { ...petData, petImage: null });
                 } else {
                     Swal.fire('Error', data.message || 'Failed to fetch pet details', 'error');
                 }
@@ -73,9 +72,7 @@ const CustomerPetEdit = () => {
                         "Authorization": `Bearer ${token}`
                     }
                 });
-
                 const data = await response.json();
-                console.log('Fetched Pet Types:', data);
                 setPetTypes(data.data.filter(type => !type.isDelete));
             } catch (error) {
                 console.log('Error fetching pet types:', error);
@@ -96,18 +93,17 @@ const CustomerPetEdit = () => {
                             "Authorization": `Bearer ${token}`
                         }
                     });
-
                     const data = await response.json();
                     if (!data.flag) {
                         Swal.fire({
                             title: 'Information',
                             text: 'No breeds available for this pet type',
                             icon: 'info',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#3085d6'
                         });
                     }
                     setBreeds(data.data || []);
-                    console.log('Fetched Breeds:', data.data);
                 } catch (error) {
                     console.log('Error fetching breeds:', error);
                     setBreeds([]);
@@ -122,8 +118,6 @@ const CustomerPetEdit = () => {
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setHasInteractedWithImage(true);
-        console.log('Selected file:', file);
-
         if (file) {
             const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
             if (!validImageTypes.includes(file.type)) {
@@ -131,15 +125,14 @@ const CustomerPetEdit = () => {
                     title: 'Invalid file type',
                     text: 'Only image files are accepted',
                     icon: 'warning',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
                 });
                 return;
             }
-
             setPet({ ...pet, petImage: file });
             setImagePreview(URL.createObjectURL(file));
             setErrors({ ...errors, petImage: '' });
-            console.log('Updated Pet State:', { ...pet, petImage: file });
         }
     };
 
@@ -157,14 +150,13 @@ const CustomerPetEdit = () => {
         if (!pet.petFurType.trim()) newErrors.petFurType = 'Please enter fur type';
         if (!pet.petFurColor.trim()) newErrors.petFurColor = 'Please enter fur color';
         setErrors(newErrors);
-        console.log('Validation Errors:', newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
         const result = await Swal.fire({
             title: 'Are you sure?',
-            text: "This action will update the pet's information and may affect related data. Do you want to proceed?",
+            text: "This action will update the pet's information. Do you want to proceed?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -178,6 +170,17 @@ const CustomerPetEdit = () => {
         }
 
         if (!validateForm()) return;
+
+        setIsSubmitting(true);
+
+        Swal.fire({
+            title: 'Updating your pet...',
+            html: 'Please wait while we save your changes',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         const formData = new FormData();
         formData.append('petId', pet.petId);
@@ -200,12 +203,8 @@ const CustomerPetEdit = () => {
                 ...prev,
                 petImage: 'Please select a pet image or leave it unchanged.'
             }));
+            setIsSubmitting(false);
             return;
-        }
-
-        console.log('Form Data being sent:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
         }
 
         try {
@@ -221,16 +220,25 @@ const CustomerPetEdit = () => {
                 const errorData = await response.json();
                 const errorMessage = errorData.message || 'An unknown error occurred';
                 Swal.fire('Error', errorMessage, 'error');
-                return;
             } else {
-                Swal.fire('Success', 'Pet updated successfully', 'success');
-                navigate('/customer/pet');
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Pet updated successfully',
+                    icon: 'success',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#3085d6'
+                }).then(() => {
+                    navigate('/customer/pet');
+                });
             }
         } catch (error) {
             console.error('Error updating pet:', error);
             Swal.fire('Error', 'Failed to update pet', 'error');
+        } finally {
+            setIsSubmitting(false);
         }
     };
+
     const formatDateDisplay = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
@@ -241,10 +249,16 @@ const CustomerPetEdit = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-pink-50">
             <NavbarCustomer />
-            <div className="max-w-6xl mx-auto p-6">
-                {/* Enhanced Header */}
+
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-7xl mx-auto p-6"
+            >
+                {/* Header */}
                 <div className="flex items-center mb-8 bg-white p-6 rounded-2xl shadow-sm">
                     <button
                         onClick={() => navigate('/customer/pet')}
@@ -257,26 +271,42 @@ const CustomerPetEdit = () => {
                     <h1 className="text-3xl font-bold text-gray-800 ml-4">Edit Pet Profile</h1>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+                <motion.div
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, delay: 0.1 }}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden"
+                >
                     <div className="flex flex-col md:flex-row">
                         {/* Left Column - Image Upload and Basic Info */}
-                        <div className="md:w-5/12 bg-gradient-to-b from-gray-50 to-white p-8">
+                        <div className="md:w-5/12 bg-gradient-to-br from-indigo-50 to-blue-300 p-8">
                             {/* Image Upload Section */}
                             <div className="mb-8">
-                                <div className="bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all cursor-pointer"
-                                    onClick={() => document.querySelector('input[type="file"]').click()}>
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    className={`bg-white p-6 rounded-2xl border-2 border-dashed 
+                                    ${errors.petImage && hasInteractedWithImage ? 'border-red-300' : 'border-indigo-200'} 
+                                    hover:border-indigo-400 transition-all cursor-pointer shadow-sm`}
+                                    onClick={() => document.querySelector('input[type="file"]').click()}
+                                >
                                     {imagePreview ? (
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="w-full h-64 object-contain rounded-xl"
-                                        />
+                                        <div className="relative">
+                                            <img
+                                                src={imagePreview}
+                                                alt="Preview"
+                                                className="w-full h-64 object-contain rounded-xl"
+                                            />
+                                            <div className="absolute bottom-2 right-2 bg-indigo-600 text-white p-2 rounded-full shadow-lg">
+                                                <FaEdit />
+                                            </div>
+                                        </div>
                                     ) : (
-                                        <div className="w-full h-64 rounded-xl flex flex-col items-center justify-center bg-gray-100">
-                                            <svg className="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <span className="text-gray-500">Click to change pet photo</span>
+                                        <div className="w-full h-64 rounded-xl flex flex-col items-center justify-center bg-indigo-50">
+                                            <div className="bg-indigo-100 p-4 rounded-full mb-4">
+                                                <FaCamera className="w-10 h-10 text-indigo-500" />
+                                            </div>
+                                            <span className="text-indigo-700 font-medium">Upload Pet Photo</span>
+                                            <span className="text-gray-500 text-sm mt-2">Click to browse files</span>
                                         </div>
                                     )}
                                     <input
@@ -285,48 +315,67 @@ const CustomerPetEdit = () => {
                                         className="hidden"
                                         onChange={handleImageChange}
                                     />
-                                </div>
-                                {errors.petImage && hasInteractedWithImage &&
-                                    <p className="mt-2 text-red-500 text-sm">{errors.petImage}</p>
-                                }
+                                </motion.div>
+                                {errors.petImage && hasInteractedWithImage && (
+                                    <p className="mt-2 text-red-500 text-sm flex items-center">
+                                        <span className="mr-1">⚠</span> {errors.petImage}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Basic Info */}
                             <div className="space-y-6">
                                 <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Pet Name</label>
                                     <input
                                         type="text"
-                                        placeholder="Pet Name"
-                                        className={`w-full text-2xl font-semibold p-4 rounded-xl bg-gray-50 border 
-                                        ${errors.petName ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'} 
-                                        focus:outline-none focus:ring-2 ${errors.petName ? 'focus:ring-red-200' : 'focus:ring-blue-200'} 
-                                        transition-all`}
+                                        placeholder="What's your pet's name?"
+                                        className={`w-full text-lg p-4 rounded-xl bg-white border
+                                        ${errors.petName ? 'border-red-300 focus:border-red-500' : 'border-indigo-200 focus:border-indigo-500'}
+                                        focus:outline-none focus:ring-2 ${errors.petName ? 'focus:ring-red-200' : 'focus:ring-indigo-200'}
+                                        transition-all shadow-sm`}
                                         value={pet.petName}
                                         onChange={(e) => {
                                             setPet({ ...pet, petName: e.target.value });
                                             setErrors({ ...errors, petName: '' });
                                         }}
                                     />
-                                    {errors.petName && <p className="mt-2 text-red-500 text-sm">{errors.petName}</p>}
+                                    {errors.petName && (
+                                        <p className="mt-2 text-red-500 text-sm flex items-center">
+                                            <span className="mr-1">⚠</span> {errors.petName}
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <select
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 
-                                                     focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
-                                            value={pet.petGender}
-                                            onChange={(e) => setPet({ ...pet, petGender: e.target.value === 'true' })}
-                                        >
-                                            <option value={true}>♂ Male</option>
-                                            <option value={false}>♀ Female</option>
-                                        </select>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                                        <div className="relative">
+                                            <select
+                                                className="w-full p-3 rounded-xl bg-white border border-indigo-200 
+                                                focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 
+                                                transition-all appearance-none shadow-sm pl-10"
+                                                value={pet.petGender}
+                                                onChange={(e) => setPet({ ...pet, petGender: e.target.value === 'true' })}
+                                            >
+                                                <option value={true}>Male</option>
+                                                <option value={false}>Female</option>
+                                            </select>
+                                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                {pet.petGender ?
+                                                    <FaMars className="text-blue-500" /> :
+                                                    <FaVenus className="text-pink-500" />
+                                                }
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
                                         <div className="relative">
                                             <input
                                                 type="date"
-                                                className="absolute left-0 mb-20 w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                                                className="absolute left-0 mb-20 w-full p-3 rounded-xl bg-white border border-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all"
                                                 value={pet.dateOfBirth ? pet.dateOfBirth.split('T')[0] : ''}
                                                 onChange={(e) => {
                                                     setPet({ ...pet, dateOfBirth: e.target.value });
@@ -336,34 +385,46 @@ const CustomerPetEdit = () => {
                                                 id="datePicker"
                                                 style={{ opacity: 0, zIndex: -1 }}
                                             />
-                                            <input
-                                                type="text"
-                                                className={`w-full p-3 rounded-xl bg-gray-50 border 
-                                                            ${errors.dateOfBirth ? 'border-red-300' : 'border-gray-200'} 
-                                                            focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all cursor-pointer`}
-                                                value={pet.dateOfBirth ? formatDateDisplay(pet.dateOfBirth) : ''}
+                                            <div
+                                                className={`w-full p-3 rounded-xl bg-white border
+                                                ${errors.dateOfBirth ? 'border-red-300' : 'border-indigo-200'}
+                                                focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all 
+                                                cursor-pointer flex items-center shadow-sm pl-10`}
                                                 onClick={() => document.getElementById('datePicker').showPicker()}
-                                                readOnly
-                                                placeholder="DD/MM/YYYY"
-                                            />
+                                            >
+                                                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                                    <FaCalendarAlt className="text-indigo-500" />
+                                                </div>
+                                                <span>{pet.dateOfBirth ? formatDateDisplay(pet.dateOfBirth) : 'Select date'}</span>
+                                            </div>
                                         </div>
-                                        {errors.dateOfBirth &&
-                                            <p className="mt-2 text-red-500 text-sm">{errors.dateOfBirth}</p>
-                                        }
+                                        {errors.dateOfBirth && (
+                                            <p className="mt-2 text-red-500 text-sm flex items-center">
+                                                <span className="mr-1">⚠</span> {errors.dateOfBirth}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                                     <textarea
-                                        placeholder="Notes about your pet..."
-                                        className="w-full p-4 rounded-xl bg-gray-50 border border-gray-200 min-h-[120px] 
-                                                 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                                        placeholder="Special care instructions, behaviors, or other important information..."
+                                        className={`w-full p-4 rounded-xl bg-white border shadow-sm
+                                        ${errors.petNote ? 'border-red-300 focus:border-red-500' : 'border-indigo-200 focus:border-indigo-500'}
+                                        focus:outline-none focus:ring-2 ${errors.petNote ? 'focus:ring-red-200' : 'focus:ring-indigo-200'}
+                                        transition-all min-h-[120px] resize-none`}
                                         value={pet.petNote}
-                                        onChange={(e) => setPet({ ...pet, petNote: e.target.value })}
+                                        onChange={(e) => {
+                                            setPet({ ...pet, petNote: e.target.value });
+                                            setErrors({ ...errors, petNote: '' });
+                                        }}
                                     />
-                                    {errors.petNote &&
-                                        <p className="mt-2 text-red-500 text-sm">{errors.petNote}</p>
-                                    }
+                                    {errors.petNote && (
+                                        <p className="mt-2 text-red-500 text-sm flex items-center">
+                                            <span className="mr-1">⚠</span> {errors.petNote}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -371,42 +432,58 @@ const CustomerPetEdit = () => {
                         {/* Right Column - Pet Details */}
                         <div className="md:w-7/12 p-8 bg-white">
                             <div className="space-y-6">
+                                <div className="bg-indigo-50 p-4 rounded-xl mb-6">
+                                    <h2 className="text-lg font-semibold text-indigo-700 flex items-center mb-1">
+                                        <FaPaw className="mr-2" /> Pet Details
+                                    </h2>
+                                    <p className="text-sm text-gray-600">
+                                        These details help us provide the best care for your pet
+                                    </p>
+                                </div>
+
                                 {/* Pet Type */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Pet Type</label>
-                                    <select
-                                        className={`w-full p-3 rounded-xl bg-gray-50 border 
-                                        ${errors.petTypeId ? 'border-red-300' : 'border-gray-200'} 
-                                        focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all`}
-                                        value={pet.petTypeId}
-                                        onChange={(e) => {
-                                            setPet({ ...pet, petTypeId: e.target.value, petBreedId: '' });
-                                            setBreeds([]);
-                                            setErrors({ ...errors, petTypeId: '' });
-                                        }}
-                                    >
-                                        <option value="">Select Pet Type</option>
-                                        {petTypes.map(type => (
-                                            <option key={type.petType_ID} value={type.petType_ID}>
-                                                {type.petType_Name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.petTypeId &&
-                                        <p className="mt-2 text-red-500 text-sm">{errors.petTypeId}</p>
-                                    }
+                                    <div className="relative">
+                                        <select
+                                            className={`w-full p-3 rounded-xl bg-white border shadow-sm
+                                            ${errors.petTypeId ? 'border-red-300' : 'border-indigo-200'}
+                                            focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all`}
+                                            value={pet.petTypeId}
+                                            onChange={(e) => {
+                                                setPet({ ...pet, petTypeId: e.target.value, petBreedId: '' });
+                                                setBreeds([]);
+                                                setErrors({ ...errors, petTypeId: '' });
+                                            }}
+                                        >
+                                            <option value="">Select Pet Type</option>
+                                            {petTypes.map(type => (
+                                                <option key={type.petType_ID} value={type.petType_ID}>
+                                                    {type.petType_Name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {errors.petTypeId && (
+                                        <p className="mt-2 text-red-500 text-sm flex items-center">
+                                            <span className="mr-1">⚠</span> {errors.petTypeId}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Breed */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-2">Breed</label>
                                     <select
-                                        className={`w-full p-3 rounded-xl bg-gray-50 border 
-                                        ${errors.petBreedId ? 'border-red-300' : 'border-gray-200'} 
-                                        focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all
-                                        ${!pet.petTypeId ? 'bg-gray-100' : ''}`}
+                                        className={`w-full p-3 rounded-xl bg-white border shadow-sm
+                                        ${errors.petBreedId ? 'border-red-300' : 'border-indigo-200'}
+                                        focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-all
+                                        ${!pet.petTypeId ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                                         value={pet.petBreedId || ""}
-                                        onChange={(e) => setPet({ ...pet, petBreedId: e.target.value })}
+                                        onChange={(e) => {
+                                            setPet({ ...pet, petBreedId: e.target.value });
+                                            setErrors({ ...errors, petBreedId: '' });
+                                        }}
                                         disabled={!pet.petTypeId}
                                     >
                                         <option value="">Select Breed</option>
@@ -416,80 +493,129 @@ const CustomerPetEdit = () => {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.petBreedId &&
-                                        <p className="mt-2 text-red-500 text-sm">{errors.petBreedId}</p>
-                                    }
+                                    {errors.petBreedId && (
+                                        <p className="mt-2 text-red-500 text-sm flex items-center">
+                                            <span className="mr-1">⚠</span> {errors.petBreedId}
+                                        </p>
+                                    )}
                                 </div>
 
                                 {/* Other Details */}
-                                <div className="grid grid-cols-1 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">Weight (kg)</label>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className='md:col-span-2'>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            <div className="flex items-center">
+                                                <div className="mr-2 text-indigo-500" />
+                                                Weight (kg)
+                                            </div>
+                                        </label>
                                         <input
                                             type="number"
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 
-                                                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                            step="0.1"
+                                            min="0"
+                                            className={`w-full p-3 rounded-xl bg-white border shadow-sm
+                                            ${errors.petWeight ? 'border-red-300' : 'border-indigo-200'}
+                                            focus:border-indigo-500 focus:outline-none focus:ring-2 
+                                            ${errors.petWeight ? 'focus:ring-red-200' : 'focus:ring-indigo-200'}`}
                                             value={pet.petWeight}
-                                            onChange={(e) => setPet({ ...pet, petWeight: e.target.value })}
+                                            onChange={(e) => {
+                                                setPet({ ...pet, petWeight: e.target.value });
+                                                setErrors({ ...errors, petWeight: '' });
+                                            }}
                                         />
-                                        {errors.petWeight &&
-                                            <p className="mt-2 text-red-500 text-sm">{errors.petWeight}</p>
-                                        }
+                                        {errors.petWeight && (
+                                            <p className="mt-2 text-red-500 text-sm flex items-center">
+                                                <span className="mr-1">⚠</span> {errors.petWeight}
+                                            </p>
+                                        )}
                                     </div>
 
-                                    <div>
+                                    <div className='md:col-span-2'>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Fur Type</label>
                                         <input
                                             type="text"
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 
-                                                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                            placeholder="e.g. Short, Long, Curly"
+                                            className={`w-full p-3 rounded-xl bg-white border shadow-sm
+                                            ${errors.petFurType ? 'border-red-300' : 'border-indigo-200'}
+                                            focus:border-indigo-500 focus:outline-none focus:ring-2
+                                            ${errors.petFurType ? 'focus:ring-red-200' : 'focus:ring-indigo-200'}`}
                                             value={pet.petFurType}
-                                            onChange={(e) => setPet({ ...pet, petFurType: e.target.value })}
+                                            onChange={(e) => {
+                                                setPet({ ...pet, petFurType: e.target.value });
+                                                setErrors({ ...errors, petFurType: '' });
+                                            }}
                                         />
-                                        {errors.petFurType &&
-                                            <p className="mt-2 text-red-500 text-sm">{errors.petFurType}</p>
-                                        }
+                                        {errors.petFurType && (
+                                            <p className="mt-2 text-red-500 text-sm flex items-center">
+                                                <span className="mr-1">⚠</span> {errors.petFurType}
+                                            </p>
+                                        )}
                                     </div>
 
-                                    <div>
+                                    <div className="md:col-span-2">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Fur Color</label>
                                         <input
                                             type="text"
-                                            className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 
-                                                     focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                                            placeholder="e.g. Brown, Black & White, Tabby"
+                                            className={`w-full p-3 rounded-xl bg-white border shadow-sm
+                                            ${errors.petFurColor ? 'border-red-300' : 'border-indigo-200'}
+                                            focus:border-indigo-500 focus:outline-none focus:ring-2
+                                            ${errors.petFurColor ? 'focus:ring-red-200' : 'focus:ring-indigo-200'}`}
                                             value={pet.petFurColor}
-                                            onChange={(e) => setPet({ ...pet, petFurColor: e.target.value })}
+                                            onChange={(e) => {
+                                                setPet({ ...pet, petFurColor: e.target.value });
+                                                setErrors({ ...errors, petFurColor: '' });
+                                            }}
                                         />
-                                        {errors.petFurColor &&
-                                            <p className="mt-2 text-red-500 text-sm">{errors.petFurColor}</p>
-                                        }
+                                        {errors.petFurColor && (
+                                            <p className="mt-2 text-red-500 text-sm flex items-center">
+                                                <span className="mr-1">⚠</span> {errors.petFurColor}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Action Buttons */}
-                                <div className="flex justify-center gap-4 pt-6 mt-8 border-t">
-                                    <button
+                                <div className="flex justify-center gap-4 pt-6 mt-8 border-t border-gray-100">
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                         onClick={() => navigate('/customer/pet')}
-                                        className="px-8 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 
-                                                 transition-colors font-medium"
+                                        className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200
+                                                transition-colors font-medium flex items-center"
+                                        disabled={isSubmitting}
                                     >
                                         Cancel
-                                    </button>
-                                    <button
+                                    </motion.button>
+                                    <motion.button
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
                                         onClick={handleSubmit}
-                                        className="px-8 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 
-                                                 transition-colors font-medium"
+                                        className="px-8 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700
+                                                transition-colors font-medium flex items-center shadow-md"
+                                        disabled={isSubmitting}
                                     >
-                                        Save Changes
-                                    </button>
+                                        {isSubmitting ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Updating...
+                                            </>
+                                        ) : (
+                                            'Save Changes'
+                                        )}
+                                    </motion.button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     );
 };
 
 export default CustomerPetEdit;
+

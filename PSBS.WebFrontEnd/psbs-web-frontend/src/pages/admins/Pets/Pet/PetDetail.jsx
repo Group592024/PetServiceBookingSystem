@@ -256,7 +256,7 @@ const AdminPetDetail = () => {
                                     label="Pet Diary"
                                     icon="📖"
                                     className="bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-200"
-                                    onClick={() => navigate(`/list/${pet.petId}`)} 
+                                    onClick={() => navigate(`/customer/pet-diaries/${pet.petId}`)} 
                                 />
                                 <ActionButton
                                     label="Health Book"

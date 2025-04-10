@@ -80,7 +80,7 @@ namespace VoucherApi.Presentation.Controllers
             var voucher = await voucherInteface.GetByIdAsync(id);
             if (voucher is null)
             {
-                return NotFound("voucher requested not found");
+                return Ok(new Response(false, "voucher requested not found"));
             }
             // convert from entity to DTO and return
             var (_voucher, _) = VoucherConversion.FromEntity(voucher, null);

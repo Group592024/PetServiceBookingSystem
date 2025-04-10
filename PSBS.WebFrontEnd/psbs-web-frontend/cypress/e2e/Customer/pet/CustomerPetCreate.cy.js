@@ -72,7 +72,7 @@ describe('Customer Pet Create Page', () => {
           win.sessionStorage.setItem('accountId', 'customer-123');
         }
       },
-      timeout: 30000 
+      timeout: 30000
     });
   });
 
@@ -89,17 +89,18 @@ describe('Customer Pet Create Page', () => {
 
   it('should display the create pet form correctly', () => {
     cy.contains('h1', 'Add New Pet').should('be.visible');
-    cy.contains('Click to upload pet photo').should('be.visible');
+    cy.contains('Upload Pet Photo').should('be.visible');
+    cy.contains('Click to browse files').should('be.visible');
 
-    cy.get('input[placeholder="Pet Name"]').should('be.visible');
-    cy.get('select').first().should('contain', 'Male');
-    cy.get('select').first().should('contain', 'Female');
-    cy.get('textarea[placeholder="Notes about your pet..."]').should('be.visible');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").should('be.visible');
+    cy.get('div').contains('Male').should('exist');
+    cy.get('div').contains('Female').should('exist');
+    cy.get('textarea[placeholder="Any special information about your pet..."]').should('be.visible');
 
     cy.contains('label', 'Pet Type').should('be.visible');
-    cy.get('select').eq(1).should('contain', 'Dog');
-    cy.get('select').eq(1).should('contain', 'Cat');
-    cy.get('select').eq(1).should('not.contain', 'Bird');
+    cy.get('select').should('contain', 'Dog');
+    cy.get('select').should('contain', 'Cat');
+    cy.get('select').should('not.contain', 'Bird');    
 
     cy.contains('label', 'Breed').should('be.visible');
     cy.contains('label', 'Weight (kg)').should('be.visible');
@@ -185,7 +186,7 @@ describe('Customer Pet Create Page', () => {
     cy.get('#datePicker').click({ force: true }).clear().type(pastDate).trigger('change', { force: true });
 
     cy.get('#datePicker').should('have.value', pastDate);
-    cy.get('input[placeholder="DD/MM/YYYY"]').should('have.value', '15/01/2020');
+    cy.get('#datePicker').should('have.value', '2020-01-15');
   });
 
   it('should clear validation errors when fields are corrected', () => {
@@ -195,7 +196,7 @@ describe('Customer Pet Create Page', () => {
 
     cy.contains('Please enter pet name').should('be.visible');
 
-    cy.get('input[placeholder="Pet Name"]').type('Buddy');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").type('Buddy');
 
     cy.contains('Please enter pet name').should('not.exist');
 
@@ -278,8 +279,8 @@ describe('Customer Pet Create Page', () => {
       });
     });
 
-    cy.get('input[placeholder="Pet Name"]').type('Buddy');
-    cy.get('select').first().select('true');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").type('Buddy');
+    cy.contains('div', 'Male').click();
 
     const today = new Date();
     const oneYearAgo = new Date(today);
@@ -341,7 +342,7 @@ describe('Customer Pet Create Page', () => {
       });
     });
 
-    cy.get('input[placeholder="Pet Name"]').type('Buddy');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").type('Buddy');
     const today = new Date();
     const oneYearAgo = new Date(today);
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -389,7 +390,7 @@ describe('Customer Pet Create Page', () => {
       });
     });
 
-    cy.get('input[placeholder="Pet Name"]').type('Max');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").type('Max');
     const today = new Date();
     const oneYearAgo = new Date(today);
     oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
@@ -403,10 +404,10 @@ describe('Customer Pet Create Page', () => {
       .trigger('change', { force: true });
 
     cy.get('#datePicker').should('have.value', formattedDate);
-    cy.get('textarea[placeholder="Notes about your pet..."]').type('Test notes');
-    cy.get('select').eq(1).select('Cat');
+    cy.get('textarea[placeholder="Any special information about your pet..."]').type('Test notes');
+    cy.get('select').eq(0).select('Cat');
     cy.wait('@getCatBreeds');
-    cy.get('select').eq(2).select('Persian');
+    cy.get('select').eq(1).select('Persian');
     cy.contains('label', 'Weight (kg)').parent().find('input').type('4.2');
     cy.contains('label', 'Fur Type').parent().find('input').type('Short');
     cy.contains('label', 'Fur Color').parent().find('input').type('Gray');

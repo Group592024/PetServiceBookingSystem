@@ -46,14 +46,13 @@ const Datatable = ({
                 const response = await deleteData(`${apiPath}/${params.id}`);
 
                 if (response.flag === true) {
-                  toast.success("Deleted successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
+                  Swal.fire({
+                    title: "Deleted!",
+                    text: response.message,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    timer: 3000,  // Auto close after 3 seconds
+                    timerProgressBar: true
                   });
                   if (response.data != null) {
                     setRows((prevRows) =>
@@ -71,10 +70,20 @@ const Datatable = ({
                     );
                   }
                 } else {
-                  toast.error("Failed to delete user.");
+                  Swal.fire({
+                    title: "Error!",
+                    text: response.message,
+                    icon: "error",
+                    confirmButtonText: "OK"
+                  });
                 }
               } catch (error) {
-                toast.error("An error occurred while deleting.");
+                Swal.fire({
+                  title: "Error!",
+                  text: "An error occurred while deleting.",
+                  icon: "error",
+                  confirmButtonText: "OK"
+                });
               }
             }
           });
@@ -136,7 +145,7 @@ const Datatable = ({
         }}
         pageSizeOptions={[5, 10]}
       />
-      <ToastContainer />
+    
     </div>
   );
 };
