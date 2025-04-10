@@ -95,7 +95,7 @@ describe('Customer Pet Edit Page', () => {
           win.sessionStorage.setItem('accountId', 'customer-123');
         }
       },
-      timeout: 30000 
+      timeout: 30000
     });
 
     cy.wait('@getPetDetails');
@@ -124,7 +124,7 @@ describe('Customer Pet Edit Page', () => {
       }
     }).as('updatePetError');
 
-    cy.get('input[placeholder="Pet Name"]').clear().type('Duplicate Name');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('Duplicate Name');
 
     cy.contains('button', 'Save Changes').click();
 
@@ -143,9 +143,9 @@ describe('Customer Pet Edit Page', () => {
       .and('have.attr', 'src')
       .and('include', 'http://localhost:5050/pet-service/Images/buddy.jpg');
 
-    cy.get('input[placeholder="Pet Name"]').should('have.value', 'Buddy');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").should('have.value', 'Buddy');
     cy.get('select').first().should('have.value', 'true');
-    cy.get('textarea[placeholder="Notes about your pet..."]').should('have.value', 'Buddy is a friendly dog who loves to play fetch.');
+    cy.get('textarea[placeholder="Special care instructions, behaviors, or other important information..."]').should('have.value', 'Buddy is a friendly dog who loves to play fetch.');
 
 
     cy.get('select').eq(1).should('have.value', 'type1');
@@ -165,11 +165,11 @@ describe('Customer Pet Edit Page', () => {
   });
 
   it('should update pet information successfully', () => {
-    cy.get('input[placeholder="Pet Name"]').clear().type('Buddy Updated');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('Buddy Updated');
 
     cy.get('select').first().select('false');
 
-    cy.get('textarea[placeholder="Notes about your pet..."]').clear().type('Updated notes about Buddy');
+    cy.get('textarea[placeholder="Special care instructions, behaviors, or other important information..."]').clear().type('Updated notes about Buddy');
 
     cy.contains('label', 'Weight (kg)').parent().find('input').clear().type('16.5');
 
@@ -257,7 +257,7 @@ describe('Customer Pet Edit Page', () => {
       }
     }).as('updatePetError');
 
-    cy.get('input[placeholder="Pet Name"]').clear().type('Error Test');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('Error Test');
 
     cy.contains('button', 'Save Changes').click();
     cy.contains('button', 'Yes, update it!').click();
@@ -292,8 +292,8 @@ describe('Customer Pet Edit Page', () => {
   });
 
   it('should validate form before submission', () => {
-    cy.get('input[placeholder="Pet Name"]').clear();
-    cy.get('textarea[placeholder="Notes about your pet..."]').clear();
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear();
+    cy.get('textarea[placeholder="Special care instructions, behaviors, or other important information..."]').clear();
     cy.contains('label', 'Weight (kg)').parent().find('input').clear().type('0');
     cy.contains('label', 'Fur Type').parent().find('input').clear();
     cy.contains('label', 'Fur Color').parent().find('input').clear();
@@ -307,8 +307,8 @@ describe('Customer Pet Edit Page', () => {
     cy.contains('Please enter fur type').should('be.visible');
     cy.contains('Please enter fur color').should('be.visible');
 
-    cy.get('input[placeholder="Pet Name"]').type('Buddy Fixed', { force: true });
-    cy.get('textarea[placeholder="Notes about your pet..."]').type('Fixed notes');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").type('Buddy Fixed', { force: true });
+    cy.get('textarea[placeholder="Special care instructions, behaviors, or other important information..."]').type('Fixed notes');
     cy.contains('label', 'Weight (kg)').parent().find('input').clear().type('10');
     cy.contains('label', 'Fur Type').parent().find('input').type('Short');
     cy.contains('label', 'Fur Color').parent().find('input').type('Brown');
@@ -321,7 +321,7 @@ describe('Customer Pet Edit Page', () => {
   });
 
   it('should cancel update when clicking Cancel on confirmation dialog', () => {
-    cy.get('input[placeholder="Pet Name"]').clear().type('Canceled Update');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('Canceled Update');
 
     cy.contains('button', 'Save Changes').click();
 
@@ -358,11 +358,11 @@ describe('Customer Pet Edit Page', () => {
     cy.get('#datePicker').click({ force: true }).clear().type(newDate).trigger('change', { force: true });
 
     cy.get('#datePicker').should('have.value', newDate);
-    cy.get('input[placeholder="DD/MM/YYYY"]').should('have.value', '15/06/2021');
+    cy.get('#datePicker').should('have.value', '2021-06-15');
   });
 
   it('should preserve existing image if no new image is uploaded', () => {
-    cy.get('input[placeholder="Pet Name"]').clear().type('No Image Change');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('No Image Change');
 
     cy.contains('button', 'Save Changes').click();
     cy.contains('button', 'Yes, update it!').click();
@@ -375,7 +375,7 @@ describe('Customer Pet Edit Page', () => {
       forceNetworkError: true
     }).as('networkError');
 
-    cy.get('input[placeholder="Pet Name"]').clear().type('Network Error Test');
+    cy.get("input[placeholder=\"What's your pet's name?\"]").clear().type('Network Error Test');
     cy.contains('button', 'Save Changes').click();
     cy.contains('button', 'Yes, update it!').click();
 
