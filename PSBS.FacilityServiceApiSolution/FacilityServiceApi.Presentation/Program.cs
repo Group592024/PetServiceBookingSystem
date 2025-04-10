@@ -47,7 +47,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 
 // Đăng ký FfmpegService và các service khác
-builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+//builder.Services.AddSingleton<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 builder.Services.AddInfrastructureService(builder.Configuration);
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
@@ -68,16 +68,16 @@ builder.Services.AddAuthorization(options =>
 var app = builder.Build();
 
 // Khởi động FfmpegService (với kiểm tra lỗi)
-var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
+//var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
 Process? ffmpegProcess = null;
-try
-{
-    ffmpegProcess = ffmpegService.StartFfmpegConversion();
-}
-catch (Exception ex)
-{
-    Console.WriteLine($"Error starting FfmpegService: {ex.Message}");
-}
+//try
+//{
+//    ffmpegProcess = ffmpegService.StartFfmpegConversion();
+//}
+//catch (Exception ex)
+//{
+//    Console.WriteLine($"Error starting FfmpegService: {ex.Message}");
+//}
 
 //Lấy đường dẫn HLS từ cấu hình
  var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"] ;
