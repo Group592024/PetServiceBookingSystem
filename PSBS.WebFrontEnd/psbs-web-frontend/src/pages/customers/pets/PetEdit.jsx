@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import NavbarCustomer from '../../../components/navbar-customer/NavbarCustomer';
 import Swal from 'sweetalert2';
 import { motion } from 'framer-motion';
-import { FaArrowLeft, FaPaw, FaWeight, FaCalendarAlt, FaMars, FaVenus, FaCamera, FaEdit } from 'react-icons/fa';
+import { FaPaw, FaCalendarAlt, FaMars, FaVenus, FaCamera, FaEdit } from 'react-icons/fa';
 
 const CustomerPetEdit = () => {
     const navigate = useNavigate();
@@ -502,10 +502,10 @@ const CustomerPetEdit = () => {
 
                                 {/* Other Details */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
+                                    <div className='md:col-span-2'>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             <div className="flex items-center">
-                                                <FaWeight className="mr-2 text-indigo-500" />
+                                                <div className="mr-2 text-indigo-500" />
                                                 Weight (kg)
                                             </div>
                                         </label>
@@ -530,7 +530,7 @@ const CustomerPetEdit = () => {
                                         )}
                                     </div>
 
-                                    <div>
+                                    <div className='md:col-span-2'>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">Fur Type</label>
                                         <input
                                             type="text"
