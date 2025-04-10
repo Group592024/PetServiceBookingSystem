@@ -1,9 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import jwtDecode from "jwt-decode";
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
+  const location=useLocation();
   const userToken = sessionStorage.getItem("token");
+  console.log(location)
   console.log(userToken);
   const userRole = useMemo(() => {
     if (!userToken) {
@@ -25,6 +27,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/login" replace />;
   } else if (!userRole || !allowedRoles.includes(userRole)) {
     localStorage.setItem("currentRole", userRole);
+    
     return <Navigate to="/unauthorized" replace />;
   }
 
