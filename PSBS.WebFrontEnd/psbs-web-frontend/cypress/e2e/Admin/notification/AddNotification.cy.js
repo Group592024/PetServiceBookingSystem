@@ -3,12 +3,12 @@ describe("Create Notification E2E Tests", () => {
     const testNotificationContent = "This is a test notification content created by Cypress.";
   
     before(() => {
-      cy.login("user6@example.com", "123456"); // login function defined in commands
+      cy.loginByHien("user6@example.com", "123456"); // loginByHien function defined in commands
     });
   
     beforeEach(() => {
       cy.restoreLocalStorage();
-      cy.login("user6@example.com", "123456");
+      cy.loginByHien("user6@example.com", "123456");
       cy.visit("http://localhost:3000/notification");
       cy.contains("button", "NEW").click();
     });
@@ -26,7 +26,7 @@ describe("Create Notification E2E Tests", () => {
     it("should open the create notification form and submit successfully", () => {
       // Select notification type
       cy.get('#NotiTypeId').click();
-      cy.contains("li", "Common").click();
+      cy.contains("li", "Common").click({force: true});
   
       // Fill out the form fields
       cy.get('input[name="NotificationTitle"]').type(testNotificationTitle);
