@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Infrastructure.Data;
 using FacilityServiceApi.Infrastructure.Repositories;
+using FacilityServiceApi.Infrastructure.Streams;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,7 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
             services.AddScoped<IServiceType, ServiceTypeRepository>();
             services.AddScoped<IRoomHistory, RoomHistoryRepository>();
             services.AddScoped<IReport, ReportFacilityRepository>();
-
+            services.AddSingleton<StreamManager>();
             services.AddQuartz(q =>
             {
                 q.UseInMemoryStore();

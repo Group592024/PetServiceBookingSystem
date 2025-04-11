@@ -132,7 +132,7 @@ describe('Pet Breed Detail Page', () => {
 
     cy.wait('@getPetBreedNotFound');
 
-    cy.contains('Loading...').should('be.visible');
+    cy.contains('Loading, please wait...').should('be.visible');
   });
 
   it('should handle pet type not found correctly', () => {
@@ -206,7 +206,7 @@ describe('Pet Breed Detail Page', () => {
 
     cy.wait('@networkError');
 
-    cy.contains('Loading...').should('be.visible');
+    cy.contains('Loading, please wait...').should('be.visible');
   });
 
   it('should handle malformed response data correctly', () => {
@@ -228,7 +228,7 @@ describe('Pet Breed Detail Page', () => {
 
     cy.wait('@malformedResponse');
 
-    cy.contains('Loading...').should('be.visible');
+    cy.contains('Loading, please wait...').should('be.visible');
   });
 
   it('should handle server errors gracefully', () => {
@@ -250,7 +250,7 @@ describe('Pet Breed Detail Page', () => {
 
     cy.wait('@serverError');
 
-    cy.contains('Loading...').should('be.visible');
+    cy.contains('Loading, please wait...').should('be.visible');
   });
 
   it('should display image correctly with different image paths', () => {

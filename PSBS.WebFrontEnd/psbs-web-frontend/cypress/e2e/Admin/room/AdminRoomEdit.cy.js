@@ -125,7 +125,7 @@ describe('Room Edit Page', () => {
   it('should load room data correctly', () => {
     cy.contains('h1', 'Edit Room').should('be.visible');
     cy.get('input[value="Room 101"]').should('exist');
-    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('eq', '500000 VND');
+    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('contain', '500.000');
     cy.get('textarea').should('have.value', 'Standard room with a view');
     cy.get('img[alt="Preview"]').should('be.visible');
   });

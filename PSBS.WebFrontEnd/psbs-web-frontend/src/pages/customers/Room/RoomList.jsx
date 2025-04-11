@@ -38,8 +38,8 @@ const CustomerRoomList = () => {
                 setRoomTypes(typesData.data || []);
 
             } catch (error) {
-                Swal.fire("Error", "Failed to fetch room data!", "error");
-                console.error("Error fetching data:", error);
+                Swal.fire("Service Unavailable", "We couldn't retrieve room information at the moment. Please try again later", "error");
+                console.error("Service unavailable - failed to fetch room data:", error);
             } finally {
                 setLoading(false);
             }

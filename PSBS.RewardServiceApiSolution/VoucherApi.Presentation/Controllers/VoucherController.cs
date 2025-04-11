@@ -135,5 +135,21 @@ namespace VoucherApi.Presentation.Controllers
             var response = await voucherInteface.DeleteAsync(getEntity);
             return response.Flag is true ? Ok(response) : BadRequest(response);
         }
+
+        // GET api/<VoucherController>/
+        [HttpGet("search-gift-code")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<VoucherDTO>> GetVoucherByVoucherCode([FromQuery]string voucherCode)
+        {
+            // get single voucher from the repo
+            var voucher = await voucherInteface.GetVoucherByVoucherCode(voucherCode);
+            if (voucher is null)
+            {
+                return Ok(new Response(false, "Voucher requested not found"));
+            }
+            var (_voucher, _) = VoucherConversion.FromEntity(voucher, null);
+            return _voucher is not null ? Ok(new Response(true, "The Voucher retrieved successfully") { Data = _voucher })
+            : NotFound(new Response(false, "Voucher requested not found"));
+        }
     }
 }

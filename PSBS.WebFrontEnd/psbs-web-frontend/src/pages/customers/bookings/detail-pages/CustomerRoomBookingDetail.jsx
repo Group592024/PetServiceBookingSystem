@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
 import { motion } from "framer-motion";
+import CameraModal from "../../../admins/camfeed/videoFeed/VideoFeed";
 
 const CustomerRoomBookingDetail = () => {
   const { bookingId } = useParams();
@@ -18,7 +19,8 @@ const CustomerRoomBookingDetail = () => {
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
   const [allDataLoaded, setAllDataLoaded] = useState(false);
-
+  const [selectedData, setSelectedData] = useState(null);
+  const [isPushModalOpen, setPushModalOpen] = useState(false);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -202,60 +204,10 @@ const CustomerRoomBookingDetail = () => {
   const handleCameraSettings = (roomHistoryId) => {
     const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
     if (!room) return;
-
-    Swal.fire({
-      title: "Camera Settings",
-      html: `
-        <div class="text-left">
-          <div class="mb-4">
-            <p class="font-semibold">Room: <span class="font-normal">${roomName}</span></p>
-            <p class="font-semibold">Pet: <span class="font-normal">${petNames[room.petId] || "Unknown"
-        }</span></p>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Standard</option>
-                <option>Night Vision</option>
-                <option>Wide Angle</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Recording</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Continuous</option>
-                <option>Motion Activated</option>
-                <option>Disabled</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quality</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>High (1080p)</option>
-                <option>Medium (720p)</option>
-                <option>Low (480p)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Save Settings",
-      cancelButtonText: "Cancel",
-      focusConfirm: false,
-      preConfirm: () => {
-        // Here you would typically save the settings to your backend
-        return Promise.resolve();
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Saved!", "Camera settings have been updated.", "success");
-      }
-    });
+    console.log(room);
+    setSelectedData(room.cameraId);
+    console.log("daya", selectedData);
+    setPushModalOpen(true);
   };
 
   const handleVNPayPayment = async () => {
@@ -376,7 +328,10 @@ const CustomerRoomBookingDetail = () => {
                     Total Amount:
                   </span>{" "}
                   <span className="text-green-600 font-bold">
-                    {booking.totalAmount.toLocaleString()} VND
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(booking.totalAmount)}
                   </span>
                 </p>
                 <p className="text-lg">
@@ -400,7 +355,14 @@ const CustomerRoomBookingDetail = () => {
                   Booking Date:
                 </span>{" "}
                 <span className="text-gray-800">
-                  {formatDate(booking.bookingDate)}
+                  {booking.bookingDate.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  }).replace(',', '')}
                 </span>
               </p>
               <p className="text-lg mt-2">
@@ -508,20 +470,20 @@ const CustomerRoomBookingDetail = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Booking Period:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.bookingStartDate)} -{" "}
-                        {formatDate(history.bookingEndDate)}
+                      {formatDate(history.bookingStartDate)} -{" "}
+                      {formatDate(history.bookingEndDate)}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-in:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.checkInDate)}
+                      {history.checkInDate? formatDate(history.checkInDate): "Not checked in"}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-out:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.checkOutDate)}
+                      {history.checkOutDate ? formatDate(history.checkOutDate): "Not checked out"}
                       </span>
                     </p>
                     <p className="text-gray-700">
@@ -539,9 +501,9 @@ const CustomerRoomBookingDetail = () => {
                   </div>
                   <div className="flex items-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Check out"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Checked out"
                         ? "bg-green-100 text-green-800"
-                        : history.status === "Check in"
+                        : history.status === "Checked in"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-yellow-100 text-yellow-800"
                         }`}
@@ -591,6 +553,7 @@ const CustomerRoomBookingDetail = () => {
             </motion.div>
           )}
       </motion.div>
+      <CameraModal cameraId={selectedData} onClose={() => setPushModalOpen(false)} open={isPushModalOpen} />
     </div>
   );
 };

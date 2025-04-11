@@ -124,7 +124,7 @@ function GiftUpdatePage() {
     event.preventDefault();
 
     if (!validateForm()) {
-      return; // Do not proceed if there are validation errors
+      return;
     }
 
     try {

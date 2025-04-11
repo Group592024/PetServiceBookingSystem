@@ -20,7 +20,6 @@
 
 	<ItemGroup>
 	  <Folder Include="Images\" />
-	  <Folder Include="wwwroot\hls\" />
 	</ItemGroup>
 
 </Project>

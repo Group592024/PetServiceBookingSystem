@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
-import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useParams, useNavigate } from 'react-router-dom';
+import { CircularProgress } from '@mui/material';
 import Swal from 'sweetalert2';
 
 const RoomDetail = () => {
@@ -63,7 +64,11 @@ const RoomDetail = () => {
     }, [id]);
 
     if (!detail) {
-        return <div>Loading...</div>;
+        return (
+            <div className="flex justify-center items-center h-64">
+                <CircularProgress />
+            </div>
+        );
     }
 
     const imageURL = `http://localhost:5050/facility-service${detail.roomImage}`;
@@ -112,7 +117,9 @@ const RoomDetail = () => {
                                         <span className="text-blue-600 font-medium">
                                             {new Intl.NumberFormat('vi-VN', {
                                                 style: 'currency',
-                                                currency: 'VND'
+                                                currency: 'VND',
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 3
                                             }).format(roomTypePrice)}
                                         </span>
                                     </div>
@@ -130,9 +137,9 @@ const RoomDetail = () => {
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Status:</label>
                                     <div className={`flex-1 p-3 rounded-lg font-medium ${detail.status === 'In Use' ? 'bg-orange-50 text-orange-600 border border-orange-200' :
-                                            detail.status === 'Free' ? 'bg-green-50 text-green-600 border border-green-200' :
-                                                detail.status === 'Maintenance' ? 'bg-red-50 text-red-600 border border-red-200' :
-                                                    'bg-gray-50 text-gray-600 border border-gray-200'
+                                        detail.status === 'Free' ? 'bg-green-50 text-green-600 border border-green-200' :
+                                            detail.status === 'Maintenance' ? 'bg-red-50 text-red-600 border border-red-200' :
+                                                'bg-gray-50 text-gray-600 border border-gray-200'
                                         }`}>
                                         {detail.status || 'Unknown'}
                                     </div>
@@ -142,8 +149,8 @@ const RoomDetail = () => {
                                 <div className="flex items-center gap-4">
                                     <label className="font-semibold text-gray-600 min-w-[100px]">Available:</label>
                                     <div className={`flex-1 p-3 rounded-lg font-medium ${detail.isDeleted
-                                            ? 'bg-red-50 text-red-600 border border-red-200'
-                                            : 'bg-green-50 text-green-600 border border-green-200'
+                                        ? 'bg-red-50 text-red-600 border border-red-200'
+                                        : 'bg-green-50 text-green-600 border border-green-200'
                                         }`}>
                                         {detail.isDeleted ? 'Inactive' : 'Active'}
                                     </div>

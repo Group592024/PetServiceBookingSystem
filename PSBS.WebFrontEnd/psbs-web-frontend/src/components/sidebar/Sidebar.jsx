@@ -86,8 +86,8 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
 
-        <li className={location.pathname.startsWith("/admin/bookings/") ? "active" : ""}>
-          <Link to="/admin/bookings/">
+        <li className={location.pathname.startsWith("/bookings/") ? "active" : ""}>
+          <Link to="/bookings/">
             <i className="bx bxs-book-content"></i>
             Booking
           </Link>
@@ -117,8 +117,8 @@ const Sidebar = forwardRef((_, ref) => {
           </Link>
         </li>
         {isAdmin && (
-          <li className={/^\/cameralist(\/|$)/.test(location.pathname) ? "active" : ""}>
-            <Link to="/cameralist">
+          <li className={/^\/camera(\/|$)/.test(location.pathname) ? "active" : ""}>
+            <Link to="/camera">
               <i className="bx bxs-camera"></i>
               Camera
             </Link>

@@ -55,7 +55,7 @@ const CustomerPetEdit = () => {
                 }
             } catch (error) {
                 console.log('Error fetching pet data:', error);
-                Swal.fire('Error', 'Failed to fetch pet details', 'error');
+                Swal.fire('Service Unavailable', "We couldn't retrieve pet information at the moment. Please try again later.", 'error');
             }
         };
         fetchPetData();

@@ -6,7 +6,7 @@ describe("Customer Voucher Detail E2E Tests", () => {
 
   before(() => {
     // Create a test voucher as admin that we'll use for detail testing
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -50,12 +50,12 @@ describe("Customer Voucher Detail E2E Tests", () => {
   });
 
   beforeEach(() => {
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
   });
 
   after(() => {
     // Clean up - delete the test voucher
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.deleteVoucher(testVoucherCode);
   });
 
@@ -188,7 +188,7 @@ describe("Customer Voucher Detail E2E Tests", () => {
     cy.contains("Regular Voucher").should("be.visible");
     
     // Now create a gift voucher as admin
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -232,22 +232,22 @@ describe("Customer Voucher Detail E2E Tests", () => {
       .then((id) => {
         giftVoucherId = id;
         
-        // Login as customer and check gift voucher
-        cy.login("431straight@ptct.net", "123456");
+        // loginByHien as customer and check gift voucher
+        cy.loginByHien("431straight@ptct.net", "123456");
         cy.visit(`http://localhost:3000/customer/vouchers/detail/${giftVoucherId}`);
         
         // Verify gift voucher chip is shown
         cy.contains("Gift Voucher").should("be.visible");
         
         // Clean up - delete the gift voucher
-        cy.login("user6@example.com", "123456");
+        cy.loginByHien("user6@example.com", "123456");
         cy.deleteVoucher(giftVoucherCode);
       });
   });
 
   it("should display expired status for expired vouchers", () => {
     // Create an expired voucher as admin
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -293,15 +293,15 @@ describe("Customer Voucher Detail E2E Tests", () => {
       .then((id) => {
         expiredVoucherId = id;
         
-        // Login as customer and check expired voucher
-        cy.login("431straight@ptct.net", "123456");
+        // loginByHien as customer and check expired voucher
+        cy.loginByHien("431straight@ptct.net", "123456");
         cy.visit(`http://localhost:3000/customer/vouchers/detail/${expiredVoucherId}`);
         
         // Verify expired status is shown
         cy.contains("Expired").should("be.visible");
         
         // Clean up - delete the expired voucher
-        cy.login("user6@example.com", "123456");
+        cy.loginByHien("user6@example.com", "123456");
         cy.deleteVoucher(expiredVoucherCode);
       });
   });
