@@ -7,11 +7,15 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { Chip } from "@mui/material";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
+import { useNavigate } from "react-router-dom";
 
 const AdminBookingDatatable = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     const getToken = () => sessionStorage.getItem("token");
 
@@ -287,28 +291,12 @@ const AdminBookingDatatable = () => {
                 return (
                     <div className="cellAction flex items-center w-full h-full justify-start gap-2 ">
                         <div className="w-8 h-8 flex items-center justify-center">
-                            <Link
-                                to={`/admin/bookings/detail/${detailPage}/${params.row.bookingId}`}
-                                className="detailBtn"
-                                style={{ textDecoration: "none" }}
+                            <IconButton
+                                aria-label="info"
+                                onClick={() => navigate(`/bookings/detail/${detailPage}/${params.row.bookingId}`)}
                             >
-                                <svg
-                                    className="w-6 h-6 text-gray-800 dark:text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="24"
-                                    height="24"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke="currentColor"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                                    />
-                                </svg>
-                            </Link>
+                                <InfoIcon color="info" />
+                            </IconButton>
                         </div>
                         {params.row.isMedicalBooking && params.row.petIds && (
                             <div className="w-8 h-8 flex items-center justify-center">
@@ -352,6 +340,10 @@ const AdminBookingDatatable = () => {
 
     const bookingsRows = bookings.map((booking) => ({
         ...booking,
+        totalAmount: new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          }).format(booking.totalAmount), 
         bookingDate: new Date(booking.bookingDate).toLocaleString('en-US', {
             year: 'numeric',
             month: '2-digit',

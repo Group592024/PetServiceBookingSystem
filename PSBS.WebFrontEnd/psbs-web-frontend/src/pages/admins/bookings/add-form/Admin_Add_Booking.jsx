@@ -100,15 +100,25 @@ const Admin_Add_Booking = () => {
       return;
     }
 
-    if (activeStep === 1 && !formData.phone) {
-      if (!formData.name || !formData.address || !formData.paymentMethod)
+    if (activeStep === 1) {
+      if (!formData.phone || !formData.name || !formData.address) {
         Swal.fire(
           "Failed!",
-          `Please fill all input and select payment type before proceeding.`,
+          "Please fill all input and select payment type before proceeding.",
           "error"
         );
-      return;
+        return;
+      }
+      if (!formData.paymentMethod) {
+        Swal.fire(
+          "Failed!",
+          `Please select payment type before proceeding.`,
+          "error"
+        );
+        return;
+      }
     }
+    console.log("Payment Option:", formData.paymentMethod);
 
     if (activeStep === 2 && selectedOption === "Room") {
       if (bookingRooms.length === 0) {
@@ -274,7 +284,7 @@ const Admin_Add_Booking = () => {
               OrderDescription: bookingCode.trim(),
             });
             // Get current path to redirect back after payment
-            const currentPath = "/admin/bookings";
+            const currentPath = "/bookings";
             // Create description with booking code and path
             const description = JSON.stringify({
               bookingCode: bookingCode.trim(),
@@ -307,8 +317,9 @@ const Admin_Add_Booking = () => {
               );
             }
           }
-          window.location.href = "/admin/bookings";
+          window.location.href = "/bookings";
         } else {
+          setIsSubmitting(false);
           Swal.fire(
             "Failed!",
             result.message || "Could not create booking.",
@@ -316,6 +327,7 @@ const Admin_Add_Booking = () => {
           );
         }
       } catch (error) {
+        setIsSubmitting(false);
         Swal.fire("Error!", "Failed to confirm booking", "error");
       }
     } else {

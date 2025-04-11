@@ -19,7 +19,7 @@ const CustomerRoomBookingDetail = () => {
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
   const [allDataLoaded, setAllDataLoaded] = useState(false);
-const [selectedData, setSelectedData] = useState(null);
+  const [selectedData, setSelectedData] = useState(null);
   const [isPushModalOpen, setPushModalOpen] = useState(false);
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -204,10 +204,10 @@ const [selectedData, setSelectedData] = useState(null);
   const handleCameraSettings = (roomHistoryId) => {
     const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
     if (!room) return;
-   console.log(room);
-   setSelectedData(room.cameraId);
-   console.log("daya", selectedData);
-   setPushModalOpen(true);
+    console.log(room);
+    setSelectedData(room.cameraId);
+    console.log("daya", selectedData);
+    setPushModalOpen(true);
   };
 
   const handleVNPayPayment = async () => {
@@ -328,7 +328,10 @@ const [selectedData, setSelectedData] = useState(null);
                     Total Amount:
                   </span>{" "}
                   <span className="text-green-600 font-bold">
-                    {booking.totalAmount.toLocaleString()} VND
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(booking.totalAmount)}
                   </span>
                 </p>
                 <p className="text-lg">
@@ -352,7 +355,14 @@ const [selectedData, setSelectedData] = useState(null);
                   Booking Date:
                 </span>{" "}
                 <span className="text-gray-800">
-                  {formatDate(booking.bookingDate)}
+                  {booking.bookingDate.toLocaleString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  }).replace(',', '')}
                 </span>
               </p>
               <p className="text-lg mt-2">
@@ -460,20 +470,20 @@ const [selectedData, setSelectedData] = useState(null);
                     <p className="text-gray-700">
                       <span className="font-semibold">Booking Period:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.bookingStartDate)} -{" "}
-                        {formatDate(history.bookingEndDate)}
+                      {formatDate(history.bookingStartDate)} -{" "}
+                      {formatDate(history.bookingEndDate)}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-in:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.checkInDate)}
+                      {history.checkInDate? formatDate(history.checkInDate): "Not checked in"}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-out:</span>{" "}
                       <span className="text-gray-800">
-                        {formatDate(history.checkOutDate)}
+                      {history.checkOutDate ? formatDate(history.checkOutDate): "Not checked out"}
                       </span>
                     </p>
                     <p className="text-gray-700">
@@ -491,9 +501,9 @@ const [selectedData, setSelectedData] = useState(null);
                   </div>
                   <div className="flex items-center">
                     <span
-                      className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Check out"
+                      className={`px-3 py-1 rounded-full text-sm font-semibold ${history.status === "Checked out"
                         ? "bg-green-100 text-green-800"
-                        : history.status === "Check in"
+                        : history.status === "Checked in"
                           ? "bg-blue-100 text-blue-800"
                           : "bg-yellow-100 text-yellow-800"
                         }`}

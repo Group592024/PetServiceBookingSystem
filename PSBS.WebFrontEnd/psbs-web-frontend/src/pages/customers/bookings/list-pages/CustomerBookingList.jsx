@@ -10,7 +10,7 @@ const CustomerBookingList = () => {
     const navigate = useNavigate();
   
     const handleNewButtonClick = () => {
-      navigate("/bookings/new"); 
+      navigate("/customer/bookings/new"); 
     };
   
     return (
