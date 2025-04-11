@@ -160,22 +160,6 @@ const PetHealthBookListCus = () => {
                   </svg>
                   <span>Back</span>
                 </button>
-
-                <button
-                  onClick={toggleSortOrder}
-                  className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 transition-colors text-sm font-medium"
-                >
-                  <span>Sort by Next Visit</span>
-                  {sortOrder === "asc" ? (
-                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4"></path>
-                    </svg>
-                  )}
-                </button>
               </div>
             </div>
           </header>
@@ -280,7 +264,7 @@ const PetHealthBookListCus = () => {
                                             <span className={`ml-2 text-xs font-medium ${daysUntilNextVisit <= 3 ? 'text-red-600' : 'text-orange-500'}`}>
                                               {daysUntilNextVisit <= 0
                                                 ? 'Tomorrow!'
-                                                : `${daysUntilNextVisit} day${daysUntilNextVisit !== 1 ? 's' : ''} left`}
+                                                : `${daysUntilNextVisit} day${daysUntilNextVisit !== 1 ? 's' : ''}`}
                                             </span>
                                           )}
                                         </div>

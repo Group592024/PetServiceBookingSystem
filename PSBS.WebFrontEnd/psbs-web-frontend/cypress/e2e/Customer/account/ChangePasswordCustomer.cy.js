@@ -49,32 +49,28 @@ describe('Change Password Customer Page', () => {
   
     it('displays user avatar and name', () => {
       cy.wait(['@getAccount', '@loadImage']);
-      cy.get('img[alt="Profile Preview"]').should('be.visible');
+      cy.get('img[alt="Profile"]').should('be.visible');
       cy.contains('John Doe').should('be.visible');
     });
   
     it('validates required fields and mismatched passwords', () => {
-        // Click submit to trigger validation
         cy.contains('button', 'Change Password').click();
       
-        // Now check for "All fields are required"
         cy.contains('All fields are required.').should('be.visible');
       
-        // Fill passwords but mismatched confirm
-        cy.get('input[placeholder="Enter current password"]').type('oldpass');
-        cy.get('input[placeholder="Enter new password"]').type('newpass');
-        cy.get('input[placeholder="Confirm new password"]').type('wrongconfirm');
+        cy.get('input[placeholder="Enter your current password"]').type('oldpass');
+        cy.get('input[placeholder="Enter your new password"]').type('newpass');
+        cy.get('input[placeholder="Confirm your new password"]').type('wrongconfirm');
       
-        // Click submit again to validate
         cy.contains('button', 'Change Password').click();
       
         cy.contains('New password and confirm password do not match.').should('be.visible');
       });
       
       it('validates minimum password length', () => {
-        cy.get('input[placeholder="Enter current password"]').type('oldpass');
-        cy.get('input[placeholder="Enter new password"]').type('123');
-        cy.get('input[placeholder="Confirm new password"]').type('123');
+        cy.get('input[placeholder="Enter your current password"]').type('oldpass');
+        cy.get('input[placeholder="Enter your new password"]').type('123');
+        cy.get('input[placeholder="Confirm your new password"]').type('123');
       
         cy.contains('button', 'Change Password').click();
       
@@ -87,9 +83,9 @@ describe('Change Password Customer Page', () => {
         statusCode: 200,
       }).as('changePassword');
   
-      cy.get('input[placeholder="Enter current password"]').type('oldpass123');
-      cy.get('input[placeholder="Enter new password"]').type('newpass123');
-      cy.get('input[placeholder="Confirm new password"]').type('newpass123');
+      cy.get('input[placeholder="Enter your current password"]').type('oldpass123');
+      cy.get('input[placeholder="Enter your new password"]').type('newpass123');
+      cy.get('input[placeholder="Confirm your new password"]').type('newpass123');
   
       cy.contains('button', 'Change Password').click();
 
@@ -97,8 +93,8 @@ describe('Change Password Customer Page', () => {
       cy.contains('Password changed successfully!').should('be.visible');
     });
   
-    it('navigates back when clicking Back button', () => {
-      cy.contains('button', 'Back').click();
+    it('navigates back when clicking Cancel button', () => {
+      cy.contains('button', 'Cancel').click();
       cy.url().should('not.include', '/changepasswordcustomer');
     });
   });
