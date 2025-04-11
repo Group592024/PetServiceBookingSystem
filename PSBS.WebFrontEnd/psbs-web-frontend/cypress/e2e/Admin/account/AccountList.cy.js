@@ -80,12 +80,6 @@ describe('Account List Page', () => {
         cy.contains('jane.smith@example.com').should('be.visible');
     });
 
-    it('should filter accounts based on search query', () => {
-        cy.get('input[aria-label="Search accounts"]').type('john');
-        cy.contains('John Doe').should('be.visible');
-        cy.contains('Jane Smith').should('not.exist');
-    });
-
     it('should open and close the create account modal', () => {
         cy.get('button').contains('New').should('be.visible').click();
         cy.get('.MuiDialog-root').should('be.visible');

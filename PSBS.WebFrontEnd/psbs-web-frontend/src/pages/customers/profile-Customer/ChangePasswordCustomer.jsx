@@ -272,7 +272,7 @@ const ChangePasswordCustomer = () => {
                     <h3 className="font-semibold mb-2">Password Tips:</h3>
                     <ul className="text-xs space-y-1 text-left">
                       <li className="flex items-start">
-                        <span className="mr-2">•</span> Use at least 8 characters
+                        <span className="mr-2">•</span> Use at least 6 characters
                       </li>
                       <li className="flex items-start">
                         <span className="mr-2">•</span> Include uppercase & lowercase letters
