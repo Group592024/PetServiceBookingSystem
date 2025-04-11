@@ -89,11 +89,11 @@ const GiftDetailPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center">
         <div role="status">
           <svg
             aria-hidden="true"
-            className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
+            className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
             viewBox="0 0 100 101"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
@@ -115,7 +115,7 @@ const GiftDetailPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 flex items-center justify-center">
         <div className="text-center p-8 bg-white rounded-xl shadow-lg">
           <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
           <p className="text-gray-600">{error}</p>
@@ -125,7 +125,7 @@ const GiftDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50">
       <NavbarCustomer />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
@@ -147,7 +147,7 @@ const GiftDetailPage = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.3 }}
-                  className="md:w-1/2 p-8 bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center"
+                    className="md:w-1/2 p-8 bg-gradient-to-br from-blue-300 to-cyan-300 flex items-center justify-center"
                 >
                   <div className="relative group">
                     <img
@@ -169,22 +169,22 @@ const GiftDetailPage = () => {
                   <div className="space-y-6">
                     {/* Gift Name */}
                     <div>
-                      <h2 className="text-sm font-semibold text-purple-600 mb-1">Gift Name</h2>
+                      <h2 className="text-sm font-semibold text-blue-600 mb-1">Gift Name</h2>
                       <p className="text-2xl font-bold text-gray-800">{gift.giftName}</p>
                     </div>
 
                     {/* Points */}
                     <div>
-                      <h2 className="text-sm font-semibold text-purple-600 mb-1">Required Points</h2>
-                      <div className="inline-flex items-center px-4 py-2 bg-purple-50 rounded-full">
-                        <span className="text-xl font-bold text-purple-600">{gift.giftPoint}</span>
+                      <h2 className="text-sm font-semibold text-blue-600 mb-1">Required Points</h2>
+                      <div className="inline-flex items-center px-4 py-2 bg-blue-50 rounded-full">
+                        <span className="text-xl font-bold text-blue-600">{gift.giftPoint}</span>
                         <span className="ml-2 text-sm text-gray-500">points</span>
                       </div>
                     </div>
 
                     {/* Description */}
                     <div>
-                      <h2 className="text-sm font-semibold text-purple-600 mb-1">Description</h2>
+                      <h2 className="text-sm font-semibold text-blue-600 mb-1">Description</h2>
                       <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">
                         {gift.giftDescription || "No description available"}
                       </p>
@@ -196,7 +196,7 @@ const GiftDetailPage = () => {
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={handleRedeem}
-                        className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors duration-300 shadow-md hover:shadow-lg"
+                        className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-md hover:shadow-lg"
                       >
                         Redeem Gift
                       </motion.button>

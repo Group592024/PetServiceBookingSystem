@@ -11,7 +11,7 @@ const CreateCamera = () => {
   const [cameraDetails, setCameraDetails] = useState({
     cameraType: "",
     cameraCode: "",
-    cameraStatus: "",
+    cameraStatus: "Active",
     rtspUrl: "",
     cameraAddress: "",
     isDeleted: false,
@@ -108,26 +108,27 @@ const CreateCamera = () => {
             />
           </div>
           <div className="mb-3">
-            <label className="block text-sm font-medium mb-1">Camera Code</label>
+            <label className="block text-sm font-medium mb-1">Camera Name</label>
             <input
               type="text"
               name="cameraCode"
               value={cameraDetails.cameraCode}
               onChange={handleChange}
-              placeholder="Enter Camera Code"
+              placeholder="Enter Camera Name"
               className="w-full p-3 border rounded-md"
             />
           </div>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">Camera Status</label>
-            <input
-              type="text"
+            <select
               name="cameraStatus"
               value={cameraDetails.cameraStatus}
               onChange={handleChange}
-              placeholder="Enter Camera Status"
               className="w-full p-3 border rounded-md"
-            />
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
           </div>
           <div className="mb-3">
             <label className="block text-sm font-medium mb-1">RTSP URL</label>

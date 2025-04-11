@@ -118,7 +118,7 @@ const Sidebar = forwardRef((_, ref) => {
         </li>
         {isAdmin && (
           <li className={/^\/cameralist(\/|$)/.test(location.pathname) ? "active" : ""}>
-            <Link to="/cameralist">
+            <Link to="/camera">
               <i className="bx bxs-camera"></i>
               Camera
             </Link>

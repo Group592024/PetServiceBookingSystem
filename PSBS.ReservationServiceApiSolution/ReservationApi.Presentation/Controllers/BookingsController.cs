@@ -427,7 +427,7 @@ namespace ReservationApi.Presentation.Controllers
             string authorizationHeader = Request.Headers["Authorization"];
             string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
-            LogExceptions.LogToConsole("Token ne "  +token);
+            LogExceptions.LogToConsole("Token ne " + token);
             LogExceptions.LogToConsole("BookingID ne " + bookingId);
 
 
@@ -870,40 +870,51 @@ namespace ReservationApi.Presentation.Controllers
                 try
                 {
                     var paymentResult = vnpay.GetPaymentResult(Request.Query);
-                    foreach (var key in Request.Query.Keys)
+                    var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
+
+                    // Parse the JSON description
+                    var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
+                    string bookingCode = description.bookingCode;
+                    string redirectPath = description.redirectPath;
+                    LogExceptions.LogToConsole(redirectPath);
+
+                    // Default paths if not provided
+                    if (string.IsNullOrEmpty(redirectPath))
                     {
-                        LogExceptions.LogToConsole($"{key}: {Request.Query[key]}");
+                        redirectPath = Request.Headers["Referer"].ToString().Contains("/admin/")
+                            ? "/admin/bookings"
+                            : "/bookings";
                     }
-                    var resultDescription = paymentResult.PaymentResponse.Description;
-                    // var resultDescription = $"{paymentResult.PaymentResponse.Description}. {paymentResult.TransactionStatus.Description}.";
-                    var bookingCode = Request.Query["vnp_OrderInfo"];
+
                     if (paymentResult.IsSuccess)
                     {
-                        LogExceptions.LogToConsole("bookingCode " + bookingCode);
-                        Console.WriteLine("bookingCode " + bookingCode);
                         var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
                         if (existingBooking == null)
                         {
-                            return Redirect("http://localhost:3000/bookings?status=failed");
+                            return Redirect($"http://localhost:3000{redirectPath}?status=failed");
                         }
-                        LogExceptions.LogToConsole("booking" + existingBooking.BookingId);
-                        Console.WriteLine("qua day roi");
+
                         existingBooking.isPaid = true;
                         context.Bookings.Update(existingBooking);
                         await context.SaveChangesAsync();
-                        LogExceptions.LogToConsole("payment" + existingBooking.isPaid);
-                        Console.WriteLine("qua day nuaaaaaaaaaaaaaaaaaaa roi");
-                        return Redirect("http://localhost:3000/bookings?status=success");
+
+                        return Redirect($"http://localhost:3000{redirectPath}?status=success");
                     }
 
-                    return Redirect("http://localhost:3000/bookings?status=failed");
+                    return Redirect($"http://localhost:3000{redirectPath}?status=failed");
                 }
                 catch (Exception ex)
                 {
-                    return Redirect("http://localhost:3000/bookings?status=error");
+                    // Try to determine if admin or user flow based on referer
+                    var isAdmin = Request.Headers["Referer"].ToString().Contains("/admin/");
+                    return Redirect(isAdmin
+                        ? "http://localhost:3000/admin/bookings?status=error"
+                        : "http://localhost:3000/bookings?status=error");
                 }
             }
-            return Ok(new { status = "notfound" });
+
+            // Final fallback
+            return Redirect("http://localhost:3000/bookings?status=notfound");
         }
 
         [HttpGet("Vnpay/Callback/admin")]

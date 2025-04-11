@@ -21,12 +21,10 @@ const DatatableNotification = ({
   columns,
   rows,
   apiPath,
-  basePath,
   setRows,
   title,
   rowId,
 }) => {
-  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setEditIsModalOpen] = useState(false);
   const [isPushModalOpen, setPushModalOpen] = useState(false);

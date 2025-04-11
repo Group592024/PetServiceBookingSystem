@@ -1,15 +1,10 @@
-﻿using FacilityServiceApi.Application.Interfaces;
+﻿using FacilityServiceApi.Application.DTOs;
+using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.Responses;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace FacilityServiceApi.Infrastructure.Repositories
 {
     public class CameraReponsitory(FacilityServiceDbContext context) : ICamera
@@ -18,6 +13,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                var exists = await context.Camera
+           .AnyAsync(c => c.cameraCode == entity.cameraCode && !c.isDeleted);
+
+                if (exists)
+                    return new Response(false, "Camera Name already exists");
                 context.Camera.Add(entity);
                 await context.SaveChangesAsync();
 
@@ -44,6 +44,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 var existingCamera = await context.Camera.FindAsync(entity.cameraId);
                 if (existingCamera == null)
                     return new Response(false, "Camera not found");
+                var duplicate = await context.Camera
+            .AnyAsync(c => c.cameraCode == entity.cameraCode && c.cameraId != entity.cameraId && !c.isDeleted);
+
+                if (duplicate)
+                    return new Response(false, "Camera Name already exists for another camera");
 
                 existingCamera.cameraType = entity.cameraType;
                 existingCamera.cameraCode = entity.cameraCode;
@@ -116,6 +121,36 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             return await context.Camera.FirstOrDefaultAsync(c => c.cameraId == id);
         }
 
-        
+        public async Task<Response> AssignCamera(AssignCameraDTO cameraDTO)
+        {
+            try
+            {
+                var roomHistory = await context.RoomHistories.FindAsync(cameraDTO.reoomHistoryId);
+                var camera = await context.Camera.FindAsync(cameraDTO.cameraId);
+                if (camera == null)
+                {
+                    return new Response(false, "The camera does not exist");
+                }
+                if (roomHistory == null)
+                {
+                    return new Response(false, "The room history does not exist");
+                }
+                if (roomHistory.CameraId is not null)
+                {
+                    var existCam = await context.Camera.FindAsync(roomHistory.CameraId);
+                    existCam!.cameraStatus = "Free";
+
+                }
+                roomHistory.CameraId = cameraDTO.cameraId;
+                context.RoomHistories.Update(roomHistory);
+                camera.cameraStatus = "InUse";
+
+                await context.SaveChangesAsync();
+                return new Response(true, "Assign The Camera to This successfully");
+            }
+            catch (Exception ex) {
+            return new Response(false, ex.Message);
+            }
+        }
     }
 }

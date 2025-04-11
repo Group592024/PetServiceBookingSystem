@@ -135,16 +135,17 @@ const AccountList = () => {
       }
 
       return false;
-    }).filter((account) => {
-      const query = searchQuery.toLowerCase();
-      return (
-        !searchQuery ||
-        account.accountPhoneNumber.includes(query) ||
-        account.accountEmail.toLowerCase().includes(query) ||
-        account.accountName.toLowerCase().includes(query)
+     });
+    //.filter((account) => {
+    //   const query = searchQuery.toLowerCase();
+    //   return (
+    //     !searchQuery ||
+    //     account.accountPhoneNumber.includes(query) ||
+    //     account.accountEmail.toLowerCase().includes(query) ||
+    //     account.accountName.toLowerCase().includes(query)
 
-      );
-    });
+    //   );
+    // });
 
 
 
@@ -290,7 +291,7 @@ const AccountList = () => {
           <div className="p-4 bg-white shadow-md rounded-md h-full">
             <h2 className="mb-4 text-xl font-bold">Account List</h2>
             <div className="flex justify-end mb-4">
-              <form className="relative flex items-center mr-4">
+              {/* <form className="relative flex items-center mr-4">
                 <input
                   type="search"
                   id="search-dropdown"
@@ -322,7 +323,7 @@ const AccountList = () => {
                     />
                   </svg>
                 </button>
-              </form>
+              </form> */}
               {userRole === "staff" && (
                 <button
                   type="button"
