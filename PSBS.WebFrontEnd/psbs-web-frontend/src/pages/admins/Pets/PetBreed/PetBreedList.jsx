@@ -221,7 +221,6 @@ const PetBreedList = () => {
             <Sidebar ref={sidebarRef} />
             <div className='content'>
                 <Navbar sidebarRef={sidebarRef} />
-                {/* Thêm div với padding 8 ở tất cả các cạnh */}
                 <div className="p-8">
                     <main className="bg-white shadow-lg rounded-lg p-6">
                         {/* Header */}
@@ -239,8 +238,7 @@ const PetBreedList = () => {
                         {/* Data Grid */}
                         <Box
                             sx={{
-                                height: "100%",
-                                maxHeight: "400px",
+                                height: 400,
                                 width: "100%",
                                 "& .MuiDataGrid-root": {
                                     backgroundColor: "#ffffff",
