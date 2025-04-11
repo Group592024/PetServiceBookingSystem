@@ -34,7 +34,8 @@ const CameraModal = ({ cameraId, onClose, open = true }) => {
         // Start the stream
         const res = await postData(`api/stream/start/${cameraId}`);
         if(res.flag){
-          const streamUrl = `${res.data}?_=${new Date().getTime()}`;
+          const streamUrl = `${res.data}`;
+
           // Function to attempt loading the stream
           const loadStream = async (retryCount = 0, maxRetries = 30) => {  // Increased to 30 retries
             if (retryCount > maxRetries) {

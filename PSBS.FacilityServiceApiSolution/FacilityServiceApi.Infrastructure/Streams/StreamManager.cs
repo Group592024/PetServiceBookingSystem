@@ -22,11 +22,15 @@ namespace FacilityServiceApi.Infrastructure.Streams
 
                 var outputPath = Path.Combine(outputDir, "stream.m3u8");
 
-                var args = $"-rtsp_transport tcp -i \"{rtspUrl}\" " +
-                           "-c:v libx264 -preset veryfast -tune zerolatency " +
-                           "-c:a aac -ar 44100 " +
-                           "-f hls -hls_time 2 -hls_list_size 3 -hls_flags delete_segments " +
-                           $"-loglevel warning \"{outputPath}\"";
+                var args = $"-fflags +genpts+igndts -use_wallclock_as_timestamps 1 -avoid_negative_ts make_zero " +
+       $"-rtsp_transport tcp -i \"{rtspUrl}\" " +
+       "-c:v libx264 -preset veryfast -tune zerolatency " +
+       "-an " + // (or use audio config if needed)
+       "-f hls -hls_time 2 -hls_list_size 3 -hls_flags delete_segments " +
+       "-hls_allow_cache 0 -hls_segment_type mpegts -start_at_zero " +
+       $"-loglevel warning \"{outputPath}\"";
+
+
 
                 var errorMessages = new List<string>();
                 var process = new Process
