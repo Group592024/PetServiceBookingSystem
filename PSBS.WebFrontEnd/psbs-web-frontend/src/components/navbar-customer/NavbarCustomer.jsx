@@ -182,7 +182,7 @@ const NavbarCustomer = () => {
           </li>
           <li>
             <NavLink
-              to="/bookings"
+              to="/customer/bookings"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }

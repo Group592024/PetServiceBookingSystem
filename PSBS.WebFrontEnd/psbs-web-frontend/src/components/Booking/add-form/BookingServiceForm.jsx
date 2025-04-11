@@ -144,7 +144,10 @@ const BookingServiceForm = () => {
         setVoucherError("");
       } else {
         setVoucherError(
-          `Minimum spend required: ${selectedVoucher.voucherMinimumSpend.toLocaleString()} VND`
+          `Minimum spend required: ${new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(selectedVoucher.voucherMinimumSpend)}`
         );
         setFinalDiscount(0);
         setDiscountedPrice(totalPrice);
@@ -510,7 +513,10 @@ const BookingServiceForm = () => {
               <MenuItem key={voucher.voucherId} value={voucher.voucherId}>
                 {voucher.voucherName} - {voucher.voucherCode} (
                 {voucher.voucherDiscount}% Off, Max{" "}
-                {voucher.voucherMaximum.toLocaleString()} VND)
+                {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(voucher.voucherMaximum)})
               </MenuItem>
             ))}
           </TextField>
@@ -535,7 +541,10 @@ const BookingServiceForm = () => {
                 <Typography>Original Price:</Typography>
               </Grid>
               <Grid item>
-                <Typography>{totalPrice.toLocaleString()} VND</Typography>
+                <Typography>{new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(totalPrice)}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -555,7 +564,10 @@ const BookingServiceForm = () => {
                 </Grid>
                 <Grid item>
                   <Typography color="success.main">
-                    -{finalDiscount.toLocaleString()} VND
+                    -{new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(finalDiscount)}
                   </Typography>
                 </Grid>
               </Grid>
@@ -573,7 +585,10 @@ const BookingServiceForm = () => {
               </Grid>
               <Grid item>
                 <Typography variant="h6" color="primary" fontWeight="bold">
-                  {discountedPrice.toLocaleString()} VND
+                  {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(discountedPrice)} 
                 </Typography>
               </Grid>
             </Grid>

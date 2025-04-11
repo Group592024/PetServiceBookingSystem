@@ -354,8 +354,8 @@ function App() {
             />
           </Route>
 
-          {/* Booking links*/}
-          <Route path="/bookings">
+          {/* Customer Booking links*/}
+          <Route path="/customer/bookings">
             <Route index element={<CustomerBookingList />} />
             <Route
               path="new"
@@ -376,7 +376,7 @@ function App() {
             />
           </Route>
 
-          <Route path="/admin/bookings">
+          <Route path="/bookings">
             <Route index element={<AdminBookingList />} />
             <Route
               path="detail/ServiceBookingDetailPage/:bookingId"
