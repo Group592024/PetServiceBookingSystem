@@ -178,6 +178,24 @@ namespace VoucherApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<Voucher> GetVoucherByVoucherCode(string voucherCode)
+        {
+            try
+            {
+                var voucher = await context.Vouchers
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(v => v.VoucherCode.Equals(voucherCode) && v.IsGift && v.VoucherQuantity > 0);
+                return voucher!;
+            }
+            catch (Exception ex)
+            {
+                // Log the original exception
+                LogExceptions.LogException(ex);
+                // Display a client-friendly error message
+                throw new Exception("Error occurred retrieving voucher.");
+            }
+        }
+
         public async Task<Response> MinusVoucherQuanitty(Guid id)
         {
             try

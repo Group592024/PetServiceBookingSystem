@@ -834,7 +834,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
         {
             var account = await context.Accounts.Where(a => a.AccountPhoneNumber == phone).FirstOrDefaultAsync();
-            if (account == null)
+            if (account == null || account.RoleId == "admin")
                 return null;
 
             return new GetAccountDTO(

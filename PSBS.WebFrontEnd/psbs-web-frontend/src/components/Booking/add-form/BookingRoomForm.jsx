@@ -22,7 +22,7 @@ import axios from "axios";
 
 const BookingRoomForm = () => {
   const {
-    formData, 
+    formData,
     setFormData,
     bookingRooms,
     setBookingRooms,
@@ -51,6 +51,9 @@ const BookingRoomForm = () => {
   const [error, setError] = useState("");
   const [petNames, setPetNames] = useState({});
   const [roomTypes, setRoomTypes] = useState({});
+  const [voucherSearchCode, setVoucherSearchCode] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   // Fetch rooms from API
   useEffect(() => {
@@ -81,10 +84,10 @@ const BookingRoomForm = () => {
           headers: { Authorization: `Bearer ${getToken()}` }
         });
         const roomData = await roomResponse.json();
-        
+
         if (roomData.flag) {
           setRooms(roomData.data);
-          
+
           // Fetch prices for each room type
           const types = {};
           for (const room of roomData.data) {
@@ -198,8 +201,8 @@ const BookingRoomForm = () => {
       }
     } else {
       setSelectAllRooms(false);
-      setSelectedRooms(prev => 
-        prev.includes(roomId) 
+      setSelectedRooms(prev =>
+        prev.includes(roomId)
           ? prev.filter(id => id !== roomId)
           : [...prev, roomId]
       );
@@ -216,11 +219,52 @@ const BookingRoomForm = () => {
       }
     } else {
       setSelectAllPets(false);
-      setSelectedPets(prev => 
-        prev.includes(petId) 
+      setSelectedPets(prev =>
+        prev.includes(petId)
           ? prev.filter(id => id !== petId)
           : [...prev, petId]
       );
+    }
+  };
+
+  const handleSearchVoucher = async () => {
+    if (!voucherSearchCode.trim()) {
+      setSearchError("Please enter a voucher code");
+      return;
+    }
+
+    setSearchLoading(true);
+    setSearchError("");
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/search-gift-code?voucherCode=${voucherSearchCode}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        // Check if this voucher is already in our list
+        const existingVoucher = vouchers.find(v => v.voucherId === response.data.data.voucherId);
+
+        if (!existingVoucher) {
+          // Add the found voucher to our list
+          setVouchers([...vouchers, response.data.data]);
+        }
+
+        // Set the selected voucher
+        setVoucherId(response.data.data.voucherId);
+      } else {
+        setSearchError(response.data.message || "Voucher not found");
+      }
+    } catch (error) {
+      console.error("Error searching voucher:", error);
+      setSearchError(error.response?.data?.message || "Error searching voucher");
+    } finally {
+      setSearchLoading(false);
     }
   };
 
@@ -230,11 +274,11 @@ const BookingRoomForm = () => {
 
   const handleCreateBookingRooms = () => {
     setError("");
-    
+
     // Check if number of rooms is sufficient
     const numRooms = selectAllRooms ? rooms.length : selectedRooms.length;
     const numPets = selectAllPets ? pets.length : selectedPets.length;
-    
+
     if (numRooms < numPets) {
       setError("Number of rooms must be greater than or equal to the number of pets");
       return;
@@ -290,7 +334,7 @@ const BookingRoomForm = () => {
   // Apply voucher logic
   useEffect(() => {
     const selectedVoucherData = vouchers.find((v) => v.voucherId === voucherId);
-  
+
     if (selectedVoucherData) {
       if (totalPrice >= selectedVoucherData.voucherMinimumSpend) {
         const discountAmount = (totalPrice * selectedVoucherData.voucherDiscount) / 100;
@@ -462,6 +506,36 @@ const BookingRoomForm = () => {
           <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
             Apply Voucher
           </Typography>
+
+          {/* Voucher Search Section */}
+          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+            <TextField
+              fullWidth
+              label="Search Voucher by Code"
+              value={voucherSearchCode}
+              onChange={(e) => setVoucherSearchCode(e.target.value)}
+              variant="outlined"
+              disabled={searchLoading}
+            />
+            <Button
+              variant="contained"
+              onClick={handleSearchVoucher}
+              disabled={searchLoading || !voucherSearchCode.trim()}
+            >
+              {searchLoading ? "Searching..." : "Apply Voucher"}
+            </Button>
+          </Box>
+
+          {searchError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {searchError}
+            </Alert>
+          )}
+
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Or select from available vouchers:
+          </Typography>
+
           <TextField
             select
             fullWidth
@@ -479,6 +553,7 @@ const BookingRoomForm = () => {
               </MenuItem>
             ))}
           </TextField>
+
           {voucherError && (
             <Typography color="error" variant="body2" sx={{ mt: 1 }}>
               {voucherError}

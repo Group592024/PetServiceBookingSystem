@@ -76,6 +76,7 @@ const AdminBookingInformation = () => {
         } catch (error) {
           console.error("Error fetching user by phone:", error);
           if (error.response && error.response.status === 404) {
+            setFormData({ ...formData, cusId: "", name: "", address: "" });
             setNotFound(true);
             Swal.fire({
               icon: "warning",
@@ -83,6 +84,7 @@ const AdminBookingInformation = () => {
               text: "No user found with this phone number.",
             });
           } else {
+            setFormData({ ...formData, cusId: "", name: "", address: "" });
             Swal.fire({
               icon: "error",
               title: "Error",
