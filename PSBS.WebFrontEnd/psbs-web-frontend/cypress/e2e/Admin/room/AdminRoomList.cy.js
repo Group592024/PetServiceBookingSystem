@@ -134,7 +134,7 @@ describe('Room List Page', () => {
     cy.contains('Room 102').should('be.visible');
     cy.contains('Standard Room').should('be.visible');
     cy.contains('Deluxe Room').should('be.visible');
-    cy.contains('500000 VND').should('be.visible');
+    cy.contains('500.000').should('be.visible');
 
     cy.contains('div', 'Free')
       .should('have.css', 'color')

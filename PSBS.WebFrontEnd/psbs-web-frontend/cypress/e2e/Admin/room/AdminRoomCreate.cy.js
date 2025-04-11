@@ -163,7 +163,7 @@ describe('Room Create Page', () => {
   it('should select a room type and display its price', () => {
     cy.get('.MuiSelect-select').click();
     cy.contains('.MuiMenuItem-root', 'Deluxe Room').click();
-    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('eq', '800000 VND');
+    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('contain', '800.000');
   });
 
   it('should handle image upload', () => {

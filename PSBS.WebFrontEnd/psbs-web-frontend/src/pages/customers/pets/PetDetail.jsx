@@ -55,8 +55,8 @@ const CustomerPetDetail = () => {
           }
         }
       } catch (error) {
-        console.log("Lỗi khi fetch dữ liệu: ", error);
-        Swal.fire("Error", "Failed to fetch data", "error");
+        console.log("Failed to fetch data: ", error);
+        Swal.fire("Service Unavailable", "We couldn't retrieve pet information at the moment. Please try again later.", "error");
       } finally {
         setLoading(false);
       }

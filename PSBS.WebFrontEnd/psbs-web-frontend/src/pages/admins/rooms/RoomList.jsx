@@ -156,6 +156,24 @@ const RoomList = () => {
         });
     };
 
+    const getRoomTypePrice = (roomTypeId) => {
+        const roomType = roomTypes.find(type => type.roomTypeId === roomTypeId);
+        if (roomType) {
+            const roomTypePrice = roomType.price;
+            return (
+                <div>
+                    <p>
+                        {new Intl.NumberFormat('vi-VN', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 3
+                        }).format(roomTypePrice)}
+                    </p>
+                </div>
+            );
+        }
+        return <div>N/A</div>;
+    };
+
     const columns = [
         {
             field: 'index',
@@ -212,10 +230,7 @@ const RoomList = () => {
                     Price
                 </div>
             ),
-            renderCell: (params) => {
-                const roomType = roomTypes.find(type => type.roomTypeId === params.row.roomTypeId);
-                return roomType ? `${roomType.price} VND` : 'N/A';
-            }
+            renderCell: (params) => getRoomTypePrice(params.row.roomTypeId)
         },
         {
             field: 'status',
@@ -322,7 +337,7 @@ const RoomList = () => {
                                 <span>NEW</span>
                             </button>
                         </div>
-    
+
                         {/* Data Grid */}
                         <Box
                             sx={{
