@@ -73,7 +73,7 @@
 //            }
 
 //            // Làm sạch thư mục HLS trước khi chạy ffmpeg
-//            //CleanHlsDirectory();
+//            CleanHlsDirectory();
 
 //            string outputFilePath = Path.Combine(_hlsOutputPath, "output.m3u8");
 //            // Thêm -y để ghi đè file đầu ra nếu đã tồn tại

@@ -34,7 +34,7 @@ describe('Camera Creation Page - Admin', () => {
             .and("have.attr", "placeholder", "Enter Camera Type");
         cy.get('input[name="cameraCode"]')
             .should("be.visible")
-            .and("have.attr", "placeholder", "Enter Camera Code");
+            .and("have.attr", "placeholder", "Enter Camera Name");
         cy.get('input[name="cameraStatus"]')
             .should("be.visible")
             .and("have.attr", "placeholder", "Enter Camera Status");

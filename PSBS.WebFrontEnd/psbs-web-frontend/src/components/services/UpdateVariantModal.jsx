@@ -128,7 +128,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
 
   return (
     <div>
-      <Modal open={open} onClose={handleClose}>
+      <Modal open={open} onClose={handleClose} data-testid="edit-modal-variant">
         <Box
           sx={{
             position: "absolute",
@@ -157,6 +157,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                   <div>
                     <p className="font-semibold text-2xl ">Service Content:</p>
                     <TextField
+                      data-testid="variant-content-input"
                       type="text"
                       value={variant.serviceContent}
                       sx={{
@@ -177,13 +178,14 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       }}
                       error={error.content}
                       helperText={
-                        error.name ? "Service content is required." : ""
+                        error.content ? "Service content is required." : ""
                       }
                     />
                   </div>
                   <div>
                     <p className="font-semibold text-2xl ">Service Price:</p>
                     <TextField
+                      data-testid="variant-price-input"
                       type="text"
                       sx={{
                         borderRadius: "10px",
@@ -207,7 +209,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
                       }}
                       error={error.price}
                       helperText={
-                        error.price ? "Service Price is required." : ""
+                        error.price ? "Service price is required." : ""
                       }
                     />
                   </div>
@@ -243,6 +245,7 @@ const UpdateVariantModal = ({ id, open, handleClose }) => {
 
                   <div className="flex justify-between">
                     <button
+                      data-testid="submit-button-variant"
                       type="submit"
                       className="bg-customPrimary py-5 px-20 rounded-3xl text-customLight text-xl font-semibold 
                   hover:bg-customLightPrimary hover:text-customPrimary"

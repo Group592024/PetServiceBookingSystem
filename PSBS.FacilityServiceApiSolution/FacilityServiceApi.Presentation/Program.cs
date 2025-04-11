@@ -1,5 +1,4 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
-using FacilityServiceApi.Domain.Entities;
 using FacilityServiceApi.Infrastructure.DependencyInjection;
 using FacilityServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -35,7 +34,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowLocalhost3000", policyBuilder =>
     {
         policyBuilder
-            .WithOrigins("http://localhost:3000")  
+            .WithOrigins("http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -71,7 +70,7 @@ var app = builder.Build();
 
 // Khởi động FfmpegService (với kiểm tra lỗi)
 //var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-//Process? ffmpegProcess = null;
+Process? ffmpegProcess = null;
 //try
 //{
 //    ffmpegProcess = ffmpegService.StartFfmpegConversion();
@@ -84,6 +83,7 @@ var app = builder.Build();
 // Lấy đường dẫn HLS từ cấu hình
 // var hlsOutputPath = builder.Configuration["CameraConfig:HlsOutputPath"];
 // var hlsFileProvider = new PhysicalFileProvider(hlsOutputPath);
+
 // Cấu hình Static Files cho Images
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
@@ -102,7 +102,7 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/Images"
 });
 
-// Cấu hình Static Files cho HLS với header CORS đúng
+// // Cấu hình Static Files cho HLS với header CORS đúng
 // app.UseStaticFiles(new StaticFileOptions
 // {
 //     FileProvider = hlsFileProvider,

@@ -88,7 +88,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("all")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [AllowAnonymous]
 
         public async Task<IActionResult> GetAll()
         {
@@ -97,7 +97,7 @@ namespace FacilityServiceApi.Presentation.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var camera = await _camera.GetByIdAsync(id);

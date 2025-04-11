@@ -13,6 +13,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         {
             try
             {
+                var exists = await context.Camera
+           .AnyAsync(c => c.cameraCode == entity.cameraCode && !c.isDeleted);
+
+                if (exists)
+                    return new Response(false, "Camera Name already exists");
                 context.Camera.Add(entity);
                 await context.SaveChangesAsync();
 
@@ -39,6 +44,11 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 var existingCamera = await context.Camera.FindAsync(entity.cameraId);
                 if (existingCamera == null)
                     return new Response(false, "Camera not found");
+                var duplicate = await context.Camera
+            .AnyAsync(c => c.cameraCode == entity.cameraCode && c.cameraId != entity.cameraId && !c.isDeleted);
+
+                if (duplicate)
+                    return new Response(false, "Camera Name already exists for another camera");
 
                 existingCamera.cameraType = entity.cameraType;
                 existingCamera.cameraCode = entity.cameraCode;

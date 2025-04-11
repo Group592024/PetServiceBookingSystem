@@ -14,7 +14,7 @@ namespace FacilityServiceApi.Domain.Entities
         [Column("booking_Id")]
         public Guid BookingId { get; set; }
         [Column("camera_id")]
-        public Guid? CameraId { get; set; }
+        public Guid? cameraId { get; set; }
         [Column("status")]
         public string Status { get; set; } = null!;
         [Column("checkin_date")]

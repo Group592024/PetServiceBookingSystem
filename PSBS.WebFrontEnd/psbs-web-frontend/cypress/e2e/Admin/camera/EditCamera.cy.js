@@ -68,7 +68,7 @@ describe("Camera Edit Page - Admin", () => {
       cy.get('input[name="cameraCode"]')
         .should("be.visible")
         .and("have.value", cameraData.cameraCode)
-        .and("have.attr", "placeholder", "Nhập Camera Code");
+        .and("have.attr", "placeholder", "Nhập Camera Name");
       cy.get('input[name="cameraStatus"]')
         .should("be.visible")
         .and("have.value", cameraData.cameraStatus)

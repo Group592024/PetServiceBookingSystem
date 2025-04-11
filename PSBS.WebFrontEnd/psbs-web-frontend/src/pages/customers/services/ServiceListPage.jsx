@@ -34,6 +34,9 @@ const banners = [
 const ServiceListPage = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+  const [searchName, setSearchName] = useState("");
+const [searchType, setSearchType] = useState("");
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Auto-slide effect
@@ -74,6 +77,16 @@ const ServiceListPage = () => {
     fetchDataFunction();
   }, []);
 
+  const filteredData = data.filter((item) => {
+    const nameMatch = item.serviceName
+      .toLowerCase()
+      .includes(searchName.toLowerCase());
+    const typeMatch =
+      searchType === "" || item.serviceType.typeName === searchType;
+    return nameMatch && typeMatch;
+  });
+  
+
   return (
     <div>
       <NavbarCustomer />
@@ -105,9 +118,36 @@ const ServiceListPage = () => {
 
       {/* Service Section */}
       <div className="flex justify-center p-5">
-        <p className="text-3xl font-bold">Services For Your Pets</p>
+        <p className="text-3xl font-bold" data-testid="test-ne">
+          Services For Your Pets
+        </p>
       </div>
-      <ServiceCardList data={data} />
+      <div className="flex flex-col md:flex-row items-center justify-center gap-5 px-5 py-4">
+  {/* Service Name Search */}
+  <input
+    type="text"
+    placeholder="Search by Service Name"
+    value={searchName}
+    onChange={(e) => setSearchName(e.target.value)}
+    className="border px-4 py-2 rounded-full shadow-md w-72"
+  />
+
+  {/* Service Type Dropdown */}
+  <select
+    value={searchType}
+    onChange={(e) => setSearchType(e.target.value)}
+    className="border px-4 py-2 rounded-full shadow-md w-72"
+  >
+    <option value="">All Types</option>
+    {[...new Set(data.map((item) => item.serviceType?.typeName))].map((type) => (
+      <option key={type} value={type}>
+        {type}
+      </option>
+    ))}
+  </select>
+</div>
+
+<ServiceCardList data={filteredData} />
     </div>
   );
 };

@@ -47,12 +47,22 @@ const AddDiaryModal = ({ categories, open, onClose }) => {
   };
 
   const handleSave = async () => {
+    console.log(content);
     const sanitizedContent = content.replace(/<[^>]+>/g, "").trim();
+    console.log(sanitizedContent);
     if (!sanitizedContent) {
       return Swal.fire({
         icon: "error",
         title: "Error",
         text: "The content can not be empty!",
+      });
+    }
+
+    if (!selectedCategory) {
+      return Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "The category can not be empty!",
       });
     }
 
@@ -112,7 +122,7 @@ const AddDiaryModal = ({ categories, open, onClose }) => {
   };
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={onClose} data-testid="add-diary-modal">
       <div>
         <Stack
           spacing={4}
@@ -139,6 +149,7 @@ const AddDiaryModal = ({ categories, open, onClose }) => {
 
           <div className="flex justify-start">
             <Autocomplete
+              data-testid="category-select"
               options={categories}
               getOptionLabel={(option) => option}
               value={selectedCategory}
@@ -172,6 +183,7 @@ const AddDiaryModal = ({ categories, open, onClose }) => {
             className="no-scroll-bar"
           >
             <JoditEditor
+              data-testid="content-editor"
               ref={editor}
               value={content}
               config={config}

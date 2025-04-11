@@ -125,7 +125,7 @@ const CustomerPetDetail = () => {
         <div role='status'>
           <svg
             aria-hidden='true'
-            className='inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600'
+            className='inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600'
             viewBox='0 0 100 101'
             fill='none'
             xmlns='http://www.w3.org/2000/svg'
@@ -155,11 +155,11 @@ const CustomerPetDetail = () => {
           <div className="flex items-center">
             <button onClick={() => navigate(-1)}
               className="hover:bg-indigo-100 p-3 rounded-xl transition-all">
-              <svg className="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            <h1 className="text-4xl font-bold text-indigo-900 ml-6">Pet Profile</h1>
+            <h1 className="text-4xl font-bold text-black ml-6">Pet Profile</h1>
           </div>
           <button
             onClick={() => navigate('/customer/pet/add')}
@@ -214,18 +214,22 @@ const CustomerPetDetail = () => {
                     <InfoRow
                       label='Breed'
                       value={petBreed ? petBreed.petBreedName : 'Loading...'}
+                      className="hover:bg-indigo-50 cursor-pointer"
                     />
                     <InfoRow
                       label='Weight'
                       value={`${pet.petWeight} kg`}
+                      className="hover:bg-indigo-50 cursor-pointer"
                     />
                     <InfoRow
                       label='Fur Type'
                       value={pet.petFurType}
+                      className="hover:bg-indigo-50 cursor-pointer"
                     />
                     <InfoRow
                       label='Fur Color'
                       value={pet.petFurColor}
+                      className="hover:bg-indigo-50 cursor-pointer"
                     />
 
                     {/* Notes Section */}
@@ -287,7 +291,7 @@ const CustomerPetDetail = () => {
             </button>
             <button
               onClick={() => navigate(`/list/${pet.petId}`)}
-              className='bg-gradient-to-r from-purple-200 to-purple-300 hover:from-purple-300 hover:to-purple-400
+              className='bg-gradient-to-r from-blue-200 to-blue-300 hover:from-blue-300 hover:to-blue-400
                  p-8 rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl
                  transform hover:-translate-y-1 group h-[250px]'
             >
@@ -311,8 +315,8 @@ const CustomerPetDetail = () => {
 };
 
 // Enhanced InfoRow Component
-const InfoRow = ({ label, value, icon }) => (
-  <div className='flex items-center gap-4 p-4 bg-gray-50 rounded-xl'>
+const InfoRow = ({ label, value, icon, className = '' }) => (
+  <div className={`flex items-center gap-4 p-4 bg-gray-50 rounded-xl transition-colors duration-200 ease-in-out ${className}`}>
     <div className='flex-shrink-0'>
       {icon}
     </div>
