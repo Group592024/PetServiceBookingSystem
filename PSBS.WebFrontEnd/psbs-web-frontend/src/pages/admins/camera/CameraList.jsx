@@ -116,7 +116,7 @@ const CameraList = () => {
       flex: 0.5,
       renderCell: (params) => <span>{params.row.id ?? ""}</span>,
     },
-    { field: "cameraCode", headerName: "Camera Code", flex: 1 },
+    { field: "cameraCode", headerName: "Camera Name", flex: 1 },
     { field: "cameraType", headerName: "Type", flex: 1 },
     { field: "cameraStatus", headerName: "Status", flex: 1 },
     { field: "rtspUrl", headerName: "RTSP URL", flex: 2 },

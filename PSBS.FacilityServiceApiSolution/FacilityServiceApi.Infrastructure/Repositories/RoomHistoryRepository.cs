@@ -116,5 +116,36 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 return new Response(false, "Error occured update new room history");
             }
         }
+        public async Task<Response> UpdateCameraAsync(Guid roomHistoryId, Guid cameraId)
+        {
+            try
+            {
+                var existingEntity = await context.RoomHistories.FirstOrDefaultAsync(h => h.RoomHistoryId == roomHistoryId);
+                if (existingEntity == null)
+                {
+                    return new Response(false, "RoomHistory not found");
+                }
+
+                var cameraExists = await context.Camera.AnyAsync(c => c.cameraId == cameraId);
+                if (!cameraExists)
+                {
+                    return new Response(false, "Camera not found");
+                }
+
+                existingEntity.cameraId = cameraId;
+
+                context.RoomHistories.Update(existingEntity);
+                await context.SaveChangesAsync();
+
+                return new Response(true, "Camera updated successfully");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ UpdateCameraAsync error: {ex.Message}");
+                return new Response(false, "Error occurred updating camera");
+            }
+        }
+
+
     }
 }

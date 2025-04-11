@@ -657,6 +657,28 @@
       // }
     },
     {
+      // Stream  API
+      "DownstreamPathTemplate": "/api/Stream/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5023
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Stream/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      // "FileCacheOptions": {
+      //   "TtlSeconds": 60,
+      //   "Region": "default",
+      //   "Header": "PSBS-Caching-Control"
+      // },
+      // "AuthenticationOptions": {
+      //   "AuthenticationProviderKey": "Bearer",
+      //   "AllowedScopes": []
+      // }
+    },
+    {
       // Payment Type API
       "DownstreamPathTemplate": "/api/PaymentType/{everything}",
       "DownstreamScheme": "http",
@@ -836,6 +858,19 @@
       "UpstreamPathTemplate": "/uploads/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
     },
+    {
+      "DownstreamPathTemplate": "/hls/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5023
+        }
+      ],
+      "UpstreamPathTemplate": "/hls/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "HEAD" ]
+    }
+,    
     {
       //Image Facility Service
       "DownstreamPathTemplate": "/images/{everything}",

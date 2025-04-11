@@ -3,14 +3,14 @@ describe("Delete Voucher E2E Tests", () => {
     const testVoucherName = "Test Voucher For Deletion";
   
     before(() => {
-      // Login and create a test voucher
-      cy.login("user6@example.com", "123456");
+      // loginByHien and create a test voucher
+      cy.loginByHien("user6@example.com", "123456");
       cy.createTestVoucher(testVoucherCode, testVoucherName);
     });
   
     beforeEach(() => {
-      // Login before each test
-      cy.login("user6@example.com", "123456");
+      // loginByHien before each test
+      cy.loginByHien("user6@example.com", "123456");
       cy.visit("http://localhost:3000/vouchers");
       cy.wait(2000); // Wait for page load
     });

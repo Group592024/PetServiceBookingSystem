@@ -38,7 +38,7 @@ Cypress.Commands.add("restoreLocalStorage", () => {
 });
 
 // Session-based login command (recommended)
-Cypress.Commands.add("login", (email, password) => {
+Cypress.Commands.add("loginByHien", (email, password) => {
   cy.session([email, password], () => {
     cy.visit("http://localhost:3000/login");
     cy.get("#email").type(email);
@@ -48,7 +48,18 @@ Cypress.Commands.add("login", (email, password) => {
   });
 });
 
-
+Cypress.Commands.add('createTestNotification', (notification) => {
+  cy.request({
+    method: 'POST',
+    url: 'api/Notification',
+    body: {
+      notiTypeId: notification.type === 'Booking' ? '22222222-2222-2222-2222-222222222222' : '11111111-1111-1111-1111-111111111111',
+      notificationTitle: notification.title,
+      notificationContent: notification.content,
+      isDeleted: false
+    }
+  });
+});
 
 // Add a soft delete command for cleanup
 Cypress.Commands.add("softDeleteVoucher", (voucherId, token = null) => {

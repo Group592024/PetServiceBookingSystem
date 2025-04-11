@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import BookingRoomStatus from "../../../../components/Booking/booking-status/BookingRoomStatus";
 import { motion } from "framer-motion";
+import CameraModal from "../../../admins/camfeed/videoFeed/VideoFeed";
 
 const CustomerRoomBookingDetail = () => {
   const { bookingId } = useParams();
@@ -18,8 +19,8 @@ const CustomerRoomBookingDetail = () => {
   const [error, setError] = useState(null);
   const [petNames, setPetNames] = useState({});
   const [allDataLoaded, setAllDataLoaded] = useState(false);
-  const [voucherDetails, setVoucherDetails] = useState(null);
-
+const [selectedData, setSelectedData] = useState(null);
+  const [isPushModalOpen, setPushModalOpen] = useState(false);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -69,12 +70,6 @@ const CustomerRoomBookingDetail = () => {
           }
         );
         setBooking(bookingResponse.data.data);
-
-        // Fetch voucher details if voucherId exists
-        if (bookingResponse.data.data.voucherId &&
-          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
-          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
-        }
 
         const paymentResponse = await axios.get(
           `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
@@ -206,82 +201,13 @@ const CustomerRoomBookingDetail = () => {
     });
   };
 
-  const fetchVoucherDetails = async (voucherId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5050/api/Voucher/${voucherId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        }
-      );
-
-      if (response.data.flag && response.data.data) {
-        setVoucherDetails(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching voucher details:", error);
-    }
-  };
-
   const handleCameraSettings = (roomHistoryId) => {
     const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
     if (!room) return;
-
-    Swal.fire({
-      title: "Camera Settings",
-      html: `
-        <div class="text-left">
-          <div class="mb-4">
-            <p class="font-semibold">Room: <span class="font-normal">${roomName}</span></p>
-            <p class="font-semibold">Pet: <span class="font-normal">${petNames[room.petId] || "Unknown"
-        }</span></p>
-          </div>
-          
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">View Mode</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Standard</option>
-                <option>Night Vision</option>
-                <option>Wide Angle</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Recording</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>Continuous</option>
-                <option>Motion Activated</option>
-                <option>Disabled</option>
-              </select>
-            </div>
-            
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Quality</label>
-              <select class="w-full border border-gray-300 rounded-md px-3 py-2">
-                <option>High (1080p)</option>
-                <option>Medium (720p)</option>
-                <option>Low (480p)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: "Save Settings",
-      cancelButtonText: "Cancel",
-      focusConfirm: false,
-      preConfirm: () => {
-        // Here you would typically save the settings to your backend
-        return Promise.resolve();
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire("Saved!", "Camera settings have been updated.", "success");
-      }
-    });
+   console.log(room);
+   setSelectedData(room.cameraId);
+   console.log("daya", selectedData);
+   setPushModalOpen(true);
   };
 
   const handleVNPayPayment = async () => {
@@ -448,29 +374,6 @@ const CustomerRoomBookingDetail = () => {
                   {booking.isPaid ? "Paid" : "Pending"}
                 </span>
               </p>
-              {voucherDetails && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-gray-700">
-                        <span className="font-semibold">Voucher Name:</span>{" "}
-                        <span className="text-blue-600">{voucherDetails.voucherName}</span>
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-semibold">Code:</span>{" "}
-                        <span className="text-gray-800">{voucherDetails.voucherCode}</span>
-                      </p>
-                      <p className="text-gray-700">
-                        <span className="font-semibold">Discount:</span>{" "}
-                        <span className="text-green-600">
-                          {voucherDetails.voucherDiscount}% (Max {voucherDetails.voucherMaximum.toLocaleString()} VND)
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </motion.div>
         )}
@@ -640,6 +543,7 @@ const CustomerRoomBookingDetail = () => {
             </motion.div>
           )}
       </motion.div>
+      <CameraModal cameraId={selectedData} onClose={() => setPushModalOpen(false)} open={isPushModalOpen} />
     </div>
   );
 };

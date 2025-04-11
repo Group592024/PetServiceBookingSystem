@@ -4,13 +4,13 @@ describe("Voucher Visibility Tests", () => {
   
   before(() => {
     // Clean up any existing test vouchers
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.deleteVoucher(testVoucherCode);
   });
 
   it("should create a voucher as admin and verify it appears for customers", () => {
-    // 1. Login as admin and create a voucher
-    cy.login("user6@example.com", "123456");
+    // 1. loginByHien as admin and create a voucher
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -44,10 +44,10 @@ describe("Voucher Visibility Tests", () => {
     cy.get(".swal2-title", { timeout: 10000 }).should("contain", "Success");
     cy.get(".swal2-confirm").click();
     
-    // 2. Logout and login as customer
+    // 2. Logout and loginByHien as customer
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
     
     // 3. Visit customer voucher page
     cy.visit("http://localhost:3000/customer/vouchers");
@@ -58,8 +58,8 @@ describe("Voucher Visibility Tests", () => {
   });
 
   it("should update voucher to inactive and verify it disappears for customers", () => {
-    // 1. Login as admin
-    cy.login("user6@example.com", "123456");
+    // 1. loginByHien as admin
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     
     // 2. Find and edit the test voucher
@@ -83,10 +83,10 @@ describe("Voucher Visibility Tests", () => {
     cy.get(".swal2-title", { timeout: 10000 }).should("contain", "Success");
     cy.get(".swal2-confirm").click();
     
-    // 6. Logout and login as customer
+    // 6. Logout and loginByHien as customer
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
     
     // 7. Visit customer voucher page
     cy.visit("http://localhost:3000/customer/vouchers");
@@ -96,8 +96,8 @@ describe("Voucher Visibility Tests", () => {
   });
 
   it("should verify gift vouchers are not visible to customers", () => {
-    // 1. Login as admin and create a gift voucher
-    cy.login("user6@example.com", "123456");
+    // 1. loginByHien as admin and create a gift voucher
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -134,10 +134,10 @@ describe("Voucher Visibility Tests", () => {
     cy.get(".swal2-title", { timeout: 10000 }).should("contain", "Success");
     cy.get(".swal2-confirm").click();
     
-    // 2. Logout and login as customer
+    // 2. Logout and loginByHien as customer
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
     
     // 3. Visit customer voucher page
     cy.visit("http://localhost:3000/customer/vouchers");
@@ -145,16 +145,16 @@ describe("Voucher Visibility Tests", () => {
     // 4. Verify the gift voucher is NOT visible (based on backend filter)
     cy.contains(giftVoucherName).should("not.exist");
     
-    // 5. Clean up - login as admin and delete the gift voucher
+    // 5. Clean up - loginByHien as admin and delete the gift voucher
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.deleteVoucher(giftVoucherCode);
   });
 
   it("should verify search functionality for customer vouchers", () => {
-    // 1. Login as admin and create another active voucher
-    cy.login("user6@example.com", "123456");
+    // 1. loginByHien as admin and create another active voucher
+    cy.loginByHien("user6@example.com", "123456");
     cy.visit("http://localhost:3000/vouchers");
     cy.contains("button", "NEW").click();
     
@@ -189,10 +189,10 @@ describe("Voucher Visibility Tests", () => {
     cy.get(".swal2-title", { timeout: 10000 }).should("contain", "Success");
     cy.get(".swal2-confirm").click();
     
-    // 2. Logout and login as customer
+    // 2. Logout and loginByHien as customer
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("431straight@ptct.net", "123456");
+    cy.loginByHien("431straight@ptct.net", "123456");
     
     // 3. Visit customer voucher page
     cy.visit("http://localhost:3000/customer/vouchers");
@@ -210,16 +210,16 @@ describe("Voucher Visibility Tests", () => {
     cy.wait(500);
     cy.contains(searchTestVoucherName).should("be.visible");
     
-    // 7. Clean up - login as admin and delete the search test voucher
+    // 7. Clean up - loginByHien as admin and delete the search test voucher
     cy.clearCookies();
     cy.clearLocalStorage();
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.deleteVoucher(searchTestVoucherCode);
   });
 
   after(() => {
     // Clean up all test vouchers
-    cy.login("user6@example.com", "123456");
+    cy.loginByHien("user6@example.com", "123456");
     cy.deleteVoucher(testVoucherCode);
   });
 });
