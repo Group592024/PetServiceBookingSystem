@@ -135,13 +135,13 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 {
                     return new Response(false, "The room history does not exist");
                 }
-                if (roomHistory.CameraId is not null)
+                if (roomHistory.cameraId is not null)
                 {
-                    var existCam = await context.Camera.FindAsync(roomHistory.CameraId);
+                    var existCam = await context.Camera.FindAsync(roomHistory.cameraId);
                     existCam!.cameraStatus = "Free";
 
                 }
-                roomHistory.CameraId = cameraDTO.cameraId;
+                roomHistory.cameraId = cameraDTO.cameraId;
                 context.RoomHistories.Update(roomHistory);
                 camera.cameraStatus = "InUse";
 

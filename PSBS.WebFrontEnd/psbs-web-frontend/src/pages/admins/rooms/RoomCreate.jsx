@@ -193,7 +193,12 @@ const RoomCreate = () => {
                                         <label className="block text-sm font-medium text-gray-700 mb-1">Room Price</label>
                                         <TextField
                                             fullWidth
-                                            value={`${roomTypePrice} VND`}
+                                            value={new Intl.NumberFormat('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND',
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 3
+                                            }).format(roomTypePrice)}
                                             InputProps={{
                                                 readOnly: true,
                                             }}

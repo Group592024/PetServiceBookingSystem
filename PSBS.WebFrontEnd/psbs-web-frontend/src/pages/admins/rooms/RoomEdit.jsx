@@ -179,7 +179,7 @@ const RoomEdit = () => {
                         </button>
                         <h1 className="text-3xl font-bold text-gray-800 ml-4">Edit Room</h1>
                     </div>
-    
+
                     <div className="bg-white rounded-xl p-8 shadow-lg">
                         <form onSubmit={handleSubmit}>
                             <div className="flex flex-col md:flex-row gap-12">
@@ -203,7 +203,7 @@ const RoomEdit = () => {
                                                 }}
                                             />
                                         </div>
-    
+
                                         {/* Room Type */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
@@ -232,13 +232,18 @@ const RoomEdit = () => {
                                                 </Select>
                                             </FormControl>
                                         </div>
-    
+
                                         {/* Room Price */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Room Price</label>
                                             <TextField
                                                 fullWidth
-                                                value={`${roomTypePrice} VND`}
+                                                value={new Intl.NumberFormat('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                    minimumFractionDigits: 0,
+                                                    maximumFractionDigits: 3
+                                                }).format(roomTypePrice)}
                                                 InputProps={{
                                                     readOnly: true,
                                                 }}
@@ -250,7 +255,7 @@ const RoomEdit = () => {
                                                 }}
                                             />
                                         </div>
-    
+
                                         {/* Description */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
@@ -270,7 +275,7 @@ const RoomEdit = () => {
                                                 }}
                                             />
                                         </div>
-    
+
                                         {/* Status */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -283,8 +288,8 @@ const RoomEdit = () => {
                                                         backgroundColor: '#f8fafc',
                                                         color:
                                                             roomStatus === 'In Use' ? '#f97316' :
-                                                            roomStatus === 'Free' ? '#22c55e' :
-                                                            roomStatus === 'Maintenance' ? '#ef4444' : 'inherit',
+                                                                roomStatus === 'Free' ? '#22c55e' :
+                                                                    roomStatus === 'Maintenance' ? '#ef4444' : 'inherit',
                                                         fontWeight: '600'
                                                     }}
                                                 >
@@ -294,7 +299,7 @@ const RoomEdit = () => {
                                                 </Select>
                                             </FormControl>
                                         </div>
-    
+
                                         {/* Available Status */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-2">Availability Status</label>
@@ -320,7 +325,7 @@ const RoomEdit = () => {
                                         </div>
                                     </div>
                                 </div>
-    
+
                                 {/* Right Column - Image Upload */}
                                 <div className="md:w-1/2 space-y-6">
                                     <div className="bg-gray-50 p-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all">
@@ -350,7 +355,7 @@ const RoomEdit = () => {
                                     </div>
                                 </div>
                             </div>
-    
+
                             {/* Action Buttons */}
                             <div className="flex justify-center space-x-4 mt-12 pt-6 border-t">
                                 <button
