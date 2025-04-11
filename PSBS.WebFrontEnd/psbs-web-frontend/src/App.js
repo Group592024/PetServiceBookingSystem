@@ -97,6 +97,7 @@ import CameraCreate from "./pages/admins/camera/CreateCamera";
 import CameraCus from "./pages/customers/cameras/CameraCus";
 import Unauthorized from "./pages/authorize/Unauthorized";
 import ListNotification from "./pages/admins/notification/listNotification/ListNotification";
+import CamList from "./pages/admins/camfeed/camList/CamList";
 
 function App() {
   const userId = sessionStorage.getItem("accountId");
@@ -839,6 +840,26 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["admin"]}>
                   <ListNotification />
+                </ProtectedRoute>
+              }
+            />
+            {/* <Route
+              path="detail/:voucherId"
+              element={
+                <ProtectedRoute allowedRoles={["user"]}>
+                  <CustomerVoucherDetail />
+                </ProtectedRoute>
+              }
+            /> */}
+          </Route>
+
+            {/**Camera links */}
+            <Route path="/camera">
+            <Route
+              index
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <CamList />
                 </ProtectedRoute>
               }
             />
