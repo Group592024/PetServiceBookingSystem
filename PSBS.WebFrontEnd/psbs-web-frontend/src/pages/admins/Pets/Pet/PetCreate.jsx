@@ -32,7 +32,7 @@ const AdminPetCreate = () => {
         const fetchPetTypes = async () => {
             try {
                 const token = sessionStorage.getItem("token");
-                const response = await fetch('http://localhost:5050/api/petType/available',{
+                const response = await fetch('http://localhost:5050/api/petType/available', {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -188,9 +188,12 @@ const AdminPetCreate = () => {
         }
     };
 
+    // Modify the filteredAccounts function to search by both name and phone
     const filteredAccounts = accounts.filter((account) =>
-        account.accountName.toLowerCase().includes(search.toLowerCase()) && account.roleId === "user"
-    ); // Assuming roleId is "user"
+        (account.accountName.toLowerCase().includes(search.toLowerCase()) ||
+            (account.accountPhoneNumber && account.accountPhoneNumber.includes(search))) &&
+        account.roleId === "user"
+    );
 
     const handleBlur = (e) => {
         setTimeout(() => {
@@ -199,7 +202,8 @@ const AdminPetCreate = () => {
             }
             const matchedAccount = accounts.find(
                 (account) =>
-                    account.accountName.toLowerCase() === search.toLowerCase() &&
+                    (account.accountName.toLowerCase() === search.toLowerCase() ||
+                        account.accountPhoneNumber === search) &&
                     account.roleId === "user"
             );
             if (matchedAccount) {
@@ -217,7 +221,9 @@ const AdminPetCreate = () => {
         if (e.key === "Enter") {
             const matchedAccount = accounts.find(
                 (account) =>
-                    account.accountName.toLowerCase() === search.toLowerCase() && account.roleId === "user"
+                    (account.accountName.toLowerCase() === search.toLowerCase() ||
+                        account.accountPhoneNumber === search) &&
+                    account.roleId === "user"
             );
 
             if (matchedAccount) {
@@ -358,10 +364,24 @@ const AdminPetCreate = () => {
                                                     filteredAccounts.map((account) => (
                                                         <li
                                                             key={account.accountId}
-                                                            className="p-3 hover:bg-blue-50 cursor-pointer transition-colors"
+                                                            className="p-3 hover:bg-blue-50 cursor-pointer transition-colors flex items-center"
                                                             onMouseDown={() => handleSelect(account.accountId, account.accountName)}
                                                         >
-                                                            {account.accountName}
+                                                            {account.accountImage ? (
+                                                                <img
+                                                                    src={`http://localhost:5050/account-service/images/${account.accountImage}`}
+                                                                    alt={account.accountName}
+                                                                    className="w-10 h-10 rounded-full object-cover mr-3"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                                                                    <span className="text-gray-500 text-sm">{account.accountName.charAt(0).toUpperCase()}</span>
+                                                                </div>
+                                                            )}
+                                                            <div>
+                                                                <div className="font-medium">{account.accountName}</div>
+                                                                <div className="text-sm text-gray-500">{account.accountPhoneNumber || 'No phone'}</div>
+                                                            </div>
                                                         </li>
                                                     ))
                                                 ) : (
