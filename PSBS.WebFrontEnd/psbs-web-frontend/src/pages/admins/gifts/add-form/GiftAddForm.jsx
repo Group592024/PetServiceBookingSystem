@@ -2,8 +2,8 @@ import React, { useState, useRef } from "react";
 import { TextField, Button } from "@mui/material";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
-import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 function GiftAddForm() {
   const sidebarRef = useRef(null);
@@ -22,8 +22,9 @@ function GiftAddForm() {
     image: "",
     quantity: "",
   });
+  
   const token = sessionStorage.getItem("token");
-
+  
   const validateForm = () => {
     const newErrors = {
       giftName: giftName ? "" : "Gift Name is required.",
@@ -33,16 +34,14 @@ function GiftAddForm() {
       quantity: quantity > 0 ? "" : "Quantity must be greater than 0.",
       image: image ? "" : "Gift Image is required.",
     };
-
     setErrors(newErrors);
     return Object.values(newErrors).every((error) => error === "");
   };
-
+  
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!validateForm()) return;
-
+    
     try {
       // First check if gift code exists (if provided)
       if (giftCode) {
@@ -55,9 +54,7 @@ function GiftAddForm() {
             },
           }
         );
-
         const checkData = await checkResponse.json();
-
         if (!checkResponse.ok) {
           setErrors(prevErrors => ({
             ...prevErrors,
@@ -65,7 +62,6 @@ function GiftAddForm() {
           }));
           return;
         }
-
         if (!checkData.flag || !checkData.data) {
           setErrors(prevErrors => ({
             ...prevErrors,
@@ -80,7 +76,7 @@ function GiftAddForm() {
           }));
         }
       }
-
+      
       // If gift code check passed or no gift code provided, proceed with submission
       const formData = new FormData();
       formData.append("giftName", giftName);
@@ -89,7 +85,7 @@ function GiftAddForm() {
       formData.append("giftCode", giftCode);
       formData.append("quantity", quantity);
       formData.append("imageFile", document.getElementById("fileInput").files[0]);
-
+      
       const response = await fetch("http://localhost:5050/Gifts", {
         method: "POST",
         body: formData,
@@ -97,21 +93,36 @@ function GiftAddForm() {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      
       const data = await response.json();
       if (response.ok) {
-        toast.success(data.message || "Gift added successfully!");
+        Swal.fire({
+          title: 'Success',
+          text: data.message || 'Gift added successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         handleCancel();
         navigate("/gifts");
       } else {
-        toast.error("Error: " + data.message);
+        Swal.fire({
+          title: 'Warning',
+          text: data.message || 'An error occurred while adding the gift!',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while adding the gift.");
+      Swal.fire({
+        title: 'Warning',
+        text: 'Some error occurs when add Gift!',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
     }
   };
-
+  
   const handleCancel = () => {
     setGiftName("");
     setGiftDescription("");
@@ -125,10 +136,11 @@ function GiftAddForm() {
       giftPoint: "",
       giftCode: "",
       image: "",
+      quantity: "",
     });
     navigate("/gifts");
   };
-
+  
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file) {
@@ -148,7 +160,7 @@ function GiftAddForm() {
       }
     }
   };
-
+  
   return (
     <div>
       <Sidebar ref={sidebarRef} />
@@ -181,6 +193,7 @@ function GiftAddForm() {
                 <div className="mb-4">
                   <TextField
                     label="Gift Name"
+                    placeholder="Gift Name"
                     variant="outlined"
                     fullWidth
                     value={giftName}
@@ -197,13 +210,14 @@ function GiftAddForm() {
                     helperText={errors.giftName}
                   />
                 </div>
-
                 {/* Gift Description */}
                 <div className="mb-4">
                   <TextField
                     label="Gift Description"
+                    placeholder="Gift Description"
                     variant="outlined"
                     fullWidth
+                    multiline
                     value={giftDescription}
                     onChange={(e) => {
                       setGiftDescription(e.target.value);
@@ -218,11 +232,11 @@ function GiftAddForm() {
                     helperText={errors.giftDescription}
                   />
                 </div>
-
                 {/* Gift Point */}
                 <div className="mb-4">
                   <TextField
                     label="Gift Point"
+                    placeholder="Gift Point"
                     variant="outlined"
                     type="number"
                     fullWidth
@@ -240,17 +254,18 @@ function GiftAddForm() {
                     helperText={errors.giftPoint}
                   />
                 </div>
-
                 {/* Gift Quantity */}
                 <div className="mb-4">
                   <TextField
                     label="Gift Quantity"
+                    placeholder="Gift Quantity"
                     variant="outlined"
+                    type="number"
                     fullWidth
                     value={quantity}
                     onChange={(e) => {
                       setQuantity(e.target.value);
-                      if (e.target.value) {
+                      if (e.target.value > 0) {
                         setErrors((prevErrors) => ({
                           ...prevErrors,
                           quantity: "",
@@ -261,11 +276,11 @@ function GiftAddForm() {
                     helperText={errors.quantity}
                   />
                 </div>
-
                 {/* Gift Code */}
                 <div className="mb-4">
                   <TextField
                     label="Gift Code (Optional)"
+                    placeholder="Gift Code (Optional)"
                     variant="outlined"
                     fullWidth
                     value={giftCode}
@@ -283,7 +298,6 @@ function GiftAddForm() {
                     helperText={errors.giftCode}
                   />
                 </div>
-
                 {/* Image Upload */}
                 <div className="mb-6">
                   <input
@@ -297,7 +311,6 @@ function GiftAddForm() {
                     <p className="text-sm text-red-500 mt-2">{errors.image}</p>
                   )}
                 </div>
-
                 {/* Submit and Cancel Buttons */}
                 <div className="flex justify-around">
                   <Button
@@ -323,7 +336,6 @@ function GiftAddForm() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

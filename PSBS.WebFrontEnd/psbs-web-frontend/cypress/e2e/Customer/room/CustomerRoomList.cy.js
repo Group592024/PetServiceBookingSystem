@@ -7,8 +7,8 @@ describe('Customer Room List Page', () => {
 
     cy.visit('http://localhost:3000/login');
     cy.get('#email', { timeout: 10000 }).should('be.visible');
-    cy.get('#email').type('abc@gmail.com');
-    cy.get('#password').type('123456789');
+    cy.get('#email').type('tranthibich@gmail.com');
+    cy.get('#password').type('bich2024');
     cy.get('button[type="submit"]').click();
 
     cy.wait('@loginRequest', { timeout: 15000 }).then((interception) => {

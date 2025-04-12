@@ -4,7 +4,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import Swal from 'sweetalert2';
 
 function GiftDetailPage() {
   const sidebarRef = useRef(null);
@@ -29,18 +29,32 @@ function GiftDetailPage() {
     const fetchGiftDetail = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5050/Gifts/${giftId}`,config
+          `http://localhost:5050/Gifts/${giftId}`, config
         );
 
         if (response.data.flag) {
           setGift(response.data.data);
-          toast.success(
-            response.data.message || "Gift data fetched successfully!"
-          );
+          Swal.fire({
+            title: 'Success',
+            text: response.data.message || 'Gift data fetched successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
         } else {
-          toast.error(response.data.message || "Gift not found");
+          Swal.fire({
+            title: 'Warning',
+            text: response.data.message || 'Gift not found',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
         }
       } catch (error) {
+        Swal.fire({
+          title: 'Warning',
+          text: 'Gift not found',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
         console.error("Error fetching gift details:", error);
       } finally {
         setLoading(false);
@@ -222,7 +236,6 @@ function GiftDetailPage() {
             </Box>
           </div>
         </div>
-        <ToastContainer />
       </div>
     </div>
   );
