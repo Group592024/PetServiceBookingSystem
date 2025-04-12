@@ -171,6 +171,16 @@ namespace ReservationApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<Response> IsReferencedInBookings(Guid voucherId)
+        {
+           var isReferencedInBooking = await context.Bookings.AnyAsync(r=>r.VoucherId == voucherId);
+            if (isReferencedInBooking)
+            {
+                return new Response(true, "The voucher is referenced in the booking");
+            }
+            return new Response(false, "The voucher is not referenced in the booking");
+        }
+
         public Task<Response> UpdateAsync(Booking entity)
         {
             throw new NotImplementedException();

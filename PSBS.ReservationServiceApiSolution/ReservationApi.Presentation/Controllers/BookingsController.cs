@@ -961,5 +961,13 @@ namespace ReservationApi.Presentation.Controllers
 
             return Redirect("http://localhost:3000/admin/bookings?status=notfound");
         }
+
+        [HttpGet("voucher/{voucher}")]
+        public async Task<ActionResult<IEnumerable<BookingDTO>>> IsReferenceInBooking(Guid voucher)
+        {
+            var bookings = await bookingInterface.IsReferencedInBookings(voucher);
+
+            return Ok(bookings);
+        }
     }
 }

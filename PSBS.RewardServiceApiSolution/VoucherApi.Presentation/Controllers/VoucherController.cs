@@ -20,15 +20,13 @@ namespace VoucherApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchers()
         {
             // get all vouchers from repo
-            var vouchers = await voucherInteface.GetAllAsync();
-            if (!vouchers.Any())
-                return NotFound("No vouchers detected in the database");
+            var vouchers = await voucherInteface.GetAllAsync();       
             // convert data from entity to DTO and return
             var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
             return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
             {
                 Data = list
-            }) : NotFound(new Response(false, "No Voucher detected"));
+            }) : Ok(new Response(false, "No Voucher detected"));
 
 
         }
@@ -133,7 +131,7 @@ namespace VoucherApi.Presentation.Controllers
             // convert to entity to DT
             var getEntity = await voucherInteface.GetByIdAsync(id);
             var response = await voucherInteface.DeleteAsync(getEntity);
-            return response.Flag is true ? Ok(response) : BadRequest(response);
+            return  Ok(response) ;
         }
 
         // GET api/<VoucherController>/

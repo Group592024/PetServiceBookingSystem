@@ -187,6 +187,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
             <Select
               labelId="receiverType-label"
               value={receiverType}
+              id="pushSelect"
               onChange={handleReceiverChange}
               label="Receiver Type *"
             >
@@ -207,6 +208,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
                 <TextField
                   label="Search by name or phone"
                   fullWidth
+                  id="searchInput"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   InputProps={{
@@ -268,6 +270,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
                     Selected Receivers ({selectedUsers.length})
                   </Typography>
                   <Stack
+                  id="selectedUsers"
                     direction="row"
                     spacing={1}
                     sx={{ flexWrap: "wrap", gap: 1 }}
@@ -275,6 +278,7 @@ const SelectReceiverModal = ({ open, onClose, onConfirm, initId }) => {
                     {selectedUsers.map((user) => (
                       <Chip
                         key={user.accountId}
+                        id={user.accountId}
                         avatar={
                           <Avatar>
                             <Person />
