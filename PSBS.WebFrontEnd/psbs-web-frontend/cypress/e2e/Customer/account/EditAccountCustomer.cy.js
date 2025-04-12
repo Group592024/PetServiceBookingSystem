@@ -61,22 +61,23 @@ describe('Edit Profile Customer Page', () => {
 
     it('pre-fills the form after load', () => {
         cy.wait(['@getAccount', '@loadImage']);
-
         cy.get('#name').should('have.value', accountData.accountName);
         cy.get('#email')
-            .should('have.value', accountData.accountEmail)
-            .and('be.disabled');
-        cy.contains('label', 'Birthday')
-            .parent()
-            .find('input')
-            .should('have.value', '15/05/1990');
-        cy.get('input[name="gender"][value="male"]').should('be.checked');
+          .should('have.value', accountData.accountEmail)
+          .and('be.disabled');
+        cy.contains('label', 'Date of Birth')
+          .parent()
+          .find('input')
+          .should('have.value', '15/05/1990');
+        cy.contains('span', 'Male')
+          .closest('div.flex-1')
+          .should('have.class', 'bg-blue-50');
         cy.get('#phone').should('have.value', accountData.accountPhoneNumber);
         cy.get('#address').should('have.value', accountData.accountAddress);
         cy.get('img[alt="Profile Preview"]')
-            .should('be.visible')
-            .and('have.attr', 'src')
-            .and('match', /^data:image\/png;base64,/);
+          .should('be.visible')
+          .and('have.attr', 'src')
+          .and('match', /^data:image\/png;base64,/);
     });
 
     it('validates required fields', () => {
@@ -137,7 +138,7 @@ describe('Edit Profile Customer Page', () => {
         cy.visit(EDIT_URL);
         cy.wait(['@getAccount', '@loadImage']);
 
-        cy.contains('button', 'Back').click();
+        cy.contains('button', 'Cancel').click();
         cy.url().should('include', '/customer/services');
     });
 });

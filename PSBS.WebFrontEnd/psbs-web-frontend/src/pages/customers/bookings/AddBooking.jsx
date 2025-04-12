@@ -255,6 +255,8 @@ const AddBooking = () => {
       }
 
       console.log("Request Payload:", JSON.stringify(requestData, null, 2));
+      
+    
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -267,6 +269,8 @@ const AddBooking = () => {
 
         const result = await response.json();
         console.log("API Response:", result);
+        console.log("Result Flag False - Message:", result.message);
+
 
         if (result.flag) {
           if (paymentTypeName === "VNPay") {
@@ -278,7 +282,7 @@ const AddBooking = () => {
               OrderDescription: bookingCode.trim(),
             });
             // Get current path to redirect back after payment
-            const currentPath = "/bookings";
+            const currentPath = "/customer/bookings";
             // Create description with booking code and path
             const description = JSON.stringify({
               bookingCode: bookingCode.trim(),
@@ -308,13 +312,25 @@ const AddBooking = () => {
               Swal.fire("Failed!", `VNPay payment failed!`, "error");
             }
           }
-          window.location.href = "/bookings";
-        } else {
-          throw new Error(result.message || "Failed to submit booking");
+          window.location.href = "/customer/bookings";
+        } 
+        if(!result.flag){
+          setIsSubmitting(false);
+          Swal.fire(
+            "Failed!",
+            result.message || "Failed to submit booking", 
+            "error"
+          );
+          return; 
         }
       } catch (error) {
+        setIsSubmitting(false);
         console.error("Error submitting booking:", error);
-        Swal.fire("Failed!", `Failed to confirm booking.`, "error");
+        Swal.fire(
+          "Failed!",
+          error.message || "Could not create booking.",
+          "error"
+        );
       }
     } else {
       setActiveStep((prevStep) => Math.min(prevStep + 1, steps.length - 1));

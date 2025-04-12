@@ -20,10 +20,10 @@ function GiftAddForm() {
     giftPoint: "",
     giftCode: "",
     image: "",
-    quantity:"",
+    quantity: "",
   });
   const token = sessionStorage.getItem("token");
- 
+
   const validateForm = () => {
     const newErrors = {
       giftName: giftName ? "" : "Gift Name is required.",
@@ -43,22 +43,60 @@ function GiftAddForm() {
 
     if (!validateForm()) return;
 
-    const formData = new FormData();
-    formData.append("giftName", giftName);
-    formData.append("giftDescription", giftDescription);
-    formData.append("giftPoint", giftPoint);
-    formData.append("giftCode", giftCode);
-    formData.append("quantity", quantity);
-    formData.append("imageFile", document.getElementById("fileInput").files[0]);
-
     try {
-      const response = await fetch("http://localhost:5050/Gifts",{
+      // First check if gift code exists (if provided)
+      if (giftCode) {
+        const checkResponse = await fetch(
+          `http://localhost:5050/api/Voucher/search-gift-code?voucherCode=${giftCode}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const checkData = await checkResponse.json();
+
+        if (!checkResponse.ok) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            giftCode: "Error checking gift code: " + (checkData.message || "Invalid gift code")
+          }));
+          return;
+        }
+
+        if (!checkData.flag || !checkData.data) {
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            giftCode: "Gift code not found or invalid"
+          }));
+          return;
+        } else {
+          // Clear any previous gift code errors if validation passed
+          setErrors(prevErrors => ({
+            ...prevErrors,
+            giftCode: ""
+          }));
+        }
+      }
+
+      // If gift code check passed or no gift code provided, proceed with submission
+      const formData = new FormData();
+      formData.append("giftName", giftName);
+      formData.append("giftDescription", giftDescription);
+      formData.append("giftPoint", giftPoint);
+      formData.append("giftCode", giftCode);
+      formData.append("quantity", quantity);
+      formData.append("imageFile", document.getElementById("fileInput").files[0]);
+
+      const response = await fetch("http://localhost:5050/Gifts", {
         method: "POST",
         body: formData,
         headers: {
-          Authorization: `Bearer ${token}`, // Attach the token here
+          Authorization: `Bearer ${token}`,
         },
-      },);
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -231,7 +269,16 @@ function GiftAddForm() {
                     variant="outlined"
                     fullWidth
                     value={giftCode}
-                    onChange={(e) => setGiftCode(e.target.value)}
+                    onChange={(e) => {
+                      setGiftCode(e.target.value);
+                      // Clear error when user types
+                      if (errors.giftCode) {
+                        setErrors(prevErrors => ({
+                          ...prevErrors,
+                          giftCode: ""
+                        }));
+                      }
+                    }}
                     error={!!errors.giftCode}
                     helperText={errors.giftCode}
                   />

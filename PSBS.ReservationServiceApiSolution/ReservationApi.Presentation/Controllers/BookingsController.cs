@@ -11,6 +11,7 @@ using ReservationApi.Application.DTOs.Conversions;
 using ReservationApi.Application.Intefaces;
 using ReservationApi.Domain.Entities;
 using ReservationApi.Infrastructure.Data;
+using ReservationApi.Infrastructure.Data.Migrations;
 using System.Drawing;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -131,6 +132,8 @@ namespace ReservationApi.Presentation.Controllers
         {
             try
             {
+                var latestBookingDateRoom = DateTime.Now;
+
                 // Log received booking request
                 Console.WriteLine("Received Booking Request:");
                 Console.WriteLine($"Selected Option: {bookingRequest.SelectedOption}");
@@ -159,16 +162,27 @@ namespace ReservationApi.Presentation.Controllers
                     Console.WriteLine($"Camera: {room.Camera}");
                     Console.WriteLine("----------------------------");
                 }
+                for (int i = 0; i < bookingRequest.BookingRooms.Count; i++)
+                {
+                    if (i == 0) latestBookingDateRoom = bookingRequest.BookingRooms[i].Start;
+                    if(bookingRequest.BookingRooms[i].Start<latestBookingDateRoom) latestBookingDateRoom = bookingRequest.BookingRooms[i].Start;
+                    Console.WriteLine($"Index: {i}");
+                    Console.WriteLine($"BookingDattelst ID: {latestBookingDateRoom}");
+                }
+
                 //token
                 string authorizationHeader = Request.Headers["Authorization"];
                 string token = authorizationHeader.Substring("Bearer ".Length).Trim();
 
                 //check booking confirmed
-                var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
-                var bookingConfirmedList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusConfirmed.BookingStatusId);
+                var bookingStatusPending = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Pending"));
+                var bookingTypeRoom = await context.BookingTypes.Where(bt => bt.BookingTypeName.Contains("Hotel")).FirstOrDefaultAsync();
+                var bookingAllPendingList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusPending.BookingStatusId);
+                var bookingHotelPendingList = bookingAllPendingList.Where(b => b.BookingTypeId == bookingTypeRoom.BookingTypeId).ToList();
+                LogExceptions.LogToConsole(bookingHotelPendingList.ToString());
                 foreach (var room in bookingRequest.BookingRooms)
                 {
-                    foreach (var bookingroom in bookingConfirmedList)
+                    foreach (var bookingroom in bookingHotelPendingList)
                     {
                         List<RoomHistoryDTO> bookingroomDetail;
                         using (HttpClient client = new HttpClient())
@@ -197,17 +211,18 @@ namespace ReservationApi.Presentation.Controllers
                         }
                         foreach (var roomHistory in bookingroomDetail)
                         {
-                            if (room.Start >= roomHistory.bookingStartDate && room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
+                            // Simplified overlap detection
+                            bool isOverlapping = room.Start < roomHistory.bookingEndDate &&
+                                                room.End > roomHistory.bookingStartDate &&
+                                                room.Room == roomHistory.roomId;
+
+                            if (isOverlapping)
                             {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                            }
-                            if (room.Start >= roomHistory.bookingStartDate && room.Start <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
-                            {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                            }
-                            if (room.End >= roomHistory.bookingStartDate && room.End <= roomHistory.bookingEndDate && room.Room == roomHistory.roomId)
-                            {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
+                                return BadRequest(new
+                                {
+                                    flag = false,
+                                    message = $"The room is already booked from {roomHistory.bookingStartDate} to {roomHistory.bookingEndDate}"
+                                });
                             }
                         }
                     }
@@ -221,6 +236,8 @@ namespace ReservationApi.Presentation.Controllers
                 Console.WriteLine("BookingStatus Id" + bookingTypeRequest.BookingTypeId);
                 var createBookingDetail = new AddBookingDTO(bookingRequest.Customer.CusId, new Guid(bookingRequest.Customer.PaymentMethod), bookingRequest.VoucherId, bookingTypeRequest.BookingTypeId, bookingStatusRequest.BookingStatusId, Guid.Empty, bookingRequest.DiscountedPrice, bookingRequest.Customer.Note);
                 var createEntity = BookingConversion.ToEntityForCreate(createBookingDetail);
+                createEntity.BookingDate = latestBookingDateRoom;
+                LogExceptions.LogToConsole("Booking room date" + createEntity.BookingDate);
                 Console.WriteLine(createEntity.ToString());
                 var bookingResponse = await bookingInterface.CreateAsync(createEntity);
                 if (!bookingResponse.Flag)
@@ -293,7 +310,7 @@ namespace ReservationApi.Presentation.Controllers
 
             }
         }
-
+        
         [HttpPost("service")]
         public async Task<ActionResult<Response>> CreateBookingService([FromBody] BookingServiceRequestDTO bookingRequest)
         {
@@ -593,6 +610,7 @@ namespace ReservationApi.Presentation.Controllers
                             LogExceptions.LogToConsole(errorResponse);
                         }
                     }
+                    room.status = "Checked in";
                     room.checkInDate = DateTime.Now;
                     LogExceptions.LogToConsole(room.ToString());
                     using (HttpClient client = new HttpClient())
@@ -703,23 +721,6 @@ namespace ReservationApi.Presentation.Controllers
                             string errorResponse = await response.Content.ReadAsStringAsync();
                             LogExceptions.LogToConsole(errorResponse);
                         }
-                    }
-                    room.checkOutDate = DateTime.Now;
-                    LogExceptions.LogToConsole(room.ToString());
-                    using (HttpClient client = new HttpClient())
-                    {
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/");
-                        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                        HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
-                        if (!roomResponse.IsSuccessStatusCode)
-                        {
-                            var jsonResponse = await roomResponse.Content.ReadAsStringAsync();
-                            LogExceptions.LogToConsole(jsonResponse);
-                            return BadRequest(new Response(false, "Update room history check out date not success."));
-                        }
-
                     }
                 }
 
@@ -882,8 +883,8 @@ namespace ReservationApi.Presentation.Controllers
                     if (string.IsNullOrEmpty(redirectPath))
                     {
                         redirectPath = Request.Headers["Referer"].ToString().Contains("/admin/")
-                            ? "/admin/bookings"
-                            : "/bookings";
+                            ? "/bookings"
+                            : "/customer/bookings";
                     }
 
                     if (paymentResult.IsSuccess)
@@ -908,13 +909,13 @@ namespace ReservationApi.Presentation.Controllers
                     // Try to determine if admin or user flow based on referer
                     var isAdmin = Request.Headers["Referer"].ToString().Contains("/admin/");
                     return Redirect(isAdmin
-                        ? "http://localhost:3000/admin/bookings?status=error"
-                        : "http://localhost:3000/bookings?status=error");
+                        ? "http://localhost:3000/bookings?status=error"
+                        : "http://localhost:3000/customer/bookings?status=error");
                 }
             }
 
             // Final fallback
-            return Redirect("http://localhost:3000/bookings?status=notfound");
+            return Redirect("http://localhost:3000/customer/bookings?status=notfound");
         }
 
         [HttpGet("Vnpay/Callback/admin")]
@@ -948,18 +949,18 @@ namespace ReservationApi.Presentation.Controllers
                         await context.SaveChangesAsync();
                         LogExceptions.LogToConsole("payment" + existingBooking.isPaid);
                         Console.WriteLine("qua day nuaaaaaaaaaaaaaaaaaaa roi");
-                        return Redirect("http://localhost:3000/admin/bookings?status=success");
+                        return Redirect("http://localhost:3000/bookings?status=success");
                     }
 
-                    return Redirect("http://localhost:3000/admin/bookings?status=failed");
+                    return Redirect("http://localhost:3000/bookings?status=failed");
                 }
                 catch (Exception ex)
                 {
-                    return Redirect("http://localhost:3000/admin/bookings?status=error");
+                    return Redirect("http://localhost:3000/bookings?status=error");
                 }
             }
 
-            return Redirect("http://localhost:3000/admin/bookings?status=notfound");
+            return Redirect("http://localhost:3000/bookings?status=notfound");
         }
 
         [HttpGet("voucher/{voucher}")]

@@ -1,4 +1,4 @@
-describe('Edit Profile Page', () => {
+describe('Profile Page', () => {
     const accountId = '12345';
     const validToken =
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyMyIsIm5hbWUiOiJUZXN0IFVzZXIiLCJyb2xlIjoidXNlciIsImlhdCI6MTYwOTE1MjgwMH0.dummySignature';
@@ -18,6 +18,7 @@ describe('Edit Profile Page', () => {
                 accountDob: '1990-01-01T00:00:00',
                 accountAddress: '123 ABC Street',
                 roleId: 'user',
+                accountLoyaltyPoint: 2000,
                 accountImage: 'testuser.png',
             },
         }).as('getAccount');
@@ -33,7 +34,7 @@ describe('Edit Profile Page', () => {
             },
         }).as('getImage');
 
-        cy.visit(`http://localhost:3000/editprofile/${accountId}`, {
+        cy.visit(`http://localhost:3000/profile/${accountId}`, {
             onBeforeLoad: (win) => {
                 win.sessionStorage.setItem('token', validToken);
             },
@@ -43,32 +44,64 @@ describe('Edit Profile Page', () => {
         cy.wait('@getImage');
     });
     it('should display account information and profile image when image is available', () => {
+        const accountData = {
+          accountName: 'TestUser',
+          accountEmail: 'testuser@example.com',
+          accountPhoneNumber: '0123456789',
+          accountGender: 'male',
+          accountDob: '1990-01-01T00:00:00',
+          accountAddress: '123 ABC Street',
+          roleId: 'user',
+          accountLoyaltyPoint: 2000,
+          accountImage: 'testuser.png',
+        };
+        cy.intercept('GET', `**/api/Account?AccountId=${accountId}`, {
+          statusCode: 200,
+          body: accountData,
+        }).as('getAccount');
+        cy.intercept('GET', `**/api/Account/loadImage?filename=${accountData.accountImage}`, {
+          statusCode: 200,
+          body: {
+            flag: true,
+            data: {
+              fileContents: 'iVBORw0KGgoAAAANSUhEUgAAAAUA…', 
+              contentType: 'image/png',
+            },
+          },
+        }).as('getImage');
+        cy.visit(`http://localhost:3000/profile/${accountId}`, {
+          onBeforeLoad(win) {
+            win.sessionStorage.setItem('token', validToken);
+          },
+        });
+        cy.wait('@getAccount');
+        cy.wait('@getImage');
         cy.contains('Profile').should('be.visible');
-        cy.get('input#accountName').should('have.value', 'TestUser');
-        cy.get('input#email').should('have.value', 'testuser@example.com');
+        cy.get('input#accountName').should('have.value', accountData.accountName);
+        cy.get('input#email').should('have.value', accountData.accountEmail);
         cy.get('input#birthday').should('have.value', '01/01/1990');
-        cy.get('input#phone').should('have.value', '0987654321');
-        cy.get('input#address').should('have.value', '123 Đường ABC, Quận 1');
+        cy.get('input#phone').should('have.value', accountData.accountPhoneNumber);
+        cy.get('input#address').should('have.value', accountData.accountAddress);
         cy.get('input#loyaltyPoints').should('have.value', '2,000');
         cy.get('input[type="radio"][value="male"]').should('be.checked');
         cy.get('input[type="radio"][value="female"]').should('not.be.checked');
-
-        cy.wait('@getImage');
-        cy.get('img[alt="Profile Preview"]').should('exist');
-    });
-
+        cy.get('img[alt="Profile Preview"]')
+          .should('have.attr', 'src')
+          .and('match', /^data:image\/png;base64,/);
+      });
+      
     it('should display default SVG when account image is not available', () => {
         cy.intercept('GET', `**/api/Account?AccountId=${accountId}`, {
             statusCode: 200,
             body: {
                 accountName: 'TestUser',
                 accountEmail: 'testuser@example.com',
-                accountDob: '1990-01-01T00:00:00',
+                accountPhoneNumber: '0123456789',
                 accountGender: 'male',
-                accountPhoneNumber: '0987654321',
-                accountAddress: '123 Đường ABC, Quận 1',
+                accountDob: '1990-01-01T00:00:00',
+                accountAddress: '123 ABC Street',
                 accountLoyaltyPoint: 2000,
-                accountImage: null,
+                accountImage: 'testuser.png',
             },
         }).as('getAccountNoImage');
 

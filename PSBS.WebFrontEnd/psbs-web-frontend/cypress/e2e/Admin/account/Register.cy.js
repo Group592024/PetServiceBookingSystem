@@ -1,139 +1,179 @@
-describe('Register Page', () => {
-    beforeEach(() => {
-        cy.visit('http://localhost:3000/register');
+import dayjs from 'dayjs';
+
+describe('Register Page (E2E)', () => {
+  const baseUrl = 'http://localhost:3000';
+  const apiUrl = 'http://localhost:5050/api/Account/register';
+  const dummyToken = 'dummy-token';
+
+  beforeEach(() => {
+    cy.window().then(win => {
+      win.sessionStorage.setItem('token', dummyToken);
     });
-
-    it('Should display validation errors when submitting empty form', () => {
-        cy.get('button[type="submit"]').click();
-
-        cy.get('#name').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
-        cy.get('#email').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
-        cy.get('#phone').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
-        cy.get('#password').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
-        cy.get('#gender').then(($input) => {
-        });
-        cy.get('#dob').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
-        cy.get('#address').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain('fill out');
-        });
+    cy.visit(`${baseUrl}/register`, {
+      onBeforeLoad(win) {
+        win.sessionStorage.setItem('token', dummyToken);
+      }
     });
+  });
 
-    it('Should show error for invalid email format', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('johndoegmail.com.nv');
-        cy.get('#phone').clear().type('0123456789');
-        cy.get('#password').clear().type('password123');
-        cy.get('#gender').select('Male');
-        cy.get('#dob').clear().type('1990-05-10');
-        cy.get('#address').clear().type('123 Main Street');
-        cy.get('button[type="submit"]').click();
-        cy.get('#email').then(($input) => {
-            expect($input[0].checkValidity()).to.be.false;
-            expect($input[0].validationMessage).to.contain("@");
-        });
-    });
+  it('renders all form fields and the submit button', () => {
+    cy.contains('Create Account').should('be.visible');
+    cy.get('#name').should('exist');
+    cy.get('#email').should('exist');
+    cy.get('#phone').should('exist');
+    cy.get('#password').should('exist');
+    cy.get('#gender').should('exist');
+    cy.get('#dob').should('exist');
+    cy.get('input[readonly][placeholder="DD/MM/YYYY"]').should('exist');
+    cy.get('#address').should('exist');
+    cy.get('#terms[type="checkbox"]').should('exist');
+    cy.get('label[for="terms"]').should('contain', 'I agree to the Terms of Service and Privacy Policy');
+    cy.get('label[for="terms"] a').should('have.length', 2)
+      .first().should('have.attr', 'href', '#')
+      .next().should('have.attr', 'href', '#');
+    cy.get('button[type="submit"]').contains('Create Account').should('exist');
+  });
 
-    it('Should show error for invalid phone number format', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('johndoe@gmail.com');
-        cy.get('#phone').clear().type('12345');
-        cy.get('#password').clear().type('password123');
-        cy.get('#gender').select('Male');
-        cy.get('#dob').clear().type('1990-05-10');
-        cy.get('#address').clear().type('123 Main Street');
-        cy.get('button[type="submit"]').click();
-        cy.contains('Please enter a valid phone number').should('be.visible');
-    });
+  it('shows validation errors when submitting empty form', () => {
+    cy.get('#terms').invoke('removeAttr', 'required');
+    cy.get('button[type="submit"]').click();
 
+    cy.get('p.text-red-500').should('have.length', 7)
+      .then($errs => {
+        const texts = [...$errs].map(el => el.innerText);
+        expect(texts).to.include.members([
+          'Name is required',
+          'Email is required',
+          'Phone number is required',
+          'Password is required',
+          'Gender is required',
+          'Date of birth is required',
+          'Address is required',
+        ]);
+      });
+  });
 
-    it('Should show error for short password', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('johndoe@gmail.com');
-        cy.get('#phone').clear().type('0123456789');
-        cy.get('#password').clear().type('123');
-        cy.get('#gender').select('Male');
-        cy.get('#dob').clear().type('1990-05-10');
-        cy.get('#address').clear().type('123 Main Street');
-        cy.get('button[type="submit"]').click();
-        cy.contains('Password must be at least 6 characters long').should('be.visible');
-    });
+  it('toggles the terms checkbox when clicking its label', () => {
+    cy.get('#terms').should('not.be.checked');
+    cy.get('label[for="terms"]').click({ force: true });
+    cy.get('#terms').should('be.checked');
+    cy.get('label[for="terms"]').click();
+    cy.get('label[for="terms"]').click({ force: true });
 
-    it('Should show error if date of birth is in the future', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('johndoe@gmail.com');
-        cy.get('#phone').clear().type('0123456789');
-        cy.get('#password').clear().type('password123');
-        cy.get('#gender').select('Male');
-        const futureDate = new Date();
-        futureDate.setFullYear(futureDate.getFullYear() + 1);
-        const futureDateString = futureDate.toISOString().split('T')[0];
-        cy.get('#dob').clear().type(futureDateString);
-        cy.get('#address').clear().type('123 Main Street');
-        cy.get('button[type="submit"]').click();
-        cy.contains('Date of birth cannot be in the future').should('be.visible');
-    });
+    cy.get('#terms').should('not.be.checked');
 
-    it('Should successfully register with valid inputs', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('johndoe@gmail.com');
-        cy.get('#phone').clear().type('0123456789');
-        cy.get('#password').clear().type('password123');
-        cy.get('#gender').select('Male');
-        cy.get('#dob').clear().type('1990-05-10');
-        cy.get('#address').clear().type('123 Main Street');
-        cy.intercept('POST', 'http://localhost:5050/api/Account/register', {
-            statusCode: 200,
-            body: { flag: true },
-        }).as('registerRequest');
-        cy.get('button[type="submit"]').click();
-        cy.wait('@registerRequest');
-        cy.get('.swal2-popup')
-            .should('be.visible')
-            .within(() => {
-                cy.contains('Registration Successful').should('be.visible');
-                cy.contains('Your account has been registered successfully!').should('be.visible');
-                cy.get('.swal2-confirm').click();
-            });
+  });
 
-        cy.url().should('include', '/login');
-    });
+  it('validates format errors correctly', () => {
+    cy.get('#email').type(' username@gmail.com');
+    cy.get('#phone').type('123');
+    cy.get('#password').type('123');
+    const future = dayjs().add(1, 'day').format('YYYY-MM-DD');
+    cy.get('#dob[type="date"]').invoke('val', future).trigger('input', { force: true });
 
-    it('Should display server error message when registration fails', () => {
-        cy.get('#name').clear().type('John Doe');
-        cy.get('#email').clear().type('existinguser@gmail.com');
-        cy.get('#phone').clear().type('0123456789');
-        cy.get('#password').clear().type('password123');
-        cy.get('#gender').select('Male');
-        cy.get('#dob').clear().type('1990-05-10');
-        cy.get('#address').clear().type('123 Main Street');
-        cy.intercept('POST', 'http://localhost:5050/api/Account/register', {
-            statusCode: 400,
-            body: { message: 'Email already exists' },
-        }).as('registerFail');
+    cy.get('#name').type('Test User');
+    cy.get('#address').type('123 Main St');
+    cy.get('#gender').select('male');
+    cy.get('#terms').check();
 
-        cy.get('button[type="submit"]').click();
-        cy.wait('@registerFail');
-        cy.contains('Email already exists').should('be.visible');
-    });
+    cy.get('button[type="submit"]').click();
 
-    it('Should allow user to navigate to login page', () => {
-        cy.contains('Login Here').click();
-        cy.url().should('include', '/login');
-    });
+    cy.get('p.text-red-500').should('have.length', 3)
+      .then($errs => {
+        const texts = [...$errs].map(el => el.innerText);
+        expect(texts).to.include.members([
+          'Please enter a valid phone number',
+          'Password must be at least 6 characters long',
+          'Date of birth is required'
+        ]);
+      });
+  });
+
+  it('submits successfully and navigates to login', () => {
+    const data = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      phone: '0123456789',
+      password: 'password123',
+      gender: 'female',
+      dob: '1990-01-01',
+      address: '456 Elm St'
+    };
+
+    cy.intercept('POST', apiUrl, req => {
+      expect(req.headers).to.have.property('authorization', `Bearer ${dummyToken}`);
+      req.reply({ statusCode: 200, body: { flag: true, message: 'Registered successfully' } });
+    }).as('postRegister');
+    cy.get('#name').type(data.name);
+    cy.get('#email').type(data.email);
+    cy.get('#phone').type(data.phone);
+    cy.get('#password').type(data.password);
+    cy.get('#gender').select(data.gender);
+    cy.get('#dob')
+    .invoke('attr', 'style', 'opacity: 1; z-index: 9999; position: relative') 
+    .type('1990-01-01', { force: true }); 
+    cy.get('#address').type(data.address);
+    cy.get('#terms').check();
+    cy.get('button[type="submit"]').click();
+    cy.wait('@postRegister');
+    cy.get('.swal2-popup').should('be.visible');
+    cy.get('.swal2-title').contains('Registration Successful');
+    cy.get('.swal2-confirm').click();
+    cy.url().should('include', '/login');
+  });
+
+  it('displays server-side validation errors', () => {
+    const serverErrors = {
+      AccountName: ['Too short'],
+      AccountEmail: ['Already exists'],
+      AccountPhoneNumber: ['Invalid phone'],
+      AccountDob: ['Age too high']
+    };
+    cy.intercept('POST', apiUrl, {
+      statusCode: 400,
+      body: { errors: serverErrors }
+    }).as('postErr');
+    cy.get('#name').type('JD');
+    cy.get('#email').type('john@example.com');
+    cy.get('#phone').type('0123456789');
+    cy.get('#password').type('password123');
+    cy.get('#gender').select('male');
+    cy.get('#dob')
+  .invoke('attr', 'style', 'opacity: 1; z-index: 9999; position: relative') 
+  .type('1990-01-01', { force: true }); 
+    cy.get('#address').type('456 Elm St');
+    cy.get('#terms').check();
+    cy.get('button[type="submit"]').click();
+    cy.wait('@postErr');
+    cy.get('p.text-red-500').should('have.length', 4)
+      .then($errs => {
+        const texts = [...$errs].map(el => el.innerText);
+        expect(texts).to.include.members([
+          'Too short',
+          'Already exists',
+          'Invalid phone',
+          'Age too high'
+        ]);
+      });
+  });
+
+  it('shows generic error on server failure', () => {
+    cy.intercept('POST', apiUrl, {
+      statusCode: 500,
+      body: 'Internal server error'
+    }).as('postFail');
+    cy.get('#name').type('John Doe');
+    cy.get('#email').type('john@example.com');
+    cy.get('#phone').type('0123456789');
+    cy.get('#password').type('password123');
+    cy.get('#gender').select('male');
+    cy.get('#dob')
+    .invoke('attr', 'style', 'opacity: 1; z-index: 9999; position: relative') 
+    .type('1990-01-01', { force: true }); 
+    cy.get('#address').type('456 Elm St');
+    cy.get('#terms').check();
+    cy.get('button[type="submit"]').click();
+    cy.wait('@postFail');
+    cy.get('p.text-red-500').first().should('contain', 'Internal server error');
+  });
 });

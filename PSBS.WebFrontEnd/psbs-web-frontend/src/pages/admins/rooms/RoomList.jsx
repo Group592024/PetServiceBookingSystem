@@ -341,8 +341,7 @@ const RoomList = () => {
                         {/* Data Grid */}
                         <Box
                             sx={{
-                                height: "100%",
-                                maxHeight: "400px",
+                                height: 400,
                                 width: "100%",
                                 "& .MuiDataGrid-root": {
                                     backgroundColor: "#ffffff",

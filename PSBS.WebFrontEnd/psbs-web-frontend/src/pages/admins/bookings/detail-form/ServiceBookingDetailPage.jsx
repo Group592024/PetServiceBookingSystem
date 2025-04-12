@@ -102,7 +102,7 @@ const ServiceBookingDetailPage = () => {
           `http://localhost:5115/Bookings/${bookingId}`
         );
         setBooking(bookingResponse.data.data);
-        
+
         // Fetch voucher details if voucherId exists
         if (bookingResponse.data.data.voucherId &&
           bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
@@ -275,20 +275,20 @@ const ServiceBookingDetailPage = () => {
   const handleVNPayPayment = async () => {
     try {
       if (!booking) return;
-  
+
       // Get current path to redirect back after payment
-      const currentPath = window.location.pathname; 
-  
+      const currentPath = window.location.pathname;
+
       // Create description with booking code and path
       const description = JSON.stringify({
         bookingCode: booking.bookingCode.trim(),
         redirectPath: currentPath
       });
-  
+
       const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
       )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
-  
+
       const vnpayResponse = await fetch(vnpayUrl, {
         method: "GET",
         headers: {
@@ -296,11 +296,11 @@ const ServiceBookingDetailPage = () => {
           Authorization: `Bearer ${getToken()}`,
         },
       });
-  
+
       const vnpayResult = await vnpayResponse.text();
-      
+
       if (vnpayResult.startsWith("http")) {
-        window.location.href = vnpayResult; 
+        window.location.href = vnpayResult;
       } else {
         throw new Error("VNPay payment initiation failed");
       }
@@ -309,7 +309,7 @@ const ServiceBookingDetailPage = () => {
       Swal.fire("Error!", "An error occurred while processing payment.", "error");
     }
   };
-  
+
   const fetchVoucherDetails = async (voucherId) => {
     try {
       const response = await axios.get(
@@ -376,8 +376,8 @@ const ServiceBookingDetailPage = () => {
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-700 font-semibold text-lg">Current Status:</span>
                   <span className={`px-4 py-2 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                        "bg-blue-100 text-blue-800"
+                    bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                      "bg-blue-100 text-blue-800"
                     }`}>
                     {bookingStatusName}
                   </span>
@@ -445,13 +445,16 @@ const ServiceBookingDetailPage = () => {
                 <div className="space-y-4">
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Total Amount:</span>{" "}
-                    <span className="text-green-600 font-bold">{booking.totalAmount.toLocaleString()} VND</span>
+                    <span className="text-green-600 font-bold">{new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(booking.totalAmount)}</span>
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                        bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                          "bg-blue-100 text-blue-800"
+                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                        "bg-blue-100 text-blue-800"
                       }`}>
                       {bookingStatusName}
                     </span>
@@ -468,7 +471,6 @@ const ServiceBookingDetailPage = () => {
                       year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: false
                     }).replace(',', '')}
                   </span>
                 </p>
@@ -499,7 +501,10 @@ const ServiceBookingDetailPage = () => {
                         <p className="text-gray-700">
                           <span className="font-semibold">Discount:</span>{" "}
                           <span className="text-green-600">
-                            {voucherDetails.voucherDiscount}% (Max {voucherDetails.voucherMaximum.toLocaleString()} VND)
+                            {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(voucherDetails.voucherMaximum)})
                           </span>
                         </p>
                       </div>
@@ -560,7 +565,10 @@ const ServiceBookingDetailPage = () => {
                           <p className="text-gray-700 mt-1">
                             <span className="font-semibold">Base Price:</span>{" "}
                             <span className="text-green-600 font-semibold">
-                              {serviceInfo[item.serviceVariantId].variantPrice.toLocaleString()} VND
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(serviceInfo[item.serviceVariantId].variantPrice)}
                             </span>
                           </p>
                         </div>
@@ -577,7 +585,10 @@ const ServiceBookingDetailPage = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Final Price:</span>{" "}
                       <span className="text-green-600 font-semibold">
-                        {item.price.toLocaleString()} VND
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(item.price)}
                       </span>
                     </p>
                   </div>

@@ -54,7 +54,7 @@ const RoomBookingDetailPage = () => {
     setSelectedCameraId(roomHistoryId.cameraId);
     setAssignModalOpen(true);
   };
-  
+
   const handleAssignSuccess = () => {
     // Refresh data or show success message
     // For example: fetchRoomHistories();
@@ -491,7 +491,10 @@ const RoomBookingDetailPage = () => {
                       Total Amount:
                     </span>{" "}
                     <span className="text-green-600 font-bold">
-                      {booking.totalAmount.toLocaleString()} VND
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(booking.totalAmount)}
                     </span>
                   </p>
                   <p className="text-lg">
@@ -522,7 +525,6 @@ const RoomBookingDetailPage = () => {
                         year: "numeric",
                         hour: "2-digit",
                         minute: "2-digit",
-                        hour12: false,
                       })
                       .replace(",", "")}
                   </span>
@@ -583,6 +585,7 @@ const RoomBookingDetailPage = () => {
                       <button
                         onClick={() =>
                           handleOpenAssignModal (history)
+
                         }
                         className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
                         title="Camera Settings"
@@ -653,7 +656,6 @@ const RoomBookingDetailPage = () => {
                             year: "numeric",
                             hour: "2-digit",
                             minute: "2-digit",
-                            hour12: false,
                           })}
                         </span>
                       </p>
@@ -667,7 +669,6 @@ const RoomBookingDetailPage = () => {
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
-                              hour12: false,
                             })
                             : "Not checked in"}
                         </span>
@@ -684,7 +685,6 @@ const RoomBookingDetailPage = () => {
                               year: "numeric",
                               hour: "2-digit",
                               minute: "2-digit",
-                              hour12: false,
                             })
                             : "Not checked out"}
                         </span>
@@ -766,6 +766,7 @@ const RoomBookingDetailPage = () => {
   onSuccess={handleAssignSuccess}
   cameraId={selectedCameraId}
 />
+
     </div>
   );
 };

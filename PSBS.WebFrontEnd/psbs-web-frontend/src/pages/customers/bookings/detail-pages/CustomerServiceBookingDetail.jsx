@@ -337,7 +337,10 @@ const CustomerServiceBookingDetail = () => {
                 <div className="space-y-4">
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Total Amount:</span>{" "}
-                    <span className="text-green-600 font-bold">{booking.totalAmount.toLocaleString()} VND</span>
+                    <span className="text-green-600 font-bold">{new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(booking.totalAmount)}</span>
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
@@ -360,7 +363,7 @@ const CustomerServiceBookingDetail = () => {
                       year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: false
+                      hour12: true
                     }).replace(',', '')}
                   </span>
                 </p>
@@ -391,7 +394,10 @@ const CustomerServiceBookingDetail = () => {
                         <p className="text-gray-700">
                           <span className="font-semibold">Discount:</span>{" "}
                           <span className="text-green-600">
-                            {voucherDetails.voucherDiscount}% (Max {voucherDetails.voucherMaximum.toLocaleString()} VND)
+                            {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(voucherDetails.voucherMaximum)})
                           </span>
                         </p>
                       </div>
@@ -452,7 +458,10 @@ const CustomerServiceBookingDetail = () => {
                           <p className="text-gray-700 mt-1">
                             <span className="font-semibold">Base Price:</span>{" "}
                             <span className="text-green-600 font-semibold">
-                              {serviceInfo[item.serviceVariantId].variantPrice.toLocaleString()} VND
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(serviceInfo[item.serviceVariantId].variantPrice)}
                             </span>
                           </p>
                         </div>
@@ -469,7 +478,10 @@ const CustomerServiceBookingDetail = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Final Price:</span>{" "}
                       <span className="text-green-600 font-semibold">
-                        {item.price.toLocaleString()} VND
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(item.price)}
                       </span>
                     </p>
                   </div>
