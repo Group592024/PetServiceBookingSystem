@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPaw, FaEye, FaEyeSlash, FaVenusMars } from 'react-icons/fa';
 import { motion } from 'framer-motion';
+import TermsPrivacyPopup from '../../../components/TermsPrivacy/TermsPrivacyPopup';
 
 const Register = () => {
   const [AccountEmail, setEmail] = useState('');
@@ -454,11 +455,11 @@ const Register = () => {
                     />
                   </div>
                   <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                    I agree to the <a href="#" className="text-blue-500 hover:underline">Terms of Service</a> and <a href="#" className="text-blue-500 hover:underline">Privacy Policy</a>
+                    I agree to the{' '}
+                    <TermsPrivacyPopup />
                   </label>
                 </div>
               </div>
-
               {/* Submit Button */}
               <div className="mt-6">
                 <button
