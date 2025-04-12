@@ -108,7 +108,7 @@ const CamList = () => {
               rows={rows}
               basePath={basePath}
               setRows={setRows}
-              title="Cameras"
+              title="Camera"
               apiPath={apiPath}
             />
           </div>

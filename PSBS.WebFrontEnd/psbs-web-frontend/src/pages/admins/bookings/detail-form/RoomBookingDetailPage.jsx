@@ -23,7 +23,7 @@ const RoomBookingDetailPage = () => {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedRoomHistoryId, setSelectedRoomHistoryId] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
-
+ const [selectedCameraId, setSelectedCameraId] = useState(null);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -50,7 +50,8 @@ const RoomBookingDetailPage = () => {
     }
   };
   const handleOpenAssignModal = (roomHistoryId) => {
-    setSelectedRoomHistoryId(roomHistoryId);
+    setSelectedRoomHistoryId(roomHistoryId.roomHistoryId);
+    setSelectedCameraId(roomHistoryId.cameraId);
     setAssignModalOpen(true);
   };
 
@@ -583,7 +584,8 @@ const RoomBookingDetailPage = () => {
                       </span>
                       <button
                         onClick={() =>
-                          handleOpenAssignModal(history.roomHistoryId)
+                          handleOpenAssignModal (history)
+
                         }
                         className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
                         title="Camera Settings"
@@ -757,12 +759,14 @@ const RoomBookingDetailPage = () => {
             )}
         </motion.div>
       </div>
-      <AssignCamera
-        open={assignModalOpen}
-        onClose={() => setAssignModalOpen(false)}
-        roomHistoryId={selectedRoomHistoryId}
-        onSuccess={handleAssignSuccess}
-      />
+      <AssignCamera 
+  open={assignModalOpen}
+  onClose={() => setAssignModalOpen(false)}
+  roomHistoryId={selectedRoomHistoryId}
+  onSuccess={handleAssignSuccess}
+  cameraId={selectedCameraId}
+/>
+
     </div>
   );
 };

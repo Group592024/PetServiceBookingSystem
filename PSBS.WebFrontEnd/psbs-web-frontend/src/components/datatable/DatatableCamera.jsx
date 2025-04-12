@@ -191,21 +191,24 @@ const DatatableCamera = ({
               <InfoIcon color="info" />
             </IconButton>
             <IconButton
+               disabled = {params.row.cameraStatus === "InUse" ? true : false}
               aria-label="edit"
               onClick={() => handleEditOpen(params.row)}
               title="Edit"
             >
-              <EditIcon color="success" />
+              <EditIcon color={params.row.cameraStatus === "InUse" ? "default" : "success"} />
             </IconButton>
             <IconButton
+               disabled = {params.row.cameraStatus === "InUse" ? true : false}
               aria-label="delete"
               onClick={handleDelete}
               title="Delete"
             >
-              <DeleteIcon color="error" />
+              <DeleteIcon  color={params.row.cameraStatus === "InUse" ? "default" : "error"} />
             </IconButton>
         
               <IconButton
+           
                 aria-label="push"
                 onClick={() => handlePush(params.row.cameraId)}
                 title="Video"

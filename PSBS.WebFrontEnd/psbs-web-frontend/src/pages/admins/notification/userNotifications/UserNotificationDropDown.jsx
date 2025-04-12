@@ -194,7 +194,7 @@ const NotificationsDropdown = ({ onClose,onUnreadCountChange  }) => {
           <IconButton onClick={fetchNotifications} size="small" title="Refresh">
             <Refresh fontSize="small" />
           </IconButton>
-          <IconButton onClick={onClose} size="small">
+          <IconButton onClick={onClose} size="small" id="close-button">
             <Close fontSize="small" />
           </IconButton>
         </Box>

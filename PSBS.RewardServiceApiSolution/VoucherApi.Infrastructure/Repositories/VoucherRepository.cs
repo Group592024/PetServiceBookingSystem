@@ -4,13 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
 using System.Linq.Expressions;
+using System.Net.Http.Json;
+using System.Net.Http;
 using VoucherApi.Application.Interfaces;
 using VoucherApi.Domain.Entities;
 using VoucherApi.Infrastructure.Data;
 
 namespace VoucherApi.Infrastructure.Repositories
 {
-    public class VoucherRepository(RewardServiceDBContext context) : IVoucher
+    public class VoucherRepository(RewardServiceDBContext context, IHttpClientFactory _httpClientFactory) : IVoucher
     {
         public async Task<Response> CreateAsync(Voucher entity)
         {
@@ -64,14 +66,19 @@ namespace VoucherApi.Infrastructure.Repositories
                 }
                 else
                 {
-                    //// Check if BookingStatusId is still referenced in Bookings table
-                    //bool isReferencedInBookings = await context.Bookings
-                    //    .AnyAsync(b => b.BookingStatusId == entity.BookingStatusId);
+                    var client = _httpClientFactory.CreateClient("ApiGateway");
+                    var response = await client.GetAsync("Bookings/voucher/"+entity.VoucherId);
 
-                    //if (isReferencedInBookings)
-                    //{
-                    //    return new Response(false, $"Cannot permanently delete {entity.BookingStatusName} because it is referenced in existing bookings.");
-                    //}
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadFromJsonAsync<Response>();
+                        LogExceptions.LogToConsole(responseContent.ToString());// Deserialize the response
+                        if (responseContent != null && responseContent.Flag)
+                        {
+                            return new Response(false, $"Cannot permanently delete {entity.VoucherName} because it is referenced in existing bookings.");
+                        }
+                    }
+                  
 
                     // Permanently delete from the database
                     context.Vouchers.Remove(voucher);
@@ -84,7 +91,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 // Log the original exception
                 LogExceptions.LogException(ex);
                 // Display a user-friendly message to the client
-                return new Response(false, "An error occurred while deleting the booking status.");
+                return new Response(false, "An error occurred while deleting ");
             }
         }
 
