@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:psbs_app_flutter/pages/Camera/CameraFeed/camera_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -45,7 +46,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/Bookings/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -56,7 +57,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
+            "http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -66,7 +67,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}"),
+            "http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -76,7 +77,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
+            "http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -86,7 +87,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch room history
       final historyResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/RoomHistories/${widget.bookingId}"),
+            "http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -132,7 +133,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token');
         final petResponse = await http.get(
-          Uri.parse("http://127.0.0.1:5050/api/pet/${history['petId']}"),
+          Uri.parse("http://10.0.2.2:5050/api/pet/${history['petId']}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -155,7 +156,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final roomResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Room/$roomId"),
+        Uri.parse("http://10.0.2.2:5050/api/Room/$roomId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -178,7 +179,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse("http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -348,7 +349,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       }
 
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Voucher/$voucherId"),
+        Uri.parse("http://10.0.2.2:5050/api/Voucher/$voucherId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -398,9 +399,9 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       });
 
       final vnpayUrl =
-          "http://127.0.0.1:5201/Bookings/CreatePaymentUrl?moneyToPay=${booking!['totalAmount']}"
+          "http://10.0.2.2:5201/Bookings/CreatePaymentUrl?moneyToPay=${booking!['totalAmount']}"
           "&description=${Uri.encodeComponent(description)}"
-          "&returnUrl=http://127.0.0.1:5201/Vnpay/Callback";
+          "&returnUrl=http://10.0.2.2:5201/Vnpay/Callback";
 
       final response = await http.get(
         Uri.parse(vnpayUrl),
@@ -447,75 +448,31 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   }
 
   Future<void> handleCameraSettings(Map<String, dynamic> roomHistory) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Camera Settings"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Room: ${roomName}"),
-              Text("Pet: ${roomHistory['petName'] ?? 'Unknown'}"),
-              SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "View Mode"),
-                items: [
-                  DropdownMenuItem(value: "Standard", child: Text("Standard")),
-                  DropdownMenuItem(
-                      value: "Night Vision", child: Text("Night Vision")),
-                  DropdownMenuItem(
-                      value: "Wide Angle", child: Text("Wide Angle")),
-                ],
-                onChanged: (value) {},
-              ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "Recording"),
-                items: [
-                  DropdownMenuItem(
-                      value: "Continuous", child: Text("Continuous")),
-                  DropdownMenuItem(
-                      value: "Motion Activated",
-                      child: Text("Motion Activated")),
-                  DropdownMenuItem(value: "Disabled", child: Text("Disabled")),
-                ],
-                onChanged: (value) {},
-              ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "Quality"),
-                items: [
-                  DropdownMenuItem(value: "High", child: Text("High (1080p)")),
-                  DropdownMenuItem(
-                      value: "Medium", child: Text("Medium (720p)")),
-                  DropdownMenuItem(value: "Low", child: Text("Low (480p)")),
-                ],
-                onChanged: (value) {},
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Save settings logic here
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Camera settings have been updated."),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              },
-              child: Text("Save"),
-            ),
-          ],
-        );
-      },
+  // Check if there's a camera assigned to this room
+  final cameraId = roomHistory['cameraId'];
+  
+  if (cameraId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("No camera is assigned to this room."),
+        backgroundColor: Colors.orange,
+      ),
     );
+    return;
   }
+
+  // Show the camera modal
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CameraModal(
+        cameraId: cameraId,
+        onClose: () => Navigator.of(context).pop(),
+        open: true,
+      );
+    },
+  );
+}
 
   Widget _buildVoucherSection() {
     if (!isVoucherLoaded || voucherName == null) {
@@ -960,28 +917,30 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
             ),
           ],
         ),
-        SizedBox(height: 8),
-        ElevatedButton(
-          onPressed: () => handleCameraSettings(history),
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            backgroundColor: Colors.blue.shade600,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+        if (history['cameraId'] != null) ...[
+          SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () => handleCameraSettings(history),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              backgroundColor: Colors.blue.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.videocam, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "View Camera Feed",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.videocam, size: 20),
-              SizedBox(width: 8),
-              Text(
-                "Camera Settings",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
+        ],
       ],
     );
   }

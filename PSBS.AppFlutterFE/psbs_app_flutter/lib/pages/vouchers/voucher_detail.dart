@@ -13,40 +13,48 @@ class VoucherDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
+    final NumberFormat currencyFormatter = NumberFormat.currency(
+      locale: 'vi_VN',
+      symbol: '₫',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Voucher Details'),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.black,
       ),
       body: Container(
-        color: Colors.white, // Page background set to white
+        color: Colors.blue.shade50,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Voucher Icon
               Center(
                 child: Icon(
                   Icons.card_giftcard,
                   size: 80,
-                  color: Colors.blue.shade300,
+                  color: Colors.blue.shade700,
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Section 1: Voucher Code
+              // Voucher Code Section
               _buildSectionTitle('Voucher Code'),
               const SizedBox(height: 8),
               _buildContainer(
                 child: TextFormField(
                   readOnly: true,
                   initialValue: voucher.voucherCode,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, 
+                      fontSize: 16,
+                      color: Colors.blue.shade800),
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.copy),
+                      icon: Icon(Icons.copy, color: Colors.blue.shade700),
                       onPressed: () {
                         Clipboard.setData(
                             ClipboardData(text: voucher.voucherCode));
@@ -54,7 +62,7 @@ class VoucherDetailScreen extends StatelessWidget {
                           msg: "Copied to clipboard!",
                           toastLength: Toast.LENGTH_SHORT,
                           gravity: ToastGravity.BOTTOM,
-                          backgroundColor: Colors.black87,
+                          backgroundColor: Colors.blue.shade700,
                           textColor: Colors.white,
                           fontSize: 14.0,
                         );
@@ -66,7 +74,7 @@ class VoucherDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Section 2: Voucher Details in a Container
+              // Voucher Details Section
               _buildSectionTitle('Voucher Details'),
               _buildContainer(
                 child: Column(
@@ -78,16 +86,16 @@ class VoucherDetailScreen extends StatelessWidget {
                     if (voucher.voucherMaximum != null) _buildDivider(),
                     if (voucher.voucherMaximum != null)
                       _buildDetailRow('Maximum Discount:',
-                          '${voucher.voucherMaximum!.toStringAsFixed(0)}'),
+                          currencyFormatter.format(voucher.voucherMaximum!)),
                     _buildDivider(),
                     _buildDetailRow('Minimum Spend:',
-                        '${voucher.voucherMinimumSpend.toStringAsFixed(0)}'),
+                        currencyFormatter.format(voucher.voucherMinimumSpend)),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Section 3: Validity Period in a Container
+              // Validity Period Section
               _buildSectionTitle('Validity Period'),
               _buildContainer(
                 child: Column(
@@ -102,14 +110,17 @@ class VoucherDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Section 4: Description
+              // Description Section
               _buildSectionTitle('Description'),
               _buildContainer(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
                     voucher.voucherDescription,
-                    style: const TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.blue.shade800,
+                    ),
                   ),
                 ),
               ),
@@ -120,19 +131,17 @@ class VoucherDetailScreen extends StatelessWidget {
     );
   }
 
-  // Helper function to build a section title
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         fontWeight: FontWeight.bold,
         fontSize: 18,
-        color: Colors.black,
+        color: Colors.blue.shade800,
       ),
     );
   }
 
-  // Helper function to build a row with grey label and black content
   Widget _buildDetailRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
@@ -145,7 +154,7 @@ class VoucherDetailScreen extends StatelessWidget {
               label,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade700,
+                color: Colors.blue.shade600,
               ),
             ),
           ),
@@ -155,10 +164,10 @@ class VoucherDetailScreen extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(
                 value,
-                style: const TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w600, // Increased font weight
-                  fontSize: 16, // Slightly larger font
+                style: TextStyle(
+                  color: Colors.blue.shade900,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
                 ),
               ),
             ),
@@ -168,19 +177,18 @@ class VoucherDetailScreen extends StatelessWidget {
     );
   }
 
-  // Helper function to wrap content in a container
   Widget _buildContainer({required Widget child}) {
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100, // Light grey background
+        color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Colors.blue.shade200),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: Colors.blue.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 3,
           ),
@@ -190,8 +198,11 @@ class VoucherDetailScreen extends StatelessWidget {
     );
   }
 
-  // Helper function to add a subtle divider between rows
   Widget _buildDivider() {
-    return Divider(color: Colors.grey.shade300, thickness: 1, height: 10);
+    return Divider(
+      color: Colors.blue.shade200, 
+      thickness: 1, 
+      height: 10
+    );
   }
 }

@@ -38,7 +38,7 @@ class _CustomerServiceBookingDetailState
 
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse('http://127.0.0.1:5050/Bookings/${widget.bookingId}'),
+        Uri.parse('http://10.0.2.2:5050/Bookings/${widget.bookingId}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -49,7 +49,7 @@ class _CustomerServiceBookingDetailState
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
+            'http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -59,7 +59,7 @@ class _CustomerServiceBookingDetailState
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}'),
+            'http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ class _CustomerServiceBookingDetailState
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
+            'http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -79,7 +79,7 @@ class _CustomerServiceBookingDetailState
       // Fetch service items
       final serviceItemsResponse = await http.get(
         Uri.parse(
-            'http://127.0.0.1:5050/api/BookingServiceItems/${widget.bookingId}'),
+            'http://10.0.2.2:5050/api/BookingServiceItems/${widget.bookingId}'),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -97,7 +97,7 @@ class _CustomerServiceBookingDetailState
         // Get pet name if petId exists
         if (item['petId'] != null) {
           final petResponse = await http.get(
-            Uri.parse('http://127.0.0.1:5050/api/Pet/${item['petId']}'),
+            Uri.parse('http://10.0.2.2:5050/api/Pet/${item['petId']}'),
             headers: {
               "Authorization": "Bearer $token",
               "Content-Type": "application/json",
@@ -114,7 +114,7 @@ class _CustomerServiceBookingDetailState
           try {
             final serviceVariantResponse = await http.get(
               Uri.parse(
-                  'http://127.0.0.1:5050/api/ServiceVariant/${item['serviceVariantId']}'),
+                  'http://10.0.2.2:5050/api/ServiceVariant/${item['serviceVariantId']}'),
               headers: {
                 "Authorization": "Bearer $token",
                 "Content-Type": "application/json",
@@ -126,7 +126,7 @@ class _CustomerServiceBookingDetailState
             if (variantData != null && variantData['serviceId'] != null) {
               final serviceResponse = await http.get(
                 Uri.parse(
-                    'http://127.0.0.1:5050/api/Service/${variantData['serviceId']}'),
+                    'http://10.0.2.2:5050/api/Service/${variantData['serviceId']}'),
                 headers: {
                   "Authorization": "Bearer $token",
                   "Content-Type": "application/json",
@@ -185,7 +185,7 @@ class _CustomerServiceBookingDetailState
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     final response = await http.put(
-      Uri.parse('http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}'),
+      Uri.parse('http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}'),
       headers: {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",

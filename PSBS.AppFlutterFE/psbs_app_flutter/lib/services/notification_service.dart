@@ -66,4 +66,32 @@ class NotificationService {
       throw Exception("Error deleting notification: $e");
     }
   }
+   static Future<bool> markAsRead(String notificationId) async {
+    print("day la id ne" + notificationId);
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.delete(
+        Uri.parse("$_baseUrl/api/Notification/user/isRead/$notificationId"),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        if (jsonResponse['flag'] == true) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        throw Exception("Failed to read notification");
+      }
+    } catch (e) {
+      throw Exception("Error read notification: $e");
+    }
+  }
 }

@@ -307,7 +307,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
       case 'Booking':
         return Colors.blue;
       case 'Common':
-        return Colors.purple;
+        return const Color.fromARGB(255, 209, 119, 35);
       default:
         return Colors.grey;
     }
@@ -317,7 +317,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (!notification.isRead) {
       try {
         // Call API to mark as read
-        // await NotificationService.markAsRead(notification.notificationId);
+        await NotificationService.markAsRead(notification.notificationId);
 
         setState(() {
           notification.isRead = true;
@@ -336,9 +336,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
     if (_unreadCount == 0) return;
 
     try {
-      // Call API to mark all as read
-      // await NotificationService.markAllAsRead();
-
+  
       setState(() {
         _notificationsFuture = _notificationsFuture.then((notifications) {
           for (var notification in notifications) {
