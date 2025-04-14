@@ -133,53 +133,60 @@ const DatatableCamera = ({
       renderCell: (params) => {
         const handleDelete = async () => {
           Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
-          }).then(async (result) => {
-            if (result.isConfirmed) {
-              try {
-                // Call the deleteData API with the appropriate path
-                const response = await deleteData(`${apiPath}/${params.id}`);
-
-                if (response.flag === true) {
-                  toast.success("Deleted successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                  });
-                  if (response.data != null) {
-                    setRows((prevRows) =>
-                      prevRows.map((row) =>
-                        row[rowId] === response.data[rowId]
-                          ? { ...row, ...response.data }
-                          : row
-                      )
-                    );
-                    console.log("row id torng khi xoa nay", rowId);
-                  } else {
-                    // Update the rows state to exclude the deleted user
-                    setRows((prevRows) =>
-                      prevRows.filter((row) => row[rowId] !== params.id)
-                    );
-                  }
-                } else {
-                  toast.error("Failed to delete the camera.");
-                }
-              } catch (error) {
-                toast.error("An error occurred while deleting.");
-              }
-            }
-          });
+                     title: "Are you sure?",
+                     text: "You won't be able to revert this!",
+                     icon: "warning",
+                     showCancelButton: true,
+                     confirmButtonColor: "#3085d6",
+                     cancelButtonColor: "#d33",
+                     confirmButtonText: "Yes, delete it!",
+                     cancelButtonText: "Cancel",
+                     preConfirm: async () => {
+                       try {
+                         Swal.showLoading(); // Show loading spinner
+                         const response = await deleteData(`${apiPath}/${params.id}`);
+                   
+                         if (response.flag === true) {
+                           if (response.data != null) {
+                             setRows((prevRows) =>
+                               prevRows.map((row) =>
+                                 row[rowId] === response.data[rowId]
+                                   ? { ...row, ...response.data }
+                                   : row
+                               )
+                             );
+                           } else {
+                             setRows((prevRows) =>
+                               prevRows.filter((row) => row[rowId] !== params.id)
+                             );
+                           }
+                   
+                           Swal.fire({
+                             title: "Deleted!",
+                             text: response.message,
+                             icon: "success",
+                             timer: 3000,
+                             timerProgressBar: true,
+                             confirmButtonText: "OK"
+                           });
+                         } else {
+                           Swal.fire({
+                             title: "Error!",
+                             text: response.message,
+                             icon: "error",
+                             confirmButtonText: "OK"
+                           });
+                         }
+                       } catch (error) {
+                         Swal.fire({
+                           title: "Error!",
+                           text: "An error occurred while deleting.",
+                           icon: "error",
+                           confirmButtonText: "OK"
+                         });
+                       }
+                     },
+                   });
         };
         return (
           <div className="cellAction flex space-x-2">

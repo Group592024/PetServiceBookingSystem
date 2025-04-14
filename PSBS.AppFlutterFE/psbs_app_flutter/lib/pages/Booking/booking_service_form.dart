@@ -43,7 +43,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/Service'),
+        Uri.parse('http://10.0.2.2:5050/api/Service'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -68,7 +68,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:5050/api/pet/available/${widget.cusId}'),
+        Uri.parse('http://10.0.2.2:5050/api/pet/available/${widget.cusId}'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -222,7 +222,7 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/ServiceVariant/service/$serviceId"),
+        Uri.parse("http://10.0.2.2:5050/api/ServiceVariant/service/$serviceId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

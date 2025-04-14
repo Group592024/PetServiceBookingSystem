@@ -11,7 +11,6 @@ import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
 import { toast, ToastContainer } from "react-toastify";
 import { deleteData, postData, updateData } from "../../Utilities/ApiFunctions";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import CreateNotificationModal from "../../pages/admins/notification/addNotiForm/addModal";
 import UpdateNotificationModal from "../../pages/admins/notification/updateNotification/updateModal";
@@ -128,54 +127,61 @@ const DatatableNotification = ({
       width: 250,
       renderCell: (params) => {
         const handleDelete = async () => {
-          Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!",
-            cancelButtonText: "Cancel",
-          }).then(async (result) => {
-            if (result.isConfirmed) {
-              try {
-                // Call the deleteData API with the appropriate path
-                const response = await deleteData(`${apiPath}/${params.id}`);
-
-                if (response.flag === true) {
-                  toast.success("Deleted successfully!", {
-                    position: "top-right",
-                    autoClose: 3000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
+         Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!",
+                    cancelButtonText: "Cancel",
+                    preConfirm: async () => {
+                      try {
+                        Swal.showLoading(); // Show loading spinner
+                        const response = await deleteData(`${apiPath}/${params.id}`);
+                  
+                        if (response.flag === true) {
+                          if (response.data != null) {
+                            setRows((prevRows) =>
+                              prevRows.map((row) =>
+                                row[rowId] === response.data[rowId]
+                                  ? { ...row, ...response.data }
+                                  : row
+                              )
+                            );
+                          } else {
+                            setRows((prevRows) =>
+                              prevRows.filter((row) => row[rowId] !== params.id)
+                            );
+                          }
+                  
+                          Swal.fire({
+                            title: "Deleted!",
+                            text: response.message,
+                            icon: "success",
+                            timer: 3000,
+                            timerProgressBar: true,
+                            confirmButtonText: "OK"
+                          });
+                        } else {
+                          Swal.fire({
+                            title: "Error!",
+                            text: response.message,
+                            icon: "error",
+                            confirmButtonText: "OK"
+                          });
+                        }
+                      } catch (error) {
+                        Swal.fire({
+                          title: "Error!",
+                          text: "An error occurred while deleting.",
+                          icon: "error",
+                          confirmButtonText: "OK"
+                        });
+                      }
+                    },
                   });
-                  if (response.data != null) {
-                    setRows((prevRows) =>
-                      prevRows.map((row) =>
-                        row[rowId] === response.data[rowId]
-                          ? { ...row, ...response.data }
-                          : row
-                      )
-                    );
-                    console.log("row id torng khi xoa nay", rowId);
-                  } else {
-                    // Update the rows state to exclude the deleted user
-                    setRows((prevRows) =>
-                      prevRows.filter((row) => row[rowId] !== params.id)
-                    );
-                  }
-                } else {
-                  toast.error("Failed to delete user.");
-                }
-              } catch (error) {
-                toast.error("An error occurred while deleting.");
-              }
-            }
-          });
         };
         return (
           <div className="cellAction flex space-x-2">
@@ -202,11 +208,12 @@ const DatatableNotification = ({
             </IconButton>
             {!params.row.isPushed && (
               <IconButton
+              disabled = {params.row.isDeleted === true ? true : false}
                 aria-label="push"
                 onClick={() => handlePush(params.row.notificationId)}
                 title="Push"
               >
-                <ArrowCircleUpIcon color="warning" />
+                <ArrowCircleUpIcon  color={params.row.isDeleted  === true ? "default" : "warning"}/>
               </IconButton>
             )}
           </div>
