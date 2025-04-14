@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:psbs_app_flutter/pages/Camera/CameraFeed/camera_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'vnpay_webview.dart';
@@ -88,6 +89,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch room history
       final historyResponse = await http.get(
         Uri.parse("http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
+
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -402,8 +404,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         'redirectPath': '/customer/bookings'
       });
 
-      print(
-          '[DEBUG] Sending payment request for amount: ${booking!['totalAmount']}');
+
 
       // Use the secure get method
       final response = await _secureGet(
@@ -478,75 +479,31 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   }
 
   Future<void> handleCameraSettings(Map<String, dynamic> roomHistory) async {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Camera Settings"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text("Room: ${roomName}"),
-              Text("Pet: ${roomHistory['petName'] ?? 'Unknown'}"),
-              SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "View Mode"),
-                items: [
-                  DropdownMenuItem(value: "Standard", child: Text("Standard")),
-                  DropdownMenuItem(
-                      value: "Night Vision", child: Text("Night Vision")),
-                  DropdownMenuItem(
-                      value: "Wide Angle", child: Text("Wide Angle")),
-                ],
-                onChanged: (value) {},
-              ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "Recording"),
-                items: [
-                  DropdownMenuItem(
-                      value: "Continuous", child: Text("Continuous")),
-                  DropdownMenuItem(
-                      value: "Motion Activated",
-                      child: Text("Motion Activated")),
-                  DropdownMenuItem(value: "Disabled", child: Text("Disabled")),
-                ],
-                onChanged: (value) {},
-              ),
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(labelText: "Quality"),
-                items: [
-                  DropdownMenuItem(value: "High", child: Text("High (1080p)")),
-                  DropdownMenuItem(
-                      value: "Medium", child: Text("Medium (720p)")),
-                  DropdownMenuItem(value: "Low", child: Text("Low (480p)")),
-                ],
-                onChanged: (value) {},
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Save settings logic here
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Camera settings have been updated."),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-              },
-              child: Text("Save"),
-            ),
-          ],
-        );
-      },
+  // Check if there's a camera assigned to this room
+  final cameraId = roomHistory['cameraId'];
+  
+  if (cameraId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("No camera is assigned to this room."),
+        backgroundColor: Colors.orange,
+      ),
     );
+    return;
   }
+
+  // Show the camera modal
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CameraModal(
+        cameraId: cameraId,
+        onClose: () => Navigator.of(context).pop(),
+        open: true,
+      );
+    },
+  );
+}
 
   Widget _buildVoucherSection() {
     if (!isVoucherLoaded || voucherName == null) {
@@ -991,7 +948,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
             ),
           ],
         ),
-        SizedBox(height: 8),
+              SizedBox(height: 8),
               if (bookingStatusName.toLowerCase() == "checked in" && 
           (history['status']?.toString().toLowerCase() == "checked in"))
           ElevatedButton(
@@ -1003,18 +960,19 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
               borderRadius: BorderRadius.circular(12),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.videocam, size: 20),
-              SizedBox(width: 8),
-              Text(
-                "Camera Settings",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ],
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.videocam, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "View Camera Feed",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
           ),
-        ),
+        ],
       ],
     );
   }

@@ -20,7 +20,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
   static const String apiBaseUrl = 'http://10.0.2.2:5050';
   static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+
   static const String paymentBaseUrl = 'https://10.0.2.2:5201';
+
 
   // Rest of your existing variables
   int _currentStep = 0;

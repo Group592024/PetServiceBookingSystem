@@ -19,7 +19,8 @@ const Datatable = ({
   modelStructure,
   addModel,
   title,
-  rowId
+  rowId, 
+  hideActions
 }) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -109,7 +110,8 @@ const Datatable = ({
        toast.error("Failed to submit data.");
      }
   };
-  const actionColumn = [
+  const actionColumn = !hideActions
+  ? [
     {
       field: "action",
       headerName: "Action",
@@ -184,7 +186,7 @@ const Datatable = ({
         );
       },
     },
-  ];
+  ] : [];
 
   return (
     <div className="datatable">
@@ -212,16 +214,18 @@ const Datatable = ({
         initialData={selectedData}
         view={true}
       />
-      <div className="datatableTitle">
-        {title} List
-        <Button
-          variant="contained"
-          startIcon={<AddCircleOutlineIcon />}
-          onClick={handleOpen}
-        >
-          NEW
-        </Button>
-      </div>
+     <div className="datatableTitle">
+  {title} List
+  {!hideActions && (
+    <Button
+      variant="contained"
+      startIcon={<AddCircleOutlineIcon />}
+      onClick={handleOpen}
+    >
+      NEW
+    </Button>
+  )}
+</div>
       <DataGrid
         className="datagrid"
         getRowId={(row) => row[rowId]}

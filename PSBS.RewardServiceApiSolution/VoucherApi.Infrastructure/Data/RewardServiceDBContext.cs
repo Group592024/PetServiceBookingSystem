@@ -27,9 +27,9 @@ namespace VoucherApi.Infrastructure.Data
 
             // Seed RedeemStatus data
             modelBuilder.Entity<RedeemStatus>().HasData(
-                new RedeemStatus { ReddeemStautsId = Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"), RedeemName = "Just Redeemed" },
+                new RedeemStatus { ReddeemStautsId = Guid.Parse("6a565faf-d31e-4ec7-ad20-433f34e3d7a9"), RedeemName = "Canceled Redeem" },
                 new RedeemStatus { ReddeemStautsId = Guid.Parse("33b84495-c2a6-4b3e-98ca-f13d9c150946"), RedeemName = "Picked up at Store" },
-                new RedeemStatus { ReddeemStautsId = Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4"), RedeemName = "Canceled Redeem" }
+                new RedeemStatus { ReddeemStautsId = Guid.Parse("1509e4e6-e1ec-42a4-9301-05131dd498e4"), RedeemName = "Just Redeemed" }
             );
 
         }

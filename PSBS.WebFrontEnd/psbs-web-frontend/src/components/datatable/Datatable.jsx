@@ -8,7 +8,6 @@ import InfoIcon from "@mui/icons-material/Info";
 import "./style.css";
 import { DataGrid } from "@mui/x-data-grid";
 import Swal from "sweetalert2";
-import { toast, ToastContainer } from "react-toastify";
 import { deleteData } from "../../Utilities/ApiFunctions";
 import { useNavigate } from "react-router-dom";
 const Datatable = ({
@@ -39,21 +38,12 @@ const Datatable = ({
             cancelButtonColor: "#d33",
             confirmButtonText: "Yes, delete it!",
             cancelButtonText: "Cancel",
-          }).then(async (result) => {
-            if (result.isConfirmed) {
+            preConfirm: async () => {
               try {
-                // Call the deleteData API with the appropriate path
+                Swal.showLoading(); // Show loading spinner
                 const response = await deleteData(`${apiPath}/${params.id}`);
-
+          
                 if (response.flag === true) {
-                  Swal.fire({
-                    title: "Deleted!",
-                    text: response.message,
-                    icon: "success",
-                    confirmButtonText: "OK",
-                    timer: 3000,  // Auto close after 3 seconds
-                    timerProgressBar: true
-                  });
                   if (response.data != null) {
                     setRows((prevRows) =>
                       prevRows.map((row) =>
@@ -62,13 +52,20 @@ const Datatable = ({
                           : row
                       )
                     );
-                    console.log("row id torng khi xoa nay", rowId);
                   } else {
-                    // Update the rows state to exclude the deleted user
                     setRows((prevRows) =>
                       prevRows.filter((row) => row[rowId] !== params.id)
                     );
                   }
+          
+                  Swal.fire({
+                    title: "Deleted!",
+                    text: response.message,
+                    icon: "success",
+                    timer: 3000,
+                    timerProgressBar: true,
+                    confirmButtonText: "OK"
+                  });
                 } else {
                   Swal.fire({
                     title: "Error!",
@@ -85,8 +82,9 @@ const Datatable = ({
                   confirmButtonText: "OK"
                 });
               }
-            }
+            },
           });
+          
         };
 
         return (
