@@ -838,15 +838,32 @@ namespace ReservationApi.Presentation.Controllers
             }
         }
         [HttpGet("IpnAction")]
-        public IActionResult IpnAction()
+        public async Task<IActionResult> IpnAction()
         {
             if (Request.QueryString.HasValue)
             {
                 try
                 {
                     var paymentResult = vnpay.GetPaymentResult(Request.Query);
+                    var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
+
+                    // Parse the JSON description
+                    var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
+                    string bookingCode = description.bookingCode;
+                    string redirectPath = description.redirectPath;
+                    LogExceptions.LogToConsole(redirectPath);
                     if (paymentResult.IsSuccess)
                     {
+                   
+                    var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+                        if (existingBooking == null)
+                        {
+                            return Redirect($"http://localhost:3000{redirectPath}?status=failed");
+                        }
+
+                        existingBooking.isPaid = true;
+                        context.Bookings.Update(existingBooking);
+                        await context.SaveChangesAsync();
                         // Thực hiện hành động nếu thanh toán thành công tại đây. Ví dụ: Cập nhật trạng thái đơn hàng trong cơ sở dữ liệu.
                         return Ok();
                     }

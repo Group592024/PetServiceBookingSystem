@@ -8,6 +8,8 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
 import 'vnpay_webview.dart';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -16,9 +18,9 @@ class AddBookingPage extends StatefulWidget {
 
 class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
-  static const String apiBaseUrl = 'http://127.0.0.1:5050';
-  static const String bookingBaseUrl = 'http://127.0.0.1:5115';
-  static const String paymentBaseUrl = 'https://127.0.0.1:5201';
+  static const String apiBaseUrl = 'http://10.0.2.2:5050';
+  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+  static const String paymentBaseUrl = 'https://10.0.2.2:5201';
 
   // Rest of your existing variables
   int _currentStep = 0;
@@ -377,6 +379,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
       'redirectPath': '/customer/bookings'
     });
     
+    print('[DEBUG] Sending payment request for amount: ${amount.toInt()}');
+    
+    // Apply certificate bypass for development
+    HttpOverrides.global = DevHttpOverrides();
+    
     // Call your API to get the VNPay URL
     final response = await http.get(
       Uri.parse('$paymentBaseUrl/Bookings/CreatePaymentUrl?'
@@ -389,13 +396,39 @@ class _AddBookingPageState extends State<AddBookingPage> {
       },
     );
     
-    if (response.statusCode == 201) { // Your API returns 201 Created
+    if (response.statusCode == 201) {
       // The response body directly contains the VNPay URL as text
       final vnpayUrl = response.body.trim();
       print('[DEBUG] Received VNPay URL: $vnpayUrl');
       
-      // Open the URL in external browser or WebView
-      if (!await _launchUrl(vnpayUrl)) {
+      // Try to launch URL directly
+      final uri = Uri.parse(vnpayUrl);
+      if (await canLaunchUrl(uri)) {
+        final launched = await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        
+        if (launched) {
+          // Show success message
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Payment page opened in browser. Please complete your payment.')),
+            );
+          }
+        } else {
+          // If direct launch fails, use WebView as fallback
+          if (mounted) {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => VNPayWebView(url: vnpayUrl),
+              ),
+            );
+          }
+        }
+      } else {
+        // If canLaunchUrl fails, use WebView as fallback
         if (mounted) {
           await Navigator.push(
             context,
@@ -406,10 +439,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
         }
       }
     } else {
-      throw Exception('Failed to get VNPay URL: ${response.body}');
+      throw Exception('Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
     }
-  } catch (e) {
+  } catch (e, stackTrace) {
     print('[ERROR] VNPay payment processing error: $e');
+    print('[STACK] $stackTrace');
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error processing payment: $e')),
@@ -417,7 +451,6 @@ class _AddBookingPageState extends State<AddBookingPage> {
     }
   }
 }
-
 
   Future<void> _sendRoomBookingRequest() async {
     if (mounted) setState(() => _isProcessing = true);
