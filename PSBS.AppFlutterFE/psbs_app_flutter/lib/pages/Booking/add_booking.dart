@@ -373,6 +373,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     
+    // Store the booking code for the current payment session
+    await prefs.setString('current_payment_booking_code', bookingCode);
+    
     // Create description with booking code and redirect path
     final description = jsonEncode({
       'bookingCode': bookingCode.trim(),
@@ -381,62 +384,37 @@ class _AddBookingPageState extends State<AddBookingPage> {
     
     print('[DEBUG] Sending payment request for amount: ${amount.toInt()}');
     
-    // Apply certificate bypass for development
-    HttpOverrides.global = DevHttpOverrides();
-    
-    // Call your API to get the VNPay URL
-    final response = await http.get(
-      Uri.parse('$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+    // Use the secure get method
+    final response = await _secureGet(
+      '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
           'moneyToPay=${amount.toInt()}&'
-          'description=${Uri.encodeComponent(description)}&'
-          'returnUrl=$paymentBaseUrl/Vnpay/Callback'),
-      headers: {
+          'description=${Uri.encodeComponent(description)}',
+      {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
     );
     
-    if (response.statusCode == 201) {
+    print('[DEBUG] Response status code: ${response.statusCode}');
+    print('[DEBUG] Response body: ${response.body}');
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
       // The response body directly contains the VNPay URL as text
       final vnpayUrl = response.body.trim();
       print('[DEBUG] Received VNPay URL: $vnpayUrl');
       
-      // Try to launch URL directly
-      final uri = Uri.parse(vnpayUrl);
-      if (await canLaunchUrl(uri)) {
-        final launched = await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
+      if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+        throw Exception('Invalid VNPay URL received: $vnpayUrl');
+      }
+      
+      // Try to open the URL in WebView first (more reliable)
+      if (mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VNPayWebView(url: vnpayUrl),
+          ),
         );
-        
-        if (launched) {
-          // Show success message
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Payment page opened in browser. Please complete your payment.')),
-            );
-          }
-        } else {
-          // If direct launch fails, use WebView as fallback
-          if (mounted) {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => VNPayWebView(url: vnpayUrl),
-              ),
-            );
-          }
-        }
-      } else {
-        // If canLaunchUrl fails, use WebView as fallback
-        if (mounted) {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VNPayWebView(url: vnpayUrl),
-            ),
-          );
-        }
       }
     } else {
       throw Exception('Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
@@ -451,6 +429,27 @@ class _AddBookingPageState extends State<AddBookingPage> {
     }
   }
 }
+
+// Add this method to your _AddBookingPageState class
+Future<http.Response> _secureGet(String url, Map<String, String> headers) async {
+  // Apply certificate bypass for development
+  HttpOverrides.global = DevHttpOverrides();
+  
+  try {
+    final client = http.Client();
+    final response = await client.get(
+      Uri.parse(url),
+      headers: headers,
+    ).timeout(Duration(seconds: 30));
+    
+    return response;
+  } catch (e) {
+    print('[ERROR] HTTP request failed: $e');
+    rethrow;
+  }
+}
+
+
 
   Future<void> _sendRoomBookingRequest() async {
     if (mounted) setState(() => _isProcessing = true);
