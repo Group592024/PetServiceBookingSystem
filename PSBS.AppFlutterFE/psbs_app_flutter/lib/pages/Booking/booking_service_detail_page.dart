@@ -3,6 +3,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'vnpay_webview.dart';
 
 class CustomerServiceBookingDetail extends StatefulWidget {
   final String bookingId;
@@ -25,6 +28,13 @@ class _CustomerServiceBookingDetailState
   bool isLoading = true;
   String? error;
 
+  // Voucher fields
+  String? voucherName;
+  String? voucherCode;
+  double? voucherDiscount;
+  double? voucherMaximum;
+  bool isVoucherLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -45,6 +55,12 @@ class _CustomerServiceBookingDetailState
         },
       );
       final bookingData = json.decode(bookingResponse.body)['data'];
+
+      // Fetch voucher details if voucherId exists
+      if (bookingData['voucherId'] != null &&
+          bookingData['voucherId'] != "00000000-0000-0000-0000-000000000000") {
+        await fetchVoucherDetails(bookingData['voucherId']);
+      }
 
       // Fetch payment type
       final paymentResponse = await http.get(
@@ -175,6 +191,143 @@ class _CustomerServiceBookingDetailState
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> fetchVoucherDetails(String voucherId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        print("Error: User is not logged in.");
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse("http://10.0.2.2:5050/api/Voucher/$voucherId"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      final responseData = json.decode(response.body);
+      if (responseData['flag'] && responseData['data'] != null) {
+        setState(() {
+          voucherName = responseData['data']['voucherName'];
+          voucherCode = responseData['data']['voucherCode'];
+          voucherDiscount = responseData['data']['voucherDiscount'];
+          voucherMaximum = responseData['data']['voucherMaximum'];
+          isVoucherLoaded = true;
+        });
+      }
+    } catch (error) {
+      print("Error fetching voucher details: $error");
+    }
+  }
+
+  Future<void> handleVNPayPayment() async {
+    try {
+      if (booking == null) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "User is not logged in. Please log in to proceed with payment."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Apply certificate bypass for development
+      HttpOverrides.global = DevHttpOverrides();
+
+      // Store the booking code for the current payment session
+      await prefs.setString(
+          'current_payment_booking_code', booking!['bookingCode']);
+
+      // Create description with booking code and redirect path
+      final description = jsonEncode({
+        'bookingCode': booking!['bookingCode'].trim(),
+        'redirectPath': '/customer/bookings'
+      });
+
+      print(
+          '[DEBUG] Sending payment request for amount: ${booking!['totalAmount']}');
+
+      // Use the secure get method
+      final response = await _secureGet(
+        'https://10.0.2.2:5201/Bookings/CreatePaymentUrl?'
+        'moneyToPay=${booking!['totalAmount']}&'
+        'description=${Uri.encodeComponent(description)}',
+        {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print('[DEBUG] Response status code: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // The response body directly contains the VNPay URL as text
+        final vnpayUrl = response.body.trim();
+        print('[DEBUG] Received VNPay URL: $vnpayUrl');
+
+        if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+          throw Exception('Invalid VNPay URL received: $vnpayUrl');
+        }
+
+        // Try to open the URL in WebView first (more reliable)
+        if (mounted) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VNPayWebView(url: vnpayUrl),
+            ),
+          );
+
+          // Refresh the booking details after payment
+          fetchBookingDetails();
+        }
+      } else {
+        throw Exception(
+            'Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      print('[ERROR] VNPay payment processing error: $e');
+      print('[STACK] $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error processing payment: $e')),
+        );
+      }
+    }
+  }
+
+  Future<http.Response> _secureGet(String url, Map<String, String> headers) async {
+    // Apply certificate bypass for development
+    HttpOverrides.global = DevHttpOverrides();
+
+    try {
+      final client = http.Client();
+      final response = await client
+          .get(
+            Uri.parse(url),
+            headers: headers,
+          )
+          .timeout(Duration(seconds: 30));
+
+      return response;
+    } catch (e) {
+      print('[ERROR] HTTP request failed: $e');
+      rethrow;
     }
   }
 
@@ -318,6 +471,92 @@ class _CustomerServiceBookingDetailState
           },
         ) ??
         false;
+  }
+
+  Widget _buildVoucherSection() {
+    if (!isVoucherLoaded || voucherName == null) {
+      return SizedBox.shrink();
+    }
+
+    return Container(
+      margin: EdgeInsets.only(top: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Applied Voucher",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text("Voucher Name: $voucherName", style: TextStyle(fontSize: 14)),
+          Text("Code: $voucherCode", style: TextStyle(fontSize: 14)),
+          Text(
+            "Discount: ${voucherDiscount?.toStringAsFixed(2)}% (Max ${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(voucherMaximum)})",
+            style: TextStyle(fontSize: 14, color: Colors.green.shade700),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (booking?['isPaid'] == false && paymentTypeName == "VNPay")
+          ElevatedButton(
+            onPressed: handleVNPayPayment,
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              backgroundColor: Colors.blue.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.payment, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "Pay with VNPay",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        SizedBox(width: 16),
+        ElevatedButton(
+          onPressed: cancelBooking,
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            backgroundColor: Colors.red.shade600,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.cancel, size: 20),
+              SizedBox(width: 8),
+              Text(
+                "Cancel Booking",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -578,43 +817,12 @@ class _CustomerServiceBookingDetailState
                               ),
                             ),
 
-                      // Cancel Button (if applicable)
-                      if (bookingStatusName == "Pending" ||
-                          bookingStatusName == "Confirmed")
-                        AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          margin: EdgeInsets.only(top: 24),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: cancelBooking,
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 32, vertical: 16),
-                                backgroundColor: Colors.red.shade600,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                                shadowColor: Colors.red.shade100,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.cancel, size: 20),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Cancel Booking",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      // Voucher Section
+                      _buildVoucherSection(),
+
+                      // Action Buttons
+                      _buildActionButtons(),
+
                       SizedBox(height: 20),
                     ],
                   ),
@@ -680,5 +888,14 @@ class _CustomerServiceBookingDetailState
       default:
         return Colors.grey;
     }
+  }
+}
+
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }

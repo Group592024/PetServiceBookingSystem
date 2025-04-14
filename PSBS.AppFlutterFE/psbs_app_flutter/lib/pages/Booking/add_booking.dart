@@ -7,6 +7,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'vnpay_webview.dart';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -17,7 +20,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
   static const String apiBaseUrl = 'http://10.0.2.2:5050';
   static const String bookingBaseUrl = 'http://10.0.2.2:5115';
-  static const String paymentBaseUrl = 'https://10.211.55.7:5201';
+
+  static const String paymentBaseUrl = 'https://10.0.2.2:5201';
+
 
   // Rest of your existing variables
   int _currentStep = 0;
@@ -312,24 +317,32 @@ class _AddBookingPageState extends State<AddBookingPage> {
   }
 
   Future<bool> _launchUrl(String url) async {
-    try {
-      print('[DEBUG] Attempting to launch URL: $url');
+  try {
+    print('[DEBUG] Attempting to launch URL: $url');
 
-      if (await canLaunchUrl(Uri.parse(url))) {
-        final result = await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        );
-        print('[DEBUG] launchUrl result: $result');
-        return result;
-      }
-      print('[ERROR] URL cannot be handled: $url');
-      return false;
-    } catch (e, stackTrace) {
-      print('[ERROR] Exception in _launchUrl: $e\n$stackTrace');
+    final uri = Uri.parse(url);
+    
+    // First check if we can launch the URL
+    if (await canLaunchUrl(uri)) {
+      // Try to launch in external application
+      final result = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      
+      print('[DEBUG] launchUrl result: $result');
+      return result;
+    } else {
+      print('[WARNING] Cannot launch URL: $url');
       return false;
     }
+  } catch (e, stackTrace) {
+    print('[ERROR] Exception in _launchUrl: $e\n$stackTrace');
+    return false;
   }
+}
+
+
 
   Future<String?> _getPaymentTypeName(String paymentTypeId) async {
     try {
@@ -356,6 +369,89 @@ class _AddBookingPageState extends State<AddBookingPage> {
       return null;
     }
   }
+
+  Future<void> _processVNPayPayment(String bookingCode, double amount) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    
+    // Store the booking code for the current payment session
+    await prefs.setString('current_payment_booking_code', bookingCode);
+    
+    // Create description with booking code and redirect path
+    final description = jsonEncode({
+      'bookingCode': bookingCode.trim(),
+      'redirectPath': '/customer/bookings'
+    });
+    
+    print('[DEBUG] Sending payment request for amount: ${amount.toInt()}');
+    
+    // Use the secure get method
+    final response = await _secureGet(
+      '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+          'moneyToPay=${amount.toInt()}&'
+          'description=${Uri.encodeComponent(description)}',
+      {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+    
+    print('[DEBUG] Response status code: ${response.statusCode}');
+    print('[DEBUG] Response body: ${response.body}');
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      // The response body directly contains the VNPay URL as text
+      final vnpayUrl = response.body.trim();
+      print('[DEBUG] Received VNPay URL: $vnpayUrl');
+      
+      if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+        throw Exception('Invalid VNPay URL received: $vnpayUrl');
+      }
+      
+      // Try to open the URL in WebView first (more reliable)
+      if (mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VNPayWebView(url: vnpayUrl),
+          ),
+        );
+      }
+    } else {
+      throw Exception('Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
+    }
+  } catch (e, stackTrace) {
+    print('[ERROR] VNPay payment processing error: $e');
+    print('[STACK] $stackTrace');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error processing payment: $e')),
+      );
+    }
+  }
+}
+
+// Add this method to your _AddBookingPageState class
+Future<http.Response> _secureGet(String url, Map<String, String> headers) async {
+  // Apply certificate bypass for development
+  HttpOverrides.global = DevHttpOverrides();
+  
+  try {
+    final client = http.Client();
+    final response = await client.get(
+      Uri.parse(url),
+      headers: headers,
+    ).timeout(Duration(seconds: 30));
+    
+    return response;
+  } catch (e) {
+    print('[ERROR] HTTP request failed: $e');
+    rethrow;
+  }
+}
+
+
 
   Future<void> _sendRoomBookingRequest() async {
     if (mounted) setState(() => _isProcessing = true);
@@ -417,47 +513,22 @@ class _AddBookingPageState extends State<AddBookingPage> {
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+      final result = json.decode(response.body);
+      final bookingCode = result['data'].toString().trim();
 
-        if (paymentTypeName == "VNPay") {
-          final bookingCode = result['data'].toString().trim();
-          final amount = _totalPrice.toInt();
-
-          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
-              'moneyToPay=$amount&'
-              'description=$bookingCode&'
-              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
-
-          if (!await _launchUrl(vnpayUrl)) {
-            if (mounted) {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(title: const Text('Payment')),
-                    body: WebViewWidget(
-                      // Changed from WebView to WebViewWidget
-                      controller: WebViewController()
-                        ..loadRequest(Uri.parse(vnpayUrl))
-                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Room booking created successfully')),
-            );
-            Navigator.pop(context);
-          }
-        }
+      if (paymentTypeName == "VNPay") {
+        await _processVNPayPayment(bookingCode, _totalPrice);
       } else {
-        throw Exception('Failed to create room booking: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Room booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
       }
+    } else {
+      throw Exception('Failed to create room booking: ${response.body}');
+    }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -531,46 +602,22 @@ class _AddBookingPageState extends State<AddBookingPage> {
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+      final result = json.decode(response.body);
+      final bookingCode = result['data'].toString().trim();
 
-        if (paymentTypeName == "VNPay") {
-          final bookingCode = result['data'].toString().trim();
-          final amount = _totalPrice.toInt();
-
-          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
-              'moneyToPay=$amount&'
-              'description=$bookingCode&'
-              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
-
-          if (!await _launchUrl(vnpayUrl)) {
-            if (mounted) {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(title: const Text('Payment')),
-                    body: WebViewWidget(
-                      controller: WebViewController()
-                        ..loadRequest(Uri.parse(vnpayUrl))
-                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Service booking created successfully')),
-            );
-            Navigator.pop(context);
-          }
-        }
+      if (paymentTypeName == "VNPay") {
+        await _processVNPayPayment(bookingCode, _totalPrice);
       } else {
-        throw Exception('Failed to create service booking: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Service booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
       }
+    } else {
+      throw Exception('Failed to create service booking: ${response.body}');
+    }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
