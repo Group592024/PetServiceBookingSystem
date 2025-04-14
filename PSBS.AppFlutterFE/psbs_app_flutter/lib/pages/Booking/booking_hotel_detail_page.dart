@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'vnpay_webview.dart';
+import 'dart:io';
 
 class CustomerRoomBookingDetail extends StatefulWidget {
   final String bookingId;
@@ -85,8 +87,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch room history
       final historyResponse = await http.get(
-        Uri.parse(
-            "http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -388,61 +389,91 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         return;
       }
 
-      // Get current path to redirect back after payment
-      final currentPath = "/booking-details/${widget.bookingId}";
+      // Apply certificate bypass for development
+      HttpOverrides.global = DevHttpOverrides();
 
-      // Create description with booking code and path
-      final description = json.encode({
-        "bookingCode": booking!['bookingCode'].trim(),
-        "redirectPath": currentPath
+      // Store the booking code for the current payment session
+      await prefs.setString(
+          'current_payment_booking_code', booking!['bookingCode']);
+
+      // Create description with booking code and redirect path
+      final description = jsonEncode({
+        'bookingCode': booking!['bookingCode'].trim(),
+        'redirectPath': '/customer/bookings'
       });
 
-      final vnpayUrl =
-          "http://10.0.2.2:5201/Bookings/CreatePaymentUrl?moneyToPay=${booking!['totalAmount']}"
-          "&description=${Uri.encodeComponent(description)}"
-          "&returnUrl=http://10.0.2.2:5201/Vnpay/Callback";
+      print(
+          '[DEBUG] Sending payment request for amount: ${booking!['totalAmount']}');
 
-      final response = await http.get(
-        Uri.parse(vnpayUrl),
-        headers: {
+      // Use the secure get method
+      final response = await _secureGet(
+        'https://10.0.2.2:5201/Bookings/CreatePaymentUrl?'
+        'moneyToPay=${booking!['totalAmount']}&'
+        'description=${Uri.encodeComponent(description)}',
+        {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
         },
       );
 
-      if (response.statusCode == 200 && response.body.startsWith("http")) {
-        final paymentUrl = response.body;
+      print('[DEBUG] Response status code: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
 
-        // Check if we can launch the URL
-        if (await canLaunch(paymentUrl)) {
-          await launch(
-            paymentUrl,
-            forceSafariVC: false, // Important for iOS to open in browser
-            forceWebView: false, // Important to open in external browser
-            universalLinksOnly: true,
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // The response body directly contains the VNPay URL as text
+        final vnpayUrl = response.body.trim();
+        print('[DEBUG] Received VNPay URL: $vnpayUrl');
+
+        if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+          throw Exception('Invalid VNPay URL received: $vnpayUrl');
+        }
+
+        // Try to open the URL in WebView first (more reliable)
+        if (mounted) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VNPayWebView(url: vnpayUrl),
+            ),
           );
 
-          // Set up a listener for when the app returns
-          // This requires deep linking to be configured
-        } else {
-          throw 'Could not launch $paymentUrl';
+          // Refresh the booking details after payment
+          fetchBookingDetails();
         }
       } else {
+        throw Exception(
+            'Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      print('[ERROR] VNPay payment processing error: $e');
+      print('[STACK] $stackTrace');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("VNPay payment failed."),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error processing payment: $e')),
         );
       }
-    } catch (error) {
-      print("Error processing VNPay payment: $error");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("An error occurred while processing payment."),
-          backgroundColor: Colors.red,
-        ),
-      );
+    }
+  }
+
+// Add this helper method for secure HTTP requests
+  Future<http.Response> _secureGet(
+      String url, Map<String, String> headers) async {
+    // Apply certificate bypass for development
+    HttpOverrides.global = DevHttpOverrides();
+
+    try {
+      final client = http.Client();
+      final response = await client
+          .get(
+            Uri.parse(url),
+            headers: headers,
+          )
+          .timeout(Duration(seconds: 30));
+
+      return response;
+    } catch (e) {
+      print('[ERROR] HTTP request failed: $e');
+      rethrow;
     }
   }
 
@@ -961,7 +992,9 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
           ],
         ),
         SizedBox(height: 8),
-        ElevatedButton(
+              if (bookingStatusName.toLowerCase() == "checked in" && 
+          (history['status']?.toString().toLowerCase() == "checked in"))
+          ElevatedButton(
           onPressed: () => handleCameraSettings(history),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
