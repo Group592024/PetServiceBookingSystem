@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { Link } from "react-router-dom";
+import Tooltip from '@mui/material/Tooltip';
 const Dashboard = () => {
   const sidebarRef = useRef(null);
   return (
@@ -19,7 +20,7 @@ const Dashboard = () => {
                 </li>
                 /
                 <li>
-                  <a href="#">Sub-Table in Bookings</a>
+                  <a href="#">Sub-Table in Booking</a>
                 </li>
               </ul>
             </div>
@@ -31,7 +32,7 @@ const Dashboard = () => {
           <ul className="insights">
           <Link to="/settings/bookingType">
             <li className="first">
-            <i class='bx bx-cog'></i>
+            <i class='bx bx-receipt'></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p> Booking Type</p>
@@ -40,7 +41,7 @@ const Dashboard = () => {
             </Link>
             <Link to="/settings/bookingStatus">
             <li className="second">
-            <i class='bx bxs-cog' ></i>
+            <i class='bx bx-receipt'></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Booking Status</p>
@@ -49,7 +50,7 @@ const Dashboard = () => {
             </Link>
             <Link to="/settings/paymentType">
             <li className="third">
-            <i class='bx bx-cog'></i>
+            <i class='bx bx-money' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Payment Type</p>
@@ -58,7 +59,7 @@ const Dashboard = () => {
             </Link>
              <Link to="/settings/pointRule">
              <li className="fourth">
-             <i class='bx bxs-cog' ></i>
+             <i class='bx bx-coin'></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Point Rule</p>
@@ -76,26 +77,16 @@ const Dashboard = () => {
                 </li>
                 /
                 <li>
-                  <a href="#">Sub-Table in Bookings</a>
+                  <a href="#">Sub-Table in Facilitiy</a>
                 </li>
               </ul>
             </div>
           
           </div>
-          <ul className="insights">
-          
-            <Link to="/settings/treatments">
-             <li className="first">
-            <i className="bx bx-calendar-check"></i>
-              <span className="info">
-                <h3>Setting</h3>
-                <p>Treatment</p>
-              </span>
-            </li>
-            </Link>
+          <ul className="insights">       
             <Link to="/settings/servicetypes">
-             <li className="second">
-            <i className="bx bx-calendar-check"></i>
+             <li className="first">
+             <i className="bx bx-store-alt"></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Service Type</p>
@@ -103,8 +94,8 @@ const Dashboard = () => {
             </li>
             </Link>
             <Link to="/settings/roomtypes">
-             <li className="third">
-            <i className="bx bx-calendar-check"></i>
+             <li className="second">
+             <i class='bx bx-home-heart' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Room Type</p>
@@ -113,7 +104,7 @@ const Dashboard = () => {
             </Link>
             <Link to="/petType">
              <li className="third">
-            <i className="bx bx-calendar-check"></i>
+             <i class='bx bxs-dog' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Pet Type</p>
@@ -122,23 +113,52 @@ const Dashboard = () => {
             </Link>
             <Link to="/petBreed">
              <li className="third">
-            <i className="bx bx-calendar-check"></i>
+             <i class='bx bxs-dog' ></i>
               <span className="info">
                 <h3>Setting</h3>
                 <p>Pet Breed</p>
               </span>
             </li>
             </Link>
-            <Link to="/medicines">
-             <li className="third">
-            <i className="bx bx-calendar-check"></i>
-              <span className="info">
-                <h3>Setting</h3>
-                <p>Medicine</p>
-              </span>
-            </li>
-            </Link>
+           
           </ul>
+
+          <div className="header">
+            <div className="left">
+            
+              <ul className="breadcrumb">
+                <li>
+                  <a href="#">Settings</a>
+                </li>
+                /
+                <li>
+                  <a href="#">Sub-Table in HealCare</a>
+                </li>
+              </ul>
+            </div>
+        
+          </div>
+          <ul className="insights">
+          
+          <Link to="/settings/treatments">
+           <li className="first">
+           <i class='bx bx-plus-medical' ></i>
+            <span className="info">
+              <h3>Setting</h3>
+              <p>Treatment</p>
+            </span>
+          </li>
+          </Link>         
+          <Link to="/medicines">
+           <li className="second">
+           <i class='bx bxs-capsule' ></i>
+            <span className="info">
+              <h3>Setting</h3>
+              <p>Medicine</p>
+            </span>
+          </li>
+          </Link>
+        </ul>
         </main>
       </div>
     </div>

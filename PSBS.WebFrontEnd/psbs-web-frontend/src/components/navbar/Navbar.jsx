@@ -148,7 +148,7 @@ const Navbar = ({ sidebarRef }) => {
   return (
     <div className="nav">
       <i className="bx bx-menu" onClick={handleMenuClick}></i>
-      <form action="#">
+      <form action="#" >
         <div className="form-input">
           <input type="search" placeholder="Search..." />
           <button className="search-btn" type="submit">
@@ -160,7 +160,7 @@ const Navbar = ({ sidebarRef }) => {
       <label htmlFor="theme-toggle"></label>
       <div className="notifications" onClick={toggleNotificationDropdown}>
         <i class="bx bx-bell"></i>
-        <span className="count">{notificationCount}</span>
+      
       </div>
       <a href="/chat" className="notifications">
         <i className="bx bx-message-square-dots"></i>
