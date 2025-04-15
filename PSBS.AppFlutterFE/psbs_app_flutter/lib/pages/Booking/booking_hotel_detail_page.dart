@@ -973,7 +973,6 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
             ),
           ),
         ],
-      ],
     );
   }
 
