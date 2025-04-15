@@ -1,5 +1,40 @@
 .list {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  max-width: 400px;
+  border-right: 1px solid #dddddd35;
+  background-color: rgba(17, 25, 40, 0.2);
+}
+
+@media (min-width: 1200px) {
+  .list {
+      max-width: 400px;
   }
+}
+
+@media (max-width: 1199px) {
+  .list {
+      max-width: 350px;
+  }
+}
+
+@media (max-width: 992px) {
+  .list {
+      max-width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .list {
+      max-width: 250px;
+  }
+}
+
+@media (max-width: 576px) {
+  .list {
+      max-width: none;
+      width: 100%;
+  }
+}
