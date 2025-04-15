@@ -3,9 +3,11 @@ import ServiceCard from "./ServiceCard";
 
 const ServiceCardList = ({ data }) => {
   if (data.length === 0) {
-    return <p className="text-center w-full text-lg mt-10">No services found.</p>;
+    return (
+      <p className="text-center w-full text-lg mt-10">No services found.</p>
+    );
   }
-  
+
   return (
     <div className="flex justify-start items-center flex-wrap translate-x-[5%]">
       {data.map((item) => (
@@ -13,7 +15,6 @@ const ServiceCardList = ({ data }) => {
       ))}
     </div>
   );
-  
 };
 
 export default ServiceCardList;

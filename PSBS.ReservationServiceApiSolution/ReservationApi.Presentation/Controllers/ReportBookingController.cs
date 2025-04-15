@@ -12,6 +12,23 @@ namespace ReservationApi.Presentation.Controllers
     public class ReportBookingController(IBookingStatus bookingStatusInterface,
             IReport reportInterface) : ControllerBase
     {
+        [HttpGet("accountAmount")]
+        public async Task<ActionResult<IEnumerable<ReportBookingTypeDTO>>> GetIncomeEachCustomer(int? year,
+            int? month, DateTime? startDate, DateTime? endDate)
+        {
+            // get all BookingStatuss from repo
+            var bookings = await reportInterface.GetIncomeEachCustomer(year, month, startDate, endDate);
+            if (!bookings.Any())
+                return NotFound(new Response(false, "No bookings detected"));
+            // convert data from entity to DTO and return
+
+            return bookings!.Any() ? Ok(new Response(true, "Booking retrieved successfully!")
+            {
+                Data = bookings
+            }) : NotFound(new Response(false, "No Booking detected"));
+
+        }
+
         [HttpGet("bookingStatus")]
         public async Task<ActionResult<IEnumerable<BookingStatusDTO>>> GetBookingStatuses()
         {
