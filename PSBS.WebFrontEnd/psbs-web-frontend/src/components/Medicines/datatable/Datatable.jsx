@@ -279,7 +279,6 @@ const Datatable = () => {
           disableRowSelectionOnClick
         />
       </Box>
-      <ToastContainer />
     </div>
   );
 };

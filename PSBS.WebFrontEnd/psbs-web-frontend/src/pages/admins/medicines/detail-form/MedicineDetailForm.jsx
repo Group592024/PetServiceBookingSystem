@@ -4,11 +4,11 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 function MedicineDetailForm() {
   const sidebarRef = useRef(null);
-  const { medicineId } = useParams(); // Extract medicineId from the URL
+  const { medicineId } = useParams(); 
   const [medicine, setMedicine] = useState({
     medicineName: "",
     treatmentFor: "",
@@ -36,8 +36,19 @@ function MedicineDetailForm() {
 
         if (response.data.flag) {
           setMedicine(response.data.data);
+          Swal.fire({
+            title: 'Success',
+            text: response.data.message || 'Medicine retrieved successfully!',
+            icon: 'success',
+            confirmButtonText: 'OK'
+          });
         } else {
-          toast.error(response.data.message || "Medicine not found");
+          Swal.fire({
+            title: 'Warning',
+            text: response.data.message || 'Medicine not found',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
         }
       } catch (error) {
         console.error("Error fetching medicine details:", error);
@@ -45,7 +56,6 @@ function MedicineDetailForm() {
         setLoading(false);
       }
     };
-
     fetchMedicineDetail();
   }, [medicineId]);
 
@@ -93,6 +103,7 @@ function MedicineDetailForm() {
                 {/* Medicine Name TextField */}
                 <div className="mb-4">
                   <TextField
+                  id="medicineName"
                     label="Medicine Name"
                     variant="outlined"
                     fullWidth
@@ -107,6 +118,7 @@ function MedicineDetailForm() {
                 {/* Treatment For Autocomplete */}
                 <div className="mb-4">
                   <TextField
+                  id="treatmentName"
                     label="Treatment Name"
                     variant="outlined"
                     fullWidth
@@ -121,6 +133,7 @@ function MedicineDetailForm() {
                 {/* Status */}
                 <div className="mb-4">
                   <TextField
+                  id="treatmentStatus" 
                     label="Treatment Status"
                     variant="outlined"
                     fullWidth
@@ -161,7 +174,6 @@ function MedicineDetailForm() {
             </div>
           </div>
         </div>
-        <ToastContainer />
       </div>
     </div>
   );
