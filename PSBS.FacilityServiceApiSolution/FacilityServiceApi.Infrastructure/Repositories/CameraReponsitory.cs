@@ -83,15 +83,26 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 if (!camera.isDeleted)
                 {
                     camera.isDeleted = true;
+                    camera.cameraStatus = "Discard";
                     context.Camera.Update(camera);
                     await context.SaveChangesAsync();
                     return new Response(true, "Camera soft-deleted successfully") { Data = camera };
                 }
                 else
                 {
+                    var isReferencedInRoom = await context.RoomHistories.FirstOrDefaultAsync(r => r.cameraId == entity.cameraId);
+                    if (isReferencedInRoom is not null)
+                    {
+                        return new Response(false, $"Camera cannot be permanently deleted as it has room history.")
+                        {
+                            Data = camera
+                        };
+                    }
+
+
                     context.Camera.Remove(camera);
                     await context.SaveChangesAsync();
-                    return new Response(true, "Camera hard-deleted successfully") { Data = camera };
+                    return new Response(true, "Camera hard-deleted successfully") { Data = null };
                 }
             }
             catch (Exception ex)
@@ -138,7 +149,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
                 if (roomHistory.cameraId is not null)
                 {
                     var existCam = await context.Camera.FindAsync(roomHistory.cameraId);
-                    existCam!.cameraStatus = "Free";
+                    existCam!.cameraStatus = "UnderRepair";
 
                 }
                 roomHistory.cameraId = cameraDTO.cameraId;

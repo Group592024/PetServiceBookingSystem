@@ -7,8 +7,8 @@ describe('Room List Page', () => {
 
     cy.visit('http://localhost:3000/login');
     cy.get('#email', { timeout: 10000 }).should('be.visible');
-    cy.get('#email').type('admin@gmail.com');
-    cy.get('#password').type('08046428');
+    cy.get('#email').type('se.rn.a.vill.ar.es@gmail.com');
+    cy.get('#password').type('minh1234');
     cy.get('button[type="submit"]').click();
 
     cy.wait('@loginRequest', { timeout: 15000 }).then((interception) => {
@@ -134,7 +134,7 @@ describe('Room List Page', () => {
     cy.contains('Room 102').should('be.visible');
     cy.contains('Standard Room').should('be.visible');
     cy.contains('Deluxe Room').should('be.visible');
-    cy.contains('500000 VND').should('be.visible');
+    cy.contains('500.000').should('be.visible');
 
     cy.contains('div', 'Free')
       .should('have.css', 'color')

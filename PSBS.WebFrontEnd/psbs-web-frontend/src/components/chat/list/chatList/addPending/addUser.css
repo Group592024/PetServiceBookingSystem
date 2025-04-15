@@ -1,95 +1,232 @@
 .addUser {
-  width: max-content;
-  height: max-content;
-  padding: 30px;
-  background-color: rgba(17, 25, 40, 0.781);
-  border-radius: 10px;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-
-  form {
+    width: 90%;
+    max-width: 500px;
+    height: auto;
+    max-height: 90vh;
+    padding: 25px;
+    background-color: rgba(17, 25, 40, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+    
+    .close-button {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      color: white;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+    
+    form {
       display: flex;
-      gap: 20px;
-
+      gap: 10px;
+      margin-bottom: 20px;
+      width: 100%;
+      
       input {
-          padding: 20px;
-          border-radius: 10px;
-          border: none;
-          outline: none;
-          color: black;
+        flex: 1;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: all 0.3s;
+        
+        &:focus {
+          border-color: #1a73e8;
+          background-color: rgba(255, 255, 255, 0.15);
+        }
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.6);
+        }
       }
-
+      
       button {
-          padding: 20px;
-          border-radius: 10px;
-          background-color: #1a73e8;
-          color: white;
-          border: none;
-          cursor: pointer;
+        padding: 12px 20px;
+        border-radius: 8px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.3s;
+        
+        &:hover {
+          background-color: #1557b0;
+        }
       }
-  }
-
-  .user {
-      margin-top: 50px;
+    }
+    
+    .userContainer {
+      margin-top: 10px;
+      max-height: 60vh;
+      overflow-y: auto;
+      padding-right: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      
+      /* Custom scrollbar styles */
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: rgba(17, 25, 40, 0.3);
+        border-radius: 3px;
+      }
+      
+      p {
+        color: rgba(255, 255, 255, 0.7);
+        text-align: center;
+        padding: 20px 0;
+      }
+    }
+    
+    .user {
       display: flex;
       align-items: center;
       justify-content: space-between;
-
+      padding: 12px 15px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      transition: background-color 0.3s;
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      
       .detail {
-          display: flex; /* Keep avatar and name/message side-by-side */
-          align-items: center; /* Vertically align avatar and name/message */
-          gap: 20px; /* Space between avatar and name/message */
-
-          .nameAndMessage { /* New container for name and message */
-              display: flex;
-              flex-direction: column; /* Stack name and message vertically */
-              align-items: flex-start;
-              gap: 5px;
-          }
-
-          img {
-              width: 50px;
-              height: 50px;
-              border-radius: 50%;
-              object-fit: cover;
-          }
-
-          span {
-              font-weight: bold;
-          }
-
-          p.truncate {
-              font-size: 0.85rem;
-              color: #888;
-              max-width: 200px;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-          }
-      }
-
-      button {
-          padding: 10px;
-          border-radius: 10px;
-          background-color: #1a73e8;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        
+        img {
+          width: 45px;
+          height: 45px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        span {
           color: white;
-          border: none;
-          cursor: pointer;
+          font-weight: 500;
+          font-size: 15px;
+        }
       }
-  }
-  .close-button {
-    position: absolute; /* Or relative, depending on your layout */
-    top: 10px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed */
-    z-index: 10; /* Ensure it's above other content */
-    /* Add other styling as needed (e.g., background, padding) */
+      .nameAndMessage {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+      }
+      
+      .no-users {
+        width: 100%;
+        text-align: left;
+        padding: 10px 0;
+      }
+      
+      .truncate {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+        text-align: left;
+      }
+      
+      button {
+        padding: 8px 15px;
+        border-radius: 6px;
+        background-color: #1a73e8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 13px;
+        transition: all 0.3s;
+        
+        &:hover {
+          background-color: #1557b0;
+          transform: translateY(-2px);
+        }
+        
+        &:active {
+          transform: translateY(0);
+        }
+      }
+    }
   }
   
-  .userContainer {
-    position: relative; /* Make the container relative for absolute positioning of the close button */
+  /* Media queries for responsiveness */
+  @media (max-width: 768px) {
+    .addUser {
+      width: 95%;
+      padding: 20px;
+      
+      form {
+        flex-direction: column;
+        gap: 10px;
+        
+        input, button {
+          width: 100%;
+          padding: 12px;
+        }
+      }
+      
+      .user {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+        
+        .detail {
+          width: 100%;
+        }
+        
+        button {
+          width: 100%;
+        }
+      }
+    }
   }
-}
+  
+  @media (max-width: 480px) {
+    .addUser {
+      padding: 15px;
+      
+      .userContainer {
+        max-height: 50vh;
+      }
+      
+      .user .detail img {
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+  

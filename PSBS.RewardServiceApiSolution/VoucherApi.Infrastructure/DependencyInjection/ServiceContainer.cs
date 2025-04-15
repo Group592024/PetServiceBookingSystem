@@ -20,6 +20,10 @@ namespace VoucherApi.Infrastructure.DependencyInjection
             services.AddScoped<IVoucher, VoucherRepository>();
             services.AddScoped<IGift, GiftRepository>();
             services.AddScoped<IRedeemGiftHistory, RedeemGiftHistoryRepository>();
+            services.AddHttpClient("ApiGateway", client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5050/");
+            });
 
             return services;
         }

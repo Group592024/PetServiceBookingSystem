@@ -3,6 +3,8 @@ import Swal from "sweetalert2";
 import "./addUser.css";
 import { getData } from "../../../../../Utilities/ApiFunctions";
 import CloseIcon from "@mui/icons-material/Close";
+import SearchIcon from "@mui/icons-material/Search";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const AddPending = ({
   signalRService,
@@ -14,6 +16,11 @@ const AddPending = ({
   const [filteredUserList, setFilteredUserList] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [originalUserList, setOriginalUserList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [processingRooms, setProcessingRooms] = useState(new Set());
+  
+  // Add a new state to track the active search term
+  const [activeSearchTerm, setActiveSearchTerm] = useState("");
 
   const fetchUserDetails = useCallback(async (pendingUsers) => {
     const promises = pendingUsers.map(async (item) => {
@@ -33,68 +40,110 @@ const AddPending = ({
 
   const filterUsers = useCallback(
     (users) => {
+      // Use activeSearchTerm instead of searchTerm for filtering
       const filtered = users.filter((user) => {
         const userName = user.user?.accountName?.toLowerCase() || "";
-        return userName.includes(searchTerm.toLowerCase());
+        return userName.includes(activeSearchTerm.toLowerCase());
       });
       setFilteredUserList(filtered);
     },
-    [searchTerm]
+    [activeSearchTerm] // Change dependency to activeSearchTerm
   );
 
   useEffect(() => {
     const getDetailsAndFilter = async () => {
+      setIsLoading(true);
       if (currentList && currentList.length > 0) {
         const usersWithDetails = await fetchUserDetails(currentList);
         setPendingUsersWithDetails(usersWithDetails);
         setOriginalUserList(usersWithDetails);
-        filterUsers(usersWithDetails);
+        setFilteredUserList(usersWithDetails); // Show all users initially
       } else {
         setPendingUsersWithDetails([]);
         setFilteredUserList([]);
         setOriginalUserList([]);
       }
+      setIsLoading(false);
     };
-
     getDetailsAndFilter();
-  }, [currentList, fetchUserDetails, filterUsers]);
+  }, [currentList, fetchUserDetails]);
 
-  const handleSearch = () => {
+  // Update this useEffect to respond to activeSearchTerm changes
+  useEffect(() => {
     filterUsers(originalUserList);
+  }, [activeSearchTerm, originalUserList, filterUsers]);
+
+  // Update handleSearch to set the activeSearchTerm
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setActiveSearchTerm(searchTerm); // Only update the active search term when button is clicked
   };
 
   const handleAdd = async (chatRoomId, staffId, customerId) => {
     try {
+      setProcessingRooms(prev => new Set(prev).add(chatRoomId));
+      
       await signalRService.invoke(
         "AssignStaffToChatRoom",
         chatRoomId,
         staffId,
         customerId
       );
-
+      
       const updatedCurrentList = filteredUserList.filter(
         (item) => item.chatRoomId !== chatRoomId
       );
-
       setFilteredUserList(updatedCurrentList);
-      Swal.fire("Success", "Staff assigned successfully!", "success");
+      setOriginalUserList(updatedCurrentList);
+      
+      Swal.fire({
+        title: "Success",
+        text: "Staff assigned successfully!",
+        icon: "success",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000
+      });
     } catch (err) {
-      Swal.fire("Error", "Failed to assign staff. Please try again.", "error");
+      Swal.fire({
+        title: "Error",
+        text: "Failed to assign staff. Please try again.",
+        icon: "error",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000
+      });
       console.error("Error assigning staff to chat room:", err);
+    } finally {
+      setProcessingRooms(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(chatRoomId);
+        return newSet;
+      });
     }
   };
 
   useEffect(() => {
     if (signalRService) {
       signalRService.on("AssignStaffFailed", (message) => {
-        Swal.fire("Error", message, "error");
+        Swal.fire({
+          title: "Error",
+          text: message,
+          icon: "error",
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000
+        });
       });
-
+      
       return () => {
         signalRService.off("AssignStaffFailed");
       };
     }
-  }, [signalRService, currentList]);
+  }, [signalRService]);
 
   const handleClose = () => {
     setAddMode(false);
@@ -102,22 +151,32 @@ const AddPending = ({
 
   return (
     <div className="addUser">
-      <div className="close-button">
-        <CloseIcon onClick={handleClose} style={{ cursor: "pointer" }} />
+      <div className="header">
+        <h2>Pending Chat Rooms</h2>
+        <div className="close-button">
+          <CloseIcon onClick={handleClose} style={{ cursor: "pointer" }} />
+        </div>
       </div>
-      <form onSubmit={(e) => e.preventDefault()}>
+      
+      <form onSubmit={handleSearch}>
         <input
           type="text"
           placeholder="Search by username"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button type="button" onClick={handleSearch}>
+        <button type="submit">
+          <SearchIcon fontSize="small" style={{ marginRight: "5px" }} />
           Search
         </button>
       </form>
+      
       <div className="userContainer">
-        {filteredUserList.length > 0 ? (
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '30px' }}>
+            <CircularProgress size={40} style={{ color: '#1a73e8' }} />
+          </div>
+        ) : filteredUserList.length > 0 ? (
           filteredUserList.map((user) => (
             <div className="user" key={user.chatRoomId}>
               <div className="detail">
@@ -128,11 +187,14 @@ const AddPending = ({
                       : "/avatar.png"
                   }
                   alt="Profile"
+                  onError={(e) => {
+                    e.target.src = "/avatar.png";
+                  }}
                 />
                 <div className="nameAndMessage">
-                  <span>{user.user?.accountName}</span>
-                  <p className="truncate max-w-[200px]">
-                    {user?.lastMessage || "null"}
+                  <span>{user.user?.accountName || "Unknown User"}</span>
+                  <p className="truncate">
+                    {user?.lastMessage || "No messages yet"}
                   </p>
                 </div>
               </div>
@@ -144,13 +206,20 @@ const AddPending = ({
                     user.user.accountId
                   )
                 }
+                disabled={processingRooms.has(user.chatRoomId)}
               >
-                Claim room
+                {processingRooms.has(user.chatRoomId) ? (
+                  <CircularProgress size={16} style={{ color: 'white' }} />
+                ) : (
+                  "Claim Room"
+                )}
               </button>
             </div>
           ))
         ) : (
-          <p>No users found</p>
+          <div className="no-users">
+            <p>No pending chat rooms found</p>
+          </div>
         )}
       </div>
     </div>

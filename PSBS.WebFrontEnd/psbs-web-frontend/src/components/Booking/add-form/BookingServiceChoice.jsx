@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { 
+import {
   TextField,
   Select,
   MenuItem,
@@ -64,10 +64,10 @@ const BookingServiceChoice = ({ formData, handleChange, services, data }) => {
   const selectedPet = pets.find(p => p.petId === formData.pet);
 
   return (
-    <Box sx={{ 
-      border: '1px solid #ddd', 
-      borderRadius: 2, 
-      p: 2, 
+    <Box sx={{
+      border: '1px solid #ddd',
+      borderRadius: 2,
+      p: 2,
       mb: 2,
       backgroundColor: '#f9f9f9'
     }}>
@@ -108,7 +108,10 @@ const BookingServiceChoice = ({ formData, handleChange, services, data }) => {
           >
             {serviceVariants.map((v) => (
               <MenuItem key={v.serviceVariantId} value={v.serviceVariantId}>
-                {v.serviceContent} ({v.servicePrice.toLocaleString()} VND)
+                {v.serviceContent} ({new Intl.NumberFormat("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                }).format(v.servicePrice)})
               </MenuItem>
             ))}
           </Select>
@@ -120,7 +123,10 @@ const BookingServiceChoice = ({ formData, handleChange, services, data }) => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography>Price:</Typography>
         <Typography fontWeight="bold">
-          {formData.price?.toLocaleString() || "0"} VND
+          {new Intl.NumberFormat("vi-VN", {
+            style: "currency",
+            currency: "VND",
+          }).format(formData.price) || "0"} VND
         </Typography>
       </Box>
     </Box>

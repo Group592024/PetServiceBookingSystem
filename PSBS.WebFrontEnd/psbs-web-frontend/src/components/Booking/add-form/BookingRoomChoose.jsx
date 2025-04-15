@@ -194,7 +194,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             size="small"
           />
         }
-        label="Camera (+50,000 VND)"
+        label="Camera (+50.000 ₫)"
         sx={{ mb: 2 }}
       />
 
@@ -203,7 +203,10 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <Typography>Price:</Typography>
         <Typography fontWeight="bold">
-          {formData.price?.toLocaleString() || "0"} VND
+          {new Intl.NumberFormat("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        }).format(formData.price) || "0"} VND
         </Typography>
       </Box>
 

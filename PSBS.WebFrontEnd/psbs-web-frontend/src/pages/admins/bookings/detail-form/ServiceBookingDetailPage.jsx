@@ -20,6 +20,7 @@ const ServiceBookingDetailPage = () => {
   const [petNames, setPetNames] = useState({});
   const [serviceInfo, setServiceInfo] = useState({});
   const [statusLoading, setStatusLoading] = useState(false);
+  const [voucherDetails, setVoucherDetails] = useState(null);
 
 
   const getToken = () => {
@@ -101,6 +102,12 @@ const ServiceBookingDetailPage = () => {
           `http://localhost:5115/Bookings/${bookingId}`
         );
         setBooking(bookingResponse.data.data);
+
+        // Fetch voucher details if voucherId exists
+        if (bookingResponse.data.data.voucherId &&
+          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
+          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
+        }
 
         // Fetch payment type name
         const paymentResponse = await axios.get(
@@ -268,20 +275,20 @@ const ServiceBookingDetailPage = () => {
   const handleVNPayPayment = async () => {
     try {
       if (!booking) return;
-  
+
       // Get current path to redirect back after payment
-      const currentPath = window.location.pathname; 
-  
+      const currentPath = window.location.pathname;
+
       // Create description with booking code and path
       const description = JSON.stringify({
         bookingCode: booking.bookingCode.trim(),
         redirectPath: currentPath
       });
-  
+
       const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
       )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
-  
+
       const vnpayResponse = await fetch(vnpayUrl, {
         method: "GET",
         headers: {
@@ -289,17 +296,36 @@ const ServiceBookingDetailPage = () => {
           Authorization: `Bearer ${getToken()}`,
         },
       });
-  
+
       const vnpayResult = await vnpayResponse.text();
-      
+
       if (vnpayResult.startsWith("http")) {
-        window.location.href = vnpayResult; 
+        window.location.href = vnpayResult;
       } else {
         throw new Error("VNPay payment initiation failed");
       }
     } catch (error) {
       console.error("Payment error:", error);
       Swal.fire("Error!", "An error occurred while processing payment.", "error");
+    }
+  };
+
+  const fetchVoucherDetails = async (voucherId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/${voucherId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        setVoucherDetails(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
     }
   };
 
@@ -350,8 +376,8 @@ const ServiceBookingDetailPage = () => {
                 <div className="flex items-center space-x-4">
                   <span className="text-gray-700 font-semibold text-lg">Current Status:</span>
                   <span className={`px-4 py-2 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                        "bg-blue-100 text-blue-800"
+                    bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                      "bg-blue-100 text-blue-800"
                     }`}>
                     {bookingStatusName}
                   </span>
@@ -419,13 +445,16 @@ const ServiceBookingDetailPage = () => {
                 <div className="space-y-4">
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Total Amount:</span>{" "}
-                    <span className="text-green-600 font-bold">{booking.totalAmount.toLocaleString()} VND</span>
+                    <span className="text-green-600 font-bold">{new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(booking.totalAmount)}</span>
                   </p>
                   <p className="text-lg">
                     <span className="font-semibold text-gray-700">Status:</span>{" "}
                     <span className={`px-3 py-1 rounded-full text-sm font-semibold ${bookingStatusName === "Completed" ? "bg-green-100 text-green-800" :
-                        bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
-                          "bg-blue-100 text-blue-800"
+                      bookingStatusName === "Cancelled" ? "bg-red-100 text-red-800" :
+                        "bg-blue-100 text-blue-800"
                       }`}>
                       {bookingStatusName}
                     </span>
@@ -442,7 +471,6 @@ const ServiceBookingDetailPage = () => {
                       year: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: false
                     }).replace(',', '')}
                   </span>
                 </p>
@@ -457,6 +485,32 @@ const ServiceBookingDetailPage = () => {
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
+                {voucherDetails && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Voucher Name:</span>{" "}
+                          <span className="text-blue-600">{voucherDetails.voucherName}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Code:</span>{" "}
+                          <span className="text-gray-800">{voucherDetails.voucherCode}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Discount:</span>{" "}
+                          <span className="text-green-600">
+                            {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(voucherDetails.voucherMaximum)})
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -511,7 +565,10 @@ const ServiceBookingDetailPage = () => {
                           <p className="text-gray-700 mt-1">
                             <span className="font-semibold">Base Price:</span>{" "}
                             <span className="text-green-600 font-semibold">
-                              {serviceInfo[item.serviceVariantId].variantPrice.toLocaleString()} VND
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(serviceInfo[item.serviceVariantId].variantPrice)}
                             </span>
                           </p>
                         </div>
@@ -528,7 +585,10 @@ const ServiceBookingDetailPage = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Final Price:</span>{" "}
                       <span className="text-green-600 font-semibold">
-                        {item.price.toLocaleString()} VND
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(item.price)}
                       </span>
                     </p>
                   </div>

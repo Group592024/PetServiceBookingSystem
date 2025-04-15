@@ -4,7 +4,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import Swal from 'sweetalert2';
 
 function GiftUpdatePage() {
   const sidebarRef = useRef(null);
@@ -45,14 +45,23 @@ function GiftUpdatePage() {
           setImagePreview(
             `http://localhost:5050${response.data.data.giftImage}`
           ); // Set the image preview URL
-          toast.success(
-            response.data.message || "Gift data fetched successfully!"
-          );
+         
         } else {
-          toast.error(response.data.message || "Gift not found");
+          Swal.fire({
+            title: 'Warning',
+            text:  response.data.message || "Gift not found",
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
         }
       } catch (error) {
         console.error("Error fetching gift details:", error);
+        Swal.fire({
+          title: 'Warning',
+          text:  "Gift not found",
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       } finally {
         setLoading(false);
       }
@@ -124,7 +133,7 @@ function GiftUpdatePage() {
     event.preventDefault();
 
     if (!validateForm()) {
-      return; // Do not proceed if there are validation errors
+      return;
     }
 
     try {
@@ -166,14 +175,29 @@ function GiftUpdatePage() {
       );
 
       if (response.data.flag) {
-        toast.success(response.data.message || "Gift updated successfully!");
+        Swal.fire({
+          title: 'Success',
+          text:  response.data.message || "Gift updated successfully!",
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         navigate("/gifts");
       } else {
-        toast.error(response.data.message || "Failed to update gift");
+        Swal.fire({
+          title: 'Warning',
+          text:  response.data.message || "Failed to update gift",
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
     } catch (error) {
       console.error("Error updating gift:", error);
-      toast.error("Error updating gift.");
+      Swal.fire({
+        title: 'Warning',
+        text:  "Error updating gift.",
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
@@ -345,7 +369,6 @@ function GiftUpdatePage() {
           </div>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

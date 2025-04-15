@@ -182,7 +182,19 @@ const NavbarCustomer = () => {
           </li>
           <li>
             <NavLink
-              to="/bookings"
+              to="/customerroom"
+              className={({ isActive }) =>
+                isActive ? "nav-link active" : "nav-link"
+              }
+            >
+            <i class='bx bx-home-circle' ></i>
+              Room
+            </NavLink>
+          </li>
+          {isLoggedIn && (
+          <li>
+            <NavLink
+              to="/customer/bookings"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
@@ -191,18 +203,9 @@ const NavbarCustomer = () => {
               Booking
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/customer/pet"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <i className="bx bxs-dog"></i>
-              Pet
-            </NavLink>
-          </li>
-
+          )}
+        
+            {isLoggedIn && (
           <li>
             <NavLink
               to="/customer/gifts"
@@ -214,17 +217,20 @@ const NavbarCustomer = () => {
               Gift
             </NavLink>
           </li>
+          )}
+          {isLoggedIn && (
           <li>
             <NavLink
-              to="/customerroom"
+              to="/customer/pet"
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
             >
-            <i class='bx bx-home-circle' ></i>
-              Room
+              <i className="bx bxs-dog"></i>
+              Pet
             </NavLink>
           </li>
+          )}
         </ul>
       </div>
 
@@ -234,7 +240,7 @@ const NavbarCustomer = () => {
           <>
             <div className="notifications" onClick={toggleNotificationDropdown}>
               <i className="bx bx-bell"></i>
-              <span className="count">{notificationCount}</span>
+          
             </div>
 
             <Link to="/chat/customer" className="notifications">

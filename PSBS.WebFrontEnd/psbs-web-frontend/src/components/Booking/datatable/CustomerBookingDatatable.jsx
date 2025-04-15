@@ -7,12 +7,16 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import jwtDecode from "jwt-decode";
 import Swal from "sweetalert2";
+import IconButton from "@mui/material/IconButton";
+import InfoIcon from "@mui/icons-material/Info";
+import { useNavigate } from "react-router-dom";
+
 
 const CustomerBookingDatatable = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const getToken = () => {
     return sessionStorage.getItem('token');
   };
@@ -151,11 +155,12 @@ const CustomerBookingDatatable = () => {
         const detailPage = params.row.bookingTypeName === "Hotel" ? "RoomBookingDetailPage" : "ServiceBookingDetailPage";
         return (
           <div className="cellAction flex justify-around items-center w-full h-full">
-            <Link to={`/bookings/detail/${detailPage}/${params.row.bookingId}`} className="detailBtn" style={{ textDecoration: "none" }}>
-              <svg className="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-              </svg>
-            </Link>
+            <IconButton
+              aria-label="info"
+              onClick={() => navigate(`/customer/bookings/detail/${detailPage}/${params.row.bookingId}`)}
+            >
+              <InfoIcon color="info" />
+            </IconButton>
           </div>
         );
       },
@@ -166,7 +171,10 @@ const CustomerBookingDatatable = () => {
     id: index + 1,
     bookingId: booking.bookingId,
     customerName: booking.customerName,
-    totalAmount: booking.totalAmount.toLocaleString(),
+    totalAmount: new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(booking.totalAmount),
     bookingTypeName: booking.bookingTypeName,
     bookingDate: new Date(booking.bookingDate).toLocaleString('en-US', {
       year: 'numeric',
@@ -246,7 +254,7 @@ const CustomerBookingDatatable = () => {
             sorting: {
               sortModel: [{
                 field: 'bookingDate',
-                sort: 'desc' 
+                sort: 'desc'
               }]
             }
           }}

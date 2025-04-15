@@ -39,6 +39,7 @@ const Admin_Add_Booking = () => {
     bookingServicesDate,
     setbookingServicesDate,
   } = useContext(BookingContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getToken = () => {
     return sessionStorage.getItem("token");
@@ -88,21 +89,44 @@ const Admin_Add_Booking = () => {
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = async () => {
+    if (isSubmitting) return;
+
     if (activeStep === 0 && !selectedOption) {
-      alert("Please select a booking type before proceeding.");
+      Swal.fire(
+        "Failed!",
+        `Please select a booking type before proceeding.`,
+        "error"
+      );
       return;
     }
 
-    if (activeStep === 1 && !formData.phone) {
-      if (!formData.name || !formData.address || !formData.paymentMethod)
-        alert(
-          "Please fill all input and select payment type before proceeding."
+    if (activeStep === 1) {
+      if (!formData.phone || !formData.name || !formData.address) {
+        Swal.fire(
+          "Failed!",
+          "Please fill all input and select payment type before proceeding.",
+          "error"
         );
-      return;
+        return;
+      }
+      if (!formData.paymentMethod) {
+        Swal.fire(
+          "Failed!",
+          `Please select payment type before proceeding.`,
+          "error"
+        );
+        return;
+      }
     }
+    console.log("Payment Option:", formData.paymentMethod);
+
     if (activeStep === 2 && selectedOption === "Room") {
       if (bookingRooms.length === 0) {
-        alert("Please add at least one booking room.");
+        Swal.fire(
+          "Failed!",
+          `Please add at least one booking room.`,
+          "error"
+        );
         return;
       }
 
@@ -114,6 +138,11 @@ const Admin_Add_Booking = () => {
           !roomData.start ||
           !roomData.end
         ) {
+          Swal.fire(
+            "Failed!",
+            `Please add at least one booking room.`,
+            "error"
+          );
           alert("Please fill in all fields for each booking room.");
           return;
         }
@@ -184,6 +213,7 @@ const Admin_Add_Booking = () => {
     }
 
     if (activeStep === steps.length - 1) {
+      setIsSubmitting(true);
       console.log("Submitting booking data...");
       let requestData = {};
       let apiUrl = "";
@@ -254,7 +284,7 @@ const Admin_Add_Booking = () => {
               OrderDescription: bookingCode.trim(),
             });
             // Get current path to redirect back after payment
-            const currentPath = "/admin/bookings";
+            const currentPath = "/bookings";
             // Create description with booking code and path
             const description = JSON.stringify({
               bookingCode: bookingCode.trim(),
@@ -280,11 +310,16 @@ const Admin_Add_Booking = () => {
               window.location.href = vnpayResult;
               return;
             } else {
-              alert("VNPay payment failed!");
+              Swal.fire(
+                "Failed!",
+                `VNPay payment failed!`,
+                "error"
+              );
             }
           }
-          window.location.href = "/admin/bookings";
+          window.location.href = "/bookings";
         } else {
+          setIsSubmitting(false);
           Swal.fire(
             "Failed!",
             result.message || "Could not create booking.",
@@ -292,6 +327,7 @@ const Admin_Add_Booking = () => {
           );
         }
       } catch (error) {
+        setIsSubmitting(false);
         Swal.fire("Error!", "Failed to confirm booking", "error");
       }
     } else {
@@ -378,8 +414,23 @@ const Admin_Add_Booking = () => {
               >
                 Back
               </Button>
-              <Button onClick={handleNext} variant="contained" color="primary">
-                {activeStep === steps.length - 1 ? "Finish" : "Next"}
+              <Button
+                onClick={handleNext}
+                variant="contained"
+                color="primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="mr-2">Processing...</span>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </>
+                ) : (
+                  activeStep === steps.length - 1 ? "Finish" : "Next"
+                )}
               </Button>
             </div>
           </div>

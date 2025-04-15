@@ -6,7 +6,7 @@ describe('Login Page', () => {
   it('should display the login form', () => {
     cy.get('input#email').should('be.visible');
     cy.get('input#password').should('be.visible');
-    cy.contains('Login').should('be.visible');
+    cy.contains('Sign In').should('be.visible');
     cy.get('button[type="submit"]').should('be.visible');
   });
 

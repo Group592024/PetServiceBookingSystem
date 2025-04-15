@@ -8,11 +8,12 @@ import { useUserStore } from "../../../lib/userStore";
 import { CircularProgress } from "@mui/material";
 const List = () => {
   const { currentUser } = useUserStore();
+
   if (!currentUser) {
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-      <CircularProgress />
-    </div>
+        <CircularProgress />
+      </div>
     );
   }
 
