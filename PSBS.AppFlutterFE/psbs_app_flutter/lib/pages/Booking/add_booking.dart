@@ -375,41 +375,29 @@ class _AddBookingPageState extends State<AddBookingPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
     
-    // Store the booking code for the current payment session
+    // Apply certificate bypass
+    HttpOverrides.global = DevHttpOverrides();
+    
     await prefs.setString('current_payment_booking_code', bookingCode);
     
-    // Create description with booking code and redirect path
     final description = jsonEncode({
       'bookingCode': bookingCode.trim(),
       'redirectPath': '/customer/bookings'
     });
     
-    print('[DEBUG] Sending payment request for amount: ${amount.toInt()}');
-    
-    // Use the secure get method
     final response = await _secureGet(
       '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
-          'moneyToPay=${amount.toInt()}&'
-          'description=${Uri.encodeComponent(description)}',
+      'moneyToPay=${amount.toInt()}&'
+      'description=${Uri.encodeComponent(description)}',
       {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
     );
     
-    print('[DEBUG] Response status code: ${response.statusCode}');
-    print('[DEBUG] Response body: ${response.body}');
-    
     if (response.statusCode == 201 || response.statusCode == 200) {
-      // The response body directly contains the VNPay URL as text
       final vnpayUrl = response.body.trim();
-      print('[DEBUG] Received VNPay URL: $vnpayUrl');
       
-      if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
-        throw Exception('Invalid VNPay URL received: $vnpayUrl');
-      }
-      
-      // Try to open the URL in WebView first (more reliable)
       if (mounted) {
         await Navigator.push(
           context,
@@ -417,16 +405,14 @@ class _AddBookingPageState extends State<AddBookingPage> {
             builder: (context) => VNPayWebView(url: vnpayUrl),
           ),
         );
+        // Refresh or navigate after payment
+        Navigator.pop(context); // Or whatever navigation you need
       }
-    } else {
-      throw Exception('Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
     }
-  } catch (e, stackTrace) {
-    print('[ERROR] VNPay payment processing error: $e');
-    print('[STACK] $stackTrace');
+  } catch (e) {
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error processing payment: $e')),
+        SnackBar(content: Text('Payment error: ${e.toString()}')),
       );
     }
   }
@@ -1216,5 +1202,14 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
         double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
 
     return (subtotal * discount / 100).clamp(0, maxDiscount);
+  }
+}
+
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = 
+          (X509Certificate cert, String host, int port) => true;
   }
 }

@@ -18,6 +18,10 @@ const AdminBookingList = () => {
         <div className="listContainer content">
           <Navbar sidebarRef={sidebarRef} />
           <main className="p-3">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1 text-left">
+              <h2 className="text-2xl font-semibold">Booking List</h2>
+            </div>
             <div className="flex justify-end items-center gap-4 mb-4">
               <button
                 type="button"
@@ -41,12 +45,13 @@ const AdminBookingList = () => {
                 New
               </button>
             </div>
+          </div>
+            
             <AdminBookingDatatable />
           </main>
         </div>
       </div>
     );
   };
-  
 
 export default AdminBookingList

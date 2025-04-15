@@ -19,7 +19,11 @@ const List = () => {
       <div className="listContainer content">
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-3">
-          <div className="flex justify-end items-center gap-4 mb-4">
+        <div className="flex items-center justify-between mb-4">
+            <div className="flex-1 text-left">
+              <h2 className="text-2xl font-semibold">Medicine List</h2>
+            </div>
+            <div className="flex justify-end items-center gap-4 mb-4">
             <button
               type="button"
               onClick={handleNewButtonClick}
@@ -41,6 +45,7 @@ const List = () => {
               </svg>
               New
             </button>
+          </div>
           </div>
           <Datatable />
         </main>

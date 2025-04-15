@@ -443,12 +443,12 @@ const CustomerServiceBookingDetail = () => {
                           </span>
                         </p>
                         <div className="bg-gray-50 p-3 rounded-lg">
-                          <p className="text-gray-700">
+                          {/* <p className="text-gray-700">
                             <span className="font-semibold">Variant:</span>{" "}
                             <span className="text-gray-800">
                               {serviceInfo[item.serviceVariantId].variantName}
                             </span>
-                          </p>
+                          </p> */}
                           <p className="text-gray-700 mt-1">
                             <span className="font-semibold">Content:</span>{" "}
                             <span className="text-gray-800">
