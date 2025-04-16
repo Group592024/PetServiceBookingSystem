@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:psbs_app_flutter/pages/pet/pet_page.dart';
 
 class PetEdit extends StatefulWidget {
   final String petId;
@@ -429,30 +430,22 @@ class _PetEditState extends State<PetEdit> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
-                  child: Text(
-                    'OK',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  onPressed: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => MyHomePage(
-                          accountId: userId,
-                          title: 'Flutter Demo Home Page',
-                          initialIndex: 1,
-                        ),
-                      ),
-                      (route) => false,
-                    );
-                  }),
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                ),
+                child: Text(
+                  'OK',
+                  style: TextStyle(fontSize: 16),
+                ),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  Navigator.pop(context, 'refresh');
+                },
+              ),
             ],
           ),
         ),
@@ -505,7 +498,9 @@ class _PetEditState extends State<PetEdit> {
                   'OK',
                   style: TextStyle(fontSize: 16),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
             ],
           ),
@@ -548,21 +543,7 @@ class _PetEditState extends State<PetEdit> {
                       child: Icon(Icons.arrow_back, color: Colors.blue),
                     ),
                     onPressed: () async {
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      String? accountId = prefs.getString('accountId');
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyHomePage(
-                            title: "PetEase App",
-                            accountId: accountId ?? "",
-                            initialIndex: 1,
-                          ),
-                        ),
-                        (route) => false,
-                      );
+                      Navigator.pop(context);
                     },
                   ),
                   flexibleSpace: FlexibleSpaceBar(
@@ -803,22 +784,8 @@ class _PetEditState extends State<PetEdit> {
                               ),
                               SizedBox(width: 16),
                               Expanded(
-                                child: _buildActionButton(
-                                  'Cancel',
-                                  Icons.close,
-                                  Colors.red,
-                                  () => Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MyHomePage(
-                                        accountId: userId,
-                                        title: 'Flutter Demo Home Page',
-                                        initialIndex: 1,
-                                      ),
-                                    ),
-                                    (route) => false,
-                                  ),
-                                ),
+                                child: _buildActionButton('Cancel', Icons.close,
+                                    Colors.red, () => Navigator.pop(context)),
                               ),
                             ],
                           ),
