@@ -66,9 +66,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   final screens = [
     HomePage(),
-    PetPage(),
-    BookingListScreen(),
     ServicePage(),
+    BookingListScreen(),
+    RoomPage(),
     ProfilePage(accountId: '', title: ''),
   ];
 
@@ -92,9 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final items = <Widget>[
       Icon(Icons.home, size: 30),
-      Icon(Icons.pets_rounded, size: 30),
-      Icon(Icons.add, size: 30),
+      //Icon(Icons.pets_rounded, size: 30),
       Icon(Icons.local_offer, size: 30),
+      Icon(Icons.add, size: 30),
+      Icon(Icons.local_hotel, size: 30),
       Icon(Icons.person, size: 30),
     ];
 
@@ -159,21 +160,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   MaterialPageRoute(
                       builder: (context) => CustomerVoucherList()),
                 );
-              // } else if (value == 'camera') {
-              //   // 👉 Điều hướng sang trang xem camera
-              //   Navigator.push(
-              //     context,
-              //     MaterialPageRoute(builder: (context) => CameraScreen()),
-              //   );
+                // } else if (value == 'camera') {
+                //   // 👉 Điều hướng sang trang xem camera
+                //   Navigator.push(
+                //     context,
+                //     MaterialPageRoute(builder: (context) => CameraScreen()),
+                //   );
               } else if (value == 'gift') {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => GiftListScreen()),
                 );
-              } else if (value == 'room') {
+              } else if (value == 'pet') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => RoomPage()),
+                  MaterialPageRoute(builder: (context) => PetPage()),
                 );
               }
             },
@@ -186,6 +187,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               PopupMenuItem(
+                value: 'gift',
+                child: ListTile(
+                  leading: Icon(Icons.card_giftcard, color: Colors.blue),
+                  title: Text('Gift', style: TextStyle(color: Colors.black)),
+                ),
+              ),
+              PopupMenuItem(
                 value: 'camera',
                 child: ListTile(
                   leading: const Icon(Icons.videocam, color: Colors.blue),
@@ -194,17 +202,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               PopupMenuItem(
-                value: 'gift',
+                value: 'pet',
                 child: ListTile(
-                  leading: Icon(Icons.card_giftcard, color: Colors.blue),
-                  title: Text('Gift', style: TextStyle(color: Colors.black)),
-                ),
-              ),
-              PopupMenuItem(
-                value: 'room',
-                child: ListTile(
-                  leading: Icon(Icons.home, color: Colors.orange),
-                  title: Text('Rooms', style: TextStyle(color: Colors.black)),
+                  leading: Icon(Icons.pets, color: Colors.blue),
+                  title: Text('Pet', style: TextStyle(color: Colors.black)),
                 ),
               ),
               PopupMenuItem(

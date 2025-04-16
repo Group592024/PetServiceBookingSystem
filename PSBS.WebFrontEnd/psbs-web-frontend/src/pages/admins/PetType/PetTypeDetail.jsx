@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const PetTypeDetail = () => {
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
 
   const [detail, setDetail] = useState({});
 
@@ -23,10 +25,25 @@ const PetTypeDetail = () => {
               Authorization: `Bearer ${token}`,
             },
           }
-        ).then((response) => response.json());
-        setDetail(response.data);
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || "Internal Server Error");
+        }
+        setDetail(data?.data || data);
       } catch (error) {
-        console.error("Failed fetching data: ", error);
+        Swal.fire({
+          title: "Error",
+          text: error?.message || error,
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#d33",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/petType");
+          }
+        });
       }
     };
     if (id) fetchDetail();
