@@ -3,6 +3,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import Datatable from "../../../../components/facilityAndHealth/datatable/ServiceTypeDatatable";
 import { getData } from "../../../../Utilities/ApiFunctions";
+import Swal from 'sweetalert2';
 
 const ServiceTypeList = () => {
   const sidebarRef = useRef(null);
@@ -11,9 +12,10 @@ const ServiceTypeList = () => {
   useEffect(() => {
     const fetchServiceTypes = async () => {
       try {
-        const data = await getData("api/ServiceType"); 
-        setRows(data.data); 
+        const data = await getData("api/ServiceType");
+        setRows(data.data);
       } catch (error) {
+        Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
         console.error("Error fetching service types:", error);
       }
     };
@@ -39,14 +41,14 @@ const ServiceTypeList = () => {
     {
       name: "createAt",
       label: "Created At",
-      type: "string", 
+      type: "string",
       disabled: true,
 
     },
     {
       name: "updateAt",
       label: "Updated At",
-      type: "string", 
+      type: "string",
       disabled: true,
     },
   ];
@@ -71,7 +73,7 @@ const ServiceTypeList = () => {
   ];
 
   const columns = [
-    { 
+    {
       field: "index",
       headerName: "No.",
       width: 100,
@@ -88,11 +90,11 @@ const ServiceTypeList = () => {
         </div>
       ),
     },
-    { 
-      field: "typeName", 
-      headerName: "Service Type Name", 
+    {
+      field: "typeName",
+      headerName: "Service Type Name",
       width: 250,
-      headerAlign: 'center',  
+      headerAlign: 'center',
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -100,9 +102,9 @@ const ServiceTypeList = () => {
         </div>
       ),
     },
-    { 
-      field: "createAt", 
-      headerName: "Created At", 
+    {
+      field: "createAt",
+      headerName: "Created At",
       width: 180,
       headerAlign: 'center',
       renderHeader: () => (
@@ -113,7 +115,7 @@ const ServiceTypeList = () => {
       renderCell: (params) => {
         const date = new Date(params.value);
         const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         return (
           <div style={{ textAlign: 'center' }}>
@@ -122,9 +124,9 @@ const ServiceTypeList = () => {
         );
       }
     },
-    { 
-      field: "updateAt", 
-      headerName: "Updated At", 
+    {
+      field: "updateAt",
+      headerName: "Updated At",
       width: 180,
       headerAlign: 'center',
       renderHeader: () => (
@@ -135,7 +137,7 @@ const ServiceTypeList = () => {
       renderCell: (params) => {
         const date = new Date(params.value);
         const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); 
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         return (
           <div style={{ textAlign: 'center' }}>
@@ -163,7 +165,7 @@ const ServiceTypeList = () => {
     },
   ];
 
-  const basePath = "api/ServiceType"; 
+  const basePath = "api/ServiceType";
 
   return (
     <div>
@@ -173,13 +175,13 @@ const ServiceTypeList = () => {
         <main>
           <div className="listContainer">
             <Datatable
-              rowId={"serviceTypeId"} 
+              rowId={"serviceTypeId"}
               columns={columns}
               rows={rows}
               basePath={basePath}
               setRows={setRows}
               modelStructure={model}
-              title="Service Types" 
+              title="Service Types"
               addModel={addModel}
             />
           </div>

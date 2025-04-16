@@ -43,6 +43,7 @@ const AdminPetCreate = () => {
                 const data = await response.json();
                 setPetTypes(data.data.filter(type => !type.isDelete));
             } catch (error) {
+                Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
                 console.log('Error fetching pet types:', error);
             }
         };
@@ -65,6 +66,7 @@ const AdminPetCreate = () => {
                 const data = await response.json();
                 setAccounts(data.data || []);
             } catch (error) {
+                Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
                 console.log('Error fetching accounts:', error);
             }
         };
@@ -96,6 +98,7 @@ const AdminPetCreate = () => {
                     }
                     setBreeds(data.data || []);
                 } catch (error) {
+                    Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
                     console.log('Error fetching breeds:', error);
                     setBreeds([]);
                 }

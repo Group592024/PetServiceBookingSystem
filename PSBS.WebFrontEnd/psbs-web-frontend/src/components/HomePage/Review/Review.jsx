@@ -6,11 +6,11 @@ const Review = () => {
   return (
     <motion.section
       className="py-20 bg-gradient-to-b from-cyan-100 to-cyan-200"
-      style={{ userSelect: "none" }} 
-      initial={{ opacity: 0, y: 50 }} 
-      whileInView={{ opacity: 1, y: 0 }} 
-      transition={{ duration: 0.8, ease: "easeOut" }} 
-      viewport={{ once: true }} 
+      style={{ userSelect: "none" }}
+      initial={{ opacity: 1 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      viewport={{ once: true }}
     >
       <div className="max-w-5xl mx-auto text-center px-6">
         <motion.h3

@@ -13,7 +13,7 @@ class Service {
 final List<Service> services = [
   Service(
       image: 'assets/HomePage/services/service-icon1.svg',
-      name: 'Pharmacy',
+      name: 'Medical',
       description:
           'Includes regular veterinary check-ups, vaccinations, and other medical services.'),
   Service(
@@ -27,6 +27,7 @@ final List<Service> services = [
       description:
           'Book short-term or long-term stays at our pet shop, ensuring your pets are well cared for.'),
 ];
+
 class ServicesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -34,14 +35,14 @@ class ServicesScreen extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text(
-            'Our Best Services',
-            style: TextStyle(
-              fontSize: 26,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF2aa6df),
-            ),
-            textAlign: TextAlign.center,
+          'Our Best Services',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF2aa6df),
           ),
+          textAlign: TextAlign.center,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
@@ -52,7 +53,7 @@ class ServicesScreen extends StatelessWidget {
         ),
         SizedBox(height: 20),
         SizedBox(
-          height: 350, 
+          height: 350,
           child: Swiper(
             autoplay: true,
             autoplayDelay: 3500,

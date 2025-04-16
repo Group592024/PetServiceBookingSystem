@@ -36,6 +36,7 @@ const RoomList = () => {
                 console.error("Unexpected response format for roomTypes:", roomTypesData);
             }
         } catch (error) {
+            Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
             console.error("Error fetching room types:", error);
         }
     };
@@ -66,6 +67,7 @@ const RoomList = () => {
                 setData([]);
             }
         } catch (error) {
+            Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
             console.error("Error fetching data:", error);
             setData([]);
         } finally {
