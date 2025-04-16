@@ -93,9 +93,10 @@ const EditableModal = ({
                       value={formValues[field.name] !== undefined ? formValues[field.name] : false}
                       onChange={handleChange}
                       readOnly={field.disabled || view}
+                       label={field.label}
                     >
-                      <MenuItem value={true}>Active</MenuItem>
-                      <MenuItem value={false}>Stopping</MenuItem>
+                      <MenuItem value={true}>Inactive</MenuItem>
+                      <MenuItem value={false}>Active</MenuItem>
                     </Select>
                   </FormControl>
                 ) : (

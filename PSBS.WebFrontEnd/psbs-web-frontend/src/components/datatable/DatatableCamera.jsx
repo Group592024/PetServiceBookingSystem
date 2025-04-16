@@ -216,7 +216,7 @@ const DatatableCamera = ({
         
               <IconButton
            
-                aria-label="push"
+                aria-label="stream"
                 onClick={() => handlePush(params.row.cameraId)}
                 title="Video"
               >

@@ -17,12 +17,7 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             try
             {
-                // Check if there's an active PointRule (isDeleted is false)
-                var activePointRule = await context.PointRules.AnyAsync(pr => !pr.isDeleted);
-                if (activePointRule)
-                {
-                    return new Response(false, "Please inactivate the current Point Rule Ratio before adding a new one.");
-                }
+               entity.isDeleted = true;
 
                 // Add the new PointRule entity
                 var currentEntity = context.PointRules.Add(entity).Entity;
@@ -59,6 +54,13 @@ namespace ReservationApi.Infrastructure.Repositories
 
                 if (!pointRule.isDeleted)
                 {
+                    // Check if this is the last active PointRule
+                    int activeCount = await context.PointRules.CountAsync(pr => !pr.isDeleted);
+                    if (activeCount <= 1)
+                    {
+                        return new Response(false, "At least one active point rule must exist.");
+                    }
+
                     // First deletion attempt: mark as deleted
                     pointRule.isDeleted = true;
                     context.PointRules.Update(pointRule);
@@ -67,7 +69,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 }
                 else
                 {
-                    // Check if BookingStatusId is still referenced in Bookings table
+                    // Check if PointRule is still referenced in Bookings
                     bool isReferencedInBookings = await context.Bookings
                         .AnyAsync(b => b.PointRuleId == entity.PointRuleId);
 
@@ -84,10 +86,8 @@ namespace ReservationApi.Infrastructure.Repositories
             }
             catch (Exception ex)
             {
-                // Log the original exception
                 LogExceptions.LogException(ex);
-                // Display a user-friendly message to the client
-                return new Response(false, "An error occurred while deleting the booking type");
+                return new Response(false, "An error occurred while deleting the point rule.");
             }
         }
 
@@ -162,35 +162,45 @@ namespace ReservationApi.Infrastructure.Repositories
             try
             {
                 var pointRule = await context.PointRules.FindAsync(entity.PointRuleId);
-                
+
                 if (pointRule is null)
                 {
                     return new Response(false, $"{entity.PointRuleRatio} not found");
                 }
 
-                // Check if isDeleted is being changed from true to false
-                if (!entity.isDeleted && pointRule.isDeleted)
+                // Prevent deactivating the last active PointRule
+                if (entity.isDeleted && !pointRule.isDeleted)
                 {
-                    // Check if there's any other active PointRule (isDeleted == false)
-                    var activePointRuleExists = await context.PointRules
-                        .AnyAsync(pr => !pr.isDeleted && pr.PointRuleId != entity.PointRuleId);
-
-                    if (activePointRuleExists)
+                    int activeCount = await context.PointRules.CountAsync(pr => !pr.isDeleted);
+                    if (activeCount <= 1)
                     {
-                        return new Response(false, "Please inactivate the current Point Rule Ratio before making another active.");
+                        return new Response(false, "At least one active point rule must exist.");
                     }
                 }
 
+                // Reactivating this PointRule — deactivate others
+                if (!entity.isDeleted && pointRule.isDeleted)
+                {
+                    var otherPointRules = await context.PointRules
+                        .Where(pr => pr.PointRuleId != entity.PointRuleId)
+                        .ToListAsync();
+
+                    foreach (var other in otherPointRules)
+                    {
+                        other.isDeleted = true;
+                        context.PointRules.Update(other);
+                    }
+                }
+              
                 context.Entry(pointRule).State = EntityState.Detached;
                 context.PointRules.Update(entity);
                 await context.SaveChangesAsync();
-                return new Response(true, $"{entity.PointRuleRatio} successfully updated") { Data = entity };
+                var list = await context.PointRules.ToListAsync();
+                return new Response(true, $"{entity.PointRuleRatio} successfully updated") { Data = list };
             }
             catch (Exception ex)
             {
-                // Log the original exception
                 LogExceptions.LogException(ex);
-                // Display a user-friendly message to the client
                 return new Response(false, "Error occurred while updating the existing Point Rule.");
             }
         }

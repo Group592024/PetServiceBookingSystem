@@ -47,9 +47,8 @@ const BounceButton = styled(Button)(({ theme }) => ({
 }));
 
 const cameraStatuses = [
-  { value: "InUse", label: "In Use" },
   { value: "Free", label: "Free" },
-  { value: "Discard", label: "Discard" },
+
   { value: "UnderRepair", label: "Under Repair" },
 ];
 
@@ -235,21 +234,28 @@ const UpdateCameraModal = ({
                             onBlur={handleBlur}
                             label="Status *"
                           >
-                            {cameraStatuses.map((status, index) => (
-                              <MenuItem
-                                key={status.value}
-                                value={status.value}
-                                sx={{
-                                  transition: "all 0.3s",
-                                  "&:hover": {
-                                    backgroundColor: "primary.light",
-                                    transform: "translateX(5px)",
-                                  },
-                                }}
-                              >
-                                {status.label}
-                              </MenuItem>
-                            ))}
+                              {initialValues.cameraStatus === "Discard" ? (
+      <MenuItem value="Discard" disabled>
+        Discard
+      </MenuItem>
+    ) : null}
+    
+    {/* Regular selectable options */}
+    {cameraStatuses.map((status) => (
+      <MenuItem
+        key={status.value}
+        value={status.value}
+        sx={{
+          transition: "all 0.3s",
+          "&:hover": {
+            backgroundColor: "primary.light",
+            transform: "translateX(5px)",
+          },
+        }}
+      >
+        {status.label}
+      </MenuItem>
+    ))}
                           </Select>
                           <FormHelperText>
                             {touched.cameraStatus && errors.cameraStatus}
