@@ -90,11 +90,13 @@ const Datatable = ({
          confirmButtonText: 'OK'
        });
       
-       setRows((prevRows) => 
-        prevRows.map((row) => 
-          row[rowId] === data[rowId] ? { ...row, ...response.data } : row
-        )
-      );      
+       setRows((prevRows) =>
+        prevRows.map((row) => {
+          const updated = response.data.find((d) => d[rowId] === row[rowId]);
+          return updated ? { ...row, ...updated } : row;
+        })
+      );
+       
       }
       else{
        Swal.fire({
@@ -226,18 +228,31 @@ const Datatable = ({
     </Button>
   )}
 </div>
-      <DataGrid
-        className="datagrid"
-        getRowId={(row) => row[rowId]}
-        rows={rows}
-        columns={columns.concat(actionColumn)}
-        initialState={{
-          pagination: {
-            paginationModel: { page: 0, pageSize: 5 },
-          },
-        }}
-        pageSizeOptions={[5, 10]}
-      />
+<DataGrid
+  className="datagrid"
+  getRowId={(row) => row[rowId]}
+  rows={rows}
+  columns={columns.concat(actionColumn)}
+  initialState={{
+    pagination: {
+      paginationModel: { page: 0, pageSize: 5 },
+    },
+  }}
+  pageSizeOptions={[5, 10]}
+  sx={{
+    '& .MuiDataGrid-cellContent': {
+      textAlign: 'center',
+      width: '100%',
+    },
+    '& .MuiDataGrid-cell': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center', // <== this line centers vertically
+    },
+  }}
+/>
+
+
       <ToastContainer/>
     </div>
   );

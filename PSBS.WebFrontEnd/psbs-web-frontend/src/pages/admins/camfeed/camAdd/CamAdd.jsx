@@ -22,9 +22,8 @@ import CircularProgress from '@mui/material/CircularProgress';
 // Removed the cameraTypes array since we'll allow free text input
 
 const cameraStatuses = [
-  { value: "InUse", label: "In Use" },
   { value: "Free", label: "Free" },
-  { value: "Discard", label: "Discard" },
+ 
   { value: "UnderRepair", label: "Under Repair" },
 ];
 
