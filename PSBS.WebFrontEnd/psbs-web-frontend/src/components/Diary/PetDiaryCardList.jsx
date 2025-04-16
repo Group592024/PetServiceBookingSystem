@@ -7,7 +7,6 @@ import { useState } from "react";
 const PetDiaryCardList = ({ data }) => {
   const [diaries, setDiaries] = useState(data);
   const [clickedDiary, setClickedDiary] = useState(null);
-
   const [open, setOpen] = useState(false);
 
   // Delete Diary Processing
@@ -76,20 +75,30 @@ const PetDiaryCardList = ({ data }) => {
   };
 
   return (
-    <Stack>
-      <div className="pr-2">
-        {diaries?.map((item) => (
-          <PetDiaryCard
-            key={item?.diary_ID}
-            petDiary={item}
-            onEdit={() => {
-              setClickedDiary(item);
-              setOpen(true);
-            }}
-            onDelete={() => handleDelete(item?.diary_ID)}
-          />
-        ))}
-      </div>
+    <div className="space-y-6">
+      {diaries?.length > 0 ? (
+        <div className="divide-y divide-gray-100">
+          {diaries.map((item) => (
+            <div
+              key={item?.diary_ID}
+              className="py-5 first:pt-0 last:pb-0 transition-all duration-300 hover:bg-gray-50 rounded-xl px-2"
+            >
+              <PetDiaryCard
+                petDiary={item}
+                onEdit={() => {
+                  setClickedDiary(item);
+                  setOpen(true);
+                }}
+                onDelete={() => handleDelete(item?.diary_ID)}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-gray-500 italic">No diary entries to display</p>
+        </div>
+      )}
 
       {clickedDiary && (
         <EditDiaryModal
@@ -98,7 +107,7 @@ const PetDiaryCardList = ({ data }) => {
           diary={clickedDiary}
         />
       )}
-    </Stack>
+    </div>
   );
 };
 

@@ -1,5 +1,5 @@
 * {
-  font-family: 'Nunito', sans-serif;
+  font-family: "Nunito", sans-serif;
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -23,7 +23,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
 }
 
 .bx {
@@ -116,7 +116,7 @@ body {
 }
 
 .sidebar .side-menu li.active::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 40px;
   height: 40px;
@@ -128,7 +128,7 @@ body {
 }
 
 .sidebar .side-menu li.active::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 40px;
   height: 40px;
@@ -199,7 +199,7 @@ body {
 }
 
 .content .nav::before {
-  content: '';
+  content: "";
   position: absolute;
   width: 40px;
   height: 40px;
@@ -257,8 +257,6 @@ body {
   cursor: pointer;
 }
 
-
-
 .content .nav .profile img {
   width: 36px;
   height: 36px;
@@ -277,7 +275,7 @@ body {
 }
 
 .content .nav .theme-toggle::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
