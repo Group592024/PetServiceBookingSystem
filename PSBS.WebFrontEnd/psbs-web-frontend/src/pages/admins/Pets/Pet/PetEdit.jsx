@@ -247,8 +247,10 @@ const AdminPetEdit = () => {
     };
 
     const filteredAccounts = accounts.filter((account) =>
-        account.accountName.toLowerCase().includes(search.toLowerCase()) && account.roleId === "user"
-    ); // Filter accounts based on search and roleId
+        (account?.accountName?.toLowerCase()?.includes(search.toLowerCase()) ||
+            account?.accountPhoneNumber?.toLowerCase()?.includes(search.toLowerCase())) &&
+        account?.roleId === "user"
+    );
 
     console.log("Filtered accounts:", filteredAccounts);
 
@@ -398,10 +400,26 @@ const AdminPetEdit = () => {
                                                 {filteredAccounts.map((account) => (
                                                     <li
                                                         key={account.accountId}
-                                                        className="p-3 hover:bg-blue-50 cursor-pointer transition-colors"
+                                                        className="p-3 hover:bg-blue-50 cursor-pointer transition-colors flex items-center gap-3"
                                                         onClick={() => handleSelect(account.accountId, account.accountName)}
                                                     >
-                                                        {account.accountName}
+                                                        {/* Avatar */}
+                                                        {account.accountImage ? (
+                                                            <img
+                                                                src={`http://localhost:5050/account-service/images/${account.accountImage}`}
+                                                                alt="avatar"
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm">
+                                                                {account.accountName?.charAt(0).toUpperCase()}
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex flex-col">
+                                                            <span className="text-gray-800 font-medium">{account.accountName}</span>
+                                                            <span className="text-gray-500 text-sm">{account.accountPhoneNumber}</span>
+                                                        </div>
                                                     </li>
                                                 ))}
                                             </ul>

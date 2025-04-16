@@ -22,7 +22,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
         public RoomHistoriesControllerTest()
         {
             _roomHistoryService = A.Fake<IRoomHistory>();
-            _controller = new RoomHistoriesController(_roomHistoryService);
+   //         _controller = new RoomHistoriesController(_roomHistoryService);
         }
 
         [Fact]

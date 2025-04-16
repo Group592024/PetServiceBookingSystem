@@ -25,6 +25,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { keyframes } from "@emotion/react";
 import { getData, updateData } from "../../../../Utilities/ApiFunctions";
+import Swal from 'sweetalert2'; // Import SweetAlert
 
 // Custom pulse animation
 const pulse = keyframes`
@@ -45,7 +46,7 @@ const BounceButton = styled(Button)(({ theme }) => ({
   },
 }));
 
-const AssignCamera = ({ open, onClose, roomHistoryId, onSuccess }) => {
+const AssignCamera = ({ open, onClose, roomHistoryId, cameraId, onSuccess }) => {
   const [cameras, setCameras] = useState([]);
   const [loading, setLoading] = useState(false);
   const [animateIn, setAnimateIn] = useState(true);
@@ -79,25 +80,63 @@ const AssignCamera = ({ open, onClose, roomHistoryId, onSuccess }) => {
   };
 
   const handleSubmit = async (values, { resetForm }) => {
+    // Check if there's already a camera assigned (cameraId is not null)
+    if (cameraId) {
+      // Show warning with SweetAlert
+      const result = await Swal.fire({
+        title: 'Warning!',
+        text: 'This room already has a camera assigned. If you proceed, the current camera will be marked as under repair. Do you want to continue?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, assign new camera',
+        cancelButtonText: 'Cancel'
+      });
+      
+      // If user cancels, return early
+      if (!result.isConfirmed) {
+        return;
+      }
+    }
+    
     setLoading(true);
     setAnimateIn(false);
     
     try {
       const assignData = {
-        reoomHistoryId: roomHistoryId, // Note: API has a typo in the field name
+        reoomHistoryId: roomHistoryId, 
         cameraId: values.cameraId
       };
       
       const response = await updateData("api/Camera/assign", assignData);
       
       if (response.flag) {
+        Swal.fire({
+          title: 'Success!',
+          text: 'Camera assigned successfully',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        
         if (onSuccess) onSuccess();
         resetForm();
         onClose();
       } else {
+        Swal.fire({
+          title: 'Error!',
+          text: response.message || 'Failed to assign camera',
+          icon: 'error'
+        });
         console.error("Failed to assign camera:", response.message);
       }
     } catch (error) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'An error occurred while assigning the camera',
+        icon: 'error'
+      });
       console.error("Error assigning camera:", error);
     } finally {
       setLoading(false);
@@ -159,6 +198,21 @@ const AssignCamera = ({ open, onClose, roomHistoryId, onSuccess }) => {
                 </Zoom>
               </Box>
               <Divider sx={{ my: 2 }} />
+              
+              {/* Display info about current camera if one exists */}
+              {cameraId && (
+                <Fade in={animateIn} style={{ transitionDelay: "350ms" }}>
+                  <Box sx={{ mb: 2 }}>
+                    <Chip 
+                      icon={<Link />}
+                      label="This room already has a camera assigned" 
+                      color="warning" 
+                      variant="outlined"
+                      sx={{ width: '100%', justifyContent: 'flex-start' }}
+                    />
+                  </Box>
+                </Fade>
+              )}
               
               <Formik
                 initialValues={initialValues}

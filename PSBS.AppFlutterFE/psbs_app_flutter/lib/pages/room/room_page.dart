@@ -236,7 +236,7 @@ class _RoomPageState extends State<RoomPage> {
               actions: [
                 IconButton(
                   icon: Icon(
-                    isGridView ? Icons.grid_view : Icons.view_list,
+                    isGridView ? Icons.view_list : Icons.grid_view,
                     color: Colors.white,
                   ),
                   onPressed: () {

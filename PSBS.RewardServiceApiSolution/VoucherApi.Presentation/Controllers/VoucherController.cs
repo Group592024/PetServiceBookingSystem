@@ -20,15 +20,13 @@ namespace VoucherApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchers()
         {
             // get all vouchers from repo
-            var vouchers = await voucherInteface.GetAllAsync();
-            if (!vouchers.Any())
-                return NotFound("No vouchers detected in the database");
+            var vouchers = await voucherInteface.GetAllAsync();       
             // convert data from entity to DTO and return
             var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
             return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
             {
                 Data = list
-            }) : NotFound(new Response(false, "No Voucher detected"));
+            }) : Ok(new Response(false, "No Voucher detected"));
 
 
         }
@@ -133,7 +131,23 @@ namespace VoucherApi.Presentation.Controllers
             // convert to entity to DT
             var getEntity = await voucherInteface.GetByIdAsync(id);
             var response = await voucherInteface.DeleteAsync(getEntity);
-            return response.Flag is true ? Ok(response) : BadRequest(response);
+            return  Ok(response) ;
+        }
+
+        // GET api/<VoucherController>/
+        [HttpGet("search-gift-code")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<VoucherDTO>> GetVoucherByVoucherCode([FromQuery]string voucherCode)
+        {
+            // get single voucher from the repo
+            var voucher = await voucherInteface.GetVoucherByVoucherCode(voucherCode);
+            if (voucher is null)
+            {
+                return Ok(new Response(false, "Voucher requested not found"));
+            }
+            var (_voucher, _) = VoucherConversion.FromEntity(voucher, null);
+            return _voucher is not null ? Ok(new Response(true, "The Voucher retrieved successfully") { Data = _voucher })
+            : NotFound(new Response(false, "Voucher requested not found"));
         }
     }
 }

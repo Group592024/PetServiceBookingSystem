@@ -7,8 +7,8 @@ describe('Room Create Page', () => {
 
     cy.visit('http://localhost:3000/login');
     cy.get('#email', { timeout: 10000 }).should('be.visible');
-    cy.get('#email').type('admin@gmail.com');
-    cy.get('#password').type('08046428');
+    cy.get('#email').type('se.rn.a.vill.ar.es@gmail.com');
+    cy.get('#password').type('minh1234');
     cy.get('button[type="submit"]').click();
 
     cy.wait('@loginRequest', { timeout: 15000 }).then((interception) => {
@@ -163,7 +163,7 @@ describe('Room Create Page', () => {
   it('should select a room type and display its price', () => {
     cy.get('.MuiSelect-select').click();
     cy.contains('.MuiMenuItem-root', 'Deluxe Room').click();
-    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('eq', '800000 VND');
+    cy.contains('label', 'Room Price').parent().find('input').invoke('val').should('contain', '800.000');
   });
 
   it('should handle image upload', () => {

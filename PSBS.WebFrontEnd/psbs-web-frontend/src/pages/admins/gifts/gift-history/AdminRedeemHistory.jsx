@@ -14,7 +14,8 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Chip
+  Chip,
+  
 } from "@mui/material";
 import Swal from "sweetalert2";
 import DatatableNoAction from "../../../../components/datatable/DatatableNoAction";
@@ -26,6 +27,8 @@ const AdminRedeemHistory = () => {
   const [redeemStatuses, setRedeemStatuses] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRedeemId, setSelectedRedeemId] = useState(null);
+  const [selectedAccountId, setSelectedAccountId] = useState(null);
+  const [selectedPoint, setSelectedPoint] = useState(null);
   const [selectedRedeemStatusId, setSelectedRedeemStatusId] = useState(null);
   const basePath = "/vouchers/";
   const apiPath = "api/Voucher";
@@ -111,15 +114,117 @@ const AdminRedeemHistory = () => {
     fetchRedeemStatuses();
   }, []);
 
-  const handleOpenModal = (redeemId) => {
-    setSelectedRedeemId(redeemId);
+  const handleOpenModal = (redeem) => {
+    console.log("Redeem ID:", redeem);
+    setSelectedAccountId(redeem.accountId);
+    setSelectedRedeemId(redeem.id);
+    setSelectedPoint(redeem.redeemPoint);
     setModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
   };
-
+  const handleCancelRedeem = (redeemHistoryId, point) => {
+    const token = sessionStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#1976d2",
+      cancelButtonColor: "#d32f2f",
+      confirmButtonText: "Yes, cancel it!",
+      background: '#ffffff',
+      customClass: {
+        title: 'swal-title',
+        content: 'swal-text'
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        // Show loading state
+        Swal.fire({
+          title: 'Processing...',
+          html: 'Please wait while we cancel your redemption.',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+        
+        try {
+          const responseCancel = await axios.put(
+            `http://localhost:5050/api/Account/refundPoint?accountId=${selectedAccountId}`,
+            {
+              giftId: redeemHistoryId,
+              requiredPoints: point,
+            }, 
+            config
+          );
+          
+          if (responseCancel.data.flag) {
+            // Close loading and show success
+            Swal.fire({
+              title: "Cancelled!",
+              text: "Your redemption has been cancelled.",
+              icon: "success",
+              confirmButtonColor: '#1976d2',
+            });
+            
+            // Refresh the history after cancellation
+            const response = await axios.get(
+              `http://localhost:5050/redeemhistory/${selectedAccountId}`, 
+              config
+            );
+            
+            if (response.data.flag) {
+              const formattedData = await Promise.all(
+                response.data.data.map(async (item) => {
+                  const giftResponse = await axios.get(
+                    `http://localhost:5050/Gifts/detail/${item.giftId}`, 
+                    config
+                  );
+                  return {
+                    id: item.redeemHistoryId,
+                    ...item,
+                    gift: giftResponse.data.data,
+                  };
+                })
+              );
+              
+              setModalOpen(false);
+              fetchAllHistory();
+            }
+          } else {
+            // Show error if the flag is false
+            Swal.fire({
+              title: "Error!",
+              text: responseCancel.data.message || "Failed to cancel redemption.",
+              icon: "error",
+              confirmButtonColor: '#1976d2',
+            });
+          }
+        } catch (error) {
+          console.error("Error cancelling redeem:", error);
+          // Show error alert
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to cancel redemption.",
+            icon: "error",
+            confirmButtonColor: '#1976d2',
+          });
+        }
+      }
+    });
+  };
+  
+  
   const handleUpdateStatus = async () => {
     const token = sessionStorage.getItem("token");
     const config = {
@@ -127,6 +232,10 @@ const AdminRedeemHistory = () => {
         Authorization: `Bearer ${token}`,
       },
     };
+    console.log("Selected Redeem ID:", selectedRedeemId);
+   if(selectedRedeemStatusId === "6a565faf-d31e-4ec7-ad20-433f34e3d7a9"){
+    handleCancelRedeem(selectedRedeemId, selectedPoint);
+   } else{
     try {
       const response = await axios.put(
         `http://localhost:5050/redeemhistory/${selectedRedeemId}/status/${selectedRedeemStatusId}`,  {}, 
@@ -142,6 +251,7 @@ const AdminRedeemHistory = () => {
     } catch (error) {
       Swal.fire("Error", "Failed to update status", "error");
     }
+   }
   };
 
   const statusMapping = {
@@ -230,11 +340,19 @@ const AdminRedeemHistory = () => {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      renderCell: (params) => (
-        <IconButton aria-label="edit" onClick={() => handleOpenModal(params.row.id)}>
-          <EditIcon color="success" />
-        </IconButton>
-      ),
+      
+         renderCell: (params) => {
+              // Only show cancel button for redeemed items that haven't been picked up or cancelled
+              const isRedeemed = params.row.redeemStatusId === "1509e4e6-e1ec-42a4-9301-05131dd498e4";
+              
+              return isRedeemed ? (
+                <IconButton aria-label="edit" onClick={() => handleOpenModal(params.row)}>
+                <EditIcon color="success" />
+              </IconButton>
+              ) : (
+                <Typography variant="body2" color="text.secondary">No actions</Typography>
+              );
+            },
     },
   ];
 
@@ -246,6 +364,7 @@ const AdminRedeemHistory = () => {
         <main>
           <div className="listContainer">
             <DatatableNoAction
+         
               rowId={"redeemHistoryId"}
               columns={columns}
               rows={allHistory}

@@ -242,7 +242,6 @@ const GiftDatatable = () => {
           disableRowSelectionOnClick
         />
       </Box>
-      <ToastContainer />
     </div>
   );
 };

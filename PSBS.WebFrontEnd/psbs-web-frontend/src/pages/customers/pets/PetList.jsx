@@ -31,7 +31,13 @@ const CustomerPetList = () => {
                 setError(data.message || "Failed to fetch pets.");
             }
         } catch (err) {
-            setError("An error occurred while fetching data.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Service Unavailable',
+                text: "We couldn't retrieve pet information at the moment. Please try again later.",
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#3085d6'
+            });
         } finally {
             setLoading(false);
         }

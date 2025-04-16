@@ -50,7 +50,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
 
       // Fetch rooms
       final roomResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Room/available"),
+        Uri.parse("http://10.0.2.2:5050/api/Room/available"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -74,7 +74,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       // Fetch pets if customer ID exists
       if (widget.data["cusId"] != null) {
         final petResponse = await http.get(
-          Uri.parse("http://127.0.0.1:5050/api/pet/available/${widget.data["cusId"]}"),
+          Uri.parse("http://10.0.2.2:5050/api/pet/available/${widget.data["cusId"]}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -119,7 +119,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
       String? token = prefs.getString('token');
       
       final response = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/RoomType/$roomTypeId"),
+        Uri.parse("http://10.0.2.2:5050/api/RoomType/$roomTypeId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",

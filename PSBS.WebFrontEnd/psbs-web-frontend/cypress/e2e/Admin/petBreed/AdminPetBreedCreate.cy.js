@@ -7,8 +7,8 @@ describe('Pet Breed Create Page', () => {
 
     cy.visit('http://localhost:3000/login');
     cy.get('#email', { timeout: 10000 }).should('be.visible');
-    cy.get('#email').type('admin@gmail.com');
-    cy.get('#password').type('08046428');
+    cy.get('#email').type('se.rn.a.vill.ar.es@gmail.com');
+    cy.get('#password').type('minh1234');
     cy.get('button[type="submit"]').click();
 
     cy.wait('@loginRequest', { timeout: 15000 }).then((interception) => {

@@ -2,7 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:psbs_app_flutter/pages/Camera/CameraFeed/camera_modal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'vnpay_webview.dart';
+import 'dart:io';
 
 class CustomerRoomBookingDetail extends StatefulWidget {
   final String bookingId;
@@ -25,6 +29,12 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   bool isLoading = true;
   String? error;
 
+  String? voucherName;
+  String? voucherCode;
+  double? voucherDiscount;
+  double? voucherMaximum;
+  bool isVoucherLoaded = false;
+
   @override
   void initState() {
     super.initState();
@@ -38,7 +48,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch booking details
       final bookingResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/Bookings/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -49,7 +59,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch payment type
       final paymentResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
+            "http://10.0.2.2:5050/api/PaymentType/${bookingData['paymentTypeId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -59,7 +69,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch account name
       final accountResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/Account?AccountId=${bookingData['accountId']}"),
+            "http://10.0.2.2:5050/api/Account?AccountId=${bookingData['accountId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -69,7 +79,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       // Fetch booking status
       final statusResponse = await http.get(
         Uri.parse(
-            "http://127.0.0.1:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
+            "http://10.0.2.2:5050/api/BookingStatus/${bookingData['bookingStatusId']}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -78,7 +88,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Fetch room history
       final historyResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/RoomHistories/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/api/RoomHistories/${widget.bookingId}"),
+
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -124,7 +135,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('token');
         final petResponse = await http.get(
-          Uri.parse("http://127.0.0.1:5050/api/pet/${history['petId']}"),
+          Uri.parse("http://10.0.2.2:5050/api/pet/${history['petId']}"),
           headers: {
             "Authorization": "Bearer $token",
             "Content-Type": "application/json",
@@ -147,7 +158,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final roomResponse = await http.get(
-        Uri.parse("http://127.0.0.1:5050/api/Room/$roomId"),
+        Uri.parse("http://10.0.2.2:5050/api/Room/$roomId"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -170,7 +181,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       final response = await http.put(
-        Uri.parse("http://127.0.0.1:5050/Bookings/cancel/${widget.bookingId}"),
+        Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
         headers: {
           "Authorization": "Bearer $token",
           "Content-Type": "application/json",
@@ -327,6 +338,257 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
     } catch (e) {
       return "Invalid date";
     }
+  }
+
+  Future<void> fetchVoucherDetails(String voucherId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        print("Error: User is not logged in.");
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse("http://10.0.2.2:5050/api/Voucher/$voucherId"),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      final responseData = json.decode(response.body);
+      if (responseData['flag'] && responseData['data'] != null) {
+        setState(() {
+          voucherName = responseData['data']['voucherName'];
+          voucherCode = responseData['data']['voucherCode'];
+          voucherDiscount = responseData['data']['voucherDiscount'];
+          voucherMaximum = responseData['data']['voucherMaximum'];
+          isVoucherLoaded = true;
+        });
+      }
+    } catch (error) {
+      print("Error fetching voucher details: $error");
+    }
+  }
+
+  Future<void> handleVNPayPayment() async {
+    try {
+      if (booking == null) return;
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "User is not logged in. Please log in to proceed with payment."),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Apply certificate bypass for development
+      HttpOverrides.global = DevHttpOverrides();
+
+      // Store the booking code for the current payment session
+      await prefs.setString(
+          'current_payment_booking_code', booking!['bookingCode']);
+
+      // Create description with booking code and redirect path
+      final description = jsonEncode({
+        'bookingCode': booking!['bookingCode'].trim(),
+        'redirectPath': '/customer/bookings'
+      });
+
+
+
+      // Use the secure get method
+      final response = await _secureGet(
+        'https://10.0.2.2:5201/Bookings/CreatePaymentUrl?'
+        'moneyToPay=${booking!['totalAmount']}&'
+        'description=${Uri.encodeComponent(description)}',
+        {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print('[DEBUG] Response status code: ${response.statusCode}');
+      print('[DEBUG] Response body: ${response.body}');
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        // The response body directly contains the VNPay URL as text
+        final vnpayUrl = response.body.trim();
+        print('[DEBUG] Received VNPay URL: $vnpayUrl');
+
+        if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+          throw Exception('Invalid VNPay URL received: $vnpayUrl');
+        }
+
+        // Try to open the URL in WebView first (more reliable)
+        if (mounted) {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => VNPayWebView(url: vnpayUrl),
+            ),
+          );
+
+          // Refresh the booking details after payment
+          fetchBookingDetails();
+        }
+      } else {
+        throw Exception(
+            'Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e, stackTrace) {
+      print('[ERROR] VNPay payment processing error: $e');
+      print('[STACK] $stackTrace');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error processing payment: $e')),
+        );
+      }
+    }
+  }
+
+// Add this helper method for secure HTTP requests
+  Future<http.Response> _secureGet(
+      String url, Map<String, String> headers) async {
+    // Apply certificate bypass for development
+    HttpOverrides.global = DevHttpOverrides();
+
+    try {
+      final client = http.Client();
+      final response = await client
+          .get(
+            Uri.parse(url),
+            headers: headers,
+          )
+          .timeout(Duration(seconds: 30));
+
+      return response;
+    } catch (e) {
+      print('[ERROR] HTTP request failed: $e');
+      rethrow;
+    }
+  }
+
+  Future<void> handleCameraSettings(Map<String, dynamic> roomHistory) async {
+  // Check if there's a camera assigned to this room
+  final cameraId = roomHistory['cameraId'];
+  
+  if (cameraId == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("No camera is assigned to this room."),
+        backgroundColor: Colors.orange,
+      ),
+    );
+    return;
+  }
+
+  // Show the camera modal
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return CameraModal(
+        cameraId: cameraId,
+        onClose: () => Navigator.of(context).pop(),
+        open: true,
+      );
+    },
+  );
+}
+
+  Widget _buildVoucherSection() {
+    if (!isVoucherLoaded || voucherName == null) {
+      return SizedBox.shrink();
+    }
+
+    return Container(
+      margin: EdgeInsets.only(top: 16),
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Applied Voucher",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade800,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text("Voucher Name: $voucherName", style: TextStyle(fontSize: 14)),
+          Text("Code: $voucherCode", style: TextStyle(fontSize: 14)),
+          Text(
+            "Discount: ${voucherDiscount?.toStringAsFixed(2)}% (Max ${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(voucherMaximum)})",
+            style: TextStyle(fontSize: 14, color: Colors.green.shade700),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (booking?['isPaid'] == false && paymentTypeName == "VNPay")
+          ElevatedButton(
+            onPressed: handleVNPayPayment,
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              backgroundColor: Colors.blue.shade600,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.payment, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "Pay with VNPay",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        SizedBox(width: 16),
+        ElevatedButton(
+          onPressed: cancelBooking,
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            backgroundColor: Colors.red.shade600,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.cancel, size: 20),
+              SizedBox(width: 8),
+              Text(
+                "Cancel Booking",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -522,60 +784,8 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                                   ),
                                   child: Padding(
                                     padding: EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(Icons.king_bed,
-                                                color: Colors.blue.shade700,
-                                                size: 24),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              roomName,
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        SizedBox(height: 12),
-                                        _buildRoomDetailRow(
-                                          Icons.pets,
-                                          "Pet:",
-                                          history['petName'] ?? "Unknown Pet",
-                                        ),
-                                        _buildRoomDetailRow(
-                                          Icons.login,
-                                          "Check-in:",
-                                          formatDate(
-                                              history['bookingStartDate']),
-                                        ),
-                                        _buildRoomDetailRow(
-                                          Icons.logout,
-                                          "Check-out:",
-                                          formatDate(history['bookingEndDate']),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Icon(Icons.circle,
-                                                color: _getStatusColor(
-                                                    history['status']),
-                                                size: 16),
-                                            SizedBox(width: 8),
-                                            Text(
-                                              history['status'] ?? "Unknown",
-                                              style: TextStyle(
-                                                color: Colors.grey.shade700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                    child:
+                                        _buildRoomDetailRowWithCamera(history),
                                   ),
                                 );
                               },
@@ -599,43 +809,12 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
                               ),
                             ),
 
-                      // Cancel Button (if applicable)
-                      if (bookingStatusName == "Pending" ||
-                          bookingStatusName == "Confirmed")
-                        AnimatedContainer(
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          margin: EdgeInsets.only(top: 24),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: cancelBooking,
-                              style: ElevatedButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 32, vertical: 16),
-                                backgroundColor: Colors.red.shade600,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 2,
-                                shadowColor: Colors.red.shade100,
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.cancel, size: 20),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    "Cancel Booking",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      // Voucher Section
+                      _buildVoucherSection(),
+
+                      // Action Buttons
+                      _buildActionButtons(),
+
                       SizedBox(height: 20),
                     ],
                   ),
@@ -719,6 +898,81 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRoomDetailRowWithCamera(Map<String, dynamic> history) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.king_bed, color: Colors.blue.shade700, size: 24),
+            SizedBox(width: 8),
+            Text(
+              roomName,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12),
+        _buildRoomDetailRow(
+          Icons.pets,
+          "Pet:",
+          history['petName'] ?? "Unknown Pet",
+        ),
+        _buildRoomDetailRow(
+          Icons.login,
+          "Check-in:",
+          formatDate(history['bookingStartDate']),
+        ),
+        _buildRoomDetailRow(
+          Icons.logout,
+          "Check-out:",
+          formatDate(history['bookingEndDate']),
+        ),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Icon(Icons.circle,
+                color: _getStatusColor(history['status']), size: 16),
+            SizedBox(width: 8),
+            Text(
+              history['status'] ?? "Unknown",
+              style: TextStyle(
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
+              SizedBox(height: 8),
+              if (bookingStatusName.toLowerCase() == "checked in" && 
+          (history['status']?.toString().toLowerCase() == "checked in"))
+          ElevatedButton(
+          onPressed: () => handleCameraSettings(history),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            backgroundColor: Colors.blue.shade600,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.videocam, size: 20),
+                SizedBox(width: 8),
+                Text(
+                  "View Camera Feed",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ],
     );
   }
 

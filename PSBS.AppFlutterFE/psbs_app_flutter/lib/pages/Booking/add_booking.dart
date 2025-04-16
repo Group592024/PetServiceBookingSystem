@@ -7,6 +7,9 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'vnpay_webview.dart';
+import 'dart:io';
+import 'package:url_launcher/url_launcher.dart';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -15,9 +18,11 @@ class AddBookingPage extends StatefulWidget {
 
 class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
-  static const String apiBaseUrl = 'http://127.0.0.1:5050';
-  static const String bookingBaseUrl = 'http://127.0.0.1:5115';
-  static const String paymentBaseUrl = 'https://10.211.55.7:5201';
+  static const String apiBaseUrl = 'http://10.0.2.2:5050';
+  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+
+  static const String paymentBaseUrl = 'https://10.0.2.2:5201';
+
 
   // Rest of your existing variables
   int _currentStep = 0;
@@ -33,6 +38,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
   Map<String, String> _roomNames = {};
   Map<String, String> _petNames = {};
   bool _isProcessing = false;
+  String _voucherSearchCode = '';
+  bool _searchLoading = false;
+  String _searchError = '';
 
   @override
   void initState() {
@@ -117,12 +125,14 @@ class _AddBookingPageState extends State<AddBookingPage> {
     print('=== AddBookingPage: _updateBookingServiceData ===');
     print('Received Data:');
     print(json.encode(data));
-    
+
     if (mounted) {
       setState(() {
         _bookingServiceData = List<Map<String, dynamic>>.from(data);
-        print('Updated _bookingServiceData length: ${_bookingServiceData.length}');
-        print('Updated Service Variant: ${_bookingServiceData.first['serviceVariant']['content']} - ${_bookingServiceData.first['serviceVariant']['price']}');
+        print(
+            'Updated _bookingServiceData length: ${_bookingServiceData.length}');
+        print(
+            'Updated Service Variant: ${_bookingServiceData.first['serviceVariant']['content']} - ${_bookingServiceData.first['serviceVariant']['price']}');
         _calculateTotalPrice();
       });
     }
@@ -140,7 +150,9 @@ class _AddBookingPageState extends State<AddBookingPage> {
     } else if (_serviceType == "Service") {
       subtotal = _bookingServiceData.fold(0.0, (sum, service) {
         if (service["serviceVariant"] != null) {
-          double price = double.tryParse(service["serviceVariant"]["price"].toString()) ?? 0.0;
+          double price =
+              double.tryParse(service["serviceVariant"]["price"].toString()) ??
+                  0.0;
           return sum + price;
         }
         return sum;
@@ -152,13 +164,16 @@ class _AddBookingPageState extends State<AddBookingPage> {
       var voucher = _vouchers.firstWhere(
           (v) => v['voucherId'] == _selectedVoucher,
           orElse: () => {});
-      
+
       if (voucher.isNotEmpty) {
-        double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
-        double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
-        
+        double discount =
+            double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+        double maxDiscount =
+            double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+
         // Calculate discount amount
-        double discountAmount = (subtotal * discount / 100).clamp(0, maxDiscount);
+        double discountAmount =
+            (subtotal * discount / 100).clamp(0, maxDiscount);
         total = subtotal - discountAmount;
 
         print('=== Price Calculation with Voucher ===');
@@ -241,25 +256,93 @@ class _AddBookingPageState extends State<AddBookingPage> {
     }
   }
 
-  Future<bool> _launchUrl(String url) async {
-    try {
-      print('[DEBUG] Attempting to launch URL: $url');
+  Future<void> _searchVoucher() async {
+    if (_voucherSearchCode.trim().isEmpty) {
+      setState(() {
+        _searchError = "Please enter a voucher code";
+      });
+      return;
+    }
 
-      if (await canLaunchUrl(Uri.parse(url))) {
-        final result = await launchUrl(
-          Uri.parse(url),
-          mode: LaunchMode.externalApplication,
-        );
-        print('[DEBUG] launchUrl result: $result');
-        return result;
+    setState(() {
+      _searchLoading = true;
+      _searchError = '';
+    });
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+      final response = await http.get(
+        Uri.parse(
+            '$apiBaseUrl/api/Voucher/search-gift-code?voucherCode=$_voucherSearchCode'),
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['flag'] && data['data'] != null) {
+          // Check if this voucher is already in our list
+          bool exists =
+              _vouchers.any((v) => v['voucherId'] == data['data']['voucherId']);
+
+          if (!exists) {
+            setState(() {
+              _vouchers = [..._vouchers, data['data']];
+            });
+          }
+
+          setState(() {
+            _selectedVoucher = data['data']['voucherId'];
+            _calculateTotalPrice();
+          });
+        } else {
+          setState(() {
+            _searchError = data['message'] ?? "Voucher not found";
+          });
+        }
       }
-      print('[ERROR] URL cannot be handled: $url');
-      return false;
-    } catch (e, stackTrace) {
-      print('[ERROR] Exception in _launchUrl: $e\n$stackTrace');
-      return false;
+    } catch (e) {
+      setState(() {
+        _searchError = "Error searching voucher";
+      });
+      print("Error searching voucher: $e");
+    } finally {
+      setState(() {
+        _searchLoading = false;
+      });
     }
   }
+
+  Future<bool> _launchUrl(String url) async {
+  try {
+    print('[DEBUG] Attempting to launch URL: $url');
+
+    final uri = Uri.parse(url);
+    
+    // First check if we can launch the URL
+    if (await canLaunchUrl(uri)) {
+      // Try to launch in external application
+      final result = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      
+      print('[DEBUG] launchUrl result: $result');
+      return result;
+    } else {
+      print('[WARNING] Cannot launch URL: $url');
+      return false;
+    }
+  } catch (e, stackTrace) {
+    print('[ERROR] Exception in _launchUrl: $e\n$stackTrace');
+    return false;
+  }
+}
+
+
 
   Future<String?> _getPaymentTypeName(String paymentTypeId) async {
     try {
@@ -286,6 +369,89 @@ class _AddBookingPageState extends State<AddBookingPage> {
       return null;
     }
   }
+
+  Future<void> _processVNPayPayment(String bookingCode, double amount) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    
+    // Store the booking code for the current payment session
+    await prefs.setString('current_payment_booking_code', bookingCode);
+    
+    // Create description with booking code and redirect path
+    final description = jsonEncode({
+      'bookingCode': bookingCode.trim(),
+      'redirectPath': '/customer/bookings'
+    });
+    
+    print('[DEBUG] Sending payment request for amount: ${amount.toInt()}');
+    
+    // Use the secure get method
+    final response = await _secureGet(
+      '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+          'moneyToPay=${amount.toInt()}&'
+          'description=${Uri.encodeComponent(description)}',
+      {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+    
+    print('[DEBUG] Response status code: ${response.statusCode}');
+    print('[DEBUG] Response body: ${response.body}');
+    
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      // The response body directly contains the VNPay URL as text
+      final vnpayUrl = response.body.trim();
+      print('[DEBUG] Received VNPay URL: $vnpayUrl');
+      
+      if (vnpayUrl.isEmpty || !vnpayUrl.startsWith('http')) {
+        throw Exception('Invalid VNPay URL received: $vnpayUrl');
+      }
+      
+      // Try to open the URL in WebView first (more reliable)
+      if (mounted) {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VNPayWebView(url: vnpayUrl),
+          ),
+        );
+      }
+    } else {
+      throw Exception('Failed to get VNPay URL: ${response.statusCode} - ${response.body}');
+    }
+  } catch (e, stackTrace) {
+    print('[ERROR] VNPay payment processing error: $e');
+    print('[STACK] $stackTrace');
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error processing payment: $e')),
+      );
+    }
+  }
+}
+
+// Add this method to your _AddBookingPageState class
+Future<http.Response> _secureGet(String url, Map<String, String> headers) async {
+  // Apply certificate bypass for development
+  HttpOverrides.global = DevHttpOverrides();
+  
+  try {
+    final client = http.Client();
+    final response = await client.get(
+      Uri.parse(url),
+      headers: headers,
+    ).timeout(Duration(seconds: 30));
+    
+    return response;
+  } catch (e) {
+    print('[ERROR] HTTP request failed: $e');
+    rethrow;
+  }
+}
+
+
 
   Future<void> _sendRoomBookingRequest() async {
     if (mounted) setState(() => _isProcessing = true);
@@ -347,47 +513,22 @@ class _AddBookingPageState extends State<AddBookingPage> {
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+      final result = json.decode(response.body);
+      final bookingCode = result['data'].toString().trim();
 
-        if (paymentTypeName == "VNPay") {
-          final bookingCode = result['data'].toString().trim();
-          final amount = _totalPrice.toInt();
-
-          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
-              'moneyToPay=$amount&'
-              'description=$bookingCode&'
-              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
-
-          if (!await _launchUrl(vnpayUrl)) {
-            if (mounted) {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(title: const Text('Payment')),
-                    body: WebViewWidget(
-                      // Changed from WebView to WebViewWidget
-                      controller: WebViewController()
-                        ..loadRequest(Uri.parse(vnpayUrl))
-                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Room booking created successfully')),
-            );
-            Navigator.pop(context);
-          }
-        }
+      if (paymentTypeName == "VNPay") {
+        await _processVNPayPayment(bookingCode, _totalPrice);
       } else {
-        throw Exception('Failed to create room booking: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Room booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
       }
+    } else {
+      throw Exception('Failed to create room booking: ${response.body}');
+    }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -461,46 +602,22 @@ class _AddBookingPageState extends State<AddBookingPage> {
       );
 
       if (response.statusCode == 200) {
-        final result = json.decode(response.body);
+      final result = json.decode(response.body);
+      final bookingCode = result['data'].toString().trim();
 
-        if (paymentTypeName == "VNPay") {
-          final bookingCode = result['data'].toString().trim();
-          final amount = _totalPrice.toInt();
-
-          final vnpayUrl = '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
-              'moneyToPay=$amount&'
-              'description=$bookingCode&'
-              'returnUrl=$paymentBaseUrl/Vnpay/Callback';
-
-          if (!await _launchUrl(vnpayUrl)) {
-            if (mounted) {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Scaffold(
-                    appBar: AppBar(title: const Text('Payment')),
-                    body: WebViewWidget(
-                      controller: WebViewController()
-                        ..loadRequest(Uri.parse(vnpayUrl))
-                        ..setJavaScriptMode(JavaScriptMode.unrestricted),
-                    ),
-                  ),
-                ),
-              );
-            }
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                  content: Text('Service booking created successfully')),
-            );
-            Navigator.pop(context);
-          }
-        }
+      if (paymentTypeName == "VNPay") {
+        await _processVNPayPayment(bookingCode, _totalPrice);
       } else {
-        throw Exception('Failed to create service booking: ${response.body}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Service booking created successfully')),
+          );
+          Navigator.pop(context);
+        }
       }
+    } else {
+      throw Exception('Failed to create service booking: ${response.body}');
+    }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -510,6 +627,15 @@ class _AddBookingPageState extends State<AddBookingPage> {
     } finally {
       if (mounted) setState(() => _isProcessing = false);
     }
+  }
+
+  StepState _getStepState(int step) {
+    if (_currentStep > step) {
+      return StepState.complete;
+    } else if (_currentStep == step) {
+      return StepState.editing;
+    }
+    return StepState.indexed;
   }
 
   List<Step> _getSteps() {
@@ -555,11 +681,56 @@ class _AddBookingPageState extends State<AddBookingPage> {
       ),
       Step(
         title: Text("Choose Voucher"),
-        content: _vouchers.isEmpty
-            ? CircularProgressIndicator()
-            : Column(
-                children: [
-                  DropdownButtonFormField<String>(
+        content: Column(
+          children: [
+            // Voucher Search Section
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    decoration: InputDecoration(
+                      labelText: 'Search Voucher by Code',
+                      border: OutlineInputBorder(),
+                    ),
+                    controller: TextEditingController(text: _voucherSearchCode),
+                    onChanged: (value) {
+                      setState(() {
+                        _voucherSearchCode = value;
+                      });
+                    },
+                    enabled: !_searchLoading,
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _searchLoading || _voucherSearchCode.trim().isEmpty
+                      ? null
+                      : _searchVoucher,
+                  child: _searchLoading
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Text("Apply Voucher"),
+                ),
+              ],
+            ),
+            if (_searchError.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text(
+                  _searchError,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            SizedBox(height: 16),
+            _vouchers.isEmpty
+                ? Text("No vouchers available")
+                : DropdownButtonFormField<String>(
                     value: _selectedVoucher,
                     hint: Text("Select a Voucher (Optional)"),
                     items: [
@@ -582,9 +753,10 @@ class _AddBookingPageState extends State<AddBookingPage> {
                       });
                     },
                   ),
-                ],
-              ),
+          ],
+        ),
         isActive: _currentStep >= 2,
+        state: _getStepState(2),
       ),
       Step(
         title: Text("Choose Payment Type"),
@@ -607,265 +779,269 @@ class _AddBookingPageState extends State<AddBookingPage> {
         isActive: _currentStep >= 2,
       ),
       Step(
-  title: Text(
-    "Booking Summary",
-    style: TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.bold,
-      color: Colors.blue.shade800,
-    ),
-  ),
-  content: Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [
-      // Service Type Header
-      Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.blue.shade50,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          "Service Type: $_serviceType",
+        title: Text(
+          "Booking Summary",
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.blue.shade700,
+            color: Colors.blue.shade800,
           ),
         ),
-      ),
-      SizedBox(height: 16),
-
-      Text(
-        "Booking Details:",
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade800,
-        ),
-      ),
-      SizedBox(height: 8),
-
-      if (_serviceType == "Room") ...[
-        ..._bookingRoomData.map((room) => Card(
-          elevation: 2,
-          margin: EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow(
-                  icon: Icons.meeting_room,
-                  label: "Room",
-                  value: _roomNames[room["room"].toString()] ?? "Loading...",
+        content: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Service Type Header
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                "Service Type: $_serviceType",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue.shade700,
                 ),
-                _buildDetailRow(
-                  icon: Icons.pets,
-                  label: "Pet",
-                  value: _petNames[room["pet"].toString()] ?? "Loading...",
-                ),
-                _buildDetailRow(
-                  icon: Icons.calendar_today,
-                  label: "Start Date",
-                  value: _formatDate(room["start"]),
-                ),
-                _buildDetailRow(
-                  icon: Icons.calendar_today,
-                  label: "End Date",
-                  value: _formatDate(room["end"]),
-                ),
-                _buildDetailRow(
-                  icon: Icons.attach_money,
-                  label: "Room Price",
-                  value: "${room["price"]} VND",
-                  valueStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
-                ),
-                _buildDetailRow(
-                  icon: Icons.videocam,
-                  label: "Camera",
-                  value: room["camera"] ? "Yes (+50,000 VND)" : "No",
-                ),
-                Divider(height: 20),
-              ],
+              ),
             ),
-          ),
-        )),
-        _buildPriceRow(
-          label: "Subtotal",
-          value: "${_calculateSubtotal()} VND",
-        ),
-        if (_selectedVoucher != null) ...[
-          SizedBox(height: 8),
-          _buildDetailRow(
-            icon: Icons.local_offer,
-            label: "Voucher Applied",
-            value: _vouchers.firstWhere(
-              (v) => v['voucherId'] == _selectedVoucher, 
-              orElse: () => {}
-            )['voucherName'],
-            valueStyle: TextStyle(color: Colors.blue.shade700),
-          ),
-          _buildPriceRow(
-            label: "Discount",
-            value: "${_calculateDiscount()} VND",
-            isDiscount: true,
-          ),
-        ],
-        Divider(thickness: 2, height: 24),
-        _buildPriceRow(
-          label: "Final Total",
-          value: "$_totalPrice VND",
-          isTotal: true,
-        ),
-      ] else ...[
-        ..._bookingServiceData.map((service) => Card(
-          elevation: 2,
-          margin: EdgeInsets.only(bottom: 12),
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  service["service"]?["name"] ?? "Unknown Service",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.purple.shade700,
-                  ),
-                ),
+            SizedBox(height: 16),
+
+            Text(
+              "Booking Details:",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade800,
+              ),
+            ),
+            SizedBox(height: 8),
+
+            if (_serviceType == "Room") ...[
+              ..._bookingRoomData.map((room) => Card(
+                    elevation: 2,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildDetailRow(
+                            icon: Icons.meeting_room,
+                            label: "Room",
+                            value: _roomNames[room["room"].toString()] ??
+                                "Loading...",
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.pets,
+                            label: "Pet",
+                            value: _petNames[room["pet"].toString()] ??
+                                "Loading...",
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.calendar_today,
+                            label: "Start Date",
+                            value: _formatDate(room["start"]),
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.calendar_today,
+                            label: "End Date",
+                            value: _formatDate(room["end"]),
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.attach_money,
+                            label: "Room Price",
+                            value: "${room["price"]} VND",
+                            valueStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.videocam,
+                            label: "Camera",
+                            value: room["camera"] ? "Yes (+50,000 VND)" : "No",
+                          ),
+                          Divider(height: 20),
+                        ],
+                      ),
+                    ),
+                  )),
+              _buildPriceRow(
+                label: "Subtotal",
+                value: "${_calculateSubtotal()} VND",
+              ),
+              if (_selectedVoucher != null) ...[
                 SizedBox(height: 8),
                 _buildDetailRow(
-                  icon: Icons.category,
-                  label: "Variant",
-                  value: service["serviceVariant"]?["content"] ?? "No Variant",
+                  icon: Icons.local_offer,
+                  label: "Voucher Applied",
+                  value: _vouchers.firstWhere(
+                      (v) => v['voucherId'] == _selectedVoucher,
+                      orElse: () => {})['voucherName'],
+                  valueStyle: TextStyle(color: Colors.blue.shade700),
                 ),
-                _buildDetailRow(
-                  icon: Icons.attach_money,
-                  label: "Price",
-                  value: "${service["serviceVariant"]?["price"] ?? "0"} VND",
-                  valueStyle: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green.shade700,
-                  ),
+                _buildPriceRow(
+                  label: "Discount",
+                  value: "${_calculateDiscount()} VND",
+                  isDiscount: true,
                 ),
-                _buildDetailRow(
-                  icon: Icons.pets,
-                  label: "Pet",
-                  value: service["pet"]?["name"] ?? "Unknown Pet",
-                ),
-                Divider(height: 20),
               ],
+              Divider(thickness: 2, height: 24),
+              _buildPriceRow(
+                label: "Final Total",
+                value: "$_totalPrice VND",
+                isTotal: true,
+              ),
+            ] else ...[
+              ..._bookingServiceData.map((service) => Card(
+                    elevation: 2,
+                    margin: EdgeInsets.only(bottom: 12),
+                    child: Padding(
+                      padding: EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            service["service"]?["name"] ?? "Unknown Service",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.purple.shade700,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                          _buildDetailRow(
+                            icon: Icons.category,
+                            label: "Variant",
+                            value: service["serviceVariant"]?["content"] ??
+                                "No Variant",
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.attach_money,
+                            label: "Price",
+                            value:
+                                "${service["serviceVariant"]?["price"] ?? "0"} VND",
+                            valueStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade700,
+                            ),
+                          ),
+                          _buildDetailRow(
+                            icon: Icons.pets,
+                            label: "Pet",
+                            value: service["pet"]?["name"] ?? "Unknown Pet",
+                          ),
+                          Divider(height: 20),
+                        ],
+                      ),
+                    ),
+                  )),
+              _buildPriceRow(
+                label: "Total Price",
+                value: "$_totalPrice VND",
+              ),
+            ],
+            SizedBox(height: 16),
+            _buildDetailRow(
+              icon: Icons.local_offer,
+              label: "Voucher Applied",
+              value: _vouchers.firstWhere(
+                      (v) => v['voucherId'] == _selectedVoucher,
+                      orElse: () => {})['voucherName'] ??
+                  "No Voucher",
             ),
-          ),
-        )),
-        _buildPriceRow(
-          label: "Total Price",
-          value: "$_totalPrice VND",
+            _buildDetailRow(
+              icon: Icons.payment,
+              label: "Payment Type",
+              value: _paymentTypes.firstWhere(
+                      (p) => p['paymentTypeId'] == _selectedPaymentType,
+                      orElse: () => {})['paymentTypeName'] ??
+                  "Not Selected",
+            ),
+          ],
         ),
-      ],
-      SizedBox(height: 16),
-      _buildDetailRow(
-        icon: Icons.local_offer,
-        label: "Voucher Applied",
-        value: _vouchers.firstWhere(
-          (v) => v['voucherId'] == _selectedVoucher, 
-          orElse: () => {}
-        )['voucherName'] ?? "No Voucher",
+        isActive: _currentStep >= 3,
       ),
-      _buildDetailRow(
-        icon: Icons.payment,
-        label: "Payment Type",
-        value: _paymentTypes.firstWhere(
-          (p) => p['paymentTypeId'] == _selectedPaymentType, 
-          orElse: () => {}
-        )['paymentTypeName'] ?? "Not Selected",
-      ),
-    ],
-  ),
-  isActive: _currentStep >= 3,
-),
     ];
   }
+
   Widget _buildDetailRow({
-  required IconData icon,
-  required String label,
-  required String value,
-  TextStyle? valueStyle,
-}) {
-  return Padding(
-    padding: EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      children: [
-        Icon(icon, size: 18, color: Colors.grey.shade600),
-        SizedBox(width: 8),
-        Text(
-          "$label: ",
-          style: TextStyle(fontWeight: FontWeight.w500),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: valueStyle ?? TextStyle(),
+    required IconData icon,
+    required String label,
+    required String value,
+    TextStyle? valueStyle,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: Colors.grey.shade600),
+          SizedBox(width: 8),
+          Text(
+            "$label: ",
+            style: TextStyle(fontWeight: FontWeight.w500),
           ),
-        ),
-      ],
-    ),
-  );
-}
-
-Widget _buildPriceRow({
-  required String label,
-  required String value,
-  bool isDiscount = false,
-  bool isTotal = false,
-}) {
-  return Container(
-    padding: EdgeInsets.all(12),
-    margin: EdgeInsets.symmetric(vertical: 4),
-    decoration: BoxDecoration(
-      color: isTotal ? Colors.blue.shade50 : Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: isDiscount ? Colors.red.shade700 : Colors.grey.shade800,
+          Expanded(
+            child: Text(
+              value,
+              style: valueStyle ?? TextStyle(),
+            ),
           ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: isTotal ? 16 : 14,
-            color: isDiscount 
-              ? Colors.red.shade700 
-              : isTotal 
-                ? Colors.blue.shade800 
-                : Colors.green.shade700,
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-String _formatDate(String dateString) {
-  try {
-    final date = DateTime.parse(dateString);
-    return DateFormat('MMM dd, yyyy - hh:mm a').format(date);
-  } catch (e) {
-    return dateString;
+        ],
+      ),
+    );
   }
-}
+
+  Widget _buildPriceRow({
+    required String label,
+    required String value,
+    bool isDiscount = false,
+    bool isTotal = false,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(vertical: 4),
+      decoration: BoxDecoration(
+        color: isTotal ? Colors.blue.shade50 : Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: isDiscount ? Colors.red.shade700 : Colors.grey.shade800,
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isTotal ? 16 : 14,
+              color: isDiscount
+                  ? Colors.red.shade700
+                  : isTotal
+                      ? Colors.blue.shade800
+                      : Colors.green.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatDate(String dateString) {
+    try {
+      final date = DateTime.parse(dateString);
+      return DateFormat('MMM dd, yyyy - hh:mm a').format(date);
+    } catch (e) {
+      return dateString;
+    }
+  }
 
   Widget _buildServiceOption(String option) {
     return GestureDetector(
@@ -894,9 +1070,40 @@ String _formatDate(String dateString) {
   }
 
   void _onStepContinue() {
+    // Step 0 validation - must choose service type
     if (_currentStep == 0 && _serviceType.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please select a booking type')),
+      );
+      return;
+    }
+
+    // Step 1 validation - must have valid booking data
+    if (_currentStep == 1) {
+      if (_serviceType == "Room" &&
+          (_bookingRoomData.isEmpty ||
+              _bookingRoomData.any((room) =>
+                  room["room"] == null ||
+                  room["pet"] == null ||
+                  room["start"] == null ||
+                  room["end"] == null))) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Please complete all booking room information')),
+        );
+        return;
+      } else if (_serviceType == "Service" && _bookingServiceData.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please add at least one service booking')),
+        );
+        return;
+      }
+    }
+
+    // Step 3 validation - must select payment type
+    if (_currentStep == 3 && _selectedPaymentType == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select a payment method')),
       );
       return;
     }
@@ -930,6 +1137,28 @@ String _formatDate(String dateString) {
         onStepContinue: _isProcessing ? null : _onStepContinue,
         onStepCancel: _isProcessing ? null : _onStepCancel,
         controlsBuilder: (BuildContext context, ControlsDetails details) {
+          bool isNextDisabled = false;
+
+          // Disable next button based on current step
+          if (_currentStep == 0 && _serviceType.isEmpty) {
+            isNextDisabled = true;
+          } else if (_currentStep == 1) {
+            if (_serviceType == "Room" &&
+                (_bookingRoomData.isEmpty ||
+                    _bookingRoomData.any((room) =>
+                        room["room"] == null ||
+                        room["pet"] == null ||
+                        room["start"] == null ||
+                        room["end"] == null))) {
+              isNextDisabled = true;
+            } else if (_serviceType == "Service" &&
+                _bookingServiceData.isEmpty) {
+              isNextDisabled = true;
+            }
+          } else if (_currentStep == 3 && _selectedPaymentType == null) {
+            isNextDisabled = true;
+          }
+
           return Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: Row(
@@ -941,7 +1170,12 @@ String _formatDate(String dateString) {
                   ),
                 SizedBox(width: 12),
                 ElevatedButton(
-                  onPressed: _isProcessing ? null : details.onStepContinue,
+                  onPressed: _isProcessing || isNextDisabled
+                      ? null
+                      : details.onStepContinue,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isNextDisabled ? Colors.grey : null,
+                  ),
                   child: _isProcessing
                       ? CircularProgressIndicator(color: Colors.white)
                       : Text(_currentStep == _getSteps().length - 1
@@ -968,17 +1202,19 @@ String _formatDate(String dateString) {
 
   double _calculateDiscount() {
     if (_selectedVoucher == null) return 0.0;
-    
+
     var voucher = _vouchers.firstWhere(
         (v) => v['voucherId'] == _selectedVoucher,
         orElse: () => {});
-    
+
     if (voucher.isEmpty) return 0.0;
-    
+
     double subtotal = _calculateSubtotal();
-    double discount = double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
-    double maxDiscount = double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
-    
+    double discount =
+        double.tryParse(voucher['voucherDiscount'].toString()) ?? 0.0;
+    double maxDiscount =
+        double.tryParse(voucher['voucherMaximum'].toString()) ?? 0.0;
+
     return (subtotal * discount / 100).clamp(0, maxDiscount);
   }
 }

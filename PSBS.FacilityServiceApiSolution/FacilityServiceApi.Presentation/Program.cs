@@ -70,7 +70,7 @@ var app = builder.Build();
 
 // Khởi động FfmpegService (với kiểm tra lỗi)
 //var ffmpegService = app.Services.GetRequiredService<FacilityServiceApi.Infrastructure.Services.FfmpegService>();
-Process? ffmpegProcess = null;
+//Process? ffmpegProcess = null;
 //try
 //{
 //    ffmpegProcess = ffmpegService.StartFfmpegConversion();

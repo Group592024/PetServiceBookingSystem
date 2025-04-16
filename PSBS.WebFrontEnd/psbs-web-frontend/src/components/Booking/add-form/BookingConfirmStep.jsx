@@ -12,17 +12,17 @@ import {
 } from "@mui/material";
 
 const BookingConfirmStep = ({ formData, selectedOption }) => {
-  const { bookingRooms, bookingServices,bookingServicesDate, voucherId, totalPrice, discountedPrice, finalDiscount } = useContext(BookingContext);
+  const { bookingRooms, bookingServices, bookingServicesDate, voucherId, totalPrice, discountedPrice, finalDiscount } = useContext(BookingContext);
   const [roomNames, setRoomNames] = useState({});
   const [voucherDetails, setVoucherDetails] = useState(null);
   const [paymentTypeName, setPaymentTypeName] = useState("");
   const [serviceNames, setserviceNames] = useState({});
-  const [serviceVariantNames, setServiceVariantNames] = useState({}); 
+  const [serviceVariantNames, setServiceVariantNames] = useState({});
   const [petNames, setPetNames] = useState({});
 
   const getToken = () => {
     return sessionStorage.getItem('token');
-};
+  };
 
   // Fetch voucher details based on selected voucher ID
   useEffect(() => {
@@ -166,7 +166,7 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
   useEffect(() => {
     const fetchPetNames = async () => {
       const updatedPetNames = { ...petNames };
-      
+
       // Fetch pet names for room bookings
       for (const room of bookingRooms) {
         if (room.pet && !petNames[room.pet]) {
@@ -285,7 +285,7 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
           {selectedOption === "Room" ? "Room Booking Details" : "Service Booking Details"}
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        
+
         {selectedOption === "Room" ? (
           bookingRooms.length > 0 ? (
             <List>
@@ -305,7 +305,10 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
                           Camera: {room.camera ? "Yes" : "No"}
                         </Typography>
                         <Typography component="span" display="block" fontWeight="bold">
-                          {room.price.toLocaleString()} VND
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(room.price)}
                         </Typography>
                       </>
                     }
@@ -336,7 +339,10 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
                             Pet: {petNames[service.pet] || "Loading..."}
                           </Typography>
                           <Typography component="span" display="block" fontWeight="bold">
-                            {service.price.toLocaleString()} VND
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(service.price)}
                           </Typography>
                         </>
                       }
@@ -360,18 +366,27 @@ const BookingConfirmStep = ({ formData, selectedOption }) => {
         <List dense>
           <ListItem>
             <ListItemText primary="Subtotal" />
-            <Typography>{totalPrice.toLocaleString()} VND</Typography>
+            <Typography>{new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(totalPrice)} </Typography>
           </ListItem>
           {finalDiscount > 0 && (
             <ListItem>
               <ListItemText primary="Discount" />
-              <Typography color="success.main">-{finalDiscount.toLocaleString()} VND</Typography>
+              <Typography color="success.main">-{new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(finalDiscount)}</Typography>
             </ListItem>
           )}
           <ListItem>
             <ListItemText primary="Total Amount" />
             <Typography variant="h6" fontWeight="bold">
-              {discountedPrice.toLocaleString()} VND
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(discountedPrice)}
             </Typography>
           </ListItem>
         </List>

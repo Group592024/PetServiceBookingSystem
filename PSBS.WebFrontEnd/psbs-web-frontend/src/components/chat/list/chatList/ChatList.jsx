@@ -5,10 +5,12 @@ import { getData } from "../../../../Utilities/ApiFunctions";
 import { useChatStore } from "../../../../lib/chatStore";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import Swal from "sweetalert2";
+
 const ChatList = ({ signalRService, currentUser }) => {
   const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null); // Track the active chat
+  const [searchTerm, setSearchTerm] = useState(""); // Add search functionality
   const { chatId, ChangeChat } = useChatStore();
 
   const fetchUserDetails = useCallback(async (chatRooms) => {
@@ -29,7 +31,6 @@ const ChatList = ({ signalRService, currentUser }) => {
         }; // Fallback data
       }
     });
-
     const chatData = await Promise.all(promises);
     return chatData.sort(
       (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
@@ -39,7 +40,6 @@ const ChatList = ({ signalRService, currentUser }) => {
   useEffect(() => {
     const handleUpdateChatList = async (chatRooms) => {
       const sortedChats = await fetchUserDetails(chatRooms);
-
       // Update chats: mark active chat as seen
       const updatedChats = sortedChats.map((chat) => {
         if (chat.chatRoomId === currentChat) {
@@ -47,7 +47,6 @@ const ChatList = ({ signalRService, currentUser }) => {
         }
         return chat; // Other chats remain unchanged
       });
-
       setChats(updatedChats);
     };
 
@@ -57,13 +56,11 @@ const ChatList = ({ signalRService, currentUser }) => {
           console.error("❌ SignalRService is not initialized.");
           return;
         }
-
         await signalRService.startConnection(
           "http://localhost:5050/chatHub",
           currentUser.accountId
         );
         console.log("✅ SignalR Connected");
-
         signalRService.on("getList", handleUpdateChatList);
         signalRService.on("updateaftercreate", handleUpdateChatList);
         signalRService.on("staffremoved", (message) => {
@@ -77,7 +74,6 @@ const ChatList = ({ signalRService, currentUser }) => {
     };
 
     startSignalR();
-
     return () => {
       signalRService.off("updatechatlist");
     };
@@ -92,20 +88,32 @@ const ChatList = ({ signalRService, currentUser }) => {
       }
       return item;
     });
-
     setChats(updatedChats); // Update the chats state
-    console.log("trong change chat ne", chat.isSupportRoom);
     ChangeChat(chat.chatRoomId, chat.user.data, chat.isSupportRoom); // Change the active chat in the store
   };
 
-  console.log("chat nay:", chats);
+  // Filter chats based on search term
+  const filteredChats = chats.filter(chat => {
+    const name = chat.isSupportRoom && currentUser.roleId !== "user"
+      ? `Support For ${chat.user.data?.accountName}`
+      : chat.isSupportRoom && currentUser.roleId === "user"
+      ? "Support Agent"
+      : `${chat.user.data?.accountName}`;
+    
+    return name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
     <div className="chatList">
       <div className="search">
         <div className="searchBar">
           <img src="/search.png" alt="" />
-          <input type="text" placeholder="Search" />
+          <input 
+            type="text" 
+            placeholder="Search" 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
         <img
           src={addMode ? "/minus.png" : "/plus.png"}
@@ -114,8 +122,7 @@ const ChatList = ({ signalRService, currentUser }) => {
           onClick={() => setAddMode((prev) => !prev)}
         />
       </div>
-
-      {chats.map((chat) => (
+      {filteredChats.map((chat) => (
         <div
           key={chat.chatRoomId}
           className={`item ${chat.isSupportRoom ? "support" : ""} ${
@@ -139,17 +146,13 @@ const ChatList = ({ signalRService, currentUser }) => {
                 ? "Support Agent"
                 : `${chat.user.data?.accountName}`}
             </span>
-            <p className="truncate max-w-[200px]">
-              {chat?.lastMessage || "null"}
-            </p>
+            <p>{chat?.lastMessage || "No messages yet"}</p>
           </div>
-
           {/* Show unread dot if the message is unread */}
           {!chat.isSeen && <div className="unreadDot"></div>}
           {chat.isSupportRoom && <SupportAgentIcon className="supportIcon" />}
         </div>
       ))}
-
       {addMode && (
         <AddUser
           signalRService={signalRService}

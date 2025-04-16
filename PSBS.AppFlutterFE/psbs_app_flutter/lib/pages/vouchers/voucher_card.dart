@@ -13,65 +13,179 @@ class VoucherCard extends StatelessWidget {
       onTap: () {
         Navigator.pushNamed(
           context,
-          '/customer/vouchers/detail', // No ID in the URL
-          arguments: voucher, // Pass the entire voucher object
+          '/customer/vouchers/detail',
+          arguments: voucher,
         );
       },
       child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            // Use const for better performance
-            colors: [Colors.blue, Colors.teal],
-            begin: Alignment.topLeft, // Align gradient like React example
-            end: Alignment.bottomRight,
-          ),
           borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            // Use const
-            BoxShadow(color: Colors.black26, blurRadius: 5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 5,
+              spreadRadius: 1,
+            ),
           ],
         ),
-        padding: const EdgeInsets.all(16), // Use const
-        child: Row(
-          // Use Row for icon and text side-by-side
-          crossAxisAlignment: CrossAxisAlignment.center, // Center vertically
-          children: [
-            Expanded(
-              // Use Expanded to handle text wrapping
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min, // Important for text wrapping
-                children: [
-                  Text(
-                    voucher.voucherName,
-                    style: const TextStyle(
-                      // Use const
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
+            children: [
+              // Main card content
+              IntrinsicHeight(
+                child: Row(
+                  children: [
+                    // Left blue section
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      color: Colors.blue[600],
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "${voucher.voucherDiscount.toStringAsFixed(0)}%",
+                            style: const TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const Text(
+                            "DISCOUNT",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  Text(
-                    "${voucher.voucherDiscount.toStringAsFixed(0)}% OFF",
-                    style: const TextStyle(
-                      // Use const
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                    
+                    // Right white section
+                    Expanded(
+                      child: Container(
+                        color: Colors.white,
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              voucher.voucherName,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[800],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Tap to view this voucher",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.blue[500],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chevron_right,
+                                  color: Colors.blue[600],
+                                  size: 24,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const Icon(
-              // Narrow Icon
-              Icons.chevron_right,
-              color: Colors.white,
-              size: 30,
-            ),
-          ],
+              
+              // Dotted line separator
+              Positioned(
+                left: MediaQuery.of(context).size.width * 0.3,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    height: double.infinity,
+                    width: 1,
+                    decoration: BoxDecoration(
+                      border: Border(
+                        left: BorderSide(
+                          color: Colors.blue[300]!,
+                          width: 2,
+                          style: BorderStyle.solid,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              
+              // Scissors icons
+              Positioned(
+                left: MediaQuery.of(context).size.width * 0.3 - 12,
+                top: -4,
+                child: Transform.rotate(
+                  angle: 1.5708, // 90 degrees in radians
+                  child: Icon(
+                    Icons.cut,
+                    color: Colors.blue[400],
+                    size: 24,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: MediaQuery.of(context).size.width * 0.3 - 12,
+                bottom: -4,
+                child: Transform.rotate(
+                  angle: 1.5708, // 90 degrees in radians
+                  child: Icon(
+                    Icons.cut,
+                    color: Colors.blue[400],
+                    size: 24,
+                  ),
+                ),
+              ),
+              
+              // Decorative circles
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.blue[500]!.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 40,
+                bottom: -8,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.blue[500]!.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

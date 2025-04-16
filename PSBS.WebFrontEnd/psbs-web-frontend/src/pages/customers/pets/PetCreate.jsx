@@ -38,7 +38,6 @@ const CustomerPetCreate = () => {
                 });
 
                 const data = await response.json();
-                console.log("Data received from API:", data);
 
                 if (!Array.isArray(data.data)) {
                     throw new Error("API did not return an array");
@@ -48,10 +47,10 @@ const CustomerPetCreate = () => {
             } catch (error) {
                 console.log("Error fetching pet types:", error);
                 Swal.fire({
-                    title: 'Error',
-                    text: 'Failed to load pet types. Please try again.',
                     icon: 'error',
-                    confirmButtonText: 'OK',
+                    title: 'Service Unavailable',
+                    text: "We couldn't retrieve pet information at the moment. Please try again later.",
+                    confirmButtonText: 'Close',
                     confirmButtonColor: '#3085d6'
                 });
             }
@@ -180,7 +179,13 @@ const CustomerPetCreate = () => {
             }
         } catch (error) {
             console.error('Error creating pet:', error);
-            Swal.fire('Error', 'Failed to create pet', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to Create Pet',
+                text: 'Something went wrong while creating the pet. Please try again later.',
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#3085d6'
+            });
         } finally {
             setIsSubmitting(false);
         }
