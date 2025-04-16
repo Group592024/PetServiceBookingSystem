@@ -8,37 +8,37 @@ class AllService extends StatelessWidget {
       'title': 'Pet Grooming',
       'image': 'assets/HomePage/services/grooming.png',
       'content': 'Professional grooming services for your pet.',
-      'price': 'From 39\$ / complex'
+      'price': 'From 150.000₫ / package'
     },
     {
       'title': 'Health & Wellness',
       'image': 'assets/HomePage/services/veterinary.png',
       'content': 'Routine vet checkups to ensure your pet’s health.',
-      'price': 'From 39\$ / visit'
+      'price': 'From 200.000₫ / visit'
     },
     {
       'title': 'Pet Hotel',
       'image': 'assets/HomePage/services/pet-hotel.png',
       'content': 'Daily care for your pet while you are away.',
-      'price': 'From 15\$ / night'
+      'price': 'From 120.000₫ / night'
     },
     {
       'title': 'Walking & Sitting',
       'image': 'assets/HomePage/services/dog-walking.png',
       'content': 'Daily pet walking service to keep your pet active.',
-      'price': 'From 15\$ / hour'
+      'price': 'From 50.000₫ / hour'
     },
     {
       'title': 'Pet Training',
       'image': 'assets/HomePage/services/training.png',
       'content': 'Behavioral training for your pet by experts.',
-      'price': 'From 27\$ / hour'
+      'price': 'From 180.000₫ / session'
     },
     {
       'title': 'Pet Taxi',
       'image': 'assets/HomePage/services/pet-taxi.png',
       'content': 'Safe and comfortable boarding services for your pet.',
-      'price': 'From 22\$ / trip'
+      'price': 'From 100.000₫ / trip'
     },
   ];
 
@@ -166,7 +166,8 @@ class ServiceDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(service['title']!, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(service['title']!,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF2aa6df),
         foregroundColor: Colors.white,
       ),
@@ -207,7 +208,8 @@ class ServiceDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                   decoration: BoxDecoration(
                     color: Colors.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
@@ -229,7 +231,8 @@ class ServiceDetailScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 12),
                   ),
                   child: const Text(
                     "Book Now",

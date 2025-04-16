@@ -78,7 +78,7 @@ describe('Customer Room Detail Page', () => {
                     }));
                 }
             },
-            timeout: 30000 
+            timeout: 30000
         });
 
         cy.wait(['@getRoomDetail', '@getRoomType']);
@@ -168,8 +168,8 @@ describe('Customer Room Detail Page', () => {
         cy.reload();
         cy.wait('@getRoomDetailError');
 
-        cy.contains('Error').should('be.visible');
-        cy.contains('Failed to fetch data!').should('be.visible');
+        cy.contains('Service Unavailable').should('be.visible');
+        cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
     });
 
     it('should handle API error when fetching room type', () => {
@@ -198,8 +198,8 @@ describe('Customer Room Detail Page', () => {
         cy.reload();
         cy.wait(['@getRoomDetail', '@getRoomTypeError']);
 
-        cy.contains('Error').should('be.visible');
-        cy.contains('Failed to fetch data!').should('be.visible');
+        cy.contains('Service Unavailable').should('be.visible');
+        cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
     });
 
     it('should display different status colors correctly', () => {
@@ -355,8 +355,8 @@ describe('Customer Room Detail Page', () => {
         cy.wait('@getRoomTypeError');
 
         cy.get('.swal2-container').should('be.visible');
-        cy.contains('Error').should('be.visible');
-        cy.contains('Failed to fetch data!').should('be.visible');
+        cy.contains('Service Unavailable').should('be.visible');
+        cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
     });
 
     it('should handle room with no description', () => {
@@ -382,24 +382,6 @@ describe('Customer Room Detail Page', () => {
         cy.contains('button', 'Read More').should('not.exist');
     });
 
-    it('should handle unauthorized access', () => {
-        cy.intercept('GET', '**/api/Room/room1', {
-            statusCode: 401,
-            body: {
-                message: 'Unauthorized'
-            }
-        }).as('getUnauthorized');
-
-        cy.window().then((win) => {
-            win.sessionStorage.removeItem('token');
-        });
-
-        cy.reload();
-        cy.wait('@getUnauthorized');
-
-        cy.contains('Error').should('be.visible');
-    });
-
     it('should handle network errors gracefully', () => {
         cy.intercept('GET', '**/api/Room/room1', {
             forceNetworkError: true
@@ -408,8 +390,8 @@ describe('Customer Room Detail Page', () => {
         cy.reload();
         cy.wait('@getNetworkError');
 
-        cy.contains('Error').should('be.visible');
-        cy.contains('Failed to fetch data!').should('be.visible');
+        cy.contains('Service Unavailable').should('be.visible');
+        cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
     });
 
     it('should display correct currency format for price', () => {

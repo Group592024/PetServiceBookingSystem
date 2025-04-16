@@ -60,6 +60,7 @@ const PetBreedList = () => {
                 console.error("Unexpected response format: ", data);
             }
         } catch (error) {
+            Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
             console.error("Error fetching data: ", error);
         }
     };

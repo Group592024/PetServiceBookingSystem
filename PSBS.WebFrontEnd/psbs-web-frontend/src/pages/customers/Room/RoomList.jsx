@@ -105,9 +105,9 @@ const CustomerRoomList = () => {
                 </div>
 
                 {/* Search and Filter Section */}
-                <div className="mb-8 flex flex-col sm:flex-row justify-between items-center sm:space-x-6 space-y-4 sm:space-y-0">
+                <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                     {/* Search Box */}
-                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                    <div className="relative">
                         <input
                             type="text"
                             placeholder="Search by room name..."
@@ -134,11 +134,13 @@ const CustomerRoomList = () => {
                     </div>
 
                     {/* Filter by Room Type */}
-                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                    <div className="relative">
                         <select
                             value={selectedFilters.roomType || ''}
-                            onChange={(e) => setSelectedFilters((prev) => ({ ...prev, roomType: e.target.value }))}
-                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
+                            onChange={(e) =>
+                                setSelectedFilters((prev) => ({ ...prev, roomType: e.target.value }))
+                            }
+                            className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
                         >
                             <option value="">Select Room Type</option>
                             {roomTypes.map((type) => (
@@ -150,11 +152,13 @@ const CustomerRoomList = () => {
                     </div>
 
                     {/* Filter by Price */}
-                    <div className="relative flex-1 max-w-xs sm:max-w-md">
+                    <div className="relative">
                         <select
                             value={selectedFilters.price || ''}
-                            onChange={(e) => setSelectedFilters((prev) => ({ ...prev, price: e.target.value }))}
-                            className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
+                            onChange={(e) =>
+                                setSelectedFilters((prev) => ({ ...prev, price: e.target.value }))
+                            }
+                            className="w-full pl-4 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-md transition-all ease-in-out"
                         >
                             <option value="">Select Price Range</option>
                             <option value="Low">Under 100.000</option>
@@ -170,12 +174,13 @@ const CustomerRoomList = () => {
                                 setSearchTerm('');
                                 setSelectedFilters({ roomType: '', price: '' });
                             }}
-                            className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all ease-in-out"
+                            className="w-full px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all ease-in-out"
                         >
                             Clear Filter
                         </button>
                     </div>
                 </div>
+
 
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -270,7 +275,7 @@ const CustomerRoomList = () => {
                 )}
 
                 {/* Empty State */}
-                {!loading && filteredRooms.length === 0 && (
+                {!loading && rooms.length === 0 && filteredRooms.length === 0 && (
                     <div className="text-center py-16">
                         <div className="bg-white rounded-2xl p-8 max-w-md mx-auto shadow-sm">
                             <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -279,6 +284,42 @@ const CustomerRoomList = () => {
                             <h3 className="text-xl font-semibold text-gray-800 mb-2">No Rooms Available</h3>
                             <p className="text-gray-600">Please check back later for available rooms.</p>
                         </div>
+                    </div>
+                )}
+
+                {/* No Result Found */}
+                {rooms.length > 0 && filteredRooms.length === 0 && (
+                    <div className="text-center py-16">
+                        <div className="bg-white rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+                            <svg
+                                className="w-16 h-16 mx-auto text-gray-400 mb-4"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                />
+                            </svg>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">No Rooms Found</h3>
+                            <p className="text-gray-600">
+                                We couldn't find any rooms matching your search criteria. Please try different filters or browse all rooms.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setSelectedFilters({});
+                                navigate('/customerroom', { replace: true });
+                            }}
+                            className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
+                        >
+                            View All Rooms
+                        </button>
                     </div>
                 )}
             </main>

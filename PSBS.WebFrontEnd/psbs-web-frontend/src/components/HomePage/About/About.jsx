@@ -34,7 +34,7 @@ const About = () => {
   ];
 
   return (
-    <section
+    <section id="about"
       className="bg-gradient-to-b from-blue-100 to-cyan-100 min-h-[760px] flex justify-center items-center text-white py-16 px-4 sm:px-6"
       style={{ userSelect: "none" }}
     >

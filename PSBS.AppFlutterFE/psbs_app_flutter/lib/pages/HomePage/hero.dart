@@ -117,7 +117,7 @@ class _HeroSectionState extends State<HeroSection> {
                 ),
               ),
               onPressed: () {},
-              child: Text("Learn More",
+              child: Text("Start Your Journey",
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

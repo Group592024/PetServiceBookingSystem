@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import WalkingImg from '../../../assets/HomePage/services/dog-walking.png';
 import GroomingImg from '../../../assets/HomePage/services/grooming.png';
 import TrainingImg from '../../../assets/HomePage/services/training.png';
@@ -8,16 +9,41 @@ import PetHealthImg from '../../../assets/HomePage/services/veterinary.png';
 import PetHotelImg from '../../../assets/HomePage/services/pet-hotel.png';
 import ArrowImg from '../../../assets/HomePage/services/right-arrow.png';
 
+// Map service titles to the expected service types in the ServiceListPage
+const serviceTypeMapping = {
+    'Pet Grooming': 'Grooming',
+    'Health & Wellness': 'Medical',
+    'Pet Hotel': 'Room',
+    'Walking & Sitting': 'Walking',
+    'Pet Training': 'Pet Training',
+    'Pet Taxi': 'Pet Taxi'
+};
+
 const services = [
-    { title: 'Pet Grooming', image: GroomingImg, content: 'Professional grooming services for your pet.', price: 'From 39$ / complex' },
-    { title: 'Health & Wellness', image: PetHealthImg, content: 'Routine vet checkups to ensure your pet’s health.', price: 'From 39$/ visit' },
-    { title: 'Pet Hotel', image: PetHotelImg, content: 'Daily care for your pet while you are away.', price: 'From 15$ / night' },
-    { title: 'Walking & Sitting', image: WalkingImg, content: 'Daily pet walking service to keep your pet active.', price: 'From 15$ / hour' },
-    { title: 'Pet Training', image: TrainingImg, content: 'Behavioral training for your pet by experts.', price: 'From 27$ / hour' },
-    { title: 'Pet Taxi', image: PetTaxiImg, content: 'Safe and comfortable boarding services for your pet.', price: 'From 22$ / trip' },
+    { title: 'Pet Grooming', image: GroomingImg, content: 'Professional grooming services for your pet.', price: 'From 150.000₫ / package' },
+    { title: 'Health & Wellness', image: PetHealthImg, content: "Routine vet checkups to ensure your pet's health.", price: 'From 200.000₫ / visit' },
+    { title: 'Pet Hotel', image: PetHotelImg, content: 'Daily care for your pet while you are away.', price: 'From 120.000₫ / night' },
+    { title: 'Walking & Sitting', image: WalkingImg, content: 'Daily pet walking service to keep your pet active.', price: 'From 50.000₫ / hour' },
+    { title: 'Pet Training', image: TrainingImg, content: 'Behavioral training for your pet by experts.', price: 'From 180.000₫ / session' },
+    { title: 'Pet Taxi', image: PetTaxiImg, content: 'Safe and comfortable transport services for your pet.', price: 'From 100.000₫ / trip' },
 ];
 
 const AllService = () => {
+    const navigate = useNavigate();
+
+    const handleServiceClick = (serviceTitle) => {
+        const serviceType = serviceTypeMapping[serviceTitle];
+
+        if (serviceType === 'Room') {
+            navigate('/customerRoom');
+        } else {
+            navigate(`/customer/services?type=${serviceType}`);
+        }
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+        }, 0);
+    };
+
     return (
         <motion.div
             className="px-4 py-10 bg-gradient-to-b from-gray-50 to-blue-100 select-none"
@@ -37,7 +63,7 @@ const AllService = () => {
                 {services.map((service, index) => (
                     <motion.div
                         key={index}
-                        className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center transition-transform duration-300 hover:scale-105 select-none 
+                        className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center text-center transition-transform duration-300 hover:scale-105 select-none
                                     hover:bg-[#1182c5] hover:text-white group"
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -58,6 +84,7 @@ const AllService = () => {
                             className="flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
+                            onClick={() => handleServiceClick(service.title)}
                         >
                             Get Service
                             <img src={ArrowImg} alt="Arrow" className="w-6 h-6" />

@@ -3,6 +3,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import Datatable from "../../../../components/facilityAndHealth/datatable/DataTable";
 import { getData } from "../../../../Utilities/ApiFunctions";
+import Swal from 'sweetalert2';
 
 const TreatmentList = () => {
   const sidebarRef = useRef(null);
@@ -14,6 +15,7 @@ const TreatmentList = () => {
         const data = await getData("api/Treatment");
         setRows(data.data);
       } catch (error) {
+        Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
         console.error("Error fetching treatments:", error);
       }
     };

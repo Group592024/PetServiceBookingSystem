@@ -7,8 +7,8 @@ import HourImg from "../../../assets/HomePage/contact/clock.png";
 
 const Contact = () => {
   return (
-    <div className="py-20 bg-gradient-to-b from-cyan-200 to-[#48cae4] select-none">
-      <motion.div 
+    <div id="contact" className="py-20 bg-gradient-to-b from-cyan-200 to-[#48cae4] select-none">
+      <motion.div
         className="text-center mb-12"
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}

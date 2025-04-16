@@ -6,7 +6,7 @@ const Services = () => {
   return (
     <motion.section
       className="bg-gray-50 py-16 min-h-[600px] flex justify-center items-center px-6 select-none"
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 1 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       viewport={{ once: true }}
@@ -26,7 +26,7 @@ const Services = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
         >
-          We provide top-notch services to ensure your pets receive the best care. 
+          We provide top-notch services to ensure your pets receive the best care.
           From grooming to medical check-ups, we've got everything covered!
         </motion.p>
         <ServiceSlider />

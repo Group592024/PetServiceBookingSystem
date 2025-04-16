@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Link, useNavigate } from "react-router-dom";
 import phoneImg from '../../../assets/HomePage/footer/phone.png';
 import arrowImg from '../../../assets/HomePage/footer/arrows.png';
 
@@ -7,12 +8,13 @@ const Footer = () => {
   return (
     <motion.footer
       className="bg-gradient-to-b from-[#48CAE4] to-cyan-100 py-12 px-6 select-none"
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 1 }}
+      whileInView={{ opacity: 1 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       viewport={{ once: true }}
     >
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-gray-900">
+        {/* Logo + Phone */}
         <motion.div
           className="bg-[#90E0EF] rounded-lg shadow-lg p-6"
           initial={{ opacity: 0, x: -50 }}
@@ -37,6 +39,8 @@ const Footer = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Links */}
         <motion.div
           className="p-6"
           initial={{ opacity: 0, y: 50 }}
@@ -46,22 +50,37 @@ const Footer = () => {
           <h3 className="text-lg font-bold text-black">Useful Links</h3>
           <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
             {[
-              { name: "Home", link: "#" },
-              { name: "About", link: "#" },
-              { name: "Service", link: "#" },
-              { name: "Room", link: "#" },
-              { name: "Contact", link: "#" },
-              { name: "Support", link: "#" }
+              { name: "Home", type: "section", link: "#" },
+              { name: "About", type: "section", link: "#about" },
+              { name: "Service", type: "page", link: "/customer/services" },
+              { name: "Room", type: "page", link: "/customerroom" },
+              { name: "Contact", type: "section", link: "#contact" },
+              { name: "Support", type: "page", link: "/chat/customer" }
             ].map((item, index) => (
               <div key={index} className="flex items-center group">
                 <span className="relative before:content-[''] before:absolute before:left-[-10px] before:top-[50%] before:translate-y-[-50%] before:w-2 before:h-2 before:bg-black before:rounded-full group-hover:before:bg-[#1182c5]"></span>
-                <a href={item.link} className="ml-2 text-gray-700 group-hover:text-[#0e6ba8] font-medium group-hover:font-extrabold transition-all duration-300">
-                  {item.name}
-                </a>
+                {item.type === "page" ? (
+                  <Link
+                    to={item.link}
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                    className="ml-2 text-gray-700 group-hover:text-[#0e6ba8] font-medium group-hover:font-extrabold transition-all duration-300"
+                  >
+                    {item.name}
+                  </Link>
+                ) : (
+                  <a
+                    href={item.link}
+                    className="ml-2 text-gray-700 group-hover:text-[#0e6ba8] font-medium group-hover:font-extrabold transition-all duration-300"
+                  >
+                    {item.name}
+                  </a>
+                )}
               </div>
             ))}
           </div>
         </motion.div>
+
+        {/* Working hours */}
         <motion.div
           className="p-6"
           initial={{ opacity: 0, y: 50 }}
@@ -84,6 +103,8 @@ const Footer = () => {
             </div>
           </div>
         </motion.div>
+
+        {/* Booking */}
         <motion.div
           className="p-6"
           initial={{ opacity: 0, y: 50 }}
@@ -92,12 +113,16 @@ const Footer = () => {
         >
           <h3 className="text-lg font-bold text-black">Book Service</h3>
           <p className="mt-2 text-sm text-gray-700">Let's book your services right now!</p>
-          <a href="#" className="mt-4 flex items-center cursor-pointer group">
+          <Link
+            to="/customer/bookings"
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            className="mt-4 flex items-center cursor-pointer group"
+          >
             <p className="text-gray-900 font-bold text-lg group-hover:text-[#1182c5] group-hover:font-extrabold transition-all duration-300">
               Get Started
             </p>
             <img src={arrowImg} alt="arrow" className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform duration-300" />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </motion.footer>

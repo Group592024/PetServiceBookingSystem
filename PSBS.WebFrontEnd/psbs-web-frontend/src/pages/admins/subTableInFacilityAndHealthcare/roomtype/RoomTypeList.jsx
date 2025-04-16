@@ -3,6 +3,7 @@ import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
 import Datatable from "../../../../components/facilityAndHealth/datatable/RoomTypeDatatable";
 import { getData } from "../../../../Utilities/ApiFunctions";
+import Swal from 'sweetalert2';
 
 const RoomTypeList = () => {
   const sidebarRef = useRef(null);
@@ -14,6 +15,7 @@ const RoomTypeList = () => {
         const data = await getData("api/RoomType"); // API endpoint for RoomType data
         setRows(data.data);
       } catch (error) {
+        Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
         console.error("Error fetching room types:", error);
       }
     };
@@ -37,15 +39,15 @@ const RoomTypeList = () => {
       label: "Price ",
       type: "decimal",
       customValidation: (value) => {
-        if (!/^\d+(\.\d+)?$/.test(value)) {  
+        if (!/^\d+(\.\d+)?$/.test(value)) {
           return "Price must be a valid number";
         }
-        if (parseFloat(value) <= 0) { 
+        if (parseFloat(value) <= 0) {
           return "Price must be greater than 0";
         }
         return null;
       },
-      
+
     },
     {
       name: "description",
@@ -58,7 +60,7 @@ const RoomTypeList = () => {
       type: "bool",
     },
   ];
-  
+
   const addModel = [
     {
       name: "name",
@@ -76,10 +78,10 @@ const RoomTypeList = () => {
       label: "Price",
       type: "decimal",
       customValidation: (value) => {
-        if (!/^\d+(\.\d+)?$/.test(value)) {  
+        if (!/^\d+(\.\d+)?$/.test(value)) {
           return "Price must be a valid number";
         }
-        if (parseFloat(value) <= 0) { 
+        if (parseFloat(value) <= 0) {
           return "Price must be greater than 0";
         }
         return null;
@@ -94,7 +96,7 @@ const RoomTypeList = () => {
   ];
 
   const columns = [
-    { 
+    {
       field: "index",
       headerName: "No.",
       width: 100,
@@ -110,12 +112,12 @@ const RoomTypeList = () => {
           {rows.indexOf(params.row) + 1}
         </div>
       ),
-    },    
-    { 
-      field: "name", 
-      headerName: " Name", 
+    },
+    {
+      field: "name",
+      headerName: " Name",
       width: 200,
-      headerAlign: 'center', 
+      headerAlign: 'center',
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -123,11 +125,11 @@ const RoomTypeList = () => {
         </div>
       ),
     },
-    { 
-      field: "description", 
-      headerName: "Description", 
+    {
+      field: "description",
+      headerName: "Description",
       width: 200,
-      headerAlign: 'center', 
+      headerAlign: 'center',
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -135,15 +137,15 @@ const RoomTypeList = () => {
         </div>
       ),
     },
-    { 
-      field: "price", 
-      headerName: "Price", 
+    {
+      field: "price",
+      headerName: "Price",
       width: 200,
-      headerAlign: 'center', 
+      headerAlign: 'center',
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
-          Price 
+          Price
         </div>
       ),
     },
@@ -151,7 +153,7 @@ const RoomTypeList = () => {
       field: "isDeleted",
       headerName: "Status",
       width: 150,
-      headerAlign: 'center', 
+      headerAlign: 'center',
       align: 'center',
       renderHeader: () => (
         <div style={{ fontWeight: 'bold', textAlign: 'center' }}>
@@ -166,7 +168,7 @@ const RoomTypeList = () => {
     },
   ];
 
-  const basePath = "api/RoomType"; 
+  const basePath = "api/RoomType";
 
   return (
     <div>
