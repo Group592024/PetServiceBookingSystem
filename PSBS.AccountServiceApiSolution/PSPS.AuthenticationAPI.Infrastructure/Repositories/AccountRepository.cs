@@ -864,7 +864,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 {
                     return new Response(false, "Error occurred while updating the existing Point of user.");
                 }
-                existingAccount.AccountLoyaltyPoint = point;
+                existingAccount.AccountLoyaltyPoint += point;
                 context.Accounts.Update(existingAccount);
                 await context.SaveChangesAsync();
                 return new Response(true, "Point of user successfully updated");

@@ -78,12 +78,11 @@ const CustomerBookingDatatable = () => {
                       const formatDate = (date) => {
                           if (!date) return "N/A";
                           const options = {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              hour12: true,
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
                           };
                           return new Date(date).toLocaleString("en-GB", options).replace(",", "");
                       };
@@ -340,7 +339,7 @@ const CustomerBookingDatatable = () => {
                         },
                         sorting: {
                             sortModel: [{
-                                field: 'rawCreateAt',
+                                field: 'formattedCreateAt',
                                 sort: 'desc'
                             }]
                         }

@@ -2,7 +2,7 @@
 import React from "react";
 import NavbarCustomer from "../../../../components/navbar-customer/NavbarCustomer";
 import { useNavigate } from "react-router-dom";
-import CustomerBookingDatatable from "../../../../components/Booking/datatable/CustomerBookingDatatable";
+import CustomerBookingDatatable from "../../../../components/Booking/datatable/CustomerBookingDatatable"; 
 
 const CustomerBookingList = () => {
     const navigate = useNavigate();
@@ -38,8 +38,6 @@ const CustomerBookingList = () => {
                         New Booking
                     </button>
                 </div>
-                
-                {/* The datatable will handle its own empty state */}
                 <CustomerBookingDatatable />
             </div>
         </div>

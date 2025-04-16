@@ -132,7 +132,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             <MenuItem value="">Select room</MenuItem>
             {rooms.map(room => (
               <MenuItem key={room.roomId} value={room.roomId}>
-                {room.roomName} - {room.description}
+                {room.roomName} - {room.description.length > 20 ? `${room.description.slice(0, 20)}...` : room.description}
               </MenuItem>
             ))}
           </Select>
