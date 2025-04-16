@@ -157,12 +157,12 @@ const EditProfileCustomer = () => {
       valid = false;
     }
 
-    const phonePattern = /^(03|05|07|08|09)\d{8}$/;
+    const phonePattern = /^(0)\d{9}$/;
     if (!account.accountPhoneNumber.trim()) {
       errors.accountPhoneNumber = "Phone number is required";
       valid = false;
     } else if (!phonePattern.test(account.accountPhoneNumber)) {
-      errors.accountPhoneNumber = "Please enter a valid phone number (starting with 03, 05, 07, 08, or 09 and 9 digits)";
+      errors.accountPhoneNumber = "Phone number must start with 0 and have 10 digits";
       valid = false;
     }
 
