@@ -165,6 +165,8 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
       _bookingChoices = [];
     });
 
+    await Future.delayed(Duration(milliseconds: 10));
+
     if (_selectedDate.isBefore(DateTime.now().add(const Duration(hours: 1)))) {
       setState(() {
         _error = 'Please select a valid booking date and time (at least 1 hour from now)';
@@ -212,6 +214,11 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
         });
       }
     }
+    _selectedServices = [];
+    _selectedPets = [];
+    _selectAllServices = false;
+    _selectAllPets = false;
+    _totalPrice = 0;
 
     _updateBookingServiceData();
     _calculateTotalPrice();

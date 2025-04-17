@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { TextField, Autocomplete, Button } from "@mui/material";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
-import { ToastContainer, toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function MedicineAddForm() {
   const sidebarRef = useRef(null);
@@ -43,9 +43,21 @@ function MedicineAddForm() {
           ]);
         } else {
           console.error("Failed to fetch treatments:", result.message || "Unknown error");
+          Swal.fire({
+            title: 'Warning',
+            text: result.message || 'Failed to load treatments!',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+          });
         }
       } catch (error) {
         console.error("Error fetching treatments:", error);
+        Swal.fire({
+          title: 'Warning',
+          text: 'Failed to load treatments!',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
     };
 
@@ -88,15 +100,30 @@ function MedicineAddForm() {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success(data.message || "Medicine added successfully!");
+        Swal.fire({
+          title: 'Success',
+          text: data.message || 'Medicine added successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         handleCancel();
         navigate("/medicines");
       } else {
-        toast.error("Error: " + data.message);
+        Swal.fire({
+          title: 'Warning',
+          text: data.message || 'An error occurred while adding the medicine!',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while adding the medicine.");
+      Swal.fire({
+        title: 'Warning',
+        text: 'An error occurred while adding the medicine!',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
@@ -240,7 +267,6 @@ function MedicineAddForm() {
           )}
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

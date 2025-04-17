@@ -76,7 +76,7 @@ Cypress.Commands.add("softDeleteVoucher", (voucherId, token = null) => {
   return cy
     .request({
       method: "DELETE",
-      url: `${Cypress.env("API_URL") || "http://localhost:5000"}/api/Voucher/${voucherId}`,
+      url: `${Cypress.env("API_URL") || "http://localhost:5001"}/api/Voucher/${voucherId}`,
       headers: {
         Authorization: `Bearer ${authToken}`,
       },

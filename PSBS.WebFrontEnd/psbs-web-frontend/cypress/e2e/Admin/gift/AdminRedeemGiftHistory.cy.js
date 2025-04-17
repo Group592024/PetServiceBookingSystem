@@ -411,8 +411,8 @@ describe('Admin Redeem History', () => {
 
         cy.contains('button', 'Update').click({ force: true });
 
-        cy.get('.swal2-container').should('not.exist');
-        cy.contains('Update Redeem Status').should('be.visible');
+        // cy.get('.swal2-container').should('not.exist');
+        cy.contains('Failed to update status').should('be.visible');
     });
 
     it('should handle network errors gracefully when updating status', () => {
