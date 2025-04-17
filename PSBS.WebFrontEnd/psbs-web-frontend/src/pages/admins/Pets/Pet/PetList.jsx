@@ -76,6 +76,7 @@ const AdminPetList = () => {
                 console.error('Unexpected response format:', petData);
             }
         } catch (error) {
+            Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
             console.error('Error fetching data:', error);
         } finally {
             setLoading(false);

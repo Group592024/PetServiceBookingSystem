@@ -13,8 +13,8 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem("rememberedEmail");
-    const savedPassword = localStorage.getItem("rememberedPassword");
+    const savedEmail = sessionStorage.getItem("rememberedEmail");
+    const savedPassword = sessionStorage.getItem("rememberedPassword");
 
     if (savedEmail && savedPassword) {
       setEmail(savedEmail);
@@ -69,11 +69,11 @@ const Login = () => {
 
   const handleRememberMe = () => {
     if (rememberMe) {
-      localStorage.setItem("rememberedEmail", AccountEmail);
-      localStorage.setItem("rememberedPassword", AccountPassword);
+      sessionStorage.setItem("rememberedEmail", AccountEmail);
+      sessionStorage.setItem("rememberedPassword", AccountPassword);
     } else {
-      localStorage.removeItem("rememberedEmail");
-      localStorage.removeItem("rememberedPassword");
+      sessionStorage.removeItem("rememberedEmail");
+      sessionStorage.removeItem("rememberedPassword");
     }
   };
 
@@ -115,7 +115,7 @@ const Login = () => {
             decodedToken[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
-          localStorage.setItem("role", role);
+            sessionStorage.setItem("role", role);
 
           Swal.fire({
             icon: "success",

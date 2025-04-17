@@ -52,7 +52,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
         headers['Authorization'] = 'Bearer $token';
       }
       final petResponse = await http.get(
-   Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+        Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -67,7 +67,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
 
       final breedResponse = await http.get(
         Uri.parse(
-        'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
+            'http://10.0.2.2:5050/api/petBreed/${petData['data']['petBreedId']}'),
         headers: headers.isNotEmpty ? headers : null,
       );
 
@@ -122,20 +122,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 child: Icon(Icons.arrow_back, color: Colors.blue),
               ),
               onPressed: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                String? accountId = prefs.getString('accountId');
-
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyHomePage(
-                      title: "PetEase App",
-                      accountId: accountId ?? "",
-                      initialIndex: 1,
-                    ),
-                  ),
-                  (route) => false,
-                );
+                Navigator.of(context).pop(true);
               },
             ),
             flexibleSpace: FlexibleSpaceBar(
@@ -143,7 +130,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-   'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
+                    'http://10.0.2.2:5050/pet-service${pet!['petImage']}',
                     fit: BoxFit.cover,
                   ),
                   Container(
@@ -255,13 +242,20 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                               'Edit Pet',
                               Icons.edit,
                               Colors.blue,
-                              () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      PetEdit(petId: pet!['petId']),
-                                ),
-                              ),
+                              () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        PetEdit(petId: pet!['petId']),
+                                  ),
+                                );
+
+                                if (result == 'refresh') {
+                                  await fetchPetDetails();
+                                  setState(() {});
+                                }
+                              },
                             ),
                           ),
                           SizedBox(width: 10),
@@ -596,7 +590,7 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
           if (token != null) 'Authorization': 'Bearer $token',
         };
         final response = await http.delete(
-     Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
+          Uri.parse('http://10.0.2.2:5050/api/pet/${widget.petId}'),
           headers: headers,
         );
         final responseData = json.decode(response.body);
@@ -655,17 +649,8 @@ class _CustomerPetDetailState extends State<CustomerPetDetail> {
                       SizedBox(height: 20),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyHomePage(
-                                accountId: userId,
-                                title: 'Flutter Demo Home Page',
-                                initialIndex: 1,
-                              ),
-                            ),
-                            (route) => false,
-                          );
+                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(

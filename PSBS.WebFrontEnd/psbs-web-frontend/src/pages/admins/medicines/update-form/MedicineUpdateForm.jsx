@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { TextField, Autocomplete, Button } from "@mui/material";
 import Sidebar from "../../../../components/sidebar/Sidebar";
 import Navbar from "../../../../components/navbar/Navbar";
-import { ToastContainer, toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 
 function MedicineUpdateForm() {
   const sidebarRef = useRef(null);
@@ -145,15 +145,30 @@ function MedicineUpdateForm() {
 
       if (response.ok) {
         const data = await response.json();
-        toast.success(data.message || "Medicine updated successfully!");
+        Swal.fire({
+          title: 'Success',
+          text: data.message || 'Medicine updated successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
+        });
         navigate("/medicines");
       } else {
         const errorData = await response.json();
-        toast.error("Error: " + (errorData.message || "Unknown error"));
+        Swal.fire({
+          title: 'Warning',
+          text: errorData.message || 'An error occurred while updating the medicine!',
+          icon: 'warning',
+          confirmButtonText: 'OK'
+        });
       }
     } catch (error) {
       console.error("Error submitting form:", error);
-      toast.error("An error occurred while updating the medicine.");
+      Swal.fire({
+        title: 'Warning',
+        text: 'An error occurred while updating the medicine!',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
@@ -205,6 +220,7 @@ function MedicineUpdateForm() {
               <form onSubmit={handleSubmit}>
                 <div className="mb-4">
                   <TextField
+                  id = "medicineName"
                     label="Medicine Name"
                     variant="outlined"
                     fullWidth
@@ -218,6 +234,7 @@ function MedicineUpdateForm() {
 
                 <div className="mb-6">
                   <Autocomplete
+                  id= "treatmentFor"
                     value={treatmentFor}
                     onChange={handleTreatmentChange}
                     options={treatmentOptions}
@@ -237,12 +254,13 @@ function MedicineUpdateForm() {
                 </div>
                 <div className="mb-6">
                   <Autocomplete
+                  id="medicineStatus"
                     value={
                       medicineStatus !== null
                         ? {
-                            label: medicineStatus ? "Inactive" : "Active",
-                            value: medicineStatus,
-                          }
+                          label: medicineStatus ? "Inactive" : "Active",
+                          value: medicineStatus,
+                        }
                         : null
                     }
                     onChange={handleMedicineStatusChange}
@@ -333,7 +351,6 @@ function MedicineUpdateForm() {
             </div>
           )}
         </div>
-        <ToastContainer />
       </div>
     </div>
   );

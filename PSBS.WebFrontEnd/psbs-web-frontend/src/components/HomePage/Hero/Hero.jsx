@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import heroBg from "../../../assets/HomePage/hero/blue-pattern.png";
 import Pet1Img from "../../../assets/HomePage/hero/shiba.jpg";
 import Pet2Img from "../../../assets/HomePage/hero/beagle.jpg";
@@ -34,44 +35,49 @@ const Hero = () => {
 
   return (
     <motion.section
-      className="bg-cover bg-center min-h-[650px] flex items-center px-16 py-12 relative select-none"
+      className="bg-cover bg-center min-h-[650px] flex items-center px-4 sm:px-8 md:px-12 lg:px-16 py-12 relative select-none"
       style={{ backgroundImage: `url(${heroBg})` }}
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 1, ease: "easeOut" }}
       viewport={{ once: true }}
     >
-      <div className="flex w-full justify-between items-center mt-[-50px]">
+      <div className="flex flex-col lg:flex-row w-full justify-between items-center gap-8 lg:gap-0 mt-[-30px]">
+        {/* Left - Text */}
         <motion.div
-          className="max-w-3xl"
+          className="max-w-3xl text-center lg:text-left"
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
           viewport={{ once: true }}
         >
-          <h1 className="text-5xl sm:text-6xl font-bold uppercase leading-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold uppercase leading-tight">
             Unleash<br />
             <span className="text-orange-500 inline-block animate-pulse">
-             the Power
+              the Power
             </span>
             <br />
             of PetEase
           </h1>
-          <button className="mt-6 px-6 py-3 bg-orange-500 text-white font-bold rounded-lg shadow-md transition-transform hover:bg-orange-600 hover:-translate-y-1">
-            Learn more
-          </button>
+          <Link to="/customer/services">
+            <button className="mt-6 px-6 py-3 bg-orange-500 text-white font-bold rounded-lg shadow-md transition-transform hover:bg-orange-600 hover:-translate-y-1">
+              Start Your Journey
+            </button>
+          </Link>
         </motion.div>
-        <motion.div className="flex flex-col items-center space-y-4 mt-6">
-          <div className="text-3xl font-bold capitalize bg-gradient-to-l from-[#ff9933] via-[#d2691e] to-[#8B4513] bg-clip-text text-transparent">
+
+        {/* Center - Pet Details */}
+        <motion.div className="flex flex-col items-center space-y-4 mt-6 text-center">
+          <div className="text-2xl sm:text-3xl font-bold capitalize bg-gradient-to-l from-[#ff9933] via-[#d2691e] to-[#8B4513] bg-clip-text text-transparent">
             {petDetails.category}
           </div>
-          <div className="text-xl uppercase mb-2 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
+          <div className="text-lg sm:text-xl uppercase mb-2 bg-gradient-to-r from-blue-500 via-cyan-400 to-blue-600 bg-clip-text text-transparent">
             {petDetails.name}
           </div>
-          <div className="text-md text-center bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent px-6 mt-4">
+          <div className="text-sm sm:text-md text-center bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500 bg-clip-text text-transparent px-4 sm:px-6 mt-2 sm:mt-4">
             {petDetails.description}
           </div>
-          <div className="w-56 h-56 border-4 border-white rounded-full overflow-hidden">
+          <div className="w-44 h-44 sm:w-56 sm:h-56 border-4 border-white rounded-full overflow-hidden">
             <img
               src={petDetails.image}
               alt={petDetails.name}
@@ -80,7 +86,9 @@ const Hero = () => {
             />
           </div>
         </motion.div>
-        <motion.div className="grid grid-cols-3 gap-6 max-w-lg">
+
+        {/* Right - Pet Thumbnails */}
+        <motion.div className="grid grid-cols-3 gap-4 sm:gap-6 max-w-lg mt-6 lg:mt-0">
           {pets.map((pet, index) => (
             <div
               key={pet.id}
@@ -88,12 +96,12 @@ const Hero = () => {
                 getPetDetails(pet.id);
                 setPetIndex(index);
               }}
-              className="relative cursor-pointer w-28 h-28 rounded-full overflow-hidden transition-transform hover:scale-110 shadow-lg"
+              className="relative cursor-pointer w-20 h-20 sm:w-28 sm:h-28 rounded-full overflow-hidden transition-transform hover:scale-110 shadow-lg"
             >
               <div
                 className={`absolute inset-0 rounded-full ${petIndex === index
-                    ? "bg-white/40 border-4 border-white"
-                    : "bg-black/40"
+                  ? "bg-white/40 border-4 border-white"
+                  : "bg-black/40"
                   }`}
               ></div>
               <img

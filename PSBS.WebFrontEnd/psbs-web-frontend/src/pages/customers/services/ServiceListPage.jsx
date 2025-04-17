@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import ServiceCardList from "../../../components/ServiceCustomer/ServiceCardList";
 import { motion, AnimatePresence } from "framer-motion";
 import banner1 from "../../../assets/Service/banner1.jpeg";
@@ -33,14 +33,32 @@ const banners = [
 
 const ServiceListPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [data, setData] = useState([]);
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+
+  // Get the service type from URL query parameter
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const typeParam = queryParams.get('type');
+    if (typeParam) {
+      setSearchType(typeParam);
+
+      // Scroll to services section after a short delay to ensure the component is rendered
+      setTimeout(() => {
+        document
+          .getElementById("services-section")
+          ?.scrollIntoView({
+            behavior: "smooth",
+          });
+      }, 500);
+    }
+  }, [location.search]);
 
   // Auto-slide effect
   useEffect(() => {
@@ -73,12 +91,10 @@ const ServiceListPage = () => {
       }
 
       const response = await fetchData.json();
-
       const result = response.data.map((item) => ({
         id: item.serviceId,
         ...item,
       }));
-
       setData(result);
     } catch (error) {
       console.error("Error fetching data: ", error);
@@ -109,10 +125,10 @@ const ServiceListPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <NavbarCustomer />
-
       {/* Banner Slider */}
       <div
         data-testid="banner-container"
+
         className="relative w-full h-[500px] overflow-hidden rounded-b-[2.5rem] shadow-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
@@ -128,6 +144,7 @@ const ServiceListPage = () => {
                   ? "bg-white w-8"
                   : "bg-white/50 hover:bg-white/80"
               }`}
+
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -227,7 +244,6 @@ const ServiceListPage = () => {
           )}
         </AnimatePresence>
       </div>
-
       {/* Service Section */}
       <div
         id="services-section"
@@ -403,6 +419,9 @@ const ServiceListPage = () => {
                 onClick={() => {
                   setSearchName("");
                   setSearchType("");
+
+                  // Remove the type parameter from the URL
+                  navigate('/customer/services', { replace: true });
                 }}
                 className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 hover:bg-gray-200"
               >
@@ -480,6 +499,9 @@ const ServiceListPage = () => {
               onClick={() => {
                 setSearchName("");
                 setSearchType("");
+
+                // Remove the type parameter from the URL
+                navigate('/customer/services', { replace: true });
               }}
               className="mt-4 px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200"
             >
@@ -503,6 +525,7 @@ const ServiceListPage = () => {
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-[15%]">
+
             {serviceTypes.slice(0, 6).map((type, index) => (
               <motion.div
                 key={type}
@@ -526,6 +549,10 @@ const ServiceListPage = () => {
                   <button
                     onClick={() => {
                       setSearchType(type);
+
+                      // Update URL with the selected type
+                      navigate(`/customer/services?type=${type}`, { replace: true });
+
                       // Add scrolling to the services section
                       document
                         .getElementById("services-section")

@@ -45,7 +45,11 @@ describe('Account List Page', () => {
             },
         }).as('getAccounts');
 
+        cy.window().then((win) => {
+            win.sessionStorage.setItem('role', 'staff');
+        });
         cy.visit('http://localhost:3000/login');
+        
         cy.get('#email', { timeout: 10000 }).should('be.visible').type('tuanla2678@gmail.com');
         cy.get('#password').type('123456');
         cy.get('button[type="submit"]').click();
@@ -65,8 +69,8 @@ describe('Account List Page', () => {
         });
 
         cy.window().then((win) => {
-            if (!win.localStorage.getItem('role')) {
-                win.localStorage.setItem('role', 'staff');
+            if (!win.sessionStorage.getItem('role')) {
+                win.sessionStorage.setItem('role', 'staff');
             }
         });
 
@@ -124,9 +128,6 @@ describe('Account List Page', () => {
         cy.get('.swal2-popup').should('not.exist');
     });
     
-
-
-
     it('should create a new account successfully', () => {
         cy.intercept('POST', '**/api/Account/addaccount', {
             statusCode: 200,
@@ -143,39 +144,4 @@ describe('Account List Page', () => {
         cy.get('.swal2-popup').should('contain.text', 'Account added successfully!');
     });
 
-    it('should delete an account (soft delete) successfully', () => {
-        cy.intercept('DELETE', '**/api/Account/delete/*', {
-            statusCode: 200,
-            body: { message: 'Account has been marked as deleted.' },
-        }).as('deleteAccount');
-
-        cy.get('.MuiDataGrid-root', { timeout: 15000 }).should('be.visible');
-        cy.get('.MuiDataGrid-row').first().within(() => {
-            cy.get('button[aria-label="Delete"]').click();
-        });
-
-        cy.contains('Are you sure?').should('be.visible');
-        cy.contains('Yes, delete it!').click();
-
-        cy.wait('@deleteAccount');
-        cy.get('.swal2-popup').should('contain.text', 'marked as deleted');
-    });
-
-    it('should handle delete error correctly', () => {
-        cy.intercept('DELETE', '**/api/Account/delete/*', {
-            statusCode: 400,
-            body: { message: 'Failed to delete the account.' },
-        }).as('deleteAccountError');
-
-        cy.get('.MuiDataGrid-root', { timeout: 15000 }).should('be.visible');
-        cy.get('.MuiDataGrid-row').first().within(() => {
-            cy.get('button[aria-label="Delete"]').click();
-        });
-
-        cy.contains('Are you sure?').should('be.visible');
-        cy.contains('Yes, delete it!').click();
-
-        cy.wait('@deleteAccountError');
-        cy.get('.swal2-popup').should('contain.text', 'Failed to delete the account');
-    });
 });

@@ -3,11 +3,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'booking_room_choose.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
 
 
 class BookingRoomForm extends StatefulWidget {
   final String? cusId;
   final Function(List<Map<String, dynamic>>)? onBookingDataChange;
+
 
   BookingRoomForm({
     required this.cusId,
@@ -161,10 +163,14 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
     return (s1.isBefore(e2) && e1.isAfter(s2));
   }
 
-  void _handleCreateBookingRooms() {
+  void _handleCreateBookingRooms() async{
     setState(() {
       _error = null;
+      _bookingRooms = [];
     });
+
+     // Small delay to ensure UI updates
+    await Future.delayed(Duration(milliseconds: 10));
 
     // Check if number of rooms is sufficient
     final numRooms = _selectAllRooms ? _rooms.length : _selectedRooms.length;
@@ -224,6 +230,12 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
     setState(() {
       _bookingRooms = newBookingRooms;
+      // Clear selections after creating
+    _selectedRooms = [];
+    _selectedPets = [];
+    _selectAllRooms = false;
+    _selectAllPets = false;
+    _totalPrice = 0;
     });
     _notifyParent();
   }
@@ -251,6 +263,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
   @override
   Widget build(BuildContext context) {
+  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
     return Column(
       children: [
         // Rooms Selection
@@ -273,7 +286,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 if (!_selectAllRooms)
                   ..._rooms.map((room) => CheckboxListTile(
                         title: Text(
-                          "${room['roomName']} - ${room['description']} - ${_roomPrices[room['roomTypeId']]?.toStringAsFixed(0) ?? '...'} VND/day"
+                          "${room['roomName']} - ${currencyFormat.format(_roomPrices[room['roomTypeId']] ?? 0)}"
                         ),
                         value:
                             _selectedRooms.contains(room['roomId'].toString()),
@@ -365,7 +378,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
         SizedBox(height: 20),
         Text(
-          "Total Price: ${_totalPrice.toStringAsFixed(2)} VND",
+          "Total Price: ${currencyFormat.format(_totalPrice)}",
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
       ],

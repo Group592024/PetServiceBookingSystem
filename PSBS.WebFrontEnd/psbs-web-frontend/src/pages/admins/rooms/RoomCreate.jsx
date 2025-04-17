@@ -37,7 +37,7 @@ const RoomCreate = () => {
                 const data = await response.json();
                 setRoomTypes(data.data || []);
             } catch (error) {
-                Swal.fire("Error", "Failed to fetch room types!", "error");
+                Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
             }
         };
 

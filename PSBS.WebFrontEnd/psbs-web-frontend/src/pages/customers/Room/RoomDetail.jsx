@@ -75,8 +75,8 @@ const CustomerRoomDetail = () => {
                     <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
                         <div className="flex flex-col lg:flex-row">
                             {/* Left Column - Image Gallery */}
-                            <div className="lg:w-1/2 relative">
-                                <div className="relative h-[600px] group">
+                            <div className="lg:w-1/2 relative flex flex-col">
+                                <div className={`relative h-[600px] group ${showFullDescription ? 'flex-grow' : ''}`}>
                                     <img
                                         src={`http://localhost:5050/facility-service${detail.roomImage}`}
                                         alt={detail.roomName}
@@ -117,12 +117,12 @@ const CustomerRoomDetail = () => {
                                             </p>
                                         </div>
                                         <button
-                                            onClick={() => navigate(`/booking/${detail.roomId}`)}
+                                            onClick={() => navigate(`/customer/bookings/new`)}
                                             className="bg-gradient-to-r from-yellow-400 to-yellow-500 
-                                                     text-gray-900 px-8 py-4 rounded-xl font-semibold
-                                                     hover:from-yellow-500 hover:to-yellow-600 
-                                                     transition-all duration-300 transform hover:-translate-y-0.5
-                                                     hover:shadow-lg"
+                                                        text-gray-900 px-8 py-4 rounded-xl font-semibold
+                                                        hover:from-yellow-500 hover:to-yellow-600 
+                                                        transition-all duration-300 transform hover:-translate-y-0.5
+                                                        hover:shadow-lg"
                                         >
                                             Book Now
                                         </button>
@@ -159,7 +159,7 @@ const CustomerRoomDetail = () => {
                                             <button
                                                 onClick={() => setShowFullDescription(!showFullDescription)}
                                                 className="mt-4 text-blue-600 hover:text-blue-700 font-medium 
-                                                         flex items-center gap-1 transition-colors"
+                                                            flex items-center gap-1 transition-colors"
                                             >
                                                 {showFullDescription ? 'Show Less' : 'Read More'}
                                                 <svg className={`w-4 h-4 transform transition-transform ${showFullDescription ? 'rotate-180' : ''}`}
@@ -177,7 +177,6 @@ const CustomerRoomDetail = () => {
             </main>
         </div>
     );
-
 };
 
 export default CustomerRoomDetail;

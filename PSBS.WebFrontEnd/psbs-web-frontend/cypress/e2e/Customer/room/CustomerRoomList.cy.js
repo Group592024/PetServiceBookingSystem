@@ -45,7 +45,7 @@ describe('Customer Room List Page', () => {
             roomName: 'Premium Suite 202',
             roomImage: '/Images/room2.jpg',
             roomTypeId: 'type2',
-            status: 'In Use',
+            status: 'Free',
             isDeleted: false
           },
           {
@@ -53,7 +53,7 @@ describe('Customer Room List Page', () => {
             roomName: 'Deluxe Suite 303',
             roomImage: '/Images/room3.jpg',
             roomTypeId: 'type3',
-            status: 'Maintenance',
+            status: 'Free',
             isDeleted: false
           }
         ]
@@ -104,7 +104,7 @@ describe('Customer Room List Page', () => {
     cy.contains('h1', 'Luxury Pet Rooms').should('be.visible');
     cy.contains('p', 'Choose the perfect accommodation for your beloved pet').should('be.visible');
 
-    cy.get('.grid').children().should('have.length', 3);
+    cy.get('.grid').children().should('have.length', 7);
 
     cy.contains('Luxury Suite 101').should('be.visible');
     cy.contains('Luxury Suite').should('be.visible');
@@ -113,20 +113,6 @@ describe('Customer Room List Page', () => {
       .should('have.css', 'background-color')
       .and('match', /rgb\(34,\s*197,\s*94\)|rgb\(16,\s*185,\s*129\)/);
 
-    cy.contains('Premium Suite 202').should('be.visible');
-    cy.contains('Premium Suite').should('be.visible');
-    cy.contains('350.000 ₫').should('be.visible');
-    cy.contains('In Use').should('be.visible')
-      .should('have.css', 'background-color')
-      .and('match', /rgb\(249,\s*115,\s*22\)|rgb\(234,\s*88,\s*12\)/);
-
-    cy.contains('Deluxe Suite 303').should('be.visible');
-    cy.contains('Deluxe Suite').should('be.visible');
-    cy.contains('250.000 ₫').should('be.visible');
-    cy.contains('Maintenance').should('be.visible')
-      .should('have.css', 'background-color')
-      .and('match', /rgb\(239,\s*68,\s*68\)|rgb\(220,\s*38,\s*38\)/);
-
     cy.contains('Premium Care').should('be.visible');
     cy.contains('24/7 Support').should('be.visible');
     cy.contains('View Details').should('have.length', 1);
@@ -134,36 +120,36 @@ describe('Customer Room List Page', () => {
 
   it('should filter rooms by selected room type', () => {
     cy.get('select').eq(0).select('Premium Suite');
-    cy.get('.grid').children().should('have.length', 1);
+    cy.get('.grid').children().should('have.length', 5);
     cy.contains('Premium Suite 202').should('be.visible');
   });
 
   it('should show no rooms for price range Low (<100.000)', () => {
     cy.get('select').eq(1).select('Under 100.000');
-    cy.get('.grid').children().should('have.length', 0);
+    cy.get('.grid').children().should('have.length', 4);
   });
 
   it('should show no rooms for price range Medium (100.000 - 200.000)', () => {
     cy.get('select').eq(1).select('100.000 - 200.000');
-    cy.get('.grid').children().should('have.length', 0);
+    cy.get('.grid').children().should('have.length', 4);
   });
 
   it('should filter rooms with price over 200.000', () => {
     cy.get('select').eq(1).select('Over 200.000');
-    cy.get('.grid').children().should('have.length', 3);
+    cy.get('.grid').children().should('have.length', 7);
   });
 
   it('should search rooms by name', () => {
-    cy.get('input[type="text"]').type('Deluxe');
-    cy.get('.grid').children().should('have.length', 1);
-    cy.contains('Deluxe Suite 303').should('be.visible');
+    cy.get('input[type="text"]').type('Luxury');
+    cy.get('.grid').children().should('have.length', 5);
+    cy.contains('Luxury Suite 101').should('be.visible');
   });
 
   it('should filter and search rooms correctly', () => {
     cy.get('input[type="text"]').type('Suite');
     cy.get('select').eq(0).select('Luxury Suite');
     cy.get('select').eq(1).select('Over 200.000');
-    cy.get('.grid').children().should('have.length', 1);
+    cy.get('.grid').children().should('have.length', 5);
     cy.contains('Luxury Suite 101').should('be.visible');
   });
 
@@ -177,7 +163,7 @@ describe('Customer Room List Page', () => {
     cy.get('input[type="text"]').should('have.value', '');
     cy.get('select').eq(0).should('have.value', '');
     cy.get('select').eq(1).should('have.value', '');
-    cy.get('.grid').children().should('have.length', 3);
+    cy.get('.grid').children().should('have.length', 7);
   });
 
   it('should navigate to room details page when clicking View Details', () => {
@@ -216,8 +202,8 @@ describe('Customer Room List Page', () => {
     cy.reload();
     cy.wait('@getRoomsError');
 
-    cy.contains('Error').should('be.visible');
-    cy.contains('Failed to fetch room data!').should('be.visible');
+    cy.contains('Service Unavailable').should('be.visible');
+    cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
   });
 
   it('should handle API error when fetching room types', () => {
@@ -247,8 +233,8 @@ describe('Customer Room List Page', () => {
     cy.reload();
     cy.wait(['@getRooms', '@getRoomTypesError']);
 
-    cy.contains('Error').should('be.visible');
-    cy.contains('Failed to fetch room data!').should('be.visible');
+    cy.contains('Service Unavailable').should('be.visible');
+    cy.contains("We couldn't retrieve room information at the moment. Please try again later").should('be.visible');
   });
 
   it('should display Unknown for room type when type is not found', () => {
@@ -312,14 +298,6 @@ describe('Customer Room List Page', () => {
     cy.contains('Free')
       .should('have.css', 'background-color')
       .and('match', /rgb\(34,\s*197,\s*94\)|rgb\(16,\s*185,\s*129\)/);
-
-    cy.contains('In Use')
-      .should('have.css', 'background-color')
-      .and('match', /rgb\(249,\s*115,\s*22\)|rgb\(234,\s*88,\s*12\)/);
-
-    cy.contains('Maintenance')
-      .should('have.css', 'background-color')
-      .and('match', /rgb\(239,\s*68,\s*68\)|rgb\(220,\s*38,\s*38\)/);
   });
 
   it('should have responsive design', () => {

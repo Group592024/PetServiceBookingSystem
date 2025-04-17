@@ -14,7 +14,7 @@ const Navbar = ({ sidebarRef }) => {
   const navigate = useNavigate();
   const [notificationDropdownVisible, setNotificationDropdownVisible] =
     useState(false);
-    const [notificationCount, setNotificationCount] = useState("0");
+  const [notificationCount, setNotificationCount] = useState("0");
   const intervalRef = useRef(null);
   const isNotificationOpenRef = useRef(false);
 
@@ -54,7 +54,6 @@ const Navbar = ({ sidebarRef }) => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-
     if (token) {
       const decodedToken = jwt_decode(token);
       setAccountName(decodedToken.AccountName);
@@ -146,36 +145,29 @@ const Navbar = ({ sidebarRef }) => {
   };
 
   return (
-    <div className="nav">
+    <div className="nav flex justify-between items-center px-4 py-2 relative">
       <i className="bx bx-menu" onClick={handleMenuClick}></i>
-      <form action="#" >
-        <div className="form-input">
-          <input type="search" placeholder="Search..." />
-          <button className="search-btn" type="submit">
-            <i className="bx bx-search"></i>
-          </button>
-        </div>
-      </form>
       <input type="checkbox" id="theme-toggle" hidden />
       <label htmlFor="theme-toggle"></label>
-      <div className="notifications" onClick={toggleNotificationDropdown}>
-        <i class="bx bx-bell"></i>
-      
+      <div className="flex items-center ml-auto space-x-4">
+        <div className="notifications" onClick={toggleNotificationDropdown}>
+          <i class="bx bx-bell"></i>
+        </div>
+        <a href="/chat" className="notifications">
+          <i className="bx bx-message-square-dots"></i>
+        </a>
       </div>
-      <a href="/chat" className="notifications">
-        <i className="bx bx-message-square-dots"></i>
-      </a>
       {notificationDropdownVisible && (
-         <NotificationsDropdown 
-         onClose={() => {
-           setNotificationDropdownVisible(false);
-           isNotificationOpenRef.current = false;
-         }}
-         onUnreadCountChange={(count) => {
-           dropdownUnreadCountRef.current = count;
-           setNotificationCount(count.toString());
-         }}
-       />
+        <NotificationsDropdown
+          onClose={() => {
+            setNotificationDropdownVisible(false);
+            isNotificationOpenRef.current = false;
+          }}
+          onUnreadCountChange={(count) => {
+            dropdownUnreadCountRef.current = count;
+            setNotificationCount(count.toString());
+          }}
+        />
       )}
       <div className="navbar-profile" onClick={toggleDropdown}>
         {imagePreview ? (

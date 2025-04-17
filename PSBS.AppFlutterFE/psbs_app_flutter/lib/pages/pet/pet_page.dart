@@ -87,7 +87,7 @@ class _CustomerPetListState extends State<PetPage> {
 
           allPets = fetchedPets;
           filteredPets = fetchedPets;
-
+          _filterPets();
           return fetchedPets;
         } else {
           return [];
@@ -95,13 +95,12 @@ class _CustomerPetListState extends State<PetPage> {
       } else if (response.statusCode == 404) {
         return [];
       } else {
-        throw Exception(
-            "Failed to fetch data. Status Code: ${response.statusCode}");
+        throw ("Something went wrong while retrieving your pets. Please try again later.");
       }
     } catch (e, stacktrace) {
       debugPrint("Error fetching pets: $e");
       debugPrint("Stacktrace: $stacktrace");
-      throw Exception("An error occurred while fetching data: $e");
+      throw "We’re having trouble loading your pets. Please check your connection or try again shortly.";
     }
   }
 
@@ -177,17 +176,7 @@ class _CustomerPetListState extends State<PetPage> {
                     SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => MyHomePage(
-                              accountId: userId,
-                              title: 'Flutter Demo Home Page',
-                              initialIndex: 1,
-                            ),
-                          ),
-                          (route) => false,
-                        );
+                        Navigator.of(context).pop();
                       },
                       child: Container(
                         padding:
@@ -529,6 +518,10 @@ class _CustomerPetListState extends State<PetPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('My Pets'),
+        backgroundColor: Colors.blue,
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -548,14 +541,37 @@ class _CustomerPetListState extends State<PetPage> {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'My Pets',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade800,
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.only(right: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  spreadRadius: 1,
+                                  blurRadius: 5,
+                                  offset: Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: TextField(
+                              controller: searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search pets by name...',
+                                prefixIcon: Icon(
+                                  Icons.search,
+                                  color: Colors.grey,
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: 15,
+                                  horizontal: 20,
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                         IconButton(
@@ -570,38 +586,6 @@ class _CustomerPetListState extends State<PetPage> {
                           ),
                         ),
                       ],
-                    ),
-
-                    // Search bar
-                    SizedBox(height: 16),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.2),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search pets by name...',
-                          prefixIcon: Icon(
-                            Icons.search,
-                            color: Colors.grey,
-                          ),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                            vertical: 15,
-                            horizontal: 20,
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -639,11 +623,17 @@ class _CustomerPetListState extends State<PetPage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => PetCreate()),
           );
+
+          if (result == true) {
+            setState(() {
+              pets = fetchPets();
+            });
+          }
         },
         child: Icon(Icons.add),
         backgroundColor: const Color.fromARGB(255, 179, 240, 255),
@@ -722,24 +712,38 @@ class _CustomerPetListState extends State<PetPage> {
                       'Details',
                       Icons.info_outline,
                       Colors.blue,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CustomerPetDetail(petId: pet.petId),
-                        ),
-                      ),
+                      () async {
+                        final shouldRefresh = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CustomerPetDetail(petId: pet.petId),
+                          ),
+                        );
+
+                        if (shouldRefresh == true) {
+                          await fetchPets();
+                          setState(() {});
+                        }
+                      },
                     ),
                     _buildActionButton(
                       'Edit',
                       Icons.edit,
                       Colors.green,
-                      () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PetEdit(petId: pet.petId),
-                        ),
-                      ),
+                      () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PetEdit(petId: pet.petId),
+                          ),
+                        );
+                        if (result == 'refresh') {
+                          setState(() {
+                            pets = fetchPets();
+                          });
+                        }
+                      },
                     ),
                     _buildActionButton(
                       'Delete',
@@ -981,23 +985,36 @@ class _CustomerPetListState extends State<PetPage> {
                           _buildGridActionButton(
                             Icons.info_outline,
                             Colors.blue,
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    CustomerPetDetail(petId: pet.petId),
-                              ),
-                            ),
+                            () async {
+                              bool? shouldRefresh = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      CustomerPetDetail(petId: pet.petId),
+                                ),
+                              );
+                              if (shouldRefresh == true) {
+                                await fetchPets();
+                                setState(() {});
+                              }
+                            },
                           ),
                           _buildGridActionButton(
                             Icons.edit,
                             Colors.green,
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PetEdit(petId: pet.petId),
-                              ),
-                            ),
+                            () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      PetEdit(petId: pet.petId),
+                                ),
+                              );
+                              if (result == 'refresh') {
+                                await fetchPets();
+                                setState(() {});
+                              }
+                            },
                           ),
                           _buildGridActionButton(
                             Icons.delete,

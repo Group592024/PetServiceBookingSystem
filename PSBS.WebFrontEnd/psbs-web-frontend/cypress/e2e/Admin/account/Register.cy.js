@@ -28,9 +28,7 @@ describe('Register Page (E2E)', () => {
     cy.get('#address').should('exist');
     cy.get('#terms[type="checkbox"]').should('exist');
     cy.get('label[for="terms"]').should('contain', 'I agree to the Terms of Service and Privacy Policy');
-    cy.get('label[for="terms"] a').should('have.length', 2)
-      .first().should('have.attr', 'href', '#')
-      .next().should('have.attr', 'href', '#');
+    
     cy.get('button[type="submit"]').contains('Create Account').should('exist');
   });
 

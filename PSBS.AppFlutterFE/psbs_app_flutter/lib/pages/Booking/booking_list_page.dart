@@ -274,7 +274,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
                     ),
                   ),
                   Text(
-                    '${booking.totalAmount.toStringAsFixed(2)}VND',
+                    '${booking.totalAmount.toStringAsFixed(2)} ₫',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

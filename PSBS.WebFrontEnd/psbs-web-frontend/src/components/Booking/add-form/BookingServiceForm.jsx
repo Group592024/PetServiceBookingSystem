@@ -54,6 +54,7 @@ const BookingServiceForm = () => {
   const [voucherSearchCode, setVoucherSearchCode] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [isCreatingServices, setIsCreatingServices] = useState(false);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -145,9 +146,9 @@ const BookingServiceForm = () => {
       } else {
         setVoucherError(
           `Minimum spend required: ${new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(selectedVoucher.voucherMinimumSpend)}`
+            style: "currency",
+            currency: "VND",
+          }).format(selectedVoucher.voucherMinimumSpend)}`
         );
         setFinalDiscount(0);
         setDiscountedPrice(totalPrice);
@@ -207,62 +208,81 @@ const BookingServiceForm = () => {
   };
 
   const handleCreateBookingServices = () => {
-    const newBookingServices = [];
+    // First, clear all existing booking services
+    setIsCreatingServices(true);
+    setbookingServices([]);
 
-    // If "All" is selected for both services and pets
-    if (selectAllServices && selectAllPets) {
-      services.forEach((service) => {
-        pets.forEach((pet) => {
-          newBookingServices.push({
-            service: service.serviceId,
-            pet: pet.petId,
-            price: 0, // Initialize to 0, will be updated when variant is selected
-            serviceVariant: null, // Initialize as null
-          });
-        });
-      });
-    }
-    // If "All" is selected for services only
-    else if (selectAllServices) {
-      services.forEach((service) => {
-        selectedPets.forEach((petId) => {
-          newBookingServices.push({
-            service: service.serviceId,
-            pet: petId,
-            price: 0,
-            serviceVariant: null,
-          });
-        });
-      });
-    }
-    // If "All" is selected for pets only
-    else if (selectAllPets) {
-      selectedServices.forEach((serviceId) => {
-        pets.forEach((pet) => {
-          newBookingServices.push({
-            service: serviceId,
-            pet: pet.petId,
-            price: 0,
-            serviceVariant: null,
-          });
-        });
-      });
-    }
-    // If specific services and pets are selected
-    else {
-      selectedServices.forEach((serviceId) => {
-        selectedPets.forEach((petId) => {
-          newBookingServices.push({
-            service: serviceId,
-            pet: petId,
-            price: 0,
-            serviceVariant: null,
-          });
-        });
-      });
-    }
+    // Then proceed with creating new ones after a tiny delay
+    setTimeout(() => {
+      const newBookingServices = [];
 
-    setbookingServices(newBookingServices);
+      // If "All" is selected for both services and pets
+      if (selectAllServices && selectAllPets) {
+        services.forEach((service) => {
+          pets.forEach((pet) => {
+            newBookingServices.push({
+              service: service.serviceId,
+              pet: pet.petId,
+              price: 0, // Initialize to 0, will be updated when variant is selected
+              serviceVariant: null, // Initialize as null
+            });
+          });
+        });
+      }
+      // If "All" is selected for services only
+      else if (selectAllServices) {
+        services.forEach((service) => {
+          selectedPets.forEach((petId) => {
+            newBookingServices.push({
+              service: service.serviceId,
+              pet: petId,
+              price: 0,
+              serviceVariant: null,
+            });
+          });
+        });
+      }
+      // If "All" is selected for pets only
+      else if (selectAllPets) {
+        selectedServices.forEach((serviceId) => {
+          pets.forEach((pet) => {
+            newBookingServices.push({
+              service: serviceId,
+              pet: pet.petId,
+              price: 0,
+              serviceVariant: null,
+            });
+          });
+        });
+      }
+      // If specific services and pets are selected
+      else {
+        selectedServices.forEach((serviceId) => {
+          selectedPets.forEach((petId) => {
+            newBookingServices.push({
+              service: serviceId,
+              pet: petId,
+              price: 0,
+              serviceVariant: null,
+            });
+          });
+        });
+      }
+
+      setbookingServices(newBookingServices);
+      setIsCreatingServices(false);
+
+      // Reset selections if needed
+      setSelectedServices([]);
+      setSelectedPets([]);
+      setSelectAllServices(false);
+      setSelectAllPets(false);
+
+      // Reset prices since we're starting fresh
+      setTotalPrice(0);
+      setFinalDiscount(0);
+      setDiscountedPrice(0);
+    }, 0); // Small delay to ensure state is cleared
   };
 
   const handleSearchVoucher = async () => {
@@ -419,11 +439,12 @@ const BookingServiceForm = () => {
           onClick={handleCreateBookingServices}
           disabled={
             (!selectAllServices && selectedServices.length === 0) ||
-            (!selectAllPets && selectedPets.length === 0)
+            (!selectAllPets && selectedPets.length === 0) ||
+            isCreatingServices
           }
           sx={{ px: 4, py: 1.5 }}
         >
-          Create Booking Services
+          {isCreatingServices ? "Creating..." : "Create Booking Services"}
         </Button>
       </Box>
 
@@ -514,9 +535,9 @@ const BookingServiceForm = () => {
                 {voucher.voucherName} - {voucher.voucherCode} (
                 {voucher.voucherDiscount}% Off, Max{" "}
                 {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(voucher.voucherMaximum)})
+                  style: "currency",
+                  currency: "VND",
+                }).format(voucher.voucherMaximum)})
               </MenuItem>
             ))}
           </TextField>
@@ -542,9 +563,9 @@ const BookingServiceForm = () => {
               </Grid>
               <Grid item>
                 <Typography>{new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(totalPrice)}</Typography>
+                  style: "currency",
+                  currency: "VND",
+                }).format(totalPrice)}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -565,9 +586,9 @@ const BookingServiceForm = () => {
                 <Grid item>
                   <Typography color="success.main">
                     -{new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(finalDiscount)}
+                      style: "currency",
+                      currency: "VND",
+                    }).format(finalDiscount)}
                   </Typography>
                 </Grid>
               </Grid>
@@ -586,9 +607,9 @@ const BookingServiceForm = () => {
               <Grid item>
                 <Typography variant="h6" color="primary" fontWeight="bold">
                   {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(discountedPrice)} 
+                    style: "currency",
+                    currency: "VND",
+                  }).format(discountedPrice)}
                 </Typography>
               </Grid>
             </Grid>

@@ -174,55 +174,44 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   }
 
   Future<void> cancelBooking() async {
-    bool confirm = await showCancelConfirmationDialog();
-    if (!confirm) return;
+  bool confirm = await showCancelConfirmationDialog();
+  if (!confirm) return;
 
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token');
-      final response = await http.put(
-        Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-      final responseData = json.decode(response.body);
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final response = await http.put(
+      Uri.parse("http://10.0.2.2:5050/Bookings/cancel/${widget.bookingId}"),
+      headers: {
+        "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      },
+    );
+    final responseData = json.decode(response.body);
 
-      if (responseData['flag']) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content:
-                Text(responseData['message'] ?? "Booking has been cancelled."),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: EdgeInsets.all(20),
-            backgroundColor: Colors.green,
-          ),
-        );
-        setState(() {
-          bookingStatusName = "Cancelled";
-        });
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                responseData['message'] ?? "The booking can't be cancelled."),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            margin: EdgeInsets.all(20),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } catch (error) {
+    if (responseData['flag']) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Failed to cancel booking. Please try again."),
+          content: Text(responseData['message'] ?? "Booking has been cancelled."),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          margin: EdgeInsets.all(20),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Add a delay before updating the UI
+      await Future.delayed(Duration(seconds: 2));
+
+      setState(() {
+        bookingStatusName = "Cancelled";
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(responseData['message'] ?? "The booking can't be cancelled."),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -232,7 +221,20 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
         ),
       );
     }
+  } catch (error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Failed to cancel booking. Please try again."),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        margin: EdgeInsets.all(20),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   Future<bool> showCancelConfirmationDialog() async {
     return await showDialog(
@@ -542,54 +544,57 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (booking?['isPaid'] == false && paymentTypeName == "VNPay")
-          ElevatedButton(
-            onPressed: handleVNPayPayment,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              backgroundColor: Colors.blue.shade600,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.payment, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  "Pay with VNPay",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        SizedBox(width: 16),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      if (booking?['isPaid'] == false && paymentTypeName == "VNPay" && bookingStatusName == "Pending" || bookingStatusName == "Confirmed")
         ElevatedButton(
-          onPressed: cancelBooking,
+          onPressed: handleVNPayPayment,
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            backgroundColor: Colors.red.shade600,
+            backgroundColor: Colors.blue.shade600,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.cancel, size: 20),
+              Icon(Icons.payment, size: 20),
               SizedBox(width: 8),
               Text(
-                "Cancel Booking",
+                "Pay with VNPay",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ],
           ),
         ),
-      ],
-    );
-  }
+      SizedBox(height: 16), // Add spacing between buttons
+      if (bookingStatusName == "Pending" || bookingStatusName == "Confirmed")
+      ElevatedButton(
+        onPressed: cancelBooking,
+        style: ElevatedButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          backgroundColor: Colors.red.shade600,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.cancel, size: 20),
+            SizedBox(width: 8),
+            Text(
+              "Cancel Booking",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -973,7 +978,6 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
             ),
           ),
         ],
-      ],
     );
   }
 
@@ -994,5 +998,13 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
       default:
         return Colors.grey;
     }
+  }
+}
+class DevHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
   }
 }
