@@ -444,13 +444,19 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
 
 
-        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model) 
+        public async Task<Response> AddAccount([FromForm] RegisterAccountDTO model)
         {
             try
             {
-                var getAccount = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
-                if (getAccount != null)
+                // Kiểm tra email tồn tại
+                var existingAccountByEmail = await GetAccountByAccountEmail(model.RegisterTempDTO.AccountEmail);
+                if (existingAccountByEmail != null)
                     return new Response(false, "Email existed!");
+
+                // Kiểm tra số điện thoại tồn tại
+                var existingAccountByPhone = await GetAccountByPhone(model.RegisterTempDTO.AccountPhoneNumber);
+                if (existingAccountByPhone != null)
+                    return new Response(false, "Phone number existed!");
 
                 string fileName = GetDefaultImage();
 
@@ -512,6 +518,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
         }
 
+
         private string GetDefaultImage()
         {
             string imagesPath = Path.Combine(_hostingEnvironment.ContentRootPath, "images");
@@ -553,27 +560,43 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountName))
                     account.AccountName = model.AccountTempDTO.AccountName;
 
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber))
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountPhoneNumber) &&
+                    model.AccountTempDTO.AccountPhoneNumber != account.AccountPhoneNumber)
+                {
+                    var existingAccountByPhone = await GetAccountByPhone(model.AccountTempDTO.AccountPhoneNumber);
+                    if (existingAccountByPhone != null && existingAccountByPhone.AccountId != account.AccountId)
+                        return new Response(false, "Phone number existed!");
+
                     account.AccountPhoneNumber = model.AccountTempDTO.AccountPhoneNumber;
+                }
 
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountGender))
                     account.AccountGender = model.AccountTempDTO.AccountGender;
 
-                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail))
+                if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountEmail) &&
+                    model.AccountTempDTO.AccountEmail != account.AccountEmail)
                 {
                     if (!Regex.IsMatch(model.AccountTempDTO.AccountEmail, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
                         return new Response(false, "Invalid email!");
+
+                    var existingAccountByEmail = await GetAccountByAccountEmail(model.AccountTempDTO.AccountEmail);
+                    if (existingAccountByEmail != null && existingAccountByEmail.AccountId != account.AccountId)
+                        return new Response(false, "Email existed!");
+
                     account.AccountEmail = model.AccountTempDTO.AccountEmail;
                 }
+
                 if (model.AccountTempDTO.AccountDob != null)
                 {
                     account.AccountDob = model.AccountTempDTO.AccountDob.Value;
                 }
+
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.AccountAddress))
                     account.AccountAddress = model.AccountTempDTO.AccountAddress;
 
                 if (!string.IsNullOrEmpty(model.AccountTempDTO.RoleId))
                     account.RoleId = model.AccountTempDTO.RoleId;
+
                 if (model.AccountTempDTO.isPickImage == true && model.UploadModel?.ImageFile != null)
                 {
                     List<string> allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".gif" };
@@ -599,10 +622,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                     account.AccountImage = fileName;
                 }
-                else if (model.AccountTempDTO.isPickImage == false)
-                {
 
-                }
                 account.UpdatedAt = DateTime.Now;
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
@@ -616,6 +636,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, "Internal server error: " + ex.Message);
             }
         }
+
 
         public async Task<Response> LoadImage(string fileName) // LoadImage with file Images
         {

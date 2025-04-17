@@ -50,10 +50,17 @@ namespace PSPS.Presentation.Controllers
         [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> AddAccount([FromForm] RegisterAccountDTO model)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(new { message = "Invalid input." });
+
             var result = await account.AddAccount(model);
-            return result.Flag ? Ok(result) : BadRequest(Request);
+
+            if (result.Flag)
+                return Ok(result);
+
+            return BadRequest(new { message = result.Message });
         }
+
         [HttpPost("Login")]// Login account
         [AllowAnonymous]
         public async Task<ActionResult<Response>> Login(LoginDTO loginDTO)
