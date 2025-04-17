@@ -6,7 +6,8 @@ const ServiceCard = ({ data }) => {
 
   return (
     <div
-      className="w-[42%] flex gap-10 p-10 mx-5 my-5 bg-gradient-to-r from-customLightPrimary to-customSecondary 
+      data-testid="service-card"
+      className="w-[42%] h-[320px] flex gap-10 p-10 mx-5 my-5 bg-gradient-to-r from-customLightPrimary to-customSecondary 
                     rounded-3xl shadow-2xl transition-all duration-300 hover:shadow-3xl"
     >
       {/* Image Section */}
@@ -22,14 +23,14 @@ const ServiceCard = ({ data }) => {
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col justify-between w-2/3">
+      <div className="flex flex-col justify-between w-2/3 h-full">
         {/* Service Details */}
-        <div className="space-y-4">
-          <p className="text-2xl font-extrabold text-customDark leading-tight">
+        <div className="space-y-4 overflow-hidden">
+          <p className="text-xl line-clamp-2 font-extrabold text-customDark leading-tight">
             {data.serviceName}
           </p>
 
-          <p className="text-gray-700 text-base line-clamp-4 leading-relaxed">
+          <p className="text-gray-700 text-base line-clamp-3 leading-relaxed">
             {data.serviceDescription}
           </p>
         </div>
@@ -37,7 +38,7 @@ const ServiceCard = ({ data }) => {
         {/* Button */}
         <Link
           to={`/customer/services/${data.serviceId}`}
-          className="mt-6 bg-customDark px-6 py-3 rounded-full text-customLight text-lg font-semibold text-center 
+          className="mt-auto bg-customDark px-6 py-3 rounded-full text-customLight text-lg font-semibold text-center 
                     hover:bg-customLight hover:text-customPrimary transition-all duration-300 shadow-lg 
                     hover:shadow-xl transform hover:scale-105"
         >

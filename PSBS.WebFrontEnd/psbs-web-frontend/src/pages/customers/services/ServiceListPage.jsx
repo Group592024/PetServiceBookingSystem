@@ -112,6 +112,7 @@ const ServiceListPage = () => {
 
       {/* Banner Slider */}
       <div
+        data-testid="banner-container"
         className="relative w-full h-[500px] overflow-hidden rounded-b-[2.5rem] shadow-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
@@ -230,7 +231,7 @@ const ServiceListPage = () => {
       {/* Service Section */}
       <div
         id="services-section"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
+        className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -251,7 +252,7 @@ const ServiceListPage = () => {
         </motion.div>
 
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-12">
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-12 mx-[20%]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="w-full md:w-1/2">
               <label
@@ -443,7 +444,7 @@ const ServiceListPage = () => {
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="text-lg font-medium mb-2">Error Loading Services</h3>
+            <h3 className="text-lg font-medium mb-2">Service Unavailable</h3>
             <p className="text-red-500 mb-4">{error}</p>
             <button
               onClick={fetchDataFunction}
@@ -501,7 +502,7 @@ const ServiceListPage = () => {
             Our Service Types
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-[15%]">
             {serviceTypes.slice(0, 6).map((type, index) => (
               <motion.div
                 key={type}

@@ -16,9 +16,21 @@ import { styled } from "@mui/material/styles";
 // Styled DataGrid with zebra striping and hover effects
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
   border: "none",
+  "& .MuiDataGrid-cell": {
+    color: theme.palette.primary.main,
+    display: "flex",
+    alignItems: "center",
+    bgColor: "black",
+  },
   "& .MuiDataGrid-cell:hover": {
     color: theme.palette.primary.main,
   },
+  "& .MuiDataGrid-cell MuiDataGrid-cell--textCenter": {
+    display: "flex",
+    alignItems: "center",
+    bgColor: "black",
+  },
+
   "& .MuiDataGrid-row:nth-of-type(odd)": {
     backgroundColor: alpha(theme.palette.primary.main, 0.04),
   },
@@ -80,7 +92,15 @@ const Datatable = ({
       align: "center",
       headerAlign: "center",
       renderCell: (params) => (
-        <Box sx={{ display: "flex", gap: "4px", justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: "4px",
+            justifyContent: "center",
+            alignItems: "center",
+            marginTop: "10px",
+          }}
+        >
           {onView && (
             <Tooltip title="View Details" arrow>
               <IconButton

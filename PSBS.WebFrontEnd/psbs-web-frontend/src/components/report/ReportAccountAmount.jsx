@@ -3,6 +3,7 @@ import useTimeStore from "../../lib/timeStore";
 import Datatable from "../services/Datatable";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
+import formatCurrency from "../../Utilities/formatCurrency.js";
 
 const ReportAccountAmount = () => {
   const [dtos, setDtos] = useState([]);
@@ -96,13 +97,6 @@ const ReportAccountAmount = () => {
 
     setData(report);
   }, [dtos, accounts]);
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
 
   // Find top spender
   const topSpender =

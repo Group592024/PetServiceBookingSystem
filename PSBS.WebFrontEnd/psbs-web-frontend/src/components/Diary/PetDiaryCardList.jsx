@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 import EditDiaryModal from "./EditDiaryModal";
 import { useState } from "react";
 
-const PetDiaryCardList = ({ data }) => {
+const PetDiaryCardList = ({ data, role, getCategories }) => {
   const [diaries, setDiaries] = useState(data);
   const [clickedDiary, setClickedDiary] = useState(null);
   const [open, setOpen] = useState(false);
@@ -84,6 +84,7 @@ const PetDiaryCardList = ({ data }) => {
               className="py-5 first:pt-0 last:pb-0 transition-all duration-300 hover:bg-gray-50 rounded-xl px-2"
             >
               <PetDiaryCard
+                role={role}
                 petDiary={item}
                 onEdit={() => {
                   setClickedDiary(item);
@@ -105,6 +106,7 @@ const PetDiaryCardList = ({ data }) => {
           open={open}
           onClose={handleCloseEditModal}
           diary={clickedDiary}
+          getCategories={getCategories}
         />
       )}
     </div>

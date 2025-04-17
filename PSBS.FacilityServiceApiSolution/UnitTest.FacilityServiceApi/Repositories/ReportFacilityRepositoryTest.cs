@@ -329,7 +329,7 @@ namespace UnitTest.FacilityServiceApi.Repositories
             await _context.SaveChangesAsync();
 
             // Act
-            var result = await _repository.GetBookingServiceItemQuantity(2025, 3, null, null);
+            var result = await _repository.GetServiceQuantity(2025, 3, null, null);
 
             // Assert
             result.Should().NotBeNull();

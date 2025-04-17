@@ -1,4 +1,5 @@
 import React from "react";
+import formatCurrency from "../../../Utilities/formatCurrency";
 
 const VariantCard = ({ data }) => {
   return (
@@ -20,8 +21,7 @@ const VariantCard = ({ data }) => {
 
       <div className="mt-4 pt-3 border-t border-gray-100">
         <p className="text-customDanger font-bold flex items-center">
-          <span className="text-2xl">{data.servicePrice.toLocaleString()}</span>
-          <span className="ml-1 text-sm font-medium">VND</span>
+          <span className="text-2xl">{formatCurrency(data.servicePrice)}</span>
         </p>
       </div>
     </div>

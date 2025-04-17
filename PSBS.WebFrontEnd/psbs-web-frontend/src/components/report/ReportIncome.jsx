@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 import useTimeStore from "../../lib/timeStore";
+import formatCurrency from "../../Utilities/formatCurrency.js";
 
 const ReportIncome = () => {
   const [data, setData] = useState([]);
@@ -78,13 +79,6 @@ const ReportIncome = () => {
   useEffect(() => {
     fetchDataIncome();
   }, [year, month, startDate, endDate]);
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
 
   return (
     <div className="w-full">
@@ -207,7 +201,7 @@ const ReportIncome = () => {
                   <YAxis
                     tick={{ fill: "rgba(255,255,255,0.7)", fontSize: 12 }}
                     stroke="rgba(255,255,255,0.3)"
-                    tickFormatter={(value) => `$${value}`}
+                    tickFormatter={(value) => `${formatCurrency(value)}`}
                   />
                   <Tooltip
                     contentStyle={{

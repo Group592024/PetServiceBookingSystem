@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useParams } from "react-router-dom";
 
-const EditDiaryModal = ({ open, onClose, diary }) => {
+const EditDiaryModal = ({ open, onClose, diary, getCategories }) => {
   console.log(diary);
   const { petId } = useParams();
   const petInfo = JSON.parse(localStorage.getItem("petInfo"));
@@ -25,7 +25,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
 
   const config = {
     readonly: false,
-    placeholder: "Start typings...",
+    placeholder: "Start typing your diary entry...",
     buttons: [
       "bold",
       "italic",
@@ -111,6 +111,7 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
       });
       setSelectedCategory("");
       setContent("");
+      await getCategories();
       onClose();
     } catch (error) {
       console.log(error);
@@ -159,17 +160,25 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
 
   return (
     <Modal open={open} onClose={onClose} data-testid="edit-diary-modal">
-      <div>
-        <Stack
-          spacing={4}
-          className="px-8 py-12 bg-customLightPrimary w-2/3 mx-auto mt-[5%] max-h-[550px] rounded-xl"
-        >
-          <div className="flex justify-start items-center gap-4 w-full">
-            <button onClick={onClose}>
-              <ArrowBackIosIcon />
-            </button>
+      <div className="flex justify-center items-center min-h-screen p-4">
+        <div className="bg-customLightPrimary w-full max-w-5xl rounded-2xl shadow-xl overflow-hidden transform transition-all">
+          {/* Header */}
+          <div className="px-8 py-6 bg-customPrimary text-white">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full hover:bg-white/20 transition-colors"
+              >
+                <ArrowBackIosIcon />
+              </button>
+              <h2 className="text-xl font-bold">Edit Diary Entry</h2>
+            </div>
+          </div>
 
-            <div className="flex justify-center items-center gap-2">
+          {/* Content */}
+          <div className="px-10 py-6 max-h-[75vh] overflow-y-auto">
+            {/* Pet Info */}
+            <div className="flex items-center gap-3 mb-6 p-3 bg-white/50 rounded-lg">
               <Avatar
                 alt={petInfo?.petName}
                 src={
@@ -177,95 +186,161 @@ const EditDiaryModal = ({ open, onClose, diary }) => {
                     ? `http://localhost:5010${petInfo?.petImage}`
                     : sampleImage
                 }
+                className="h-12 w-12 border-2 border-customPrimary"
               />
-              <h3 className="font-bold">{petInfo?.petName}</h3>
+              <div>
+                <h3 className="font-bold text-customDark">
+                  {petInfo?.petName}
+                </h3>
+                <p className="text-sm text-customDarkGrey">Edit diary entry</p>
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-start">
-            <Autocomplete
-              data-testid="category-select"
-              options={categories}
-              getOptionLabel={(option) => option}
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Select category"
-                  variant="outlined"
+            {/* Category Selection */}
+            <div className="flex flex-col md:flex-row gap-4 mb-6">
+              <div className="flex-1">
+                <Autocomplete
+                  data-testid="category-select"
+                  options={categories}
+                  getOptionLabel={(option) => option}
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select category"
+                      variant="outlined"
+                      className="bg-white rounded-lg"
+                    />
+                  )}
+                  sx={{ width: "100%" }}
                 />
-              )}
-              sx={{ width: "500px" }}
-            />
-            <div className="mx-5">
+              </div>
               <button
-                className="m-auto flex justify-center items-center gap-1 text-center rounded-xl
-                     bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
+                className="flex justify-center items-center gap-2 rounded-lg
+                  bg-customDark text-white py-3 px-5 hover:bg-opacity-90 transition-all
+                  transform hover:scale-105 shadow-md"
                 onClick={() => setOpenCategory(true)}
               >
                 <AddCircleOutlineIcon /> New topic
               </button>
             </div>
-          </div>
 
-          <div
-            style={{
-              borderRadius: "0.5rem",
-              overflowY: "auto",
-              maxHeight: "300px",
-            }}
-            className="no-scroll-bar"
-          >
-            <JoditEditor
-              ref={editor}
-              value={content}
-              config={config}
-              tabIndex={1}
-              onBlur={(newContent) => setContent(newContent)}
-            />
-          </div>
+            {/* Editor */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+              <div className="p-2 bg-customGrey/30 border-b border-customGrey">
+                <p className="text-sm text-customDarkGrey">
+                  💡 Tip: You can add images by clicking the image icon
+                </p>
+              </div>
+              <JoditEditor
+                ref={editor}
+                value={content}
+                config={{
+                  ...config,
+                  width: "100%",
+                  height: 350,
+                  toolbarAdaptive: false,
+                  showCharsCounter: false,
+                  showWordsCounter: false,
+                  showXPathInStatusbar: false,
+                }}
+                tabIndex={1}
+                onBlur={(newContent) => setContent(newContent)}
+                className="w-full"
+              />
+            </div>
 
-          <div className="flex justify-center mt-8">
-            <button
-              className={`rounded-full px-8 py-4 bg-customPrimary text-customLight w-1/3 ${
-                loading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={loading}
-              onClick={handleSave}
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-4 mt-6">
+              <button
+                className="rounded-lg px-6 py-3 bg-customGrey text-customDark font-medium
+                  hover:bg-opacity-80 transition-all"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className={`rounded-lg px-8 py-3 bg-customPrimary text-white font-medium
+                  shadow-lg hover:shadow-xl transition-all transform hover:translate-y-[-2px]
+                  ${
+                    loading
+                      ? "opacity-70 cursor-not-allowed"
+                      : "hover:bg-opacity-90"
+                  }`}
+                disabled={loading}
+                onClick={handleSave}
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Saving...
+                  </span>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            </div>
           </div>
-        </Stack>
+        </div>
 
+        {/* New Category Modal */}
         <Modal open={openCategory} onClose={handleCloseAddModal}>
-          <div>
-            <Stack
-              spacing={4}
-              className="px-8 py-12 bg-white w-1/3 mx-auto mt-[15%] max-h-[500px] rounded-xl"
-            >
-              <p className="text-customPrimary font-semibold text-xl">
-                Create new category:
-              </p>
+          <div className="flex justify-center items-center min-h-screen p-4">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all">
+              <h3 className="text-customPrimary font-bold text-xl mb-4 border-b pb-2">
+                Create New Category
+              </h3>
+
               <TextField
-                multiline
+                fullWidth
+                label="Category Name"
+                variant="outlined"
+                placeholder="Enter a new category name"
+                className="mb-6"
                 onChange={(e) => {
                   if (e.target.value.trim() !== "") {
                     setSelectedCategory(e.target.value);
                   }
                 }}
               />
-              <div className="mt-5">
+
+              <div className="flex justify-end gap-3 mt-6">
                 <button
-                  className="m-auto flex justify-center items-center gap-1 text-center rounded-xl hover:scale-110
-                             bg-customDark border-2 text-white  py-3 px-5 hover:opacity-90 "
+                  className="px-5 py-2 rounded-lg border border-customDarkGrey text-customDark
+                    hover:bg-customGrey transition-colors"
+                  onClick={handleCloseAddModal}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-5 py-2 rounded-lg bg-customPrimary text-white
+                    hover:bg-opacity-90 transition-all shadow-md"
                   onClick={() => setOpenCategory(false)}
                 >
                   Create
                 </button>
               </div>
-            </Stack>
+            </div>
           </div>
         </Modal>
       </div>
