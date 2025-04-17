@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { 
+import {
   TextField,
   Select,
   MenuItem,
@@ -87,10 +87,14 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
         return;
       }
       setError(null);
-      const daysDifference = Math.ceil((endDate - startDate) / (1000 * 3600 * 24));
+      const startDay = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+
+      const daysDifference = Math.ceil((endDay - startDay) / (1000 * 3600 * 24)) + 1;
+
       let totalPrice = selectedRoomType.price * daysDifference;
       if (formData.camera) totalPrice += 50000;
-      
+
       const updatedData = { ...formData, price: totalPrice };
       setFormData(updatedData);
       onBookingDataChange(updatedData);
@@ -111,10 +115,10 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
   const selectedPet = pets.find(p => p.petId === formData.pet);
 
   return (
-    <Box sx={{ 
-      border: '1px solid #ddd', 
-      borderRadius: 2, 
-      p: 2, 
+    <Box sx={{
+      border: '1px solid #ddd',
+      borderRadius: 2,
+      p: 2,
       mb: 2,
       backgroundColor: '#f9f9f9'
     }}>
@@ -132,7 +136,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             <MenuItem value="">Select room</MenuItem>
             {rooms.map(room => (
               <MenuItem key={room.roomId} value={room.roomId}>
-                {room.roomName} - {room.description.length > 20 ? `${room.description.slice(0, 20)}...` : room.description}
+                {room.roomName.length > 15 ? `${room.description.slice(0, 15)}...` : room.roomName} - {room.description.length > 10 ? `${room.description.slice(0, 10)}...` : room.description}
               </MenuItem>
             ))}
           </Select>
@@ -149,7 +153,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             <MenuItem value="">Select pet</MenuItem>
             {pets.map(pet => (
               <MenuItem key={pet.petId} value={pet.petId}>
-                {pet.petName}
+                {pet.petName.length > 15 ? `${pet.petName.slice(0, 15)}...` : pet.petName}
               </MenuItem>
             ))}
           </Select>
@@ -204,9 +208,9 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
         <Typography>Price:</Typography>
         <Typography fontWeight="bold">
           {new Intl.NumberFormat("vi-VN", {
-          style: "currency",
-          currency: "VND",
-        }).format(formData.price) || "0"} VND
+            style: "currency",
+            currency: "VND",
+          }).format(formData.price) || "0"} 
         </Typography>
       </Box>
 

@@ -54,6 +54,7 @@ const BookingRoomForm = () => {
   const [voucherSearchCode, setVoucherSearchCode] = useState("");
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState("");
+  const [isCreatingRooms, setIsCreatingRooms] = useState(false);
 
   // Fetch rooms from API
   useEffect(() => {
@@ -274,55 +275,73 @@ const BookingRoomForm = () => {
 
   const handleCreateBookingRooms = () => {
     setError("");
+    setIsCreatingRooms(true);
 
-    // Check if number of rooms is sufficient
-    const numRooms = selectAllRooms ? rooms.length : selectedRooms.length;
-    const numPets = selectAllPets ? pets.length : selectedPets.length;
+    // First, clear all existing booking rooms immediately
+    setBookingRooms([]);
 
-    if (numRooms < numPets) {
-      setError("Number of rooms must be greater than or equal to the number of pets");
-      return;
-    }
+    // Then proceed with creating new ones after state has cleared
+    setTimeout(() => {
+      // Get fresh copies of the selected items
+      const currentSelectedRooms = selectAllRooms ? rooms : rooms.filter(r => selectedRooms.includes(r.roomId));
+      const currentSelectedPets = selectAllPets ? pets : pets.filter(p => selectedPets.includes(p.petId));
 
-    const newBookingRooms = [];
-    const selectedRoomsList = selectAllRooms ? rooms : rooms.filter(r => selectedRooms.includes(r.roomId));
-    const selectedPetsList = selectAllPets ? pets : pets.filter(p => selectedPets.includes(p.petId));
-
-    // Create booking entries
-    selectedPetsList.forEach((pet, index) => {
-      if (index < selectedRoomsList.length) {
-        newBookingRooms.push({
-          room: selectedRoomsList[index].roomId,
-          pet: pet.petId,
-          start: "",
-          end: "",
-          price: 0,
-          camera: false
-        });
+      // Check if number of rooms is sufficient
+      if (currentSelectedRooms.length < currentSelectedPets.length) {
+        setError("Number of rooms must be greater than or equal to the number of pets");
+        setIsCreatingRooms(false);
+        return;
       }
-    });
 
-    // Check for time overlaps
-    const hasOverlap = newBookingRooms.some((booking1, i) => {
-      return newBookingRooms.some((booking2, j) => {
-        if (i !== j && booking1.room === booking2.room) {
-          return checkTimeOverlap(
-            booking1.start,
-            booking1.end,
-            booking2.start,
-            booking2.end
-          );
+      const newBookingRooms = [];
+
+      // Create booking entries
+      currentSelectedPets.forEach((pet, index) => {
+        if (index < currentSelectedRooms.length) {
+          newBookingRooms.push({
+            room: currentSelectedRooms[index].roomId,
+            pet: pet.petId,
+            start: "",
+            end: "",
+            price: 0,
+            camera: false
+          });
         }
-        return false;
       });
-    });
 
-    if (hasOverlap) {
-      setError("Time slots cannot overlap for the same room");
-      return;
-    }
+      // Check for time overlaps
+      const hasOverlap = newBookingRooms.some((booking1, i) => {
+        return newBookingRooms.some((booking2, j) => {
+          if (i !== j && booking1.room === booking2.room) {
+            return checkTimeOverlap(
+              booking1.start,
+              booking1.end,
+              booking2.start,
+              booking2.end
+            );
+          }
+          return false;
+        });
+      });
 
-    setBookingRooms(newBookingRooms);
+      if (hasOverlap) {
+        setError("Time slots cannot overlap for the same room");
+        return;
+      }
+
+      setBookingRooms(newBookingRooms);
+      //Reset selections after creating booking rooms
+      setSelectedRooms([]);
+      setSelectedPets([]);
+      setSelectAllRooms(false);
+      setSelectAllPets(false);
+
+      // Reset total price and discounts since we're starting fresh
+      setTotalPrice(0);
+      setFinalDiscount(0);
+      setDiscountedPrice(0);
+      setIsCreatingRooms(false);
+    }, 0); // Using 0ms timeout to let React process the state change
   };
 
   // Calculate total price before discount
@@ -462,11 +481,12 @@ const BookingRoomForm = () => {
           onClick={handleCreateBookingRooms}
           disabled={
             (!selectAllRooms && selectedRooms.length === 0) ||
-            (!selectAllPets && selectedPets.length === 0)
+            (!selectAllPets && selectedPets.length === 0) ||
+            isCreatingRooms
           }
           sx={{ px: 4, py: 1.5 }}
         >
-          Create Booking Rooms
+          {isCreatingRooms ? "Creating..." : "Create Booking Rooms"}
         </Button>
       </Box>
 
@@ -556,9 +576,9 @@ const BookingRoomForm = () => {
                 {voucher.voucherName} - {voucher.voucherCode} (
                 {voucher.voucherDiscount}% Off, Max{" "}
                 {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(voucher.voucherMaximum)})
+                  style: "currency",
+                  currency: "VND",
+                }).format(voucher.voucherMaximum)})
               </MenuItem>
             ))}
           </TextField>
@@ -584,9 +604,9 @@ const BookingRoomForm = () => {
               </Grid>
               <Grid item>
                 <Typography>{new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(totalPrice)}</Typography>
+                  style: "currency",
+                  currency: "VND",
+                }).format(totalPrice)}</Typography>
               </Grid>
             </Grid>
           </Box>
@@ -624,9 +644,9 @@ const BookingRoomForm = () => {
               <Grid item>
                 <Typography variant="h6" color="primary" fontWeight="bold">
                   {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(discountedPrice)}
+                    style: "currency",
+                    currency: "VND",
+                  }).format(discountedPrice)}
                 </Typography>
               </Grid>
             </Grid>

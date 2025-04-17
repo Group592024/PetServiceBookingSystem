@@ -8,6 +8,7 @@ import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { Chip } from "@mui/material";
 
 const CustomerBookingDatatable = () => {
     const [bookings, setBookings] = useState([]);
@@ -201,14 +202,43 @@ const CustomerBookingDatatable = () => {
         { 
             field: "bookingStatusName", 
             headerName: "Status", 
-            flex: 1, 
+            flex: 1.5,
+            minWidth: 130, 
             headerAlign: "center", 
             align: "center",
-            renderCell: (params) => (
-                <div className={`status-pill ${params.value.toLowerCase().replace(/\s+/g, '-')}`}>
-                    {params.value}
-                </div>
-            )
+            renderCell: (params) => {
+                const getStatusColor = (status) => {
+                    switch(status) {
+                        case 'Pending': return 'warning';
+                        case 'Processing': return 'info';
+                        case 'Cancelled': return 'error';
+                        case 'Confirmed': return 'success';
+                        case 'Checked in': return 'secondary';
+                        case 'Checked out': return 'primary';
+                        case 'Completed': return 'success';
+                        case 'Refunded': return 'warning';
+                        case 'Rejected': return 'error';
+                        default: return 'default';
+                    }
+                };
+                
+                const status = params.value || 'Unknown';
+                const color = getStatusColor(status);
+                
+                return (
+                    <Chip 
+                        label={status} 
+                        color={color} 
+                        size="small" 
+                        variant="outlined"
+                        sx={{ 
+                            minWidth: '100px',
+                            maxWidth: '100%',
+                            fontWeight: 'medium'
+                        }}
+                    />
+                );
+            }
         },
         {
             field: "isPaid",
@@ -346,7 +376,6 @@ const CustomerBookingDatatable = () => {
                     }}
                     pageSizeOptions={[5, 10, 25]}
                     disableRowSelectionOnClick
-                    disableColumnMenu
                     autoHeight={false}
                 />
             </Box>

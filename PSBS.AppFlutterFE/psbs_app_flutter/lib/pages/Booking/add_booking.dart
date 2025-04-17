@@ -838,7 +838,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                           _buildDetailRow(
                             icon: Icons.attach_money,
                             label: "Room Price",
-                            value: "${room["price"]} VND",
+                            value: "${room["price"]} ₫",
                             valueStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green.shade700,
@@ -847,7 +847,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                           _buildDetailRow(
                             icon: Icons.videocam,
                             label: "Camera",
-                            value: room["camera"] ? "Yes (+50,000 VND)" : "No",
+                            value: room["camera"] ? "Yes (+50,000 ₫)" : "No",
                           ),
                           Divider(height: 20),
                         ],
@@ -856,7 +856,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                   )),
               _buildPriceRow(
                 label: "Subtotal",
-                value: "${_calculateSubtotal()} VND",
+                value: "${_calculateSubtotal()} ₫",
               ),
               if (_selectedVoucher != null) ...[
                 SizedBox(height: 8),
@@ -870,14 +870,14 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                 ),
                 _buildPriceRow(
                   label: "Discount",
-                  value: "${_calculateDiscount()} VND",
+                  value: "${_calculateDiscount()} ₫",
                   isDiscount: true,
                 ),
               ],
               Divider(thickness: 2, height: 24),
               _buildPriceRow(
                 label: "Final Total",
-                value: "$_totalPrice VND",
+                value: "$_totalPrice ₫",
                 isTotal: true,
               ),
             ] else ...[
@@ -908,7 +908,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                             icon: Icons.attach_money,
                             label: "Price",
                             value:
-                                "${service["serviceVariant"]?["price"] ?? "0"} VND",
+                                "${service["serviceVariant"]?["price"] ?? "0"} ₫",
                             valueStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green.shade700,
@@ -926,7 +926,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                   )),
               _buildPriceRow(
                 label: "Total Price",
-                value: "$_totalPrice VND",
+                value: "$_totalPrice ₫",
               ),
             ],
             SizedBox(height: 16),
@@ -1066,19 +1066,22 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
 
     // Step 1 validation - must have valid booking data
     if (_currentStep == 1) {
-      if (_serviceType == "Room" &&
-          (_bookingRoomData.isEmpty ||
-              _bookingRoomData.any((room) =>
-                  room["room"] == null ||
-                  room["pet"] == null ||
-                  room["start"] == null ||
-                  room["end"] == null))) {
+      if (_serviceType == "Room") {
+      if (_bookingRoomData.isEmpty ||
+          _bookingRoomData.any((room) =>
+              room["room"] == null ||
+              room["pet"] == null ||
+              room["start"].isEmpty || // Validate start date
+              room["end"].isEmpty || // Validate end date
+              DateTime.parse(room["start"]).isAfter(DateTime.parse(room["end"])))) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Please complete all booking room information')),
+              content: Text(
+                  'Please complete all booking room information, including valid start and end dates')),
         );
         return;
-      } else if (_serviceType == "Service" && _bookingServiceData.isEmpty) {
+      }
+    } else if (_serviceType == "Service" && _bookingServiceData.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Please add at least one service booking')),
         );
