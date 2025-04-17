@@ -5,7 +5,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { formatDateString } from "../../Utilities/formatDate";
 
-const PetDiaryCard = ({ petDiary, onEdit, onDelete }) => {
+const PetDiaryCard = ({ petDiary, onEdit, onDelete, role }) => {
   const [showAllContent, setShowAllContent] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
   const contentRef = useRef(null);
@@ -48,27 +48,31 @@ const PetDiaryCard = ({ petDiary, onEdit, onDelete }) => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={onEdit}
-              className="group flex items-center justify-center p-2 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
-              aria-label="Edit diary"
-            >
-              <EditIcon
-                className="text-blue-600 group-hover:scale-110 transition-transform duration-200"
-                fontSize="small"
-              />
-            </button>
+            {role === "user" && (
+              <button
+                onClick={onEdit}
+                className="group flex items-center justify-center p-2 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors duration-200"
+                aria-label="Edit diary"
+              >
+                <EditIcon
+                  className="text-blue-600 group-hover:scale-110 transition-transform duration-200"
+                  fontSize="small"
+                />
+              </button>
+            )}
 
-            <button
-              onClick={onDelete}
-              className="group flex items-center justify-center p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors duration-200"
-              aria-label="Delete diary"
-            >
-              <DeleteIcon
-                className="text-red-600 group-hover:scale-110 transition-transform duration-200"
-                fontSize="small"
-              />
-            </button>
+            {role === "user" && (
+              <button
+                onClick={onDelete}
+                className="group flex items-center justify-center p-2 rounded-full bg-red-50 hover:bg-red-100 transition-colors duration-200"
+                aria-label="Delete diary"
+              >
+                <DeleteIcon
+                  className="text-red-600 group-hover:scale-110 transition-transform duration-200"
+                  fontSize="small"
+                />
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -24,6 +24,62 @@ namespace UnitTest.ReservationApi.Controllers
         }
 
         [Fact]
+        public async Task GetIncomeEachCustomer_WithTimeFilters_WhenBookingsExist_ReturnsOk()
+        {
+            // Arrange
+            int year = 2024;
+            int month = 3;
+            DateTime startDate = new DateTime(2024, 3, 1);
+            DateTime endDate = new DateTime(2024, 3, 31);
+
+            var fakeData = new List<AccountAmountDTO>
+    {
+        new AccountAmountDTO(Guid.NewGuid(), 1500),
+        new AccountAmountDTO(Guid.NewGuid(), 2300)
+    };
+
+            A.CallTo(() => _report.GetIncomeEachCustomer(year, month, startDate, endDate))
+                .Returns(Task.FromResult<IEnumerable<AccountAmountDTO>>(fakeData));
+
+            // Act
+            var result = await _controller.GetIncomeEachCustomer(year, month, startDate, endDate);
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(result.Result);
+            var response = Assert.IsType<Response>(okResult.Value);
+
+            response.Flag.Should().BeTrue();
+            response.Message.Should().Be("Booking retrieved successfully!");
+            response.Data.Should().BeEquivalentTo(fakeData);
+        }
+
+        [Fact]
+        public async Task GetIncomeEachCustomer_WithTimeFilters_WhenNoBookingsExist_ReturnsNotFound()
+        {
+            // Arrange
+            int year = 2023;
+            int month = 12;
+            DateTime startDate = new DateTime(2023, 12, 1);
+            DateTime endDate = new DateTime(2023, 12, 31);
+
+            var emptyData = new List<AccountAmountDTO>();
+
+            A.CallTo(() => _report.GetIncomeEachCustomer(year, month, startDate, endDate))
+                .Returns(Task.FromResult<IEnumerable<AccountAmountDTO>>(emptyData));
+
+            // Act
+            var result = await _controller.GetIncomeEachCustomer(year, month, startDate, endDate);
+
+            // Assert
+            var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+            var response = Assert.IsType<Response>(notFoundResult.Value);
+
+            response.Flag.Should().BeFalse();
+            response.Message.Should().Be("No bookings detected");
+        }
+
+
+        [Fact]
         public async Task GetBookingStatuses_ReturnsNotFound_WhenNoBookingStatusDetected()
         {
             // Arrange

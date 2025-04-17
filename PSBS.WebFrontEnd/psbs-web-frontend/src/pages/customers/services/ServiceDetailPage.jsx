@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import VariantCard from "../../admins/services/VariantCard";
+import Swal from "sweetalert2";
 
 const ServiceDetailPage = () => {
   const sidebarRef = useRef(null);
@@ -37,16 +38,31 @@ const ServiceDetailPage = () => {
               Authorization: `Bearer ${token}`,
             },
           }
-        ).then((response) => response.json());
+        );
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data?.message || "Internal Server Error");
+        }
 
         const newData = {
-          ...response.data,
-          serviceTypeName: response.data.serviceType.typeName,
+          ...data.data,
+          serviceTypeName: data.data.serviceType.typeName,
         };
 
         setDetail(newData);
       } catch (error) {
-        console.error("Failed fetching data: ", error);
+        Swal.fire({
+          title: "Error",
+          text: "Service not found" || error,
+          icon: "error",
+          confirmButtonText: "OK",
+          confirmButtonColor: "#d33",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/customer/services");
+          }
+        });
       }
     };
     if (id) {
@@ -72,7 +88,9 @@ const ServiceDetailPage = () => {
         }
       );
       const response = await fetchData.json();
-
+      if (!fetchData.ok) {
+        throw new Error(response?.message || "Internal Server Error");
+      }
       const result = response.data.map((item) => ({
         id: item.serviceVariantId,
         ...item,
@@ -81,7 +99,17 @@ const ServiceDetailPage = () => {
 
       setDataVariant(result);
     } catch (error) {
-      console.error("Error fetching data: ", error);
+      Swal.fire({
+        title: "Error",
+        text: "Variant not found" || error,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/customer/services");
+        }
+      });
     }
   };
 
