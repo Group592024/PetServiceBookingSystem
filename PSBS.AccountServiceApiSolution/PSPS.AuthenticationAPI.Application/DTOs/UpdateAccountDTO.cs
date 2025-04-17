@@ -15,6 +15,7 @@ namespace PSPS.AccountAPI.Application.DTOs
          string? AccountAddress,
          string? AccountImage,
          bool? isPickImage,
-         string? RoleId
+         string? RoleId,
+         bool? AccountIsDeleted
         );
 }

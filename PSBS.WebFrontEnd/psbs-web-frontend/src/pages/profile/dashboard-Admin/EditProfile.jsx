@@ -22,6 +22,7 @@ const EditProfile = () => {
     accountAddress: "",
     roleId: "user",
     accountImage: null,
+    accountIsDeleted: false,
   });
   const [imagePreview, setImagePreview] = useState(null);
   const [errorMessages, setErrorMessages] = useState({
@@ -52,6 +53,7 @@ const EditProfile = () => {
             setAccount((prevState) => ({
               ...prevState,
               accountDob: dob,
+
             }));
           }
           if (data.accountImage) {
@@ -173,7 +175,9 @@ const EditProfile = () => {
     formData.append("AccountTempDTO.AccountDob", formattedDob);
     formData.append("AccountTempDTO.AccountAddress", account.accountAddress);
     formData.append("AccountTempDTO.roleId", account.roleId);
-    formData.append("AccountTempDTO.updatedAt", updatedAt); 
+    formData.append("AccountTempDTO.updatedAt", updatedAt);
+    formData.append("AccountTempDTO.accountIsDeleted", account.accountIsDeleted ? "true" : "false");
+
 
     if (account.accountImage) {
       formData.append("AccountTempDTO.isPickImage", true);
@@ -189,7 +193,7 @@ const EditProfile = () => {
       const response = await fetch(`http://localhost:5050/api/Account`, {
         method: "PUT",
         headers: {
-          "Authorization": `Bearer ${token}`, 
+          "Authorization": `Bearer ${token}`,
         },
         body: formData,
       });
@@ -442,6 +446,24 @@ const EditProfile = () => {
                     <p className="text-red-500 text-sm mt-1">{errorMessages.accountAddress}</p>
                   )}
                 </div>
+                <div className="mb-3">
+                  <label htmlFor="isDelete" className="block text-sm font-medium mb-1 font-bold">
+                    Status
+                  </label>
+                  <select
+                    id="isDelete"
+                    className="w-full p-3 border rounded-md"
+                    value={account.accountIsDeleted ? "true" : "false"}  
+                    onChange={(e) =>
+                      setAccount({ ...account, accountIsDeleted: e.target.value === "true" })
+                    }
+                  >
+                    <option value="false">Active</option>
+                    <option value="true">Banned</option>
+                  </select>
+                </div>
+
+
                 <div className="flex justify-between">
                   <button
                     type="button"

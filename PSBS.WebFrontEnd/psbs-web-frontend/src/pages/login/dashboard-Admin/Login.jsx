@@ -106,8 +106,8 @@ const Login = () => {
         if (isAccountDeleted) {
           Swal.fire({
             icon: "error",
-            title: "Account Deleted",
-            text: "Your account has been deleted. Please contact support.",
+            title: "Account Baned",
+            text: "Your account has been baned. Please contact shop to support.",
             confirmButtonColor: "#3B82F6",
           });
         } else {

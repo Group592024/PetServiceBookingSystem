@@ -622,7 +622,10 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
 
                     account.AccountImage = fileName;
                 }
-
+                if (model.AccountTempDTO.AccountIsDeleted.HasValue)
+                {
+                    account.AccountIsDeleted = model.AccountTempDTO.AccountIsDeleted ?? false;
+                }
                 account.UpdatedAt = DateTime.Now;
                 context.Accounts.Update(account);
                 await context.SaveChangesAsync();
