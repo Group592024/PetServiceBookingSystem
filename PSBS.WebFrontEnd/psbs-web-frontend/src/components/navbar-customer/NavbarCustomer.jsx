@@ -2,10 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import Swal from "sweetalert2";
-import "./style.css"; // Make sure this path is correct
+import "./style.css";
 import { NavLink } from "react-router-dom";
 import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 import signalRService from "../../lib/ChatService";
+
 const NavbarCustomer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountName, setAccountName] = useState("Guest");
@@ -14,20 +15,173 @@ const NavbarCustomer = () => {
   );
   const [accountId, setAccountId] = useState(null);
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const [notificationDropdownVisible, setNotificationDropdownVisible] =
-    useState(false);
+  const [notificationDropdownVisible, setNotificationDropdownVisible] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState("0");
   const intervalRef = useRef(null);
   const isNotificationOpenRef = useRef(false);
-
-  // Create a ref to store the latest notification count from dropdown
   const dropdownUnreadCountRef = useRef(0);
+
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchRef = useRef(null);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSearchResults(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setIsSearching(true);
+    setShowSearchResults(true);
+
+    const token = sessionStorage.getItem("token");
+    const headers = token ? {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    } : {
+      "Content-Type": "application/json",
+    };
+
+    // Fetch all services (showAll=false)
+    fetch(`http://localhost:5050/api/Service?showAll=false`, {
+      method: "GET",
+      headers: headers,
+    })
+      .then(response => response.json())
+      .then(serviceData => {
+        // Fetch available rooms
+        fetch(`http://localhost:5050/api/Room/available`, {
+          method: "GET",
+          headers: headers,
+        })
+          .then(response => response.json())
+          .then(roomData => {
+            const keyword = searchTerm.trim().toLowerCase();
+
+            const services = serviceData.data ? serviceData.data
+              .filter(service => service.serviceName?.toLowerCase().includes(keyword))
+              .map(service => ({
+                id: service.serviceId,
+                name: service.serviceName,
+                type: 'service',
+                image: service.serviceImage,
+              })) : [];
+
+            const rooms = roomData.data ? roomData.data
+              .filter(room => room.roomName?.toLowerCase().includes(keyword))
+              .map(room => ({
+                id: room.roomId,
+                name: room.roomName,
+                type: 'room',
+                image: room.roomImage,
+              })) : [];
+
+            setSearchResults([...services, ...rooms]);
+            setIsSearching(false);
+          })
+          .catch(error => {
+            console.error("Error fetching rooms:", error);
+            setIsSearching(false);
+          });
+      })
+      .catch(error => {
+        console.error("Error fetching services:", error);
+        setIsSearching(false);
+      });
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    setIsSearching(true);
+    setShowSearchResults(true);
+
+    const token = sessionStorage.getItem("token");
+    const headers = token ? {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    } : {
+      "Content-Type": "application/json",
+    };
+
+    // Fetch all services (showAll=false)
+    fetch(`http://localhost:5050/api/Service?showAll=false`, {
+      method: "GET",
+      headers: headers,
+    })
+      .then(response => response.json())
+      .then(serviceData => {
+        // Fetch available rooms
+        fetch(`http://localhost:5050/api/Room/available`, {
+          method: "GET",
+          headers: headers,
+        })
+          .then(response => response.json())
+          .then(roomData => {
+            const keyword = value.trim().toLowerCase();
+
+            const services = serviceData.data ? serviceData.data
+              .filter(service => service.serviceName?.toLowerCase().includes(keyword))
+              .map(service => ({
+                id: service.serviceId,
+                name: service.serviceName,
+                type: 'service',
+                image: service.serviceImage,
+              })) : [];
+
+            const rooms = roomData.data ? roomData.data
+              .filter(room => room.roomName?.toLowerCase().includes(keyword))
+              .map(room => ({
+                id: room.roomId,
+                name: room.roomName,
+                type: 'room',
+                image: room.roomImage,
+              })) : [];
+
+            setSearchResults([...services, ...rooms]);
+            setIsSearching(false);
+          })
+          .catch(error => {
+            console.error("Error fetching rooms:", error);
+            setIsSearching(false);
+          });
+      })
+      .catch(error => {
+        console.error("Error fetching services:", error);
+        setIsSearching(false);
+      });
+  };
+
+  // Handle search result click
+  const handleResultClick = (result) => {
+    setShowSearchResults(false);
+    setSearchTerm("");
+    if (result.type === 'service') {
+      navigate(`/customer/services/${result.id}`);
+    } else if (result.type === 'room') {
+      navigate(`/customerroom/${result.id}`);
+    }
+  };
+
   useEffect(() => {
     const id = sessionStorage.getItem("accountId");
 
     const handleNotificationCount = (value) => {
-      // Only update if dropdown is closed or we haven't received data from dropdown
       if (!isNotificationOpenRef.current) {
         setNotificationCount(value.unreadChats);
       }
@@ -39,13 +193,8 @@ const NavbarCustomer = () => {
       }
     };
 
-    // Initial fetch
     fetchNotificationCount();
-
-    // Set up periodic refresh only when dropdown is closed
     intervalRef.current = setInterval(fetchNotificationCount, 30000);
-
-    // Set up listener
     signalRService.on("chatcount", handleNotificationCount);
 
     return () => {
@@ -59,11 +208,9 @@ const NavbarCustomer = () => {
     setNotificationDropdownVisible(newState);
     isNotificationOpenRef.current = newState;
 
-    // When opening, use the dropdown's count
     if (newState) {
       setNotificationCount(dropdownUnreadCountRef.current.toString());
     } else {
-      // When closing, fetch the latest count from SignalR
       const id = sessionStorage.getItem("accountId");
       if (id) {
         signalRService.invoke("GetUnreadNotificationCount", id).catch(console.error);
@@ -73,7 +220,6 @@ const NavbarCustomer = () => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
-    // signalRService.on("notificationCount", handleNotificationCount);
     if (token) {
       setIsLoggedIn(true);
       const decodedToken = jwt_decode(token);
@@ -81,6 +227,8 @@ const NavbarCustomer = () => {
 
       setAccountName(AccountName || "User");
       setAccountId(AccountId);
+      sessionStorage.setItem("accountId", AccountId);
+
       if (AccountImage) {
         fetch(
           `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
@@ -113,6 +261,10 @@ const NavbarCustomer = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   const handleViewProfile = () => {
     navigate(`/profilecustomer/${accountId}`);
   };
@@ -129,20 +281,19 @@ const NavbarCustomer = () => {
       cancelButtonColor: "#d33",
     }).then((result) => {
       if (result.isConfirmed) {
-        // Remove token and user data from storage
         localStorage.removeItem("token");
         sessionStorage.removeItem("token");
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
+        sessionStorage.removeItem("accountId");
 
-        // Show success message and redirect to login page
         Swal.fire({
           title: "Logged out",
           text: "You have been logged out successfully!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          setIsLoggedIn(false); // Update state
+          setIsLoggedIn(false);
           navigate("/login", { replace: true });
         });
       }
@@ -158,15 +309,120 @@ const NavbarCustomer = () => {
         </div>
       </a>
 
-      <div className="navbar-central">
-        <form action="#">
-          <div className="form-input">
-            <input type="search" placeholder="Search..." />
-            <button className="search-btn" type="submit">
-              <i className="bx bx-search"></i>
-            </button>
-          </div>
-        </form>
+      {/* Mobile menu toggle - add to your CSS */}
+      <div className="mobile-menu-toggle" onClick={toggleMobileMenu}>
+        <i className={`bx ${mobileMenuOpen ? 'bx-x' : 'bx-menu'}`}></i>
+      </div>
+
+      <div className={`navbar-central ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="search-container" ref={searchRef}>
+          <form onSubmit={handleSearchSubmit}>
+            <div className="form-input">
+              <input
+                type="search"
+                placeholder="Search services or rooms..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              <button className="search-btn" type="submit">
+                <i className="bx bx-search"></i>
+              </button>
+            </div>
+
+            {/* Search results dropdown */}
+            {showSearchResults && (
+              <div className="search-results-dropdown">
+                {isSearching ? (
+                  <div className="search-loading">
+                    <i className='bx bx-loader-alt bx-spin'></i> Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <>
+                    {searchResults.some(r => r.type === 'service') && (
+                      <>
+                        <div className="search-section-title">Services</div>
+                        {searchResults
+                          .filter(result => result.type === 'service')
+                          .map((result) => (
+                            <div
+                              key={`${result.type}-${result.id}`}
+                              className={`search-result-item ${result.type}`}
+                              onClick={() => handleResultClick(result)}
+                            >
+                              <div className="search-result-image">
+                                {result.image ? (
+                                  <img
+                                    src={`http://localhost:5050/facility-service${result.image}`}
+                                    alt={result.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://via.placeholder.com/50";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="placeholder-image">
+                                    <i className="bx bx-store-alt"></i>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="search-result-content">
+                                <div className="search-result-name">{result.name}</div>
+                                <div className="search-result-type">
+                                  <i className="bx bx-store-alt"></i> Service
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                    {searchResults.some(r => r.type === 'room') && (
+                      <>
+                        <div className="divider"></div>
+                        <div className="search-section-title">Rooms</div>
+                        {searchResults
+                          .filter(result => result.type === 'room')
+                          .map((result) => (
+                            <div
+                              key={`${result.type}-${result.id}`}
+                              className={`search-result-item ${result.type}`}
+                              onClick={() => handleResultClick(result)}
+                            >
+                              <div className="search-result-image">
+                                {result.image ? (
+                                  <img
+                                    src={`http://localhost:5050/facility-service${result.image}`}
+                                    alt={result.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://via.placeholder.com/50";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="placeholder-image">
+                                    <i className="bx bx-home-circle"></i>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="search-result-content">
+                                <div className="search-result-name">{result.name}</div>
+                                <div className="search-result-type">
+                                  <i className="bx bx-home-circle"></i> Room
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                  </>
+                ) : searchTerm.trim().length > 0 ? (
+                  <div className="no-results">No results found</div>
+                ) : (
+                  <div className="search-hint">Start typing to search</div>
+                )}
+              </div>
+            )}
+          </form>
+        </div>
 
         <ul className="navbar-links">
           <li>
@@ -175,6 +431,7 @@ const NavbarCustomer = () => {
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
+              onClick={() => setMobileMenuOpen(false)}
             >
               <i className="bx bx-store-alt"></i>
               Service
@@ -186,61 +443,65 @@ const NavbarCustomer = () => {
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
+              onClick={() => setMobileMenuOpen(false)}
             >
-            <i class='bx bx-home-circle' ></i>
+              <i className='bx bx-home-circle'></i>
               Room
             </NavLink>
           </li>
           {isLoggedIn && (
-          <li>
-            <NavLink
-              to="/customer/bookings"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <i className="bx bx-home-heart"></i>
-              Booking
-            </NavLink>
-          </li>
-          )}
-        
-            {isLoggedIn && (
-          <li>
-            <NavLink
-              to="/customer/gifts"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <i className="bx bx-gift"></i>
-              Gift
-            </NavLink>
-          </li>
+            <li>
+              <NavLink
+                to="/customer/bookings"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <i className="bx bx-home-heart"></i>
+                Booking
+              </NavLink>
+            </li>
           )}
           {isLoggedIn && (
-          <li>
-            <NavLink
-              to="/customer/pet"
-              className={({ isActive }) =>
-                isActive ? "nav-link active" : "nav-link"
-              }
-            >
-              <i className="bx bxs-dog"></i>
-              Pet
-            </NavLink>
-          </li>
+            <li>
+              <NavLink
+                to="/customer/gifts"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <i className="bx bx-gift"></i>
+                Gift
+              </NavLink>
+            </li>
+          )}
+          {isLoggedIn && (
+            <li>
+              <NavLink
+                to="/customer/pet"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <i className="bx bxs-dog"></i>
+                Pet
+              </NavLink>
+            </li>
           )}
         </ul>
       </div>
 
-      {/* Right side icons and profile */}
       <div className="navbar-right">
         {isLoggedIn && (
           <>
             <div className="notifications" onClick={toggleNotificationDropdown}>
               <i className="bx bx-bell"></i>
-          
+              {notificationCount > 0 && (
+                <span className="count">{notificationCount}</span>
+              )}
             </div>
 
             <Link to="/chat/customer" className="notifications">
@@ -249,7 +510,6 @@ const NavbarCustomer = () => {
           </>
         )}
 
-        {/* Show Login button if not logged in, otherwise show profile */}
         {!isLoggedIn ? (
           <Link
             to="/login"
@@ -269,8 +529,12 @@ const NavbarCustomer = () => {
               <div className="dropdown-menu">
                 <ul>
                   <li>{accountName || "User"}</li>
-                  <li onClick={handleViewProfile}>View Profile</li>
-                  <li onClick={handleLogout}>Logout</li>
+                  <li onClick={handleViewProfile}>
+                    <i className="bx bx-user"></i> View Profile
+                  </li>
+                  <li onClick={handleLogout}>
+                    <i className="bx bx-log-out"></i> Logout
+                  </li>
                 </ul>
               </div>
             )}
@@ -292,3 +556,4 @@ const NavbarCustomer = () => {
 };
 
 export default NavbarCustomer;
+

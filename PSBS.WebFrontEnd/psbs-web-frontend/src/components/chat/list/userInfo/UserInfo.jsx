@@ -89,7 +89,7 @@ const UserInfor = () => {
       <div className="icons">
         <div className="iconContainer">
           <SupportAgentIcon onClick={handleSupportIconClick} />
-        {currentUser.roleId !=='user' &&   <span className="unreadDot">5</span>}
+      
         </div>
       </div>
 

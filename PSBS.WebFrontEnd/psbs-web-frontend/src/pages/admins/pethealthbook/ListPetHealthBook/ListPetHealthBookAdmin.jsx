@@ -147,7 +147,7 @@ const PetHealthBookListAdmin = () => {
                                 <header className="mb-8">
                                     <div className="flex justify-between items-center">
                                         <div>
-                                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Pet Health Book List</h1>
+                                            <h1 className="text-3xl font-bold text-gray-800 mb-2">Pet Health Books</h1>
                                             <p className="text-gray-600">View and manage health book for all pets</p>
                                         </div>
 
@@ -280,7 +280,7 @@ const PetHealthBookListAdmin = () => {
                                                                                                     <span className={`ml-2 text-xs font-medium ${daysUntilNextVisit <= 3 ? 'text-red-600' : 'text-orange-500'}`}>
                                                                                                         {daysUntilNextVisit <= 0
                                                                                                             ? 'Tomorrow!'
-                                                                                                            : `${daysUntilNextVisit} day${daysUntilNextVisit !== 1 ? 's' : ''} left`}
+                                                                                                            : `${daysUntilNextVisit} day${daysUntilNextVisit !== 1 ? 's' : ''} `}
                                                                                                     </span>
                                                                                                 )}
                                                                                             </div>

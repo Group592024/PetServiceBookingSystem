@@ -35,7 +35,7 @@ const PetBreedCreate = () => {
                 const data = await response.json();
                 setPetTypes(data.data || []);
             } catch (error) {
-                Swal.fire('Error', 'Failed to fetch pet types!', 'error');
+                Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
                 console.error('Failed to fetch pet types', error);
             }
         };

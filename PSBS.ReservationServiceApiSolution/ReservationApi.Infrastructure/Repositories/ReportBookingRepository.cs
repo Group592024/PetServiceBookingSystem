@@ -9,6 +9,42 @@ namespace ReservationApi.Infrastructure.Repositories
 {
     public class ReportBookingRepository(ReservationServiceDBContext context) : IReport
     {
+
+        public async Task<IEnumerable<AccountAmountDTO>> GetIncomeEachCustomer(
+     int? year, int? month, DateTime? startDate, DateTime? endDate)
+        {
+            var bookingServiceItemsQuery = context.Bookings.Where(p => p.isPaid == true).AsQueryable();
+
+            // Filter by date range or month/year
+            if (startDate.HasValue && endDate.HasValue)
+            {
+                bookingServiceItemsQuery = bookingServiceItemsQuery
+                    .Where(p => p.BookingDate >= startDate && p.BookingDate <= endDate);
+            }
+            else if (month.HasValue && year.HasValue)
+            {
+                bookingServiceItemsQuery = bookingServiceItemsQuery
+                    .Where(p => p.BookingDate.Month == month && p.BookingDate.Year == year);
+            }
+            else if (year.HasValue)
+            {
+                bookingServiceItemsQuery = bookingServiceItemsQuery
+                    .Where(p => p.BookingDate.Year == year);
+            }
+
+            // Group by service name
+            var groupedData = await bookingServiceItemsQuery
+                .GroupBy(p => p.AccountId)
+                .Select(g => new AccountAmountDTO
+                (
+                    g.Key,
+                    g.Sum(x => x.TotalAmount)
+                ))
+                .ToListAsync();
+
+            return groupedData;
+        }
+
         //return list booking status include bookings
         public async Task<IEnumerable<BookingStatus>> GetAllBookingStatusIncludeBookingAsync()
         {
@@ -47,7 +83,7 @@ namespace ReservationApi.Infrastructure.Repositories
                         finalBookings = bookings.Where(p => p.BookingDate >= startDate
                         && p.BookingDate <= endDate).ToList();
 
-                        Console.WriteLine("So booking"+finalBookings.Count);
+                        Console.WriteLine("So booking" + finalBookings.Count);
 
                     }
                     else if (month.HasValue)
@@ -90,7 +126,7 @@ namespace ReservationApi.Infrastructure.Repositories
                         TotalAmount = s.Sum(m => m.TotalAmount)
                     }).ToList();
 
-                    Console.WriteLine("response ne nhe: "+response.ToString());
+                Console.WriteLine("response ne nhe: " + response.ToString());
 
                 var result = allDays.Select(p => new AmountDTO(
                     p.ToString("yyyy/MM/dd"),

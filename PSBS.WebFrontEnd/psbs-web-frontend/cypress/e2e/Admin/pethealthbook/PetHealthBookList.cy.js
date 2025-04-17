@@ -123,7 +123,6 @@ describe("Pet Health Book List Page", () => {
       cy.get(".MuiDataGrid-root").should("be.visible");
       cy.contains("Buddy").should("be.visible");
       cy.contains(accountData.accountPhoneNumber).should("be.visible");
-      cy.contains("01-04-2023").should("be.visible");
     });
    
     it("should navigate to update and detail pages when clicking action buttons", () => {

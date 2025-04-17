@@ -73,7 +73,9 @@ describe("PetTypeDetail Page", () => {
       },
     }).as("getPetTypeNoImage");
 
-    cy.visit("http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000");
+    cy.visit(
+      "http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000"
+    );
     cy.wait("@getPetTypeNoImage");
 
     cy.get("img");
@@ -87,21 +89,42 @@ describe("PetTypeDetail Page", () => {
       },
     }).as("getPetTypeMissing");
 
-    cy.visit("http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000");
+    cy.visit(
+      "http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000"
+    );
     cy.wait("@getPetTypeMissing");
 
     cy.get("img");
     cy.contains("Pet Type Detail").should("exist");
   });
 
-  it("Should show error in console on fetch failure", () => {
+  it("Should show alert and redirect when pet type is not found (404)", () => {
     cy.intercept("GET", "**/api/PetType/550e8400-e29b-41d4-a716-446655440000", {
-      statusCode: 500,
-    }).as("getPetTypeError");
+      statusCode: 404,
+      body: {
+        flag: false,
+        message: "PetType requested not found",
+      },
+    }).as("getPetTypeNotFound");
 
-    cy.visit("http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000");
-    cy.wait("@getPetTypeError");
+    cy.visit(
+      "http://localhost:3000/petType/550e8400-e29b-41d4-a716-446655440000"
+    );
 
-    cy.contains("Pet Type Detail").should("exist");
+    cy.wait("@getPetTypeNotFound");
+
+    // SweetAlert should be visible
+    cy.get(".swal2-popup").should("be.visible");
+    cy.get(".swal2-title").should("contain", "Error");
+    cy.get(".swal2-html-container").should(
+      "contain",
+      "PetType requested not found"
+    );
+
+    // Confirm the alert
+    cy.get(".swal2-confirm").click();
+
+    // Ensure we are redirected
+    cy.url().should("include", "/petType");
   });
 });

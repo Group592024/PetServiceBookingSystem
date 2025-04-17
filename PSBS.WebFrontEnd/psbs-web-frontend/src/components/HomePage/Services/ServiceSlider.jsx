@@ -1,6 +1,7 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import "swiper/css";
 import "swiper/css/autoplay";
@@ -11,10 +12,11 @@ import Service3Icon from "../../../assets/HomePage/services/pet-boarding.png";
 const services = [
   {
     image: Service1Icon,
-    name: "Pharmacy",
+    name: "Medical",
     description:
       "Includes regular veterinary check-ups, vaccinations, and other medical services to keep your pets healthy.",
     btnText: "Explore",
+    type: "Medical",
   },
   {
     image: Service2Icon,
@@ -22,6 +24,7 @@ const services = [
     description:
       "Offers bathing, haircuts, nail trimming, and ear cleaning to keep your pets clean and well-groomed.",
     btnText: "Explore",
+    type: "Grooming",
   },
   {
     image: Service3Icon,
@@ -29,10 +32,25 @@ const services = [
     description:
       "Book short-term or long-term stays at our pet shop, ensuring your pets are well cared for while you are away.",
     btnText: "Explore",
+    type: "Room",
   },
 ];
 
 const ServiceSlider = () => {
+  const navigate = useNavigate();
+
+  const handleExploreClick = (type) => {
+    if (type === "Room") {
+      navigate("/customerRoom");
+    } else {
+      navigate(`/customer/services?type=${type}`);
+    }
+
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 0);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}
@@ -65,7 +83,10 @@ const ServiceSlider = () => {
               <img className="w-24 mb-4" src={service.image} alt={service.name} />
               <h3 className="text-xl font-semibold text-white mb-2">{service.name}</h3>
               <p className="text-base text-white mb-4 text-center">{service.description}</p>
-              <button className="bg-[#4A90E2] hover:bg-[#357ABD] text-white px-6 py-2 rounded-full transition-all duration-300">
+              <button
+                className="bg-[#4A90E2] hover:bg-[#357ABD] text-white px-6 py-2 rounded-full transition-all duration-300"
+                onClick={() => handleExploreClick(service.type)}
+              >
                 {service.btnText}
               </button>
             </motion.div>

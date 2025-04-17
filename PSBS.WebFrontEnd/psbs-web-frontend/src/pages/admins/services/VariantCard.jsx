@@ -1,17 +1,29 @@
 import React from "react";
+
 const VariantCard = ({ data }) => {
   return (
     <div
-      className="p-4 border-2 border-customPrimary rounded-3xl w-full bg-white shadow-md 
-                    hover:shadow-lg transition-all duration-300"
+      className="p-5 border border-gray-200 rounded-xl w-full bg-white shadow-sm 
+                  hover:shadow-md hover:border-customPrimary transition-all duration-300
+                  flex flex-col justify-between h-full transform hover:-translate-y-1"
     >
-      <p className="line-clamp-2 text-lg text-gray-800 font-medium">
-        {data.serviceContent}
-      </p>
+      <div className="flex-grow">
+        <div className="flex justify-between items-start mb-3">
+          <h3 className="line-clamp-2 text-lg font-semibold text-gray-800">
+            {data.serviceContent}
+          </h3>
+          <span className="bg-customPrimary/10 text-customPrimary text-xs px-2 py-1 rounded-full">
+            Variant
+          </span>
+        </div>
+      </div>
 
-      <p className="text-customDanger text-2xl font-bold mt-3">
-        {data.servicePrice} VND
-      </p>
+      <div className="mt-4 pt-3 border-t border-gray-100">
+        <p className="text-customDanger font-bold flex items-center">
+          <span className="text-2xl">{data.servicePrice.toLocaleString()}</span>
+          <span className="ml-1 text-sm font-medium">VND</span>
+        </p>
+      </div>
     </div>
   );
 };

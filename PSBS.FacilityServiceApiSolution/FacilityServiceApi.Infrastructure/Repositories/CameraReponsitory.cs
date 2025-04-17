@@ -82,8 +82,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
                 if (!camera.isDeleted)
                 {
-                    camera.isDeleted = true;
-                    camera.cameraStatus = "Discard";
+                    camera.isDeleted = true;                  
                     context.Camera.Update(camera);
                     await context.SaveChangesAsync();
                     return new Response(true, "Camera soft-deleted successfully") { Data = camera };

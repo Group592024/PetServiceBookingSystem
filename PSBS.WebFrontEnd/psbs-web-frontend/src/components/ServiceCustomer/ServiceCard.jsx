@@ -10,13 +10,13 @@ const ServiceCard = ({ data }) => {
                     rounded-3xl shadow-2xl transition-all duration-300 hover:shadow-3xl"
     >
       {/* Image Section */}
-      <div className="relative bg-customPrimary p-3 rounded-3xl shadow-lg flex justify-center items-center">
+      <div className="relative rounded-3xl flex justify-center items-center">
         <img
           className="rounded-2xl w-[280px] h-[200px] object-cover transition-transform duration-300 hover:scale-110"
           src={`${baseline}${data.serviceImage}`}
           alt={data.serviceName}
         />
-        <div className="absolute top-3 right-3 bg-white px-3 py-1 rounded-xl text-xs font-semibold text-customDark shadow-md">
+        <div className="absolute top-4 right-3 bg-white px-3 py-1 rounded-xl text-xs font-semibold text-customDark shadow-md">
           {data.serviceType.typeName}
         </div>
       </div>

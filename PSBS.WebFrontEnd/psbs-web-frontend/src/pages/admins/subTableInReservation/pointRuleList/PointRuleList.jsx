@@ -42,6 +42,7 @@ const [rows, setRows] = useState([]);
       label: "ID",
       type: "string",
       disabled: true,
+      pass: true,
     },
     {
       name: "pointRuleRatio",

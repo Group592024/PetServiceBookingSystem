@@ -21,7 +21,7 @@ const AccountList = () => {
   const sidebarRef = useRef(null);
   const token = sessionStorage.getItem("token");
 
-  const userRole = localStorage.getItem("role");
+  const userRole = sessionStorage.getItem("role");
 
   const fetchAccounts = async () => {
     try {
@@ -57,68 +57,68 @@ const AccountList = () => {
     fetchAccounts();
   }, []);
 
-  const handleDelete = async (accountId, accountName, isDeleted) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: `You want to delete account: ${accountName}`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const apiUrl = isDeleted
-            ? `http://localhost:5050/api/Account/delete/${accountId}`
-            : `http://localhost:5050/api/Account/delete/${accountId}`;
-          const response = await fetch(apiUrl, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`
-            }
-          });
+  // const handleDelete = async (accountId, accountName, isDeleted) => {
+  //   Swal.fire({
+  //     title: "Are you sure?",
+  //     text: `You want to delete account: ${accountName}`,
+  //     icon: "warning",
+  //     showCancelButton: true,
+  //     confirmButtonColor: "#d33",
+  //     cancelButtonColor: "#3085d6",
+  //     confirmButtonText: "Yes, delete it!",
+  //   }).then(async (result) => {
+  //     if (result.isConfirmed) {
+  //       try {
+  //         const apiUrl = isDeleted
+  //           ? `http://localhost:5050/api/Account/delete/${accountId}`
+  //           : `http://localhost:5050/api/Account/delete/${accountId}`;
+  //         const response = await fetch(apiUrl, {
+  //           method: "DELETE",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`
+  //           }
+  //         });
 
-          if (response.ok) {
-            if (isDeleted) {
-              setAccounts((prev) =>
-                prev.filter((acc) => acc.accountId !== accountId)
-              );
-              Swal.fire(
-                "Deleted!",
-                `${accountName} has been permanently deleted.`,
-                "success"
-              );
-            } else {
-              setAccounts((prev) =>
-                prev.map((acc) =>
-                  acc.accountId === accountId
-                    ? { ...acc, accountIsDeleted: true }
-                    : acc
-                )
-              );
-              Swal.fire(
-                "Deleted!",
-                `${accountName} has been marked as deleted.`,
-                "success"
-              );
-            }
-          } else {
-            const errorData = await response.json();
-            Swal.fire(
-              "Error!",
-              errorData.message || "Failed to delete the account.",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error("Error deleting account:", error);
-          Swal.fire("Error!", "An error occurred while deleting the account.", "error");
-        }
-      }
-    });
-  };
+  //         if (response.ok) {
+  //           if (isDeleted) {
+  //             setAccounts((prev) =>
+  //               prev.filter((acc) => acc.accountId !== accountId)
+  //             );
+  //             Swal.fire(
+  //               "Deleted!",
+  //               `${accountName} has been permanently deleted.`,
+  //               "success"
+  //             );
+  //           } else {
+  //             setAccounts((prev) =>
+  //               prev.map((acc) =>
+  //                 acc.accountId === accountId
+  //                   ? { ...acc, accountIsDeleted: true }
+  //                   : acc
+  //               )
+  //             );
+  //             Swal.fire(
+  //               "Deleted!",
+  //               `${accountName} has been marked as deleted.`,
+  //               "success"
+  //             );
+  //           }
+  //         } else {
+  //           const errorData = await response.json();
+  //           Swal.fire(
+  //             "Error!",
+  //             errorData.message || "Failed to delete the account.",
+  //             "error"
+  //           );
+  //         }
+  //       } catch (error) {
+  //         console.error("Error deleting account:", error);
+  //         Swal.fire("Error!", "An error occurred while deleting the account.", "error");
+  //       }
+  //     }
+  //   });
+  // };
 
   const filteredAccounts = accounts
     .filter((account) => {
@@ -135,17 +135,17 @@ const AccountList = () => {
       }
 
       return false;
-     });
-    //.filter((account) => {
-    //   const query = searchQuery.toLowerCase();
-    //   return (
-    //     !searchQuery ||
-    //     account.accountPhoneNumber.includes(query) ||
-    //     account.accountEmail.toLowerCase().includes(query) ||
-    //     account.accountName.toLowerCase().includes(query)
+    });
+  //.filter((account) => {
+  //   const query = searchQuery.toLowerCase();
+  //   return (
+  //     !searchQuery ||
+  //     account.accountPhoneNumber.includes(query) ||
+  //     account.accountEmail.toLowerCase().includes(query) ||
+  //     account.accountName.toLowerCase().includes(query)
 
-    //   );
-    // });
+  //   );
+  // });
 
 
 
@@ -188,27 +188,57 @@ const AccountList = () => {
       const response = await fetch("http://localhost:5050/api/Account/addaccount", {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: formData
+        body: formData,
       });
 
-      const data = await response.json();
+      const responseText = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        data = { message: responseText || null };
+      }
+
       if (response.ok) {
-        Swal.fire("Success", "Account added successfully!", "success");
+        Swal.fire("Success", data.message || "Account added successfully!", "success");
         setOpenDialog(false);
         fetchAccounts();
         setAccountEmail("");
         setAccountPhoneNumber("");
       } else {
-        Swal.fire("Error", data.message || "Error adding account", "error");
+        let errorMessage = data.message; // Ưu tiên dùng message từ back-end
+
+        // Nếu message không tồn tại, fallback theo mã lỗi
+        if (!errorMessage) {
+          switch (response.status) {
+            case 400:
+              errorMessage = "Invalid input or data already exists.";
+              break;
+            case 500:
+              errorMessage = "Internal server error.";
+              break;
+            case 403:
+              errorMessage = "You are not authorized to perform this action.";
+              break;
+            default:
+              errorMessage = `Unexpected error (${response.status})`;
+          }
+        }
+        
+        console.log("Raw response:", data);
+        Swal.fire("Error", errorMessage, "error");
+
+        console.error(`Server error (status: ${response.status}):`, errorMessage);
+        Swal.fire("Error", errorMessage, "error");
       }
     } catch (error) {
       console.error("Error submitting form:", error);
       Swal.fire("Error", "An error occurred while adding the account.", "error");
     }
   };
-
 
   const columns = [
     {
@@ -256,17 +286,19 @@ const AccountList = () => {
       sortable: false,
       renderCell: (params) => (
         <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-          <Link to={`/editprofile/${params.row.accountId}`}>
-            <IconButton color="primary">
-              <EditIcon />
-            </IconButton>
-          </Link>
+          {userRole != "staff" && (
+            <Link to={`/editprofile/${params.row.accountId}`}>
+              <IconButton color="primary">
+                <EditIcon />
+              </IconButton>
+            </Link>
+          )}
           <Link to={`/profile/${params.row.accountId}`}>
             <IconButton color="custom">
               <VisibilityIcon />
             </IconButton>
           </Link>
-          <IconButton
+          {/* <IconButton
             aria-label="Delete"
             color="error"
             onClick={() =>
@@ -274,7 +306,7 @@ const AccountList = () => {
             }
           >
             <DeleteIcon />
-          </IconButton>
+          </IconButton> */}
 
         </div>
       ),

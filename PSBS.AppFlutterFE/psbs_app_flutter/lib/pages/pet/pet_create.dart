@@ -296,22 +296,10 @@ class _PetCreateState extends State<PetCreate> {
                   style: TextStyle(fontSize: 16),
                 ),
                 onPressed: () async {
-                  SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  String? accountId = prefs.getString('accountId');
-
-                  Navigator.of(context).pop(); 
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => MyHomePage(
-                        title: "PetEase App",
-                        accountId: accountId ?? "",
-                        initialIndex: 1, 
-                      ),
-                    ),
-                    (route) => false,
-                  );
+                  Navigator.of(context, rootNavigator: true)
+                      .pop(); 
+                  Navigator.of(context)
+                      .pop(true); 
                 },
               ),
             ],
@@ -370,7 +358,7 @@ class _PetCreateState extends State<PetCreate> {
                   'OK',
                   style: TextStyle(fontSize: 16),
                 ),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Navigator.pop(context),
               ),
             ],
           ),
@@ -424,21 +412,7 @@ class _PetCreateState extends State<PetCreate> {
                       child: Icon(Icons.arrow_back, color: Colors.blue),
                     ),
                     onPressed: () async {
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      String? accountId = prefs.getString('accountId');
-
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => MyHomePage(
-                            title: "PetEase App",
-                            accountId: accountId ?? "",
-                            initialIndex: 1,
-                          ),
-                        ),
-                        (route) => false,
-                      );
+                      Navigator.pop(context);
                     },
                   ),
                   flexibleSpace: FlexibleSpaceBar(

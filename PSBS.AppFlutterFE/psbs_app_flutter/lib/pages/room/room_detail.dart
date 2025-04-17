@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:psbs_app_flutter/main.dart';
 
 class CustomerRoomDetail extends StatefulWidget {
   final String roomId;
@@ -117,7 +118,23 @@ class _CustomerRoomDetailState extends State<CustomerRoomDetail> {
                       ),
                       child: Icon(Icons.arrow_back, color: Colors.blue),
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      String? accountId = prefs.getString('accountId');
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyHomePage(
+                            title: "PetEase App",
+                            accountId: accountId ?? "",
+                            initialIndex: 3,
+                          ),
+                        ),
+                        (route) => false,
+                      );
+                    },
                   ),
                   flexibleSpace: FlexibleSpaceBar(
                     background: Stack(
