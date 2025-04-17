@@ -131,7 +131,7 @@ namespace VoucherApi.Presentation.Controllers
         [Authorize(Policy = "AdminOrStaff")]
         public async Task<ActionResult<Response>> UpdateGift([FromForm] UpdateGiftDTO updateGift)
         {
-            if(updateGift.giftId == Guid.Empty)
+            if (updateGift.giftId == Guid.Empty)
             {
                 ModelState.AddModelError("giftId", "The ID is invalid.");
             }
@@ -148,7 +148,11 @@ namespace VoucherApi.Presentation.Controllers
             {
                 return NotFound(new Response(false, "The gift is not found!"));
             }
+
             var getEntity = GiftConversion.ToEntityForUpdate(updateGift);
+
+            getEntity.GiftCode = string.IsNullOrWhiteSpace(updateGift.giftCode) ? null : updateGift.giftCode.Trim();
+
             if (updateGift.imageFile != null && updateGift.imageFile.Length > 0)
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), existingGift.GiftImage.TrimStart('/'));
@@ -179,6 +183,7 @@ namespace VoucherApi.Presentation.Controllers
             var response = await giftInterface.UpdateAsync(getEntity);
             return response.Flag ? Ok(response) : BadRequest(response);
         }
+
 
         // DELETE api/<GiftsController>/5
         [HttpDelete("{id}")]
