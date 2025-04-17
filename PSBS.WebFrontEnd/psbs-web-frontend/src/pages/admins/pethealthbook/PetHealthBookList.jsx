@@ -131,8 +131,8 @@ const PetHealthBookList = () => {
 
           const booking = bookingServiceItem
             ? bookingsData.data.find(
-                (bk) => bk.bookingId === bookingServiceItem.bookingId
-              )
+              (bk) => bk.bookingId === bookingServiceItem.bookingId
+            )
             : null;
 
           const accountId = booking ? booking.accountId : null;
@@ -170,8 +170,8 @@ const PetHealthBookList = () => {
           const breed =
             matchedPet && matchedPet.petBreedId
               ? petBreedsData.data.find(
-                  (b) => b.petBreedId === matchedPet.petBreedId
-                )?.petBreedName || "Unknown Breed"
+                (b) => b.petBreedId === matchedPet.petBreedId
+              )?.petBreedName || "Unknown Breed"
               : "Unknown Breed";
 
           return {
@@ -362,7 +362,7 @@ const PetHealthBookList = () => {
               <EditIcon />
             </IconButton>
           </Link>
-          <Link to={`/detail/${params.row.healthBookId}`}>
+          <Link to={`/pethealthbook/detail/${params.row.healthBookId}`}>
             <IconButton color="default">
               <VisibilityIcon />
             </IconButton>
@@ -378,12 +378,12 @@ const PetHealthBookList = () => {
         <Navbar sidebarRef={sidebarRef} />
         <main className="flex-1">
           <div className="listContainer">
-        
+
             <div className="datatable">
-            <div className="datatableTitle">
-            Health Book List
+              <div className="datatableTitle">
+                Health Book List
               </div>
-               <DataGrid
+              <DataGrid
                 rows={filteredPets
                   .sort((a, b) => a.accountIsDeleted - b.accountIsDeleted)
                   .map((acc, index) => ({ ...acc, id: index + 1 }))}
@@ -396,7 +396,7 @@ const PetHealthBookList = () => {
                 getRowId={(row) => row.healthBookId}
               />
             </div>
-           
+
           </div>
         </main>
       </div>
