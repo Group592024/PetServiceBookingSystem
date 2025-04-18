@@ -1,0 +1,22 @@
+# Comments start with a '#'
+
+# Ignore build output
+bin/
+obj/
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore Git repository
+.git/
+.gitignore
+
+# Ignore VS Code project settings
+.vscode/
+
+# Ignore environment variables (be cautious!)
+.env
+
+# Ignore log files
+*.log
+logs/
