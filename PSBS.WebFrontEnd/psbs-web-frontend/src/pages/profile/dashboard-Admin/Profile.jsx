@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import Navbar from "../../../components/navbar/Navbar";
 
@@ -7,8 +7,10 @@ const Profile = () => {
   const [account, setAccount] = useState(null);
   const sidebarRef = useRef(null);
   const token = sessionStorage.getItem("token");
+  const userRole = sessionStorage.getItem("role");
   const [imagePreview, setImagePreview] = useState(null);
   const { accountId } = useParams();
+  const navigate = useNavigate();
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
@@ -75,6 +77,7 @@ const Profile = () => {
         <Navbar sidebarRef={sidebarRef} />
 
         <div className="p-6 bg-white shadow-md rounded-md max-w-full">
+
           <h2 className="mb-4 text-xl font-bold text-left">Profile</h2>
 
           <div className="flex flex-wrap gap-8">
@@ -110,6 +113,15 @@ const Profile = () => {
 
             <div className="w-full sm:w-2/3 md:w-2/4 bg-white shadow-md rounded-md p-6">
               <form>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => navigate(-1)}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium px-4 py-2 rounded-md"
+                  >
+                    &larr; Back
+                  </button>
+                </div>
                 <div className="mb-3">
                   <label htmlFor="accountName" className="block text-sm font-medium mb-1 font-bold">
                     Name
@@ -209,25 +221,27 @@ const Profile = () => {
                     disabled
                   />
                 </div>
+                {userRole != "staff" && (
+                  <div className="flex flex-wrap justify-between gap-4">
+                    <Link to={`/editprofile/${accountId}`}>
+                      <button
+                        type="button"
+                        className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                      >
+                        Edit
+                      </button>
+                    </Link>
+                    <Link to={`/changepassword/${accountId}`}>
+                      <button
+                        type="button"
+                        className="bg-gray-300 text-black px-6 py-3 font-medium rounded-md hover:bg-cyan-700 w-full sm:w-auto"
+                      >
+                        Change Password
+                      </button>
+                    </Link>
+                  </div>
+                )}
 
-                <div className="flex flex-wrap justify-between gap-4">
-                  <Link to={`/editprofile/${accountId}`}>
-                    <button
-                      type="button"
-                      className="bg-teal-600 text-white text-sm font-bold px-6 py-3 rounded-md hover:bg-cyan-700 w-full sm:w-auto"
-                    >
-                      Edit
-                    </button>
-                  </Link>
-                  <Link to={`/changepassword/${accountId}`}>
-                    <button
-                      type="button"
-                      className="bg-gray-300 text-black px-6 py-3 font-medium rounded-md hover:bg-cyan-700 w-full sm:w-auto"
-                    >
-                      Change Password
-                    </button>
-                  </Link>
-                </div>
               </form>
             </div>
           </div>
@@ -236,5 +250,6 @@ const Profile = () => {
     </div>
   );
 };
+
 
 export default Profile;

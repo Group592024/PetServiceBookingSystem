@@ -115,4 +115,25 @@ describe('Profile Page', () => {
         cy.get('a[href="/editprofile/12345"]').contains('Edit').should('exist');
         cy.get('a[href="/changepassword/12345"]').contains('Change Password').should('exist');
     });
+    it('should navigate to previous page when clicking Back button', () => {
+      const previousPage = '/accounts';
+      
+      cy.visit(`http://localhost:3000${previousPage}`, {
+          onBeforeLoad(win) {
+              win.sessionStorage.setItem('token', validToken);
+          },
+      });
+
+      cy.visit(`http://localhost:3000/profile/${accountId}`, {
+          onBeforeLoad(win) {
+              win.sessionStorage.setItem('token', validToken);
+          },
+      });
+
+      cy.wait('@getAccount');
+      cy.wait('@getImage');
+
+      cy.get('button').contains('Back').click();
+      cy.url().should('include', previousPage);
+  });
 });

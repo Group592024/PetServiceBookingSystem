@@ -135,82 +135,56 @@ class Footer extends StatelessWidget {
           SizedBox(height: 20),
 
           // Book Service
-          FooterSection(
-              title: "Book Service", items: ["Get Started"], isLink: true),
+          FooterSection(title: "Book Service", items: ["Get Started"]),
         ],
       ),
     );
   }
 }
 
-// Footer Section for general lists
 class FooterSection extends StatelessWidget {
   final String title;
   final List<String> items;
-  final bool isLink;
 
-  FooterSection(
-      {required this.title, required this.items, this.isLink = false});
+  const FooterSection({required this.title, required this.items, super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Chia danh sách thành 2 cột
-    List<List<String>> splitItems = [
-      items.sublist(0, (items.length / 2).ceil()),
-      items.sublist((items.length / 2).ceil())
-    ];
+    final routeMap = {
+      "Home": "/",
+      "About": "/about",
+      "Service": "/services",
+      "Room": "/room",
+      "Contact": "/contact",
+      "Support": "/support",
+      "Get Started": "/booking"
+    };
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: splitItems.map((columnItems) {
-            return Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: columnItems.map((item) {
-                  bool isGetStarted = item == "Get Started";
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        if (!isGetStarted) ...[
-                          Icon(Icons.circle, size: 6, color: Colors.black),
-                          SizedBox(width: 6),
-                        ],
-                        GestureDetector(
-                          onTap: () {},
-                          child: Row(
-                            children: [
-                              Text(
-                                item,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      isGetStarted ? Colors.blue : Colors.black,
-                                ),
-                              ),
-                              if (isGetStarted)
-                                Icon(Icons.arrow_forward,
-                                    size: 16, color: Colors.blue),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
-              ),
-            );
-          }).toList(),
+        Text(
+          title,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
+        const SizedBox(height: 10),
+        ...items.map((item) => GestureDetector(
+              onTap: () {
+                final route = routeMap[item];
+                if (route != null) {
+                  Navigator.of(context).pushNamed(route);
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  item,
+                  style: const TextStyle(color: Colors.blue),
+                ),
+              ),
+            )),
       ],
-    ).animate().fade(duration: 600.ms).slideY(begin: 0.2);
+    );
   }
 }
 
@@ -251,9 +225,7 @@ class WorkingHoursSection extends StatelessWidget {
                   text: time,
                   style: TextStyle(
                     color: isClosed ? Colors.red : Colors.black,
-                    fontWeight: isClosed
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    fontWeight: isClosed ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
               ],
