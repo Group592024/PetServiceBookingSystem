@@ -174,6 +174,7 @@ const ServiceDetailPage = () => {
 
               <div className="mt-8">
                 <button
+                  onClick={() => navigate("/customer/bookings/new")}
                   className="w-full bg-gradient-to-r from-customDanger to-red-600 text-white py-4 px-6 rounded-xl 
                   font-bold text-lg shadow-lg hover:shadow-xl transform transition duration-300 hover:-translate-y-1 
                   flex items-center justify-center"
