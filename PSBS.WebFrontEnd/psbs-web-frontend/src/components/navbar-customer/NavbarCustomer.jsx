@@ -133,34 +133,55 @@ const NavbarCustomer = () => {
         })
           .then(response => response.json())
           .then(roomData => {
-            const keyword = value.trim().toLowerCase();
+            fetch(`http://localhost:5050/Gifts`, {
+              method: "GET",
+              headers: headers,
+            })
+              .then(response => response.json())
+              .then(giftData => {
+                const keyword = value.trim().toLowerCase();
 
-            const services = serviceData.data ? serviceData.data
-              .filter(service => service.serviceName?.toLowerCase().includes(keyword))
-              .map(service => ({
-                id: service.serviceId,
-                name: service.serviceName,
-                type: 'service',
-                image: service.serviceImage,
-              })) : [];
+                const services = serviceData.data ? serviceData.data
+                  .filter(service => service.serviceName?.toLowerCase().includes(keyword))
+                  .map(service => ({
+                    id: service.serviceId,
+                    name: service.serviceName,
+                    type: 'service',
+                    image: service.serviceImage,
+                  })) : [];
 
-            const rooms = roomData.data ? roomData.data
-              .filter(room => room.roomName?.toLowerCase().includes(keyword))
-              .map(room => ({
-                id: room.roomId,
-                name: room.roomName,
-                type: 'room',
-                image: room.roomImage,
-              })) : [];
+                const rooms = roomData.data ? roomData.data
+                  .filter(room => room.roomName?.toLowerCase().includes(keyword))
+                  .map(room => ({
+                    id: room.roomId,
+                    name: room.roomName,
+                    type: 'room',
+                    image: room.roomImage,
+                  })) : [];
 
-            setSearchResults([...services, ...rooms]);
-            setIsSearching(false);
+                const gifts = giftData.flag && giftData.data ? giftData.data
+                  .filter(gift => gift.giftName?.toLowerCase().includes(keyword))
+                  .map(gift => ({
+                    id: gift.giftId,
+                    name: gift.giftName,
+                    type: 'gift',
+                    image: gift.giftImage,
+                  })) : [];
+
+                setSearchResults([...services, ...rooms, ...gifts]);
+                setIsSearching(false);
+              })
+              .catch(error => {
+                console.error("Error fetching rooms:", error);
+                setIsSearching(false);
+              });
           })
           .catch(error => {
-            console.error("Error fetching rooms:", error);
+            console.error("Error fetching services:", error);
             setIsSearching(false);
           });
       })
+
       .catch(error => {
         console.error("Error fetching services:", error);
         setIsSearching(false);
@@ -175,6 +196,8 @@ const NavbarCustomer = () => {
       navigate(`/customer/services/${result.id}`);
     } else if (result.type === 'room') {
       navigate(`/customerroom/${result.id}`);
+    } else if (result.type === 'gift') {
+      navigate(`/customer/gifts/detail/${result.id}`);
     }
   };
 
@@ -407,6 +430,45 @@ const NavbarCustomer = () => {
                                 <div className="search-result-name">{result.name}</div>
                                 <div className="search-result-type">
                                   <i className="bx bx-home-circle"></i> Room
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
+                    {/* Add Gift section */}
+                    {searchResults.some(r => r.type === 'gift') && (
+                      <>
+                        <div className="divider"></div>
+                        <div className="search-section-title">Gifts</div>
+                        {searchResults
+                          .filter(result => result.type === 'gift')
+                          .map((result) => (
+                            <div
+                              key={`${result.type}-${result.id}`}
+                              className={`search-result-item ${result.type}`}
+                              onClick={() => handleResultClick(result)}
+                            >
+                              <div className="search-result-image">
+                                {result.image ? (
+                                  <img
+                                    src={`http://localhost:5050${result.image}`}
+                                    alt={result.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://via.placeholder.com/50";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="placeholder-image">
+                                    <i className="bx bx-gift"></i>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="search-result-content">
+                                <div className="search-result-name">{result.name}</div>
+                                <div className="search-result-type">
+                                  <i className="bx bx-gift"></i> Gift
                                 </div>
                               </div>
                             </div>

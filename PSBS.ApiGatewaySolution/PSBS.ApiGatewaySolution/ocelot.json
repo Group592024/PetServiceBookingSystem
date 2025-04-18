@@ -7,7 +7,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5000
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/authentication/{everything}",
@@ -31,7 +31,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5000
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/Account/{everything}",
@@ -58,7 +58,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5000
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/ReportAccount/{everything}",
@@ -839,7 +839,7 @@
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 5000
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/account-service/images/{everything}",

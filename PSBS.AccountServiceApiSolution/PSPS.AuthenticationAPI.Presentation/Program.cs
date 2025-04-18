@@ -26,7 +26,7 @@ builder.Services.AddControllers()
     });
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5000); // Any IP with 5023
+    options.ListenAnyIP(5001); // Any IP with 5023
 });
 builder.Services.AddHttpClient("ApiGateway", client =>
 {

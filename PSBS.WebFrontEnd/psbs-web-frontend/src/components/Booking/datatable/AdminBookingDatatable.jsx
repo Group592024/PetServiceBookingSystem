@@ -1,5 +1,5 @@
 import "./admin_booking_datatable.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
@@ -12,7 +12,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import { useNavigate } from "react-router-dom";
 import { min } from "date-fns";
 
-const AdminBookingDatatable = () => {
+const AdminBookingDatatable = ({ filterOptions }) => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -251,7 +251,7 @@ const AdminBookingDatatable = () => {
             flex: 2,
             headerAlign: "center",
             align: "center",
-        }, 
+        },
         {
             field: "createAt",
             headerName: "Created At",
@@ -260,16 +260,16 @@ const AdminBookingDatatable = () => {
             align: "center",
             cellClassName: "cell-font"
         },
-        { 
-            field: "bookingStatusName", 
-            headerName: "Status", 
+        {
+            field: "bookingStatusName",
+            headerName: "Status",
             flex: 1.5,
-            minWidth: 130, 
-            headerAlign: "center", 
+            minWidth: 130,
+            headerAlign: "center",
             align: "center",
             renderCell: (params) => {
                 const getStatusColor = (status) => {
-                    switch(status) {
+                    switch (status) {
                         case 'Pending': return 'warning';
                         case 'Processing': return 'info';
                         case 'Cancelled': return 'error';
@@ -282,17 +282,17 @@ const AdminBookingDatatable = () => {
                         default: return 'default';
                     }
                 };
-                
+
                 const status = params.value || 'Unknown';
                 const color = getStatusColor(status);
-                
+
                 return (
-                    <Chip 
-                        label={status} 
-                        color={color} 
-                        size="small" 
+                    <Chip
+                        label={status}
+                        color={color}
+                        size="small"
                         variant="outlined"
-                        sx={{ 
+                        sx={{
                             minWidth: '100px',
                             maxWidth: '100%',
                             fontWeight: 'medium'
@@ -375,35 +375,57 @@ const AdminBookingDatatable = () => {
         },
     ];
 
-    const bookingsRows = bookings.map((booking) => ({
-        ...booking,
-        totalAmount: new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }).format(booking.totalAmount), 
-        bookingDate: new Date(booking.bookingDate).toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
-        createAt: new Date(booking.createAt).toLocaleString('en-GB', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
-    }));
-    console.log(bookingsRows);
+    // Apply filters to the bookings data
+    const filteredBookingsRows = useMemo(() => {
+        let filtered = [...bookings];
+
+        // Apply date filter if provided (today's bookings)
+        if (filterOptions?.date) {
+            const today = filterOptions.date;
+            filtered = filtered.filter(booking => {
+                const bookingDate = new Date(booking.bookingDate);
+                return bookingDate.setHours(0, 0, 0, 0) === today.getTime();
+            });
+        }
+
+        // Apply status filter if provided
+        if (filterOptions?.status) {
+            filtered = filtered.filter(booking =>
+                booking.bookingStatusName === filterOptions.status
+            );
+        }
+
+
+        return filtered.map((booking) => ({
+            ...booking,
+            totalAmount: new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+            }).format(booking.totalAmount),
+            bookingDate: new Date(booking.bookingDate).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            createAt: new Date(booking.createAt).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+        }));
+    }, [bookings, filterOptions]);
+
     if (loading) {
         return (
-            <div class="flex items-center justify-center h-svh">
+            <div className="flex items-center justify-center h-svh">
                 <div role="status">
                     <svg
                         aria-hidden="true"
-                        class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
+                        className="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
                         viewBox="0 0 100 101"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -417,7 +439,7 @@ const AdminBookingDatatable = () => {
                             fill="currentFill"
                         />
                     </svg>
-                    <span class="sr-only">Loading Booking...</span>
+                    <span className="sr-only">Loading Booking...</span>
                 </div>
             </div>
         );
@@ -425,6 +447,8 @@ const AdminBookingDatatable = () => {
 
     return (
         <div className="datatable">
+
+
             <Box
                 sx={{
                     height: '100%',
@@ -439,7 +463,7 @@ const AdminBookingDatatable = () => {
                 }}
             >
                 <DataGrid
-                    rows={bookingsRows}
+                    rows={filteredBookingsRows}
                     columns={columns}
                     getRowId={(row) => row.bookingId}
                     initialState={{
