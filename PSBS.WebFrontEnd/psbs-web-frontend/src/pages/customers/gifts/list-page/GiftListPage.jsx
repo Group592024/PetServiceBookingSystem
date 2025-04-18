@@ -20,7 +20,7 @@ const GiftListPage = () => {
 
   const fetchGifts = async () => {
     try {
-      const response = await axios.get("http://localhost:5050/Gifts", config); 
+      const response = await axios.get("http://localhost:5050/Gifts", config);
       if (response.data.flag) {
         setGifts(response.data.data);
       } else {
@@ -69,31 +69,6 @@ const GiftListPage = () => {
               Browse and redeem gifts with your reward points
             </p>
           </div>
-          {/* Search Input */}
-          <div className="relative w-full max-w-xs sm:max-w-md">
-            <input
-              type="text"
-              placeholder="Search gifts by name..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 shadow-md transition-all"
-            />
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </div>
           {/* Navigation Buttons */}
           <div className="flex items-center gap-2">
             <button
@@ -132,8 +107,8 @@ const GiftListPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredGifts.map((gift) => (
-              <div 
-                key={gift.giftId} 
+              <div
+                key={gift.giftId}
                 className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
                 onClick={() => navigate(`/customer/gifts/detail/${gift.giftId}`)}
               >
@@ -145,7 +120,7 @@ const GiftListPage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
                   <h2 className="absolute bottom-4 left-6 text-2xl font-bold text-white">{gift.giftName}</h2>
-                  
+
                   {/* Gift code badge */}
                   {gift.giftCode && (
                     <div className="absolute top-4 right-4 bg-yellow-400 text-white rounded-full p-2 shadow-lg">
@@ -170,7 +145,7 @@ const GiftListPage = () => {
                 {/* Gift Info */}
                 <div className="p-6">
                   <p className="text-gray-600 mb-6 line-clamp-3">{gift.giftDescription}</p>
-                  
+
                   {/* Points Display */}
                   <div className="flex justify-between items-center border-t pt-4">
                     <span className="text-gray-600 font-medium">Required Points</span>
