@@ -63,9 +63,11 @@ const ServiceListPage = () => {
   // Auto-slide effect
   useEffect(() => {
     if (isHovering) return; // Don't auto-slide when user is hovering
+
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % banners.length);
     }, 5000); // Change banner every 5 seconds
+
     return () => clearInterval(interval);
   }, [isHovering]);
 
@@ -83,9 +85,11 @@ const ServiceListPage = () => {
           },
         }
       );
+
       if (!fetchData.ok) {
         throw new Error(`HTTP error! Status: ${fetchData.status}`);
       }
+
       const response = await fetchData.json();
       const result = response.data.map((item) => ({
         id: item.serviceId,
@@ -123,6 +127,8 @@ const ServiceListPage = () => {
       <NavbarCustomer />
       {/* Banner Slider */}
       <div
+        data-testid="banner-container"
+
         className="relative w-full h-[500px] overflow-hidden rounded-b-[2.5rem] shadow-lg"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
@@ -133,14 +139,17 @@ const ServiceListPage = () => {
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${index === currentIndex
-                ? "bg-white w-8"
-                : "bg-white/50 hover:bg-white/80"
-                }`}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                index === currentIndex
+                  ? "bg-white w-8"
+                  : "bg-white/50 hover:bg-white/80"
+              }`}
+
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>
+
         {/* Banner Navigation Arrows */}
         <button
           className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 backdrop-blur-sm transition-all duration-300"
@@ -165,6 +174,7 @@ const ServiceListPage = () => {
             />
           </svg>
         </button>
+
         <button
           className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/20 hover:bg-black/40 text-white rounded-full p-2 backdrop-blur-sm transition-all duration-300"
           onClick={() =>
@@ -186,6 +196,7 @@ const ServiceListPage = () => {
             />
           </svg>
         </button>
+
         <AnimatePresence>
           {banners.map(
             (banner, index) =>
@@ -201,6 +212,7 @@ const ServiceListPage = () => {
                 >
                   {/* Dark overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20"></div>
+
                   <motion.div
                     className="relative z-10 p-10 text-center text-white max-w-3xl mx-auto px-6"
                     initial={{ y: 30, opacity: 0 }}
@@ -235,7 +247,7 @@ const ServiceListPage = () => {
       {/* Service Section */}
       <div
         id="services-section"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
+        className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-16"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -254,8 +266,9 @@ const ServiceListPage = () => {
             keep your furry friends happy, healthy, and well-groomed.
           </p>
         </motion.div>
+
         {/* Search and Filter Section */}
-        <div className="bg-white rounded-2xl shadow-md p-6 mb-12">
+        <div className="bg-white rounded-2xl shadow-md p-6 mb-12 mx-[20%]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="w-full md:w-1/2">
               <label
@@ -291,6 +304,7 @@ const ServiceListPage = () => {
                 />
               </div>
             </div>
+
             <div className="w-full md:w-1/2">
               <label
                 htmlFor="service-type"
@@ -347,6 +361,7 @@ const ServiceListPage = () => {
               </div>
             </div>
           </div>
+
           {/* Filter Tags */}
           <div className="mt-4 flex flex-wrap gap-2">
             {searchName && (
@@ -373,6 +388,7 @@ const ServiceListPage = () => {
                 </button>
               </div>
             )}
+
             {searchType && (
               <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800">
                 <span>Type: {searchType}</span>
@@ -397,11 +413,13 @@ const ServiceListPage = () => {
                 </button>
               </div>
             )}
+
             {(searchName || searchType) && (
               <button
                 onClick={() => {
                   setSearchName("");
                   setSearchType("");
+
                   // Remove the type parameter from the URL
                   navigate('/customer/services', { replace: true });
                 }}
@@ -411,11 +429,13 @@ const ServiceListPage = () => {
               </button>
             )}
           </div>
+
           {/* Results Summary */}
           <div className="mt-4 text-sm text-gray-600">
             Showing {filteredData.length} of {data.length} services
           </div>
         </div>
+
         {/* Service Cards */}
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
@@ -443,7 +463,7 @@ const ServiceListPage = () => {
                 d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="text-lg font-medium mb-2">Error Loading Services</h3>
+            <h3 className="text-lg font-medium mb-2">Service Unavailable</h3>
             <p className="text-red-500 mb-4">{error}</p>
             <button
               onClick={fetchDataFunction}
@@ -479,6 +499,7 @@ const ServiceListPage = () => {
               onClick={() => {
                 setSearchName("");
                 setSearchType("");
+
                 // Remove the type parameter from the URL
                 navigate('/customer/services', { replace: true });
               }}
@@ -496,12 +517,15 @@ const ServiceListPage = () => {
             <ServiceCardList data={filteredData} />
           </motion.div>
         )}
+
         {/* Service Categories Section */}
         <div className="mt-20">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Our Service Types
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-[15%]">
+
             {serviceTypes.slice(0, 6).map((type, index) => (
               <motion.div
                 key={type}
@@ -525,8 +549,10 @@ const ServiceListPage = () => {
                   <button
                     onClick={() => {
                       setSearchType(type);
+
                       // Update URL with the selected type
                       navigate(`/customer/services?type=${type}`, { replace: true });
+
                       // Add scrolling to the services section
                       document
                         .getElementById("services-section")

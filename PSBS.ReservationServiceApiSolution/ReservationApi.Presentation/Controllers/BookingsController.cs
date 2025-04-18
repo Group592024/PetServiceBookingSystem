@@ -431,10 +431,75 @@ namespace ReservationApi.Presentation.Controllers
         [HttpPut("cancel/{id}")]
         public async Task<ActionResult<Response>> CancelBooking(Guid id)
         {
-            var response = await bookingInterface.CancelBookingAsync(id);
-            return response.Flag ? Ok(response) : BadRequest(response);
+            try
+            {
+                // Get the booking to check if it has a voucher
+                var booking = await bookingInterface.GetByIdAsync(id);
+                if (booking == null)
+                {
+                    return NotFound(new Response(false, "Booking not found"));
+                }
 
+                // Cancel the booking
+                var response = await bookingInterface.CancelBookingAsync(id);
+                if (!response.Flag)
+                {
+                    return BadRequest(response);
+                }
+
+                // Check if the booking used a voucher
+                if (booking.VoucherId != Guid.Empty)
+                {
+                    try
+                    {
+                        string authorizationHeader = Request.Headers["Authorization"];
+                        if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                        {
+                            LogExceptions.LogToConsole("Authorization header is missing or invalid");
+                            return Ok(response); // Return success for booking cancellation even if voucher refund fails
+                        }
+
+                        string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+                        // Make API call to refund the voucher quantity
+                        using (HttpClient client = new HttpClient())
+                        {
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                            client.BaseAddress = new Uri("http://localhost:5050/api/Voucher/");
+                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                            // Call the refund-quantity endpoint
+                            HttpResponseMessage voucherResponse = await client.PutAsync($"refund-quantity/{booking.VoucherId}", null);
+
+                            if (!voucherResponse.IsSuccessStatusCode)
+                            {
+                                LogExceptions.LogToConsole($"Failed to refund voucher quantity. Status: {voucherResponse.StatusCode}");
+                                // We don't want to fail the booking cancellation if voucher refund fails
+                                // Just log the error
+                            }
+                            else
+                            {
+                                LogExceptions.LogToConsole($"Successfully refunded voucher quantity for voucher: {booking.VoucherId}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogExceptions.LogToConsole($"Error refunding voucher: {ex.Message}");
+                        // We don't want to fail the booking cancellation if voucher refund fails
+                        // Just log the error
+                    }
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToConsole($"Error in CancelBooking: {ex.Message}");
+                return BadRequest(new Response(false, "Error processing booking cancellation"));
+            }
         }
+
 
 
         [HttpPut("updateRoomStatus/{bookingId}")]
@@ -446,6 +511,7 @@ namespace ReservationApi.Presentation.Controllers
 
             LogExceptions.LogToConsole("Token ne " + token);
             LogExceptions.LogToConsole("BookingID ne " + bookingId);
+            LogExceptions.LogToConsole("Status cap nhat ne " + request.Status);
 
 
 
@@ -462,77 +528,6 @@ namespace ReservationApi.Presentation.Controllers
             {
                 var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
                 var bookingConfirmedList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusConfirmed.BookingStatusId);
-                List<RoomHistoryDTO> roomHistoryDTOs;
-                using (HttpClient client = new HttpClient())
-                {
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    client.BaseAddress = new Uri("http://localhost:5050/api/");
-                    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                    HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
-                    if (!roomHistoryResponse.IsSuccessStatusCode)
-                    {
-                        return BadRequest(new Response(false, "Invalid status transition."));
-                    }
-                    var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
-                    var responseObject = JObject.Parse(jsonResponse);
-
-                    bool flag = responseObject["flag"]?.Value<bool>() ?? false;
-                    string message = responseObject["message"]?.Value<string>() ?? "No message";
-
-                    var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
-
-                    if (roomHistoryData == null || !roomHistoryData.Any())
-                    {
-                        return BadRequest(new Response(false, "Invalid status transition."));
-                    }
-                    roomHistoryDTOs = roomHistoryData;
-                }
-                foreach (var room in roomHistoryDTOs)
-                {
-                    foreach (var bookingroom in bookingConfirmedList)
-                    {
-                        List<RoomHistoryDTO> bookingroomDetail;
-                        using (HttpClient client = new HttpClient())
-                        {
-                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                            client.BaseAddress = new Uri("http://localhost:5050/api/");
-                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                            HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
-                            if (!roomHistoryResponse.IsSuccessStatusCode)
-                            {
-                                return BadRequest(new Response(false, "Invalid status transition."));
-                            }
-                            var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
-                            var responseObject = JObject.Parse(jsonResponse);
-
-                            bool flag = responseObject["flag"]?.Value<bool>() ?? false;
-                            string message = responseObject["message"]?.Value<string>() ?? "No message";
-
-                            var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
-
-                            if (roomHistoryData == null || !roomHistoryData.Any())
-                            {
-                                return BadRequest(new { flag = false, message = "Invalid status transition." });
-                            }
-                            bookingroomDetail = roomHistoryData;
-                        }
-                        foreach (var roomHistory in bookingroomDetail)
-                        {
-                            if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                            {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                            }
-                            if (room.bookingEndDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                            {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                            }
-                            if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingStartDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                            {
-                                return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                            }
-                        }
-                    }
-                }
             }
 
             if (request.Status == "Checked in")
@@ -951,33 +946,33 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         [HttpGet("Vnpay/Callback/update-status")]
-public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingCode)
-{
-    try
-    {
-        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
-        if (existingBooking == null)
+        public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingCode)
         {
-            LogExceptions.LogToConsole("Booking not found in database");
-            return BadRequest(new Response(false, "Booking not found in database!"));
+            try
+            {
+                var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+                if (existingBooking == null)
+                {
+                    LogExceptions.LogToConsole("Booking not found in database");
+                    return BadRequest(new Response(false, "Booking not found in database!"));
+                }
+
+                LogExceptions.LogToConsole($"Found booking: {existingBooking.BookingId}");
+
+                // Update payment status
+                existingBooking.isPaid = true;
+                context.Bookings.Update(existingBooking);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Successfully updated booking payment status");
+
+                return Ok(new Response(true, "Payment status updated successfully!"));
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToConsole($"Error saving booking: {ex.Message}");
+                return StatusCode(500, new Response(false, "Error updating payment status"));
+            }
         }
-
-        LogExceptions.LogToConsole($"Found booking: {existingBooking.BookingId}");
-
-        // Update payment status
-        existingBooking.isPaid = true;
-        context.Bookings.Update(existingBooking);
-        await context.SaveChangesAsync();
-        Console.WriteLine("Successfully updated booking payment status");
-        
-        return Ok(new Response(true, "Payment status updated successfully!"));
-    }
-    catch (Exception ex)
-    {
-        LogExceptions.LogToConsole($"Error saving booking: {ex.Message}");
-        return StatusCode(500, new Response(false, "Error updating payment status"));
-    }
-}
 
         [HttpGet("voucher/{voucher}")]
         public async Task<ActionResult<IEnumerable<BookingDTO>>> IsReferenceInBooking(Guid voucher)
@@ -986,5 +981,26 @@ public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingC
 
             return Ok(bookings);
         }
+
+        [HttpPut("addnote/{bookingId}")]
+        public async Task<ActionResult<Response>> AddNoteToBooking(Guid bookingId, [FromBody] string notes)
+        {
+            if (string.IsNullOrWhiteSpace(notes))
+            {
+                return BadRequest(new Response(false, "Note cannot be empty."));
+            }
+
+            var response = await bookingInterface.AddNoteToBookingAsync(bookingId, notes);
+
+            if (response.Flag)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
     }
 }

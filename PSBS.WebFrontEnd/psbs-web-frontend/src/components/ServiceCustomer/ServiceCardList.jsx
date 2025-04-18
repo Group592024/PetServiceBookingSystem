@@ -11,7 +11,11 @@ const ServiceCardList = ({ data }) => {
   return (
     <div className="flex justify-start items-center flex-wrap translate-x-[5%]">
       {data.map((item) => (
-        <ServiceCard key={item.serviceId} data={item} />
+        <ServiceCard
+          data-testid="service-card"
+          key={item.serviceId}
+          data={item}
+        />
       ))}
     </div>
   );

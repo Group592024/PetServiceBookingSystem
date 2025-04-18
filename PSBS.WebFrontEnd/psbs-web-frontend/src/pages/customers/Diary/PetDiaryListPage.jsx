@@ -17,11 +17,12 @@ import { formatDateString } from "../../../Utilities/formatDate";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useParams } from "react-router-dom";
+import jwtDecode from "jwt-decode";
 
 const PetDiaryListPage = () => {
   const { petId } = useParams();
   const petInfo = JSON.parse(localStorage.getItem("petInfo"));
-
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(false);
   const [pageIndex, setPageIndex] = useState(1);
   const [petDiary, setPetDiary] = useState({ data: [], meta: null });
@@ -70,12 +71,25 @@ const PetDiaryListPage = () => {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Something went wrong. Please try again!",
+        text: "Service Unavailable",
       });
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      const decoded = jwtDecode(token);
+      setUserRole(
+        decoded?.role ||
+          decoded[
+            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+          ]
+      );
+    }
+  }, []);
 
   useEffect(() => {
     fetchPetDiary(petId, selectedCategory, pageIndex);
@@ -163,16 +177,18 @@ const PetDiaryListPage = () => {
                 </p>
               </div>
 
-              <div className="p-4 flex justify-center">
-                <button
-                  onClick={() => setAddModalOpen(true)}
-                  className="flex items-center justify-center gap-2 bg-customDark text-white py-3 px-6 rounded-xl
+              {userRole === "user" && (
+                <div className="p-4 flex justify-center">
+                  <button
+                    onClick={() => setAddModalOpen(true)}
+                    className="flex items-center justify-center gap-2 bg-customDark text-white py-3 px-6 rounded-xl
                            hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-md"
-                >
-                  <AddCircleOutlineIcon />
-                  <span className="font-medium">Create New Post</span>
-                </button>
-              </div>
+                  >
+                    <AddCircleOutlineIcon />
+                    <span className="font-medium">Create New Post</span>
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Categories card */}
@@ -293,7 +309,11 @@ const PetDiaryListPage = () => {
                 {petDiary?.data?.length > 0 ? (
                   <>
                     <div className="space-y-6">
-                      <PetDiaryCardList data={petDiary?.data} />
+                      <PetDiaryCardList
+                        data={petDiary?.data}
+                        role={userRole}
+                        getCategories={fetchCategories}
+                      />
                     </div>
 
                     {/* Pagination */}

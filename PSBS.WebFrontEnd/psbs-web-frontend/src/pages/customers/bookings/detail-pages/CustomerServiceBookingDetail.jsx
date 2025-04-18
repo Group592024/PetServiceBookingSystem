@@ -23,6 +23,15 @@ const CustomerServiceBookingDetail = () => {
     return sessionStorage.getItem("token");
   };
 
+  const showErrorAlert = (message) => {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: message,
+      confirmButtonColor: '#3085d6',
+    });
+  };
+
   const fetchPetName = async (petId) => {
     try {
       const response = await fetch(`http://localhost:5050/api/pet/${petId}`, {
@@ -209,10 +218,10 @@ const CustomerServiceBookingDetail = () => {
             Swal.fire("Cancelled!", "The booking has been cancelled.", "success");
             setBookingStatusName("Cancelled");
           } else {
-            Swal.fire("Error!", response.data.message, "error");
+            showErrorAlert(response.data.message);
           }
         } catch (err) {
-          Swal.fire("Error!", "Failed to cancel the booking.", "error");
+          showErrorAlert("Failed to cancel the booking!");
         }
       }
     });
@@ -267,23 +276,26 @@ const CustomerServiceBookingDetail = () => {
       console.log("VNPay API Response:", vnpayResult);
 
       if (vnpayResult.startsWith("http")) {
-        window.location.href = vnpayResult; // Redirect to VNPay
+        window.location.href = vnpayResult;
       } else {
-        Swal.fire("Failed!", "VNPay payment failed!", "error");
+        showErrorAlert("Failed to create VNPay payment link!");
       }
     } catch (error) {
       console.error("Payment error:", error);
-      Swal.fire("Error!", "An error occurred while processing payment.", "error");
+      showErrorAlert("An error occurred while processing payment!");
     }
   };
 
   if (loading)
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+      <div>
+        <NavbarCustomer />
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
       </div>
     );
-  if (error) return <p className="text-center text-xl text-red-500">{error}</p>;
+  if (error) return showErrorAlert(error);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -373,7 +385,7 @@ const CustomerServiceBookingDetail = () => {
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                  <span id="paidStatus" className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                     }`}>
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
@@ -443,12 +455,12 @@ const CustomerServiceBookingDetail = () => {
                           </span>
                         </p>
                         <div className="bg-gray-50 p-3 rounded-lg">
-                          <p className="text-gray-700">
+                          {/* <p className="text-gray-700">
                             <span className="font-semibold">Variant:</span>{" "}
                             <span className="text-gray-800">
                               {serviceInfo[item.serviceVariantId].variantName}
                             </span>
-                          </p>
+                          </p> */}
                           <p className="text-gray-700 mt-1">
                             <span className="font-semibold">Content:</span>{" "}
                             <span className="text-gray-800">

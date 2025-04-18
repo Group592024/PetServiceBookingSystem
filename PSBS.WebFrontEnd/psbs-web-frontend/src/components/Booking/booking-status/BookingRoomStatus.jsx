@@ -10,39 +10,40 @@ const steps = [
   { label: "Cancelled", icon: <Cancel /> },
 ];
 
-// Mapping status names to step indexes
 const statusToStep = {
   "Pending": 0,
   "Confirmed": 1,
   "Checked in": 2,
   "Checked out": 3,
-  "Cancelled": 4
+  "Cancelled": 4,
 };
 
-const CustomStepIcon = (props) => {
-  const { active, completed, icon } = props;
+const CustomStepIcon = ({ active, completed, icon }) => {
   return (
-    <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-      completed || active ? "bg-green-500 text-white" : "bg-white text-green-500"
-    } border-green-500`}>
+    <div
+      className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300
+        ${completed || active
+          ? "bg-gradient-to-tr from-green-500 to-green-400 text-white shadow-lg scale-105"
+          : "bg-gray-100 text-green-600 border-gray-300"
+        }`}
+    >
       {steps[Number(icon) - 1].icon}
     </div>
   );
 };
 
 const BookingRoomStatus = ({ bookingStatus }) => {
-  // Get the active step index from the statusToStep mapping
-  const activeStep = statusToStep[bookingStatus] || 0; // Default to 0 if status not found
+  const activeStep = statusToStep[bookingStatus] || 0;
+  const filteredSteps =
+    bookingStatus === "Cancelled" ? steps : steps.filter((s) => s.label !== "Cancelled");
 
   return (
-    <div className="p-6 bg-white shadow-lg rounded-lg mb-6">
+    <div className="p-6 bg-white shadow-xl rounded-2xl mb-10">
       <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((step, index) => (
+        {filteredSteps.map((step, index) => (
           <Step key={index}>
             <StepLabel StepIconComponent={(props) => <CustomStepIcon {...props} />}>
-              <div className="text-center">
-                <p className="text-sm font-semibold">{step.label}</p>
-              </div>
+              <p className="text-xs text-gray-700 font-semibold mt-3 tracking-wide">{step.label}</p>
             </StepLabel>
           </Step>
         ))}

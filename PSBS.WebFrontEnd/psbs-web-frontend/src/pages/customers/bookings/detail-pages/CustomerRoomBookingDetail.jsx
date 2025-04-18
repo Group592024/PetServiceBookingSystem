@@ -21,6 +21,8 @@ const CustomerRoomBookingDetail = () => {
   const [allDataLoaded, setAllDataLoaded] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [isPushModalOpen, setPushModalOpen] = useState(false);
+  const [selectedRoomHistoryId, setSelectedRoomHistoryId] = useState(null);
+  const [voucherDetails, setVoucherDetails] = useState(null);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -70,6 +72,11 @@ const CustomerRoomBookingDetail = () => {
           }
         );
         setBooking(bookingResponse.data.data);
+        // Fetch voucher details if voucherId exists
+        if (bookingResponse.data.data.voucherId &&
+          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
+          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
+        }
 
         const paymentResponse = await axios.get(
           `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
@@ -199,6 +206,25 @@ const CustomerRoomBookingDetail = () => {
         }
       }
     });
+  };
+  const fetchVoucherDetails = async (voucherId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/${voucherId}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        setVoucherDetails(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
+    }
   };
 
   const handleCameraSettings = (roomHistoryId) => {
@@ -384,6 +410,32 @@ const CustomerRoomBookingDetail = () => {
                   {booking.isPaid ? "Paid" : "Pending"}
                 </span>
               </p>
+              {voucherDetails && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Voucher Name:</span>{" "}
+                        <span className="text-blue-600">{voucherDetails.voucherName}</span>
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Code:</span>{" "}
+                        <span className="text-gray-800">{voucherDetails.voucherCode}</span>
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Discount:</span>{" "}
+                        <span className="text-green-600">
+                          {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(voucherDetails.voucherMaximum)})
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -470,20 +522,20 @@ const CustomerRoomBookingDetail = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Booking Period:</span>{" "}
                       <span className="text-gray-800">
-                      {formatDate(history.bookingStartDate)} -{" "}
-                      {formatDate(history.bookingEndDate)}
+                        {formatDate(history.bookingStartDate)} -{" "}
+                        {formatDate(history.bookingEndDate)}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-in:</span>{" "}
                       <span className="text-gray-800">
-                      {history.checkInDate? formatDate(history.checkInDate): "Not checked in"}
+                        {history.checkInDate ? formatDate(history.checkInDate) : "Not checked in"}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-out:</span>{" "}
                       <span className="text-gray-800">
-                      {history.checkOutDate ? formatDate(history.checkOutDate): "Not checked out"}
+                        {history.checkOutDate ? formatDate(history.checkOutDate) : "Not checked out"}
                       </span>
                     </p>
                     <p className="text-gray-700">

@@ -18,6 +18,11 @@ namespace PetApi.Infrastructure.Repositories
                 //var getPet = await GetByAsync(_ => _.pet_Name!.Equals(entity.pet_Name));
                 //if (getPet is not null && !string.IsNullOrEmpty(getPet.pet_Name))
                 //    return new Response(false, $"{entity.pet_Name} already added");
+                var existingServiceVariant = await context.PetTypes.FirstOrDefaultAsync(r => r.PetType_ID == entity.PetType_ID);
+                if (existingServiceVariant != null)
+                {
+                    return new Response(false, $"Pet Type with ID {entity.PetType_ID} already exists!");
+                }
 
                 var currentEnity = context.PetTypes.Add(entity).Entity;
                 await context.SaveChangesAsync();

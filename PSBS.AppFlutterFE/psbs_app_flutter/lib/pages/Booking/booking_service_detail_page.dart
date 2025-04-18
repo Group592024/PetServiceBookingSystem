@@ -347,9 +347,6 @@ class _CustomerServiceBookingDetailState
 
     final responseData = json.decode(response.body);
     if (responseData['flag']) {
-      setState(() {
-        bookingStatusName = "Cancelled";
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Booking has been cancelled."),
@@ -360,6 +357,12 @@ class _CustomerServiceBookingDetailState
           ),
         ),
       );
+
+      await Future.delayed(Duration(seconds: 2));
+
+      setState(() {
+        bookingStatusName = "Cancelled";
+      });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -510,31 +513,33 @@ class _CustomerServiceBookingDetailState
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        if (booking?['isPaid'] == false && paymentTypeName == "VNPay")
-          ElevatedButton(
-            onPressed: handleVNPayPayment,
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-              backgroundColor: Colors.blue.shade600,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.payment, size: 20),
-                SizedBox(width: 8),
-                Text(
-                  "Pay with VNPay",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      if (booking?['isPaid'] == false && paymentTypeName == "VNPay" && bookingStatusName == "Pending" || bookingStatusName == "Confirmed")
+        ElevatedButton(
+          onPressed: handleVNPayPayment,
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            backgroundColor: Colors.blue.shade600,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
-        SizedBox(width: 16),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.payment, size: 20),
+              SizedBox(width: 8),
+              Text(
+                "Pay with VNPay",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      SizedBox(height: 16), // Add spacing between buttons
+      if (bookingStatusName == "Pending" || bookingStatusName == "Confirmed")
         ElevatedButton(
           onPressed: cancelBooking,
           style: ElevatedButton.styleFrom(
@@ -545,6 +550,7 @@ class _CustomerServiceBookingDetailState
             ),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.cancel, size: 20),
               SizedBox(width: 8),
@@ -555,9 +561,9 @@ class _CustomerServiceBookingDetailState
             ],
           ),
         ),
-      ],
-    );
-  }
+    ],
+  );
+}
 
   @override
   Widget build(BuildContext context) {

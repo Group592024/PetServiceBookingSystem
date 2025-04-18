@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using PSPS.SharedLibrary.DependencyInjection;
 using ReservationApi.Application.Intefaces;
+using ReservationApi.Infrastructure.BackgroundWorkers;
 using ReservationApi.Infrastructure.Data;
 using ReservationApi.Infrastructure.Repositories;
 
@@ -25,6 +26,7 @@ namespace ReservationApi.Infrastructure.DependencyInjection
             services.AddScoped<IPaymentType, PaymentTypeRepository>();
             
             services.AddScoped<IReport, ReportBookingRepository>();
+            services.AddHostedService<BookingStatusWorker>();
             return services;
         }
         public static IApplicationBuilder UserInfrastructurePolicy(this IApplicationBuilder app)

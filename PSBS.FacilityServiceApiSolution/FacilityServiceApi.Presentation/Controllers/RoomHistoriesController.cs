@@ -115,22 +115,22 @@ namespace FacilityServiceApi.Presentation.Controllers
                 existingRoom.status = "Free";
                 var roomResponse = await roomInterface.UpdateAsync(existingRoom);
 
-                //if (existingRoomHistory.BookingCamera && existingRoomHistory.CameraId != Guid.Empty)
-                //{
-                //    if(existingRoomHistory.CameraId == null)
-                //    {
-                //        LogExceptions.LogException(new Exception($"Camera Id {existingRoomHistory.CameraId} not found"));
-                //        return Ok(checkoutResponse);
-                //    }
-                //    var bookingCamera = await cameraInterface.GetByIdAsync((Guid) existingRoomHistory.CameraId);
-                //    if(bookingCamera == null)
-                //    {
-                //        LogExceptions.LogException(new Exception($"Camera with Id {existingRoomHistory.CameraId} not found"));
-                //        return Ok(checkoutResponse);
-                //    }
-                //    bookingCamera.cameraStatus = "Free";
-                //    var cameraResponse = await cameraInterface.UpdateAsync(bookingCamera);
-                //}
+                if (existingRoomHistory.BookingCamera && existingRoomHistory.cameraId != Guid.Empty)
+                {
+                   if(existingRoomHistory.cameraId == null)
+                   {
+                       LogExceptions.LogException(new Exception($"Camera Id {existingRoomHistory.cameraId} not found"));
+                       return Ok(checkoutResponse);
+                   }
+                   var bookingCamera = await cameraInterface.GetByIdAsync((Guid) existingRoomHistory.cameraId);
+                   if(bookingCamera == null)
+                   {
+                       LogExceptions.LogException(new Exception($"Camera with Id {existingRoomHistory.cameraId} not found"));
+                       return Ok(checkoutResponse);
+                   }
+                   bookingCamera.cameraStatus = "Free";
+                   var cameraResponse = await cameraInterface.UpdateAsync(bookingCamera);
+                }
 
                 return Ok(roomResponse.Flag ? checkoutResponse : roomResponse);
             }

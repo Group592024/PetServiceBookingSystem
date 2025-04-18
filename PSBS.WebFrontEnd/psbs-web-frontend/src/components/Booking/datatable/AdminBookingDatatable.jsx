@@ -1,5 +1,5 @@
 import "./admin_booking_datatable.css";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid } from "@mui/x-data-grid";
 import { Link } from "react-router-dom";
@@ -10,8 +10,9 @@ import { Chip } from "@mui/material";
 import IconButton from "@mui/material/IconButton";
 import InfoIcon from "@mui/icons-material/Info";
 import { useNavigate } from "react-router-dom";
+import { min } from "date-fns";
 
-const AdminBookingDatatable = () => {
+const AdminBookingDatatable = ({ filterOptions }) => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -205,12 +206,12 @@ const AdminBookingDatatable = () => {
         {
             field: "id",
             headerName: "No.",
-            flex: 1,
+            width: 50,
             headerAlign: "center",
             align: "center",
             renderCell: (params) => {
                 const index = bookings.findIndex(
-                    (booking) => booking.bookingId === params.row.bookingId
+                    (row) => row.bookingId === params.row.bookingId
                 );
                 return index + 1;
             },
@@ -232,17 +233,11 @@ const AdminBookingDatatable = () => {
         {
             field: "totalAmount",
             headerName: "Total Amount",
+            minWidth: 100,
             flex: 1,
             headerAlign: "center",
             align: "center",
         },
-        // {
-        //     field: "serviceName",
-        //     headerName: "ServiceName",
-        //     flex: 2,
-        //     headerAlign: "center",
-        //     align: "center",
-        // },
         {
             field: "bookingTypeName",
             headerName: "Booking Type",
@@ -258,11 +253,53 @@ const AdminBookingDatatable = () => {
             align: "center",
         },
         {
-            field: "bookingStatusName",
-            headerName: "Status",
-            flex: 1,
+            field: "createAt",
+            headerName: "Created At",
+            flex: 2,
             headerAlign: "center",
             align: "center",
+            cellClassName: "cell-font"
+        },
+        {
+            field: "bookingStatusName",
+            headerName: "Status",
+            flex: 1.5,
+            minWidth: 130,
+            headerAlign: "center",
+            align: "center",
+            renderCell: (params) => {
+                const getStatusColor = (status) => {
+                    switch (status) {
+                        case 'Pending': return 'warning';
+                        case 'Processing': return 'info';
+                        case 'Cancelled': return 'error';
+                        case 'Confirmed': return 'success';
+                        case 'Checked in': return 'secondary';
+                        case 'Checked out': return 'primary';
+                        case 'Completed': return 'success';
+                        case 'Refunded': return 'warning';
+                        case 'Rejected': return 'error';
+                        default: return 'default';
+                    }
+                };
+
+                const status = params.value || 'Unknown';
+                const color = getStatusColor(status);
+
+                return (
+                    <Chip
+                        label={status}
+                        color={color}
+                        size="small"
+                        variant="outlined"
+                        sx={{
+                            minWidth: '100px',
+                            maxWidth: '100%',
+                            fontWeight: 'medium'
+                        }}
+                    />
+                );
+            }
         },
         {
             field: "isPaid",
@@ -338,28 +375,57 @@ const AdminBookingDatatable = () => {
         },
     ];
 
-    const bookingsRows = bookings.map((booking) => ({
-        ...booking,
-        totalAmount: new Intl.NumberFormat("vi-VN", {
-            style: "currency",
-            currency: "VND",
-          }).format(booking.totalAmount), 
-        bookingDate: new Date(booking.bookingDate).toLocaleString('en-US', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit'
-        }),
-    }));
-    console.log(bookingsRows);
+    // Apply filters to the bookings data
+    const filteredBookingsRows = useMemo(() => {
+        let filtered = [...bookings];
+
+        // Apply date filter if provided (today's bookings)
+        if (filterOptions?.date) {
+            const today = filterOptions.date;
+            filtered = filtered.filter(booking => {
+                const bookingDate = new Date(booking.bookingDate);
+                return bookingDate.setHours(0, 0, 0, 0) === today.getTime();
+            });
+        }
+
+        // Apply status filter if provided
+        if (filterOptions?.status) {
+            filtered = filtered.filter(booking =>
+                booking.bookingStatusName === filterOptions.status
+            );
+        }
+
+
+        return filtered.map((booking) => ({
+            ...booking,
+            totalAmount: new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+            }).format(booking.totalAmount),
+            bookingDate: new Date(booking.bookingDate).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            createAt: new Date(booking.createAt).toLocaleString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+        }));
+    }, [bookings, filterOptions]);
+
     if (loading) {
         return (
-            <div class="flex items-center justify-center h-svh">
+            <div className="flex items-center justify-center h-svh">
                 <div role="status">
                     <svg
                         aria-hidden="true"
-                        class="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
+                        className="inline w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-purple-600"
                         viewBox="0 0 100 101"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
@@ -373,7 +439,7 @@ const AdminBookingDatatable = () => {
                             fill="currentFill"
                         />
                     </svg>
-                    <span class="sr-only">Loading...</span>
+                    <span className="sr-only">Loading Booking...</span>
                 </div>
             </div>
         );
@@ -381,10 +447,13 @@ const AdminBookingDatatable = () => {
 
     return (
         <div className="datatable">
+
+
             <Box
                 sx={{
-                    height: 400,
+                    height: '100%',
                     width: "100%",
+                    overflow: 'auto',
                     "& .MuiDataGrid-root": { backgroundColor: "#f9f9f9" },
                     "& .MuiDataGrid-row": { backgroundColor: "#f4f4f4" },
                     "& .MuiDataGrid-row.Mui-selected": { backgroundColor: "#c8f6e9 !important" },
@@ -394,19 +463,19 @@ const AdminBookingDatatable = () => {
                 }}
             >
                 <DataGrid
-                    rows={bookingsRows}
+                    rows={filteredBookingsRows}
                     columns={columns}
                     getRowId={(row) => row.bookingId}
                     initialState={{
                         pagination: { paginationModel: { pageSize: 5 } },
                         sorting: {
                             sortModel: [{
-                                field: 'bookingDate',
+                                field: 'createAt',
                                 sort: 'desc'
                             }]
                         }
                     }}
-                    pageSizeOptions={[5]}
+                    pageSizeOptions={[5, 10, 25]}
                     disableRowSelectionOnClick
                 />
             </Box>

@@ -19,6 +19,7 @@ namespace ReservationApi.Application.Intefaces
         Task<IEnumerable<Booking>> GetBookingByBookingStatusAsync(Guid id);
         Task<Response> CancelBookingAsync(Guid bookingId);
         Task<Response> IsReferencedInBookings(Guid voucherId);
+        Task<Response> AddNoteToBookingAsync(Guid bookingId, string note);
 
     }
 }

@@ -152,18 +152,20 @@ namespace VoucherApi.Infrastructure.Repositories
                 {
                     return new Response(false, "The gift can't not found");
                 }
-                if (entity.GiftCode != null)
+
+                // Check for duplicate gift code only if a code is provided
+                if (!string.IsNullOrEmpty(entity.GiftCode))
                 {
-                    var existingGiftCode = await context.Gifts.Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus && g.GiftId != entity.GiftId).FirstOrDefaultAsync();
+                    var existingGiftCode = await context.Gifts
+                        .Where(g => g.GiftCode == entity.GiftCode && !g.GiftStatus && g.GiftId != entity.GiftId)
+                        .FirstOrDefaultAsync();
+
                     if (existingGiftCode != null)
                     {
                         return new Response(false, $"{entity.GiftCode} already exist!");
                     }
                 }
-                 if(entity.GiftCode.IsNullOrEmpty())
-                {
-                    entity.GiftCode = "";
-                }
+
                 existingGift.GiftName = entity.GiftName;
                 existingGift.GiftDescription = entity.GiftDescription;
                 existingGift.GiftImage = entity.GiftImage;
@@ -171,7 +173,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 existingGift.GiftCode = entity.GiftCode;
                 existingGift.GiftQuantity = entity.GiftQuantity;
                 existingGift.GiftStatus = entity.GiftStatus;
-                
+
                 context.Entry(existingGift).State = EntityState.Modified;
                 await context.SaveChangesAsync();
                 return new Response(true, " The gift is updated successfully");

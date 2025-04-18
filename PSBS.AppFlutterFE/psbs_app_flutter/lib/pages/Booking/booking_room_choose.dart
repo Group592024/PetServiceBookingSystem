@@ -188,47 +188,50 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
   }
 
   void calculatePrice() {
-    if (selectedRoomType == null || 
-        formData["start"].isEmpty || 
-        formData["end"].isEmpty) {
+  if (selectedRoomType == null || 
+      formData["start"].isEmpty || 
+      formData["end"].isEmpty) {
+    return;
+  }
+
+  try {
+    final startDate = DateTime.parse(formData["start"]);
+    final endDate = DateTime.parse(formData["end"]);
+
+    if (!startDate.isBefore(endDate)) {
+      setState(() => error = "End date must be after start date");
       return;
     }
 
-    try {
-      final startDate = DateTime.parse(formData["start"]);
-      final endDate = DateTime.parse(formData["end"]);
+    // Truncate time part
+    final startDay = DateTime(startDate.year, startDate.month, startDate.day);
+    final endDay = DateTime(endDate.year, endDate.month, endDate.day);
 
-      if (startDate.isAfter(endDate)) {
-        setState(() => error = "End date must be after start date");
-        return;
-      }
+    final daysDifference = endDay.difference(startDay).inDays + 1;
 
-      final difference = endDate.difference(startDate);
-      final daysDifference = difference.inHours > 0 
-          ? (difference.inHours / 24).ceil()
-          : 1;
+    final roomPrice = double.tryParse(selectedRoomType!["price"].toString()) ?? 0.0;
+    var totalPrice = roomPrice * daysDifference;
 
-      final roomPrice = double.tryParse(selectedRoomType!["price"].toString()) ?? 0.0;
-      var totalPrice = roomPrice * daysDifference;
-
-      if (formData["camera"] == true) {
-        totalPrice += 50000;
-      }
-
-      setState(() {
-        formData["price"] = totalPrice.toStringAsFixed(0);
-        error = null;
-      });
-
-      widget.onBookingDataChange({
-        ...formData,
-        "price": totalPrice,
-      });
-    } catch (e) {
-      print('Error calculating price: $e');
-      setState(() => error = "Error calculating price");
+    if (formData["camera"] == true) {
+      totalPrice += 50000;
     }
+
+    setState(() {
+      formData["price"] = totalPrice.toStringAsFixed(0);
+      error = null;
+    });
+
+    widget.onBookingDataChange({
+      ...formData,
+      "price": totalPrice,
+    });
+
+  } catch (e) {
+    print('Error calculating price: $e');
+    setState(() => error = "Error calculating price");
   }
+}
+
 
   void handleChange(String field, dynamic value) {
     setState(() {
@@ -424,7 +427,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               subtitle: Text(
-                "+50,000 VND",
+                "+50,000 ₫",
                 style: TextStyle(color: Colors.green.shade700),
               ),
               value: formData["camera"] ?? false,
@@ -480,7 +483,7 @@ class _BookingRoomChooseState extends State<BookingRoomChoose> {
                 ),
                 SizedBox(height: 4),
                 Text(
-                  "${formData["price"]} VND",
+                  "${formData["price"]} ₫",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,

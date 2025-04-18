@@ -209,6 +209,18 @@ const Admin_Add_Booking = () => {
       if (!bookingServicesDate) {
         Swal.fire("Failed!", `Please select a booking date and time`, "error");
         return;
+      } else {
+        const now = new Date();
+        const fiveMinutesLater = new Date(now.getTime() + 5 * 60 * 1000);
+        const selectedDateTime = new Date(bookingServicesDate);
+        if (selectedDateTime < fiveMinutesLater) {
+          Swal.fire(
+            "Failed!",
+            `Booking date must be at least 5 minutes from now.`,
+            "error"
+          );
+          return;
+        }
       }
     }
 

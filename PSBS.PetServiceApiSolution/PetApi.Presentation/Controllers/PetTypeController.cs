@@ -92,6 +92,12 @@ namespace PetApi.Presentation.Controllers
                 return BadRequest(new Response(false, "The uploaded file failed"));
             }
 
+            var existingVariant = await petInterface.GetByAsync(x => x.PetType_Name.ToLower().Trim().Equals(pet.PetType_Name.ToLower().Trim()));
+            if (existingVariant != null)
+            {
+                return Conflict(new Response(false, $"Pet type with name {existingVariant.PetType_Name} is already existed"));
+            }
+
             var getEntity = PetTypeConversion.ToEntity(pet, imagePath);
 
             var response = await petInterface.CreateAsync(getEntity);
