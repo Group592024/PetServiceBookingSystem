@@ -115,7 +115,7 @@ const Login = () => {
             decodedToken[
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
-            sessionStorage.setItem("role", role);
+          sessionStorage.setItem("role", role);
 
           Swal.fire({
             icon: "success",

@@ -49,7 +49,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
 
   String formatDate(String dateString) {
     DateTime dateTime = DateTime.parse(dateString);
-    return DateFormat('yyyy-MM-dd HH:mm').format(dateTime);
+    return DateFormat('dd MMM yyyy, HH:mm').format(dateTime);
   }
 
   Future<void> getBookingTypeName(String bookingTypeId) async {
@@ -120,18 +120,10 @@ class _BookingListScreenState extends State<BookingListScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.red),
+                    Icon(Icons.calendar_today, size: 48, color: Colors.blue),
                     SizedBox(height: 16),
-                    Text('Failed to load bookings', 
-                      style: TextStyle(fontSize: 18, color: Colors.red)),
-                    SizedBox(height: 8),
-                    Text('${snapshot.error}', 
-                      style: TextStyle(color: Colors.grey[600])),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _handleRefresh,
-                      child: Text('Retry'),
-                    ),
+                    Text('No bookings yet', 
+                      style: TextStyle(fontSize: 18, color: Colors.grey[800])),
                   ],
                 ),
               );
@@ -229,7 +221,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
                         ),
                         SizedBox(width: 4),
                         Text(
-                          booking.isPaid ? 'Paid' : 'Pending',
+                          booking.isPaid ? 'Paid' : 'Unpaid',
                           style: TextStyle(
                             color: booking.isPaid ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold,
@@ -274,7 +266,7 @@ class _BookingListScreenState extends State<BookingListScreen> {
                     ),
                   ),
                   Text(
-                    '${booking.totalAmount.toStringAsFixed(2)} ₫',
+                    "${NumberFormat.currency(locale: 'vi_VN', symbol: '₫').format(booking.totalAmount ?? 0)}",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

@@ -10,6 +10,8 @@ import 'package:intl/intl.dart';
 import 'vnpay_webview.dart';
 import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
 class AddBookingPage extends StatefulWidget {
   @override
@@ -41,6 +43,11 @@ class _AddBookingPageState extends State<AddBookingPage> {
   String _voucherSearchCode = '';
   bool _searchLoading = false;
   String _searchError = '';
+  final _currencyFormatter = NumberFormat.currency(
+  locale: 'vi_VN',
+  symbol: '₫',
+  decimalDigits: 0,
+);
 
   @override
   void initState() {
@@ -616,18 +623,21 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
   }
 
   StepState _getStepState(int step) {
-    if (_currentStep > step) {
-      return StepState.complete;
-    } else if (_currentStep == step) {
-      return StepState.editing;
-    }
-    return StepState.indexed;
+  if (_currentStep > step) {
+    return StepState.complete;
+  } else if (_currentStep == step) {
+    return StepState.editing;
+  } else if (step == _currentStep + 1) {
+    return StepState.indexed; // Next step
   }
+  return StepState.disabled; // Future steps
+}
+
 
   List<Step> _getSteps() {
     return [
       Step(
-        title: Text("Choose Booking Type"),
+        title: Text("Type", style: TextStyle(fontSize: 10)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -645,9 +655,10 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
           ],
         ),
         isActive: _currentStep >= 0,
+        state: _getStepState(0),
       ),
       Step(
-        title: Text("Booking Details"),
+        title: Text("Details", style: TextStyle(fontSize: 10)),
         content: Column(
           children: [
             _serviceType == "Room"
@@ -664,9 +675,10 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
           ],
         ),
         isActive: _currentStep >= 1,
+        state: _getStepState(1),
       ),
       Step(
-        title: Text("Choose Voucher"),
+        title: Text("Voucher", style: TextStyle(fontSize: 10)),
         content: Column(
           children: [
             // Voucher Search Section
@@ -745,7 +757,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
         state: _getStepState(2),
       ),
       Step(
-        title: Text("Choose Payment Type"),
+         title: Text("Payment", style: TextStyle(fontSize: 10)),
         content: _paymentTypes.isEmpty
             ? CircularProgressIndicator()
             : Column(
@@ -762,17 +774,11 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                   );
                 }).toList(),
               ),
-        isActive: _currentStep >= 2,
+        isActive: _currentStep >= 3,
+      state: _getStepState(3),
       ),
       Step(
-        title: Text(
-          "Booking Summary",
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue.shade800,
-          ),
-        ),
+        title: Text("Summary", style: TextStyle(fontSize: 10)),
         content: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -838,7 +844,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                           _buildDetailRow(
                             icon: Icons.attach_money,
                             label: "Room Price",
-                            value: "${room["price"]} ₫",
+                            value: _currencyFormatter.format(room["price"]),
                             valueStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green.shade700,
@@ -856,7 +862,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                   )),
               _buildPriceRow(
                 label: "Subtotal",
-                value: "${_calculateSubtotal()} ₫",
+                value: _currencyFormatter.format(_calculateSubtotal()),
               ),
               if (_selectedVoucher != null) ...[
                 SizedBox(height: 8),
@@ -870,14 +876,14 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                 ),
                 _buildPriceRow(
                   label: "Discount",
-                  value: "${_calculateDiscount()} ₫",
+                  value: _currencyFormatter.format(_calculateDiscount()),
                   isDiscount: true,
                 ),
               ],
               Divider(thickness: 2, height: 24),
               _buildPriceRow(
                 label: "Final Total",
-                value: "$_totalPrice ₫",
+                value: _currencyFormatter.format(_totalPrice),
                 isTotal: true,
               ),
             ] else ...[
@@ -908,7 +914,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                             icon: Icons.attach_money,
                             label: "Price",
                             value:
-                                "${service["serviceVariant"]?["price"] ?? "0"} ₫",
+                                _currencyFormatter.format(service["serviceVariant"]?["price"] ?? 0),
                             valueStyle: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green.shade700,
@@ -918,7 +924,14 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                             icon: Icons.pets,
                             label: "Pet",
                             value: service["pet"]?["name"] ?? "Unknown Pet",
-                          ),
+                          ),_buildDetailRow(
+          icon: Icons.calendar_today,
+          label: "Booking Date",
+          value: _formatDate(service["bookingDate"] ?? ""),
+          valueStyle: TextStyle(
+            color: Colors.blue.shade700,
+          ),
+        ),
                           Divider(height: 20),
                         ],
                       ),
@@ -926,7 +939,7 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
                   )),
               _buildPriceRow(
                 label: "Total Price",
-                value: "$_totalPrice ₫",
+                value: _currencyFormatter.format(_totalPrice),
               ),
             ],
             SizedBox(height: 16),
@@ -948,7 +961,8 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
             ),
           ],
         ),
-        isActive: _currentStep >= 3,
+        isActive: _currentStep >= 4,
+      state: _getStepState(4),
       ),
     ];
   }
@@ -981,44 +995,46 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
   }
 
   Widget _buildPriceRow({
-    required String label,
-    required String value,
-    bool isDiscount = false,
-    bool isTotal = false,
-  }) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      margin: EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: isTotal ? Colors.blue.shade50 : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isDiscount ? Colors.red.shade700 : Colors.grey.shade800,
-            ),
+  required String label,
+  required String value,
+  bool isDiscount = false,
+  bool isTotal = false,
+}) {
+  return Container(
+    padding: EdgeInsets.all(12),
+    margin: EdgeInsets.symmetric(vertical: 4),
+    decoration: BoxDecoration(
+      color: isTotal ? Colors.blue.shade50 : Colors.grey.shade50,
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDiscount ? Colors.red.shade700 : Colors.grey.shade800,
           ),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isTotal ? 16 : 14,
-              color: isDiscount
-                  ? Colors.red.shade700
-                  : isTotal
-                      ? Colors.blue.shade800
-                      : Colors.green.shade700,
-            ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: isTotal ? 16 : 14,
+            color: isDiscount
+                ? Colors.red.shade700
+                : isTotal
+                    ? Colors.blue.shade800
+                    : Colors.green.shade700,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   String _formatDate(String dateString) {
     try {
@@ -1056,17 +1072,21 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
   }
 
   void _onStepContinue() {
-    // Step 0 validation - must choose service type
-    if (_currentStep == 0 && _serviceType.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a booking type')),
-      );
-      return;
-    }
+  // Step 0 validation - must choose service type
+  if (_currentStep == 0 && _serviceType.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please select a booking type'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    return;
+  }
 
-    // Step 1 validation - must have valid booking data
-    if (_currentStep == 1) {
-      if (_serviceType == "Room") {
+  // Step 1 validation - must have valid booking data
+  if (_currentStep == 1) {
+    if (_serviceType == "Room") {
       if (_bookingRoomData.isEmpty ||
           _bookingRoomData.any((room) =>
               room["room"] == null ||
@@ -1076,108 +1096,242 @@ Future<http.Response> _secureGet(String url, Map<String, String> headers) async 
               DateTime.parse(room["start"]).isAfter(DateTime.parse(room["end"])))) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text(
-                  'Please complete all booking room information, including valid start and end dates')),
+            content: Text('Please complete all booking room information, including valid start and end dates'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
         );
         return;
       }
     } else if (_serviceType == "Service" && _bookingServiceData.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please add at least one service booking')),
-        );
-        return;
-      }
-    }
-
-    // Step 3 validation - must select payment type
-    if (_currentStep == 3 && _selectedPaymentType == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select a payment method')),
+        SnackBar(
+          content: Text('Please add at least one service booking'),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
       );
       return;
     }
+  }
 
-    if (_currentStep < _getSteps().length - 1) {
-      setState(() => _currentStep += 1);
-    } else {
-      if (_serviceType == "Room") {
-        _sendRoomBookingRequest();
-      } else if (_serviceType == "Service") {
-        _sendServiceBookingRequest();
+  // Step 3 validation - must select payment type
+  if (_currentStep == 3 && _selectedPaymentType == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Please select a payment method'),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+    return;
+  }
+
+  if (_currentStep < _getSteps().length - 1) {
+    // Add haptic feedback
+    HapticFeedback.selectionClick();
+    
+    // Smooth transition to next step
+    setState(() {
+      _currentStep += 1;
+    });
+    
+    // Scroll to top of the new step content
+    Timer(Duration(milliseconds: 300), () {
+      if (mounted) {
+        Scrollable.ensureVisible(
+          context,
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       }
+    });
+  } else {
+    if (_serviceType == "Room") {
+      _sendRoomBookingRequest();
+    } else if (_serviceType == "Service") {
+      _sendServiceBookingRequest();
     }
   }
+}
 
-  void _onStepCancel() {
-    if (_currentStep > 0) {
-      setState(() => _currentStep -= 1);
-    } else {
-      Navigator.pop(context);
-    }
+void _onStepCancel() {
+  // Add haptic feedback
+  HapticFeedback.selectionClick();
+  
+  if (_currentStep > 0) {
+    setState(() => _currentStep -= 1);
+  } else {
+    Navigator.pop(context);
   }
+}
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Add Booking")),
-      body: Stepper(
-        steps: _getSteps(),
-        currentStep: _currentStep,
-        onStepContinue: _isProcessing ? null : _onStepContinue,
-        onStepCancel: _isProcessing ? null : _onStepCancel,
-        controlsBuilder: (BuildContext context, ControlsDetails details) {
-          bool isNextDisabled = false;
-
-          // Disable next button based on current step
-          if (_currentStep == 0 && _serviceType.isEmpty) {
-            isNextDisabled = true;
-          } else if (_currentStep == 1) {
-            if (_serviceType == "Room" &&
-                (_bookingRoomData.isEmpty ||
-                    _bookingRoomData.any((room) =>
-                        room["room"] == null ||
-                        room["pet"] == null ||
-                        room["start"] == null ||
-                        room["end"] == null))) {
-              isNextDisabled = true;
-            } else if (_serviceType == "Service" &&
-                _bookingServiceData.isEmpty) {
-              isNextDisabled = true;
-            }
-          } else if (_currentStep == 3 && _selectedPaymentType == null) {
-            isNextDisabled = true;
-          }
-
-          return Padding(
-            padding: const EdgeInsets.only(top: 16.0),
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: Text("Add Booking"),
+      backgroundColor: Colors.blue,
+    ),
+    body: SafeArea(
+      child: Column(
+        children: [
+          // Progress indicator
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: LinearProgressIndicator(
+              value: (_currentStep + 1) / _getSteps().length,
+              backgroundColor: Colors.blue.shade100,
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+              minHeight: 6,
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+          
+          // Custom step indicator
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                if (_currentStep != 0)
-                  TextButton(
-                    onPressed: _isProcessing ? null : details.onStepCancel,
-                    child: Text('Back'),
-                  ),
-                SizedBox(width: 12),
-                ElevatedButton(
-                  onPressed: _isProcessing || isNextDisabled
-                      ? null
-                      : details.onStepContinue,
+                _buildStepIndicator(0, "Type", Icons.category),
+                _buildStepIndicator(1, "Details", Icons.description),
+                _buildStepIndicator(2, "Voucher", Icons.card_giftcard),
+                _buildStepIndicator(3, "Payment", Icons.payment),
+                _buildStepIndicator(4, "Summary", Icons.summarize),
+              ],
+            ),
+          ),
+          
+          // Stepper content area (without the stepper navigation)
+          Expanded(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _getSteps()[_currentStep].content,
+              ),
+            ),
+          ),
+          
+          // Navigation buttons
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (_currentStep > 0)
+                  ElevatedButton.icon(
+                    onPressed: _isProcessing ? null : _onStepCancel,
+                    icon: Icon(Icons.arrow_back),
+                    label: Text('Back'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.black87,
+                      elevation: 2,
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                  )
+                else
+                  SizedBox.shrink(),
+                
+                ElevatedButton.icon(
+                  onPressed: _isProcessing ? null : _onStepContinue,
+                  icon: _isProcessing 
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : Icon(_currentStep == _getSteps().length - 1
+                          ? Icons.check
+                          : Icons.arrow_forward),
+                  label: Text(_currentStep == _getSteps().length - 1
+                      ? 'Submit'
+                      : 'Next'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isNextDisabled ? Colors.grey : null,
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                   ),
-                  child: _isProcessing
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text(_currentStep == _getSteps().length - 1
-                          ? 'Submit'
-                          : 'Next'),
                 ),
               ],
             ),
-          );
-        },
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildStepIndicator(int step, String title, IconData icon) {
+  bool isActive = _currentStep >= step;
+  bool isCurrent = _currentStep == step;
+  
+  return GestureDetector(
+    onTap: () {
+      // Only allow going back to previous steps
+      if (_currentStep > step) {
+        setState(() {
+          _currentStep = step;
+        });
+      }
+    },
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isCurrent 
+                ? Colors.blue 
+                : isActive 
+                    ? Colors.blue.shade100 
+                    : Colors.grey.shade200,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isCurrent 
+                  ? Colors.blue.shade700 
+                  : isActive 
+                      ? Colors.blue.shade300 
+                      : Colors.grey.shade400,
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              icon,
+              color: isCurrent 
+                  ? Colors.white 
+                  : isActive 
+                      ? Colors.blue.shade700 
+                      : Colors.grey.shade600,
+              size: 20,
+            ),
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
+            color: isCurrent 
+                ? Colors.blue.shade700 
+                : isActive 
+                    ? Colors.blue.shade900 
+                    : Colors.grey.shade600,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 
   double _calculateSubtotal() {
     if (_serviceType == "Room") {

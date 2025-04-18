@@ -115,7 +115,9 @@ class _GiftDetailPageState extends State<GiftDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Gift Details')),
+      appBar: AppBar(title: const Text('Gift Details'),
+        backgroundColor: Colors.blue,
+        ),
       body: Center(
         child: isLoading
             ? const CircularProgressIndicator()

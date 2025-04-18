@@ -336,7 +336,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
   String formatDate(String dateString) {
     try {
       DateTime date = DateTime.parse(dateString);
-      return DateFormat('dd MMM yyyy, hh:mm a').format(date);
+      return DateFormat('dd MMM yyyy, HH:mm').format(date);
     } catch (e) {
       return "Invalid date";
     }

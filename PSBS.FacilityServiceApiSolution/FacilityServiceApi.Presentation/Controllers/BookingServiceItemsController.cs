@@ -26,16 +26,7 @@ namespace FacilityServiceApi.Presentation.Controllers
             _context = context;
             bookingServiceItemInterface = _bookingServiceItemInterface;
         }
-        // GET: api/<BookingServiceItemsController>
-       
-        [HttpGet]
-        [Authorize(Policy = "AdminOrStaff")]
-        public IEnumerable<string> Get()
-        {
-           return new string[] { "value1", "value2" };
-        }
-
-
+        
         // GET api/<BookingServiceItemsController>/5
         [HttpGet("{id}")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
@@ -95,18 +86,18 @@ namespace FacilityServiceApi.Presentation.Controllers
                 Data = responseData
             });
         }
-        // PUT api/<BookingServiceItemsController>/5
-        [HttpPut("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
+        //// PUT api/<BookingServiceItemsController>/5
+        //[HttpPut("{id}")]
+        //[Authorize(Policy = "AdminOrStaff")]
+        //public void Put(int id, [FromBody] string value)
+        //{
+        //}
 
-        // DELETE api/<BookingServiceItemsController>/5
-        [HttpDelete("{id}")]
-        [Authorize(Policy = "AdminOrStaff")]
-        public void Delete(int id)
-        {
-        }
+        //// DELETE api/<BookingServiceItemsController>/5
+        //[HttpDelete("{id}")]
+        //[Authorize(Policy = "AdminOrStaff")]
+        //public void Delete(int id)
+        //{
+        //}
     }
 }
