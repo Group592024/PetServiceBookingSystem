@@ -4,8 +4,10 @@ import Datatable from "../services/Datatable";
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import formatCurrency from "../../Utilities/formatCurrency.js";
+import { useNavigate } from 'react-router-dom';
 
 const ReportAccountAmount = () => {
+  const navigate = useNavigate();
   const [dtos, setDtos] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,6 +91,10 @@ const ReportAccountAmount = () => {
       accountId: dto.accountId,
       accountName: accountMap.get(dto.accountId) || "Unknown",
       totalAmount: dto.totalAmount,
+      bookings: dto.bookings,
+      completedBookings: dto.completedBookings,
+      cancelBookings: dto.cancelBookings
+
     }));
 
     // Calculate total revenue
@@ -102,9 +108,13 @@ const ReportAccountAmount = () => {
   const topSpender =
     data.length > 0
       ? data.reduce((prev, current) =>
-          prev.totalAmount > current.totalAmount ? prev : current
-        )
+        prev.totalAmount > current.totalAmount ? prev : current
+      )
       : null;
+
+  const handleViewCustomerDetails = (accountId) => {
+    navigate(`/profile/${accountId}`);
+  };
 
   const columns = [
     {
@@ -137,17 +147,93 @@ const ReportAccountAmount = () => {
       headerAlign: "center",
       renderCell: (params) => (
         <div
-          className={`flex items-center gap-1 px-3 ${
-            params.value > 1000
-              ? "text-green-700 border-green-500 bg-green-50"
-              : "text-blue-700 border-blue-500 bg-blue-50"
-          }`}
+          className={`flex items-center gap-1 px-3 ${params.value > 1000000
+            ? "text-green-700 border-green-500 bg-green-50"
+            : "text-blue-700 border-blue-500 bg-blue-50"
+            }`}
         >
           <AccountBalanceWalletIcon fontSize="small" />
           <span>{formatCurrency(params.value)}</span>
         </div>
       ),
     },
+    {
+      field: "bookings",
+      headerName: "Total Bookings",
+      flex: 1,
+      minWidth: 200,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <div className="flex items-center justify-center gap-2 px-3 py-1.5  bg-blue-50 text-blue-700 font-medium shadow-sm border border-blue-200">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>{params.value}</span>
+        </div>
+      ),
+    },
+    {
+      field: "completedBookings",
+      headerName: "Completed Bookings",
+      flex: 1,
+      minWidth: 200,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <div className={`flex items-center justify-center gap-2 px-3 py-1.5 font-medium shadow-sm transition-all ${params.value >= 3
+          ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
+          : "bg-gray-50 text-gray-600 border border-gray-200"
+          }`}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          <span>{params.value}</span>
+
+        </div>
+      ),
+    },
+    {
+      field: "cancelBookings",
+      headerName: "Canceled Bookings",
+      flex: 1,
+      minWidth: 200,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => (
+        <div className={`flex items-center justify-center gap-2 px-3 py-1.5 font-medium shadow-sm transition-all ${params.value >= 3
+          ? "bg-red-100 text-red-700 border border-red-300"
+          : "bg-gray-50 text-gray-600 border border-gray-200"
+          }`}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          <span>{params.value}</span>
+
+        </div>
+      ),
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => (
+        <button
+          onClick={() => handleViewCustomerDetails(params.row.accountId)}
+          className="flex items-center justify-center gap-1.5 px-2 bg-gradient-to-r from-blue-500 to-blue-300 font-medium rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 active:scale-95"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg>
+          <span>View Account</span>
+        </button>
+      ),
+    }
   ];
 
   const getTimeRangeText = () => {

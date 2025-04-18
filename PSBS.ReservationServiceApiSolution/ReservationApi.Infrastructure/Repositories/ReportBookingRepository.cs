@@ -13,7 +13,7 @@ namespace ReservationApi.Infrastructure.Repositories
         public async Task<IEnumerable<AccountAmountDTO>> GetIncomeEachCustomer(
      int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
-            var bookingServiceItemsQuery = context.Bookings.Where(p => p.isPaid == true).AsQueryable();
+            var bookingServiceItemsQuery = context.Bookings.AsQueryable();
 
             // Filter by date range or month/year
             if (startDate.HasValue && endDate.HasValue)
@@ -38,7 +38,10 @@ namespace ReservationApi.Infrastructure.Repositories
                 .Select(g => new AccountAmountDTO
                 (
                     g.Key,
-                    g.Sum(x => x.TotalAmount)
+                    g.Sum(x => x.TotalAmount),
+                    g.Count(),
+                    g.Count(a => a.BookingStatus.BookingStatusName.ToString() == "Completed"),
+                    g.Count(a => a.BookingStatus.BookingStatusName.ToString() == "Cancelled")
                 ))
                 .ToListAsync();
 
