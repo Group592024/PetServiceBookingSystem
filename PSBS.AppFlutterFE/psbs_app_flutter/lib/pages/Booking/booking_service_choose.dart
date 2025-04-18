@@ -28,6 +28,11 @@ class BookingServiceChoice extends StatefulWidget {
 
 class _BookingServiceChoiceState extends State<BookingServiceChoice> {
   String _error = "";
+  final _currencyFormatter = NumberFormat.currency(
+  locale: 'vi_VN',
+  symbol: '₫',
+  decimalDigits: 0,
+);
 
   void _updateVariant(int index, ServiceVariant newVariant) {
     print('=== BookingServiceChoice: _updateVariant ===');
@@ -158,27 +163,27 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12),
                         child: DropdownButtonFormField<ServiceVariant>(
-                          isExpanded: true,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintText: "Select variant",
-                          ),
-                          value: choice.serviceVariant,
-                          items: choice.variants.map((variant) {
-                            return DropdownMenuItem<ServiceVariant>(
-                              value: variant,
-                              child: Text(
-                                "${variant.content} - ${variant.price} VND",
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (ServiceVariant? value) {
-                            if (value != null) {
-                              _updateVariant(index, value);
-                            }
-                          },
-                        ),
+  isExpanded: true,
+  decoration: InputDecoration(
+    border: InputBorder.none,
+    hintText: "Select variant",
+  ),
+  value: choice.serviceVariant,
+  items: choice.variants.map((variant) {
+    return DropdownMenuItem<ServiceVariant>(
+      value: variant,
+      child: Text(
+        "${variant.content} - ${_currencyFormatter.format(variant.price)}",
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }).toList(),
+  onChanged: (ServiceVariant? value) {
+    if (value != null) {
+      _updateVariant(index, value);
+    }
+  },
+),
                       ),
                     ),
                     SizedBox(height: 20),
@@ -186,32 +191,32 @@ class _BookingServiceChoiceState extends State<BookingServiceChoice> {
 
                   // Price Display
                   Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.green.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Total Price:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green.shade800,
-                          ),
-                        ),
-                        Text(
-                          "${choice.price.toStringAsFixed(2)} VND",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade800,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+  padding: EdgeInsets.all(12),
+  decoration: BoxDecoration(
+    color: Colors.green.shade50,
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        "Total Price:",
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.green.shade800,
+        ),
+      ),
+      Text(
+        _currencyFormatter.format(choice.price),
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Colors.green.shade800,
+        ),
+      ),
+    ],
+  ),
+),
                 ],
               ),
             ),
