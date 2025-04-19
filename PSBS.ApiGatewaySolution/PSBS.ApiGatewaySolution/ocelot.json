@@ -574,6 +574,30 @@
       //   "AllowedScopes": []
       // }
     },
+    // {
+    //   "DownstreamPathTemplate": "/api/VNPay/{everything}",
+    //   "DownstreamScheme": "https",
+    //   "DownstreamHostAndPorts": [
+    //     {
+    //       "Host": "localhost",
+    //       "Port": 5201
+    //     }
+    //   ],
+    //   "UpstreamPathTemplate": "/api/VNPay/{everything}",
+    //   "UpstreamHttpMethod": ["GET", "POST"]
+    // },
+    // {
+    //   "DownstreamPathTemplate": "/api/VNPay/Callback",
+    //   "DownstreamScheme": "https",
+    //   "DownstreamHostAndPorts": [
+    //     {
+    //       "Host": "localhost",
+    //       "Port": 5201 // Port of your Reservation/Payment service
+    //     }
+    //   ],
+    //   "UpstreamPathTemplate": "/api/VNPay/Callback",
+    //   "UpstreamHttpMethod": ["GET"]
+    // },
     {
       // Booking Status API
       "DownstreamPathTemplate": "/api/BookingStatus/{everything}",

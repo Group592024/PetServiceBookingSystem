@@ -104,7 +104,7 @@ const CustomerServiceBookingDetail = () => {
     const fetchBookingDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `http://localhost:5115/Bookings/${bookingId}`,
+          `http://localhost:5050/Bookings/${bookingId}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -205,7 +205,7 @@ const CustomerServiceBookingDetail = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(
-            `http://localhost:5115/Bookings/cancel/${bookingId}`,
+            `http://localhost:5050/Bookings/cancel/${bookingId}`,
             {},
             {
               headers: {
@@ -258,9 +258,9 @@ const CustomerServiceBookingDetail = () => {
         redirectPath: currentPath
       });
 
-      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+      const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
-      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
       console.log("VNPay URL:", vnpayUrl);
 
@@ -283,6 +283,48 @@ const CustomerServiceBookingDetail = () => {
     } catch (error) {
       console.error("Payment error:", error);
       showErrorAlert("An error occurred while processing payment!");
+    }
+  };
+
+  const formatBookingNotes = (notes) => {
+    if (!notes) return "No notes";
+
+    // Replace any existing line breaks with spaces to normalize the text first
+    let normalizedNotes = notes.replace(/\n/g, ' ').trim();
+
+    // Check if the note already has timestamps (Type 2)
+    if (normalizedNotes.startsWith('[')) {
+      // Type 2: Format timestamped notes
+      // First, ensure consistent spacing around timestamps
+      normalizedNotes = normalizedNotes.replace(/\s*\[/g, ' [').trim();
+      // Then replace timestamps with line breaks before them
+      return normalizedNotes.replace(/\s+\[/g, '\n[');
+    } else {
+      // Type 1: Original note followed by timestamped notes
+      const timestampPattern = /\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]/;
+
+      // Find the first timestamp
+      const firstTimestampIndex = normalizedNotes.search(timestampPattern);
+
+      if (firstTimestampIndex !== -1) {
+        // Extract the original note (everything before the first timestamp)
+        const originalNote = normalizedNotes.substring(0, firstTimestampIndex).trim();
+
+        // Extract the part with timestamps
+        const timestampedPart = normalizedNotes.substring(firstTimestampIndex);
+
+        // Format the timestamped part with line breaks
+        const formattedTimestampedPart = timestampedPart
+          .replace(/\s*\[/g, ' [')  // Ensure consistent spacing
+          .trim()
+          .replace(/\s+\[/g, '\n['); // Add line breaks before timestamps
+
+        // Combine original note with formatted timestamped part
+        return originalNote + '\n' + formattedTimestampedPart;
+      }
+
+      // If no timestamps found, just return the original note
+      return normalizedNotes;
     }
   };
 
@@ -374,16 +416,17 @@ const CustomerServiceBookingDetail = () => {
                       month: '2-digit',
                       year: 'numeric',
                       hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: true
+                      minute: '2-digit'
                     }).replace(',', '')}
                   </span>
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Notes:</span>{" "}
-                  <span className="text-gray-800">{booking.notes || "No notes"}</span>
+                  <span className="text-gray-800 whitespace-pre-line">
+                    {formatBookingNotes(booking.notes)}
+                  </span>
                 </p>
-                <p className="text-lg mt-2">
+                <p className="text-lg mt-2" >
                   <span className="font-semibold text-gray-700">Payment Status:</span>{" "}
                   <span id="paidStatus" className={`px-3 py-1 rounded-full text-sm font-semibold ${booking.isPaid ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
                     }`}>

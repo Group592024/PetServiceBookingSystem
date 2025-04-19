@@ -410,7 +410,7 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
       // Use the secure get method
       final response = await _secureGet(
-        'https://10.0.2.2:5201/Bookings/CreatePaymentUrl?'
+        'https://10.0.2.2:5201/api/VNPay/CreatePaymentUrl?'
         'moneyToPay=${booking!['totalAmount']}&'
         'description=${Uri.encodeComponent(description)}',
         {
@@ -433,12 +433,17 @@ class _CustomerRoomBookingDetailState extends State<CustomerRoomBookingDetail> {
 
         // Try to open the URL in WebView first (more reliable)
         if (mounted) {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => VNPayWebView(url: vnpayUrl),
-            ),
-          );
+         final result = await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VNPayWebView(url: vnpayUrl),
+          ),
+        );
+        // If we get a result back, we can handle it here
+        if (result == true) {
+          // Payment was successful, navigate back to booking list
+          Navigator.pop(context, true);
+        }
 
           // Refresh the booking details after payment
           fetchBookingDetails();
