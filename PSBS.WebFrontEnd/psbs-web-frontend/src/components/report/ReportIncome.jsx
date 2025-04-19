@@ -86,7 +86,7 @@ const ReportIncome = () => {
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
         </div>
-      ) : data.length === 0 ? (
+      ) : total.total === 0 ? (
         <div className="flex justify-center items-center py-16 bg-gray-800 bg-opacity-50 rounded-lg">
           <p className="text-xl text-gray-300 italic">
             No data available for this period
@@ -259,14 +259,14 @@ const ReportIncome = () => {
                       fill="none"
                       stroke="#f87171"
                       strokeWidth="3"
-                      strokeDasharray={`${
-                        (total.roomTotal / total.total) * 100
-                      }, 100`}
+                      strokeDasharray={`${(total.roomTotal / total.total) * 100
+                        }, 100`}
                     />
                   </svg>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                     <div className="text-xl font-bold text-white">
-                      {Math.round((total.roomTotal / total.total) * 100)}%
+                      {total.roomTotal > 0 ? Math.round((total.roomTotal / total.total) * 100) : 0}%
+
                     </div>
                     <div className="text-xs text-white opacity-70">Room</div>
                   </div>
@@ -287,14 +287,13 @@ const ReportIncome = () => {
                       fill="none"
                       stroke="#4ade80"
                       strokeWidth="3"
-                      strokeDasharray={`${
-                        (total.serviceTotal / total.total) * 100
-                      }, 100`}
+                      strokeDasharray={`${(total.serviceTotal / total.total) * 100
+                        }, 100`}
                     />
                   </svg>
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
                     <div className="text-xl font-bold text-white">
-                      {Math.round((total.serviceTotal / total.total) * 100)}%
+                      {total.serviceTotal > 0 ? Math.round((total.serviceTotal / total.total) * 100) : 0}%
                     </div>
                     <div className="text-xs text-white opacity-70">Service</div>
                   </div>

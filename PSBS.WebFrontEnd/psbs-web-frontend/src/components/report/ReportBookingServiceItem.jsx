@@ -31,7 +31,6 @@ const ReportBookingServiceItem = () => {
       if (!fetchData.ok) {
         throw new Error(`HTTP error! Status: ${fetchData.status}`);
       }
-
       const response = await fetchData.json();
 
       const result = response.data.map((item) => ({
@@ -43,6 +42,10 @@ const ReportBookingServiceItem = () => {
       setData(result);
     } catch (error) {
       console.error("Error fetching data: ", error);
+      if (error.toString().includes("404")) {
+        setData([]);
+        return;
+      }
       setError(error.message || "Failed to fetch data");
     } finally {
       setIsLoading(false);
@@ -209,9 +212,8 @@ const ReportBookingServiceItem = () => {
                                   className="h-2.5 rounded-full"
                                   style={{
                                     width: `${percentage}%`,
-                                    backgroundColor: `hsl(${
-                                      index * 30
-                                    }, 70%, 60%)`,
+                                    backgroundColor: `hsl(${index * 30
+                                      }, 70%, 60%)`,
                                   }}
                                 ></div>
                               </div>
