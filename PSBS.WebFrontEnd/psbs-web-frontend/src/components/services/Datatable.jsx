@@ -71,6 +71,7 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 const Datatable = ({
   columns,
   data,
+  isAdmin = true,
   pageSize = 5,
   pageSizeOptions = [5, 10, 15, 25],
   onView,
@@ -119,7 +120,7 @@ const Datatable = ({
               </IconButton>
             </Tooltip>
           )}
-          {onEdit && (
+          {onEdit && isAdmin && (
             <Tooltip title="Edit" arrow>
               <IconButton
                 color="success"
@@ -138,7 +139,7 @@ const Datatable = ({
               </IconButton>
             </Tooltip>
           )}
-          {onDelete && (
+          {onDelete && isAdmin && (
             <Tooltip title="Delete" arrow>
               <IconButton
                 color="error"

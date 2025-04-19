@@ -33,5 +33,16 @@ namespace PSPS.AccountAPI.Presentation.Controllers
 
             return Ok(result);
         }
+
+        [HttpGet("countCustomers")]
+        [Authorize(Policy = "AdminOrStaff")]
+        public async Task<ActionResult<List<GetAccountDTO>>> GetAllCustomerAccount()
+        {
+            var result = await account.GetAllCustomerAccounts();
+            if (result == null)
+                return NotFound(new { Message = "No accounts found" });
+
+            return Ok(result);
+        }
     }
 }

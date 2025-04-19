@@ -20,7 +20,7 @@ const ReportAccountAmount = () => {
     try {
       const token = sessionStorage.getItem("token");
       const fetchData = await fetch(
-        "http://localhost:5050/api/ReportAccount/countCustomer",
+        "http://localhost:5050/api/ReportAccount/countCustomers",
         {
           method: "GET",
           headers: {
