@@ -31,7 +31,7 @@ namespace VoucherApi.Presentation.Controllers
 
         }
 
-        // GET: api/<VoucherController>
+         // GET: api/<VoucherController>
         [HttpGet("customer")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchersForCustomer()
@@ -39,13 +39,15 @@ namespace VoucherApi.Presentation.Controllers
             // get all vouchers from repo
             var vouchers = await voucherInteface.GetAllForCustomer();
             if (!vouchers.Any())
-                return NotFound("No vouchers detected in the database");
+                return Ok(new Response(false, "No Voucher detected"){
+                    Data = null
+                });
             // convert data from entity to DTO and return
             var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
             return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
             {
                 Data = list
-            }) : NotFound(new Response(false, "No Voucher detected"));
+            }) : Ok(new Response(false, "No Voucher detected"){Data = null});
 
 
         }

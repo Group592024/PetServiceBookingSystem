@@ -40,13 +40,16 @@ const CustomerVoucherList = () => {
     const fetchBookingStatuses = async () => {
       try {
         const data = await getData("api/Voucher/customer");
-        setRows(data.data);
+        // Check if data.data exists before setting it to rows
+        setRows(data.data || []);
       } catch (error) {
         console.error("Error fetching voucher:", error);
+        setRows([]);
       }
     };
     fetchBookingStatuses();
   }, []);
+
   // Auto-slide effect
   useEffect(() => {
     const interval = setInterval(() => {
@@ -57,6 +60,11 @@ const CustomerVoucherList = () => {
   }, []);
   // Search functionality
   useEffect(() => {
+    if (!rows) {
+      setFilteredRows([]);
+      return;
+    }
+
     if (searchTerm.trim() === "") {
       setFilteredRows(rows);
     } else {
@@ -66,6 +74,7 @@ const CustomerVoucherList = () => {
       setFilteredRows(filtered);
     }
   }, [searchTerm, rows]);
+
   const basePath = "/customer/vouchers/";
   return (
     <div className="bg-blue-50 min-h-screen">

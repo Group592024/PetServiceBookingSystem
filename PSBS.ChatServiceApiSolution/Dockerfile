@@ -36,7 +36,7 @@ WORKDIR /app
 # Use the same path as where the files were published
 COPY --from=build /app/out .
 # Create the images directory
-
+RUN mkdir -p /app/wwwroot
 EXPOSE 5159
 # Fix the DLL name to match the actual built DLL
 ENTRYPOINT ["dotnet", "ChatServiceApi.Presentation.dll"]

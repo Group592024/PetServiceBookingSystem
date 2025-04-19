@@ -15,7 +15,7 @@ const AddUser = ({ signalRService, currentUser, currentList, setClose }) => {
         if (data.flag) {
           const filtered = data.data.filter(
             (user) =>
-              user.accountId !== currentUser.accountId &&
+              user.accountId !== currentUser.accountId && !user.accountIsDeleted &&
               !currentList.some(
                 (chat) =>
                   chat.serveFor === user.accountId && !chat.isSupportRoom

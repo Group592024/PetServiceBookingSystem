@@ -15,7 +15,7 @@ const RoomList = () => {
     const [data, setData] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(true);
-
+    const [userRole, setUserRole] = useState('');
     const fetchRoomTypes = async () => {
         try {
             const token = sessionStorage.getItem("token");
@@ -76,6 +76,8 @@ const RoomList = () => {
     };
 
     useEffect(() => {
+        const role = sessionStorage.getItem("role");
+        setUserRole(role);
         const fetchData = async () => {
             setLoading(true);
             await fetchRoomTypes();
@@ -304,18 +306,22 @@ const RoomList = () => {
                     >
                         <InfoIcon />
                     </IconButton>
-                    <IconButton
-                        color='success'
-                        onClick={() => navigate(`/room/edit/${params.row.id}`)}
-                    >
-                        <EditIcon />
-                    </IconButton>
-                    <IconButton
-                        color='error'
-                        onClick={() => handleDelete(params.row.id)}
-                    >
-                        <DeleteIcon />
-                    </IconButton>
+                    {userRole !== 'staff' && (
+                        <>
+                            <IconButton
+                                color='success'
+                                onClick={() => navigate(`/room/edit/${params.row.id}`)}
+                            >
+                                <EditIcon />
+                            </IconButton>
+                            <IconButton
+                                color='error'
+                                onClick={() => handleDelete(params.row.id)}
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </>
+                    )}
                 </div>
             ),
         },
@@ -331,13 +337,15 @@ const RoomList = () => {
                         {/* Header */}
                         <div className="flex items-center justify-between border-b pb-4 mb-4">
                             <h1 className="text-2xl font-bold text-gray-800">Room List</h1>
-                            <button
-                                className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
-                                onClick={() => navigate('/room/add')}
-                            >
-                                <i className="bx bxs-plus-circle text-lg"></i>
-                                <span>NEW</span>
-                            </button>
+                            {userRole !== 'staff' && (
+                                <button
+                                    className="flex items-center gap-2 px-5 py-2 text-white font-semibold bg-gradient-to-r from-blue-500 to-green-400 rounded-lg shadow-md hover:from-blue-600 hover:to-green-500 transition duration-300"
+                                    onClick={() => navigate('/room/add')}
+                                >
+                                    <i className="bx bxs-plus-circle text-lg"></i>
+                                    <span>NEW</span>
+                                </button>
+                            )}
                         </div>
 
                         {/* Data Grid */}

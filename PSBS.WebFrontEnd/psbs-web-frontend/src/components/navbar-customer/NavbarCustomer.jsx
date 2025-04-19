@@ -625,9 +625,7 @@ const NavbarCustomer = () => {
           <>
             <div className="notifications" onClick={toggleNotificationDropdown}>
               <i className="bx bx-bell"></i>
-              {notificationCount > 0 && (
-                <span className="count">{notificationCount}</span>
-              )}
+
             </div>
 
             <Link to="/chat/customer" className="notifications">
