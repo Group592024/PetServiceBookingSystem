@@ -104,9 +104,7 @@ function App() {
   useEffect(() => {
     signalRService.startConnection("http://localhost:5050/chatHub", userId);
 
-    return () => {
-      signalRService.stopConnection(); // Cleanup
-    };
+
   }, []);
   return (
     <div className="App">
@@ -853,8 +851,8 @@ function App() {
             /> */}
           </Route>
 
-            {/**Camera links */}
-            <Route path="/camera">
+          {/**Camera links */}
+          <Route path="/camera">
             <Route
               index
               element={

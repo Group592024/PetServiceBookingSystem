@@ -3,39 +3,33 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # Copy solution file
-COPY PSBS.FacilityServiceApiSolution/*.sln ./PSBS.FacilityServiceApiSolution/
+COPY PSBS.ReservationServiceApiSolution/*.sln ./PSBS.ReservationServiceApiSolution/
 
 # Copy project files
-COPY PSBS.FacilityServiceApiSolution/FacilityServiceApi.Domain/*.csproj ./PSBS.FacilityServiceApiSolution/FacilityServiceApi.Domain/
-COPY PSBS.FacilityServiceApiSolution/FacilityServiceApi.Application/*.csproj ./PSBS.FacilityServiceApiSolution/FacilityServiceApi.Application/
-COPY PSBS.FacilityServiceApiSolution/FacilityServiceApi.Infrastructure/*.csproj ./PSBS.FacilityServiceApiSolution/FacilityServiceApi.Infrastructure/
-COPY PSBS.FacilityServiceApiSolution/FacilityServiceApi.Presentation/*.csproj ./PSBS.FacilityServiceApiSolution/FacilityServiceApi.Presentation/
-COPY PSBS.FacilityServiceApiSolution/UnitTest.FacilityServiceApi/*.csproj ./PSBS.FacilityServiceApiSolution/UnitTest.FacilityServiceApi/
+COPY PSBS.ReservationServiceApiSolution/ReservationApi.Domain/*.csproj ./PSBS.ReservationServiceApiSolution/ReservationApi.Domain/
+COPY PSBS.ReservationServiceApiSolution/ReservationApi.Application/*.csproj ./PSBS.ReservationServiceApiSolution/ReservationApi.Application/
+COPY PSBS.ReservationServiceApiSolution/ReservationApi.Infrastructure/*.csproj ./PSBS.ReservationServiceApiSolution/ReservationApi.Infrastructure/
+COPY PSBS.ReservationServiceApiSolution/ReservationApi.Presentation/*.csproj ./PSBS.ReservationServiceApiSolution/ReservationApi.Presentation/
+COPY PSBS.ReservationServiceApiSolution/UnitTest.ReservationApi/*.csproj ./PSBS.ReservationServiceApiSolution/UnitTest.ReservationApi/
 COPY PSBS.SharedLibrarySolution/PSPS.SharedLibrary/*.csproj ./PSBS.SharedLibrarySolution/PSPS.SharedLibrary/
 
-WORKDIR /src/PSBS.FacilityServiceApiSolution
+WORKDIR /src/PSBS.ReservationServiceApiSolution
 RUN dotnet restore
 
 WORKDIR /src
-COPY PSBS.FacilityServiceApiSolution/ ./PSBS.FacilityServiceApiSolution/
+COPY PSBS.ReservationServiceApiSolution/ ./PSBS.ReservationServiceApiSolution/
 COPY PSBS.SharedLibrarySolution/ ./PSBS.SharedLibrarySolution/
 
-WORKDIR /src/PSBS.FacilityServiceApiSolution
+WORKDIR /src/PSBS.ReservationServiceApiSolution
 RUN dotnet publish -c Release -o /app/out
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
-
 COPY --from=build /app/out .
-# Create the images directory
-RUN mkdir -p /app/Images
-RUN mkdir -p /app/images /app/wwwroot/hls
+COPY PSBS.ReservationServiceApiSolution/ReservationApi.Presentation/https /app/https
+EXPOSE 5115
+EXPOSE 5201
 
-EXPOSE 5023
-
-ENTRYPOINT ["dotnet", "FacilityServiceApi.Presentation.dll"]
+ENTRYPOINT ["dotnet", "ReservationApi.Presentation.dll"]

@@ -19,7 +19,7 @@ services:
       dockerfile: PSBS.AccountServiceApiSolution/Dockerfile
     container_name: authenticationapi
     ports:
-      - "5000:5000"
+      - "5001:5001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
@@ -105,9 +105,9 @@ services:
     build:
       context: . # Set context to the root directory
       dockerfile: PSBS.RewardServiceApiSolution/Dockerfile
-    container_name: healthcareapi
+    container_name: rewardapi
     ports:
-      - "5003:5003"
+      - "5022:5022"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
     depends_on:
@@ -115,6 +115,19 @@ services:
     networks:
       - petease-network
     # Remove the temporary entrypoint
+  reservationapi:
+    build:
+      context: . # root of the repo
+      dockerfile: PSBS.ReservationServiceApiSolution/Dockerfile
+    container_name: reservationapi
+    ports:
+      - "5115:5115" # HTTP
+      - "5201:5201" # HTTPS
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - petease-network
+
 networks:
   petease-network:
     driver: bridge
