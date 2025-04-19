@@ -152,11 +152,11 @@ class FooterSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final routeMap = {
       "Home": "/",
-      "About": "/about",
+      "About": "/",
       "Service": "/services",
       "Room": "/room",
-      "Contact": "/contact",
-      "Support": "/support",
+      "Contact": "/",
+      "Support": "/chat",
       "Get Started": "/booking"
     };
 

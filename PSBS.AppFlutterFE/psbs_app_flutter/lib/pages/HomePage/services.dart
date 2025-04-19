@@ -101,7 +101,11 @@ class ServicesScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pushNamed('/services');
+                        if (service.name == 'Hotel') {
+                          Navigator.of(context).pushNamed('/room');
+                        } else {
+                          Navigator.of(context).pushNamed('/services');
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

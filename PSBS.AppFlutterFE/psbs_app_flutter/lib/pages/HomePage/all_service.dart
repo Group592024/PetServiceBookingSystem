@@ -3,42 +3,49 @@ import 'package:animations/animations.dart';
 import 'package:flutter_swiper_plus/flutter_swiper_plus.dart';
 
 class AllService extends StatelessWidget {
+  // Updated price format to be more compact
   final List<Map<String, String>> services = [
     {
       'title': 'Pet Grooming',
       'image': 'assets/HomePage/services/grooming.png',
       'content': 'Professional grooming services for your pet.',
-      'price': 'From 150.000₫ / package'
+      'price': '150K₫+',
+      'fullPrice': 'From 150.000₫ / package'
     },
     {
       'title': 'Health & Wellness',
       'image': 'assets/HomePage/services/veterinary.png',
-      'content': 'Routine vet checkups to ensure your pet’s health.',
-      'price': 'From 200.000₫ / visit'
+      'content': "Routine vet checkups to ensure your pet's health.",
+      'price': '200K₫+',
+      'fullPrice': 'From 200.000₫ / visit'
     },
     {
       'title': 'Pet Hotel',
       'image': 'assets/HomePage/services/pet-hotel.png',
       'content': 'Daily care for your pet while you are away.',
-      'price': 'From 120.000₫ / night'
+      'price': '120K₫+',
+      'fullPrice': 'From 120.000₫ / night'
     },
     {
       'title': 'Walking & Sitting',
       'image': 'assets/HomePage/services/dog-walking.png',
       'content': 'Daily pet walking service to keep your pet active.',
-      'price': 'From 50.000₫ / hour'
+      'price': '50K₫+',
+      'fullPrice': 'From 50.000₫ / hour'
     },
     {
       'title': 'Pet Training',
       'image': 'assets/HomePage/services/training.png',
       'content': 'Behavioral training for your pet by experts.',
-      'price': 'From 180.000₫ / session'
+      'price': '180K₫+',
+      'fullPrice': 'From 180.000₫ / session'
     },
     {
       'title': 'Pet Taxi',
       'image': 'assets/HomePage/services/pet-taxi.png',
       'content': 'Safe and comfortable boarding services for your pet.',
-      'price': 'From 100.000₫ / trip'
+      'price': '100K₫+',
+      'fullPrice': 'From 100.000₫ / trip'
     },
   ];
 
@@ -73,7 +80,7 @@ class AllService extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
-              childAspectRatio: 0.6,
+              childAspectRatio: 0.65, // Adjusted for better content fit
             ),
             itemCount: services.length,
             itemBuilder: (context, index) {
@@ -100,49 +107,87 @@ class AllService extends StatelessWidget {
                     ),
                     padding: const EdgeInsets.all(12),
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        // Top section with image
                         Image.asset(service['image']!, height: 60),
-                        const SizedBox(height: 8),
+
+                        // Title section
                         Text(
                           service['title']!,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                           textAlign: TextAlign.center,
+                          maxLines: 1,
                         ),
-                        const SizedBox(height: 6),
+
+                        // Content section
                         Text(
                           service['content']!,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: Colors.black54,
                           ),
                           textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          service['price']!,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+
+                        // Price badge - compact format
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.amber.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.monetization_on,
+                                  size: 14, color: Colors.amber[700]),
+                              const SizedBox(width: 4),
+                              Text(
+                                service['price']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.amber[700],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pushNamed('/services');
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+
+                        // Button section
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (service['title'] == 'Pet Hotel') {
+                                Navigator.of(context).pushNamed('/room');
+                              } else {
+                                Navigator.of(context).pushNamed('/services');
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                            ),
+                            child: Text(
+                              service['title'] == 'Pet Hotel'
+                                  ? "View Rooms"
+                                  : "Get Service",
+                              style: const TextStyle(fontSize: 14),
                             ),
                           ),
-                          child: const Text("Get Service"),
                         ),
                       ],
                     ),
@@ -161,7 +206,6 @@ class AllService extends StatelessWidget {
 
 class ServiceDetailScreen extends StatelessWidget {
   final Map<String, String> service;
-
   const ServiceDetailScreen({super.key, required this.service});
 
   @override
@@ -217,7 +261,8 @@ class ServiceDetailScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
-                    service['price']!,
+                    // Use the full price format in the detail screen
+                    service['fullPrice'] ?? service['price']!,
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -227,7 +272,14 @@ class ServiceDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 25),
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    // Fixed navigation logic for both service types
+                    if (service['title'] == 'Pet Hotel') {
+                      Navigator.of(context).pushNamed('/room');
+                    } else {
+                      Navigator.of(context).pushNamed('/services');
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2aa6df),
                     shape: RoundedRectangleBorder(
@@ -236,8 +288,10 @@ class ServiceDetailScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 12),
                   ),
-                  child: const Text(
-                    "Book Now",
+                  child: Text(
+                    service['title'] == 'Pet Hotel'
+                        ? "View Rooms"
+                        : "Get Service",
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
