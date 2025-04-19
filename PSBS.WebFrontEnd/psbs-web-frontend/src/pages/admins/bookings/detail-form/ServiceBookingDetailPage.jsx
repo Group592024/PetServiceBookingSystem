@@ -109,7 +109,12 @@ const ServiceBookingDetailPage = () => {
     const fetchBookingDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `http://localhost:5115/Bookings/${bookingId}`
+          `http://localhost:5050/Bookings/${bookingId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
         );
         setBooking(bookingResponse.data.data);
 
@@ -206,7 +211,7 @@ const ServiceBookingDetailPage = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(
-            `http://localhost:5115/Bookings/cancel/${bookingId}`,
+            `http://localhost:5050/Bookings/cancel/${bookingId}`,
             null,
             {
               headers: {
@@ -256,7 +261,7 @@ const ServiceBookingDetailPage = () => {
       setStatusLoading(true);
 
       const response = await axios.put(
-        `http://localhost:5115/Bookings/updateServiceStatus/${bookingId}`,
+        `http://localhost:5050/Bookings/updateServiceStatus/${bookingId}`,
         {
           status: nextStatus,
         },
@@ -307,9 +312,9 @@ const ServiceBookingDetailPage = () => {
         redirectPath: currentPath
       });
 
-      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+      const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
-      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
       const vnpayResponse = await fetch(vnpayUrl, {
         method: "GET",
@@ -355,8 +360,20 @@ const ServiceBookingDetailPage = () => {
   // Update the handleSaveNote function to match the backend API
   const handleSaveNote = async () => {
     try {
+      const now = new Date();
+      const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+
+      // Ensure proper spacing between existing notes and new note
+      let formattedNote;
+      if (booking.notes) {
+        // If there's already a note, add a space before the timestamp
+        formattedNote = `${booking.notes.trim()} [${timestamp}] ${bookingNote.trim()}`;
+      } else {
+        // If this is the first note, just add the timestamp
+        formattedNote = `[${timestamp}] ${bookingNote.trim()}`;
+      }
       const response = await axios.put(
-        `http://localhost:5115/Bookings/addnote/${bookingId}`,
+        `http://localhost:5050/Bookings/addnote/${bookingId}`,
         JSON.stringify(bookingNote),  // Send the note as a plain string
         {
           headers: {
@@ -370,7 +387,7 @@ const ServiceBookingDetailPage = () => {
         // Update local state with the new note
         setBooking(prev => ({
           ...prev,
-          notes: bookingNote
+          notes: formattedNote
         }));
 
         await Swal.fire(
@@ -379,6 +396,7 @@ const ServiceBookingDetailPage = () => {
           "success"
         );
         setIsNoteModalOpen(false);
+        setBookingNote("");
       } else {
         throw new Error(response.data.message || "Failed to add note");
       }
@@ -388,6 +406,40 @@ const ServiceBookingDetailPage = () => {
         error.response?.data?.message || error.message || "Failed to add note",
         "error"
       );
+    }
+  };
+
+  const formatBookingNotes = (notes) => {
+    if (!notes) return "No notes";
+
+    // Check if the note already has timestamps (Type 2)
+    if (notes.trim().startsWith('[')) {
+      // Type 2: Just display the timestamped notes with proper formatting
+      return notes.replace(/\[/g, '\n[').trim();
+    } else {
+      // Type 1: Original note followed by timestamped notes
+      // Split by timestamp pattern to separate original note from admin notes
+      const parts = notes.split(/(\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\])/);
+
+      if (parts.length > 1) {
+        // First part is the original note, rest are timestamps and notes
+        const originalNote = parts[0].trim();
+        let formattedNotes = originalNote;
+
+        // Add each timestamped note on a new line
+        for (let i = 1; i < parts.length; i++) {
+          if (parts[i].match(/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]/)) {
+            formattedNotes += '\n' + parts[i];
+          } else if (parts[i].trim()) {
+            formattedNotes += ' ' + parts[i].trim();
+          }
+        }
+
+        return formattedNotes;
+      }
+
+      // If no timestamps found, just return the original note
+      return notes;
     }
   };
 
@@ -538,7 +590,9 @@ const ServiceBookingDetailPage = () => {
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Notes:</span>{" "}
-                  <span className="text-gray-800">{booking.notes || "No notes"}</span>
+                  <span className="text-gray-800 whitespace-pre-line">
+                    {formatBookingNotes(booking.notes)}
+                  </span>
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Payment Status:</span>{" "}

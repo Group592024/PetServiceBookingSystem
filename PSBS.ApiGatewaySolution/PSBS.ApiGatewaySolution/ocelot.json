@@ -11,7 +11,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/authentication/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "PUT" ],
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "PUT"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -35,12 +35,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Account/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "DELETE",
-        "PUT"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -62,9 +57,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ReportAccount/{everything}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ]
+      "UpstreamHttpMethod": ["GET"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -81,16 +74,12 @@
       "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
-
           "Host": "localhost",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/chatHub/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -107,16 +96,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-
           "Host": "localhost",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/api/ChatControllers/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -138,7 +123,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/bookingServiceItem/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": ["GET"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -160,7 +145,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/BookingServiceItems/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -182,7 +167,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ReportFacility/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -204,7 +189,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Room/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -226,7 +211,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/RoomHistories/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -248,7 +233,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/RoomType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -270,7 +255,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Service/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -292,7 +277,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ServiceType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -314,7 +299,7 @@
         }
       ],
       "UpstreamPathTemplate": "/service/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -336,7 +321,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ServiceVariant/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -358,7 +343,7 @@
         }
       ],
       "UpstreamPathTemplate": "/Medicines/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -380,7 +365,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/PetHealthBook/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -402,7 +387,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Treatment/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -412,8 +397,7 @@
       //   "AuthenticationProviderKey": "Bearer",
       //   "AllowedScopes": []
       // }
-    }
-    ,
+    },
     {
       // Notification API
       "DownstreamPathTemplate": "/api/Notification/{everything}",
@@ -425,7 +409,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Notification/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -447,7 +431,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/pet/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -469,7 +453,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/petBreed/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -491,7 +475,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/PetDiary/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -513,7 +497,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/PetType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -535,7 +519,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ReportPet/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -557,7 +541,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Booking/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -579,7 +563,7 @@
         }
       ],
       "UpstreamPathTemplate": "/Bookings/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -590,6 +574,30 @@
       //   "AllowedScopes": []
       // }
     },
+    // {
+    //   "DownstreamPathTemplate": "/api/VNPay/{everything}",
+    //   "DownstreamScheme": "https",
+    //   "DownstreamHostAndPorts": [
+    //     {
+    //       "Host": "localhost",
+    //       "Port": 5201
+    //     }
+    //   ],
+    //   "UpstreamPathTemplate": "/api/VNPay/{everything}",
+    //   "UpstreamHttpMethod": ["GET", "POST"]
+    // },
+    // {
+    //   "DownstreamPathTemplate": "/api/VNPay/Callback",
+    //   "DownstreamScheme": "https",
+    //   "DownstreamHostAndPorts": [
+    //     {
+    //       "Host": "localhost",
+    //       "Port": 5201 // Port of your Reservation/Payment service
+    //     }
+    //   ],
+    //   "UpstreamPathTemplate": "/api/VNPay/Callback",
+    //   "UpstreamHttpMethod": ["GET"]
+    // },
     {
       // Booking Status API
       "DownstreamPathTemplate": "/api/BookingStatus/{everything}",
@@ -601,7 +609,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/BookingStatus/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -623,7 +631,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/BookingType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -645,7 +653,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Camera/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -667,7 +675,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Stream/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -689,7 +697,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/PaymentType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -711,7 +719,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/PointRule/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -733,7 +741,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/ReportBooking/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -755,7 +763,7 @@
         }
       ],
       "UpstreamPathTemplate": "/Gifts/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -777,7 +785,7 @@
         }
       ],
       "UpstreamPathTemplate": "/ImageGifts/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -799,7 +807,7 @@
         }
       ],
       "UpstreamPathTemplate": "/redeemhistory/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -821,7 +829,7 @@
         }
       ],
       "UpstreamPathTemplate": "/api/Voucher/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -843,7 +851,7 @@
         }
       ],
       "UpstreamPathTemplate": "/account-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Chat Service
@@ -856,7 +864,7 @@
         }
       ],
       "UpstreamPathTemplate": "/uploads/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       "DownstreamPathTemplate": "/hls/{everything}",
@@ -868,9 +876,8 @@
         }
       ],
       "UpstreamPathTemplate": "/hls/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "HEAD" ]
-    }
-,    
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "HEAD"]
+    },
     {
       //Image Facility Service
       "DownstreamPathTemplate": "/images/{everything}",
@@ -882,7 +889,7 @@
         }
       ],
       "UpstreamPathTemplate": "/facility-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Health Care Service
@@ -895,7 +902,7 @@
         }
       ],
       "UpstreamPathTemplate": "/healthcare-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Pet Service
@@ -908,7 +915,7 @@
         }
       ],
       "UpstreamPathTemplate": "/pet-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Reservation Service
@@ -921,7 +928,7 @@
         }
       ],
       "UpstreamPathTemplate": "/reservation-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Reward Service
@@ -934,7 +941,7 @@
         }
       ],
       "UpstreamPathTemplate": "/reward-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     }
   ],
   "GlobalConfiguration": {

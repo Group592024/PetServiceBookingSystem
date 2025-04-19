@@ -21,7 +21,7 @@ class AddBookingPage extends StatefulWidget {
 class _AddBookingPageState extends State<AddBookingPage> {
   // Network configuration
   static const String apiBaseUrl = 'http://10.0.2.2:5050';
-  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+  static const String bookingBaseUrl = 'http://10.0.2.2:5050';
 
   static const String paymentBaseUrl = 'https://10.0.2.2:5201';
 
@@ -393,7 +393,7 @@ class _AddBookingPageState extends State<AddBookingPage> {
     });
     
     final response = await _secureGet(
-      '$paymentBaseUrl/Bookings/CreatePaymentUrl?'
+      '$paymentBaseUrl/api/VNPay/CreatePaymentUrl?'
       'moneyToPay=${amount.toInt()}&'
       'description=${Uri.encodeComponent(description)}',
       {
@@ -406,14 +406,18 @@ class _AddBookingPageState extends State<AddBookingPage> {
       final vnpayUrl = response.body.trim();
       
       if (mounted) {
-        await Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => VNPayWebView(url: vnpayUrl),
           ),
         );
-        // Refresh or navigate after payment
-        Navigator.pop(context); // Or whatever navigation you need
+        
+        // If we get a result back, we can handle it here
+        if (result == true) {
+          // Payment was successful, navigate back to booking list
+          Navigator.pop(context, true);
+        }
       }
     }
   } catch (e) {
