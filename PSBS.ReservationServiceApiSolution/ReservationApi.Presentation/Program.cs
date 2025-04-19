@@ -2,6 +2,17 @@ using ReservationApi.Infrastructure.DependencyInjection;
 using VNPAY.NET;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseKestrel(options =>
+{
+    options.ListenAnyIP(5115); // HTTP
+    options.ListenAnyIP(5201, listenOptions =>
+    {
+        listenOptions.UseHttps("https/aspnetapp.pfx", "1234"); 
+    });
+});
+
+
+
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 // Add services to the container.
 builder.Services.AddSingleton<IVnpay, Vnpay>();

@@ -628,7 +628,8 @@ namespace UnitTest.AccountRepositoryTests
                 AccountAddress: "New Address",
                 AccountImage: "new.jpg",
                 isPickImage: true,
-                RoleId: "User"
+                RoleId: "User",
+                AccountIsDeleted: false
             );
 
             var addAccountModel = new AddAccount(uploadModel, updateAccountDTO);
@@ -660,7 +661,8 @@ namespace UnitTest.AccountRepositoryTests
                 AccountAddress: "Addr",
                 AccountImage: "img.jpg",
                 isPickImage: false,
-                RoleId: "User"
+                RoleId: "User",
+                AccountIsDeleted: false
             );
 
             var addAccountModel = new AddAccount(null, updateAccountDTO);

@@ -6,12 +6,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/authentication/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "PUT" ],
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "PUT"],
       "RateLimitOptions": {
         "ClientWhitelist": [],
         "EnableRateLimiting": true,
@@ -30,17 +30,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/Account/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST",
-        "DELETE",
-        "PUT"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -57,14 +52,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/ReportAccount/{everything}",
-      "UpstreamHttpMethod": [
-        "GET"
-      ]
+      "UpstreamHttpMethod": ["GET"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -81,16 +74,12 @@
       "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
-
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/chatHub/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -107,16 +96,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/api/ChatControllers/{everything}",
-      "UpstreamHttpMethod": [
-        "GET",
-        "POST"
-      ]
+      "UpstreamHttpMethod": ["GET", "POST"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -133,12 +118,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/bookingServiceItem/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
+      "UpstreamHttpMethod": ["GET"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -155,12 +140,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/BookingServiceItems/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -177,12 +162,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/ReportFacility/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -199,12 +184,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/Room/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -221,12 +206,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/RoomHistories/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -243,12 +228,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/RoomType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -265,12 +250,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/Service/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -287,12 +272,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/ServiceType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -309,12 +294,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/service/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -331,12 +316,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/ServiceVariant/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -353,12 +338,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/Medicines/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -375,12 +360,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/PetHealthBook/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -397,12 +382,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/Treatment/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -412,20 +397,19 @@
       //   "AuthenticationProviderKey": "Bearer",
       //   "AllowedScopes": []
       // }
-    }
-    ,
+    },
     {
       // Notification API
       "DownstreamPathTemplate": "/api/Notification/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/api/Notification/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -442,12 +426,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/api/pet/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -464,12 +448,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/api/petBreed/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -486,12 +470,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/api/PetDiary/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -508,12 +492,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/api/PetType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -530,12 +514,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/api/ReportPet/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -552,12 +536,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/Booking/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -574,12 +558,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/Bookings/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -596,12 +580,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/BookingStatus/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -618,12 +602,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/BookingType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -640,12 +624,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/Camera/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -662,12 +646,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/api/Stream/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -684,12 +668,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/PaymentType/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -706,12 +690,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/PointRule/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -728,12 +712,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/api/ReportBooking/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -750,12 +734,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
       "UpstreamPathTemplate": "/Gifts/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -772,12 +756,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
       "UpstreamPathTemplate": "/ImageGifts/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -794,12 +778,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
       "UpstreamPathTemplate": "/redeemhistory/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -816,12 +800,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
       "UpstreamPathTemplate": "/api/Voucher/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "PUT", "DELETE"]
       // "FileCacheOptions": {
       //   "TtlSeconds": 60,
       //   "Region": "default",
@@ -838,12 +822,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/account-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Chat Service
@@ -851,38 +835,37 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
       "UpstreamPathTemplate": "/uploads/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       "DownstreamPathTemplate": "/hls/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/hls/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE", "HEAD" ]
-    }
-,    
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE", "HEAD"]
+    },
     {
       //Image Facility Service
       "DownstreamPathTemplate": "/images/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
       "UpstreamPathTemplate": "/facility-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Health Care Service
@@ -890,12 +873,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/healthcare-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Pet Service
@@ -903,12 +886,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
       "UpstreamPathTemplate": "/pet-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Reservation Service
@@ -916,12 +899,12 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
       "UpstreamPathTemplate": "/reservation-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     },
     {
       //Image Reward Service
@@ -929,16 +912,16 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
       "UpstreamPathTemplate": "/reward-service/images/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "DELETE" ]
+      "UpstreamHttpMethod": ["GET", "POST", "DELETE"]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5050",
+    "BaseUrl": "http://gatewayapi:5050",
     "RateLimitOptions": {
       "QuotaExceededMessage": "You are overwhelming with multiple requests."
     }
