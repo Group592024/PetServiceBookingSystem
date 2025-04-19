@@ -13,13 +13,14 @@ namespace UnitTest.RewardServiceApi.Repositories
     {
         private readonly RewardServiceDBContext rewardServiceDBContext;
         private readonly VoucherRepository voucherRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
         public VoucherRepositoryTest()
         {
             var options = new DbContextOptionsBuilder<RewardServiceDBContext>()
                 .UseInMemoryDatabase(databaseName: "RewardService").Options;
 
             rewardServiceDBContext = new RewardServiceDBContext(options);
-            voucherRepository = new VoucherRepository(rewardServiceDBContext);
+            voucherRepository = new VoucherRepository(rewardServiceDBContext, _httpClientFactory);
 
         }
 

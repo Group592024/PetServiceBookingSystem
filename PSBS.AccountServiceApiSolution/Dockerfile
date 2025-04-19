@@ -38,6 +38,6 @@ COPY --from=build /app/out .
 # Create the images directory
 RUN mkdir -p /app/images
 
-EXPOSE 5000
+EXPOSE 5001
 # Fix the DLL name to match the actual built DLL
 ENTRYPOINT ["dotnet", "PSPS.AccountAPI.Presentation.dll"]

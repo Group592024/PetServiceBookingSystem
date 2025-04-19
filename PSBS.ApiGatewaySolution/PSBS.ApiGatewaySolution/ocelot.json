@@ -6,7 +6,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
@@ -30,7 +30,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
@@ -52,7 +52,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
@@ -74,7 +74,7 @@
       "DownstreamScheme": "ws",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
@@ -96,7 +96,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
@@ -118,7 +118,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -140,7 +140,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -162,7 +162,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -184,7 +184,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -206,7 +206,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -228,7 +228,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -250,7 +250,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -272,7 +272,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -294,7 +294,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -316,7 +316,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -338,7 +338,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
@@ -360,7 +360,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
@@ -382,7 +382,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
@@ -404,7 +404,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
@@ -426,7 +426,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -448,7 +448,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -470,7 +470,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -492,7 +492,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -514,7 +514,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -536,7 +536,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -558,7 +558,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -604,7 +604,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -626,7 +626,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -648,7 +648,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -670,7 +670,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -692,7 +692,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -714,7 +714,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -736,7 +736,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -758,7 +758,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
@@ -780,7 +780,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
@@ -802,7 +802,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
@@ -824,7 +824,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
@@ -846,7 +846,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "authenticationapi",
           "Port": 5001
         }
       ],
@@ -859,7 +859,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "chatapi",
           "Port": 5159
         }
       ],
@@ -871,7 +871,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -884,7 +884,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "facilityapi",
           "Port": 5023
         }
       ],
@@ -897,7 +897,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "healthcareapi",
           "Port": 5003
         }
       ],
@@ -910,7 +910,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "petapi",
           "Port": 5010
         }
       ],
@@ -923,7 +923,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "reservationapi",
           "Port": 5115
         }
       ],
@@ -936,7 +936,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
+          "Host": "rewardapi",
           "Port": 5022
         }
       ],
@@ -945,7 +945,7 @@
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5050",
+    "BaseUrl": "http://gatewayapi:5050",
     "RateLimitOptions": {
       "QuotaExceededMessage": "You are overwhelming with multiple requests."
     }
