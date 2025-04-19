@@ -192,7 +192,7 @@ const ReportRoomStatusList = () => {
             <div className="mb-6 bg-gray-50 rounded-lg p-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <p className="text-gray-500 text-sm">Total Rooms</p>
+                  <p className="text-gray-500 text-sm">Total rooms</p>
                   <p className="text-2xl font-bold text-gray-800">
                     {totalRooms}
                   </p>

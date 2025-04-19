@@ -13,15 +13,20 @@ class ServicePage extends StatefulWidget {
 
 class _ServicePageState extends State<ServicePage> {
   List<dynamic> services = [];
+  List<dynamic> filteredServices = [];
+  List<dynamic> serviceTypes = [];
   bool isLoading = true;
   bool isGridView = true;
+  String searchQuery = '';
+  String? selectedServiceTypeId;
+  TextEditingController searchController = TextEditingController();
 
   Future<void> fetchServices() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
       final responseServices = await http.get(
-        Uri.parse('http://10.0.2.2:5050/api/Service?showAll=false'),
+        Uri.parse('http://192.168.1.7:5050/api/Service?showAll=false'),
         headers: {
           "Content-Type": "application/json",
           "Authorization": "Bearer $token",
@@ -31,6 +36,7 @@ class _ServicePageState extends State<ServicePage> {
         final dataServices = json.decode(responseServices.body);
         setState(() {
           services = dataServices['data'];
+          filteredServices = services;
           isLoading = false;
         });
       } else {
@@ -44,10 +50,77 @@ class _ServicePageState extends State<ServicePage> {
     }
   }
 
+  Future<void> fetchServiceTypes() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      final response = await http.get(
+        Uri.parse('http://192.168.1.7:5050/api/Service/serviceTypes'),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          serviceTypes = data['data'];
+        });
+      } else {
+        throw Exception('Failed to load service types');
+      }
+    } catch (e) {
+      print('Error fetching service types: $e');
+    }
+  }
+
+  void filterServices() {
+    setState(() {
+      if (searchQuery.isEmpty && selectedServiceTypeId == null) {
+        filteredServices = services;
+      } else {
+        filteredServices = services.where((service) {
+          bool matchesSearch = searchQuery.isEmpty ||
+              service['serviceName']
+                  .toString()
+                  .toLowerCase()
+                  .contains(searchQuery.toLowerCase());
+
+          bool matchesType = selectedServiceTypeId == null ||
+              service['serviceTypeId'].toString() == selectedServiceTypeId;
+
+          return matchesSearch && matchesType;
+        }).toList();
+      }
+    });
+  }
+
+  void clearFilters() {
+    setState(() {
+      searchController.clear();
+      searchQuery = '';
+      selectedServiceTypeId = null;
+      filteredServices = services;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     fetchServices();
+    fetchServiceTypes();
+    searchController.addListener(() {
+      setState(() {
+        searchQuery = searchController.text;
+        filterServices();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   Widget buildServiceCard(Map<String, dynamic> service) {
@@ -75,7 +148,7 @@ class _ServicePageState extends State<ServicePage> {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
                   child: service['serviceImage'] != null
                       ? Image.network(
-                          'http://10.0.2.2:5023${service['serviceImage']}',
+                          'http://192.168.1.7:5023${service['serviceImage']}',
                           height: 200,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -191,7 +264,7 @@ class _ServicePageState extends State<ServicePage> {
                     ? Stack(
                         children: [
                           Image.network(
-                            'http://10.0.2.2:5023${service['serviceImage']}',
+                            'http://192.168.1.7:5023${service['serviceImage']}',
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -262,6 +335,106 @@ class _ServicePageState extends State<ServicePage> {
     );
   }
 
+  Widget buildSearchAndFilterBar() {
+    bool hasActiveFilters =
+        searchQuery.isNotEmpty || selectedServiceTypeId != null;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          // Search Bar with Clear Button
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: 'Search services...',
+                    prefixIcon: Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: Colors.grey),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.symmetric(vertical: 0),
+                    suffixIcon: searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              searchController.clear();
+                              setState(() {
+                                searchQuery = '';
+                                filterServices();
+                              });
+                            },
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          // Service Type Filter
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                hint: Text('Filter by service type'),
+                value: selectedServiceTypeId,
+                items: [
+                  DropdownMenuItem<String>(
+                    value: null,
+                    child: Text('All Service Types'),
+                  ),
+                  ...serviceTypes.map<DropdownMenuItem<String>>((type) {
+                    return DropdownMenuItem<String>(
+                      value: type['serviceTypeId'].toString(),
+                      child: Text(type['typeName']),
+                    );
+                  }).toList(),
+                ],
+                onChanged: (value) {
+                  setState(() {
+                    selectedServiceTypeId = value;
+                    filterServices();
+                  });
+                },
+              ),
+            ),
+          ),
+
+          // Clear All Filters Button (only shown when filters are active)
+          if (hasActiveFilters)
+            Padding(
+              padding: const EdgeInsets.only(top: 8.0),
+              child: ElevatedButton.icon(
+                onPressed: clearFilters,
+                icon: Icon(Icons.filter_alt_off),
+                label: Text('Clear All Filters'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red[400],
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 40),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -280,22 +453,35 @@ class _ServicePageState extends State<ServicePage> {
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : services.isEmpty
-              ? Center(child: Text('No services available'))
-              : RefreshIndicator(
-                  onRefresh: fetchServices,
-                  child: isGridView
-                      ? ListView.builder(
-                          itemCount: services.length,
-                          itemBuilder: (context, index) =>
-                              buildServiceCard(services[index]),
-                        )
-                      : ListView.builder(
-                          itemCount: services.length,
-                          itemBuilder: (context, index) =>
-                              buildServiceListItem(services[index]),
+          : RefreshIndicator(
+              onRefresh: () async {
+                await fetchServices();
+                filterServices();
+              },
+              child: ListView(
+                children: [
+                  buildSearchAndFilterBar(),
+                  if (filteredServices.isEmpty)
+                    Container(
+                      height: 300,
+                      alignment: Alignment.center,
+                      child: Text(
+                        'No services match your search criteria',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey[600],
                         ),
-                ),
+                      ),
+                    )
+                  else
+                    ...filteredServices
+                        .map((service) => isGridView
+                            ? buildServiceCard(service)
+                            : buildServiceListItem(service))
+                        .toList(),
+                ],
+              ),
+            ),
     );
   }
 }

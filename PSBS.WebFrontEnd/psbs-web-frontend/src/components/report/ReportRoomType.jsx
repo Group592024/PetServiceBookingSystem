@@ -40,7 +40,8 @@ const ReportRoomType = () => {
 
   return (
     <div>
-      <ReportCircleCard data={data} />
+      <ReportCircleCard data={data} type="Rooms"
+        element="Room Types" />
     </div>
   );
 };

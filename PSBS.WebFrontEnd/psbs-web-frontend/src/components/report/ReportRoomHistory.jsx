@@ -236,7 +236,7 @@ const ReportRoomHistory = () => {
             </div>
 
             <div className="transition-all duration-300">
-              <ReportCircleCard data={data} type="Rooms" element="Room Types" />
+              <ReportCircleCard data={data} type="Bookings" element="Room Types" />
             </div>
           </div>
         )}

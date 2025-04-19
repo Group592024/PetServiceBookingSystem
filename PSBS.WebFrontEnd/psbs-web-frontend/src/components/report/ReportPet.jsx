@@ -149,7 +149,7 @@ const ReportPet = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
-              Pet Statistics by Service
+              Pet Statistics by service
             </h2>
             <p className="text-gray-600 mt-1">
               Analysis of pet breeds using each service for{" "}
@@ -350,9 +350,7 @@ const ReportPet = () => {
               No Pet Data Available
             </h3>
             <p className="text-gray-500 max-w-md mx-auto">
-              There is no pet data available for {selectedService?.serviceName}{" "}
-              during this time period. Try selecting a different service or time
-              period.
+              There is no pet data available for the selected service and time period
             </p>
           </div>
         ) : (
