@@ -9,6 +9,7 @@ using ReservationApi.Application.Intefaces;
 using ReservationApi.Infrastructure.Data;
 using PSPS.SharedLibrary.Responses;
 using Microsoft.AspNetCore.Authorization;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -16,7 +17,7 @@ namespace ReservationApi.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    
     public class VNPayController : ControllerBase
     {
         private readonly IVnpay vnpay;
@@ -54,8 +55,12 @@ namespace ReservationApi.Presentation.Controllers
         {
             try
             {
-                var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+                Console.WriteLine($"CreatePaymentUrl called with moneyToPay: {moneyToPay}, description: {description}");
 
+
+
+              var  ipAddress = "127.0.0.1"; // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+                Console.WriteLine($"IP Address: {ipAddress}");
                 var request = new PaymentRequest
                 {
                     PaymentId = DateTime.Now.Ticks,
@@ -68,11 +73,13 @@ namespace ReservationApi.Presentation.Controllers
                     Language = DisplayLanguage.Vietnamese,
                 };
                 var paymentUrl = vnpay.GetPaymentUrl(request);
-
+  Console.WriteLine($"Payment URL generated: {paymentUrl}");
                 return Created(paymentUrl, paymentUrl);
             }
             catch (Exception ex)
             {
+                 Console.WriteLine($"Error in CreatePaymentUrl: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 return BadRequest(ex.Message);
             }
         }
