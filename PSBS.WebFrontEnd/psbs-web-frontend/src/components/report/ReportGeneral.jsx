@@ -79,7 +79,7 @@ const ReportGeneral = () => {
   const fetchDataPet = async () => {
     try {
       const token = sessionStorage.getItem("token");
-      const fetchData = await fetch("http://localhost:5050/api/Pet", {
+      const fetchData = await fetch("http://localhost:5050/api/Pet/available", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

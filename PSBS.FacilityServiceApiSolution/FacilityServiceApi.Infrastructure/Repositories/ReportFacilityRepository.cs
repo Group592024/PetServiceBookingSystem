@@ -271,7 +271,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         }
         public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetActiveRoomTypeList()
         {
-            var roomTypes = await context.RoomType.Include(p => p.Rooms).ToListAsync();
+            var roomTypes = await context.RoomType.Include(p => p.Rooms).Where(m => !m.isDeleted).ToListAsync();
 
             List<RoomHistoryQuantityDTO> result = new List<RoomHistoryQuantityDTO>();
 
@@ -287,7 +287,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
 
         public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetActiveServiceTypeList()
         {
-            var roomTypes = await context.ServiceType.Include(p => p.Services).ToListAsync();
+            var roomTypes = await context.ServiceType.Include(p => p.Services).Where(m => !m.isDeleted).ToListAsync();
 
             List<RoomHistoryQuantityDTO> result = new List<RoomHistoryQuantityDTO>();
 

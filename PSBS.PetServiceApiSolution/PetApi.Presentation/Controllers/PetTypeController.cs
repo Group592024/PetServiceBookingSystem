@@ -184,7 +184,7 @@ namespace PetApi.Presentation.Controllers
 
 
                 // Đường dẫn thư mục lưu ảnh
-                var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "images");
+                var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
                 if (!Directory.Exists(imagesDirectory))
                 {
                     Directory.CreateDirectory(imagesDirectory);
@@ -201,7 +201,7 @@ namespace PetApi.Presentation.Controllers
                 }
 
                 // Trả về đường dẫn để lưu trong database (đường dẫn tương đối)
-                return $"/images/{uniqueFileName}";
+                return $"/Images/{uniqueFileName}";
             }
 
             // Nếu không upload file mới, trả về đường dẫn ảnh hiện tại (nếu có)

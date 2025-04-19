@@ -5,12 +5,28 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Datatable from "../../../components/services/Datatable";
 import { formatDateString } from "../../../Utilities/formatDate";
+import jwtDecode from "jwt-decode";
 
 const ServiceList = () => {
   const sidebarRef = useRef(null);
   const navigate = useNavigate();
 
   const [data, setData] = useState([]);
+  const token = sessionStorage.getItem("token");
+  let isAdmin = false;
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      const role =
+        decodedToken.role ||
+        decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      if (role && role.toLowerCase() === "admin") {
+        isAdmin = true;
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }
 
   const fetchDataFunction = async () => {
     try {
@@ -136,14 +152,17 @@ const ServiceList = () => {
             <div className="left">
               <h1>Service List</h1>
             </div>
-            <button className="report" onClick={() => navigate("/service/add")}>
-              <i class="bx bxs-plus-circle"></i>
-              <span>NEW</span>
-            </button>
+            {isAdmin && (
+              <button className="report" onClick={() => navigate("/service/add")}>
+                <i class="bx bxs-plus-circle"></i>
+                <span>NEW</span>
+              </button>
+            )}
           </div>
           <Datatable
             columns={columns}
             data={newRows}
+            isAdmin={isAdmin}
             pageSize={5}
             pageSizeOptions={[5, 10, 15]}
             onDelete={handleDelete}

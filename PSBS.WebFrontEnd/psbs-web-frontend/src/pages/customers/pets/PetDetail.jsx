@@ -28,7 +28,8 @@ const CustomerPetDetail = () => {
         const petData = await petResponse.json();
 
         if (petData.flag) {
-          setPet(petData.data);
+
+          localStorage.removeItem("petInfo");
           localStorage.setItem(
             "petInfo",
             JSON.stringify({
@@ -38,7 +39,7 @@ const CustomerPetDetail = () => {
               petDoB: petData.data.dateOfBirth,
             })
           );
-
+          setPet(petData.data);
           const breedResponse = await fetch(
             `http://localhost:5050/api/petBreed/${petData.data.petBreedId}`, {
             method: "GET",

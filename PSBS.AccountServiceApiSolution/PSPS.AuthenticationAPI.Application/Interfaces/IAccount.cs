@@ -28,6 +28,7 @@ namespace PSPS.AccountAPI.Application.Interfaces
         Task<GetAccountDTO> GetAccountByPhone(string phone);
         Task<Response> GetAllStaffAccount();
         Task<Response> GetAllCustomerAccount();
+        Task<Response> GetAllCustomerAccounts();
 
         Task<Response> UpdateAccountPoint(Guid id, int point);
 

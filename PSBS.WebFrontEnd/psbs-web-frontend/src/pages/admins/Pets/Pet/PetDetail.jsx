@@ -75,6 +75,16 @@ const AdminPetDetail = () => {
                     setAccountName(account ? account.accountName : "Unknown");
                     const breed = breedData.data.find(breed => breed.petBreedId === petData.data.petBreedId);
                     setPetBreed(breed ? breed.petBreedName : "Unknown");
+                    localStorage.removeItem("petInfo");
+                    localStorage.setItem(
+                        "petInfo",
+                        JSON.stringify({
+                            petId: id,
+                            petName: petData.data.petName,
+                            petImage: petData.data.petImage,
+                            petDoB: petData.data.dateOfBirth,
+                        })
+                    );
                     setPet(petData.data);
                 } else {
                     Swal.fire('Error', 'Pet not found', 'error');
@@ -256,7 +266,7 @@ const AdminPetDetail = () => {
                                     label="Pet Diary"
                                     icon="📖"
                                     className="bg-blue-500 hover:bg-blue-600 shadow-lg shadow-blue-200"
-                                    onClick={() => navigate(`/customer/pet-diaries/${pet.petId}`)} 
+                                    onClick={() => navigate(`/customer/pet-diaries/${pet.petId}`)}
                                 />
                                 <ActionButton
                                     label="Health Book"

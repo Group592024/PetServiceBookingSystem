@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
 using PSPS.AccountAPI.Application.DTOs;
 using PSPS.AccountAPI.Application.Interfaces;
@@ -10,7 +9,6 @@ using PSPS.AccountAPI.Domain.Entities;
 using PSPS.AccountAPI.Infrastructure.Data;
 using PSPS.SharedLibrary.PSBSLogs;
 using PSPS.SharedLibrary.Responses;
-using System.Drawing;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Net.Http.Json;
@@ -224,6 +222,42 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 return new Response(false, $"An error occurred: {ex.Message}");
             }
         }
+
+        public async Task<Response> GetAllCustomerAccounts() // Get all customer
+        {
+            try
+            {
+                var accounts = await context.Accounts.Where(p => p.RoleId.Equals("user")).ToListAsync();
+                if (accounts == null || !accounts.Any())
+                {
+                    return new Response(false, "No customer accounts found");
+                }
+
+                var accountDTOs = accounts.Select(account => new GetAccountDTO(
+                    account.AccountId ?? Guid.Empty,
+                    account.AccountName ?? string.Empty,
+                    account.AccountEmail ?? string.Empty,
+                    account.AccountPhoneNumber ?? string.Empty,
+                    account.AccountPassword ?? string.Empty,
+                    account.AccountGender ?? string.Empty,
+                    account.AccountDob ?? DateTime.MinValue,
+                    account.CreatedAt ?? DateTime.MinValue,
+                    account.UpdatedAt ?? DateTime.MinValue,
+                    account.AccountAddress ?? string.Empty,
+                    account.AccountImage ?? string.Empty,
+                    account.AccountLoyaltyPoint,
+                    account.AccountIsDeleted,
+                    account.RoleId
+                )).ToList();
+
+                return new Response(true, "Customer accounts retrieved successfully") { Data = accountDTOs };
+            }
+            catch (Exception ex)
+            {
+                return new Response(false, $"An error occurred: {ex.Message}");
+            }
+        }
+
 
         public async Task<Response> GetDeletedAccounts() // get list accoint  AccountIsDeleted = true
         {
@@ -881,7 +915,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             try
             {
                 var existingAccount = await context.Accounts.FirstOrDefaultAsync(a => a.AccountId == id);
-                if(existingAccount == null)
+                if (existingAccount == null)
                 {
                     return new Response(false, "Error occurred while updating the existing Point of user.");
                 }
@@ -899,7 +933,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
             }
         }
 
-        public async Task<Response> RefundAccountPoint(Guid id, RedeemRequest model )
+        public async Task<Response> RefundAccountPoint(Guid id, RedeemRequest model)
         {
             try
             {
@@ -911,7 +945,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 using var transaction = await context.Database.BeginTransactionAsync();
                 try
                 {
-                   
+
 
                     var client = _httpClientFactory.CreateClient("ApiGateway");
                     var response = await client.PutAsync($"redeemhistory/customer/cancel/{model.GiftId}", null);
@@ -921,7 +955,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                         existingAccount.AccountLoyaltyPoint = existingAccount.AccountLoyaltyPoint + model.RequiredPoints;
                         context.Accounts.Update(existingAccount);
                         await context.SaveChangesAsync();
-                       
+
                         await transaction.CommitAsync();
                         return new Response(true, "Point of user successfully updated");
                     }
@@ -933,7 +967,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 {
                     await transaction.RollbackAsync();
                     return new Response(false, $"Error: {ex.Message}");
-                }           
+                }
             }
             catch (Exception ex)
             {
@@ -956,7 +990,8 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
                 await _emailRepository.SendNotificationEmail(acc, notificationMessage);
                 return new Response(true, "Send successfully");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 return new Response(false, "Cannot send email due to the errors");
             }
         }

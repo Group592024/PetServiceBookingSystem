@@ -12,6 +12,7 @@ import UpdateVariantModal from "../../../components/services/UpdateVariantModal"
 import VariantDetailModal from "../../../components/services/VariantDetailModal";
 import AddVariantModal from "../../../components/services/AddVariantModal";
 import formatCurrency from "../../../Utilities/formatCurrency";
+import jwtDecode from "jwt-decode";
 
 const ServiceDetail = () => {
   const sidebarRef = useRef(null);
@@ -19,6 +20,22 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const token = sessionStorage.getItem("token");
+  let isAdmin = false;
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      const role =
+        decodedToken.role ||
+        decodedToken["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      if (role && role.toLowerCase() === "admin") {
+        isAdmin = true;
+      }
+    } catch (error) {
+      console.error("Error decoding token:", error);
+    }
+  }
 
   const [dataVariant, setDataVariant] = useState([]);
   const [idVariant, setIdVariant] = useState("");
@@ -43,47 +60,49 @@ const ServiceDetail = () => {
   };
   const handleCloseAdd = () => setOpenAdd(false);
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      setLoading(true);
-      try {
-        const token = sessionStorage.getItem("token");
-        const response = await fetch(
-          `http://localhost:5050/api/Service/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        if (!response.ok) {
-          throw new Error("Service not found" || "Internal Server Error");
+  const fetchDetail = async () => {
+    setLoading(true);
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = await fetch(
+        `http://localhost:5050/api/Service/${id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
-        const newData = {
-          ...data.data,
-          serviceTypeName: data.data.serviceType.typeName,
-        };
-
-        setDetail(newData);
-      } catch (error) {
-        Swal.fire({
-          title: "Error",
-          text: error?.message || error,
-          icon: "error",
-          confirmButtonText: "OK",
-          confirmButtonColor: "#d33",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            navigate("/service");
-          }
-        });
-      } finally {
-        setLoading(false);
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error("Service not found" || "Internal Server Error");
       }
-    };
+      const newData = {
+        ...data.data,
+        serviceTypeName: data.data.serviceType.typeName,
+      };
+
+      setDetail(newData);
+    } catch (error) {
+      Swal.fire({
+        title: "Error",
+        text: error?.message || error,
+        icon: "error",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#d33",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate("/service");
+        }
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+
     if (id) {
       fetchDetail();
       fetchDataFunction();
@@ -107,7 +126,6 @@ const ServiceDetail = () => {
         }
       );
       const response = await fetchData.json();
-
       const result = response.data.map((item) => ({
         id: item.serviceVariantId,
         ...item,
@@ -119,7 +137,54 @@ const ServiceDetail = () => {
     }
   };
 
-  const handleDelete = (id) => {
+  const fetchDelete = async (isLastVariant = false, idVariant) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const deleteResponse = await fetch(
+        `http://localhost:5050/api/ServiceVariant/${idVariant}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (deleteResponse.ok) {
+        Swal.fire(
+          "Deleted!",
+          "The service variant has been deleted.",
+          "success"
+        );
+        if (isLastVariant) {
+          setDataVariant([]);
+          fetchDetail();
+        }
+        await fetchDataFunction();
+      } else if (deleteResponse.status === 409) {
+        Swal.fire(
+          "Error!",
+          "Can not delete this service variant because it is in at least one booking.",
+          "error"
+        );
+      } else {
+        Swal.fire(
+          "Error!",
+          "Failed to delete the service variant",
+          "error"
+        );
+      }
+    } catch (error) {
+      Swal.fire(
+        "Error!",
+        "Failed to delete the service variant",
+        "error"
+      );
+    }
+  };
+
+  const handleDelete = (idVariant) => {
     Swal.fire({
       title: "Are you sure?",
       text: "Do you want to delete this item?",
@@ -131,53 +196,49 @@ const ServiceDetail = () => {
       cancelButtonColor: "#3085d6",
     }).then((result) => {
       if (result.isConfirmed) {
-        const fetchDelete = async () => {
-          try {
-            const token = sessionStorage.getItem("token");
-            const deleteResponse = await fetch(
-              `http://localhost:5050/api/ServiceVariant/${id}`,
-              {
-                method: "DELETE",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${token}`,
-                },
-              }
-            );
+        if (dataVariant.length === 1 && dataVariant[0].isDeleted === true) {
+          Swal.fire({
+            title: "Are you sure?",
+            text: "If you delete the last service variant, this service will be deleted too.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "OK",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6"
 
-            if (deleteResponse.ok) {
-              Swal.fire(
-                "Deleted!",
-                "The service variant has been deleted.",
-                "success"
-              );
-              fetchDataFunction();
-            } else if (deleteResponse.status === 409) {
-              Swal.fire(
-                "Error!",
-                "Can not delete this service variant because it is in at least one booking.",
-                "error"
-              );
-            } else {
-              Swal.fire(
-                "Error!",
-                "Failed to delete the service variant",
-                "error"
-              );
+          }).then((result) => {
+            if (result.isConfirmed) {
+              const fetchDeleteService = async () => {
+                try {
+                  const token = sessionStorage.getItem("token");
+                  const deleteResponse = await fetch(
+                    `http://localhost:5050/api/Service/${id}`,
+                    {
+                      method: "DELETE",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  );
+                } catch (error) {
+                  console.log(error);
+                  Swal.fire("Error!", "Failed to delete the service", "error");
+                }
+              };
+              fetchDelete(true, idVariant);
+              fetchDeleteService();
             }
-          } catch (error) {
-            Swal.fire(
-              "Error!",
-              "Failed to delete the service variant",
-              "error"
-            );
-          }
-        };
+          });
 
-        fetchDelete();
+          return;
+        }
+        fetchDelete(false, idVariant);
       }
     });
   };
+
 
   const columns = [
     {
@@ -200,11 +261,10 @@ const ServiceDetail = () => {
       flex: 1,
       renderCell: (params) => (
         <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            params.row.isDeleted
-              ? "bg-red-100 text-red-800"
-              : "bg-green-100 text-green-800"
-          }`}
+          className={`px-2 py-1 rounded-full text-xs font-medium ${params.row.isDeleted
+            ? "bg-red-100 text-red-800"
+            : "bg-green-100 text-green-800"
+            }`}
         >
           {params.row.isDeleted ? "Inactive" : "Active"}
         </span>
@@ -301,11 +361,10 @@ const ServiceDetail = () => {
                         </h3>
                         <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
                           <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              detail.isDeleted
-                                ? "bg-red-100 text-red-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
+                            className={`px-3 py-1 rounded-full text-sm font-medium ${detail.isDeleted
+                              ? "bg-red-100 text-red-800"
+                              : "bg-green-100 text-green-800"
+                              }`}
                           >
                             {detail.isDeleted ? "Inactive" : "Active"}
                           </span>
@@ -361,26 +420,30 @@ const ServiceDetail = () => {
                 </div>
               </div>
 
+
               <div className="flex justify-center mb-8">
-                <button
-                  onClick={handleOpenAdd}
-                  className="px-6 py-3 bg-gradient-to-r from-customPrimary to-customLightPrimary hover:from-customLightPrimary hover:to-customPrimary text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center group"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
+                {isAdmin && (
+                  <button
+                    onClick={handleOpenAdd}
+                    className="px-6 py-3 bg-gradient-to-r from-customPrimary to-customLightPrimary hover:from-customLightPrimary hover:to-customPrimary text-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center group"
                   >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  Add New Variant
-                </button>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                    Add New Variant
+                  </button>
+                )}
               </div>
+
 
               <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <Accordion
@@ -429,6 +492,7 @@ const ServiceDetail = () => {
                       <Datatable
                         columns={columns}
                         data={dataVariant}
+                        isAdmin={isAdmin}
                         pageSize={5}
                         pageSizeOptions={[5, 10, 15]}
                         onDelete={handleDelete}
@@ -454,12 +518,14 @@ const ServiceDetail = () => {
                         <p className="text-gray-500 text-lg">
                           No variants found for this service
                         </p>
-                        <button
-                          onClick={handleOpenAdd}
-                          className="mt-4 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-200"
-                        >
-                          Add your first variant
-                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={handleOpenAdd}
+                            className="mt-4 px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors duration-200"
+                          >
+                            Add your first variant
+                          </button>
+                        )}
                       </div>
                     )}
                   </AccordionDetails>

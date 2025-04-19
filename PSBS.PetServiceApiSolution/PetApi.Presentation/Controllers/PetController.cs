@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PetApi.Application.DTOs.Conversions;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetApi.Application.DTOs;
+using PetApi.Application.DTOs.Conversions;
 using PetApi.Application.Interfaces;
 using PSPS.SharedLibrary.Responses;
-using Microsoft.AspNetCore.Authorization;
 
 namespace PetApi.Presentation.Controllers
 {
@@ -87,7 +87,7 @@ namespace PetApi.Presentation.Controllers
                 return BadRequest(new Response(false, "Invalid input") { Data = ModelState });
             }
 
-            var existingPet= await _pet.GetByIdAsync(updatingPet.petId);
+            var existingPet = await _pet.GetByIdAsync(updatingPet.petId);
             if (existingPet == null)
             {
                 return NotFound(new Response(false, $"Pet with ID {updatingPet.petId} not found"));
@@ -154,6 +154,24 @@ namespace PetApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<PetDTO>>> GetAvailablePets(Guid accountId)
         {
             var pets = await _pet.ListAvailablePetAsync(accountId);
+            if (!pets.Any())
+            {
+                return NotFound(new Response(false, "No available pets found"));
+            }
+            var (_, petDtos) = PetConversion.FromEntity(null!, pets);
+            return Ok(new Response(true, "Available pets retrieved successfully")
+            {
+                Data = petDtos
+            });
+        }
+
+
+        [HttpGet("available")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<IEnumerable<PetDTO>>> GetAvailablePet()
+        {
+            var pets = (await _pet.GetAllAsync()).Where(p => !p.IsDelete)
+                           .ToList();
             if (!pets.Any())
             {
                 return NotFound(new Response(false, "No available pets found"));
