@@ -20,7 +20,7 @@ namespace VoucherApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<VoucherDTO>>> GetVouchers()
         {
             // get all vouchers from repo
-            var vouchers = await voucherInteface.GetAllAsync();       
+            var vouchers = await voucherInteface.GetAllAsync();
             // convert data from entity to DTO and return
             var (_, list) = VoucherConversion.FromEntity(null!, vouchers);
             return list!.Any() ? Ok(new Response(true, "Vouchers retrieved successfully!")
@@ -103,9 +103,9 @@ namespace VoucherApi.Presentation.Controllers
         // PUT api/<VoucherController>/5
         [HttpPut]
         [Authorize(Policy = "AdminOrStaff")]
-        public async Task<ActionResult<Response>> UpdateVoucher( [FromBody] UpdateVoucherDTO voucher)
+        public async Task<ActionResult<Response>> UpdateVoucher([FromBody] UpdateVoucherDTO voucher)
         {
-        
+
             // CHECK model state is all data annotations are passed
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -131,13 +131,13 @@ namespace VoucherApi.Presentation.Controllers
             // convert to entity to DT
             var getEntity = await voucherInteface.GetByIdAsync(id);
             var response = await voucherInteface.DeleteAsync(getEntity);
-            return  Ok(response) ;
+            return Ok(response);
         }
 
         // GET api/<VoucherController>/
         [HttpGet("search-gift-code")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
-        public async Task<ActionResult<VoucherDTO>> GetVoucherByVoucherCode([FromQuery]string voucherCode)
+        public async Task<ActionResult<VoucherDTO>> GetVoucherByVoucherCode([FromQuery] string voucherCode)
         {
             // get single voucher from the repo
             var voucher = await voucherInteface.GetVoucherByVoucherCode(voucherCode);
@@ -148,6 +148,14 @@ namespace VoucherApi.Presentation.Controllers
             var (_voucher, _) = VoucherConversion.FromEntity(voucher, null);
             return _voucher is not null ? Ok(new Response(true, "The Voucher retrieved successfully") { Data = _voucher })
             : NotFound(new Response(false, "Voucher requested not found"));
+        }
+
+        [HttpPut("refund-quantity/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<ActionResult<Response>> RefundVoucherQuantity(Guid id)
+        {
+            var response = await voucherInteface.RefundVoucherQuantity(id);
+            return response.Flag is true ? Ok(response) : BadRequest(response);
         }
     }
 }

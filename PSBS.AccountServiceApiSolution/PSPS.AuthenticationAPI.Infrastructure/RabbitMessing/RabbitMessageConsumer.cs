@@ -64,7 +64,7 @@ namespace PSPS.AccountAPI.Infrastructure.RabbitMessing
 
                     var factory = new ConnectionFactory
                     {
-                        Uri = new Uri("amqp://guest:guest@localhost:5672"),
+                      Uri = new Uri("amqp://guest:guest@rabbit-server:5672"),
                         ClientProvidedName = "Rabbit Receive App",
                         AutomaticRecoveryEnabled = true,
                         NetworkRecoveryInterval = TimeSpan.FromSeconds(30),  // Longer recovery interval

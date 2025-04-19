@@ -101,7 +101,7 @@ class ServicesScreen extends StatelessWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        print("Clicked on: ${service.name}");
+                        Navigator.of(context).pushNamed('/services');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,

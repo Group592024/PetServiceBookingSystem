@@ -1,4 +1,4 @@
-import React, { useRef,useMemo } from "react";
+import React, { useRef, useMemo } from "react";
 import Navbar from "../../../components/navbar/Navbar";
 import Sidebar from "../../../components/sidebar/Sidebar";
 import { Link } from "react-router-dom";
@@ -17,7 +17,7 @@ const Dashboard = () => {
     return (
       decodedToken?.role ||
       decodedToken[
-        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+      "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
       ]
     );
   }, [userToken]);
@@ -25,44 +25,44 @@ const Dashboard = () => {
   if (userRole === "staff") {
     return (
       <div className="dashboard">
-      <Sidebar ref={sidebarRef} />
-      <div className="content">
-        <Navbar sidebarRef={sidebarRef} />
-        <main className="flex items-center justify-center min-h-[calc(100vh-56px)]"> {/* Adjust 56px based on your navbar height */}
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-8 mx-auto max-w-4xl">
-            <div className="welcome-message flex flex-col items-center justify-center text-center space-y-4">
-              <div className="text-4xl font-bold flex items-center space-x-2">
-              <h2>Welcome to   <i className="bx bxs-cat text-blue-600 text-5xl"></i> <span className="text-gray-800">Pet</span>
-        <span className="text-blue-600">Ease</span> Dashboard 
-      </h2>
-    </div>
-    <p className="text-gray-600 text-lg max-w-2xl">
-      Your one-stop solution for managing pet care services with ease and efficiency
-    </p>
-              <div className="mt-6">
-                <div className="bg-blue-50 p-4 rounded-full animate-pulse">
-                  <svg
-                    className="w-12 h-12 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13 10V3L4 14h7v7l9-11h-7z"
+        <Sidebar ref={sidebarRef} />
+        <div className="content">
+          <Navbar sidebarRef={sidebarRef} />
+          <main className="flex items-center justify-center min-h-[calc(100vh-56px)]"> {/* Adjust 56px based on your navbar height */}
+            <div className="bg-white rounded-lg shadow-lg p-8 mb-8 mx-auto max-w-4xl">
+              <div className="welcome-message flex flex-col items-center justify-center text-center space-y-4">
+                <div className="text-4xl font-bold flex items-center space-x-2">
+                  <h2>Welcome to   <i className="bx bxs-cat text-blue-600 text-5xl"></i> <span className="text-gray-800">Pet</span>
+                    <span className="text-blue-600">Ease</span> Dashboard
+                  </h2>
+                </div>
+                <p className="text-gray-600 text-lg max-w-2xl">
+                  Your one-stop solution for managing pet care services with ease and efficiency
+                </p>
+                <div className="mt-6">
+                  <div className="bg-blue-50 p-4 rounded-full animate-pulse">
+                    <svg
+                      className="w-12 h-12 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      xmlns="http://www.w3.org/2000/svg"
                     >
-                    </path>
-                  </svg>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z"
+                      >
+                      </path>
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
-    </div>
     );
   }
 
@@ -85,10 +85,7 @@ const Dashboard = () => {
                 </li>
               </ul>
             </div>
-            <a href="#" className="report">
-              <i className="bx bx-cloud-download"></i>
-              <span>Download CSV</span>
-            </a>
+
           </div>
           <ul className="insights">
             <Link to="/settings/bookingType">

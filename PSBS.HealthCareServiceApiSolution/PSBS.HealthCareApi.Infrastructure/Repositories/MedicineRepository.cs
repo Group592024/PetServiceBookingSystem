@@ -20,9 +20,13 @@ namespace PSBS.HealthCareApi.Infrastructure.Repositories
         {
             try
             {
-                var existingMedicine = await GetByIdAsync(entity.medicineId);
-                var existingMedicineName = context.Medicines.FirstOrDefault(m => m.medicineName.Equals(entity.medicineName));
-                if (existingMedicine != null || existingMedicineName != null)
+                var existingMedicine = await context.Medicines.FirstOrDefaultAsync(m => m.medicineId == entity.medicineId);
+                if (existingMedicine != null)
+                {
+                    return new Response(false, $"{entity.medicineName} already exist! ");
+                }
+                var existingMedicineName = await context.Medicines.FirstOrDefaultAsync(m => m.medicineName.Equals(entity.medicineName));
+                if ( existingMedicineName != null)
                 {
                     return new Response(false, $"{entity.medicineName} already exist! ");
                 }

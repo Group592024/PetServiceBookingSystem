@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:path/path.dart' as path;
+import 'package:http_parser/http_parser.dart';
 
 class ChatBoxWidget extends StatefulWidget {
   final User currentUser;
@@ -170,25 +171,56 @@ class _ChatBoxWidgetState extends State<ChatBoxWidget> {
     if (_selectedImage == null) return;
 
     try {
+      // Get file extension
+      final extension = path.extension(_selectedImage!.path).toLowerCase();
+
+      // Map extension to content type
+      final contentType = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+          }[extension] ??
+          'image/jpeg'; // Default to jpeg if unknown
+
+      print("File path: ${_selectedImage!.path}");
+      print("File extension: $extension");
+      print("Content type being set: $contentType");
+
+      // Create multipart request
       var request = http.MultipartRequest('POST',
           Uri.parse('http://10.0.2.2:5050/api/ChatControllers/upload-image'));
-      request.files.add(await http.MultipartFile.fromPath(
+
+      // Create multipart file with explicit content type
+      var multipartFile = await http.MultipartFile.fromPath(
           'image', _selectedImage!.path,
-          filename: path.basename(_selectedImage!.path)));
+          filename: path.basename(_selectedImage!.path),
+          contentType: MediaType.parse(contentType));
+
+      request.files.add(multipartFile);
+
+      // Print request details for debugging
+      print(
+          "Request files: ${request.files.map((f) => '${f.filename}: ${f.contentType}').join(', ')}");
+
       var response = await request.send();
       var responseBody = await response.stream.bytesToString();
+      print("Response status code: ${response.statusCode}");
+      print("Response body: $responseBody");
+
       var decodedResponse = json.decode(responseBody);
 
       if (decodedResponse['flag']) {
         setState(() {
           _imageUrl = decodedResponse['data'];
         });
+        print("Image uploaded successfully: $_imageUrl");
       } else {
         throw Exception(decodedResponse['message']);
       }
     } catch (e) {
       print("Error uploading image: $e");
-      throw Exception('Failed to upload image.');
+      throw Exception('Failed to upload image: ${e.toString()}');
     }
   }
 

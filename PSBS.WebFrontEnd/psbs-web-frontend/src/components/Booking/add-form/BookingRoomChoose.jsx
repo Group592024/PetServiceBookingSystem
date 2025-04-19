@@ -24,7 +24,6 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     price: "",
     camera: false,
   });
-
   const getToken = () => sessionStorage.getItem('token');
 
   // [Keep all your existing useEffect hooks and logic exactly as is]
@@ -111,7 +110,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
     onBookingDataChange(updatedData);
   };
 
-  const now = new Date().toISOString().slice(0, 16);
+  const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 16);
   const selectedPet = pets.find(p => p.petId === formData.pet);
 
   return (
@@ -171,7 +170,8 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             fullWidth
             size="small"
             InputLabelProps={{ shrink: true }}
-            min={now}
+            inputProps={{ min: now }}
+            helperText="Select a date and time from now onwards"
           />
         </Box>
         <Box sx={{ flex: 1 }}>
@@ -184,7 +184,8 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
             fullWidth
             size="small"
             InputLabelProps={{ shrink: true }}
-            min={now}
+            inputProps={{ min: formData.start || now }}
+            helperText="Select a date and time from now onwards"
           />
         </Box>
       </Box>
@@ -210,7 +211,7 @@ const BookingRoomChoose = ({ bookingData, onBookingDataChange, data }) => {
           {new Intl.NumberFormat("vi-VN", {
             style: "currency",
             currency: "VND",
-          }).format(formData.price) || "0"} 
+          }).format(formData.price) || "0"}
         </Typography>
       </Box>
 

@@ -160,7 +160,7 @@ const BookingServiceForm = () => {
   }, [voucherId, totalPrice, vouchers, setFinalDiscount, setDiscountedPrice]);
 
   useEffect(() => {
-    const now = new Date().toISOString().slice(0, 16);
+    const now = new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 16);
     setMinDateTime(now);
     if (!bookingServicesDate || bookingServicesDate < now) {
       setbookingServicesDate(now);
@@ -347,9 +347,10 @@ const BookingServiceForm = () => {
             type="datetime-local"
             value={bookingServicesDate}
             onChange={handleDateChange}
-            min={minDateTime}
+            inputProps={{ min: minDateTime }}
             fullWidth
             InputLabelProps={{ shrink: true }}
+            helperText="Select a date and time from now onwards"
           />
         </CardContent>
       </Card>

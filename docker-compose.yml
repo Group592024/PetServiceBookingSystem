@@ -1,0 +1,136 @@
+version: "3.8"
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: PetEase
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Admin@12345
+    ports:
+      - "11433:1433"
+    networks:
+      - petease-network
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  authenticationapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.AccountServiceApiSolution/Dockerfile
+    container_name: authenticationapi
+    ports:
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+
+  gatewayapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.ApiGatewaySolution/Dockerfile
+    container_name: gatewayapi
+    ports:
+      - "5050:5050"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+
+  chatapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.ChatServiceApiSolution/Dockerfile
+    container_name: chatapi
+    ports:
+      - "5159:5159"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+
+  facilityapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.FacilityServiceApiSolution/Dockerfile
+    container_name: facilityapi
+    ports:
+      - "5023:5023"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+
+  petapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.PetServiceApiSolution/Dockerfile
+    container_name: petapi
+    ports:
+      - "5150:5150"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+  healthcareapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.HealthCareServiceApiSolution/Dockerfile
+    container_name: healthcareapi
+    ports:
+      - "5003:5003"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+  rewardapi:
+    build:
+      context: . # Set context to the root directory
+      dockerfile: PSBS.RewardServiceApiSolution/Dockerfile
+    container_name: rewardapi
+    ports:
+      - "5022:5022"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    depends_on:
+      - sqlserver
+    networks:
+      - petease-network
+    # Remove the temporary entrypoint
+  reservationapi:
+    build:
+      context: . # root of the repo
+      dockerfile: PSBS.ReservationServiceApiSolution/Dockerfile
+    container_name: reservationapi
+    ports:
+      - "5115:5115" # HTTP
+      - "5201:5201" # HTTPS
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    networks:
+      - petease-network
+
+networks:
+  petease-network:
+    driver: bridge
+
+volumes:
+  sqlserver_data:

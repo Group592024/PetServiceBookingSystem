@@ -21,8 +21,8 @@ namespace ReservationApi.Infrastructure.Repositories
             var existingBooking = await GetByIdAsync(bookingId);
             try
             {
-                
-                if(existingBooking == null)
+
+                if (existingBooking == null)
                 {
                     return new Response(false, "No detected any booking.");
                 }
@@ -31,7 +31,7 @@ namespace ReservationApi.Infrastructure.Repositories
                 {
                     return new Response(false, "The booking can't be canceled. No currentBookingStatus");
                 }
-                if (!currentBookingStatus.BookingStatusName.Contains("Pending")  && !currentBookingStatus.BookingStatusName.Contains("Confirmed"))
+                if (!currentBookingStatus.BookingStatusName.Contains("Pending") && !currentBookingStatus.BookingStatusName.Contains("Confirmed"))
                 {
                     return new Response(false, "The booking can't be canceled.");
                 }
@@ -173,7 +173,7 @@ namespace ReservationApi.Infrastructure.Repositories
 
         public async Task<Response> IsReferencedInBookings(Guid voucherId)
         {
-           var isReferencedInBooking = await context.Bookings.AnyAsync(r=>r.VoucherId == voucherId);
+            var isReferencedInBooking = await context.Bookings.AnyAsync(r => r.VoucherId == voucherId);
             if (isReferencedInBooking)
             {
                 return new Response(true, "The voucher is referenced in the booking");
@@ -185,6 +185,41 @@ namespace ReservationApi.Infrastructure.Repositories
         {
             throw new NotImplementedException();
         }
+        public async Task<Response> AddNoteToBookingAsync(Guid bookingId, string note)
+        {
+            try
+            {
+                var existingBooking = await GetByIdAsync(bookingId);
+
+                if (existingBooking == null)
+                {
+                    return new Response(false, "No booking found with the specified ID.");
+                }
+
+                // Append the new note to existing notes, if any
+                if (string.IsNullOrEmpty(existingBooking.Notes))
+                {
+                    existingBooking.Notes = note;
+                }
+                else
+                {
+                    // Add a line break and timestamp before appending the new note
+                    var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    existingBooking.Notes += $"\n\n[{timestamp}] {note}";
+                }
+
+                context.Bookings.Update(existingBooking);
+                await context.SaveChangesAsync();
+
+                return new Response(true, "Note added successfully to the booking.");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                return new Response(false, "Error occurred while adding note to the booking.");
+            }
+        }
+
 
 
         private string GenerateBookingCode()

@@ -23,10 +23,23 @@ const RoomBookingDetailPage = () => {
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedRoomHistoryId, setSelectedRoomHistoryId] = useState(null);
   const [statusLoading, setStatusLoading] = useState(false);
- const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [selectedCameraId, setSelectedCameraId] = useState(null);
+  const [voucherDetails, setVoucherDetails] = useState(null);
+  const [bookingNote, setBookingNote] = useState("");
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
+  // Add this function to handle opening the note modal
+  const handleOpenNoteModal = () => {
+    setIsNoteModalOpen(true);
+  };
+
+  // Add this function to handle closing the note modal
+  const handleCloseNoteModal = () => {
+    setIsNoteModalOpen(false);
+  };
+
 
   const fetchPetName = async (petId) => {
     try {
@@ -118,7 +131,7 @@ const RoomBookingDetailPage = () => {
     const fetchBookingDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `http://localhost:5115/Bookings/${bookingId}`,
+          `http://localhost:5050/Bookings/${bookingId}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -126,6 +139,11 @@ const RoomBookingDetailPage = () => {
           }
         );
         setBooking(bookingResponse.data.data);
+        // Fetch voucher details if voucherId exists
+        if (bookingResponse.data.data.voucherId &&
+          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
+          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
+        }
 
         const paymentResponse = await axios.get(
           `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
@@ -210,7 +228,8 @@ const RoomBookingDetailPage = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(
-            `http://localhost:5115/Bookings/cancel/${bookingId}`,
+            `http://localhost:5050/Bookings/cancel/${bookingId}`,
+            null,
             {
               headers: {
                 Authorization: `Bearer ${getToken()}`,
@@ -249,6 +268,7 @@ const RoomBookingDetailPage = () => {
     });
   };
 
+
   const handleNextStatus = async () => {
     const statusOrder = ["Pending", "Confirmed", "Checked in", "Checked out"];
     const currentIndex = statusOrder.indexOf(bookingStatusName);
@@ -284,7 +304,7 @@ const RoomBookingDetailPage = () => {
       }
 
       const response = await axios.put(
-        `http://localhost:5115/Bookings/updateRoomStatus/${bookingId}`,
+        `http://localhost:5050/Bookings/updateRoomStatus/${bookingId}`,
         { status: nextStatus },
         {
           headers: {
@@ -306,6 +326,12 @@ const RoomBookingDetailPage = () => {
         }
 
         setBookingStatusName(nextStatus);
+        if (nextStatus === "Checked out" && paymentTypeName === "COD" && !booking.isPaid) {
+          setBooking(prev => ({
+            ...prev,
+            isPaid: true
+          }));
+        }
         await Swal.fire(
           "Success!",
           `Booking status updated to ${nextStatus}.`,
@@ -337,9 +363,9 @@ const RoomBookingDetailPage = () => {
         redirectPath: currentPath
       });
 
-      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+      const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
-      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
       const vnpayResponse = await fetch(vnpayUrl, {
         method: "GET",
@@ -361,6 +387,111 @@ const RoomBookingDetailPage = () => {
       Swal.fire("Error!", "An error occurred while processing payment.", "error");
     }
   };
+  const fetchVoucherDetails = async (voucherId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/${voucherId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        setVoucherDetails(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
+    }
+  };
+
+  // Add this function to handle saving the note
+  const handleSaveNote = async () => {
+    try {
+      const now = new Date();
+      const timestamp = now.toISOString().replace('T', ' ').substring(0, 19);
+
+      // Ensure proper spacing between existing notes and new note
+      let formattedNote;
+      if (booking.notes) {
+        // If there's already a note, add a space before the timestamp
+        formattedNote = `${booking.notes.trim()} [${timestamp}] ${bookingNote.trim()}`;
+      } else {
+        // If this is the first note, just add the timestamp
+        formattedNote = `[${timestamp}] ${bookingNote.trim()}`;
+      }
+      const response = await axios.put(
+        `http://localhost:5050/Bookings/addnote/${bookingId}`,
+        JSON.stringify(bookingNote),
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.data.flag) {
+        // Update local state with the new note
+        setBooking(prev => ({
+          ...prev,
+          notes: formattedNote
+        }));
+
+        await Swal.fire(
+          "Success!",
+          "Note has been added to the booking.",
+          "success"
+        );
+        setIsNoteModalOpen(false);
+        setBookingNote("");
+      } else {
+        throw new Error(response.data.message || "Failed to add note");
+      }
+    } catch (error) {
+      await Swal.fire(
+        "Error!",
+        error.response?.data?.message || error.message || "Failed to add note",
+        "error"
+      );
+    }
+  };
+
+  const formatBookingNotes = (notes) => {
+    if (!notes) return "No notes";
+
+    // Check if the note already has timestamps (Type 2)
+    if (notes.trim().startsWith('[')) {
+      // Type 2: Just display the timestamped notes with proper formatting
+      return notes.replace(/\[/g, '\n[').trim();
+    } else {
+      // Type 1: Original note followed by timestamped notes
+      // Split by timestamp pattern to separate original note from admin notes
+      const parts = notes.split(/(\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\])/);
+
+      if (parts.length > 1) {
+        // First part is the original note, rest are timestamps and notes
+        const originalNote = parts[0].trim();
+        let formattedNotes = originalNote;
+
+        // Add each timestamped note on a new line
+        for (let i = 1; i < parts.length; i++) {
+          if (parts[i].match(/\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]/)) {
+            formattedNotes += '\n' + parts[i];
+          } else if (parts[i].trim()) {
+            formattedNotes += ' ' + parts[i].trim();
+          }
+        }
+
+        return formattedNotes;
+      }
+
+      // If no timestamps found, just return the original note
+      return notes;
+    }
+  };
+
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -531,8 +662,8 @@ const RoomBookingDetailPage = () => {
                 </p>
                 <p className="text-lg mt-2">
                   <span className="font-semibold text-gray-700">Notes:</span>{" "}
-                  <span className="text-gray-800">
-                    {booking.notes || "No notes"}
+                  <span className="text-gray-800 whitespace-pre-line">
+                    {formatBookingNotes(booking.notes)}
                   </span>
                 </p>
                 <p className="text-lg mt-2">
@@ -548,6 +679,93 @@ const RoomBookingDetailPage = () => {
                     {booking.isPaid ? "Paid" : "Pending"}
                   </span>
                 </p>
+                {bookingStatusName === "Cancelled" && paymentTypeName === "VNPay" && booking?.isPaid && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <button
+                      onClick={handleOpenNoteModal}
+                      className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-300 flex items-center"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 mr-2"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                        <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                      </svg>
+                      Take Note
+                    </button>
+                    <p className="text-sm text-gray-600 mt-2">
+                      Add a note for this cancelled booking with paid VNPay payment.
+                    </p>
+                  </div>
+                )}
+
+                {/* Note Modal */}
+                {isNoteModalOpen && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                      <h3 className="text-xl font-semibold mb-4">Add Note to Booking</h3>
+                      <p className="text-gray-600 mb-4">
+                        This booking was cancelled but payment was received via VNPay.
+                        Please add a note about how this situation was handled.
+                      </p>
+
+                      <textarea
+                        value={bookingNote}
+                        onChange={(e) => setBookingNote(e.target.value)}
+                        className="w-full h-32 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter your note here..."
+                      ></textarea>
+
+                      <div className="flex justify-end mt-4 space-x-2">
+                        <button
+                          onClick={handleCloseNoteModal}
+                          className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-300"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleSaveNote}
+                          disabled={!bookingNote.trim()}
+                          className={`px-4 py-2 rounded-lg transition-colors duration-300 ${bookingNote.trim()
+                            ? "bg-blue-500 text-white hover:bg-blue-600"
+                            : "bg-blue-300 text-white cursor-not-allowed"
+                            }`}
+                        >
+                          Save Note
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {voucherDetails && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Voucher Name:</span>{" "}
+                          <span className="text-blue-600">{voucherDetails.voucherName}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Code:</span>{" "}
+                          <span className="text-gray-800">{voucherDetails.voucherCode}</span>
+                        </p>
+                        <p className="text-gray-700">
+                          <span className="font-semibold">Discount:</span>{" "}
+                          <span className="text-green-600">
+                            {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(voucherDetails.voucherMaximum)})
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -584,7 +802,7 @@ const RoomBookingDetailPage = () => {
                       </span>
                       <button
                         onClick={() =>
-                          handleOpenAssignModal (history)
+                          handleOpenAssignModal(history)
 
                         }
                         className="p-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition duration-300"
@@ -759,13 +977,13 @@ const RoomBookingDetailPage = () => {
             )}
         </motion.div>
       </div>
-      <AssignCamera 
-  open={assignModalOpen}
-  onClose={() => setAssignModalOpen(false)}
-  roomHistoryId={selectedRoomHistoryId}
-  onSuccess={handleAssignSuccess}
-  cameraId={selectedCameraId}
-/>
+      <AssignCamera
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        roomHistoryId={selectedRoomHistoryId}
+        onSuccess={handleAssignSuccess}
+        cameraId={selectedCameraId}
+      />
 
     </div>
   );

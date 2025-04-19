@@ -1,7 +1,7 @@
 import moment from 'moment';
 
 describe('Pet Health Book List - Customer Page', () => {
-  const ACCOUNT_ID = 'account-001';
+  const ACCOUNT_ID = '597618bc-b68e-48cb-8cfb-e698ae1dd4d6';
   const petId = 'pet1';
   const LOGIN_URL = 'http://localhost:3000/login';
   const PET_HEALTH_LIST_URL = `http://localhost:3000/list/${petId}`;
@@ -111,7 +111,7 @@ describe('Pet Health Book List - Customer Page', () => {
   });
 
   it('displays pet list with health records', () => {
-    cy.contains('My Pet Health Book List').should('be.visible');
+    cy.contains('My Pet Health Book').should('be.visible');
     cy.contains('View health records for all your pets').should('be.visible');
 
     cy.contains('Buddy').should('be.visible');

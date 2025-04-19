@@ -133,7 +133,9 @@ class AllService extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/services');
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue,
                             shape: RoundedRectangleBorder(

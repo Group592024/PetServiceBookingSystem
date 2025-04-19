@@ -21,6 +21,8 @@ const CustomerRoomBookingDetail = () => {
   const [allDataLoaded, setAllDataLoaded] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [isPushModalOpen, setPushModalOpen] = useState(false);
+  const [selectedRoomHistoryId, setSelectedRoomHistoryId] = useState(null);
+  const [voucherDetails, setVoucherDetails] = useState(null);
   const getToken = () => {
     return sessionStorage.getItem("token");
   };
@@ -62,7 +64,7 @@ const CustomerRoomBookingDetail = () => {
     const fetchBookingDetails = async () => {
       try {
         const bookingResponse = await axios.get(
-          `http://localhost:5115/Bookings/${bookingId}`,
+          `http://localhost:5050/Bookings/${bookingId}`,
           {
             headers: {
               Authorization: `Bearer ${getToken()}`,
@@ -70,6 +72,11 @@ const CustomerRoomBookingDetail = () => {
           }
         );
         setBooking(bookingResponse.data.data);
+        // Fetch voucher details if voucherId exists
+        if (bookingResponse.data.data.voucherId &&
+          bookingResponse.data.data.voucherId !== "00000000-0000-0000-0000-000000000000") {
+          await fetchVoucherDetails(bookingResponse.data.data.voucherId);
+        }
 
         const paymentResponse = await axios.get(
           `http://localhost:5050/api/PaymentType/${bookingResponse.data.data.paymentTypeId}`,
@@ -161,7 +168,7 @@ const CustomerRoomBookingDetail = () => {
       if (result.isConfirmed) {
         try {
           const response = await axios.put(
-            `http://localhost:5115/Bookings/cancel/${bookingId}`,
+            `http://localhost:5050/Bookings/cancel/${bookingId}`,
             null,
             {
               headers: {
@@ -200,6 +207,25 @@ const CustomerRoomBookingDetail = () => {
       }
     });
   };
+  const fetchVoucherDetails = async (voucherId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/${voucherId}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      if (response.data.flag && response.data.data) {
+        setVoucherDetails(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching voucher details:", error);
+    }
+  };
 
   const handleCameraSettings = (roomHistoryId) => {
     const room = roomHistory.find((r) => r.roomHistoryId === roomHistoryId);
@@ -222,9 +248,9 @@ const CustomerRoomBookingDetail = () => {
         redirectPath: currentPath
       });
 
-      const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+      const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
         booking.totalAmount
-      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+      )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
       console.log("VNPay URL:", vnpayUrl);
 
@@ -249,6 +275,48 @@ const CustomerRoomBookingDetail = () => {
       Swal.fire("Error!", "An error occurred while processing payment.", "error");
     }
   };
+  const formatBookingNotes = (notes) => {
+    if (!notes) return "No notes";
+
+    // Replace any existing line breaks with spaces to normalize the text first
+    let normalizedNotes = notes.replace(/\n/g, ' ').trim();
+
+    // Check if the note already has timestamps (Type 2)
+    if (normalizedNotes.startsWith('[')) {
+      // Type 2: Format timestamped notes
+      // First, ensure consistent spacing around timestamps
+      normalizedNotes = normalizedNotes.replace(/\s*\[/g, ' [').trim();
+      // Then replace timestamps with line breaks before them
+      return normalizedNotes.replace(/\s+\[/g, '\n[');
+    } else {
+      // Type 1: Original note followed by timestamped notes
+      const timestampPattern = /\[\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}\]/;
+
+      // Find the first timestamp
+      const firstTimestampIndex = normalizedNotes.search(timestampPattern);
+
+      if (firstTimestampIndex !== -1) {
+        // Extract the original note (everything before the first timestamp)
+        const originalNote = normalizedNotes.substring(0, firstTimestampIndex).trim();
+
+        // Extract the part with timestamps
+        const timestampedPart = normalizedNotes.substring(firstTimestampIndex);
+
+        // Format the timestamped part with line breaks
+        const formattedTimestampedPart = timestampedPart
+          .replace(/\s*\[/g, ' [')  // Ensure consistent spacing
+          .trim()
+          .replace(/\s+\[/g, '\n['); // Add line breaks before timestamps
+
+        // Combine original note with formatted timestamped part
+        return originalNote + '\n' + formattedTimestampedPart;
+      }
+
+      // If no timestamps found, just return the original note
+      return normalizedNotes;
+    }
+  };
+
 
   if (loading) {
     return (
@@ -355,20 +423,19 @@ const CustomerRoomBookingDetail = () => {
                   Booking Date:
                 </span>{" "}
                 <span className="text-gray-800">
-                  {booking.bookingDate.toLocaleString('en-GB', {
+                  {new Date(booking.bookingDate).toLocaleString('en-GB', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric',
                     hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: true
+                    minute: '2-digit'
                   }).replace(',', '')}
                 </span>
               </p>
               <p className="text-lg mt-2">
                 <span className="font-semibold text-gray-700">Notes:</span>{" "}
-                <span className="text-gray-800">
-                  {booking.notes || "No notes"}
+                <span className="text-gray-800 whitespace-pre-line">
+                  {formatBookingNotes(booking.notes)}
                 </span>
               </p>
               <p className="text-lg mt-2">
@@ -384,6 +451,32 @@ const CustomerRoomBookingDetail = () => {
                   {booking.isPaid ? "Paid" : "Pending"}
                 </span>
               </p>
+              {voucherDetails && (
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-2">Applied Voucher</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Voucher Name:</span>{" "}
+                        <span className="text-blue-600">{voucherDetails.voucherName}</span>
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Code:</span>{" "}
+                        <span className="text-gray-800">{voucherDetails.voucherCode}</span>
+                      </p>
+                      <p className="text-gray-700">
+                        <span className="font-semibold">Discount:</span>{" "}
+                        <span className="text-green-600">
+                          {voucherDetails.voucherDiscount}% (Max {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(voucherDetails.voucherMaximum)})
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
@@ -470,20 +563,20 @@ const CustomerRoomBookingDetail = () => {
                     <p className="text-gray-700">
                       <span className="font-semibold">Booking Period:</span>{" "}
                       <span className="text-gray-800">
-                      {formatDate(history.bookingStartDate)} -{" "}
-                      {formatDate(history.bookingEndDate)}
+                        {formatDate(history.bookingStartDate)} -{" "}
+                        {formatDate(history.bookingEndDate)}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-in:</span>{" "}
                       <span className="text-gray-800">
-                      {history.checkInDate? formatDate(history.checkInDate): "Not checked in"}
+                        {history.checkInDate ? formatDate(history.checkInDate) : "Not checked in"}
                       </span>
                     </p>
                     <p className="text-gray-700 mt-1">
                       <span className="font-semibold">Check-out:</span>{" "}
                       <span className="text-gray-800">
-                      {history.checkOutDate ? formatDate(history.checkOutDate): "Not checked out"}
+                        {history.checkOutDate ? formatDate(history.checkOutDate) : "Not checked out"}
                       </span>
                     </p>
                     <p className="text-gray-700">
