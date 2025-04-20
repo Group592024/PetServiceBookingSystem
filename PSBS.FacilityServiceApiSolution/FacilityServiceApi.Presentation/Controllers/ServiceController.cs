@@ -117,13 +117,13 @@ namespace FacilityServiceApi.Presentation.Controllers
             if (existingService == null)
                 return NotFound($"Service with ID {id} not found");
 
-            var imagePath = Path.Combine("images", imageFile.FileName);
+            var imagePath = Path.Combine("Images", imageFile.FileName);
             using (var stream = new FileStream(imagePath, FileMode.Create))
             {
                 await imageFile.CopyToAsync(stream);
             }
 
-            existingService.serviceImage = $"/images/{imageFile.FileName}";
+            existingService.serviceImage = $"/Images/{imageFile.FileName}";
             var response = await _service.UpdateAsync(existingService);
 
             return response.Flag ? Ok(response) : BadRequest(response);
@@ -259,15 +259,15 @@ namespace FacilityServiceApi.Presentation.Controllers
 
 
                 // Đường dẫn thư mục lưu ảnh
-                var imagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "images");
-                if (!Directory.Exists(imagesDirectory))
+                var ImagesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Images");
+                if (!Directory.Exists(ImagesDirectory))
                 {
-                    Directory.CreateDirectory(imagesDirectory);
+                    Directory.CreateDirectory(ImagesDirectory);
                 }
 
                 // Tạo tên file duy nhất bằng cách kết hợp DateTime với Guid và đuôi file gốc
                 var uniqueFileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}_{Guid.NewGuid()}{Path.GetExtension(imageFile.FileName)}";
-                var imagePath = Path.Combine(imagesDirectory, uniqueFileName);
+                var imagePath = Path.Combine(ImagesDirectory, uniqueFileName);
 
                 // Ghi file
                 using (var stream = new FileStream(imagePath, FileMode.Create))
@@ -276,7 +276,7 @@ namespace FacilityServiceApi.Presentation.Controllers
                 }
 
                 // Trả về đường dẫn để lưu trong database (đường dẫn tương đối)
-                return $"/images/{uniqueFileName}";
+                return $"/Images/{uniqueFileName}";
             }
 
             // Nếu không upload file mới, trả về đường dẫn ảnh hiện tại (nếu có)

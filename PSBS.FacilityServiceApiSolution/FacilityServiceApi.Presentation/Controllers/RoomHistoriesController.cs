@@ -40,7 +40,10 @@ namespace FacilityServiceApi.Presentation.Controllers
             var bookingRoomItems = await roomHistoryInterface.GetRoomHistoryByBookingId(id);
             if (!bookingRoomItems.Any())
             {
-                return NotFound(new Response(false, "No item detected"));
+                return Ok(new Response(true, "No room history items found for this booking")
+                {
+                    Data = new List<RoomHistoryDTO>()
+                });
             }
 
             return Ok(new Response(true, "Booking room item retrieved successfully!")
@@ -117,19 +120,19 @@ namespace FacilityServiceApi.Presentation.Controllers
 
                 if (existingRoomHistory.BookingCamera && existingRoomHistory.cameraId != Guid.Empty)
                 {
-                   if(existingRoomHistory.cameraId == null)
-                   {
-                       LogExceptions.LogException(new Exception($"Camera Id {existingRoomHistory.cameraId} not found"));
-                       return Ok(checkoutResponse);
-                   }
-                   var bookingCamera = await cameraInterface.GetByIdAsync((Guid) existingRoomHistory.cameraId);
-                   if(bookingCamera == null)
-                   {
-                       LogExceptions.LogException(new Exception($"Camera with Id {existingRoomHistory.cameraId} not found"));
-                       return Ok(checkoutResponse);
-                   }
-                   bookingCamera.cameraStatus = "Free";
-                   var cameraResponse = await cameraInterface.UpdateAsync(bookingCamera);
+                    if (existingRoomHistory.cameraId == null)
+                    {
+                        LogExceptions.LogException(new Exception($"Camera Id {existingRoomHistory.cameraId} not found"));
+                        return Ok(checkoutResponse);
+                    }
+                    var bookingCamera = await cameraInterface.GetByIdAsync((Guid)existingRoomHistory.cameraId);
+                    if (bookingCamera == null)
+                    {
+                        LogExceptions.LogException(new Exception($"Camera with Id {existingRoomHistory.cameraId} not found"));
+                        return Ok(checkoutResponse);
+                    }
+                    bookingCamera.cameraStatus = "Free";
+                    var cameraResponse = await cameraInterface.UpdateAsync(bookingCamera);
                 }
 
                 return Ok(roomResponse.Flag ? checkoutResponse : roomResponse);
@@ -140,7 +143,7 @@ namespace FacilityServiceApi.Presentation.Controllers
                 return StatusCode(500, new Response(false, "An unexpected error occurred"));
             }
         }
-    [HttpGet("GetAll")]
+        [HttpGet("GetAll")]
         [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> GetAllRoomHistories()
         {

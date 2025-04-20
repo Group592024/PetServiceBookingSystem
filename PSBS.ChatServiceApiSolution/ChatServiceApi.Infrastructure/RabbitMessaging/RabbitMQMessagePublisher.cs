@@ -61,7 +61,7 @@ namespace ChatServiceApi.Infrastructure.RabbitMessaging
                 {
                     var factory = new ConnectionFactory
                     {
-                        Uri = new Uri(config["RabbitMQ:Uri"] ?? "amqp://guest:guest@localhost:5672"),
+                        Uri = new Uri("amqp://guest:guest@rabbit-server:5672"),
                         ClientProvidedName = "Rabbit Sender App",
                         AutomaticRecoveryEnabled = true,
                         NetworkRecoveryInterval = TimeSpan.FromSeconds(30),

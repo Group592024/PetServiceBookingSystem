@@ -26,7 +26,7 @@ const GiftDatatable = () => {
   const fetchGifts = async () => {
     try {
       const giftResponse = await axios.get(
-        "http://localhost:5050/Gifts/admin-gift-s",
+        "http://localhost:5050/Gifts/admin-gift-list",
         config
       );
 

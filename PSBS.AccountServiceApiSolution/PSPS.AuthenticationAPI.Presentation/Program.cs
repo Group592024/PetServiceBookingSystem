@@ -6,6 +6,8 @@ using PSPS.AccountAPI.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.WebHost.UseUrls("http://0.0.0.0:5001");
+
 builder.Services.AddHttpClient();
 builder.Services.AddCors(options =>
 {
@@ -26,11 +28,11 @@ builder.Services.AddControllers()
     });
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5000); // Any IP with 5023
+    options.ListenAnyIP(5001); // Any IP with 5023
 });
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5050/");
+    client.BaseAddress = new Uri("http://gatewayapi:5050/");
 });
 builder.Services.AddAuthorization(options =>
 {

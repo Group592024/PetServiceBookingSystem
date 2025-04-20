@@ -440,7 +440,8 @@ namespace UnitTest.AccountServiceApi.Controllers
                 AccountAddress: "Updated Address",
                 AccountImage: "updated.jpg",
                 isPickImage: true,
-                RoleId: "User"
+                RoleId: "User",
+                AccountIsDeleted: false
             );
             var updateModel = new AddAccount(uploadModel, updateAccountDTO);
             var expectedResponse = new Response(true, "Update successful")
@@ -471,7 +472,8 @@ namespace UnitTest.AccountServiceApi.Controllers
                 AccountAddress: null,
                 AccountImage: null,
                 isPickImage: null,
-                RoleId: null
+                RoleId: null,
+                AccountIsDeleted: false
             );
 
             var updateModel = new AddAccount(null, updateAccountDTO);

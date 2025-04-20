@@ -110,7 +110,7 @@ describe('Login Page', () => {
     cy.get('button[type="submit"]').click();
 
     cy.wait('@deletedLogin', { timeout: 15000 });
-    cy.get('.swal2-popup').should('contain.text', 'Account Deleted');
-    cy.get('.swal2-popup').should('contain.text', 'Your account has been deleted. Please contact support.');
+    cy.get('.swal2-popup').should('contain.text', 'Account Baned');
+    cy.get('.swal2-popup').should('contain.text', 'Your account has been baned. Please contact shop to support.');
   });
 });

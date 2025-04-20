@@ -30,7 +30,7 @@ const PetDiaryCard = ({ petDiary, onEdit, onDelete, role }) => {
                 alt={petDiary?.pet?.pet_Name}
                 src={
                   petDiary
-                    ? `http://localhost:5010${petDiary?.pet?.pet_Image}`
+                    ? `http://localhost:5050/pet-service${petDiary?.pet?.pet_Image}`
                     : sampleImage
                 }
                 className="relative w-12 h-12 border-2 border-white shadow-sm"

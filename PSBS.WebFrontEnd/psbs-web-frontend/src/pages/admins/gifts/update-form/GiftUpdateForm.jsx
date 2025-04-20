@@ -28,6 +28,7 @@ function GiftUpdatePage() {
       Authorization: `Bearer ${token}`,
     },
   };
+
   useEffect(() => {
     const fetchGiftDetail = async () => {
       try {
@@ -41,15 +42,17 @@ function GiftUpdatePage() {
           setGift({
             ...response.data.data,
             giftStatus: response.data.data.giftStatus, // Ensure giftStatus is correctly assigned
+            // Convert null giftCode to empty string for controlled input
+            giftCode: response.data.data.giftCode || ""
           });
           setImagePreview(
             `http://localhost:5050${response.data.data.giftImage}`
           ); // Set the image preview URL
-         
+
         } else {
           Swal.fire({
             title: 'Warning',
-            text:  response.data.message || "Gift not found",
+            text: response.data.message || "Gift not found",
             icon: 'warning',
             confirmButtonText: 'OK'
           });
@@ -58,7 +61,7 @@ function GiftUpdatePage() {
         console.error("Error fetching gift details:", error);
         Swal.fire({
           title: 'Warning',
-          text:  "Gift not found",
+          text: "Gift not found",
           icon: 'warning',
           confirmButtonText: 'OK'
         });
@@ -76,6 +79,11 @@ function GiftUpdatePage() {
       ...prevGift,
       [name]: value,
     }));
+
+    // Clear any previous errors for this field
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleFileChange = (event) => {
@@ -129,6 +137,39 @@ function GiftUpdatePage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // New function to validate gift code
+  const validateGiftCode = async () => {
+    // If gift code is empty, it's valid (optional field)
+    if (!gift.giftCode.trim()) {
+      return true;
+    }
+
+    try {
+      const response = await axios.get(
+        `http://localhost:5050/api/Voucher/search-gift-code?voucherCode=${gift.giftCode}`,
+        config
+      );
+
+      // If the gift code exists and is different from the current gift's code
+      if (response.data.flag && response.data.data) {
+        return true;
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          giftCode: "Gift code not found or invalid"
+        }));
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking gift code:", error);
+      setErrors(prev => ({
+        ...prev,
+        giftCode: "Error checking gift code"
+      }));
+      return false;
+    }
+  };
+
   const handleUpdateGift = async (event) => {
     event.preventDefault();
 
@@ -136,21 +177,24 @@ function GiftUpdatePage() {
       return;
     }
 
+    // If gift code is provided, validate it
+    if (gift.giftCode.trim()) {
+      const isGiftCodeValid = await validateGiftCode();
+      if (!isGiftCodeValid) {
+        return;
+      }
+    }
+
     try {
       const formData = new FormData();
       formData.append("giftId", giftId);
       formData.append("giftName", gift.giftName);
       formData.append("giftPoint", gift.giftPoint);
-      formData.append("giftCode", gift.giftCode);
+      // Only append giftCode if it's not empty
+      formData.append("giftCode", gift.giftCode.trim() || "");
       formData.append("giftDescription", gift.giftDescription);
       formData.append("quantity", gift.quantity);
       formData.append("giftStatus", gift.giftStatus);
-      // Check if the giftImage is a valid file before appending to FormData
-      // if (gift.giftImage && typeof gift.giftImage === 'string') {
-      //   formData.append("giftImage", gift.giftImage);
-      // } else {
-      //   formData.append("giftImage", gift.giftImage);
-      // }
 
       if (imagePreview && typeof imagePreview === "string") {
         formData.append("giftImage", imagePreview);
@@ -177,7 +221,7 @@ function GiftUpdatePage() {
       if (response.data.flag) {
         Swal.fire({
           title: 'Success',
-          text:  response.data.message || "Gift updated successfully!",
+          text: response.data.message || "Gift updated successfully!",
           icon: 'success',
           confirmButtonText: 'OK'
         });
@@ -185,7 +229,7 @@ function GiftUpdatePage() {
       } else {
         Swal.fire({
           title: 'Warning',
-          text:  response.data.message || "Failed to update gift",
+          text: response.data.message || "Failed to update gift",
           icon: 'warning',
           confirmButtonText: 'OK'
         });
@@ -194,7 +238,7 @@ function GiftUpdatePage() {
       console.error("Error updating gift:", error);
       Swal.fire({
         title: 'Warning',
-        text:  "Error updating gift.",
+        text: "Error updating gift.",
         icon: 'warning',
         confirmButtonText: 'OK'
       });
@@ -271,10 +315,12 @@ function GiftUpdatePage() {
 
                 <TextField
                   fullWidth
-                  label="Gift Code"
+                  label="Gift Code (Optional)"
                   name="giftCode"
                   value={gift.giftCode}
                   onChange={handleInputChange}
+                  error={!!errors.giftCode}
+                  helperText={errors.giftCode}
                   sx={{ mb: 2 }}
                 />
 

@@ -123,14 +123,17 @@ namespace ChatServiceApi.Infrastructure.Repositories
                 .ToListAsync();
         }
         public async Task<IEnumerable<NotificationBox>> GetNotificationsByUserIdAsync(Guid userId)
-        {
-            return await context.NotificationBoxes
-            .Include(nb => nb.Notification)
-            .ThenInclude(n => n.NotificationType) 
-            .Where(nb => nb.UserId == userId && !nb.IsDeleted)
-            .OrderByDescending(nb => nb.CreatedDate)
-            .ToListAsync();
-        }
+{
+    return await context.NotificationBoxes
+        .Include(nb => nb.Notification)
+        .ThenInclude(n => n.NotificationType) 
+        .Where(nb => nb.UserId == userId && 
+                    !nb.IsDeleted && 
+                    !nb.Notification.IsDeleted)
+        .OrderByDescending(nb => nb.CreatedDate)
+        .ToListAsync();
+}
+
 
         public async Task<Response> DetelteUserNotification(Guid NotificationBoxId)
         {

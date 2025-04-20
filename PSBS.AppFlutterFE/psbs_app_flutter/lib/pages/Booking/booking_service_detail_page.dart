@@ -263,7 +263,7 @@ class _CustomerServiceBookingDetailState
 
       // Use the secure get method
       final response = await _secureGet(
-        'https://10.0.2.2:5201/Bookings/CreatePaymentUrl?'
+        'https://10.0.2.2:5201/api/VNPay/CreatePaymentUrl?'
         'moneyToPay=${booking!['totalAmount']}&'
         'description=${Uri.encodeComponent(description)}',
         {

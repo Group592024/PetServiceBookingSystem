@@ -168,7 +168,7 @@ const PetDiaryListPage = () => {
                   <img
                     src={
                       petInfo
-                        ? `http://localhost:5010${petInfo.petImage}`
+                        ? `http://localhost:5050/pet-service${petInfo.petImage}`
                         : SampleImage
                     }
                     alt={petInfo?.petName || "Pet"}

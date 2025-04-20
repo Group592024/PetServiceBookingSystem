@@ -209,6 +209,18 @@ const Admin_Add_Booking = () => {
       if (!bookingServicesDate) {
         Swal.fire("Failed!", `Please select a booking date and time`, "error");
         return;
+      } else {
+        const now = new Date();
+        const fiveMinutesLater = new Date(now.getTime() + 5 * 60 * 1000);
+        const selectedDateTime = new Date(bookingServicesDate);
+        if (selectedDateTime < fiveMinutesLater) {
+          Swal.fire(
+            "Failed!",
+            `Booking date must be at least 5 minutes from now.`,
+            "error"
+          );
+          return;
+        }
       }
     }
 
@@ -234,7 +246,7 @@ const Admin_Add_Booking = () => {
       }
 
       if (selectedOption === "Room") {
-        apiUrl = "http://localhost:5115/Bookings/room";
+        apiUrl = "http://localhost:5050/Bookings/room";
         requestData = {
           bookingRooms: bookingRooms, // All booking details
           customer: formData, // Include customer information
@@ -244,7 +256,7 @@ const Admin_Add_Booking = () => {
           discountedPrice,
         };
       } else if (selectedOption === "Service") {
-        apiUrl = "http://localhost:5115/Bookings/service";
+        apiUrl = "http://localhost:5050/Bookings/service";
         requestData = {
           services: bookingServices,
           customer: formData,
@@ -292,15 +304,18 @@ const Admin_Add_Booking = () => {
             });
 
             console.log("BookingCode Response:", bookingCode);
-            const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+            const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
-            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
             console.log("VNPay URL:", vnpayUrl);
 
             const vnpayResponse = await fetch(vnpayUrl, {
               method: "GET",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                Authorization: `Bearer ${getToken()}`,
+                "Content-Type": "application/json",
+              },
             });
 
             const vnpayResult = await vnpayResponse.text();

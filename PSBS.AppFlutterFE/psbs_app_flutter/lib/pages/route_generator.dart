@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:psbs_app_flutter/main.dart';
 import 'package:psbs_app_flutter/models/voucher.dart';
 import 'package:psbs_app_flutter/pages/Account/changepassword_page.dart';
+import 'package:psbs_app_flutter/pages/Booking/add_booking.dart';
+import 'package:psbs_app_flutter/pages/Booking/booking_list_page.dart';
 import 'package:psbs_app_flutter/pages/Gifts/redeem_history_page.dart';
 import 'package:psbs_app_flutter/pages/chat/chat_page.dart';
 import 'package:psbs_app_flutter/pages/home_page.dart';
@@ -14,6 +16,7 @@ import 'package:psbs_app_flutter/pages/Services/service_page.dart';
 import 'package:psbs_app_flutter/pages/Account/register_page.dart';
 import 'package:psbs_app_flutter/pages/Account/forgotpassword_page.dart';
 import 'package:psbs_app_flutter/pages/Account/editprofile_page.dart';
+import 'package:psbs_app_flutter/pages/room/room_page.dart';
 import 'package:psbs_app_flutter/pages/vouchers/customer_voucher_list.dart';
 import 'package:psbs_app_flutter/pages/vouchers/voucher_detail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,7 +38,7 @@ class RouteGenerator {
       case '/pet':
         return MaterialPageRoute(builder: (_) => const PetPage());
       case '/booking':
-        return MaterialPageRoute(builder: (_) => const BookingPage());
+        return MaterialPageRoute(builder: (_) => AddBookingPage());
       case '/voucher':
         return MaterialPageRoute(builder: (_) => CustomerVoucherList());
       case '/profile':
@@ -71,7 +74,8 @@ class RouteGenerator {
         return _errorRoute();
       case '/chat':
         return MaterialPageRoute(builder: (_) => const ChatPage());
-
+      case '/room':
+        return MaterialPageRoute(builder: (_) => const RoomPage());
       case '/gifts':
         return MaterialPageRoute(builder: (_) => GiftListScreen());
       case '/services':

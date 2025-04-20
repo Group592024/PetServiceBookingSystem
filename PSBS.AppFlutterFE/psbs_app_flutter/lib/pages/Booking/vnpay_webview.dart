@@ -27,7 +27,7 @@ class _VNPayWebViewState extends State<VNPayWebView> {
   late WebViewController _controller;
   bool _isLoading = true;
   String _currentUrl = '';
-  static const String bookingBaseUrl = 'http://10.0.2.2:5115';
+  static const String bookingBaseUrl = 'http://10.0.2.2:5050';
 
   @override
   void initState() {
@@ -207,12 +207,14 @@ class _VNPayWebViewState extends State<VNPayWebView> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Close dialog
-              Navigator.of(context).pop(); // Return to previous screen
               
               // If successful, also pop the booking screen to go back to the list
               if (success) {
-                Navigator.of(context).pop();
-              }
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              }else {
+              // Just go back to the previous screen (add booking page)
+              Navigator.of(context).pop();
+            }
             },
             child: Text('OK'),
           ),

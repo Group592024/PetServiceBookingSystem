@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseUrls("http://0.0.0.0:5023");
 // Thêm logging để debug
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

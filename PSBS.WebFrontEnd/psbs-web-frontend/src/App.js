@@ -104,9 +104,7 @@ function App() {
   useEffect(() => {
     signalRService.startConnection("http://localhost:5050/chatHub", userId);
 
-    return () => {
-      signalRService.stopConnection(); // Cleanup
-    };
+
   }, []);
   return (
     <div className="App">
@@ -129,9 +127,9 @@ function App() {
 
           {/* Route yêu cầu bảo vệ */}
           <Route
-            path="/dashboard"
+            path="/settings"
             element={
-              <ProtectedRoute allowedRoles={["admin", "staff"]}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -141,7 +139,7 @@ function App() {
             <Route
               index
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "staff"]}>
                   <ReportBookingPage />
                 </ProtectedRoute>
               }
@@ -356,43 +354,45 @@ function App() {
 
           {/* Customer Booking links*/}
           <Route path="/customer/bookings">
-            <Route index element={<CustomerBookingList />} />
+            <Route index element={<ProtectedRoute allowedRoles={["user"]}><CustomerBookingList /></ProtectedRoute>} />
             <Route
               path="new"
               element={
-                <BookingProvider>
+                <ProtectedRoute allowedRoles={["user"]}>  <BookingProvider>
                   {" "}
                   <AddBooking />{" "}
-                </BookingProvider>
+                </BookingProvider></ProtectedRoute>
               }
             />
             <Route
               path="detail/ServiceBookingDetailPage/:bookingId"
-              element={<CustomerServiceBookingDetail />}
+              element={<ProtectedRoute allowedRoles={["user"]}> <CustomerServiceBookingDetail /></ProtectedRoute>}
             />
             <Route
               path="detail/RoomBookingDetailPage/:bookingId"
-              element={<CustomerRoomBookingDetail />}
+              element={<ProtectedRoute allowedRoles={["user"]}> <CustomerRoomBookingDetail /></ProtectedRoute>}
             />
           </Route>
 
           <Route path="/bookings">
-            <Route index element={<AdminBookingList />} />
+            <Route index element={<ProtectedRoute allowedRoles={["admin", "staff"]}> <AdminBookingList /></ProtectedRoute>} />
             <Route
               path="detail/ServiceBookingDetailPage/:bookingId"
-              element={<ServiceBookingDetailPage />}
+              element={<ProtectedRoute allowedRoles={["admin", "staff"]}> <ServiceBookingDetailPage /></ProtectedRoute>}
             />
             <Route
               path="detail/RoomBookingDetailPage/:bookingId"
-              element={<RoomBookingDetailPage />}
+              element={<ProtectedRoute allowedRoles={["admin", "staff"]}> <RoomBookingDetailPage /></ProtectedRoute>}
             />
             <Route
               path="new"
               element={
-                <BookingProvider>
-                  {" "}
-                  <Admin_Add_Booking />{" "}
-                </BookingProvider>
+                <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                  <BookingProvider>
+                    {" "}
+                    <Admin_Add_Booking />{" "}
+                  </BookingProvider>
+                </ProtectedRoute>
               }
             />
           </Route>
@@ -725,7 +725,7 @@ function App() {
             <Route
               path="edit/:id"
               element={
-                <ProtectedRoute allowedRoles={["admin", "staff"]}>
+                <ProtectedRoute allowedRoles={["admin"]}>
                   <RoomEdit />
                 </ProtectedRoute>
               }
@@ -853,8 +853,8 @@ function App() {
             /> */}
           </Route>
 
-            {/**Camera links */}
-            <Route path="/camera">
+          {/**Camera links */}
+          <Route path="/camera">
             <Route
               index
               element={

@@ -116,7 +116,9 @@ class _HeroSectionState extends State<HeroSection> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed('/services');
+              },
               child: Text("Start Your Journey",
                   style: TextStyle(
                       fontSize: 18,

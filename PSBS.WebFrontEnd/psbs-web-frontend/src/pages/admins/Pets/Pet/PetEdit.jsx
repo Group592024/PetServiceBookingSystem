@@ -96,10 +96,13 @@ const AdminPetEdit = () => {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-
                 const data = await response.json();
-                setAccounts(data.data || []);
+
+                // Filter out accounts where accountIsDeleted is true
+                const activeAccounts = data.data ? data.data.filter(account => !account.accountIsDeleted) : [];
+                setAccounts(activeAccounts);
             } catch (error) {
+                Swal.fire('Service Unavailable', 'Our service is down. Please contact admin for more information.', 'error');
                 console.log('Error fetching accounts:', error);
             }
         };

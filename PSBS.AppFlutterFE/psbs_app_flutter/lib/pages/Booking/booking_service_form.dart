@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'booking_service_choose.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/booking_service_type.dart';
+import 'package:intl/intl.dart';
+
 
 class BookingServiceForm extends StatefulWidget {
   final String? cusId;
@@ -30,6 +32,11 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
   bool _selectAllPets = false;
   String? _error;
   double _totalPrice = 0.0;
+  final _currencyFormatter = NumberFormat.currency(
+  locale: 'vi_VN',
+  symbol: '₫',
+  decimalDigits: 0,
+);
 
   @override
   void initState() {
@@ -329,40 +336,151 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
     _updateBookingServiceData();
   }
 
+String _getMonthName(int month) {
+  const monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  return monthNames[month - 1];
+}
+
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
           // Date Selection
-          Card(
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+Card(
+  margin: const EdgeInsets.all(8),
+  elevation: 4,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(12),
+  ),
+  child: Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(12),
+      gradient: LinearGradient(
+        colors: [
+          Colors.blue.shade50,
+          Colors.white,
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.calendar_today,
+                color: Colors.blue.shade700,
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Text(
+                "Select Booking Date & Time",
+                style: TextStyle(
+                  fontSize: 18, 
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: Colors.blue.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.shade400,
+                  Colors.blue.shade700,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.blue.shade200.withOpacity(0.5),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: ElevatedButton(
+              onPressed: _selectDateTime,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    "Select Booking Date & Time",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  const Icon(
+                    Icons.access_time,
+                    color: Colors.white,
                   ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _selectDateTime,
-                    child: Text(
-                      _selectedDate.toLocal().toString().split('.')[0],
+                  const SizedBox(width: 10),
+                  Text(
+                    // Format date as dd mm yyyy HH:mm
+                    "${_selectedDate.day.toString().padLeft(2, '0')} ${_getMonthName(_selectedDate.month)} ${_selectedDate.year} ${_selectedDate.hour.toString().padLeft(2, '0')}:${_selectedDate.minute.toString().padLeft(2, '0')}",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
                     ),
                   ),
-                  if (_selectedDate
-                      .isBefore(DateTime.now().add(const Duration(hours: 1))))
-                    const Text(
-                      "Please select a time at least 1 hour from now",
-                      style: TextStyle(color: Colors.red),
-                    ),
                 ],
               ),
             ),
           ),
+          if (_selectedDate.isBefore(DateTime.now().add(const Duration(hours: 1))))
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.warning_amber_rounded,
+                      color: Colors.red,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        "Please select a time at least 1 hour from now",
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    ),
+  ),
+),
 
           // Services Selection
           Card(
@@ -462,23 +580,28 @@ class _BookingServiceFormState extends State<BookingServiceForm> {
 
           // Price Summary
           Card(
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "Price Summary",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text("Total Price: ${_totalPrice.toStringAsFixed(2)} VND",
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                ],
-              ),
-            ),
+  margin: const EdgeInsets.all(8),
+  child: Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Price Summary",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "Total Price: ${_currencyFormatter.format(_totalPrice)}",
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
           ),
+        ),
+      ],
+    ),
+  ),
+),
         ],
       ),
     );

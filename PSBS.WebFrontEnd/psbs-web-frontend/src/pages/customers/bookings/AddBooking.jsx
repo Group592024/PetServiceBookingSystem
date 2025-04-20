@@ -229,7 +229,7 @@ const AddBooking = () => {
       }
 
       if (selectedOption === "Room") {
-        apiUrl = "http://localhost:5115/Bookings/room";
+        apiUrl = "http://localhost:5050/Bookings/room";
         requestData = {
           bookingRooms: bookingRooms, // All booking details
           customer: formData, // Include customer information
@@ -239,7 +239,7 @@ const AddBooking = () => {
           discountedPrice,
         };
       } else if (selectedOption === "Service") {
-        apiUrl = "http://localhost:5115/Bookings/service";
+        apiUrl = "http://localhost:5050/Bookings/service";
         requestData = {
           services: bookingServices,
           customer: formData,
@@ -255,8 +255,8 @@ const AddBooking = () => {
       }
 
       console.log("Request Payload:", JSON.stringify(requestData, null, 2));
-      
-    
+
+
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -291,9 +291,9 @@ const AddBooking = () => {
 
             console.log("BookingCode Response:", bookingCode);
 
-            const vnpayUrl = `https://localhost:5201/Bookings/CreatePaymentUrl?moneyToPay=${Math.round(
+            const vnpayUrl = `https://localhost:5201/api/VNPay/CreatePaymentUrl?moneyToPay=${Math.round(
               discountedPrice
-            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/Vnpay/Callback`;
+            )}&description=${encodeURIComponent(description)}&returnUrl=https://localhost:5201/api/VNPay/Vnpay/Callback`;
 
             console.log("VNPay URL:", vnpayUrl);
 
@@ -313,15 +313,15 @@ const AddBooking = () => {
             }
           }
           window.location.href = "/customer/bookings";
-        } 
-        if(!result.flag){
+        }
+        if (!result.flag) {
           setIsSubmitting(false);
           Swal.fire(
             "Failed!",
-            result.message || "Failed to submit booking", 
+            result.message || "Failed to submit booking",
             "error"
           );
-          return; 
+          return;
         }
       } catch (error) {
         setIsSubmitting(false);

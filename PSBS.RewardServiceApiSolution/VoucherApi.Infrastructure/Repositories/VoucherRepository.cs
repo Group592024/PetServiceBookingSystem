@@ -67,7 +67,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 else
                 {
                     var client = _httpClientFactory.CreateClient("ApiGateway");
-                    var response = await client.GetAsync("Bookings/voucher/"+entity.VoucherId);
+                    var response = await client.GetAsync("Bookings/voucher/" + entity.VoucherId);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -78,7 +78,7 @@ namespace VoucherApi.Infrastructure.Repositories
                             return new Response(false, $"Cannot permanently delete {entity.VoucherName} because it is referenced in existing bookings.");
                         }
                     }
-                  
+
 
                     // Permanently delete from the database
                     context.Vouchers.Remove(voucher);
@@ -154,7 +154,7 @@ namespace VoucherApi.Infrastructure.Repositories
             {
                 var voucher = await context.Vouchers
                     .AsNoTracking()
-                    .SingleOrDefaultAsync(v => v.VoucherId == id); 
+                    .SingleOrDefaultAsync(v => v.VoucherId == id);
                 return voucher!;
             }
             catch (Exception ex)
@@ -172,7 +172,7 @@ namespace VoucherApi.Infrastructure.Repositories
             {
                 var vouchers = await context.Vouchers
                     .AsNoTracking()
-                    .Where(v => !v.IsDeleted && !v.IsGift && v.VoucherQuantity > 0 && v.VoucherStartDate <= DateTime.Now && v.VoucherEndDate >= DateTime.Now) 
+                    .Where(v => !v.IsDeleted && !v.IsGift && v.VoucherQuantity > 0 && v.VoucherStartDate <= DateTime.Now && v.VoucherEndDate >= DateTime.Now)
                     .ToListAsync();
                 return vouchers;
             }
@@ -213,7 +213,7 @@ namespace VoucherApi.Infrastructure.Repositories
                     return new Response(false, "Voucher does not exist.");
                 }
                 existingVoucher.VoucherQuantity--;
-                if(existingVoucher.VoucherQuantity == 0)
+                if (existingVoucher.VoucherQuantity == 0)
                 {
                     existingVoucher.IsDeleted = true;
                 }
@@ -221,7 +221,7 @@ namespace VoucherApi.Infrastructure.Repositories
                 await context.SaveChangesAsync();
                 return new Response(true, "Voucher quantity updated successfully.");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 // Log the original exception
                 LogExceptions.LogException(ex);
@@ -262,7 +262,7 @@ namespace VoucherApi.Infrastructure.Repositories
                     }
                 }
 
-              
+
 
                 // Detach the existing entity to prevent conflicts
                 context.Entry(existingVoucher).State = EntityState.Detached;
@@ -282,5 +282,31 @@ namespace VoucherApi.Infrastructure.Repositories
             }
         }
 
+        public async Task<Response> RefundVoucherQuantity(Guid id)
+        {
+            try
+            {
+                var existingVoucher = await context.Vouchers.FirstOrDefaultAsync(v => v.VoucherId == id);
+                if (existingVoucher == null)
+                {
+                    return new Response(false, "Voucher does not exist.");
+                }
+                existingVoucher.VoucherQuantity++;
+
+                if (existingVoucher.IsDeleted && existingVoucher.VoucherQuantity > 0)
+                {
+                    existingVoucher.IsDeleted = false;
+                }
+
+                context.Vouchers.Update(existingVoucher);
+                await context.SaveChangesAsync();
+                return new Response(true, "Voucher quantity refunded successfully.");
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogException(ex);
+                throw new Exception("Error occurred refunding voucher quantity.");
+            }
+        }
     }
 }

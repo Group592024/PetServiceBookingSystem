@@ -14,7 +14,7 @@ const CustomerBookingDatatable = () => {
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    
+
     const getToken = () => sessionStorage.getItem('token');
 
     useEffect(() => {
@@ -31,127 +31,127 @@ const CustomerBookingDatatable = () => {
     };
 
     const fetchBookings = async () => {
-      try {
-          setLoading(true);
-          const token = getToken();
-          if (!token) {
-              showErrorAlert("User not authenticated");
-              setLoading(false);
-              return;
-          }
-  
-          const decodedToken = jwtDecode(token);
-          const accountId = decodedToken.AccountId;
-  
-          if (!accountId) {
-              showErrorAlert("Account ID not found");
-              setLoading(false);
-              return;
-          }
-  
-          const bookingsResponse = await axios.get(
-              `http://localhost:5115/Bookings/list/${accountId}`, {
-              headers: { Authorization: `Bearer ${token}` }
-          });
-  
-          if (!bookingsResponse.data.flag) {
-              showErrorAlert(bookingsResponse.data.message || "No bookings found");
-              setLoading(false);
-              return;
-          }
-  
-          const bookingsData = bookingsResponse.data.data;
-          const updatedBookings = await Promise.all(
-              bookingsData.map(async (booking) => {
-                  try {
-                      const [accountResponse, statusResponse, typeResponse] = await Promise.all([
-                          axios.get(`http://localhost:5050/api/Account?AccountId=${booking.accountId}`, {
-                              headers: { Authorization: `Bearer ${token}` }
-                          }),
-                          axios.get(`http://localhost:5050/api/BookingStatus/${booking.bookingStatusId}`, {
-                              headers: { Authorization: `Bearer ${token}` }
-                          }),
-                          axios.get(`http://localhost:5050/api/BookingType/${booking.bookingTypeId}`, {
-                              headers: { Authorization: `Bearer ${token}` }
-                          })
-                      ]);
-  
-                      const formatDate = (date) => {
-                          if (!date) return "N/A";
-                          const options = {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          };
-                          return new Date(date).toLocaleString("en-GB", options).replace(",", "");
-                      };
-  
-                      return {
-                          ...booking,
-                          id: booking.bookingId,
-                          customerName: accountResponse.data?.accountName || "Unknown",
-                          bookingStatusName: statusResponse.data?.data?.bookingStatusName || "Unknown",
-                          bookingTypeName: typeResponse.data?.data?.bookingTypeName || "Unknown",
-                          formattedAmount: new Intl.NumberFormat("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                          }).format(booking.totalAmount || 0),
-                          formattedDate: formatDate(booking.bookingDate),
-                          formattedCreateAt: formatDate(booking.createAt),
-                          rawCreateAt: booking.createAt, // Keep raw date for sorting
-                      };
-                  } catch (error) {
-                      console.error("Error fetching additional details:", error);
-                      return {
-                          ...booking,
-                          id: booking.bookingId,
-                          customerName: "Error",
-                          bookingStatusName: "Error",
-                          bookingTypeName: "Error",
-                          formattedAmount: "N/A",
-                          formattedDate: "N/A",
-                          formattedCreateAt: "N/A",
-                          rawCreateAt: null,
-                      };
-                  }
-              })
-          );
-  
-          setBookings(updatedBookings);
-          Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: 'Booking data fetched successfully!',
-              confirmButtonColor: '#3085d6',
-              timer: 2000,
-              showConfirmButton: false
-          });
-      } catch (err) {
-        if (err.response && err.response.status === 404) {
-          Swal.fire({
-              icon: 'error',
-              title: 'No Booking Found',
-              text: 'No booking found for user!',
-              confirmButtonColor: '#3085d6',
-              timer: 2000,
-              showConfirmButton: false
-          });
-      } else {
-          showErrorAlert("Error fetching data: " + err.message);
-      }
-      } finally {
-          setLoading(false);
-      }
-  };
+        try {
+            setLoading(true);
+            const token = getToken();
+            if (!token) {
+                showErrorAlert("User not authenticated");
+                setLoading(false);
+                return;
+            }
+
+            const decodedToken = jwtDecode(token);
+            const accountId = decodedToken.AccountId;
+
+            if (!accountId) {
+                showErrorAlert("Account ID not found");
+                setLoading(false);
+                return;
+            }
+
+            const bookingsResponse = await axios.get(
+                `http://localhost:5050/Bookings/list/${accountId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!bookingsResponse.data.flag) {
+                showErrorAlert(bookingsResponse.data.message || "No bookings found");
+                setLoading(false);
+                return;
+            }
+
+            const bookingsData = bookingsResponse.data.data;
+            const updatedBookings = await Promise.all(
+                bookingsData.map(async (booking) => {
+                    try {
+                        const [accountResponse, statusResponse, typeResponse] = await Promise.all([
+                            axios.get(`http://localhost:5050/api/Account?AccountId=${booking.accountId}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            }),
+                            axios.get(`http://localhost:5050/api/BookingStatus/${booking.bookingStatusId}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            }),
+                            axios.get(`http://localhost:5050/api/BookingType/${booking.bookingTypeId}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            })
+                        ]);
+
+                        const formatDate = (date) => {
+                            if (!date) return "N/A";
+                            const options = {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            };
+                            return new Date(date).toLocaleString("en-GB", options).replace(",", "");
+                        };
+
+                        return {
+                            ...booking,
+                            id: booking.bookingId,
+                            customerName: accountResponse.data?.accountName || "Unknown",
+                            bookingStatusName: statusResponse.data?.data?.bookingStatusName || "Unknown",
+                            bookingTypeName: typeResponse.data?.data?.bookingTypeName || "Unknown",
+                            formattedAmount: new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                            }).format(booking.totalAmount || 0),
+                            formattedDate: formatDate(booking.bookingDate),
+                            formattedCreateAt: formatDate(booking.createAt),
+                            rawCreateAt: booking.createAt, // Keep raw date for sorting
+                        };
+                    } catch (error) {
+                        console.error("Error fetching additional details:", error);
+                        return {
+                            ...booking,
+                            id: booking.bookingId,
+                            customerName: "Error",
+                            bookingStatusName: "Error",
+                            bookingTypeName: "Error",
+                            formattedAmount: "N/A",
+                            formattedDate: "N/A",
+                            formattedCreateAt: "N/A",
+                            rawCreateAt: null,
+                        };
+                    }
+                })
+            );
+
+            setBookings(updatedBookings);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success',
+                text: 'Booking data fetched successfully!',
+                confirmButtonColor: '#3085d6',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (err) {
+            if (err.response && err.response.status === 404) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No Booking Found',
+                    text: 'No booking found for user!',
+                    confirmButtonColor: '#3085d6',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                showErrorAlert("Error fetching data: " + err.message);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const columns = [
-        { 
-            field: "id", 
-            headerName: "No.", 
-            flex: 1, 
-            headerAlign: "center", 
+        {
+            field: "id",
+            headerName: "No.",
+            flex: 1,
+            headerAlign: "center",
             align: "center",
             renderCell: (params) => {
                 const rowIndex = bookings.findIndex(item => item.id === params.id);
@@ -159,27 +159,27 @@ const CustomerBookingDatatable = () => {
             },
             cellClassName: "cell-font"
         },
-        { 
-            field: "customerName", 
-            headerName: "Customer Name", 
-            flex: 2, 
-            headerAlign: "center", 
+        {
+            field: "customerName",
+            headerName: "Customer Name",
+            flex: 2,
+            headerAlign: "center",
             align: "center",
             cellClassName: "cell-font"
         },
-        { 
-            field: "formattedAmount", 
-            headerName: "Total Amount", 
-            flex: 1, 
-            headerAlign: "center", 
+        {
+            field: "formattedAmount",
+            headerName: "Total Amount",
+            flex: 1,
+            headerAlign: "center",
             align: "center",
             cellClassName: "cell-font"
         },
-        { 
-            field: "bookingTypeName", 
-            headerName: "Booking Type", 
-            flex: 1, 
-            headerAlign: "center", 
+        {
+            field: "bookingTypeName",
+            headerName: "Booking Type",
+            flex: 1,
+            headerAlign: "center",
             align: "center",
             cellClassName: "cell-font"
         },
@@ -199,16 +199,16 @@ const CustomerBookingDatatable = () => {
             align: "center",
             cellClassName: "cell-font"
         },
-        { 
-            field: "bookingStatusName", 
-            headerName: "Status", 
+        {
+            field: "bookingStatusName",
+            headerName: "Status",
             flex: 1.5,
-            minWidth: 130, 
-            headerAlign: "center", 
+            minWidth: 130,
+            headerAlign: "center",
             align: "center",
             renderCell: (params) => {
                 const getStatusColor = (status) => {
-                    switch(status) {
+                    switch (status) {
                         case 'Pending': return 'warning';
                         case 'Processing': return 'info';
                         case 'Cancelled': return 'error';
@@ -221,17 +221,17 @@ const CustomerBookingDatatable = () => {
                         default: return 'default';
                     }
                 };
-                
+
                 const status = params.value || 'Unknown';
                 const color = getStatusColor(status);
-                
+
                 return (
-                    <Chip 
-                        label={status} 
-                        color={color} 
-                        size="small" 
+                    <Chip
+                        label={status}
+                        color={color}
+                        size="small"
                         variant="outlined"
-                        sx={{ 
+                        sx={{
                             minWidth: '100px',
                             maxWidth: '100%',
                             fontWeight: 'medium'

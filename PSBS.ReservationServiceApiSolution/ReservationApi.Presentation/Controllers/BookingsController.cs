@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
@@ -30,6 +31,7 @@ namespace ReservationApi.Presentation.Controllers
 {
     [Route("[controller]")]
     [ApiController]
+    [Authorize]
     public class BookingsController : ControllerBase
     {
         private readonly IVnpay vnpay;
@@ -62,8 +64,11 @@ namespace ReservationApi.Presentation.Controllers
             vnpay.Initialize(tmnCode, hashSecret, baseUrl, callbackUrl);
             //vnpay.Initialize(configuration["Vnpay:TmnCode"], configuration["Vnpay:HashSecret"], configuration["Vnpay:BaseUrl"], configuration["Vnpay:CallbackUrl"]);
         }
+
         // GET: api/<BookingsController>
+
         [HttpGet]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<IEnumerable<BookingDTO>>> GetBookingsForAdmin()
         {
             var bookings = await bookingInterface.GetAllAsync();
@@ -79,6 +84,7 @@ namespace ReservationApi.Presentation.Controllers
             });
         }
         [HttpGet("list/{id}")]
+        [Authorize(Policy = "OnlyUser")]
         public async Task<ActionResult<IEnumerable<BookingDTO>>> GetBookingsForUser(Guid id)
         {
             var bookings = await bookingInterface.GetAllBookingForUserAsync(id);
@@ -96,6 +102,7 @@ namespace ReservationApi.Presentation.Controllers
 
         // GET api/<BookingsController>/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<BookingDTO>> GetBookingByIdForAdmin(Guid id)
         {
             var booking = await bookingInterface.GetByIdAsync(id);
@@ -112,6 +119,7 @@ namespace ReservationApi.Presentation.Controllers
 
         // POST api/<BookingsController>
         [HttpPost]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreateBooking([FromForm] AddBookingDTO addBookingDTO)
         {
             if (!ModelState.IsValid)
@@ -128,6 +136,7 @@ namespace ReservationApi.Presentation.Controllers
 
         // POST Room api/<BookingsController>
         [HttpPost("room")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreateBookingRoom([FromBody] BookingRoomRequestDTO bookingRequest)
         {
             try
@@ -182,50 +191,72 @@ namespace ReservationApi.Presentation.Controllers
                 LogExceptions.LogToConsole(bookingHotelPendingList.ToString());
                 foreach (var room in bookingRequest.BookingRooms)
                 {
+                    // Inside the CreateBookingRoom method, modify the room history check:
+
                     foreach (var bookingroom in bookingHotelPendingList)
                     {
-                        List<RoomHistoryDTO> bookingroomDetail;
+                        List<RoomHistoryDTO> bookingroomDetail = new List<RoomHistoryDTO>();
+
                         using (HttpClient client = new HttpClient())
                         {
-                            client.BaseAddress = new Uri("http://localhost:5050/api/");
+                            client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
                             HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
-                            if (!roomHistoryResponse.IsSuccessStatusCode)
+
+                            // If response is successful, process the room histories
+                            if (roomHistoryResponse.IsSuccessStatusCode)
                             {
-                                return BadRequest(new Response(false, "Invalid status transition."));
-                            }
-                            var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
-                            var responseObject = JObject.Parse(jsonResponse);
+                                var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
+                                var responseObject = JObject.Parse(jsonResponse);
 
-                            bool flag = responseObject["flag"]?.Value<bool>() ?? false;
-                            string message = responseObject["message"]?.Value<string>() ?? "No message";
+                                bool flag = responseObject["flag"]?.Value<bool>() ?? false;
 
-                            var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
-
-                            if (roomHistoryData == null || !roomHistoryData.Any())
-                            {
-                                return BadRequest(new { flag = false, message = "Invalid status transition." });
-                            }
-                            bookingroomDetail = roomHistoryData;
-                        }
-                        foreach (var roomHistory in bookingroomDetail)
-                        {
-                            // Simplified overlap detection
-                            bool isOverlapping = room.Start < roomHistory.bookingEndDate &&
-                                                room.End > roomHistory.bookingStartDate &&
-                                                room.Room == roomHistory.roomId;
-
-                            if (isOverlapping)
-                            {
-                                return BadRequest(new
+                                // Only process if the response indicates success
+                                if (flag)
                                 {
-                                    flag = false,
-                                    message = $"The room is already booked from {roomHistory.bookingStartDate} to {roomHistory.bookingEndDate}"
-                                });
+                                    var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
+                                    if (roomHistoryData != null && roomHistoryData.Any())
+                                    {
+                                        bookingroomDetail = roomHistoryData;
+
+                                        // Check for overlapping bookings
+                                        foreach (var roomHistory in bookingroomDetail)
+                                        {
+                                            // Simplified overlap detection
+                                            bool isOverlapping = room.Start < roomHistory.bookingEndDate &&
+                                                                room.End > roomHistory.bookingStartDate &&
+                                                                room.Room == roomHistory.roomId;
+
+                                            if (isOverlapping)
+                                            {
+                                                return BadRequest(new
+                                                {
+                                                    flag = false,
+                                                    message = $"The room is already booked from {roomHistory.bookingStartDate} to {roomHistory.bookingEndDate}"
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            // If response is 404 (Not Found), it means there are no room histories yet, which is fine
+                            else if (roomHistoryResponse.StatusCode == System.Net.HttpStatusCode.NotFound)
+                            {
+                                // No room histories for this booking, so no conflicts to check
+                                continue;
+                            }
+                            // For other error responses, return an appropriate error
+                            else
+                            {
+                                var errorContent = await roomHistoryResponse.Content.ReadAsStringAsync();
+                                LogExceptions.LogToConsole($"Error retrieving room histories: {errorContent}");
+                                return BadRequest(new Response(false, "Error checking room availability. Please try again."));
                             }
                         }
                     }
+
                 }
 
                 //create booking 
@@ -248,7 +279,7 @@ namespace ReservationApi.Presentation.Controllers
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    client.BaseAddress = new Uri("http://localhost:5050/api/");
+                    client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Call RoomHistories API for each booked room
@@ -282,7 +313,7 @@ namespace ReservationApi.Presentation.Controllers
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/Voucher/");
+                        client.BaseAddress = new Uri("http://gatewayapi:5050/api/Voucher/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         if (bookingRequest.VoucherId != null && bookingRequest.VoucherId != Guid.Empty)
@@ -312,6 +343,7 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         [HttpPost("service")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CreateBookingService([FromBody] BookingServiceRequestDTO bookingRequest)
         {
             try
@@ -366,7 +398,7 @@ namespace ReservationApi.Presentation.Controllers
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    client.BaseAddress = new Uri("http://localhost:5050/api/");
+                    client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                     // Call RoomHistories API for each booked room
@@ -396,7 +428,7 @@ namespace ReservationApi.Presentation.Controllers
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/Voucher/");
+                        client.BaseAddress = new Uri("http://gatewayapi:5050/api/Voucher/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         if (bookingRequest.VoucherId != null && bookingRequest.VoucherId != Guid.Empty)
@@ -429,15 +461,82 @@ namespace ReservationApi.Presentation.Controllers
 
         // PUT api/<BookingsController>/5
         [HttpPut("cancel/{id}")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
         public async Task<ActionResult<Response>> CancelBooking(Guid id)
         {
-            var response = await bookingInterface.CancelBookingAsync(id);
-            return response.Flag ? Ok(response) : BadRequest(response);
+            try
+            {
+                // Get the booking to check if it has a voucher
+                var booking = await bookingInterface.GetByIdAsync(id);
+                if (booking == null)
+                {
+                    return NotFound(new Response(false, "Booking not found"));
+                }
 
+                // Cancel the booking
+                var response = await bookingInterface.CancelBookingAsync(id);
+                if (!response.Flag)
+                {
+                    return BadRequest(response);
+                }
+
+                // Check if the booking used a voucher
+                if (booking.VoucherId != Guid.Empty)
+                {
+                    try
+                    {
+                        string authorizationHeader = Request.Headers["Authorization"];
+                        if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer "))
+                        {
+                            LogExceptions.LogToConsole("Authorization header is missing or invalid");
+                            return Ok(response); // Return success for booking cancellation even if voucher refund fails
+                        }
+
+                        string token = authorizationHeader.Substring("Bearer ".Length).Trim();
+
+                        // Make API call to refund the voucher quantity
+                        using (HttpClient client = new HttpClient())
+                        {
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                            client.BaseAddress = new Uri("http://gatewayapi:5050/api/Voucher/");
+                            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                            // Call the refund-quantity endpoint
+                            HttpResponseMessage voucherResponse = await client.PutAsync($"refund-quantity/{booking.VoucherId}", null);
+
+                            if (!voucherResponse.IsSuccessStatusCode)
+                            {
+                                LogExceptions.LogToConsole($"Failed to refund voucher quantity. Status: {voucherResponse.StatusCode}");
+                                // We don't want to fail the booking cancellation if voucher refund fails
+                                // Just log the error
+                            }
+                            else
+                            {
+                                LogExceptions.LogToConsole($"Successfully refunded voucher quantity for voucher: {booking.VoucherId}");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogExceptions.LogToConsole($"Error refunding voucher: {ex.Message}");
+                        // We don't want to fail the booking cancellation if voucher refund fails
+                        // Just log the error
+                    }
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                LogExceptions.LogToConsole($"Error in CancelBooking: {ex.Message}");
+                return BadRequest(new Response(false, "Error processing booking cancellation"));
+            }
         }
 
 
+
         [HttpPut("updateRoomStatus/{bookingId}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<IActionResult> UpdateBookingRoomStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
             //token
@@ -463,77 +562,6 @@ namespace ReservationApi.Presentation.Controllers
             {
                 var bookingStatusConfirmed = await context.BookingStatuses.FirstOrDefaultAsync(bs => bs.BookingStatusName.Contains("Confirmed"));
                 var bookingConfirmedList = await bookingInterface.GetBookingByBookingStatusAsync(bookingStatusConfirmed.BookingStatusId);
-                // List<RoomHistoryDTO> roomHistoryDTOs;
-                // using (HttpClient client = new HttpClient())
-                // {
-                //     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                //     client.BaseAddress = new Uri("http://localhost:5050/api/");
-                //     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
-                //     if (!roomHistoryResponse.IsSuccessStatusCode)
-                //     {
-                //         return BadRequest(new Response(false, "Invalid status transition. (1)"));
-                //     }
-                //     var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
-                //     var responseObject = JObject.Parse(jsonResponse);
-
-                //     bool flag = responseObject["flag"]?.Value<bool>() ?? false;
-                //     string message = responseObject["message"]?.Value<string>() ?? "No message";
-
-                //     var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
-
-                //     if (roomHistoryData == null || !roomHistoryData.Any())
-                //     {
-                //         return BadRequest(new Response(false, "Invalid status transition. (2)"));
-                //     }
-                //     roomHistoryDTOs = roomHistoryData;
-                // }
-                // foreach (var room in roomHistoryDTOs)
-                // {
-                //     foreach (var bookingroom in bookingConfirmedList)
-                //     {
-                //         List<RoomHistoryDTO> bookingroomDetail;
-                //         using (HttpClient client = new HttpClient())
-                //         {
-                //             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                //             client.BaseAddress = new Uri("http://localhost:5050/api/");
-                //             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                //             HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{bookingroom.BookingId}");
-                //             if (!roomHistoryResponse.IsSuccessStatusCode)
-                //             {
-                //                 return BadRequest(new Response(false, "Invalid status transition. (3)"));
-                //             }
-                //             var jsonResponse = await roomHistoryResponse.Content.ReadAsStringAsync();
-                //             var responseObject = JObject.Parse(jsonResponse);
-
-                //             bool flag = responseObject["flag"]?.Value<bool>() ?? false;
-                //             string message = responseObject["message"]?.Value<string>() ?? "No message";
-
-                //             var roomHistoryData = responseObject["data"]?.ToObject<List<RoomHistoryDTO>>();
-
-                //             if (roomHistoryData == null || !roomHistoryData.Any())
-                //             {
-                //                 return BadRequest(new { flag = false, message = "Invalid status transition. (4)" });
-                //             }
-                //             bookingroomDetail = roomHistoryData;
-                //         }
-                //         foreach (var roomHistory in bookingroomDetail)
-                //         {
-                //             if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                //             {
-                //                 return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                //             }
-                //             if (room.bookingEndDate >= roomHistory.bookingStartDate && room.bookingEndDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                //             {
-                //                 return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                //             }
-                //             if (room.bookingStartDate >= roomHistory.bookingStartDate && room.bookingStartDate <= roomHistory.bookingEndDate && room.roomId == roomHistory.roomId)
-                //             {
-                //                 return BadRequest(new { flag = false, message = "The system has a booking in this time." });
-                //             }
-                //         }
-                //     }
-                // }
             }
 
             if (request.Status == "Checked in")
@@ -542,7 +570,7 @@ namespace ReservationApi.Presentation.Controllers
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    client.BaseAddress = new Uri("http://localhost:5050/api/");
+                    client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
                     if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -569,7 +597,7 @@ namespace ReservationApi.Presentation.Controllers
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/");
+                        client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
@@ -617,7 +645,7 @@ namespace ReservationApi.Presentation.Controllers
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/");
+                        client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.PutAsJsonAsync($"RoomHistories", room);
@@ -654,7 +682,7 @@ namespace ReservationApi.Presentation.Controllers
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    client.BaseAddress = new Uri("http://localhost:5050/api/");
+                    client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     HttpResponseMessage roomHistoryResponse = await client.GetAsync($"RoomHistories/{booking.BookingId}");
                     if (!roomHistoryResponse.IsSuccessStatusCode)
@@ -681,7 +709,7 @@ namespace ReservationApi.Presentation.Controllers
                     using (HttpClient client = new HttpClient())
                     {
                         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                        client.BaseAddress = new Uri("http://localhost:5050/api/");
+                        client.BaseAddress = new Uri("http://gatewayapi:5050/api/");
                         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
                         HttpResponseMessage roomResponse = await client.GetAsync($"Room/{room.roomId}");
@@ -731,7 +759,7 @@ namespace ReservationApi.Presentation.Controllers
                     var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
 
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    var requestUrl = $"http://localhost:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+                    var requestUrl = $"http://gatewayapi:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
 
                     // Sending request to update user points
                     var pointUpdateResponse = await client.PutAsync(requestUrl, null);
@@ -751,6 +779,7 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         [HttpPut("updateServiceStatus/{bookingId}")]
+        [Authorize(Policy = "AdminOrStaff")]
         public async Task<IActionResult> UpdateBookingServiceStatus(Guid bookingId, [FromBody] UpdateStatusRequest request)
         {
             //token
@@ -792,7 +821,7 @@ namespace ReservationApi.Presentation.Controllers
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                     var bookingPoint = Convert.ToInt32(booking.TotalAmount * (existPointRule.PointRuleRatio / 100.0m));
 
-                    var requestUrl = $"http://localhost:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
+                    var requestUrl = $"http://gatewayapi:5050/api/Account/UpdateUserPoint?accountId={booking.AccountId}&point={bookingPoint}";
 
                     // Sending request to update user points
                     var pointUpdateResponse = await client.PutAsync(requestUrl, null);
@@ -811,174 +840,178 @@ namespace ReservationApi.Presentation.Controllers
             return Ok(new Response(true, "Status updated successfully."));
         }
 
-        [HttpGet("CreatePaymentUrl")]
-        public ActionResult<string> CreatePaymentUrl(double moneyToPay, string description)
+        //[HttpGet("CreatePaymentUrl")]
+        //[Authorize(Policy = "AdminOrStaffOrUser")]
+        //public ActionResult<string> CreatePaymentUrl(double moneyToPay, string description)
+        //{
+        //    try
+        //    {
+        //        var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
+
+        //        var request = new PaymentRequest
+        //        {
+        //            PaymentId = DateTime.Now.Ticks,
+        //            Money = moneyToPay,
+        //            Description = description,
+        //            IpAddress = ipAddress,
+        //            BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
+        //            CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
+        //            Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
+        //            Language = DisplayLanguage.Vietnamese,
+        //        };
+        //        var paymentUrl = vnpay.GetPaymentUrl(request);
+
+        //        return Created(paymentUrl, paymentUrl);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
+        //[HttpGet("IpnAction")]
+        //[Authorize(Policy = "AdminOrStaffOrUser")]
+        //public async Task<IActionResult> IpnAction()
+        //{
+        //    if (Request.QueryString.HasValue)
+        //    {
+        //        try
+        //        {
+        //            var paymentResult = vnpay.GetPaymentResult(Request.Query);
+        //            var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
+
+        //            // Parse the JSON description
+        //            var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
+        //            string bookingCode = description.bookingCode;
+        //            string redirectPath = description.redirectPath;
+        //            LogExceptions.LogToConsole(redirectPath);
+        //            if (paymentResult.IsSuccess)
+        //            {
+
+        //                var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+        //                if (existingBooking == null)
+        //                {
+        //                    return Redirect($"http://localhost:3000{redirectPath}?status=failed");
+        //                }
+
+        //                existingBooking.isPaid = true;
+        //                context.Bookings.Update(existingBooking);
+        //                await context.SaveChangesAsync();
+        //                // Thực hiện hành động nếu thanh toán thành công tại đây. Ví dụ: Cập nhật trạng thái đơn hàng trong cơ sở dữ liệu.
+        //                return Ok();
+        //            }
+
+        //            // Thực hiện hành động nếu thanh toán thất bại tại đây. Ví dụ: Hủy đơn hàng.
+        //            return BadRequest("Thanh toán thất bại");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            return BadRequest(ex.Message);
+        //        }
+        //    }
+
+        //    return NotFound("Không tìm thấy thông tin thanh toán.");
+        //}
+
+        //[HttpGet("Vnpay/Callback")]
+        //[Authorize(Policy = "AdminOrStaffOrUser")]
+        //public async Task<IActionResult> Callback()
+        //{
+        //    if (Request.QueryString.HasValue)
+        //    {
+        //        try
+        //        {
+        //            // Log all incoming query parameters
+        //            foreach (var key in Request.Query.Keys)
+        //            {
+        //                Console.WriteLine($"{key}: {Request.Query[key]}");
+        //            }
+
+        //            var paymentResult = vnpay.GetPaymentResult(Request.Query);
+        //            var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
+
+        //            // Parse the JSON description
+        //            var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
+        //            string bookingCode = description.bookingCode;
+        //            string redirectPath = description.redirectPath;
+
+        //            Console.WriteLine($"Booking Code: {bookingCode}");
+        //            Console.WriteLine($"Redirect Path: {redirectPath}");
+        //            Console.WriteLine($"Payment Success: {paymentResult.IsSuccess}");
+
+        //            if (paymentResult.IsSuccess)
+        //            {
+        //                var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+        //                if (existingBooking == null)
+        //                {
+        //                    Console.WriteLine("Booking not found in database");
+        //                    return Redirect($"http://localhost:3000{redirectPath}?status=failed");
+        //                }
+
+        //                Console.WriteLine($"Found booking: {existingBooking.BookingId}");
+
+        //                // Update payment status
+        //                existingBooking.isPaid = true;
+        //                context.Bookings.Update(existingBooking);
+
+        //                try
+        //                {
+        //                    await context.SaveChangesAsync();
+        //                    Console.WriteLine("Successfully updated booking payment status");
+        //                }
+        //                catch (Exception ex)
+        //                {
+        //                    Console.WriteLine($"Error saving booking: {ex.Message}");
+        //                    return Redirect($"http://localhost:3000{redirectPath}?status=dberror");
+        //                }
+
+        //                // Add delay to ensure update completes before redirect
+        //                await Task.Delay(500);
+
+        //                return Redirect($"http://localhost:3000{redirectPath}?status=success");
+        //            }
+
+        //            return Redirect($"http://localhost:3000{redirectPath}?status=failed");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Console.WriteLine($"Error in callback: {ex.Message}");
+        //            return Redirect($"http://localhost:3000/customer/bookings?status=error");
+        //        }
+        //    }
+
+        //    Console.WriteLine("No query string received");
+        //    return Redirect("http://localhost:3000/customer/bookings?status=notfound");
+        //}
+
+        [HttpGet("Vnpay/Callback/update-status")]
+        [Authorize(Policy = "AdminOrStaffOrUser")]
+        public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingCode)
         {
             try
             {
-                var ipAddress = NetworkHelper.GetIpAddress(HttpContext); // Lấy địa chỉ IP của thiết bị thực hiện giao dịch
-
-                var request = new PaymentRequest
+                var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
+                if (existingBooking == null)
                 {
-                    PaymentId = DateTime.Now.Ticks,
-                    Money = moneyToPay,
-                    Description = description,
-                    IpAddress = ipAddress,
-                    BankCode = BankCode.ANY, // Tùy chọn. Mặc định là tất cả phương thức giao dịch
-                    CreatedDate = DateTime.Now, // Tùy chọn. Mặc định là thời điểm hiện tại
-                    Currency = Currency.VND, // Tùy chọn. Mặc định là VND (Việt Nam đồng)
-                    Language = DisplayLanguage.Vietnamese,
-                };
-                var paymentUrl = vnpay.GetPaymentUrl(request);
+                    LogExceptions.LogToConsole("Booking not found in database");
+                    return BadRequest(new Response(false, "Booking not found in database!"));
+                }
 
-                return Created(paymentUrl, paymentUrl);
+                LogExceptions.LogToConsole($"Found booking: {existingBooking.BookingId}");
+
+                // Update payment status
+                existingBooking.isPaid = true;
+                context.Bookings.Update(existingBooking);
+                await context.SaveChangesAsync();
+                Console.WriteLine("Successfully updated booking payment status");
+
+                return Ok(new Response(true, "Payment status updated successfully!"));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                LogExceptions.LogToConsole($"Error saving booking: {ex.Message}");
+                return StatusCode(500, new Response(false, "Error updating payment status"));
             }
         }
-        [HttpGet("IpnAction")]
-        public async Task<IActionResult> IpnAction()
-        {
-            if (Request.QueryString.HasValue)
-            {
-                try
-                {
-                    var paymentResult = vnpay.GetPaymentResult(Request.Query);
-                    var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
-
-                    // Parse the JSON description
-                    var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
-                    string bookingCode = description.bookingCode;
-                    string redirectPath = description.redirectPath;
-                    LogExceptions.LogToConsole(redirectPath);
-                    if (paymentResult.IsSuccess)
-                    {
-
-                        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
-                        if (existingBooking == null)
-                        {
-                            return Redirect($"http://localhost:3000{redirectPath}?status=failed");
-                        }
-
-                        existingBooking.isPaid = true;
-                        context.Bookings.Update(existingBooking);
-                        await context.SaveChangesAsync();
-                        // Thực hiện hành động nếu thanh toán thành công tại đây. Ví dụ: Cập nhật trạng thái đơn hàng trong cơ sở dữ liệu.
-                        return Ok();
-                    }
-
-                    // Thực hiện hành động nếu thanh toán thất bại tại đây. Ví dụ: Hủy đơn hàng.
-                    return BadRequest("Thanh toán thất bại");
-                }
-                catch (Exception ex)
-                {
-                    return BadRequest(ex.Message);
-                }
-            }
-
-            return NotFound("Không tìm thấy thông tin thanh toán.");
-        }
-
-        [HttpGet("Vnpay/Callback")]
-        public async Task<IActionResult> Callback()
-        {
-            if (Request.QueryString.HasValue)
-            {
-                try
-                {
-                    // Log all incoming query parameters
-                    foreach (var key in Request.Query.Keys)
-                    {
-                        Console.WriteLine($"{key}: {Request.Query[key]}");
-                    }
-
-                    var paymentResult = vnpay.GetPaymentResult(Request.Query);
-                    var descriptionJson = Request.Query["vnp_OrderInfo"].ToString();
-
-                    // Parse the JSON description
-                    var description = JsonConvert.DeserializeObject<dynamic>(descriptionJson);
-                    string bookingCode = description.bookingCode;
-                    string redirectPath = description.redirectPath;
-
-                    Console.WriteLine($"Booking Code: {bookingCode}");
-                    Console.WriteLine($"Redirect Path: {redirectPath}");
-                    Console.WriteLine($"Payment Success: {paymentResult.IsSuccess}");
-
-                    if (paymentResult.IsSuccess)
-                    {
-                        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
-                        if (existingBooking == null)
-                        {
-                            Console.WriteLine("Booking not found in database");
-                            return Redirect($"http://localhost:3000{redirectPath}?status=failed");
-                        }
-
-                        Console.WriteLine($"Found booking: {existingBooking.BookingId}");
-
-                        // Update payment status
-                        existingBooking.isPaid = true;
-                        context.Bookings.Update(existingBooking);
-
-                        try
-                        {
-                            await context.SaveChangesAsync();
-                            Console.WriteLine("Successfully updated booking payment status");
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error saving booking: {ex.Message}");
-                            return Redirect($"http://localhost:3000{redirectPath}?status=dberror");
-                        }
-
-                        // Add delay to ensure update completes before redirect
-                        await Task.Delay(500);
-
-                        return Redirect($"http://localhost:3000{redirectPath}?status=success");
-                    }
-
-                    return Redirect($"http://localhost:3000{redirectPath}?status=failed");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error in callback: {ex.Message}");
-                    return Redirect($"http://localhost:3000/customer/bookings?status=error");
-                }
-            }
-
-            Console.WriteLine("No query string received");
-            return Redirect("http://localhost:3000/customer/bookings?status=notfound");
-        }
-
-        [HttpGet("Vnpay/Callback/update-status")]
-public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingCode)
-{
-    try
-    {
-        var existingBooking = await bookingInterface.GetBookingByBookingCodeAsync(bookingCode);
-        if (existingBooking == null)
-        {
-            LogExceptions.LogToConsole("Booking not found in database");
-            return BadRequest(new Response(false, "Booking not found in database!"));
-        }
-
-        LogExceptions.LogToConsole($"Found booking: {existingBooking.BookingId}");
-
-        // Update payment status
-        existingBooking.isPaid = true;
-        context.Bookings.Update(existingBooking);
-        await context.SaveChangesAsync();
-        Console.WriteLine("Successfully updated booking payment status");
-        
-        return Ok(new Response(true, "Payment status updated successfully!"));
-    }
-    catch (Exception ex)
-    {
-        LogExceptions.LogToConsole($"Error saving booking: {ex.Message}");
-        return StatusCode(500, new Response(false, "Error updating payment status"));
-    }
-}
 
         [HttpGet("voucher/{voucher}")]
         public async Task<ActionResult<IEnumerable<BookingDTO>>> IsReferenceInBooking(Guid voucher)
@@ -987,5 +1020,27 @@ public async Task<IActionResult> CallbackVnPayToUpdatePaidStatus(string bookingC
 
             return Ok(bookings);
         }
+
+        [HttpPut("addnote/{bookingId}")]
+        [Authorize(Policy = "AdminOrStaff")]
+        public async Task<ActionResult<Response>> AddNoteToBooking(Guid bookingId, [FromBody] string notes)
+        {
+            if (string.IsNullOrWhiteSpace(notes))
+            {
+                return BadRequest(new Response(false, "Note cannot be empty."));
+            }
+
+            var response = await bookingInterface.AddNoteToBookingAsync(bookingId, notes);
+
+            if (response.Flag)
+            {
+                return Ok(response);
+            }
+            else
+            {
+                return BadRequest(response);
+            }
+        }
+
     }
 }

@@ -6,7 +6,7 @@ import "./style.css";
 import { NavLink } from "react-router-dom";
 import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 import signalRService from "../../lib/ChatService";
-
+import { useUserStore } from "../../lib/userStore";
 const NavbarCustomer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountName, setAccountName] = useState("Guest");
@@ -30,23 +30,47 @@ const NavbarCustomer = () => {
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef(null);
 
+  // Add a mounted ref to prevent state updates after unmounting
+  const isMounted = useRef(true);
+
+  // Set isMounted to false when component unmounts
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  // Function to safely update state only if component is still mounted
+  const safeSetState = (stateSetter, value) => {
+    if (isMounted.current) {
+      stateSetter(value);
+    }
+  };
+
   // Close search results when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearchResults(false);
+        safeSetState(setShowSearchResults, false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+    // Only add the listener when the dropdown is shown
+    if (showSearchResults) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }
+  }, [showSearchResults]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    setIsSearching(true);
-    setShowSearchResults(true);
+    if (!searchTerm.trim()) {
+      safeSetState(setShowSearchResults, false);
+      return;
+    }
+    safeSetState(setIsSearching, true);
+    safeSetState(setShowSearchResults, true);
 
     const token = sessionStorage.getItem("token");
     const headers = token ? {
@@ -56,60 +80,88 @@ const NavbarCustomer = () => {
       "Content-Type": "application/json",
     };
 
-    // Fetch all services (showAll=false)
-    fetch(`http://localhost:5050/api/Service?showAll=false`, {
-      method: "GET",
-      headers: headers,
-    })
-      .then(response => response.json())
-      .then(serviceData => {
-        // Fetch available rooms
-        fetch(`http://localhost:5050/api/Room/available`, {
-          method: "GET",
-          headers: headers,
-        })
-          .then(response => response.json())
-          .then(roomData => {
-            const keyword = searchTerm.trim().toLowerCase();
+    // Use Promise.all to handle all fetches together
+    Promise.all([
+      fetch(`http://localhost:5050/api/Service?showAll=false`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Service API error');
+        return response.json();
+      }).catch(() => ({ data: [] })),
 
-            const services = serviceData.data ? serviceData.data
-              .filter(service => service.serviceName?.toLowerCase().includes(keyword))
-              .map(service => ({
-                id: service.serviceId,
-                name: service.serviceName,
-                type: 'service',
-                image: service.serviceImage,
-              })) : [];
+      fetch(`http://localhost:5050/api/Room/available`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Room API error');
+        return response.json();
+      }).catch(() => ({ data: [] })),
 
-            const rooms = roomData.data ? roomData.data
-              .filter(room => room.roomName?.toLowerCase().includes(keyword))
-              .map(room => ({
-                id: room.roomId,
-                name: room.roomName,
-                type: 'room',
-                image: room.roomImage,
-              })) : [];
+      fetch(`http://localhost:5050/Gifts`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Gift API error');
+        return response.json();
+      }).catch(() => ({ flag: false, data: [] }))
+    ])
+      .then(([serviceData, roomData, giftData]) => {
+        if (!isMounted.current) return;
 
-            setSearchResults([...services, ...rooms]);
-            setIsSearching(false);
-          })
-          .catch(error => {
-            console.error("Error fetching rooms:", error);
-            setIsSearching(false);
-          });
+        const keyword = searchTerm.trim().toLowerCase();
+
+        const services = serviceData && serviceData.data ? serviceData.data
+          .filter(service => service.serviceName?.toLowerCase().includes(keyword))
+          .map(service => ({
+            id: service.serviceId,
+            name: service.serviceName,
+            type: 'service',
+            image: service.serviceImage,
+          })) : [];
+
+        const rooms = roomData && roomData.data ? roomData.data
+          .filter(room => room.roomName?.toLowerCase().includes(keyword))
+          .map(room => ({
+            id: room.roomId,
+            name: room.roomName,
+            type: 'room',
+            image: room.roomImage,
+          })) : [];
+
+        const gifts = giftData && giftData.flag && giftData.data ? giftData.data
+          .filter(gift => gift.giftName?.toLowerCase().includes(keyword))
+          .map(gift => ({
+            id: gift.giftId,
+            name: gift.giftName,
+            type: 'gift',
+            image: gift.giftImage,
+          })) : [];
+
+        safeSetState(setSearchResults, [...services, ...rooms, ...gifts]);
+        safeSetState(setIsSearching, false);
       })
       .catch(error => {
-        console.error("Error fetching services:", error);
-        setIsSearching(false);
+        console.error("Error fetching search results:", error);
+        if (isMounted.current) {
+          safeSetState(setSearchResults, []);
+          safeSetState(setIsSearching, false);
+        }
       });
   };
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    setSearchTerm(value);
+    safeSetState(setSearchTerm, value);
 
-    setIsSearching(true);
-    setShowSearchResults(true);
+    if (!value.trim()) {
+      safeSetState(setShowSearchResults, false);
+      safeSetState(setSearchResults, []);
+      return;
+    }
+
+    safeSetState(setIsSearching, true);
+    safeSetState(setShowSearchResults, true);
 
     const token = sessionStorage.getItem("token");
     const headers = token ? {
@@ -119,62 +171,86 @@ const NavbarCustomer = () => {
       "Content-Type": "application/json",
     };
 
-    // Fetch all services (showAll=false)
-    fetch(`http://localhost:5050/api/Service?showAll=false`, {
-      method: "GET",
-      headers: headers,
-    })
-      .then(response => response.json())
-      .then(serviceData => {
-        // Fetch available rooms
-        fetch(`http://localhost:5050/api/Room/available`, {
-          method: "GET",
-          headers: headers,
-        })
-          .then(response => response.json())
-          .then(roomData => {
-            const keyword = value.trim().toLowerCase();
+    // Use Promise.all to handle all fetches together
+    Promise.all([
+      fetch(`http://localhost:5050/api/Service?showAll=false`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Service API error');
+        return response.json();
+      }).catch(() => ({ data: [] })),
 
-            const services = serviceData.data ? serviceData.data
-              .filter(service => service.serviceName?.toLowerCase().includes(keyword))
-              .map(service => ({
-                id: service.serviceId,
-                name: service.serviceName,
-                type: 'service',
-                image: service.serviceImage,
-              })) : [];
+      fetch(`http://localhost:5050/api/Room/available`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Room API error');
+        return response.json();
+      }).catch(() => ({ data: [] })),
 
-            const rooms = roomData.data ? roomData.data
-              .filter(room => room.roomName?.toLowerCase().includes(keyword))
-              .map(room => ({
-                id: room.roomId,
-                name: room.roomName,
-                type: 'room',
-                image: room.roomImage,
-              })) : [];
+      fetch(`http://localhost:5050/Gifts`, {
+        method: "GET",
+        headers: headers,
+      }).then(response => {
+        if (!response.ok) throw new Error('Gift API error');
+        return response.json();
+      }).catch(() => ({ flag: false, data: [] }))
+    ])
+      .then(([serviceData, roomData, giftData]) => {
+        if (!isMounted.current) return;
 
-            setSearchResults([...services, ...rooms]);
-            setIsSearching(false);
-          })
-          .catch(error => {
-            console.error("Error fetching rooms:", error);
-            setIsSearching(false);
-          });
+        const keyword = value.trim().toLowerCase();
+
+        const services = serviceData && serviceData.data ? serviceData.data
+          .filter(service => service.serviceName?.toLowerCase().includes(keyword))
+          .map(service => ({
+            id: service.serviceId,
+            name: service.serviceName,
+            type: 'service',
+            image: service.serviceImage,
+          })) : [];
+
+        const rooms = roomData && roomData.data ? roomData.data
+          .filter(room => room.roomName?.toLowerCase().includes(keyword))
+          .map(room => ({
+            id: room.roomId,
+            name: room.roomName,
+            type: 'room',
+            image: room.roomImage,
+          })) : [];
+
+        const gifts = giftData && giftData.flag && giftData.data ? giftData.data
+          .filter(gift => gift.giftName?.toLowerCase().includes(keyword))
+          .map(gift => ({
+            id: gift.giftId,
+            name: gift.giftName,
+            type: 'gift',
+            image: gift.giftImage,
+          })) : [];
+
+        safeSetState(setSearchResults, [...services, ...rooms, ...gifts]);
+        safeSetState(setIsSearching, false);
       })
       .catch(error => {
-        console.error("Error fetching services:", error);
-        setIsSearching(false);
+        console.error("Error fetching search results:", error);
+        if (isMounted.current) {
+          safeSetState(setSearchResults, []);
+          safeSetState(setIsSearching, false);
+        }
       });
   };
 
   // Handle search result click
   const handleResultClick = (result) => {
-    setShowSearchResults(false);
-    setSearchTerm("");
+    safeSetState(setShowSearchResults, false);
+    safeSetState(setSearchTerm, "");
     if (result.type === 'service') {
       navigate(`/customer/services/${result.id}`);
     } else if (result.type === 'room') {
       navigate(`/customerroom/${result.id}`);
+    } else if (result.type === 'gift') {
+      navigate(`/customer/gifts/detail/${result.id}`);
     }
   };
 
@@ -182,8 +258,8 @@ const NavbarCustomer = () => {
     const id = sessionStorage.getItem("accountId");
 
     const handleNotificationCount = (value) => {
-      if (!isNotificationOpenRef.current) {
-        setNotificationCount(value.unreadChats);
+      if (!isNotificationOpenRef.current && isMounted.current) {
+        safeSetState(setNotificationCount, value.unreadChats);
       }
     };
 
@@ -205,11 +281,11 @@ const NavbarCustomer = () => {
 
   const toggleNotificationDropdown = () => {
     const newState = !notificationDropdownVisible;
-    setNotificationDropdownVisible(newState);
+    safeSetState(setNotificationDropdownVisible, newState);
     isNotificationOpenRef.current = newState;
 
     if (newState) {
-      setNotificationCount(dropdownUnreadCountRef.current.toString());
+      safeSetState(setNotificationCount, dropdownUnreadCountRef.current.toString());
     } else {
       const id = sessionStorage.getItem("accountId");
       if (id) {
@@ -221,48 +297,57 @@ const NavbarCustomer = () => {
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     if (token) {
-      setIsLoggedIn(true);
-      const decodedToken = jwt_decode(token);
-      const { AccountName, AccountImage, AccountId } = decodedToken;
+      try {
+        safeSetState(setIsLoggedIn, true);
+        const decodedToken = jwt_decode(token);
+        const { AccountName, AccountImage, AccountId } = decodedToken;
 
-      setAccountName(AccountName || "User");
-      setAccountId(AccountId);
-      sessionStorage.setItem("accountId", AccountId);
+        safeSetState(setAccountName, AccountName || "User");
+        safeSetState(setAccountId, AccountId);
+        sessionStorage.setItem("accountId", AccountId);
 
-      if (AccountImage) {
-        fetch(
-          `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        )
-          .then((response) => response.json())
-          .then((imageData) => {
-            if (imageData.flag) {
-              const imgContent = imageData.data.fileContents;
-              const imgContentType = imageData.data.contentType;
-              setAccountImage(`data:${imgContentType};base64,${imgContent}`);
-            } else {
-              console.error("Error loading image:", imageData.message);
+        if (AccountImage) {
+          fetch(
+            `http://localhost:5050/api/Account/loadImage?filename=${AccountImage}`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
             }
-          })
-          .catch((error) => console.error("Error fetching image:", error));
+          )
+            .then((response) => {
+              if (!response.ok) throw new Error('Image API error');
+              return response.json();
+            })
+            .then((imageData) => {
+              if (!isMounted.current) return;
+              if (imageData.flag) {
+                const imgContent = imageData.data.fileContents;
+                const imgContentType = imageData.data.contentType;
+                safeSetState(setAccountImage, `data:${imgContentType};base64,${imgContent}`);
+              } else {
+                console.error("Error loading image:", imageData.message);
+              }
+            })
+            .catch((error) => console.error("Error fetching image:", error));
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        safeSetState(setIsLoggedIn, false);
       }
     } else {
-      setIsLoggedIn(false);
+      safeSetState(setIsLoggedIn, false);
     }
   }, []);
 
   const toggleDropdown = () => {
-    setDropdownVisible(!dropdownVisible);
+    safeSetState(setDropdownVisible, !dropdownVisible);
   };
 
   const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+    safeSetState(setMobileMenuOpen, !mobileMenuOpen);
   };
 
   const handleViewProfile = () => {
@@ -286,15 +371,17 @@ const NavbarCustomer = () => {
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
         sessionStorage.removeItem("accountId");
-
+        useUserStore.setState({ currentUser: null, isLoading: false });
         Swal.fire({
           title: "Logged out",
           text: "You have been logged out successfully!",
           icon: "success",
           confirmButtonText: "OK",
         }).then(() => {
-          setIsLoggedIn(false);
-          navigate("/login", { replace: true });
+          if (isMounted.current) {
+            safeSetState(setIsLoggedIn, false);
+            navigate("/login", { replace: true });
+          }
         });
       }
     });
@@ -320,7 +407,7 @@ const NavbarCustomer = () => {
             <div className="form-input">
               <input
                 type="search"
-                placeholder="Search services or rooms..."
+                placeholder="Search..."
                 value={searchTerm}
                 onChange={handleSearchChange}
               />
@@ -336,7 +423,7 @@ const NavbarCustomer = () => {
                   <div className="search-loading">
                     <i className='bx bx-loader-alt bx-spin'></i> Searching...
                   </div>
-                ) : searchResults.length > 0 ? (
+                ) : searchResults && searchResults.length > 0 ? (
                   <>
                     {searchResults.some(r => r.type === 'service') && (
                       <>
@@ -413,6 +500,45 @@ const NavbarCustomer = () => {
                           ))}
                       </>
                     )}
+                    {/* Add Gift section */}
+                    {searchResults.some(r => r.type === 'gift') && (
+                      <>
+                        <div className="divider"></div>
+                        <div className="search-section-title">Gifts</div>
+                        {searchResults
+                          .filter(result => result.type === 'gift')
+                          .map((result) => (
+                            <div
+                              key={`${result.type}-${result.id}`}
+                              className={`search-result-item ${result.type}`}
+                              onClick={() => handleResultClick(result)}
+                            >
+                              <div className="search-result-image">
+                                {result.image ? (
+                                  <img
+                                    src={`http://localhost:5050${result.image}`}
+                                    alt={result.name}
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "https://via.placeholder.com/50";
+                                    }}
+                                  />
+                                ) : (
+                                  <div className="placeholder-image">
+                                    <i className="bx bx-gift"></i>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="search-result-content">
+                                <div className="search-result-name">{result.name}</div>
+                                <div className="search-result-type">
+                                  <i className="bx bx-gift"></i> Gift
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                      </>
+                    )}
                   </>
                 ) : searchTerm.trim().length > 0 ? (
                   <div className="no-results">No results found</div>
@@ -431,7 +557,7 @@ const NavbarCustomer = () => {
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => safeSetState(setMobileMenuOpen, false)}
             >
               <i className="bx bx-store-alt"></i>
               Service
@@ -443,7 +569,7 @@ const NavbarCustomer = () => {
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
-              onClick={() => setMobileMenuOpen(false)}
+              onClick={() => safeSetState(setMobileMenuOpen, false)}
             >
               <i className='bx bx-home-circle'></i>
               Room
@@ -456,7 +582,7 @@ const NavbarCustomer = () => {
                 className={({ isActive }) =>
                   isActive ? "nav-link active" : "nav-link"
                 }
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => safeSetState(setMobileMenuOpen, false)}
               >
                 <i className="bx bx-home-heart"></i>
                 Booking
@@ -470,7 +596,7 @@ const NavbarCustomer = () => {
                 className={({ isActive }) =>
                   isActive ? "nav-link active" : "nav-link"
                 }
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => safeSetState(setMobileMenuOpen, false)}
               >
                 <i className="bx bx-gift"></i>
                 Gift
@@ -484,7 +610,7 @@ const NavbarCustomer = () => {
                 className={({ isActive }) =>
                   isActive ? "nav-link active" : "nav-link"
                 }
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => safeSetState(setMobileMenuOpen, false)}
               >
                 <i className="bx bxs-dog"></i>
                 Pet
@@ -499,9 +625,7 @@ const NavbarCustomer = () => {
           <>
             <div className="notifications" onClick={toggleNotificationDropdown}>
               <i className="bx bx-bell"></i>
-              {notificationCount > 0 && (
-                <span className="count">{notificationCount}</span>
-              )}
+
             </div>
 
             <Link to="/chat/customer" className="notifications">
@@ -543,10 +667,10 @@ const NavbarCustomer = () => {
 
         {notificationDropdownVisible && (
           <NotificationsDropdown
-            onClose={() => setNotificationDropdownVisible(false)}
+            onClose={() => safeSetState(setNotificationDropdownVisible, false)}
             onUnreadCountChange={(count) => {
               dropdownUnreadCountRef.current = count;
-              setNotificationCount(count.toString());
+              safeSetState(setNotificationCount, count.toString());
             }}
           />
         )}
@@ -556,4 +680,3 @@ const NavbarCustomer = () => {
 };
 
 export default NavbarCustomer;
-
