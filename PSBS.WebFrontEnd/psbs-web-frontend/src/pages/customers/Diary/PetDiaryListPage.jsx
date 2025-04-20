@@ -84,9 +84,9 @@ const PetDiaryListPage = () => {
       const decoded = jwtDecode(token);
       setUserRole(
         decoded?.role ||
-          decoded[
-            "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
-          ]
+        decoded[
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        ]
       );
     }
   }, []);
@@ -162,7 +162,7 @@ const PetDiaryListPage = () => {
                   <img
                     src={
                       petInfo
-                        ? `http://localhost:5010${petInfo.petImage}`
+                        ? `http://localhost:5050/pet-service${petInfo.petImage}`
                         : SampleImage
                     }
                     alt={petInfo?.petName || "Pet"}
@@ -215,10 +215,9 @@ const PetDiaryListPage = () => {
                 <div className="space-y-2">
                   <div
                     className={`p-3 rounded-xl cursor-pointer transition-all duration-200 flex items-center justify-between
-                      ${
-                        selectedCategory === "All"
-                          ? "bg-customPrimary text-white shadow-md"
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      ${selectedCategory === "All"
+                        ? "bg-customPrimary text-white shadow-md"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     onClick={() => setSelectedCategory("All")}
                   >
@@ -243,10 +242,9 @@ const PetDiaryListPage = () => {
                     <div
                       key={category}
                       className={`p-3 rounded-xl cursor-pointer transition-all duration-200 flex items-center justify-between
-                        ${
-                          selectedCategory === category
-                            ? "bg-customPrimary text-white shadow-md"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ${selectedCategory === category
+                          ? "bg-customPrimary text-white shadow-md"
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         }`}
                       onClick={() => setSelectedCategory(category)}
                     >
@@ -323,10 +321,9 @@ const PetDiaryListPage = () => {
                           onClick={handleClickPrevious}
                           disabled={pageIndex <= 1}
                           className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-l-lg
-                            ${
-                              pageIndex <= 1
-                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                            ${pageIndex <= 1
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
                             }`}
                         >
                           <ArrowBackIosIcon
@@ -344,10 +341,9 @@ const PetDiaryListPage = () => {
                           onClick={handleClickNext}
                           disabled={pageIndex >= petDiary?.meta?.totalPages}
                           className={`flex items-center justify-center px-4 py-2 text-sm font-medium rounded-r-lg
-                            ${
-                              pageIndex >= petDiary?.meta?.totalPages
-                                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                            ${pageIndex >= petDiary?.meta?.totalPages
+                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                              : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
                             }`}
                         >
                           Next

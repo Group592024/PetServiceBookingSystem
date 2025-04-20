@@ -44,7 +44,7 @@ namespace PSBS.HealthCareApi.Infrastructure.DependencyInjection
 
             services.AddHttpClient("ApiGateway", client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5050/");
+                client.BaseAddress = new Uri("http://gatewayapi:5050/");
                 client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", config["MySerilog:DefaultToken"]!);
                 client.DefaultRequestHeaders.Accept.Add(
        new MediaTypeWithQualityHeaderValue("application/json"));

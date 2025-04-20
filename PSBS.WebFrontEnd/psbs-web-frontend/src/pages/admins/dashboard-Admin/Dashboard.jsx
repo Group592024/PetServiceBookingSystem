@@ -74,7 +74,7 @@ const Dashboard = () => {
         <main>
           <div className="header">
             <div className="left">
-              <h1>Dashboard</h1>
+              <h1>Settings</h1>
               <ul className="breadcrumb">
                 <li>
                   <a href="#">Settings</a>

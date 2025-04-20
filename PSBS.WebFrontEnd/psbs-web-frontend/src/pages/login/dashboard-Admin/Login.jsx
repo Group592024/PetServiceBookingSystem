@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaEnvelope, FaLock, FaPaw, FaEye, FaEyeSlash } from "react-icons/fa";
 import { motion } from "framer-motion";
-
+import { useUserStore } from "../../../lib/userStore";
 const Login = () => {
   const [AccountEmail, setEmail] = useState("");
   const [AccountPassword, setPassword] = useState("");
@@ -116,7 +116,7 @@ const Login = () => {
             "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
             ];
           sessionStorage.setItem("role", role);
-
+          useUserStore.setState({ currentUser: null, isLoading: false });
           Swal.fire({
             icon: "success",
             title: "Login Successful!",
@@ -127,7 +127,7 @@ const Login = () => {
             if (role === "user") {
               navigate("/");
             } else {
-              navigate("/dashboard");
+              navigate("/report");
             }
           });
         }

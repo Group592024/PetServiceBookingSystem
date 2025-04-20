@@ -6,7 +6,7 @@ import "./style.css";
 import { NavLink } from "react-router-dom";
 import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 import signalRService from "../../lib/ChatService";
-
+import { useUserStore } from "../../lib/userStore";
 const NavbarCustomer = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [accountName, setAccountName] = useState("Guest");
@@ -371,7 +371,7 @@ const NavbarCustomer = () => {
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
         sessionStorage.removeItem("accountId");
-
+        useUserStore.setState({ currentUser: null, isLoading: false });
         Swal.fire({
           title: "Logged out",
           text: "You have been logged out successfully!",
