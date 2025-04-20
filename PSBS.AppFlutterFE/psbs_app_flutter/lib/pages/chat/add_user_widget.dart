@@ -141,42 +141,58 @@ class _AddUserWidgetState extends State<AddUserWidget> {
             SizedBox(height: 50),
             if (_filteredUserList.isNotEmpty)
               ..._filteredUserList
-                  .map((user) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                  .map(
+                      (user) => // Replace the problematic Row with this improved version:
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                CircleAvatar(
-                                  backgroundImage: user.accountImage != null
-                                      ? NetworkImage(
-                                          "http://10.0.2.2:5050/account-service/images/${user.accountImage}")
-                                      : AssetImage("assets/default-avatar.png")
-                                          as ImageProvider,
-                                  radius: 25,
+                                // First child - user info with constrained width
+                                Expanded(
+                                  // Add Expanded here to give this section flexible width
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        backgroundImage: user.accountImage !=
+                                                null
+                                            ? NetworkImage(
+                                                "http://10.0.2.2:5050/account-service/images/${user.accountImage}")
+                                            : AssetImage(
+                                                    "assets/default-avatar.png")
+                                                as ImageProvider,
+                                        radius: 25,
+                                      ),
+                                      SizedBox(width: 20),
+                                      Flexible(
+                                        // Keep Flexible for the text
+                                        child: Text(
+                                          user.accountName,
+                                          style: TextStyle(color: Colors.white),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                SizedBox(width: 20),
-                                Text(
-                                  user.accountName,
-                                  style: TextStyle(color: Colors.white),
+                                // Add some spacing between the user info and button
+                                SizedBox(width: 10),
+                                // Second child - button with fixed width
+                                ElevatedButton(
+                                  onPressed: () => _handleAdd(user.accountId),
+                                  child: Text("Add User"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            ElevatedButton(
-                              onPressed: () => _handleAdd(user.accountId),
-                              child: Text("Add User"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ))
+                          ))
                   .toList()
             else
               Text(

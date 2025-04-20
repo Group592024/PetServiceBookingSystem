@@ -153,7 +153,7 @@ const PetTypeDetail = () => {
                       className="w-full h-80 object-cover object-center transition-transform duration-500 group-hover:scale-110"
                       src={
                         detail?.petType_Image
-                          ? `http://localhost:5010${detail?.petType_Image}`
+                          ? `http://localhost:5050/pet-service${detail?.petType_Image}`
                           : "https://www.google.com/url?sa=i&url=https%3A%2F%2Fstock.adobe.com%2Fpt%2Fsearch%3Fk%3Dimage%2Bplaceholder&psig=AOvVaw3K3cKoUrrPwH8WrK0pAsXQ&ust=1744943972118000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCIiVw4qF3owDFQAAAAAdAAAAABAQ"
                       }
                       alt={detail?.petType_Name}

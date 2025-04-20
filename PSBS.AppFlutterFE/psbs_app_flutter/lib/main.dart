@@ -193,14 +193,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   title: Text('Gift', style: TextStyle(color: Colors.black)),
                 ),
               ),
-              PopupMenuItem(
-                value: 'camera',
-                child: ListTile(
-                  leading: const Icon(Icons.videocam, color: Colors.blue),
-                  title: const Text('Camera',
-                      style: TextStyle(color: Colors.black)),
-                ),
-              ),
+              // PopupMenuItem(
+              //   value: 'camera',
+              //   child: ListTile(
+              //     leading: const Icon(Icons.videocam, color: Colors.blue),
+              //     title: const Text('Camera',
+              //         style: TextStyle(color: Colors.black)),
+              //   ),
+              // ),
               PopupMenuItem(
                 value: 'pet',
                 child: ListTile(

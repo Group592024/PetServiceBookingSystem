@@ -228,7 +228,7 @@ class _PetDiaryPageState extends State<PetDiaryPage> {
                       radius: 50,
                       backgroundImage: widget.petImage.isNotEmpty
                           ? NetworkImage(
-                              'http://10.0.2.2:5010${widget.petImage}')
+                              'http://10.0.2.2:5050/pet-service${widget.petImage}')
                           : AssetImage('assets/sampleUploadImage.jpg')
                               as ImageProvider,
                     ),
