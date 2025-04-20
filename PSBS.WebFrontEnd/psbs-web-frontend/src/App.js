@@ -127,9 +127,9 @@ function App() {
 
           {/* Route yêu cầu bảo vệ */}
           <Route
-            path="/dashboard"
+            path="/settings"
             element={
-              <ProtectedRoute allowedRoles={["admin", "staff"]}>
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -139,7 +139,7 @@ function App() {
             <Route
               index
               element={
-                <ProtectedRoute allowedRoles={["admin"]}>
+                <ProtectedRoute allowedRoles={["admin", "staff"]}>
                   <ReportBookingPage />
                 </ProtectedRoute>
               }

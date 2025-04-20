@@ -32,7 +32,7 @@ builder.WebHost.ConfigureKestrel(options =>
 });
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5050/");
+    client.BaseAddress = new Uri("http://gatewayapi:5050/");
 });
 builder.Services.AddAuthorization(options =>
 {

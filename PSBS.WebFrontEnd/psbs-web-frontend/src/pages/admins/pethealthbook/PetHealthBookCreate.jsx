@@ -178,16 +178,16 @@ const PetHealthBookCreate = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (!bookingsResponse.ok) throw new Error("Failed to fetch bookings.");
       const bookingsData = await bookingsResponse.json();
       const bookingsList = bookingsData.data || [];
-  
+
       // Find the bookingId that matches the provided bookingCode
       const matchingBooking = bookingsList.find(
         (booking) => booking.bookingCode === visitDetails.bookingId
       );
-  
+
       if (!matchingBooking) {
         Swal.fire(
           "Error",
@@ -196,7 +196,7 @@ const PetHealthBookCreate = () => {
         );
         return;
       }
-  
+
       // Fetch booking service items to validate the bookingServiceItemId
       const serviceResponse = await fetch(
         "http://localhost:5050/api/BookingServiceItems/GetBookingServiceList",
@@ -208,15 +208,15 @@ const PetHealthBookCreate = () => {
           },
         }
       );
-  
+
       if (!serviceResponse.ok) throw new Error("Failed to fetch booking service items.");
       const bookingServiceData = await serviceResponse.json();
-  
+
       // Find the matching booking service item
       const matchingServiceItem = bookingServiceData.data.find(
         (item) => item.bookingId === matchingBooking.bookingId && item.petId === selectedPet
       );
-  
+
       if (!matchingServiceItem) {
         Swal.fire(
           "Error",
@@ -225,28 +225,41 @@ const PetHealthBookCreate = () => {
         );
         return;
       }
-  
+
       // Validate required fields
       if (!visitDetails.medicineId.length || !visitDetails.visitDate || !visitDetails.performBy) {
         Swal.fire("Error", "Please fill all required fields", "error");
         return;
       }
-  
-      // Prepare data for creation
+
+      // Prepare data for creation with timezone adjustment for nextVisitDate
+      let nextVisitDateISOString = null;
+      if (visitDetails.nextVisitDate) {
+        // Create a date string that preserves the local date
+        const nextVisitDate = new Date(visitDetails.nextVisitDate);
+        const year = nextVisitDate.getFullYear();
+        const month = nextVisitDate.getMonth();
+        const day = nextVisitDate.getDate();
+
+        // Create a new date at noon to avoid timezone issues
+        const adjustedDate = new Date(Date.UTC(year, month, day, 12, 0, 0));
+        nextVisitDateISOString = adjustedDate.toISOString();
+      }
+
       const newVisitDetails = {
         bookingId: matchingBooking.bookingId,
         bookingServiceItemId: matchingServiceItem.bookingServiceItemId,
         medicineIds: visitDetails.medicineId,
-        visitDate: visitDetails.visitDate ? visitDetails.visitDate.toISOString() : null,
-        nextVisitDate: visitDetails.nextVisitDate ? visitDetails.nextVisitDate.toISOString() : null,
+        visitDate: visitDetails.visitDate ? new Date(visitDetails.visitDate).toISOString() : null,
+        nextVisitDate: nextVisitDateISOString,
         performBy: visitDetails.performBy || sessionStorage.getItem("accountName"),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         isDeleted: visitDetails.isDeleted || false,
       };
-  
+
       console.log("Data sent to API:", newVisitDetails);
-  
+
       // Send the create request
       const createResponse = await fetch("http://localhost:5050/api/PetHealthBook", {
         method: "POST",
@@ -256,7 +269,7 @@ const PetHealthBookCreate = () => {
         },
         body: JSON.stringify(newVisitDetails),
       });
-  
+
       if (!createResponse.ok) {
         const errorData = await createResponse.json();
         console.error("Error response from API:", errorData);

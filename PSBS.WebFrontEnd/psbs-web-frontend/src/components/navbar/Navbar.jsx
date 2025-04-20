@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import NotificationsDropdown from "../../pages/admins/notification/userNotifications/UserNotificationDropDown";
 import signalRService from "../../lib/ChatService";
-
 const Navbar = ({ sidebarRef }) => {
   const [accountName, setAccountName] = useState(null);
   const [accountImage, setAccountImage] = useState(null);

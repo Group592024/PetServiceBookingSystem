@@ -34,8 +34,8 @@ namespace UnitTest.ReservationApi.Controllers
 
             var fakeData = new List<AccountAmountDTO>
     {
-        new AccountAmountDTO(Guid.NewGuid(), 1500),
-        new AccountAmountDTO(Guid.NewGuid(), 2300)
+        new AccountAmountDTO(Guid.NewGuid(), 1500,2,2,2),
+        new AccountAmountDTO(Guid.NewGuid(), 2300,2,2,2)
     };
 
             A.CallTo(() => _report.GetIncomeEachCustomer(year, month, startDate, endDate))

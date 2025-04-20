@@ -44,15 +44,14 @@ const Sidebar = forwardRef((_, ref) => {
 
       <ul className="side-menu">
         {/* Dashboard stays at the top */}
-        <li className={location.pathname.startsWith("/dashboard") ? "active" : ""}>
-          <Link to="/dashboard">
+        <li className={location.pathname.startsWith("/report") ? "active" : ""}>
+          <Link to="/report">
             <Tooltip title="Dashboard" placement="right">
-              <i className="bx bxs-dashboard"></i>
+              <i className="bx bxs-report"></i>
             </Tooltip>
             Dashboard
           </Link>
         </li>
-
         {/* Alphabetically sorted */}
         <li className={location.pathname.startsWith("/account") ? "active" : ""}>
           <Link to="/account">
@@ -118,16 +117,7 @@ const Sidebar = forwardRef((_, ref) => {
             Pet HealthBook
           </Link>
         </li>
-        {isAdmin && (
-          <li className={location.pathname.startsWith("/report") ? "active" : ""}>
-            <Link to="/report">
-              <Tooltip title="Reports" placement="right">
-                <i className="bx bxs-report"></i>
-              </Tooltip>
-              Reports
-            </Link>
-          </li>
-        )}
+      
         <li className={location.pathname.startsWith("/room") ? "active" : ""}>
           <Link to="/room">
             <Tooltip title="Room" placement="right">
@@ -136,7 +126,16 @@ const Sidebar = forwardRef((_, ref) => {
             Room
           </Link>
         </li>
-
+        {isAdmin && (
+          <li className={location.pathname.startsWith("/settings") ? "active" : ""}>
+            <Link to="/settings">
+              <Tooltip title="Settings" placement="right">
+                <i className="bx bxs-dashboard"></i>
+              </Tooltip>
+              Settings
+            </Link>
+          </li>
+        )}
         <li className={location.pathname.startsWith("/service") ? "active" : ""}>
           <Link to="/service">
             <Tooltip title="Service" placement="right">
