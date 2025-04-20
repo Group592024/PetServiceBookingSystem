@@ -22,7 +22,7 @@ builder.Services.AddInfrastructureService(builder.Configuration);
 
 builder.Services.AddHttpClient("ApiGateway", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5050/");
+    client.BaseAddress = new Uri("http://gatewayapi:5050/");
 });
 
 builder.Services.Configure<ApiBehaviorOptions>(options =>
@@ -47,6 +47,12 @@ app.UseStaticFiles(new StaticFileOptions
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "Images")),
     RequestPath = "/Images"
+});
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "images")),
+    RequestPath = "/images"
 });
 
 // Configure the HTTP request pipeline.

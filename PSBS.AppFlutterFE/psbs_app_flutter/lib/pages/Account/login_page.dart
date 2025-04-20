@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       final response = await http.post(
-        Uri.parse('http://192.168.1.7:5050/api/Account/Login'),
+        Uri.parse('http://10.0.2.2:5050/api/Account/Login'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'AccountEmail': email, 'AccountPassword': password}),
       );

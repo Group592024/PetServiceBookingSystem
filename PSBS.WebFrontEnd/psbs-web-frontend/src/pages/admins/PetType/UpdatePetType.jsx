@@ -81,7 +81,7 @@ const UpdatePetType = () => {
         }
         setPetType(data.data);
         setSelectedOption(data.data.isDelete);
-        setImageDisplay(`http://localhost:5010${data.data.petType_Image}`);
+        setImageDisplay(`http://localhost:5050/pet-service${data.data.petType_Image}`);
       } catch (error) {
         Swal.fire({
           title: "Error",
