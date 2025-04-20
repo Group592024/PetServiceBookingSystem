@@ -86,6 +86,9 @@ const ReportBookingPage = () => {
                     }
                     className="bg-white bg-opacity-20 border border-blue-300 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
                   >
+                    <option value="all" className="text-gray-800">
+                      All
+                    </option>
                     <option value="year" className="text-gray-800">
                       By year
                     </option>
@@ -247,7 +250,7 @@ const ReportBookingPage = () => {
                 <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                   <div className="flex justify-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800 px-6 py-2 border-b-2 border-blue-500 inline-block">
-                      Number of Bookings by Service
+                      Number of Completed Bookings by Service
                     </h2>
                   </div>
                   <div className="justify-center">
@@ -273,7 +276,7 @@ const ReportBookingPage = () => {
                 <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
                   <div className="flex justify-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800 px-6 py-2 border-b-2 border-blue-500 inline-block">
-                      Number of Bookings by Room Type
+                      Number of Completed Bookings by Room Type
                     </h2>
                   </div>
                   <div className="justify-center">

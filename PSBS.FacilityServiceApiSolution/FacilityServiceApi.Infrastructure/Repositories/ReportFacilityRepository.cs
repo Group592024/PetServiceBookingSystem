@@ -146,30 +146,16 @@ namespace FacilityServiceApi.Infrastructure.Repositories
         }
 
 
-        public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetServiceQuantity(
-     int? year, int? month, DateTime? startDate, DateTime? endDate)
+        public async Task<IEnumerable<RoomHistoryQuantityDTO>> GetServiceQuantity(List<Guid> BookingIds)
         {
+            Console.WriteLine("Response nhan duoc ne: " + BookingIds.Count());
             var bookingServiceItemsQuery = context.bookingServiceItems
+                 .Where(b => BookingIds.Contains(b.BookingId))
                 .Include(b => b.ServiceVariant)
                     .ThenInclude(v => v.Service)
-                .AsQueryable();
+                   ;
 
-            // Filter by date range or month/year
-            if (startDate.HasValue && endDate.HasValue)
-            {
-                bookingServiceItemsQuery = bookingServiceItemsQuery
-                    .Where(p => p.CreateAt >= startDate && p.CreateAt <= endDate);
-            }
-            else if (month.HasValue && year.HasValue)
-            {
-                bookingServiceItemsQuery = bookingServiceItemsQuery
-                    .Where(p => p.CreateAt.Month == month && p.CreateAt.Year == year);
-            }
-            else if (year.HasValue)
-            {
-                bookingServiceItemsQuery = bookingServiceItemsQuery
-                    .Where(p => p.CreateAt.Year == year);
-            }
+            Console.WriteLine(" So Booking ne: " + bookingServiceItemsQuery.Count());
 
             // Group by service name
             var groupedData = await bookingServiceItemsQuery

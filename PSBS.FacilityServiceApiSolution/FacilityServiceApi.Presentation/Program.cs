@@ -4,8 +4,6 @@ using FacilityServiceApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
-using Quartz.Impl.AdoJobStore.Common;
-using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 

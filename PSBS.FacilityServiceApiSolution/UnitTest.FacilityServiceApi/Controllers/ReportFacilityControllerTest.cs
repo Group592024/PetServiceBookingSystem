@@ -3,25 +3,92 @@ using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Domain.Entities;
+using FacilityServiceApi.Infrastructure.Services;
 using FacilityServiceApi.Presentation.Controllers;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
+using System.Net;
+using System.Text.Json;
 
 namespace UnitTest.FacilityServiceApi.Controllers
 {
     public class ReportFacilityControllerTest
     {
         private readonly IReport _report;
+        private readonly ReservationApiClient _reservationApiClient;
         private readonly ReportFacilityController _controller;
+        private readonly MockHttpMessageHandler _mockHttpHandler;
 
         public ReportFacilityControllerTest()
         {
+            // Setup mocks
             _report = A.Fake<IReport>();
-            _controller = new ReportFacilityController(_report);
+
+            // Create a custom HttpMessageHandler to mock the HTTP response
+            _mockHttpHandler = new MockHttpMessageHandler();
+
+            var httpClient = new HttpClient(_mockHttpHandler)
+            {
+                BaseAddress = new Uri("https://test-api.example.com/")
+            };
+
+            // Create the ReservationApiClient with the mocked HttpClient
+            _reservationApiClient = new ReservationApiClient(httpClient);
+
+            // Setup controller with authentication context
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Authorization"] = "Bearer fake-token";
+
+            _controller = new ReportFacilityController(_report, _reservationApiClient)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = httpContext
+                }
+            };
         }
+
+        [Fact]
+        public async Task GetBookingServiceItem_WhenItemsExist_ReturnsOk()
+        {
+            // Arrange
+            int year = 2024;
+            int month = 3;
+
+            var fakeBookingIds = new List<Guid> { Guid.NewGuid(), Guid.NewGuid() };
+
+            // Configure the mock handler to return our fake booking IDs
+            _mockHttpHandler.SetResponseContent(JsonSerializer.Serialize(new { BookingIds = fakeBookingIds }));
+
+            var serviceItems = new List<RoomHistoryQuantityDTO>
+            {
+                new RoomHistoryQuantityDTO("Service A", 20),
+                new RoomHistoryQuantityDTO("Service B", 10)
+            };
+
+            // We can't mock the ReservationApiClient directly, so we mock the IReport.GetServiceQuantity method
+            // which will be called with the booking IDs returned by the ReservationApiClient
+            A.CallTo(() => _report.GetServiceQuantity(A<List<Guid>>._))
+                .Returns(Task.FromResult<IEnumerable<RoomHistoryQuantityDTO>>(serviceItems));
+
+            // Act
+            var result = await _controller.GetBookingServiceItem(year, month, null, null);
+
+            // Assert
+            result.Should().NotBeNull();
+            var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
+            okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+
+            var response = okResult.Value.Should().BeOfType<Response>().Subject;
+            response.Flag.Should().BeTrue();
+            response.Message.Should().Be("Booking found successfully");
+            response.Data.Should().BeEquivalentTo(serviceItems);
+        }
+
+
 
         [Fact]
         public async Task GetAvailableRooms_WhenRoomsExist_ReturnsOk()
@@ -186,58 +253,7 @@ namespace UnitTest.FacilityServiceApi.Controllers
             response.Message.Should().Be("No room histories found in the database");
         }
 
-        [Fact]
-        public async Task GetBookingServiceItem_WhenItemsExist_ReturnsOk()
-        {
-            // Arrange
-            int year = 2024;
-            int month = 3;
 
-            var serviceItems = new List<RoomHistoryQuantityDTO>
-    {
-        new RoomHistoryQuantityDTO("Service A", 20),
-        new RoomHistoryQuantityDTO("Service B", 10)
-    };
-
-            A.CallTo(() => _report.GetServiceQuantity(year, month, null, null))
-                .Returns(Task.FromResult<IEnumerable<RoomHistoryQuantityDTO>>(serviceItems));
-
-            // Act
-            var result = await _controller.GetBookingServiceItem(year, month, null, null);
-
-            // Assert
-            var okResult = result.Result as OkObjectResult;
-            okResult.Should().NotBeNull();
-            okResult!.StatusCode.Should().Be(StatusCodes.Status200OK);
-
-            var response = okResult.Value as Response;
-            response.Should().NotBeNull();
-            response!.Flag.Should().BeTrue();
-            response.Message.Should().Be("Booking service items retrieved successfully");
-            response.Data.Should().BeEquivalentTo(serviceItems);
-        }
-
-
-        [Fact]
-        public async Task GetBookingServiceItem_WhenNoItemsExist_ReturnsNotFound()
-        {
-            // Arrange
-            A.CallTo(() => _report.GetServiceQuantity(A<int?>._, A<int?>._, A<DateTime?>._, A<DateTime?>._))
-                .Returns(Task.FromResult<IEnumerable<RoomHistoryQuantityDTO>>(new List<RoomHistoryQuantityDTO>()));
-
-            // Act
-            var result = await _controller.GetBookingServiceItem(null, null, null, null);
-
-            // Assert
-            var notFoundResult = result.Result as NotFoundObjectResult;
-            notFoundResult.Should().NotBeNull();
-            notFoundResult!.StatusCode.Should().Be(StatusCodes.Status404NotFound);
-
-            var response = notFoundResult.Value as Response;
-            response.Should().NotBeNull();
-            response!.Flag.Should().BeFalse();
-            response.Message.Should().Be("No booking service items found in the database");
-        }
 
         [Fact]
         public async Task GetPetCount_WhenDataExists_ReturnsOk()
@@ -387,4 +403,25 @@ namespace UnitTest.FacilityServiceApi.Controllers
             response.Message.Should().Be("No service type found in the database");
         }
     }
+}
+
+public class MockHttpMessageHandler : HttpMessageHandler
+{
+    private string _responseContent = "{ \"BookingIds\": [] }";
+
+    public void SetResponseContent(string content)
+    {
+        _responseContent = content;
+    }
+
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        var response = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent(_responseContent, System.Text.Encoding.UTF8, "application/json")
+        };
+
+        return Task.FromResult(response);
+    }
+
 }

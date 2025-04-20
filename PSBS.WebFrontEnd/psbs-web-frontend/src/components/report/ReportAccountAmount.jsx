@@ -47,6 +47,7 @@ const ReportAccountAmount = () => {
       const token = sessionStorage.getItem("token");
       let url = "http://localhost:5050/api/ReportBooking/accountAmount?";
 
+      if (type === "all") url = "http://localhost:5050/api/ReportBooking/accountAmount";
       if (type === "year") url += `year=${year}`;
       if (type === "month") url += `year=${year}&month=${month}`;
       if (type === "day") url += `startDate=${startDate}&endDate=${endDate}`;

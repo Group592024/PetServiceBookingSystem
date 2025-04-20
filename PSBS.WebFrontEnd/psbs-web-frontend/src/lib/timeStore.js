@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 const useTimeStore = create((set) => ({
-  type: "year",
+  type: "all",
   year: new Date().getFullYear(),
   month: "",
   startDate: "",
