@@ -196,6 +196,13 @@ const AddService = () => {
 
         //hien popup add variant
         setOpen(true);
+      } else if (response.status === 409) {
+        Swal.fire({
+          title: "Add New Service",
+          text: "Service Already Exists!",
+          icon: "error",
+          confirmButtonColor: "#6366f1",
+        })
       } else {
         Swal.fire({
           title: "Error",

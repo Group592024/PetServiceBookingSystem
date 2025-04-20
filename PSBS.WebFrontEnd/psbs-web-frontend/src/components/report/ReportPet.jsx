@@ -76,6 +76,7 @@ const ReportPet = () => {
 
       let url = `http://localhost:5050/api/ReportPet/${selectedService.serviceId}?`;
 
+      if (type === "all") url = `http://localhost:5050/api/ReportPet/${selectedService.serviceId}`;
       if (type === "year") url += `year=${year}`;
       if (type === "month") url += `year=${year}&month=${month}`;
       if (type === "day") url += `startDate=${startDate}&endDate=${endDate}`;

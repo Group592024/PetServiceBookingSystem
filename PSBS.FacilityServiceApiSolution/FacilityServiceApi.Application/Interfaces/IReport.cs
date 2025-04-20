@@ -9,7 +9,7 @@ namespace FacilityServiceApi.Application.Interfaces
         Task<IEnumerable<RoomHistoryQuantityDTO>> GetRoomTypeQuantity(
             int? year, int? month, DateTime? startDate, DateTime? endDate);
         Task<IEnumerable<RoomHistoryQuantityDTO>> GetServiceQuantity(
-            int? year, int? month, DateTime? startDate, DateTime? endDate);
+            List<Guid> BookingIds);
         Task<IEnumerable<PetCountDTO>> GetAllBookingByPet(Guid id,
             int? year, int? month, DateTime? startDate, DateTime? endDate);
         Task<IEnumerable<Room>> ListActiveRoomsAsync();

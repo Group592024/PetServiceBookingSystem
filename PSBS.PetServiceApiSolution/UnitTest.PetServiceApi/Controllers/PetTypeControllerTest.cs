@@ -8,6 +8,7 @@ using PetApi.Application.Interfaces;
 using PetApi.Domain.Entities;
 using PetApi.Presentation.Controllers;
 using PSPS.SharedLibrary.Responses;
+using System.Linq.Expressions;
 
 namespace UnitTest.PetServiceApi.Controllers
 {
@@ -106,15 +107,23 @@ namespace UnitTest.PetServiceApi.Controllers
             var petTypeDto = new CreatePetTypeDTO("New Type", "Description");
 
             var fileMock = new Mock<IFormFile>();
-            var content = new byte[100];
+            var content = new byte[100]; // Dummy image content
             var stream = new MemoryStream(content);
             var fileName = "test.jpg";
 
-            fileMock.Setup(_ => _.OpenReadStream()).Returns(stream);
-            fileMock.Setup(_ => _.FileName).Returns(fileName);
-            fileMock.Setup(_ => _.Length).Returns(content.Length);
-            fileMock.Setup(_ => _.ContentType).Returns("image/jpeg");
+            fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
+            fileMock.Setup(f => f.FileName).Returns(fileName);
+            fileMock.Setup(f => f.Length).Returns(content.Length);
+            fileMock.Setup(f => f.ContentType).Returns("image/jpeg");
 
+            // Simulate no existing pet type
+            A.CallTo(() => _petTypeInterface.GetByAsync(A<Expression<Func<PetType, bool>>>._))
+                .Returns(Task.FromResult<PetType?>(null));
+
+            // We don't mock HandleImageUpload — so it will run the real implementation
+            // Make sure any file IO it does can work or is mocked/stubbed properly
+
+            // Simulate success from CreateAsync
             A.CallTo(() => _petTypeInterface.CreateAsync(A<PetType>.Ignored))
                 .Returns(new Response(true, "Pet type created successfully"));
 
@@ -124,8 +133,10 @@ namespace UnitTest.PetServiceApi.Controllers
             // Assert
             var okResult = result.Result.Should().BeOfType<OkObjectResult>().Subject;
             okResult.StatusCode.Should().Be(StatusCodes.Status200OK);
+
             var response = okResult.Value.Should().BeOfType<Response>().Subject;
             response.Flag.Should().BeTrue();
+            response.Message.Should().Be("Pet type created successfully");
         }
 
 
@@ -157,19 +168,23 @@ namespace UnitTest.PetServiceApi.Controllers
         public async Task CreatePetType_WhenServiceFails_ReturnsBadRequest()
         {
             // Arrange
-            var petTypeDto = new CreatePetTypeDTO
-            ("New Type", "Description");
+            var petTypeDto = new CreatePetTypeDTO("New Type", "Description");
 
             var fileMock = new Mock<IFormFile>();
             var content = new byte[100];
             var stream = new MemoryStream(content);
             var fileName = "test.jpg";
 
-            fileMock.Setup(_ => _.OpenReadStream()).Returns(stream);
-            fileMock.Setup(_ => _.FileName).Returns(fileName);
-            fileMock.Setup(_ => _.Length).Returns(content.Length);
-            fileMock.Setup(_ => _.ContentType).Returns("image/jpeg");
+            fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
+            fileMock.Setup(f => f.FileName).Returns(fileName);
+            fileMock.Setup(f => f.Length).Returns(content.Length);
+            fileMock.Setup(f => f.ContentType).Returns("image/jpeg");
 
+            // Simulate no existing pet type (no conflict)
+            A.CallTo(() => _petTypeInterface.GetByAsync(A<Expression<Func<PetType, bool>>>._))
+                .Returns(Task.FromResult<PetType?>(null));
+
+            // Simulate failed creation
             A.CallTo(() => _petTypeInterface.CreateAsync(A<PetType>.Ignored))
                 .Returns(new Response(false, "Failed to create pet type"));
 
@@ -177,43 +192,45 @@ namespace UnitTest.PetServiceApi.Controllers
             var result = await _controller.CreatePetType(petTypeDto, fileMock.Object);
 
             // Assert
-            var badRequestResult = result.Result as BadRequestObjectResult;
-            badRequestResult.Should().NotBeNull();
-            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
 
-            var response = badRequestResult.Value as Response;
-            response.Should().NotBeNull();
-            response!.Flag.Should().BeFalse();
+            var response = badRequestResult.Value.Should().BeOfType<Response>().Subject;
+            response.Flag.Should().BeFalse();
             response.Message.Should().Be("Failed to create pet type");
         }
+
 
         [Fact]
         public async Task CreatePetType_WhenInvalidName_ReturnsBadRequest()
         {
             // Arrange
-            var petTypeDto = new CreatePetTypeDTO
-            ("", "Description"); // Invalid: empty name
+            var petTypeDto = new CreatePetTypeDTO("", "Description"); // Invalid: empty name
+
             var fileMock = new Mock<IFormFile>();
             var content = new byte[100];
             var stream = new MemoryStream(content);
-            var fileName = "test.jpg";
+            fileMock.Setup(f => f.OpenReadStream()).Returns(stream);
+            fileMock.Setup(f => f.FileName).Returns("test.jpg");
+            fileMock.Setup(f => f.Length).Returns(content.Length);
+            fileMock.Setup(f => f.ContentType).Returns("image/jpeg");
 
-            fileMock.Setup(_ => _.OpenReadStream()).Returns(stream);
-            fileMock.Setup(_ => _.FileName).Returns(fileName);
-            fileMock.Setup(_ => _.Length).Returns(content.Length);
-            fileMock.Setup(_ => _.ContentType).Returns("image/jpeg");
+            // Manually simulate model validation failure
+            _controller.ModelState.AddModelError(nameof(CreatePetTypeDTO.PetType_Name), "PetType_Name is required");
 
             // Act
             var result = await _controller.CreatePetType(petTypeDto, fileMock.Object);
 
             // Assert
-            var badRequestResult = result.Result as BadRequestObjectResult;
-            badRequestResult.Should().NotBeNull();
-            badRequestResult!.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
-            var response = badRequestResult.Value as Response;
-            response.Should().NotBeNull();
-            response!.Flag.Should().BeFalse();
+            var badRequestResult = result.Result.Should().BeOfType<BadRequestObjectResult>().Subject;
+            badRequestResult.StatusCode.Should().Be(StatusCodes.Status400BadRequest);
+
+            var response = badRequestResult.Value.Should().BeOfType<Response>().Subject;
+            response.Flag.Should().BeFalse();
+            response.Message.Should().Be("Validation Error");
+            response.Data.Should().NotBeNull();
         }
+
 
         [Fact]
         public async Task UpdatePetType_WhenAllValidInput_ReturnsOkResponse()

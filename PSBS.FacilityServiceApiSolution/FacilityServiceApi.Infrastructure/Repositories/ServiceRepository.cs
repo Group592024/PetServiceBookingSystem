@@ -107,7 +107,7 @@ namespace FacilityServiceApi.Infrastructure.Repositories
             {
                 var Service = await context.Service.Where(predicate).FirstOrDefaultAsync();
 
-                return Service ?? throw new InvalidOperationException("Service not found");
+                return Service is not null ? Service : null;
             }
             catch (Exception ex)
             {

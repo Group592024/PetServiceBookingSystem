@@ -157,6 +157,11 @@ namespace FacilityServiceApi.Presentation.Controllers
                 return BadRequest(new Response(false, "The uploaded file failed"));
             }
 
+            var existingVariant = await _service.GetByAsync(x => x.serviceName.ToLower().Trim().Equals(service.serviceName.ToLower().Trim()));
+            if (existingVariant != null)
+            {
+                return Conflict(new Response(false, $"Service with name {existingVariant.serviceName} is already existed"));
+            }
 
             var getEntity = ServiceConversion.ToEntity(service, imagePath);
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import NavbarCustomer from "../../../components/navbar-customer/NavbarCustomer";
 import SampleImage from "../../../assets/sampleUploadImage.jpg";
 import {
@@ -18,8 +18,11 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useParams } from "react-router-dom";
 import jwtDecode from "jwt-decode";
+import Sidebar from "../../../components/sidebar/Sidebar";
+import Navbar from "../../../components/navbar/Navbar";
 
 const PetDiaryListPage = () => {
+  const sidebarRef = useRef(null);
   const { petId } = useParams();
   const petInfo = JSON.parse(localStorage.getItem("petInfo"));
   const [userRole, setUserRole] = useState(null);
@@ -148,7 +151,10 @@ const PetDiaryListPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
-      <NavbarCustomer />
+      {userRole === "user" ? (
+        <NavbarCustomer />
+      ) : (<div><Sidebar ref={sidebarRef} />
+        <div className="content"><Navbar sidebarRef={sidebarRef} /></div></div>)}
 
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row gap-8">

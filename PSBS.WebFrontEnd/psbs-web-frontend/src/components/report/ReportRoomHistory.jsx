@@ -43,6 +43,7 @@ const ReportRoomHistory = () => {
       const token = sessionStorage.getItem("token");
       let url = "http://localhost:5050/api/ReportFacility/roomHistory?";
 
+      if (type === "all") url = "http://localhost:5050/api/ReportFacility/roomHistory";
       if (type === "year") url += `year=${year}`;
       if (type === "month") url += `year=${year}&month=${month}`;
       if (type === "day") url += `startDate=${startDate}&endDate=${endDate}`;
@@ -226,9 +227,9 @@ const ReportRoomHistory = () => {
                   <p className="text-2xl font-bold text-gray-800">
                     {data.length > 0
                       ? Math.round(
-                          data.reduce((sum, item) => sum + item.quantity, 0) /
-                            data.length
-                        )
+                        data.reduce((sum, item) => sum + item.quantity, 0) /
+                        data.length
+                      )
                       : 0}
                   </p>
                 </div>

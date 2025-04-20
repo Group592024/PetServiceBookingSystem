@@ -104,6 +104,13 @@ const AddPetType = () => {
           confirmButtonColor: "#6366f1",
         });
         navigate("/petType");
+      } else if (response.status === 409) {
+        Swal.fire({
+          title: "Add New Pet Type",
+          text: "Pet Type Already Exists!",
+          icon: "error",
+          confirmButtonColor: "#6366f1",
+        });
       } else {
         Swal.fire({
           title: "Add New Pet Type",
@@ -111,6 +118,7 @@ const AddPetType = () => {
           icon: "error",
           confirmButtonColor: "#6366f1",
         });
+        console.log(response);
       }
     } catch (error) {
       console.error("Failed fetching api", error);

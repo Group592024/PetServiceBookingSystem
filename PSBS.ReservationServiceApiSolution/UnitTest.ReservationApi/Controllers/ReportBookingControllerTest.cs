@@ -34,8 +34,8 @@ namespace UnitTest.ReservationApi.Controllers
 
             var fakeData = new List<AccountAmountDTO>
     {
-        new AccountAmountDTO(Guid.NewGuid(), 1500,2,2,2),
-        new AccountAmountDTO(Guid.NewGuid(), 2300,2,2,2)
+        new AccountAmountDTO(Guid.NewGuid(), 1500, 1, 1, 0),
+        new AccountAmountDTO(Guid.NewGuid(), 2300, 2, 2, 0)
     };
 
             A.CallTo(() => _report.GetIncomeEachCustomer(year, month, startDate, endDate))
@@ -48,10 +48,11 @@ namespace UnitTest.ReservationApi.Controllers
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var response = Assert.IsType<Response>(okResult.Value);
 
-            response.Flag.Should().BeTrue();
-            response.Message.Should().Be("Booking retrieved successfully!");
-            response.Data.Should().BeEquivalentTo(fakeData);
+            Assert.True(response.Flag);
+            Assert.Equal("Booking retrieved successfully!", response.Message);
+            Assert.Equal(fakeData, response.Data);
         }
+
 
         [Fact]
         public async Task GetIncomeEachCustomer_WithTimeFilters_WhenNoBookingsExist_ReturnsNotFound()

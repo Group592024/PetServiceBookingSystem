@@ -1,6 +1,7 @@
 ﻿using FacilityServiceApi.Application.Interfaces;
 using FacilityServiceApi.Infrastructure.Data;
 using FacilityServiceApi.Infrastructure.Repositories;
+using FacilityServiceApi.Infrastructure.Services;
 using FacilityServiceApi.Infrastructure.Streams;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -39,6 +40,10 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
 
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
+            services.AddHttpClient<ReservationApiClient>(client =>
+            {
+                client.BaseAddress = new Uri("http://localhost:5050/api/ReportBooking/");
+            });
 
             return services;
         }
@@ -46,7 +51,8 @@ namespace FacilityServiceApi.Infrastructure.DependencyInjection
         public static IApplicationBuilder UseInfrastructurePolicy(this IApplicationBuilder app)
         {
             //Register middleware
-            SharedServiceContainer.UserSharedPolicies(app); ;
+            SharedServiceContainer.UserSharedPolicies(app);
+            ;
             return app;
 
         }

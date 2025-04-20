@@ -328,8 +328,11 @@ namespace UnitTest.FacilityServiceApi.Repositories
             _context.bookingServiceItems.AddRange(bookingItem1, bookingItem2);
             await _context.SaveChangesAsync();
 
+            // Now, simulate the list of booking IDs (this would normally come from another part of your system)
+            var bookingIds = new List<Guid> { bookingItem1.BookingServiceItemId, bookingItem2.BookingServiceItemId };
+
             // Act
-            var result = await _repository.GetServiceQuantity(2025, 3, null, null);
+            var result = await _repository.GetServiceQuantity(bookingIds);  // Pass the BookingIds list
 
             // Assert
             result.Should().NotBeNull();
@@ -341,7 +344,6 @@ namespace UnitTest.FacilityServiceApi.Repositories
             var boardingService = result.First(r => r.roomTypeName == "Boarding");
             boardingService.quantity.Should().Be(1); // One booking item in March 2025
         }
-
 
         [Fact]
         public async Task GetServiceQuantity_ShouldReturnGroupedListSuccessfully()
@@ -422,18 +424,21 @@ namespace UnitTest.FacilityServiceApi.Repositories
             _context.bookingServiceItems.AddRange(bookingItem1, bookingItem2);
             await _context.SaveChangesAsync();
 
+            // Now, simulate the list of booking IDs
+            var bookingIds = new List<Guid> { bookingItem1.BookingServiceItemId, bookingItem2.BookingServiceItemId };
+
             // Act
-            var result = await _repository.GetServiceQuantity(2025, 3, null, null);
+            var result = await _repository.GetServiceQuantity(bookingIds); // Pass the BookingIds list
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().HaveCount(2);
+            result.Should().HaveCount(2); // Should return 2 services (Grooming, Boarding)
 
             var groomingService = result.First(r => r.roomTypeName == "Grooming");
-            groomingService.quantity.Should().Be(1);
+            groomingService.quantity.Should().Be(1); // One booking item in March 2025
 
             var boardingService = result.First(r => r.roomTypeName == "Boarding");
-            boardingService.quantity.Should().Be(1);
+            boardingService.quantity.Should().Be(1); // One booking item in March 2025
         }
 
         [Fact]

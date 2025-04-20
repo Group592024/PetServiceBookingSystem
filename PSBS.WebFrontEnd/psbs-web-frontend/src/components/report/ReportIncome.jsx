@@ -27,6 +27,7 @@ const ReportIncome = () => {
     try {
       let url = "http://localhost:5050/api/ReportBooking/getIncome?";
 
+      if (type === "all") url = "http://localhost:5050/api/ReportBooking/getIncome";
       if (type === "year") url += `year=${year}`;
       if (type === "month") url += `year=${year}&month=${month}`;
       if (type === "day") url += `startDate=${startDate}&endDate=${endDate}`;
@@ -78,7 +79,7 @@ const ReportIncome = () => {
 
   useEffect(() => {
     fetchDataIncome();
-  }, [year, month, startDate, endDate]);
+  }, [type, year, month, startDate, endDate]);
 
   return (
     <div className="w-full">

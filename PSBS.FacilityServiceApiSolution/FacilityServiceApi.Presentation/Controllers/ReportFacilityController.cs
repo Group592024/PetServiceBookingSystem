@@ -2,6 +2,7 @@
 using FacilityServiceApi.Application.DTOs;
 using FacilityServiceApi.Application.DTOs.Conversions;
 using FacilityServiceApi.Application.Interfaces;
+using FacilityServiceApi.Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PSPS.SharedLibrary.Responses;
@@ -14,10 +15,12 @@ namespace FacilityServiceApi.Presentation.Controllers
     public class ReportFacilityController : ControllerBase
     {
         private readonly IReport _report;
+        private readonly ReservationApiClient _reservationApiClient;
 
-        public ReportFacilityController(IReport report)
+        public ReportFacilityController(IReport report, ReservationApiClient reservationApiClient)
         {
             _report = report;
+            _reservationApiClient = reservationApiClient;
         }
 
         [HttpGet("availableRoom")]
@@ -71,13 +74,31 @@ namespace FacilityServiceApi.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<RoomHistoryQuantityDTO>>> GetBookingServiceItem(
             int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
-            var roomHistory = await _report.GetServiceQuantity(year, month, startDate, endDate);
-            if (!roomHistory.Any())
-                return NotFound(new Response(false, "No booking service items found in the database"));
+            var authString = HttpContext.Request.Headers["Authorization"].ToString();
 
-            return Ok(new Response(true, "Booking service items retrieved successfully")
+            var auth = authString.Substring(7);
+            Console.WriteLine("token nef: " + auth);
+            Console.WriteLine("co do day nho");
+            var response = await _reservationApiClient.GetPaidBookingIds(authString, year, month, startDate, endDate);
+            if (response is null)
             {
-                Data = roomHistory
+                return NotFound(new Response(false, "No booking found"));
+            }
+            Console.WriteLine("response day nay" + response.Count());
+
+
+            var result = await _report.GetServiceQuantity(response);
+
+            Console.WriteLine("sau khi goi petbreed: " + result.ToString());
+
+            if (result is null)
+            {
+                return NotFound(new Response(false, "No booking found"));
+            }
+
+            return Ok(new Response(true, "Booking found successfully")
+            {
+                Data = result
             });
         }
 

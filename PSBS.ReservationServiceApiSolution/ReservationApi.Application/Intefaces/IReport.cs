@@ -10,5 +10,7 @@ namespace ReservationApi.Application.Intefaces
         Task<IEnumerable<BookingStatus>> GetAllBookingStatusIncludeBookingAsync();
         Task<IEnumerable<ReportBookingTypeDTO>> GetTotalIncomeByBookingTypeAsync(
             int? year, int? month, DateTime? startDate, DateTime? endDate);
+        Task<PaidBookingIdsDTO> GetPaidBookingIds(int? year, int? month, DateTime? startDate, DateTime? endDate);
+
     }
 }

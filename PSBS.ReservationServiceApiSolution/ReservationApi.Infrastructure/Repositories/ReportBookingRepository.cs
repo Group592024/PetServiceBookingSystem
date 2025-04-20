@@ -10,6 +10,25 @@ namespace ReservationApi.Infrastructure.Repositories
     public class ReportBookingRepository(ReservationServiceDBContext context) : IReport
     {
 
+        public async Task<PaidBookingIdsDTO> GetPaidBookingIds(int? year, int? month, DateTime? startDate, DateTime? endDate)
+        {
+            var query = context.Bookings
+                 .Where(b => b.isPaid).AsQueryable();
+
+            if (startDate.HasValue && endDate.HasValue)
+                query = query.Where(b => b.BookingDate.Date >= startDate && b.BookingDate.Date <= endDate);
+            else if (month.HasValue && year.HasValue)
+                query = query.Where(b => b.BookingDate.Month == month && b.BookingDate.Year == year);
+            else if (year.HasValue)
+                query = query.Where(b => b.BookingDate.Year == year);
+
+            var ids = await query.Select(b => b.BookingId).ToListAsync();
+            Console.WriteLine("ids ne" + ids.Count());
+            var result = new PaidBookingIdsDTO { BookingIds = ids ?? new List<Guid>() };
+
+            return result;
+        }
+
         public async Task<IEnumerable<AccountAmountDTO>> GetIncomeEachCustomer(
      int? year, int? month, DateTime? startDate, DateTime? endDate)
         {
@@ -89,15 +108,16 @@ namespace ReservationApi.Infrastructure.Repositories
                         Console.WriteLine("So booking" + finalBookings.Count);
 
                     }
-                    else if (month.HasValue)
+                    else if (month.HasValue && year.HasValue)
                     {
                         finalBookings = bookings.Where(p => p.BookingDate.Month == month
                         && p.BookingDate.Year == year).ToList();
                     }
-                    else
+                    else if (year.HasValue)
                     {
                         finalBookings = bookings.Where(p => p.BookingDate.Year == year).ToList();
                     }
+
                     var amountDTOs = await HandleAmountDTO(finalBookings, year, month, startDate, endDate);
                     result.Add(new ReportBookingTypeDTO(type.BookingTypeName, amountDTOs));
                 }
@@ -137,7 +157,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     )).ToList();
                 return result;
             }
-            else if (month.HasValue)
+            else if (month.HasValue && year.HasValue)
             {
                 var allMonths = Enumerable.Range(1, DateTime.DaysInMonth(year ?? DateTime.Now.Year,
                     month ?? DateTime.Now.Month));
@@ -156,7 +176,7 @@ namespace ReservationApi.Infrastructure.Repositories
                     )).ToList();
                 return result;
             }
-            else
+            else if (year.HasValue)
             {
                 var allYear = Enumerable.Range(1, 12);
 
@@ -170,6 +190,31 @@ namespace ReservationApi.Infrastructure.Repositories
                 var result = allYear.Select(p => new AmountDTO(
                     p.ToString(), response.FirstOrDefault(s => s.Date == p)?.TotalAmmount ?? 0
                     )).ToList();
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("do day ne nhe ban");
+                int currentYear = DateTime.Now.Year;
+                var recentYears = Enumerable.Range(currentYear - 9, 10); // last 10 years
+
+                var response = bookings
+                    .GroupBy(p => p.BookingDate.Year)
+                    .Select(s => new
+                    {
+                        Year = s.Key,
+                        TotalAmount = s.Sum(m => m.TotalAmount)
+                    }).ToList();
+
+                Console.WriteLine("Booking count: " + bookings.Count);
+                Console.WriteLine("Booking years: " + string.Join(", ", bookings.Select(b => b.BookingDate.Year).Distinct()));
+
+
+                var result = recentYears.Select(p => new AmountDTO(
+                    p.ToString(),
+                    response.FirstOrDefault(s => s.Year == p)?.TotalAmount ?? 0
+                )).ToList();
+
                 return result;
             }
 
