@@ -318,7 +318,7 @@ const PetHealthBookCreate = () => {
   return (
     <div className="flex h-screen bg-dark-grey-100">
       <Sidebar ref={sidebarRef} />
-      <div className="content h-full">
+      <div className="content">
         <Navbar sidebarRef={sidebarRef} />
         <main className="p-4 bg-white shadow-md rounded-md h-full">
           <h2 className="mb-4 text-xl font-bold">Create Health Book</h2>

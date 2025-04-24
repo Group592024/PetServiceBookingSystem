@@ -105,6 +105,8 @@ const ReportCircleCard = ({ data, type, element }) => {
     // Only show labels if there's enough space (fewer items or larger screen)
     if (data.length > 8 && windowWidth < 1024) return null;
 
+    const shortName = name.length > 20 ? name.slice(0, 20) + "…" : name;
+
     return (
       <text
         x={x}
@@ -115,7 +117,7 @@ const ReportCircleCard = ({ data, type, element }) => {
         className="font-medium"
         fontSize={windowWidth < 768 ? "12px" : "14px"}
       >
-        {`${name} (${(percent * 100).toFixed(1)}%)`}
+        {`${shortName} (${(percent * 100).toFixed(1)}%)`}
       </text>
     );
   };
@@ -191,7 +193,7 @@ const ReportCircleCard = ({ data, type, element }) => {
     >
       <div className="flex flex-col items-center">
         <div className="w-full overflow-hidden">
-          <ResponsiveContainer width={"100%"} height={height}>
+          <ResponsiveContainer width={"100%"} height={600}>
             <PieChart>
               <Pie
                 data={data}
@@ -320,12 +322,10 @@ const Sector = (props) => {
 
   const path = [
     `M ${cx + cos * outerRadius} ${cy + sin * outerRadius}`,
-    `A ${outerRadius} ${outerRadius} 0 ${
-      endAngle - startAngle >= 180 ? 1 : 0
+    `A ${outerRadius} ${outerRadius} 0 ${endAngle - startAngle >= 180 ? 1 : 0
     } 0 ${cx + cos2 * outerRadius} ${cy + sin2 * outerRadius}`,
     `L ${cx + cos2 * innerRadius} ${cy + sin2 * innerRadius}`,
-    `A ${innerRadius} ${innerRadius} 0 ${
-      endAngle - startAngle >= 180 ? 1 : 0
+    `A ${innerRadius} ${innerRadius} 0 ${endAngle - startAngle >= 180 ? 1 : 0
     } 1 ${cx + cos * innerRadius} ${cy + sin * innerRadius}`,
     "Z",
   ].join(" ");

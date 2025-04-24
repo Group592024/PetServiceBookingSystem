@@ -6,11 +6,11 @@ class ContactScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final contactInfo = [
       ContactItem("Phone", "assets/HomePage/contact/phone.png",
-          ["+123456789", "+987654321"]),
+          ["0847772254", "0812570907"]),
       ContactItem("Email", "assets/HomePage/contact/email.png",
-          ["example@example.com", "example@gmail.com"]),
+          ["nhulengoctam.37.8@gmail.com", "nhat08046428@gmail.com"]),
       ContactItem("Address", "assets/HomePage/contact/marker.png",
-          ["123 Main St, City, Country"]),
+          ["600 Nguyen Van Cu, Ninh Kieu District, Can Tho City"]),
       ContactItem("Open Hours", "assets/HomePage/contact/clock.png",
           ["Mon - Fri: 7 AM - 6 PM", "Saturday: 9 AM - 4 PM"]),
     ];

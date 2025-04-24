@@ -371,7 +371,7 @@ const NavbarCustomer = () => {
         localStorage.removeItem("userData");
         sessionStorage.removeItem("userData");
         sessionStorage.removeItem("accountId");
-        useUserStore.setState({ currentUser: null, isLoading: false });
+
         Swal.fire({
           title: "Logged out",
           text: "You have been logged out successfully!",
