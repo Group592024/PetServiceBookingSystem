@@ -35,7 +35,7 @@ const Sidebar = forwardRef((_, ref) => {
 
   return (
     <div className="sidebar" ref={ref}>
-      <a href="/dashboard" className="logo">
+      <a href="/report" className="logo">
         <i className="bx bxs-cat"></i>
         <div className="logo-name">
           <span>Pet</span>Ease
@@ -117,7 +117,7 @@ const Sidebar = forwardRef((_, ref) => {
             Pet HealthBook
           </Link>
         </li>
-      
+
         <li className={location.pathname.startsWith("/room") ? "active" : ""}>
           <Link to="/room">
             <Tooltip title="Room" placement="right">

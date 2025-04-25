@@ -38,13 +38,13 @@ const PetDiaryCardList = ({ data, role, getCategories }) => {
 
             if (deleteResponse.ok) {
               setDiaries(diaries?.filter((item) => item?.diary_ID !== id));
-              Swal.fire("Deleted!", "The service has been deleted.", "success");
+              Swal.fire("Deleted!", "The diary has been deleted.", "success");
             } else {
-              Swal.fire("Error!", "Failed to delete the service", "error");
+              Swal.fire("Error!", "Failed to delete the diary", "error");
             }
           } catch (error) {
             console.log(error);
-            Swal.fire("Error!", "Failed to delete the service", "error");
+            Swal.fire("Error!", "Failed to delete the diary", "error");
           }
         };
 

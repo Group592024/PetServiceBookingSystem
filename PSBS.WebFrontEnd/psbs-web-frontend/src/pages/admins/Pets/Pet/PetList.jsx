@@ -67,7 +67,7 @@ const AdminPetList = () => {
                         breed: breedMap[item.petBreedId] || 'Unknown',
                         dateOfBirth: new Intl.DateTimeFormat('vi-VN').format(new Date(item.dateOfBirth)),
                         gender: item.petGender ? 'Male' : 'Female',
-                        status: item.isDelete ? 'Stopping' : 'Active',
+                        status: item.isDelete ? 'Inactive' : 'Active',
                     };
                 });
 

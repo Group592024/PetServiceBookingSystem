@@ -178,7 +178,7 @@ const PetBreedList = () => {
             ),
             renderCell: (params) => (
                 <div style={{ textAlign: "center", fontWeight: 'bold', color: params.row.isDelete ? "red" : "green" }}>
-                    {params.row.isDelete ? 'Stopping' : 'Active'}
+                    {params.row.isDelete ? 'Inactive' : 'Active'}
                 </div>
             ),
         },

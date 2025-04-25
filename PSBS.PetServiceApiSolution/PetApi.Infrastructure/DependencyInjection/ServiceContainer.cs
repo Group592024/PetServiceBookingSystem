@@ -27,7 +27,7 @@ namespace PetApi.Infrastructure.DependencyInjection
 
             services.AddHttpClient<FacilityApiClient>(client =>
             {
-                client.BaseAddress = new Uri("http://localhost:5050/api/ReportFacility/");
+                client.BaseAddress = new Uri("http://gatewayapi:5050/api/ReportFacility/");
             });
 
             return services;

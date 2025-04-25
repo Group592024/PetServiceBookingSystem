@@ -25,7 +25,7 @@ namespace PetApi.Infrastructure.Repositories
             try
             {
                 var existingPetByName = await context.Pets
-                                      .FirstOrDefaultAsync(p => p.Pet_Name == entity.Pet_Name && p.Account_ID == entity.Account_ID);
+                                      .FirstOrDefaultAsync(p => p.Pet_Name == entity.Pet_Name && p.Account_ID == entity.Account_ID && p.IsDelete == false);
 
                 if (existingPetByName != null)
                 {
@@ -137,7 +137,7 @@ namespace PetApi.Infrastructure.Repositories
             {
                 var existingPetByName = await context.Pets
                                       .FirstOrDefaultAsync(p => p.Pet_Name == entity.Pet_Name && p.Account_ID == entity.Account_ID
-                                      && p.Pet_ID != entity.Pet_ID);
+                                      && p.Pet_ID != entity.Pet_ID && p.IsDelete == false);
 
                 if (existingPetByName != null)
                 {

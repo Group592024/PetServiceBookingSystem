@@ -50,9 +50,9 @@ const Contact = () => {
 };
 
 const contactInfo = [
-  { title: "Phone", icon: PhoneImg, details: ["+123456789", "+987654321"] },
-  { title: "Email", icon: MailImg, details: ["example@example.com", "example@gmail.com"] },
-  { title: "Address", icon: AddressImg, details: ["123 Main St, City, Country"] },
+  { title: "Phone", icon: PhoneImg, details: ["0847772254", "0812570907"] },
+  { title: "Email", icon: MailImg, details: ["nhulengoctam.37.8@gmail.com", "nhat08046428@gmail.com"] },
+  { title: "Address", icon: AddressImg, details: ["600 Nguyen Van Cu, Ninh Kieu District, Can Tho City"] },
   { title: "Open Hours", icon: HourImg, details: ["Mon - Fri: 7 AM - 6 PM", "Saturday: 9 AM - 4 PM"] }
 ];
 

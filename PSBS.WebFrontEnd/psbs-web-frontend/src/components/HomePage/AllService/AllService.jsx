@@ -77,9 +77,9 @@ const AllService = () => {
                         <p className="text-gray-500 mt-2 group-hover:text-white">
                             {service.content}
                         </p>
-                        <p className="text-lg font-bold text-blue-600 mt-3 group-hover:text-orange-400">
+                        {/* <p className="text-lg font-bold text-blue-600 mt-3 group-hover:text-orange-400">
                             {service.price}
-                        </p>
+                        </p> */}
                         <motion.button
                             className="flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                             whileHover={{ scale: 1.1 }}

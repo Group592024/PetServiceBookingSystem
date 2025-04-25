@@ -5,11 +5,9 @@ import 'booking_room_choose.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-
 class BookingRoomForm extends StatefulWidget {
   final String? cusId;
   final Function(List<Map<String, dynamic>>)? onBookingDataChange;
-
 
   BookingRoomForm({
     required this.cusId,
@@ -103,7 +101,8 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
         final data = json.decode(response.body);
         if (data['flag']) {
           setState(() {
-            _roomPrices[roomTypeId] = double.parse(data['data']['price'].toString());
+            _roomPrices[roomTypeId] =
+                double.parse(data['data']['price'].toString());
           });
         }
       }
@@ -163,13 +162,13 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
     return (s1.isBefore(e2) && e1.isAfter(s2));
   }
 
-  void _handleCreateBookingRooms() async{
+  void _handleCreateBookingRooms() async {
     setState(() {
       _error = null;
       _bookingRooms = [];
     });
 
-     // Small delay to ensure UI updates
+    // Small delay to ensure UI updates
     await Future.delayed(Duration(milliseconds: 10));
 
     // Check if number of rooms is sufficient
@@ -231,17 +230,20 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
     setState(() {
       _bookingRooms = newBookingRooms;
       // Clear selections after creating
-    _selectedRooms = [];
-    _selectedPets = [];
-    _selectAllRooms = false;
-    _selectAllPets = false;
-    _totalPrice = 0;
+      _selectedRooms = [];
+      _selectedPets = [];
+      _selectAllRooms = false;
+      _selectAllPets = false;
+      _totalPrice = 0;
     });
     _notifyParent();
   }
 
   void _updateBookingData(int index, Map<String, dynamic> newData) {
     setState(() {
+      if (newData["price"] is String) {
+        newData["price"] = double.tryParse(newData["price"]) ?? 0.0;
+      }
       _bookingRooms[index] = newData;
       _calculateTotalPrice();
     });
@@ -250,7 +252,13 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
   void _calculateTotalPrice() {
     _totalPrice = _bookingRooms.fold(0.0, (sum, room) {
-      double price = double.tryParse(room["price"].toString()) ?? 0.0;
+      // Handle both string and numeric price values
+      double price;
+      if (room["price"] is String) {
+        price = double.tryParse(room["price"]) ?? 0.0;
+      } else {
+        price = room["price"] is num ? room["price"].toDouble() : 0.0;
+      }
       return sum + price;
     });
   }
@@ -263,7 +271,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
 
   @override
   Widget build(BuildContext context) {
-  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
+    final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
     return Column(
       children: [
         // Rooms Selection
@@ -286,8 +294,7 @@ class _BookingRoomFormState extends State<BookingRoomForm> {
                 if (!_selectAllRooms)
                   ..._rooms.map((room) => CheckboxListTile(
                         title: Text(
-                          "${room['roomName']} - ${currencyFormat.format(_roomPrices[room['roomTypeId']] ?? 0)}"
-                        ),
+                            "${room['roomName']} - ${currencyFormat.format(_roomPrices[room['roomTypeId']] ?? 0)}"),
                         value:
                             _selectedRooms.contains(room['roomId'].toString()),
                         onChanged: (bool? value) =>

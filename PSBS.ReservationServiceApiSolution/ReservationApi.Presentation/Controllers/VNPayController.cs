@@ -50,7 +50,7 @@ namespace ReservationApi.Presentation.Controllers
         }
 
         [HttpGet("CreatePaymentUrl")]
-        [Authorize(Policy = "AdminOrStaffOrUser")]
+        [AllowAnonymous]
         public ActionResult<string> CreatePaymentUrl(double moneyToPay, string description)
         {
             try
