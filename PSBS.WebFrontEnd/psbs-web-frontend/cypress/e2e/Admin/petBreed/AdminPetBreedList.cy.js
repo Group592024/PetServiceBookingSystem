@@ -118,7 +118,7 @@ describe('Pet Breed List Page', () => {
       .should('have.css', 'color')
       .and('match', /rgb\(0,\s*128,\s*0\)|green/);
 
-    cy.contains('div', 'Stopping')
+    cy.contains('div', 'Inactive')
       .should('have.css', 'color')
       .and('match', /rgb\(255,\s*0,\s*0\)|red/);
   });

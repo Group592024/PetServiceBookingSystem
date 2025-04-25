@@ -15,11 +15,17 @@ namespace PSBS.HealthCareApi.Presentation.Controllers
     {
         private readonly IPetHealthBook petHealthBookInterface;
         private readonly IFetchHealthBookDetail fetchHealthBookDetail;
+        private IPetHealthBook fakePetHealthBookService;
 
         public PetHealthBookController(IPetHealthBook petHealthBookInterface, IFetchHealthBookDetail fetchHealthBookDetail)
         {
             this.petHealthBookInterface = petHealthBookInterface;
             this.fetchHealthBookDetail = fetchHealthBookDetail;
+        }
+
+        public PetHealthBookController(IPetHealthBook fakePetHealthBookService)
+        {
+            this.fakePetHealthBookService = fakePetHealthBookService;
         }
 
         // GET api/petHealthBooks
