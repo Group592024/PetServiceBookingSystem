@@ -892,7 +892,7 @@ namespace PSPS.AccountAPI.Infrastructure.Repositories
         public async Task<GetAccountDTO?> GetAccountByPhone(string phone)
         {
             var account = await context.Accounts.Where(a => a.AccountPhoneNumber == phone).FirstOrDefaultAsync();
-            if (account == null || account.RoleId == "admin")
+            if (account == null || account.RoleId == "admin" || !account.AccountIsDeleted)
                 return null;
 
             return new GetAccountDTO(
